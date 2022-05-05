@@ -1,0 +1,129 @@
+openapi: 3.0.1
+
+info:
+  title: Definition for Tenant API
+  description: This information will be replaced by the SpringFox config information
+  version: 0.0.1
+
+paths:
+  /tenant/public/{subdomain}:
+    summary: 'Represents a publicly allowed tenant data'
+    description: This resource represents an individual tenant in a system.
+    get:
+      tags:
+        - tenant-controller
+      summary: 'Gets a tenant public information [Authorization: no-auth]'
+      operationId: getRestrictedTenantDataBySubdomain
+      parameters:
+        - name: subdomain
+          in: path
+          description: Subdomain
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestrictedTenantDTO'
+        404:
+          description: Not found
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+  /tenant/public/id/{tenantId}:
+    summary: 'Represents a publicly allowed tenant data'
+    description: This resource represents an individual tenant in a system.
+    get:
+      tags:
+        - tenant-controller
+      summary: 'Gets a tenant public information [Authorization: no-auth]'
+      operationId: getRestrictedTenantDataByTenantId
+      parameters:
+        - name: tenantId
+          in: path
+          description: Tenant ID
+          required: true
+          schema:
+            type: long
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestrictedTenantDTO'
+        404:
+          description: Not found
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+components:
+  schemas:
+    RestrictedTenantDTO:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: long
+          example: 12132
+        name:
+          type: string
+          example: "Company name AG"
+          maxLength: 100
+        subdomain:
+          type: string
+          example: "subdomain"
+          maxLength: 100
+        theming:
+          $ref:
+            '#/components/schemas/Theming'
+        content:
+          $ref:
+            '#/components/schemas/Content'
+    Licensing:
+      type: object
+      required:
+        - allowedNumberOfUsers
+      properties:
+        allowedNumberOfUsers:
+          type: integer
+          example: 1
+    Theming:
+      type: object
+      properties:
+        logo:
+          type: string
+          example: "base64 encoded image"
+        favicon:
+          type: string
+          example: "base64 encoded image"
+        primaryColor:
+          type: string
+          example: "#FFFFFF"
+        secondaryColor:
+          type: string
+          example: "#FFFFFF"
+    Content:
+      type: object
+      required:
+        - impressum
+      properties:
+        impressum:
+          type: string
+          example: "Llorem ipsum..."
+        claim:
+          type: string
+          example: "Llorem ipsum..."
+        privacy:
+          type: string
+          example: "Llorem ipsum..."
+        termsAndConditions:
+          type: string
+          example: "Llorem ipsum..."

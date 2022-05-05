@@ -11,12 +11,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.session.SessionStatus;
-import de.caritas.cob.userservice.api.repository.user.User;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.model.Session.SessionStatus;
+import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -200,9 +200,9 @@ public class SessionToConsultantConditionProviderTest {
   public void isSessionsAgencyNotAvailableInConsultantAgencies_Should_returnTrue_When_ConsultantAgenciesDoesNotContainSessionAgencyId() {
     session.setAgencyId(99L);
     consultant.setConsultantAgencies(asSet(
-        new ConsultantAgency(1L, consultant, 1L, nowInUtc(), nowInUtc(), nowInUtc()),
-        new ConsultantAgency(2L, consultant, 2L, nowInUtc(), nowInUtc(), nowInUtc()),
-        new ConsultantAgency(3L, consultant, 3L, nowInUtc(), nowInUtc(), nowInUtc())
+        new ConsultantAgency(1L, consultant, 1L, nowInUtc(), nowInUtc(), nowInUtc(), null),
+        new ConsultantAgency(2L, consultant, 2L, nowInUtc(), nowInUtc(), nowInUtc(), null),
+        new ConsultantAgency(3L, consultant, 3L, nowInUtc(), nowInUtc(), nowInUtc(), null)
     ));
     boolean result = sessionToConsultantConditionProvider
         .isSessionsAgencyNotAvailableInConsultantAgencies(consultant, session);
@@ -214,9 +214,9 @@ public class SessionToConsultantConditionProviderTest {
   public void isSessionsAgencyNotAvailableInConsultantAgencies_Should_returnFalse_When_ConsultantAgenciesContainSessionAgencyId() {
     session.setAgencyId(99L);
     consultant.setConsultantAgencies(asSet(
-        new ConsultantAgency(1L, consultant, 1L, nowInUtc(), nowInUtc(), nowInUtc()),
-        new ConsultantAgency(2L, consultant, 99L, nowInUtc(), nowInUtc(), nowInUtc()),
-        new ConsultantAgency(3L, consultant, 3L, nowInUtc(), nowInUtc(), nowInUtc())
+        new ConsultantAgency(1L, consultant, 1L, nowInUtc(), nowInUtc(), nowInUtc(), null),
+        new ConsultantAgency(2L, consultant, 99L, nowInUtc(), nowInUtc(), nowInUtc(), null),
+        new ConsultantAgency(3L, consultant, 3L, nowInUtc(), nowInUtc(), nowInUtc(), null)
     ));
     boolean result = sessionToConsultantConditionProvider
         .isSessionsAgencyNotAvailableInConsultantAgencies(consultant, session);

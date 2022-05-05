@@ -1,25 +1,28 @@
 package de.caritas.cob.userservice.api.admin.facade;
 
-import static de.caritas.cob.userservice.api.model.AgencyTypeDTO.AgencyTypeEnum.DEFAULT_AGENCY;
-import static de.caritas.cob.userservice.api.model.AgencyTypeDTO.AgencyTypeEnum.TEAM_AGENCY;
+import static de.caritas.cob.userservice.api.admin.model.AgencyTypeDTO.AgencyTypeEnum.DEFAULT_AGENCY;
+import static de.caritas.cob.userservice.api.admin.model.AgencyTypeDTO.AgencyTypeEnum.TEAM_AGENCY;
+import static java.util.Objects.nonNull;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
+import de.caritas.cob.userservice.api.admin.model.AgencyConsultantResponseDTO;
+import de.caritas.cob.userservice.api.admin.model.AgencyTypeDTO;
+import de.caritas.cob.userservice.api.admin.model.ConsultantAdminResponseDTO;
+import de.caritas.cob.userservice.api.admin.model.ConsultantAgencyResponseDTO;
+import de.caritas.cob.userservice.api.admin.model.ConsultantFilter;
+import de.caritas.cob.userservice.api.admin.model.ConsultantSearchResultDTO;
+import de.caritas.cob.userservice.api.admin.model.CreateConsultantAgencyDTO;
+import de.caritas.cob.userservice.api.admin.model.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.admin.model.Sort;
+import de.caritas.cob.userservice.api.admin.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.admin.service.agency.ConsultantAgencyAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFilterService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
-import de.caritas.cob.userservice.api.model.AgencyConsultantResponseDTO;
-import de.caritas.cob.userservice.api.model.AgencyTypeDTO;
-import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
-import de.caritas.cob.userservice.api.model.ConsultantAgencyResponseDTO;
-import de.caritas.cob.userservice.api.model.ConsultantFilter;
-import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
-import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
-import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
-import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
-import de.caritas.cob.userservice.api.model.UpdateAdminConsultantDTO;
-import de.caritas.cob.userservice.api.model.UpdateConsultantDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -56,9 +59,22 @@ public class ConsultantAdminFacade {
    * @return the result list
    */
   public ConsultantSearchResultDTO findFilteredConsultants(Integer page, Integer perPage,
-      ConsultantFilter consultantFilter) {
-    return this.consultantAdminFilterService.findFilteredConsultants(page, perPage,
-        consultantFilter);
+      ConsultantFilter consultantFilter, Sort sort) {
+    var filteredConsultants = this.consultantAdminFilterService
+        .findFilteredConsultants(page, perPage, consultantFilter, sort);
+    retriveAndMergeAgenciesToConsultants(filteredConsultants);
+
+    return filteredConsultants;
+  }
+
+  private void retriveAndMergeAgenciesToConsultants(ConsultantSearchResultDTO filteredConsultants) {
+    if (nonNull(filteredConsultants)) {
+      var consultants = filteredConsultants.getEmbedded().stream()
+          .map(ConsultantAdminResponseDTO::getEmbedded)
+          .collect(Collectors.toSet());
+
+      consultantAgencyAdminService.appendAgenciesForConsultants(consultants);
+    }
   }
 
   /**
@@ -131,6 +147,10 @@ public class ConsultantAdminFacade {
    */
   public void markConsultantAgencyForDeletion(String consultantId, Long agencyId) {
     this.consultantAgencyAdminService.markConsultantAgencyForDeletion(consultantId, agencyId);
+  }
+
+  public void markConsultantAgenciesForDeletion(String consultantId) {
+    consultantAgencyAdminService.markConsultantAgenciesForDeletion(consultantId);
   }
 
   /**

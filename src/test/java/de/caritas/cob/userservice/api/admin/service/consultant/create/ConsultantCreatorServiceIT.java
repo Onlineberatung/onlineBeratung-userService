@@ -13,15 +13,15 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.UserServiceApplication;
+import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
+import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
+import de.caritas.cob.userservice.api.admin.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
-import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
-import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.service.ConsultantImportService.ImportRecord;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,7 +50,7 @@ public class ConsultantCreatorServiceIT {
   private RocketChatService rocketChatService;
 
   @MockBean
-  private KeycloakAdminClientService keycloakAdminClientService;
+  private KeycloakService keycloakService;
 
   private final EasyRandom easyRandom = new EasyRandom();
 
@@ -59,7 +59,7 @@ public class ConsultantCreatorServiceIT {
       throws RocketChatLoginException {
     when(rocketChatService.getUserID(anyString(), anyString(), anyBoolean()))
         .thenReturn(DUMMY_RC_ID);
-    when(keycloakAdminClientService.createKeycloakUser(any(), anyString(), any()))
+    when(keycloakService.createKeycloakUser(any(), anyString(), any()))
         .thenReturn(easyRandom.nextObject(KeycloakCreateUserResponseDTO.class));
     CreateConsultantDTO createConsultantDTO = this.easyRandom.nextObject(CreateConsultantDTO.class);
     createConsultantDTO.setUsername(VALID_USERNAME);
@@ -85,7 +85,7 @@ public class ConsultantCreatorServiceIT {
       throws RocketChatLoginException {
     when(rocketChatService.getUserID(anyString(), anyString(), anyBoolean()))
         .thenReturn(DUMMY_RC_ID);
-    when(keycloakAdminClientService.createKeycloakUser(any(), anyString(), any()))
+    when(keycloakService.createKeycloakUser(any(), anyString(), any()))
         .thenReturn(easyRandom.nextObject(KeycloakCreateUserResponseDTO.class));
     ImportRecord importRecord = this.easyRandom.nextObject(ImportRecord.class);
     importRecord.setUsername(VALID_USERNAME);
@@ -114,7 +114,7 @@ public class ConsultantCreatorServiceIT {
         .thenThrow(new RocketChatLoginException(""));
     KeycloakCreateUserResponseDTO validKeycloakResponse = easyRandom.nextObject(
         KeycloakCreateUserResponseDTO.class);
-    when(keycloakAdminClientService.createKeycloakUser(any(), anyString(), any()))
+    when(keycloakService.createKeycloakUser(any(), anyString(), any()))
         .thenReturn(validKeycloakResponse);
     CreateConsultantDTO createConsultantDTO = this.easyRandom.nextObject(CreateConsultantDTO.class);
     createConsultantDTO.setUsername(VALID_USERNAME);
@@ -131,7 +131,7 @@ public class ConsultantCreatorServiceIT {
     KeycloakCreateUserResponseDTO keycloakResponse = easyRandom.nextObject(
         KeycloakCreateUserResponseDTO.class);
     keycloakResponse.setUserId(null);
-    when(keycloakAdminClientService.createKeycloakUser(any(), anyString(), any()))
+    when(keycloakService.createKeycloakUser(any(), anyString(), any()))
         .thenReturn(keycloakResponse);
     CreateConsultantDTO createConsultantDTO = this.easyRandom.nextObject(CreateConsultantDTO.class);
 

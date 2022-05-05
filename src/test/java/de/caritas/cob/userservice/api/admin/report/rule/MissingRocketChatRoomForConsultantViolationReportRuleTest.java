@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.admin.report.rule;
 
-import static de.caritas.cob.userservice.api.model.ViolationDTO.ViolationTypeEnum.CONSULTANT;
+import static de.caritas.cob.userservice.api.admin.model.ViolationDTO.ViolationTypeEnum.CONSULTANT;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
@@ -12,15 +12,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.model.ViolationDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.user.UserInfoResponseDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.user.UserRoomDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.session.SessionRepository;
+import de.caritas.cob.userservice.api.admin.model.ViolationDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserInfoResponseDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserRoomDTO;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import java.util.List;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;

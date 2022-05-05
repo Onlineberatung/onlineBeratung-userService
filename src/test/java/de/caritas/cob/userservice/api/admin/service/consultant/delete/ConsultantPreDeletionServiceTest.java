@@ -8,18 +8,17 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.admin.service.agency.ConsultantAgencyDeletionValidationService;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.session.SessionRepository;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,7 +39,7 @@ public class ConsultantPreDeletionServiceTest {
   private SessionRepository sessionRepository;
 
   @Mock
-  private KeycloakAdminClientService keycloakAdminClientService;
+  private KeycloakService keycloakService;
 
   @Test
   public void performPreDeletionSteps_Should_throwCustomValidationHttpStatusException_When_consultantHasOpenSessions() {
@@ -65,7 +64,7 @@ public class ConsultantPreDeletionServiceTest {
     this.consultantPreDeletionService.performPreDeletionSteps(consultant);
 
     verify(this.validationService, times(consultant.getConsultantAgencies().size()))
-        .validateForDeletion(any());
+        .validateAndMarkForDeletion(any());
   }
 
   @Test
@@ -75,7 +74,7 @@ public class ConsultantPreDeletionServiceTest {
 
     this.consultantPreDeletionService.performPreDeletionSteps(consultant);
 
-    verify(this.keycloakAdminClientService, times(1)).deactivateUser(eq(consultant.getId()));
+    verify(this.keycloakService, times(1)).deactivateUser(consultant.getId());
   }
 
 }

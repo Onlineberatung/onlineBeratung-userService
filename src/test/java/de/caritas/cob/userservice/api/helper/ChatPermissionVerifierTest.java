@@ -13,12 +13,12 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
-import de.caritas.cob.userservice.api.repository.chat.Chat;
-import de.caritas.cob.userservice.api.repository.chatagency.ChatAgency;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.repository.useragency.UserAgency;
+import de.caritas.cob.userservice.api.model.Chat;
+import de.caritas.cob.userservice.api.model.ChatAgency;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.model.UserAgency;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.Arrays;
@@ -68,9 +68,9 @@ public class ChatPermissionVerifierTest {
     ConsultantAgency[] consultantAgencyArray =
         new ConsultantAgency[]{
             new ConsultantAgency(AGENCY_ID, consultant, AGENCY_ID, nowInUtc(),
-                nowInUtc(), nowInUtc()),
+                nowInUtc(), nowInUtc(), null),
             new ConsultantAgency(AGENCY_ID_2, consultant, AGENCY_ID_2, nowInUtc(),
-                nowInUtc(), nowInUtc())};
+                nowInUtc(), nowInUtc(), null)};
     Set<ConsultantAgency> consultantAgencySet =
         new HashSet<>(Arrays.asList(consultantAgencyArray));
 
@@ -84,9 +84,9 @@ public class ChatPermissionVerifierTest {
     ConsultantAgency[] consultantAgencyArray =
         new ConsultantAgency[]{
             new ConsultantAgency(AGENCY_ID, consultant, AGENCY_ID, nowInUtc(),
-                nowInUtc(), nowInUtc()),
+                nowInUtc(), nowInUtc(), null),
             new ConsultantAgency(AGENCY_ID_3, consultant, AGENCY_ID_3, nowInUtc(),
-                nowInUtc(), nowInUtc())};
+                nowInUtc(), nowInUtc(), null)};
     Set<ConsultantAgency> consultantAgencySet =
         new HashSet<>(Arrays.asList(consultantAgencyArray));
 

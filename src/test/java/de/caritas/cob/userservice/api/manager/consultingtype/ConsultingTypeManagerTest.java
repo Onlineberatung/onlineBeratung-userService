@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.exception.MissingConsultingTypeException;
 import de.caritas.cob.userservice.api.service.ConsultingTypeService;
+import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -72,8 +73,19 @@ class ConsultingTypeManagerTest {
   @Test
   void getAllConsultingTypeIds_Should_Return_The_Same_List()
       throws MissingConsultingTypeException {
-    when(consultingTypeService.getAllConsultingTypeIds()).thenReturn(List.of(1, 2, 3, 4));
+    Long tenant1 = 1L;
+    Long tenant2 = 2L;
+    when(consultingTypeService.getAllConsultingTypeIds(null))
+        .thenReturn(List.of(1, 2, 3, 4, 5, 6, 7, 8));
+    when(consultingTypeService.getAllConsultingTypeIds(tenant1)).thenReturn(List.of(1, 2, 3, 4));
+    when(consultingTypeService.getAllConsultingTypeIds(tenant2)).thenReturn(List.of(5, 6, 7, 8));
 
+    TenantContext.clear();
+    assertEquals(consultingTypeManager.getAllConsultingTypeIds(), List.of(1, 2, 3, 4, 5, 6, 7, 8));
+    TenantContext.setCurrentTenant(tenant1);
     assertEquals(consultingTypeManager.getAllConsultingTypeIds(), List.of(1, 2, 3, 4));
+    TenantContext.setCurrentTenant(tenant2);
+    assertEquals(consultingTypeManager.getAllConsultingTypeIds(), List.of(5, 6, 7, 8));
+    TenantContext.clear();
   }
 }

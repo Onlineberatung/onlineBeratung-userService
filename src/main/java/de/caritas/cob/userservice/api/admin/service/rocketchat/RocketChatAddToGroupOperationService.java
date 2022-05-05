@@ -3,10 +3,10 @@ package de.caritas.cob.userservice.api.admin.service.rocketchat;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -20,9 +20,9 @@ public class RocketChatAddToGroupOperationService extends RocketChatGroupOperati
   private final ConsultingTypeManager consultingTypeManager;
 
   private RocketChatAddToGroupOperationService(RocketChatFacade rocketChatFacade,
-      KeycloakAdminClientService keycloakAdminClientService, Consumer<String> logMethod,
+      IdentityClient identityClient, Consumer<String> logMethod,
       ConsultingTypeManager consultingTypeManager) {
-    super(rocketChatFacade, keycloakAdminClientService);
+    super(rocketChatFacade, identityClient);
     this.logMethod = logMethod;
     this.consultingTypeManager = consultingTypeManager;
   }
@@ -34,9 +34,9 @@ public class RocketChatAddToGroupOperationService extends RocketChatGroupOperati
    * @return the {@link RocketChatAddToGroupOperationService} instance
    */
   public static RocketChatAddToGroupOperationService getInstance(RocketChatFacade rocketChatFacade,
-      KeycloakAdminClientService keycloakAdminClientService, Consumer<String> logMethod,
+      IdentityClient identityClient, Consumer<String> logMethod,
       ConsultingTypeManager consultingTypeManager) {
-    return new RocketChatAddToGroupOperationService(rocketChatFacade, keycloakAdminClientService,
+    return new RocketChatAddToGroupOperationService(rocketChatFacade, identityClient,
         logMethod, consultingTypeManager);
   }
 

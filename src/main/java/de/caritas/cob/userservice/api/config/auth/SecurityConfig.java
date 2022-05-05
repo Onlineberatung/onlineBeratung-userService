@@ -14,8 +14,9 @@ import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValu
 import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.USE_FEEDBACK;
 import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.VIEW_AGENCY_CONSULTANTS;
 
+import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.HttpTenantFilter;
+import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.StatelessCsrfFilter;
 import de.caritas.cob.userservice.api.config.CsrfSecurityProperties;
-import de.caritas.cob.userservice.api.controller.interceptor.StatelessCsrfFilter;
 import org.keycloak.adapters.KeycloakConfigResolver;
 import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
@@ -26,8 +27,11 @@ import org.keycloak.adapters.springsecurity.filter.KeycloakAuthenticationProcess
 import org.keycloak.adapters.springsecurity.filter.KeycloakPreAuthActionsFilter;
 import org.keycloak.adapters.springsecurity.filter.KeycloakSecurityContextRequestFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -41,9 +45,14 @@ import org.springframework.security.web.csrf.CsrfFilter;
 @KeycloakConfiguration
 public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 
+  private static final String UUID_PATTERN = "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b";
+
   @SuppressWarnings({"unused", "FieldCanBeLocal"})
   private final KeycloakClientRequestFactory keycloakClientRequestFactory;
   private final CsrfSecurityProperties csrfSecurityProperties;
+  @Value("${multitenancy.enabled}")
+  private boolean multitenancy;
+  private HttpTenantFilter tenantFilter;
 
   /**
    * Processes HTTP requests and checks for a valid spring security authentication for the
@@ -52,9 +61,10 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   public SecurityConfig(
       @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
           KeycloakClientRequestFactory keycloakClientRequestFactory,
-      CsrfSecurityProperties csrfSecurityProperties) {
+      CsrfSecurityProperties csrfSecurityProperties, @Nullable HttpTenantFilter tenantFilter) {
     this.keycloakClientRequestFactory = keycloakClientRequestFactory;
     this.csrfSecurityProperties = csrfSecurityProperties;
+    this.tenantFilter = tenantFilter;
   }
 
   /**
@@ -65,26 +75,31 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     super.configure(http);
-    http.csrf().disable()
-        .addFilterBefore(new StatelessCsrfFilter(csrfSecurityProperties), CsrfFilter.class)
-        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+    var httpSecurity = http.csrf().disable()
+        .addFilterBefore(new StatelessCsrfFilter(csrfSecurityProperties), CsrfFilter.class);
+
+    httpSecurity = enableTenantFilterIfMultitenancyEnabled(httpSecurity);
+
+    httpSecurity.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .sessionAuthenticationStrategy(sessionAuthenticationStrategy()).and().authorizeRequests()
         .antMatchers(csrfSecurityProperties.getWhitelist().getConfigUris())
         .permitAll()
         .antMatchers("/users/askers/new", "/conversations/askers/anonymous/new",
-            "/users/consultants/{consultantId:\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b}",
+            "/users/consultants/{consultantId:" + UUID_PATTERN + "}",
             "/users/consultants/languages"
         )
         .permitAll()
         .antMatchers("/users/data")
         .hasAnyAuthority(ANONYMOUS_DEFAULT, USER_DEFAULT, CONSULTANT_DEFAULT)
+        .antMatchers(HttpMethod.GET, "/appointments/{appointmentId:" + UUID_PATTERN + "}")
+        .permitAll()
         .antMatchers("/users/sessions/askers")
         .hasAnyAuthority(ANONYMOUS_DEFAULT, USER_DEFAULT)
         .antMatchers("/users/email", "/users/mails/messages/new",
             "/users/password/change", "/users/chat/{chatId:[0-9]+}",
             "/users/chat/{chatId:[0-9]+}/join", "/users/chat/{chatId:[0-9]+}/members",
             "/users/chat/{chatId:[0-9]+}/leave", "/users/twoFactorAuth", "/users/2fa/**",
-            "/users/mobile/app/token"
+            "/users/mobile/app/token", "/users/consultants/toggleWalkThrough"
         )
         .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT)
         .antMatchers("/users/sessions/{sessionId:[0-9]+}/enquiry/new",
@@ -120,21 +135,43 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .hasAuthority(START_CHAT)
         .antMatchers("/users/chat/{chatId:[0-9]+}/stop")
         .hasAuthority(STOP_CHAT)
-        .antMatchers("/users/chat/{chatId:[0-9]+}/update")
+        .antMatchers(
+            "/users/chat/{chatId:[0-9]+}/update",
+            "/users/{chatUserId:[0-9A-Za-z]+}/chat/{chatId:[0-9]+}/ban"
+        )
         .hasAuthority(UPDATE_CHAT)
-        .antMatchers("/useradmin", "/useradmin/**")
+        .antMatchers("/useradmin", "/useradmin/**", "/users/consultants/search")
         .hasAuthority(USER_ADMIN)
         .antMatchers(
             "/users/consultants/sessions/{sessionId:[0-9]+}",
             "/users/sessions/{sessionId:[0-9]+}/archive",
-            "/users/sessions/{sessionId:[0-9]+}"
+            "/users/sessions/{sessionId:[0-9]+}",
+            "/appointments"
         )
+        .hasAuthority(CONSULTANT_DEFAULT)
+        .antMatchers(HttpMethod.PUT, "/appointments/{appointmentId:" + UUID_PATTERN + "}")
+        .hasAuthority(CONSULTANT_DEFAULT)
+        .antMatchers(HttpMethod.DELETE, "/appointments/{appointmentId:" + UUID_PATTERN + "}")
         .hasAuthority(CONSULTANT_DEFAULT)
         .antMatchers("/users/sessions/{sessionId:[0-9]+}/dearchive")
         .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT)
         .antMatchers("/userstatistics", "/userstatistics/**")
         .permitAll()
         .anyRequest().denyAll();
+  }
+
+  /**
+   * Adds additional filter for tenant feature if enabled that sets tenant_id into current thread.
+   *
+   * @param httpSecurity
+   * @return
+   */
+  private HttpSecurity enableTenantFilterIfMultitenancyEnabled(HttpSecurity httpSecurity) {
+    if (multitenancy) {
+      httpSecurity = httpSecurity
+          .addFilterAfter(this.tenantFilter, KeycloakAuthenticatedActionsFilter.class);
+    }
+    return httpSecurity;
   }
 
   /**

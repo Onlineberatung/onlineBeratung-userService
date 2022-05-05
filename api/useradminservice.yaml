@@ -85,6 +85,11 @@ paths:
           required: true
           schema:
             type: integer
+        - name: sort
+          in: query
+          description: The sort parameter containing field and order the response should be sorted
+          schema:
+            $ref: '#/components/schemas/Sort'
       responses:
         200:
           description: OK - successfull operation
@@ -353,6 +358,37 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+    put:
+      tags:
+        - admin-user-controller
+      summary: 'Set consultant-agency relations [Authorization: Role: user-admin]'
+      operationId: setConsultantAgencies
+      description: Existing relations are deleted, passed relations added.
+      parameters:
+        - name: consultantId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CreateConsultantAgencyDTO'
+        required: true
+      responses:
+        200:
+          description: OK - consultant-agency relations have been set
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /useradmin/consultants/{consultantId}/agencies/{agencyId}:
     delete:
       tags:
@@ -563,6 +599,9 @@ components:
           example: "I am absent until..."
           minLength: 1
           maxLength: 10000
+        tenantId:
+          type: integer
+          example: "1"
 
     UpdateAdminConsultantDTO:
       type: object
@@ -642,6 +681,12 @@ components:
           type: string
         deleteDate:
           type: string
+        status:
+          type: string
+        agencies:
+          type: array
+          items:
+            $ref: './../services/agencyadminservice.yaml#/components/schemas/AgencyAdminResponseDTO'
 
     ConsultantAdminResponseDTO:
       type: object
@@ -705,6 +750,24 @@ components:
           format: int64
         absent:
           type: boolean
+
+    Sort:
+      type: object
+      properties:
+        field:
+          type: string
+          example: 'firstName|lastName|username|email'
+          enum:
+            - 'firstName'
+            - 'lastName'
+            - 'username'
+            - 'email'
+        order:
+          type: string
+          example: 'ASC|DESC'
+          enum:
+            - 'ASC'
+            - 'DESC'
 
     CreateConsultantAgencyDTO:
       type: object

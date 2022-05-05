@@ -11,7 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
@@ -44,7 +44,7 @@ public class AssignEnquiryEmailSupplierTest {
     String askerUserName = "asker user name";
     String senderUserId = "sender user id";
     this.assignEnquiryEmailSupplier = new AssignEnquiryEmailSupplier(receiverConsultant,
-        senderUserId, askerUserName, applicationBaseUrl, consultantService);
+        senderUserId, askerUserName, applicationBaseUrl, consultantService, null, false);
     setInternalState(AssignEnquiryEmailSupplier.class, "log", logger);
   }
 

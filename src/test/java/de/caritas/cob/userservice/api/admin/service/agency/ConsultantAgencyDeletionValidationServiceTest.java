@@ -14,11 +14,11 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.session.SessionRepository;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
@@ -51,7 +51,7 @@ public class ConsultantAgencyDeletionValidationServiceTest {
     when(this.agencyService.getAgency(any())).thenReturn(new AgencyDTO().offline(false));
 
     try {
-      this.agencyDeletionValidationService.validateForDeletion(consultantAgency);
+      this.agencyDeletionValidationService.validateAndMarkForDeletion(consultantAgency);
       fail("Exception was not thrown");
     } catch (CustomValidationHttpStatusException e) {
       assertThat(requireNonNull(e.getCustomHttpHeader().get("X-Reason")).iterator().next(),
@@ -70,7 +70,7 @@ public class ConsultantAgencyDeletionValidationServiceTest {
         .thenReturn(singletonList(mock(Session.class)));
 
     try {
-      this.agencyDeletionValidationService.validateForDeletion(consultantAgency);
+      this.agencyDeletionValidationService.validateAndMarkForDeletion(consultantAgency);
       fail("Exception was not thrown");
     } catch (CustomValidationHttpStatusException e) {
       assertThat(requireNonNull(e.getCustomHttpHeader().get("X-Reason")).iterator().next(),
@@ -86,7 +86,7 @@ public class ConsultantAgencyDeletionValidationServiceTest {
         .thenReturn(singletonList(consultantAgency));
     when(this.agencyService.getAgency(any())).thenThrow(new InternalServerErrorException(""));
 
-    this.agencyDeletionValidationService.validateForDeletion(consultantAgency);
+    this.agencyDeletionValidationService.validateAndMarkForDeletion(consultantAgency);
   }
 
   @Test
@@ -98,7 +98,7 @@ public class ConsultantAgencyDeletionValidationServiceTest {
     when(this.agencyService.getAgency(any())).thenReturn(new AgencyDTO().offline(true));
 
     assertDoesNotThrow(
-        () -> this.agencyDeletionValidationService.validateForDeletion(consultantAgency));
+        () -> this.agencyDeletionValidationService.validateAndMarkForDeletion(consultantAgency));
   }
 
 }

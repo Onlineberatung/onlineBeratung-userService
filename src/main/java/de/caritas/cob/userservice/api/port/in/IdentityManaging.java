@@ -12,6 +12,10 @@ public interface IdentityManaging {
 
   Map<String, String> validateOneTimePassword(String username, String code);
 
+  boolean validatePasswordIgnoring2fa(String username, String password);
+
+  boolean changePassword(String userId, String password);
+
   void deleteOneTimePassword(String username);
 
   OtpInfoDTO getOtpCredential(String username);

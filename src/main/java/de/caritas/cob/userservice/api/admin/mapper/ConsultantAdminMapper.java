@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.admin.mapper;
 
-import de.caritas.cob.userservice.api.model.ConsultantDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.admin.model.ConsultantDTO;
+import de.caritas.cob.userservice.api.model.Consultant;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
@@ -31,7 +31,8 @@ public class ConsultantAdminMapper {
         .absenceMessage(this.consultant.getAbsenceMessage())
         .createDate(String.valueOf(this.consultant.getCreateDate()))
         .updateDate(String.valueOf(this.consultant.getUpdateDate()))
-        .deleteDate(String.valueOf(this.consultant.getDeleteDate()));
+        .deleteDate(String.valueOf(this.consultant.getDeleteDate()))
+        .status(String.valueOf(this.consultant.getStatus()));
   }
 
 }

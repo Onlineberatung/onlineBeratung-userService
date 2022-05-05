@@ -7,7 +7,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO;
-import de.caritas.cob.userservice.api.model.ViolationDTO;
+import de.caritas.cob.userservice.api.admin.model.ViolationDTO;
 import java.util.List;
 import org.junit.Test;
 

@@ -3,21 +3,22 @@ package de.caritas.cob.userservice.api.admin.controller;
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
 import de.caritas.cob.userservice.api.admin.facade.UserAdminFacade;
 import de.caritas.cob.userservice.api.admin.hallink.RootDTOBuilder;
+import de.caritas.cob.userservice.api.admin.model.Sort;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
-import de.caritas.cob.userservice.api.model.AgencyConsultantResponseDTO;
-import de.caritas.cob.userservice.api.model.AgencyTypeDTO;
-import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
-import de.caritas.cob.userservice.api.model.ConsultantAgencyResponseDTO;
-import de.caritas.cob.userservice.api.model.ConsultantFilter;
-import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
-import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
-import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
-import de.caritas.cob.userservice.api.model.RootDTO;
-import de.caritas.cob.userservice.api.model.SessionAdminResultDTO;
-import de.caritas.cob.userservice.api.model.SessionFilter;
-import de.caritas.cob.userservice.api.model.UpdateAdminConsultantDTO;
-import de.caritas.cob.userservice.api.model.ViolationDTO;
+import de.caritas.cob.userservice.api.admin.model.AgencyConsultantResponseDTO;
+import de.caritas.cob.userservice.api.admin.model.AgencyTypeDTO;
+import de.caritas.cob.userservice.api.admin.model.ConsultantAdminResponseDTO;
+import de.caritas.cob.userservice.api.admin.model.ConsultantAgencyResponseDTO;
+import de.caritas.cob.userservice.api.admin.model.ConsultantFilter;
+import de.caritas.cob.userservice.api.admin.model.ConsultantSearchResultDTO;
+import de.caritas.cob.userservice.api.admin.model.CreateConsultantAgencyDTO;
+import de.caritas.cob.userservice.api.admin.model.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.admin.model.RootDTO;
+import de.caritas.cob.userservice.api.admin.model.SessionAdminResultDTO;
+import de.caritas.cob.userservice.api.admin.model.SessionFilter;
+import de.caritas.cob.userservice.api.admin.model.UpdateAdminConsultantDTO;
+import de.caritas.cob.userservice.api.admin.model.ViolationDTO;
 import de.caritas.cob.userservice.generated.api.admin.controller.UseradminApi;
 import io.swagger.annotations.Api;
 import java.util.List;
@@ -106,6 +107,17 @@ public class UserAdminController implements UseradminApi {
     return new ResponseEntity<>(HttpStatus.CREATED);
   }
 
+  @Override
+  public ResponseEntity<Void> setConsultantAgencies(String consultantId,
+      List<CreateConsultantAgencyDTO> agencyList) {
+    consultantAdminFacade.markConsultantAgenciesForDeletion(consultantId);
+    agencyList.forEach(agency ->
+        consultantAdminFacade.createNewConsultantAgency(consultantId, agency)
+    );
+
+    return ResponseEntity.ok().build();
+  }
+
   /**
    * Entry point to delete a consultant agency relation.
    *
@@ -169,9 +181,9 @@ public class UserAdminController implements UseradminApi {
    */
   @Override
   public ResponseEntity<ConsultantSearchResultDTO> getConsultants(@NotNull @Valid Integer page,
-      @NotNull @Valid Integer perPage, @Valid ConsultantFilter consultantFilter) {
-    ConsultantSearchResultDTO resultDTO =
-        this.consultantAdminFacade.findFilteredConsultants(page, perPage, consultantFilter);
+      @NotNull @Valid Integer perPage, @Valid ConsultantFilter consultantFilter, @Valid Sort sort) {
+    var resultDTO =
+        this.consultantAdminFacade.findFilteredConsultants(page, perPage, consultantFilter, sort);
     return ResponseEntity.ok(resultDTO);
   }
 
@@ -192,7 +204,7 @@ public class UserAdminController implements UseradminApi {
    * given id.
    *
    * @param consultantId Consultant Id (required)
-   * @return {@link de.caritas.cob.userservice.api.model.ConsultantAgencyResponseDTO}s
+   * @return {@link ConsultantAgencyResponseDTO}s
    */
   @Override
   public ResponseEntity<ConsultantAgencyResponseDTO> getConsultantAgencies(

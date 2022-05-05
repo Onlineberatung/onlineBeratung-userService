@@ -19,21 +19,21 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.session.RegistrationType;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.session.SessionStatus;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.Session.RegistrationType;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatRollbackService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatRollbackService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
 import de.caritas.cob.userservice.api.service.statistics.event.AssignSessionStatisticsEvent;
@@ -66,7 +66,8 @@ public class AssignSessionFacadeTest {
   @Mock
   SessionService sessionService;
   @Mock
-  KeycloakAdminClientService keycloakAdminClientService;
+  @SuppressWarnings("unused")
+  KeycloakService keycloakService;
   @Mock
   LogService logService;
   @Mock
@@ -134,7 +135,7 @@ public class AssignSessionFacadeTest {
     verifyAsync(a -> verify(this.rocketChatFacade, atLeastOnce())
         .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getFeedbackGroupId()));
     verify(this.emailNotificationFacade, times(1))
-        .sendAssignEnquiryEmailNotification(any(), any(), any());
+        .sendAssignEnquiryEmailNotification(any(), any(), any(), any());
   }
 
   @Test
@@ -182,8 +183,8 @@ public class AssignSessionFacadeTest {
         .removeUserFromGroup("teamConsultantRcId2", session.getGroupId()));
     verifyAsync(a -> verify(this.rocketChatFacade, never())
         .removeUserFromGroup("teamConsultantRcId2", session.getFeedbackGroupId()));
-    verify(this.emailNotificationFacade, times(1))
-        .sendAssignEnquiryEmailNotification(any(), any(), any());
+    verifyAsync(a -> verify(this.emailNotificationFacade, times(1))
+        .sendAssignEnquiryEmailNotification(any(), any(), any(), any()));
   }
 
   @Test

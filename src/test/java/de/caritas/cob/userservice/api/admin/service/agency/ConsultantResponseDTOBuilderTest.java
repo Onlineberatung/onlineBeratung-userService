@@ -5,24 +5,24 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 
-import de.caritas.cob.userservice.api.model.HalLink.MethodEnum;
+import de.caritas.cob.userservice.api.admin.model.HalLink.MethodEnum;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ConsultantResponseDTOBuilderTest {
+@ExtendWith(MockitoExtension.class)
+class ConsultantResponseDTOBuilderTest {
 
   private static final int MOCKED_CONSULTANT_AGENCY_LIST_SIZE = 6;
 
   private List<de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO> agencyList;
 
-  @Before
-  public void setupResultPageMock() {
+  @BeforeEach
+  void setupResultPageMock() {
     EasyRandom easyRandom = new EasyRandom();
     agencyList = easyRandom
         .objects(
@@ -32,7 +32,7 @@ public class ConsultantResponseDTOBuilderTest {
   }
 
   @Test
-  public void build_Should_returnEmptyAgencyAdminSearchResultDTO_When_noParametersAreSet() {
+  void build_Should_returnEmptyAgencyAdminSearchResultDTO_When_noParametersAreSet() {
     var resultDTO = ConsultantResponseDTOBuilder.getInstance()
         .build();
 
@@ -45,7 +45,7 @@ public class ConsultantResponseDTOBuilderTest {
   }
 
   @Test
-  public void build_Should_returnEmptyAgencyAdminSearchResultDTOWithContent_When_ParametersAreSet() {
+  void build_Should_returnEmptyAgencyAdminSearchResultDTOWithContent_When_ParametersAreSet() {
     var resultDTO = ConsultantResponseDTOBuilder.getInstance()
         .withResult(agencyList)
         .build();
@@ -59,7 +59,7 @@ public class ConsultantResponseDTOBuilderTest {
   }
 
   @Test
-  public void build_Should_returnEmptyAgencyAdminSearchResultDTOWithTotal_When_ParametersAreSet() {
+  void build_Should_returnEmptyAgencyAdminSearchResultDTOWithTotal_When_ParametersAreSet() {
     var resultDTO = ConsultantResponseDTOBuilder.getInstance()
         .withResult(agencyList)
         .build();

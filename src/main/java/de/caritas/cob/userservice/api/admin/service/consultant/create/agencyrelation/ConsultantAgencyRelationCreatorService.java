@@ -4,25 +4,21 @@ import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
-import de.caritas.cob.userservice.api.admin.service.rocketchat.RocketChatAddToGroupOperationService;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
+import de.caritas.cob.userservice.api.admin.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
-import de.caritas.cob.userservice.api.facade.RocketChatFacade;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.session.SessionRepository;
-import de.caritas.cob.userservice.api.repository.session.SessionStatus;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.ConsultantStatus;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService.ImportRecord;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.tenant.TenantContext;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -40,10 +36,9 @@ public class ConsultantAgencyRelationCreatorService {
   private final @NonNull ConsultantAgencyService consultantAgencyService;
   private final @NonNull ConsultantRepository consultantRepository;
   private final @NonNull AgencyService agencyService;
-  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
-  private final @NonNull RocketChatFacade rocketChatFacade;
-  private final @NonNull SessionRepository sessionRepository;
+  private final @NonNull IdentityClient identityClient;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
+  private final @NonNull RocketChatAsyncHelper rocketChatAsyncHelper;
 
   /**
    * Creates a new {@link ConsultantAgency} based on the {@link ImportRecord} and agency ids.
@@ -78,6 +73,10 @@ public class ConsultantAgencyRelationCreatorService {
   private void createNewConsultantAgency(ConsultantAgencyCreationInput input,
       Consumer<String> logMethod) {
     var consultant = this.retrieveConsultant(input.getConsultantId());
+    if (!ConsultantStatus.IN_PROGRESS.equals(consultant.getStatus())) {
+      consultant.setStatus(ConsultantStatus.IN_PROGRESS);
+      consultantRepository.save(consultant);
+    }
 
     var agency = retrieveAgency(input.getAgencyId());
     if (consultingTypeManager.isConsultantBoundedToAgency(agency.getConsultingType())) {
@@ -85,7 +84,8 @@ public class ConsultantAgencyRelationCreatorService {
     }
 
     ensureConsultingTypeRoles(input, agency);
-    addConsultantToSessions(consultant, agency, logMethod);
+    rocketChatAsyncHelper.addConsultantToSessions(consultant, agency, logMethod,
+        TenantContext.getCurrentTenant());
 
     if (isTeamAgencyButNotTeamConsultant(agency, consultant)) {
       consultant.setTeamConsultant(true);
@@ -103,7 +103,7 @@ public class ConsultantAgencyRelationCreatorService {
       var roleSets = roles.getConsultant().getRoleSets();
       for (var roleSetName : input.getRoleSetNames()) {
         roleSets.getOrDefault(roleSetName, Collections.emptyList()).forEach(
-            roleName -> keycloakAdminClientService.ensureRole(input.getConsultantId(), roleName));
+            roleName -> identityClient.ensureRole(input.getConsultantId(), roleName));
       }
     }
   }
@@ -116,7 +116,7 @@ public class ConsultantAgencyRelationCreatorService {
 
   private void checkConsultantHasRoleSet(Set<String> roles, String consultantId) {
     roles.stream()
-        .filter(role -> keycloakAdminClientService.userHasRole(consultantId, role))
+        .filter(role -> identityClient.userHasRole(consultantId, role))
         .findAny()
         .orElseThrow(() -> new BadRequestException(
             String
@@ -147,27 +147,6 @@ public class ConsultantAgencyRelationCreatorService {
     }
   }
 
-  private void addConsultantToSessions(Consultant consultant, AgencyDTO agency,
-      Consumer<String> logMethod) {
-    List<Session> relevantSessions = collectRelevantSessionsToAddConsultant(agency);
-    RocketChatAddToGroupOperationService
-        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService, logMethod,
-            consultingTypeManager)
-        .onSessions(relevantSessions)
-        .withConsultant(consultant)
-        .addToGroupsOrRollbackOnFailure();
-  }
-
-  private List<Session> collectRelevantSessionsToAddConsultant(AgencyDTO agency) {
-    List<Session> sessionsToAddConsultant = sessionRepository
-        .findByAgencyIdAndStatusAndConsultantIsNull(agency.getId(), SessionStatus.NEW);
-    if (isTrue(agency.getTeamAgency())) {
-      sessionsToAddConsultant.addAll(sessionRepository
-          .findByAgencyIdAndStatusAndTeamSessionIsTrue(agency.getId(), SessionStatus.IN_PROGRESS));
-    }
-    return sessionsToAddConsultant;
-  }
-
   private boolean isTeamAgencyButNotTeamConsultant(AgencyDTO agency,
       Consultant consultant) {
     return isTrue(agency.getTeamAgency()) && !consultant.isTeamConsultant();
@@ -180,6 +159,7 @@ public class ConsultantAgencyRelationCreatorService {
         .agencyId(agencyId)
         .createDate(nowInUtc())
         .updateDate(nowInUtc())
+        .tenantId(consultant.getTenantId())
         .build();
   }
 

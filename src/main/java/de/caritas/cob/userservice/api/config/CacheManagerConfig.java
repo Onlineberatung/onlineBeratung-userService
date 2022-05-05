@@ -14,6 +14,8 @@ public class CacheManagerConfig {
 
   public static final String AGENCY_CACHE = "agencyCache";
   public static final String CONSULTING_TYPE_CACHE = "consultingTypeCache";
+  public static final String TENANT_CACHE = "tenantCache";
+  public static final String TENANT_ADMIN_CACHE = "tenantAdminCache";
 
   @Value("${cache.agencies.configuration.maxEntriesLocalHeap}")
   private long agenciesMaxEntriesLocalHeap;
@@ -39,6 +41,18 @@ public class CacheManagerConfig {
   @Value("${cache.consulting.type.configuration.timeToLiveSeconds}")
   private long consultingTypeTimeToLiveSeconds;
 
+  @Value("${cache.tenant.configuration.maxEntriesLocalHeap}")
+  private long tenantMaxEntriesLocalHeap;
+
+  @Value("${cache.tenant.configuration.eternal}")
+  private boolean tenantEternal;
+
+  @Value("${cache.tenant.configuration.timeToIdleSeconds}")
+  private long tenantTimeToIdleSeconds;
+
+  @Value("${cache.tenant.configuration.timeToLiveSeconds}")
+  private long tenantTimeToLiveSeconds;
+
   @Bean
   public CacheManager cacheManager() {
     return new EhCacheCacheManager(ehCacheManager());
@@ -49,6 +63,8 @@ public class CacheManagerConfig {
     var config = new net.sf.ehcache.config.Configuration();
     config.addCache(buildAgencyCacheConfiguration());
     config.addCache(buildConsultingTypeCacheConfiguration());
+    config.addCache(buildTenantCacheConfiguration());
+    config.addCache(buildTenantAdminCacheConfiguration());
 
     return net.sf.ehcache.CacheManager.newInstance(config);
   }
@@ -71,6 +87,26 @@ public class CacheManagerConfig {
     consultingTypeCacheConfiguration.setTimeToIdleSeconds(consultingTypeTimeToIdleSeconds);
     consultingTypeCacheConfiguration.setTimeToLiveSeconds(consultingTypeTimeToLiveSeconds);
     return consultingTypeCacheConfiguration;
+  }
+
+  private CacheConfiguration buildTenantCacheConfiguration() {
+    var tenantCacheConfiguration = new CacheConfiguration();
+    tenantCacheConfiguration.setName(TENANT_CACHE);
+    tenantCacheConfiguration.setMaxEntriesLocalHeap(tenantMaxEntriesLocalHeap);
+    tenantCacheConfiguration.setEternal(tenantEternal);
+    tenantCacheConfiguration.setTimeToIdleSeconds(tenantTimeToIdleSeconds);
+    tenantCacheConfiguration.setTimeToLiveSeconds(tenantTimeToLiveSeconds);
+    return tenantCacheConfiguration;
+  }
+
+  private CacheConfiguration buildTenantAdminCacheConfiguration() {
+    var tenantCacheConfiguration = new CacheConfiguration();
+    tenantCacheConfiguration.setName(TENANT_ADMIN_CACHE);
+    tenantCacheConfiguration.setMaxEntriesLocalHeap(tenantMaxEntriesLocalHeap);
+    tenantCacheConfiguration.setEternal(tenantEternal);
+    tenantCacheConfiguration.setTimeToIdleSeconds(tenantTimeToIdleSeconds);
+    tenantCacheConfiguration.setTimeToLiveSeconds(tenantTimeToLiveSeconds);
+    return tenantCacheConfiguration;
   }
 
 }

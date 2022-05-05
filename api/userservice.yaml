@@ -400,8 +400,9 @@ paths:
     patch:
       tags:
         - user-controller
-      summary: 'Updates an account property of the currently authenticated user'
-      description: 'The only supported field so far is encourage2fa [Authorization: Role: consultant, user]'
+      summary: 'Partially updates account properties of the currently authenticated user'
+      description: 'Supported fields so far are encourage2fa and displayName 
+        [Authorization: Role: consultant, user]'
       operationId: patchUser
       requestBody:
         required: true
@@ -820,6 +821,7 @@ paths:
           required: true
           schema:
             type: string
+            format: UUID
       responses:
         200:
           description: successful operation
@@ -835,6 +837,66 @@ paths:
           description: CONFLICT - invalid/unavailable username
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
+  /users/consultants/search:
+    get:
+      tags:
+        - user-controller
+      summary: 'Get consultants matching the given query [Auth: user-admin]'
+      operationId: searchConsultants
+      parameters:
+        - name: query
+          in: query
+          description: URL-encoded infix to search for in first name, last name, or email.
+            A non-encoded star symbol searches for all.
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - name: page
+          in: query
+          description: Page number (first page = 1)
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: perPage
+          in: query
+          description: Number of items returned per page
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+        - name: field
+          in: query
+          description: field to sort by
+          schema:
+            type: string
+            enum: [ FIRSTNAME, LASTNAME, EMAIL ]
+            default: FIRSTNAME
+            pattern: '^(FIRSTNAME|LASTNAME|EMAIL)$'
+        - name: order
+          in: query
+          description: sort order
+          schema:
+            type: string
+            enum: [ ASC, DESC ]
+            default: ASC
+            pattern: '^(ASC|DESC)$'
+      responses:
+        200:
+          description: OK - successful operation
+          content:
+            'application/hal+json':
+              schema:
+                $ref: 'useradminservice.yaml#/components/schemas/ConsultantSearchResultDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /users/sessions/{sessionId}/consultant/{consultantId}:
     put:
       tags:
@@ -1059,6 +1121,49 @@ paths:
           description: CONFLICT - Chat is already startet
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+  /users/{chatUserId}/chat/{chatId}/ban:
+    post:
+      tags:
+        - user-controller
+      summary: 'Ban a user from a group chat 
+        [Authorization: Role: consultant with authority UPDATE_CHAT]'
+      operationId: banFromChat
+      parameters:
+        - name: rcToken
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: chatUserId
+          in: path
+          required: true
+          example: Dd2WYSdFXP4No7bW6
+          schema:
+            type: string
+            minLength: 17
+            maxLength: 17
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+      responses:
+        204:
+          description: NO CONTENT - successful operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - No permission to ban
+        404:
+          description: NOT FOUND - User or chat not found
+        500:
+          description: INTERNAL SERVER ERROR - server encountered an unexpected condition
       security:
         - Bearer: [ ]
   /users/chat/{chatId}/start:
@@ -1415,52 +1520,6 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-  /users/twoFactorAuth:
-    description: deprecated
-    put:
-      tags:
-        - user-controller
-      summary: 'Activates 2FA by mobile app [authorities: consultant or user]'
-      operationId: activateTwoFactorAuthByAppDeprecated
-      requestBody:
-        content:
-          'application/json':
-            schema:
-              $ref: '#/components/schemas/OneTimePasswordDTO'
-        required: true
-      responses:
-        200:
-          description: OK - successful operation
-        400:
-          description: BAD REQUEST - invalid/incomplete request resp. provided password is wrong
-        401:
-          description: UNAUTHORIZED - no/invalid Keycloak token
-        403:
-          description: FORBIDDEN - no/invalid role/authorization or CSRF token
-        409:
-          description: CONFLICT - role from the request has no two factor auth enabled
-        500:
-          description: INTERNAL SERVER ERROR - server encountered unexpected condition
-      security:
-        - Bearer: [ ]
-    delete:
-      tags:
-        - user-controller
-      summary: 'Deactivates 2FA by mobile app [authorities: consultant or user]'
-      operationId: deactivateTwoFactorAuthByAppDeprecated
-      responses:
-        200:
-          description: OK - successful operation
-        400:
-          description: BAD REQUEST - invalid/incomplete request resp. provided password is wrong
-        401:
-          description: UNAUTHORIZED - no/invalid Keycloak token
-        403:
-          description: FORBIDDEN - no/invalid role/authorization or CSRF token
-        500:
-          description: INTERNAL SERVER ERROR - server encountered unexpected condition
-      security:
-        - Bearer: [ ]
   /liveproxy/send:
     post:
       tags:
@@ -1715,6 +1774,8 @@ components:
         username:
           type: string
           example: "asker23"
+        displayName:
+          type: string
         rcUserId:
           type: string
           example: "ag89h3tjkerg94t"
@@ -1733,6 +1794,8 @@ components:
         initiatorUserName:
           type: string
           example: "consultant23"
+        rcUserId:
+          type: string
         initiatorRcUserId:
           type: string
           example: "ag89h3tjkerg94t"
@@ -1745,6 +1808,8 @@ components:
         - "FORWARD"
         - "VIDEOCALL"
         - "FINISHED_CONVERSATION"
+        - "USER_MUTED"
+        - "USER_UNMUTED"
 
     ConsultantSessionDTO:
       type: object
@@ -1923,6 +1988,8 @@ components:
         username:
           type: string
           example: beraterXYZ
+        displayName:
+          type: string
         isAbsent:
           type: boolean
           example: true
@@ -1972,6 +2039,9 @@ components:
         userName:
           type: string
           example: max.muster
+        displayName:
+          type: string
+          example: Max M.
         firstName:
           type: string
           example: Max
@@ -2026,17 +2096,30 @@ components:
           type: boolean
           example: true
           description: "Is true if consultant has access to archive"
+        isE2EEncryptionEnabled:
+          type: boolean
+          example: true
+          description: "Is true if feature is enabled. Enables end-to-end encryption in video chat"
+        isWalkThroughEnabled:
+          type: boolean
+          example: true
+          description: "Is true if the walk through is enabled for the user"
 
     PatchUserDTO:
       type: object
-      required:
-        - encourage2fa
+      description: at least one property must be set
       properties:
         encourage2fa:
           type: boolean
           example: true
           description: indicates if 2FA is supposed to be encouraged
-
+        displayName:
+          type: string
+          minLength: 1
+        walkThroughEnabled:
+          type: boolean
+          example: true
+          description: indicates should the walkt hrough be enabled
     UpdateConsultantDTO:
       type: object
       required:
@@ -2228,6 +2311,11 @@ components:
         active:
           type: boolean
           example: false
+        bannedUsers:
+          type: array
+          description: usernames
+          items:
+            type: string
 
     ChatMembersResponseDTO:
       type: object
@@ -2246,7 +2334,7 @@ components:
           type: string
         username:
           type: string
-        name:
+        displayName:
           type: string
         utcOffset:
           type: string

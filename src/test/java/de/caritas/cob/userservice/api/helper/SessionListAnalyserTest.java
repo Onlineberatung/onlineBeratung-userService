@@ -20,8 +20,8 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionAttachmentDTO;
 import de.caritas.cob.userservice.api.exception.CustomCryptoException;
-import de.caritas.cob.userservice.api.model.SessionAttachmentDTO;
 import de.caritas.cob.userservice.api.service.DecryptionService;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.service;
 
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantCreatorService;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
 import de.caritas.cob.userservice.api.exception.ImportException;
@@ -9,10 +10,9 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.io.FileReader;
 import java.io.IOException;
@@ -45,8 +45,10 @@ public class ConsultantImportService {
   private String importFilename;
   @Value("${consultant.import.protocol.filename}")
   private String protocolFilename;
+  @Value("${multitenancy.enabled}")
+  private Boolean multiTenancyEnabled;
 
-  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
+  private final @NonNull IdentityClient identityClient;
   private final @NonNull ConsultantService consultantService;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
   private final @NonNull AgencyService agencyService;
@@ -169,7 +171,7 @@ public class ConsultantImportService {
           }
 
           // Check if decoded username is already taken
-          if (!keycloakAdminClientService.isUsernameAvailable(importRecord.getUsername())) {
+          if (!identityClient.isUsernameAvailable(importRecord.getUsername())) {
             writeToImportLog(String.format(
                 "Could not create Keycloak user for old id %s - username or e-mail address is already taken.",
                 importRecord.getIdOld()));
@@ -288,6 +290,11 @@ public class ConsultantImportService {
     }
     importRecord.setAbsenceMessage(absenceMessage);
     importRecord.setAgenciesAndRoleSets(record.get(8));
+
+    if (isTrue(multiTenancyEnabled)) {
+      importRecord.setTenantId(
+          (record.get(9).trim().equals(StringUtils.EMPTY)) ? null : Long.valueOf(record.get(9)));
+    }
     return importRecord;
   }
 
@@ -296,6 +303,7 @@ public class ConsultantImportService {
   public static class ImportRecord {
 
     String consultantId;
+    Long tenantId;
     Long idOld;
     String username;
     String usernameEncoded;

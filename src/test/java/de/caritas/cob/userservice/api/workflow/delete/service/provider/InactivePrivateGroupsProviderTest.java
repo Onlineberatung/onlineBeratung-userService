@@ -15,11 +15,11 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupsListAllException;
-import de.caritas.cob.userservice.api.model.rocketchat.group.GroupDTO;
-import de.caritas.cob.userservice.api.repository.chat.Chat;
-import de.caritas.cob.userservice.api.repository.chat.ChatRepository;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupDTO;
+import de.caritas.cob.userservice.api.model.Chat;
+import de.caritas.cob.userservice.api.port.out.ChatRepository;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collections;

@@ -17,12 +17,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.model.ConsultantResponseDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.ConsultantStatus;
+import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.Arrays;
 import java.util.List;
@@ -46,15 +47,15 @@ public class ConsultantAgencyServiceTest {
   private final Consultant CONSULTANT =
       new Consultant(CONSULTANT_ID, CONSULTANT_ROCKETCHAT_ID, "consultant", "first name",
           "last name", "consultant@cob.de", false, false, null, false, null, null, null,
-          null, null, null, null, null, true);
+          null, null, null, null, null, true, null, null, ConsultantStatus.CREATED, false);
   private final ConsultantAgency CONSULTANT_AGENCY =
-      new ConsultantAgency(AGENCY_ID, CONSULTANT, 1L, nowInUtc(), nowInUtc(), nowInUtc());
+      new ConsultantAgency(AGENCY_ID, CONSULTANT, 1L, nowInUtc(), nowInUtc(), nowInUtc(), null);
   private final List<ConsultantAgency> CONSULTANT_AGENY_LIST = Arrays.asList(CONSULTANT_AGENCY);
   private final ConsultantAgency NULL_CONSULTANT_AGENCY = null;
   private final List<ConsultantAgency> CONSULTANT_AGENCY_NULL_LIST =
       Arrays.asList(NULL_CONSULTANT_AGENCY);
   private final ConsultantAgency CONSULTANT_NULL_AGENCY = new ConsultantAgency(AGENCY_ID, null, 1L,
-      nowInUtc(), nowInUtc(), nowInUtc());
+      nowInUtc(), nowInUtc(), nowInUtc(), null);
   private final List<ConsultantAgency> CONSULTANT_NULL_AGENCY_LIST =
       Arrays.asList(CONSULTANT_NULL_AGENCY);
   private final String ERROR = "error";
@@ -164,6 +165,28 @@ public class ConsultantAgencyServiceTest {
 
     assertThat(consultantAgencyService.getConsultantsOfAgency(AGENCY_ID),
         everyItem(instanceOf(ConsultantResponseDTO.class)));
+  }
+
+  @Test
+  public void getConsultantsOfAgency_Should_ReturnOnlyConsultantsNotMarkedAsDeleted() {
+    var consultantAgencies = new EasyRandom().objects(ConsultantAgency.class, 10)
+        .collect(Collectors.toList());
+    removeDeletionFlagForConsultantAtIndex(consultantAgencies, 0, 2, 4, 6, 8, 9);
+    when(consultantAgencyRepository
+        .findByAgencyIdAndDeleteDateIsNullOrderByConsultantFirstNameAsc(any()))
+        .thenReturn(consultantAgencies);
+
+    var consultants = consultantAgencyService.getConsultantsOfAgency(0L);
+
+    assertThat(consultants, hasSize(6));
+  }
+
+  private void removeDeletionFlagForConsultantAtIndex(List<ConsultantAgency> consultantAgencies,
+      int... indexRange) {
+    Arrays.stream(indexRange)
+        .mapToObj(consultantAgencies::get)
+        .map(ConsultantAgency::getConsultant)
+        .forEach(consultant -> consultant.setDeleteDate(null));
   }
 
   @Test

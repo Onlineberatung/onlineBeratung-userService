@@ -7,14 +7,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
-import de.caritas.cob.userservice.api.model.UpdateAdminConsultantDTO;
-import de.caritas.cob.userservice.api.model.registration.UserDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.admin.model.UpdateAdminConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
+import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
@@ -30,7 +30,7 @@ public class ConsultantUpdateServiceTest {
   private ConsultantUpdateService consultantUpdateService;
 
   @Mock
-  private KeycloakAdminClientService keycloakAdminClientService;
+  private KeycloakService keycloakService;
 
   @Mock
   private ConsultantService consultantService;
@@ -57,7 +57,7 @@ public class ConsultantUpdateServiceTest {
 
     this.consultantUpdateService.updateConsultant("", updateConsultant);
 
-    verify(this.keycloakAdminClientService, times(1)).updateUserData(eq(consultant.getId()),
+    verify(this.keycloakService, times(1)).updateUserData(eq(consultant.getId()),
         any(UserDTO.class), eq(updateConsultant.getFirstname()),
         eq(updateConsultant.getLastname()));
     verify(this.consultantService, times(1)).saveConsultant(any());

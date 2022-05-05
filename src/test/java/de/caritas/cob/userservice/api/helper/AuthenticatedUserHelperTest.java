@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.helper;
 
-import static de.caritas.cob.userservice.api.repository.session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
+import static de.caritas.cob.userservice.api.model.Session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
@@ -21,9 +21,10 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.config.auth.UserRole;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.session.SessionStatus;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.ConsultantStatus;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import java.util.HashSet;
 import java.util.List;
@@ -38,25 +39,25 @@ public class AuthenticatedUserHelperTest {
 
   private final Consultant CONSULTANT = new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, USERNAME,
       FIRST_NAME, LAST_NAME, EMAIL, false, false, null, false, null, null, null, null,
-      null, null, null, null, true);
+      null, null, null, null, true, null, null, ConsultantStatus.CREATED, false);
   private final Consultant TEAM_CONSULTANT = new Consultant(TEAM_CONSULTANT_ID, ROCKETCHAT_ID,
       USERNAME, FIRST_NAME, LAST_NAME, EMAIL, false, true, null, true, null, null, null,
-      null, null, null, null, null, true);
+      null, null, null, null, null, true, null, null, ConsultantStatus.CREATED, false);
   private final Session SESSION = new Session(SESSION_ID, null, CONSULTANT,
       CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, AGENCY_ID, null, SessionStatus.NEW,
-      nowInUtc(), null, null, null, false, false, false, nowInUtc(), null);
+      nowInUtc(), null, null, null, false, false, false, nowInUtc(), null, null);
   private final Session SESSION_WITH_DIFFERENT_CONSULTANT =
       new Session(SESSION_ID, null, TEAM_CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE,
           AGENCY_ID, null, SessionStatus.NEW, nowInUtc(), null, null, null, false, false, false,
-          nowInUtc(), null);
+          nowInUtc(), null, null);
   private final Session TEAM_SESSION =
       new Session(TEAM_SESSION_ID, null, TEAM_CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED,
           POSTCODE, AGENCY_ID, null, SessionStatus.IN_PROGRESS, nowInUtc(), null, null, null,
-          IS_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null);
+          IS_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null, null);
   private final Session TEAM_SESSION_WITH_DIFFERENT_CONSULTANT =
       new Session(TEAM_SESSION_ID, null, CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE,
           AGENCY_ID, null, SessionStatus.IN_PROGRESS, nowInUtc(), null, null, null, IS_TEAM_SESSION,
-          IS_MONITORING, false, nowInUtc(), null);
+          IS_MONITORING, false, nowInUtc(), null, null);
 
   @InjectMocks
   private AuthenticatedUserHelper authenticatedUserHelper;

@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.service;
 
-import de.caritas.cob.userservice.api.service.securityheader.SecurityHeaderSupplier;
+import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
+import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import de.caritas.cob.userservice.api.config.CacheManagerConfig;
 import de.caritas.cob.userservice.consultingtypeservice.generated.ApiClient;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.ConsultingTypeControllerApi;
@@ -23,6 +24,7 @@ public class ConsultingTypeService {
 
   private final @NonNull ConsultingTypeControllerApi consultingTypeControllerApi;
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
+  private final @NonNull TenantHeaderSupplier tenantHeaderSupplier;
 
   /**
    * Returns the {@link ExtendedConsultingTypeResponseDTO} for the provided consulting type ID. the
@@ -44,7 +46,7 @@ public class ConsultingTypeService {
    * @return list with consulting type ids
    */
   @Cacheable(cacheNames = CacheManagerConfig.CONSULTING_TYPE_CACHE)
-  public List<Integer> getAllConsultingTypeIds() {
+  public List<Integer> getAllConsultingTypeIds(Long tenantId) {
     addDefaultHeaders(this.consultingTypeControllerApi.getApiClient());
     return this.consultingTypeControllerApi.getBasicConsultingTypeList().stream()
         .map(BasicConsultingTypeResponseDTO::getId)
@@ -53,6 +55,8 @@ public class ConsultingTypeService {
 
   private void addDefaultHeaders(ApiClient apiClient) {
     var headers = this.securityHeaderSupplier.getCsrfHttpHeaders();
+    tenantHeaderSupplier.addTenantHeader(headers);
     headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
   }
+
 }

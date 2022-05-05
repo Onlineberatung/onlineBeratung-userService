@@ -5,11 +5,11 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
-import de.caritas.cob.userservice.api.repository.chatagency.ChatAgency;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
-import de.caritas.cob.userservice.api.repository.consultantmobiletoken.ConsultantMobileToken;
-import de.caritas.cob.userservice.api.repository.consultantmobiletoken.ConsultantMobileTokenRepository;
+import de.caritas.cob.userservice.api.model.ChatAgency;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.ConsultantMobileToken;
+import de.caritas.cob.userservice.api.port.out.ConsultantMobileTokenRepository;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -148,6 +148,10 @@ public class ConsultantService {
       this.getConsultant(consultantId)
           .ifPresent(consultant -> this.addConsultantToken(consultant, mobileToken));
     }
+  }
+
+  public long getNumberOfActiveConsultants() {
+    return consultantRepository.countByDeleteDateIsNull();
   }
 
   private void addConsultantToken(Consultant consultant, String mobileToken) {

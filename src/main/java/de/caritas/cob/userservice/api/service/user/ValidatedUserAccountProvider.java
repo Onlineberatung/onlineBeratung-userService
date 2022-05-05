@@ -6,17 +6,13 @@ import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
-import de.caritas.cob.userservice.api.model.PasswordDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateDataDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateRequestDTO;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.user.User;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
-import de.caritas.cob.userservice.api.service.user.validation.UserAccountValidator;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserUpdateDataDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserUpdateRequestDTO;
 import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -34,8 +30,6 @@ public class ValidatedUserAccountProvider {
   private final @NonNull AuthenticatedUser authenticatedUser;
   private final @NonNull IdentityClient identityClient;
   private final @NonNull RocketChatService rocketChatService;
-  private final @NonNull UserAccountValidator userAccountValidator;
-  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
   private final @NonNull UserHelper userHelper;
 
   /**
@@ -112,7 +106,7 @@ public class ValidatedUserAccountProvider {
   }
 
   private void updateConsultantEmail(Consultant consultant, String email) {
-    UserUpdateDataDTO userUpdateDataDTO = new UserUpdateDataDTO(email, consultant.getFullName());
+    UserUpdateDataDTO userUpdateDataDTO = new UserUpdateDataDTO(email);
     UserUpdateRequestDTO requestDTO = new UserUpdateRequestDTO(consultant.getRocketChatId(),
         userUpdateDataDTO);
     this.rocketChatService.updateUser(requestDTO);
@@ -122,7 +116,7 @@ public class ValidatedUserAccountProvider {
   }
 
   private void updateUserEmail(User user, String email) {
-    UserUpdateDataDTO userUpdateDataDTO = new UserUpdateDataDTO(email, user.getUsername());
+    UserUpdateDataDTO userUpdateDataDTO = new UserUpdateDataDTO(email);
     UserUpdateRequestDTO requestDTO = new UserUpdateRequestDTO(user.getRcUserId(),
         userUpdateDataDTO);
     this.rocketChatService.updateUser(requestDTO);
@@ -132,33 +126,12 @@ public class ValidatedUserAccountProvider {
   }
 
   /**
-   * Updates the password of the currently authenticated user and checks if the given old password
-   * is correct.
-   *
-   * @param passwordDTO {@link PasswordDTO}
-   */
-  public void changePassword(PasswordDTO passwordDTO) {
-    userAccountValidator
-        .checkPasswordValidity(authenticatedUser.getUsername(), passwordDTO.getOldPassword());
-
-    if (!identityClient.changePassword(authenticatedUser.getUserId(),
-        passwordDTO.getNewPassword())) {
-      throw new InternalServerErrorException(
-          String.format("Could not update password of user %s", authenticatedUser.getUserId()));
-    }
-  }
-
-  /**
    * Deactivates the Keycloak account of the currently authenticated user and flags this account for
-   * deletion if the provided password is valid.
-   *
-   * @param deleteUserAccountDTO {@link DeleteUserAccountDTO}
+   * deletion.
    */
-  public void deactivateAndFlagUserAccountForDeletion(DeleteUserAccountDTO deleteUserAccountDTO) {
+  public void deactivateAndFlagUserAccountForDeletion() {
     User user = retrieveValidatedUser();
-    this.userAccountValidator
-        .checkPasswordValidity(user.getUsername(), deleteUserAccountDTO.getPassword());
-    this.keycloakAdminClientService.deactivateUser(user.getUserId());
+    this.identityClient.deactivateUser(user.getUserId());
     user.setDeleteDate(nowInUtc());
     userService.saveUser(user);
   }

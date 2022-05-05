@@ -14,15 +14,15 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.model.AgencyDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultant.ConsultantRepository;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.session.SessionRepository;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.Collections;
 import java.util.List;
@@ -163,8 +163,8 @@ public class ConsultantAgencyAdminServiceTest {
     this.consultantAgencyAdminService.markConsultantAgencyForDeletion("", 1L);
 
     assertThat(consultantAgency.getDeleteDate(), notNullValue());
-    verify(this.consultantAgencyRepository, times(1)).save(any(ConsultantAgency.class));
-    verify(this.agencyDeletionValidationService, times(1)).validateForDeletion(any());
+    verify(this.consultantAgencyRepository).save(any(ConsultantAgency.class));
+    verify(this.agencyDeletionValidationService).validateAndMarkForDeletion(any());
   }
 
 }

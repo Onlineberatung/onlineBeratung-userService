@@ -17,13 +17,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
 import de.caritas.cob.userservice.api.admin.facade.UserAdminFacade;
+import de.caritas.cob.userservice.api.admin.model.CreateConsultantAgencyDTO;
+import de.caritas.cob.userservice.api.admin.model.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.admin.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.config.auth.RoleAuthorizationAuthorityMapper;
 import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
-import de.caritas.cob.userservice.api.model.CreateConsultantAgencyDTO;
-import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
-import de.caritas.cob.userservice.api.model.UpdateAdminConsultantDTO;
+import java.util.ArrayList;
+import java.util.UUID;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,6 +62,10 @@ public class UserAdminControllerIT {
   protected static final String PAGE_PARAM = "page";
   protected static final String PER_PAGE_PARAM = "perPage";
 
+  private static final ObjectMapper objectMapper = new ObjectMapper();
+
+  private static final EasyRandom easyRandom = new EasyRandom();
+
   @Autowired
   private MockMvc mvc;
 
@@ -73,9 +79,11 @@ public class UserAdminControllerIT {
   private ViolationReportGenerator violationReportGenerator;
 
   @MockBean
+  @SuppressWarnings("unused")
   private LinkDiscoverers linkDiscoverers;
 
   @MockBean
+  @SuppressWarnings("unused")
   private RoleAuthorizationAuthorityMapper roleAuthorizationAuthorityMapper;
 
   @MockBean
@@ -154,7 +162,7 @@ public class UserAdminControllerIT {
         .andExpect(status().isOk());
 
     verify(this.consultantAdminFacade, times(1))
-        .findFilteredConsultants(eq(0), eq(1), any());
+        .findFilteredConsultants(eq(0), eq(1), any(), any());
   }
 
   @Test
@@ -184,7 +192,7 @@ public class UserAdminControllerIT {
 
     this.mvc.perform(post(GET_CONSULTANT_PATH)
             .contentType(MediaType.APPLICATION_JSON)
-            .content(new ObjectMapper().writeValueAsString(createConsultantDTO)))
+            .content(objectMapper.writeValueAsString(createConsultantDTO)))
         .andExpect(status().isOk());
 
     verify(this.consultantAdminFacade, times(1))
@@ -207,7 +215,7 @@ public class UserAdminControllerIT {
 
     this.mvc.perform(put(GET_CONSULTANT_PATH + "consultantId")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(new ObjectMapper().writeValueAsString(updateConsultantDTO)))
+            .content(objectMapper.writeValueAsString(updateConsultantDTO)))
         .andExpect(status().isOk());
 
     verify(this.consultantAdminFacade, times(1))
@@ -235,11 +243,28 @@ public class UserAdminControllerIT {
 
     this.mvc.perform(post(consultantAgencyPath)
             .contentType(MediaType.APPLICATION_JSON)
-            .content(new ObjectMapper().writeValueAsString(createConsultantAgencyDTO)))
+            .content(objectMapper.writeValueAsString(createConsultantAgencyDTO)))
         .andExpect(status().isCreated());
 
     verify(this.consultantAdminFacade, times(1))
         .createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
+  }
+
+  @Test
+  public void setConsultantAgenciesShouldReturnOkWhenRequiredParamsAreGiven() throws Exception {
+    var consultantId = UUID.randomUUID().toString();
+    var agencies = givenAgenciesToSet();
+
+    mvc.perform(
+        put("/useradmin/consultants/{consultantId}/agencies", consultantId)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(agencies))
+    ).andExpect(status().isOk());
+
+    verify(consultantAdminFacade, times(agencies.size()))
+        .createNewConsultantAgency(eq(consultantId), any(CreateConsultantAgencyDTO.class));
+    verify(consultantAdminFacade)
+        .markConsultantAgenciesForDeletion(consultantId);
   }
 
   @Test
@@ -303,4 +328,16 @@ public class UserAdminControllerIT {
         .findConsultantsForAgency(agencyId);
   }
 
+  private ArrayList<CreateConsultantAgencyDTO> givenAgenciesToSet() {
+    var agencies = new ArrayList<CreateConsultantAgencyDTO>();
+    var count = easyRandom.nextInt(9) + 1;
+
+    for (int i = 0; i < count; i++) {
+      var agency = new CreateConsultantAgencyDTO();
+      agency.setAgencyId(easyRandom.nextLong());
+      agency.setRoleSetKey("role set");
+      agencies.add(agency);
+    }
+    return agencies;
+  }
 }

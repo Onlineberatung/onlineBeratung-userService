@@ -1,11 +1,11 @@
 package de.caritas.cob.userservice.api.workflow.delete.scheduler;
 
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.workflow.delete.service.DeleteInactiveSessionsAndUserService;
+import de.caritas.cob.userservice.api.tenant.TenantContextProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -23,6 +23,9 @@ public class DeleteInactiveSessionsAndUserSchedulerTest {
   @Mock
   DeleteInactiveSessionsAndUserService deleteInactiveSessionsAndUserService;
 
+  @Mock
+  TenantContextProvider tenantContextProvider;
+
   @Test
   public void performDeletionWorkflow_Should_executeDeleteInactiveSessionsAndUsers_WhenFeatureIsEnabled() {
 
@@ -30,7 +33,9 @@ public class DeleteInactiveSessionsAndUserSchedulerTest {
         FIELD_NAME_SESSION_INACTIVE_DELETE_WORKFLOW_ENABLED,
         true);
     deleteInactiveSessionsAndUserScheduler.performDeletionWorkflow();
-    verify(this.deleteInactiveSessionsAndUserService, times(1)).deleteInactiveSessionsAndUsers();
+
+    verify(tenantContextProvider).setTechnicalContextIfMultiTenancyIsEnabled();
+    verify(this.deleteInactiveSessionsAndUserService).deleteInactiveSessionsAndUsers();
   }
 
   @Test
@@ -40,6 +45,8 @@ public class DeleteInactiveSessionsAndUserSchedulerTest {
         FIELD_NAME_SESSION_INACTIVE_DELETE_WORKFLOW_ENABLED,
         false);
     deleteInactiveSessionsAndUserScheduler.performDeletionWorkflow();
+
+    verify(tenantContextProvider).setTechnicalContextIfMultiTenancyIsEnabled();
     verify(this.deleteInactiveSessionsAndUserService, never()).deleteInactiveSessionsAndUsers();
   }
 

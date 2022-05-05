@@ -16,14 +16,15 @@ import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.session.SessionStatus;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.NotificationsDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -48,6 +49,8 @@ public class NewMessageEmailSupplier implements EmailSupplier {
   private final ConsultantService consultantService;
   private final String applicationBaseUrl;
   private final String emailDummySuffix;
+  private boolean multiTenancyEnabled;
+  private final TenantTemplateSupplier tenantTemplateSupplier;
 
   /**
    * Generates new message notification mails sent to regarding consultants when a user has written
@@ -109,7 +112,7 @@ public class NewMessageEmailSupplier implements EmailSupplier {
     } else {
       if (isNotBlank(session.getConsultant().getEmail())) {
         return singletonList(new ConsultantAgency(null, session.getConsultant(), null,
-            nowInUtc(), nowInUtc(), null));
+            nowInUtc(), nowInUtc(), null, null));
       }
     }
     return emptyList();
@@ -138,13 +141,18 @@ public class NewMessageEmailSupplier implements EmailSupplier {
 
   private MailDTO buildMailDtoForNewMessageNotificationConsultant(String email, String name,
       String postCode) {
+    var templateAttributes = new ArrayList<TemplateDataDTO>();
+    templateAttributes.add(new TemplateDataDTO().key("name").value(name));
+    templateAttributes.add(new TemplateDataDTO().key("plz").value(postCode));
+    if (!multiTenancyEnabled) {
+      templateAttributes.add(new TemplateDataDTO().key("url").value(applicationBaseUrl));
+    } else {
+      templateAttributes.addAll(tenantTemplateSupplier.getTemplateAttributes());
+    }
     return new MailDTO()
         .template(TEMPLATE_NEW_MESSAGE_NOTIFICATION_CONSULTANT)
         .email(email)
-        .templateData(asList(
-            new TemplateDataDTO().key("name").value(name),
-            new TemplateDataDTO().key("plz").value(postCode),
-            new TemplateDataDTO().key("url").value(applicationBaseUrl)));
+        .templateData(templateAttributes);
   }
 
   private List<MailDTO> buildMailForAsker() {
@@ -203,13 +211,20 @@ public class NewMessageEmailSupplier implements EmailSupplier {
 
   private MailDTO buildMailDtoForNewMessageNotificationAsker(String email, String consultantName,
       String askerName) {
+    var templateAttributes = new ArrayList<TemplateDataDTO>();
+    templateAttributes.add(new TemplateDataDTO().key("consultantName").value(consultantName));
+    templateAttributes.add(new TemplateDataDTO().key("askerName").value(askerName));
+
+    if (!multiTenancyEnabled) {
+      templateAttributes.add(new TemplateDataDTO().key("url").value(applicationBaseUrl));
+    } else {
+      templateAttributes.addAll(tenantTemplateSupplier.getTemplateAttributes());
+    }
+
     return new MailDTO()
         .template(TEMPLATE_NEW_MESSAGE_NOTIFICATION_ASKER)
         .email(email)
-        .templateData(asList(
-            new TemplateDataDTO().key("consultantName").value(consultantName),
-            new TemplateDataDTO().key("askerName").value(askerName),
-            new TemplateDataDTO().key("url").value(applicationBaseUrl)));
+        .templateData(templateAttributes);
   }
 
 }

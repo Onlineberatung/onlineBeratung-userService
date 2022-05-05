@@ -5,8 +5,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
+import de.caritas.cob.userservice.api.model.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,7 +20,7 @@ class DeactivateKeycloakUserActionCommandTest {
   private DeactivateKeycloakUserActionCommand deactivateKeycloakUserActionCommand;
 
   @Mock
-  private KeycloakAdminClientService keycloakAdminClientService;
+  private KeycloakService keycloakService;
 
   @Test
   void execute_Should_deactivateUserInKeycloak() {
@@ -29,7 +29,7 @@ class DeactivateKeycloakUserActionCommandTest {
 
     this.deactivateKeycloakUserActionCommand.execute(user);
 
-    verify(this.keycloakAdminClientService, times(1)).deactivateUser("user id");
+    verify(this.keycloakService, times(1)).deactivateUser("user id");
   }
 
 }

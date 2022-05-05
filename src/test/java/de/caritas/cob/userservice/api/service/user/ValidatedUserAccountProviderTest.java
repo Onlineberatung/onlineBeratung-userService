@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.service.user;
 
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.MESSAGE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -9,7 +8,6 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -18,23 +16,17 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.model.DeleteUserAccountDTO;
-import de.caritas.cob.userservice.api.model.PasswordDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateDataDTO;
-import de.caritas.cob.userservice.api.model.rocketchat.user.UserUpdateRequestDTO;
-import de.caritas.cob.userservice.api.port.out.IdentityClient;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.repository.user.UserRepository;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
-import de.caritas.cob.userservice.api.service.user.validation.UserAccountValidator;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserUpdateDataDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserUpdateRequestDTO;
 import java.util.Optional;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
@@ -59,15 +51,9 @@ public class ValidatedUserAccountProviderTest {
   @Mock
   private AuthenticatedUser authenticatedUser;
   @Mock
-  private IdentityClient identityClient;
+  private KeycloakService keycloakService;
   @Mock
   private RocketChatService rocketChatService;
-  @Mock
-  private UserAccountValidator userAccountValidator;
-  @Mock
-  private KeycloakAdminClientService keycloakAdminClientService;
-  @Mock
-  private UserRepository userRepository;
   @Mock
   private UserHelper userHelper;
 
@@ -132,12 +118,12 @@ public class ValidatedUserAccountProviderTest {
 
     this.accountProvider.changeUserAccountEmailAddress(Optional.of("newMail"));
 
-    verify(identityClient).changeEmailAddress("newMail");
+    verify(keycloakService).changeEmailAddress("newMail");
     verify(this.rocketChatService, times(1))
         .updateUser(
             new UserUpdateRequestDTO(
                 consultant.getRocketChatId(),
-                new UserUpdateDataDTO("newMail", consultant.getFullName())));
+                new UserUpdateDataDTO("newMail")));
     consultant.setEmail("newMail");
     verify(this.consultantService, times(1)).saveConsultant(consultant);
     verifyNoMoreInteractions(this.rocketChatService);
@@ -154,11 +140,11 @@ public class ValidatedUserAccountProviderTest {
 
     this.accountProvider.changeUserAccountEmailAddress(Optional.of("newMail"));
 
-    verify(identityClient).changeEmailAddress("newMail");
+    verify(keycloakService).changeEmailAddress("newMail");
     verify(this.rocketChatService, times(1))
         .updateUser(
             new UserUpdateRequestDTO(
-                user.getRcUserId(), new UserUpdateDataDTO("newMail", user.getUsername())));
+                user.getRcUserId(), new UserUpdateDataDTO("newMail")));
     user.setEmail("newMail");
     verify(this.userService, times(1)).saveUser(user);
     verifyNoMoreInteractions(this.rocketChatService);
@@ -178,13 +164,13 @@ public class ValidatedUserAccountProviderTest {
 
     accountProvider.changeUserAccountEmailAddress(Optional.empty());
 
-    verify(identityClient).deleteEmailAddress();
-    verify(identityClient, never()).changeEmailAddress(anyString());
+    verify(keycloakService).deleteEmailAddress();
+    verify(keycloakService, never()).changeEmailAddress(anyString());
     verify(rocketChatService)
         .updateUser(
             new UserUpdateRequestDTO(
                 consultant.getRocketChatId(),
-                new UserUpdateDataDTO(dummyEmail, consultant.getFullName())));
+                new UserUpdateDataDTO(dummyEmail)));
     consultant.setEmail(dummyEmail);
     verify(consultantService).saveConsultant(consultant);
     verifyNoMoreInteractions(rocketChatService);
@@ -203,12 +189,12 @@ public class ValidatedUserAccountProviderTest {
 
     accountProvider.changeUserAccountEmailAddress(Optional.empty());
 
-    verify(identityClient).deleteEmailAddress();
-    verify(identityClient, never()).changeEmailAddress(anyString());
+    verify(keycloakService).deleteEmailAddress();
+    verify(keycloakService, never()).changeEmailAddress(anyString());
     verify(rocketChatService)
         .updateUser(
             new UserUpdateRequestDTO(
-                user.getRcUserId(), new UserUpdateDataDTO(dummyEmail, user.getUsername())));
+                user.getRcUserId(), new UserUpdateDataDTO(dummyEmail)));
     user.setEmail(dummyEmail);
     verify(userService).saveUser(user);
     verifyNoMoreInteractions(rocketChatService);
@@ -216,49 +202,14 @@ public class ValidatedUserAccountProviderTest {
     verifyNoMoreInteractions(consultantService);
   }
 
-  @Test(expected = InternalServerErrorException.class)
-  public void changePassword_Should_ThrowInternalServerErrorException_When_KeycloakPwChangeCallFails() {
-    PasswordDTO passwordDTO = EASY_RANDOM.nextObject(PasswordDTO.class);
-
-    this.accountProvider.changePassword(passwordDTO);
-  }
-
   @Test
-  public void changePassword_Should_CallKeycloakAdminClientServiceToUpdateThePassword() {
-    PasswordDTO passwordDTO = EASY_RANDOM.nextObject(PasswordDTO.class);
-    when(identityClient.changePassword(any(), any())).thenReturn(true);
-    when(authenticatedUser.getUserId()).thenReturn(USER_ID);
-
-    this.accountProvider.changePassword(passwordDTO);
-
-    verify(identityClient, times(1)).changePassword(any(), any());
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void deactivateAndFlagUserAccountForDeletion_ShouldNot_DeactivateKeycloakAccountOrSetDeleteDate_When_PasswordIsIncorrect() {
-    when(authenticatedUser.getUserId()).thenReturn(USER_ID);
-    when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
-    doThrow(new BadRequestException(MESSAGE)).when(userAccountValidator)
-        .checkPasswordValidity(anyString(), anyString());
-
-    DeleteUserAccountDTO deleteUserAccountDTO = EASY_RANDOM
-        .nextObject(DeleteUserAccountDTO.class);
-    this.accountProvider.deactivateAndFlagUserAccountForDeletion(deleteUserAccountDTO);
-
-    verifyNoInteractions(keycloakAdminClientService);
-    verifyNoInteractions(userRepository);
-  }
-
-  @Test
-  public void deactivateAndFlagUserAccountForDeletion_Should_DeactivateKeycloakAccountAndSetDeleteDate_When_PasswordIsCorrect() {
+  public void deactivateAndFlagUserAccountForDeletion_Should_DeactivateKeycloakAccountAndSetDeleteDate() {
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
 
-    DeleteUserAccountDTO deleteUserAccountDTO =
-        EASY_RANDOM.nextObject(DeleteUserAccountDTO.class);
-    this.accountProvider.deactivateAndFlagUserAccountForDeletion(deleteUserAccountDTO);
+    this.accountProvider.deactivateAndFlagUserAccountForDeletion();
 
-    verify(keycloakAdminClientService, times(1)).deactivateUser(USER.getUserId());
+    verify(keycloakService, times(1)).deactivateUser(USER.getUserId());
     ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
     verify(userService, times(1)).saveUser(captor.capture());
     assertNotNull(captor.getValue().getDeleteDate());

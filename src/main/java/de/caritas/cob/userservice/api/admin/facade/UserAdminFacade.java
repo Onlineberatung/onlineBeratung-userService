@@ -5,8 +5,8 @@ import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
-import de.caritas.cob.userservice.api.repository.user.User;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserAdminFacade {
 
-  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
+  private final @NonNull IdentityClient identityClient;
   private final @NonNull UserService userService;
 
   /**
@@ -37,7 +37,7 @@ public class UserAdminFacade {
           String.format("Asker with id %s is already marked for deletion", userId));
     }
 
-    this.keycloakAdminClientService.deactivateUser(userId);
+    this.identityClient.deactivateUser(userId);
     user.setDeleteDate(nowInUtc());
     this.userService.saveUser(user);
   }

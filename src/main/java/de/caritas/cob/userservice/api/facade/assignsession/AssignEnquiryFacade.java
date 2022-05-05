@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.facade.assignsession;
 
-import static de.caritas.cob.userservice.api.repository.session.SessionStatus.IN_PROGRESS;
-import static de.caritas.cob.userservice.api.repository.session.SessionStatus.NEW;
+import static de.caritas.cob.userservice.api.model.Session.SessionStatus.IN_PROGRESS;
+import static de.caritas.cob.userservice.api.model.Session.SessionStatus.NEW;
 import static java.util.Objects.nonNull;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
@@ -9,11 +9,11 @@ import de.caritas.cob.userservice.api.admin.service.rocketchat.RocketChatRemoveF
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
 import de.caritas.cob.userservice.api.service.statistics.event.AssignSessionStatisticsEvent;
@@ -35,7 +35,7 @@ public class AssignEnquiryFacade {
 
   private final @NonNull SessionService sessionService;
   private final @NonNull RocketChatFacade rocketChatFacade;
-  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
+  private final @NonNull IdentityClient identityClient;
   private final @NonNull SessionToConsultantVerifier sessionToConsultantVerifier;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
   private final @NonNull UnauthorizedMembersProvider unauthorizedMembersProvider;
@@ -49,7 +49,7 @@ public class AssignEnquiryFacade {
    * <p>If the statistics function is enabled, the assignment of the enquired is processed as
    * statistical event.
    *
-   * @param session the session to assign the consultant
+   * @param session    the session to assign the consultant
    * @param consultant the consultant to assign
    */
   public void assignRegisteredEnquiry(Session session, Consultant consultant) {
@@ -63,7 +63,7 @@ public class AssignEnquiryFacade {
    * Assigns the given {@link Session} session to the given {@link Consultant}. Add the given {@link
    * Consultant} to the Rocket.Chat group.
    *
-   * @param session the session to assign the consultant
+   * @param session    the session to assign the consultant
    * @param consultant the consultant to assign
    */
   public void assignAnonymousEnquiry(Session session, Consultant consultant) {
@@ -121,8 +121,7 @@ public class AssignEnquiryFacade {
         .obtainConsultantsToRemove(rcGroupId, session, consultant, memberList);
 
     var rocketChatRemoveFromGroupOperationService = RocketChatRemoveFromGroupOperationService
-        .getInstance(this.rocketChatFacade, this.keycloakAdminClientService,
-            this.consultingTypeManager)
+        .getInstance(this.rocketChatFacade, this.identityClient, this.consultingTypeManager)
         .onSessionConsultants(Map.of(session, consultantsToRemoveFromRocketChat));
 
     if (rcGroupId.equalsIgnoreCase(session.getGroupId())) {

@@ -1,17 +1,20 @@
 package de.caritas.cob.userservice.api.admin.service.consultant;
 
+import static java.util.Objects.nonNull;
+
+import de.caritas.cob.userservice.api.admin.model.ConsultantFilter;
+import de.caritas.cob.userservice.api.admin.model.ConsultantSearchResultDTO;
+import de.caritas.cob.userservice.api.admin.model.Sort;
+import de.caritas.cob.userservice.api.admin.model.Sort.OrderEnum;
 import de.caritas.cob.userservice.api.admin.service.consultant.querybuilder.ConsultantFilterQueryBuilder;
-import de.caritas.cob.userservice.api.model.ConsultantFilter;
-import de.caritas.cob.userservice.api.model.ConsultantSearchResultDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.model.Consultant;
 import javax.persistence.EntityManagerFactory;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.apache.lucene.search.Query;
+import org.apache.lucene.search.SortField;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.FullTextQuery;
 import org.hibernate.search.jpa.Search;
-import org.hibernate.search.query.dsl.QueryBuilder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -33,17 +36,19 @@ public class ConsultantAdminFilterService {
    * @return the result list
    */
   public ConsultantSearchResultDTO findFilteredConsultants(final Integer page,
-      final Integer perPage, final ConsultantFilter consultantFilter) {
-    FullTextEntityManager fullTextEntityManager = Search
+      final Integer perPage, final ConsultantFilter consultantFilter, final Sort sort) {
+    var fullTextEntityManager = Search
         .getFullTextEntityManager(entityManagerFactory.createEntityManager());
 
-    FullTextQuery fullTextQuery = buildFilteredQuery(consultantFilter, fullTextEntityManager);
+    var fullTextQuery = buildFilteredQuery(consultantFilter, fullTextEntityManager);
     fullTextQuery.setMaxResults(Math.max(perPage, 1));
     fullTextQuery.setFirstResult(Math.max((page - 1) * perPage, 0));
+    fullTextQuery.setSort(buildSort(sort));
 
-    ConsultantSearchResultDTO searchResultDTO = ConsultantSearchResultBuilder
+    var searchResultDTO = ConsultantSearchResultBuilder
         .getInstance(fullTextQuery)
         .withFilter(consultantFilter)
+        .withSort(sort)
         .withPage(page)
         .withPerPage(perPage)
         .buildConsultantSearchResult();
@@ -52,19 +57,30 @@ public class ConsultantAdminFilterService {
     return searchResultDTO;
   }
 
-  private FullTextQuery buildFilteredQuery(ConsultantFilter consultantFilter,
+  protected FullTextQuery buildFilteredQuery(ConsultantFilter consultantFilter,
       FullTextEntityManager fullTextEntityManager) {
 
-    QueryBuilder queryBuilder = fullTextEntityManager.getSearchFactory()
+    var queryBuilder = fullTextEntityManager.getSearchFactory()
         .buildQueryBuilder()
         .forEntity(Consultant.class)
         .get();
 
-    Query query = ConsultantFilterQueryBuilder.getInstance(queryBuilder)
+    var query = ConsultantFilterQueryBuilder.getInstance(queryBuilder)
         .onConsultantFilter(consultantFilter)
         .buildQuery();
 
     return fullTextEntityManager.createFullTextQuery(query, Consultant.class);
+  }
+
+  private org.apache.lucene.search.Sort buildSort(Sort sort) {
+    var luceneSort = new org.apache.lucene.search.Sort();
+    if (nonNull(sort) && nonNull(sort.getField())) {
+      var reverse = OrderEnum.DESC.equals(sort.getOrder());
+      luceneSort.setSort(SortField.FIELD_SCORE,
+          new SortField(sort.getField().getValue(), SortField.Type.STRING, reverse));
+    }
+
+    return luceneSort;
   }
 
 }

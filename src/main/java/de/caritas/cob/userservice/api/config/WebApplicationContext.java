@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.config;
 
-import de.caritas.cob.userservice.api.controller.validation.MinValueValidator;
+import de.caritas.cob.userservice.api.adapters.web.controller.validation.MinValueValidator;
 import java.util.List;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;

@@ -12,10 +12,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgency;
-import de.caritas.cob.userservice.api.repository.consultantagency.ConsultantAgencyRepository;
-import de.caritas.cob.userservice.api.repository.session.Session;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
@@ -42,8 +42,9 @@ public class NewEnquiryEmailSupplierTest {
 
   @Before
   public void setup() {
-    this.newEnquiryEmailSupplier = new NewEnquiryEmailSupplier(session,
-        consultantAgencyRepository, agencyService, "app base");
+    this.newEnquiryEmailSupplier = new NewEnquiryEmailSupplier(
+        consultantAgencyRepository, agencyService, null);
+    this.newEnquiryEmailSupplier.setCurrentSession(session);
   }
 
   @Test
@@ -61,9 +62,9 @@ public class NewEnquiryEmailSupplierTest {
     when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(anyLong())).thenReturn(asList(
         null,
         new ConsultantAgency(0L, new Consultant(), 0L, nowInUtc(), nowInUtc(),
-            nowInUtc()),
+            nowInUtc(), null),
         new ConsultantAgency(1L, absentConsultant, 1L, nowInUtc(), nowInUtc(),
-            nowInUtc())));
+            nowInUtc(), null)));
 
     List<MailDTO> generatedMails = newEnquiryEmailSupplier.generateEmails();
 
@@ -74,9 +75,9 @@ public class NewEnquiryEmailSupplierTest {
   public void generateEmails_Should_ReturnExpectedMailDTO_When_PresentConsultantsWereFound() {
     when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(anyLong())).thenReturn(asList(
         new ConsultantAgency(0L, MAIN_CONSULTANT, 0L, nowInUtc(), nowInUtc(),
-            nowInUtc()),
+            nowInUtc(), null),
         new ConsultantAgency(1L, MAIN_CONSULTANT, 1L, nowInUtc(), nowInUtc(),
-            nowInUtc())));
+            nowInUtc(), null)));
     when(agencyService.getAgency(any())).thenReturn(AGENCY_DTO_U25);
     when(session.getPostcode()).thenReturn("12345");
 
@@ -95,7 +96,6 @@ public class NewEnquiryEmailSupplierTest {
     assertThat(templateData.get(2).getKey(), is("beratungsstelle"));
     assertThat(templateData.get(2).getValue(), is("Test Beratungsstelle"));
     assertThat(templateData.get(3).getKey(), is("url"));
-    assertThat(templateData.get(3).getValue(), is("app base"));
   }
 
 }

@@ -26,11 +26,17 @@
 		<java.version>11</java.version>
 		<skip.unit-tests>false</skip.unit-tests>
 		<skip.integration-tests>false</skip.integration-tests>
-		<keycloak.version>13.0.1</keycloak.version>
+		<keycloak.version>17.0.0</keycloak.version>
 		<springfox.version>2.9.2</springfox.version>
 		<powermock.version>2.0.2</powermock.version>
-		<!-- force at least version 2.16 due to https://logging.apache.org/log4j/2.x/security.html -->
-		<log4j.version>2.17.1</log4j.version>
+		<adapters.web.generated.path>
+			${project.groupId}.${project.artifactId}.generated.api.adapters.web
+		</adapters.web.generated.path>
+		<adapters.web.dto.path>
+			${project.groupId}.${project.artifactId}.api.adapters.web.dto
+		</adapters.web.dto.path>
+		<log4j.version>2.17.1
+		</log4j.version> <!-- force safe version due to https://logging.apache.org/log4j/2.x/security.html -->
 	</properties>
 
 	<dependencies>
@@ -71,7 +77,6 @@
 		<dependency>
 			<groupId>org.hibernate.validator</groupId>
 			<artifactId>hibernate-validator</artifactId>
-			<version>6.2.0.Final</version>
 		</dependency>
 
 		<!-- Search dependency -->
@@ -144,7 +149,6 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>3.12.0</version>
 		</dependency>
 
 		<!-- Apache Commons Text -->
@@ -165,7 +169,6 @@
 		<dependency>
 		    <groupId>commons-codec</groupId>
 		    <artifactId>commons-codec</artifactId>
-		    <version>1.15</version>
 		</dependency>
 
 		<dependency>
@@ -227,12 +230,10 @@
 		<dependency>
 			<groupId>net.sf.ehcache</groupId>
 			<artifactId>ehcache</artifactId>
-			<version>2.10.9.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context-support</artifactId>
-			<version>5.3.13</version>
 		</dependency>
 
 		<!-- Push notification firebase dependency -->
@@ -290,7 +291,6 @@
 		<dependency>
 			<groupId>org.awaitility</groupId>
 			<artifactId>awaitility</artifactId>
-			<version>4.1.1</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -361,7 +361,6 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>3.2.0</version>
 				<executions>
 					<execution>
 						<phase>generate-sources</phase>
@@ -390,9 +389,8 @@
 						<configuration>
 							<inputSpec>${project.basedir}/api/userservice.yaml</inputSpec>
 							<generatorName>spring</generatorName>
-							<apiPackage>${project.groupId}.${project.artifactId}.generated.api.controller
-							</apiPackage>
-							<modelPackage>${project.groupId}.${project.artifactId}.api.model</modelPackage>
+							<apiPackage>${adapters.web.generated.path}.controller</apiPackage>
+							<modelPackage>${adapters.web.dto.path}</modelPackage>
 							<generateSupportingFiles>true</generateSupportingFiles>
 							<configOptions>
 								<interfaceOnly>true</interfaceOnly>
@@ -400,62 +398,61 @@
 							</configOptions>
 							<output>target/generated-sources</output>
 							<importMappings>
-								<importMapping>
-									UserDTO=${project.groupId}.${project.artifactId}.api.model.registration.UserDTO
+								<importMapping>UserDTO=${adapters.web.dto.path}.UserDTO</importMapping>
+								<importMapping>SessionUserDTO=${adapters.web.dto.path}.SessionUserDTO
 								</importMapping>
 								<importMapping>
-									SessionUserDTO=${project.groupId}.${project.artifactId}.api.model.user.SessionUserDTO
+									SessionConsultantForUserDTO=${adapters.web.dto.path}.SessionConsultantForUserDTO
 								</importMapping>
-								<importMapping>
-									SessionConsultantForUserDTO=${project.groupId}.${project.artifactId}.api.model.user.SessionConsultantForUserDTO
+								<importMapping>UserChatDTO=${adapters.web.dto.path}.UserChatDTO</importMapping>
+								<importMapping>UserDataResponseDTO=${adapters.web.dto.path}.UserDataResponseDTO
 								</importMapping>
-								<importMapping>
-									UserChatDTO=${project.groupId}.${project.artifactId}.api.model.chat.UserChatDTO
-								</importMapping>
-								<importMapping>
-									UserDataResponseDTO=${project.groupId}.${project.artifactId}.api.model.user.UserDataResponseDTO
-								</importMapping>
-								<importMapping>
-									MonitoringDTO=${project.groupId}.${project.artifactId}.api.model.monitoring.MonitoringDTO
-								</importMapping>
-								<importMapping>
-									ChatDTO=${project.groupId}.${project.artifactId}.api.model.chat.ChatDTO
-								</importMapping>
-								<importMapping>
-									NewRegistrationDto=${project.groupId}.${project.artifactId}.api.model.registration.NewRegistrationDto
+								<importMapping>MonitoringDTO=${adapters.web.dto.path}.MonitoringDTO</importMapping>
+								<importMapping>ChatDTO=${adapters.web.dto.path}.ChatDTO</importMapping>
+								<importMapping>NewRegistrationDto=${adapters.web.dto.path}.NewRegistrationDto
 								</importMapping>
 								<importMapping>Date=java.util.Date</importMapping>
 								<importMapping>HttpStatus=org.springframework.http.HttpStatus</importMapping>
 							</importMappings>
 							<typeMappings>
+								<typeMapping>UserDTO=${adapters.web.dto.path}.UserDTO</typeMapping>
+								<typeMapping>SessionUserDTO=${adapters.web.dto.path}.SessionUserDTO</typeMapping>
 								<typeMapping>
-									ActivateTwoFactorAuthUserDTO=${project.groupId}.${project.artifactId}.api.model.ActivateTwoFactorAuthUserDTO
+									SessionConsultantForUserDTO=${adapters.web.dto.path}.SessionConsultantForUserDTO
 								</typeMapping>
-								<typeMapping>
-									UserDTO=${project.groupId}.${project.artifactId}.api.model.registration.UserDTO
+								<typeMapping>UserChatDTO=${adapters.web.dto.path}.UserChatDTO</typeMapping>
+								<typeMapping>UserDataResponseDTO=${adapters.web.dto.path}.UserDataResponseDTO
 								</typeMapping>
-								<typeMapping>
-									SessionUserDTO=${project.groupId}.${project.artifactId}.api.model.user.SessionUserDTO
-								</typeMapping>
-								<typeMapping>
-									SessionConsultantForUserDTO=${project.groupId}.${project.artifactId}.api.model.user.SessionConsultantForUserDTO
-								</typeMapping>
-								<typeMapping>
-									UserChatDTO=${project.groupId}.${project.artifactId}.api.model.chat.UserChatDTO
-								</typeMapping>
-								<typeMapping>
-									UserDataResponseDTO=${project.groupId}.${project.artifactId}.api.model.user.UserDataResponseDTO
-								</typeMapping>
-								<typeMapping>
-									MonitoringDTO=${project.groupId}.${project.artifactId}.api.model.monitoring.MonitoringDTO
-								</typeMapping>
-								<typeMapping>
-									ChatDTO=${project.groupId}.${project.artifactId}.api.model.chat.ChatDTO
-								</typeMapping>
-								<typeMapping>
-									NewRegistrationDto=${project.groupId}.${project.artifactId}.api.model.registration.NewRegistrationDto
+								<typeMapping>MonitoringDTO=${adapters.web.dto.path}.MonitoringDTO</typeMapping>
+								<typeMapping>ChatDTO=${adapters.web.dto.path}.ChatDTO</typeMapping>
+								<typeMapping>NewRegistrationDto=${adapters.web.dto.path}.NewRegistrationDto
 								</typeMapping>
 							</typeMappings>
+						</configuration>
+					</execution>
+					<execution>
+						<id>appointment-service</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<inputSpec>${project.basedir}/api/appointmentservice.yaml</inputSpec>
+							<generatorName>spring</generatorName>
+							<apiPackage>${adapters.web.generated.path}.controller</apiPackage>
+							<modelPackage>${adapters.web.dto.path}</modelPackage>
+							<generateSupportingFiles>true</generateSupportingFiles>
+							<configOptions>
+								<sourceFolder>/</sourceFolder>
+								<interfaceOnly>true</interfaceOnly>
+								<dateLibrary>java8</dateLibrary>
+							</configOptions>
+							<output>target/generated-sources</output>
+							<typeMappings>
+								<typeMapping>OffsetDateTime=Instant</typeMapping>
+							</typeMappings>
+							<importMappings>
+								<importMapping>java.time.OffsetDateTime=java.time.Instant</importMapping>
+							</importMappings>
 						</configuration>
 					</execution>
 					<execution>
@@ -471,7 +468,7 @@
 							<inputSpec>${project.basedir}/api/useradminservice.yaml</inputSpec>
 							<generatorName>spring</generatorName>
 							<apiPackage>${project.groupId}.${project.artifactId}.generated.api.admin.controller</apiPackage>
-							<modelPackage>${project.groupId}.${project.artifactId}.api.model</modelPackage>
+							<modelPackage>${project.groupId}.${project.artifactId}.api.admin.model</modelPackage>
 							<generateSupportingFiles>true</generateSupportingFiles>
 							<output>target/generated-sources</output>
 							<typeMappings>
@@ -494,7 +491,8 @@
 							<inputSpec>${project.basedir}/api/userstatisticsservice.yaml</inputSpec>
 							<generatorName>spring</generatorName>
 							<apiPackage>${project.groupId}.${project.artifactId}.generated.api.statistics.controller</apiPackage>
-							<modelPackage>${project.groupId}.${project.artifactId}.api.model</modelPackage>
+							<modelPackage>${project.groupId}.${project.artifactId}.api.statistics.model
+							</modelPackage>
 							<generateSupportingFiles>true</generateSupportingFiles>
 							<output>target/generated-sources</output>
 						</configuration>
@@ -512,26 +510,21 @@
 							</configOptions>
 							<inputSpec>${project.basedir}/api/conversationservice.yaml</inputSpec>
 							<generatorName>spring</generatorName>
-							<apiPackage>${project.groupId}.${project.artifactId}.generated.api.conversation.controller</apiPackage>
-							<modelPackage>${project.groupId}.${project.artifactId}.api.model</modelPackage>
+							<apiPackage>
+								${project.groupId}.${project.artifactId}.generated.api.conversation.controller
+							</apiPackage>
+							<modelPackage>${adapters.web.dto.path}</modelPackage>
 							<generateSupportingFiles>true</generateSupportingFiles>
 							<output>target/generated-sources</output>
 							<importMappings>
-								<importMapping>
-									SessionUserDTO=${project.groupId}.${project.artifactId}.api.model.user.SessionUserDTO
+								<importMapping>SessionUserDTO=${adapters.web.dto.path}.SessionUserDTO
 								</importMapping>
-								<importMapping>
-									UserChatDTO=${project.groupId}.${project.artifactId}.api.model.chat.UserChatDTO
-								</importMapping>
+								<importMapping>UserChatDTO=${adapters.web.dto.path}.UserChatDTO</importMapping>
 								<importMapping>Date=java.util.Date</importMapping>
 							</importMappings>
 							<typeMappings>
-								<typeMapping>
-									SessionUserDTO=${project.groupId}.${project.artifactId}.api.model.user.SessionUserDTO
-								</typeMapping>
-								<typeMapping>
-									UserChatDTO=${project.groupId}.${project.artifactId}.api.model.chat.UserChatDTO
-								</typeMapping>
+								<typeMapping>SessionUserDTO=${adapters.web.dto.path}.SessionUserDTO</typeMapping>
+								<typeMapping>UserChatDTO=${adapters.web.dto.path}.UserChatDTO</typeMapping>
 							</typeMappings>
 						</configuration>
 					</execution>
@@ -724,6 +717,56 @@
 							<generateModelTests>false</generateModelTests>
 							<modelPackage>
 								${project.groupId}.${project.artifactId}.statisticsservice.generated.web.model
+							</modelPackage>
+						</configuration>
+					</execution>
+					<execution>
+						<id>tenant-service-client-model</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<configOptions>
+								<sourceFolder>/</sourceFolder>
+								<library>resttemplate</library>
+								<dateLibrary>java8</dateLibrary>
+							</configOptions>
+							<inputSpec>${project.basedir}/services/tenantservice.yaml</inputSpec>
+							<generatorName>java</generatorName>
+							<generateApis>true</generateApis>
+							<generateApiTests>false</generateApiTests>
+							<generateModelTests>false</generateModelTests>
+							<apiPackage>
+								${project.groupId}.${project.artifactId}.tenantservice.generated.web
+							</apiPackage>
+							<modelPackage>
+								${project.groupId}.${project.artifactId}.tenantservice.generated.web.model
+							</modelPackage>
+						</configuration>
+					</execution>
+					<execution>
+						<id>tenant-admin-service-client-model</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<configOptions>
+								<sourceFolder>/</sourceFolder>
+								<library>resttemplate</library>
+								<dateLibrary>java8</dateLibrary>
+							</configOptions>
+							<inputSpec>${project.basedir}/services/tenantadminservice.yaml</inputSpec>
+							<generatorName>java</generatorName>
+							<generateApis>true</generateApis>
+							<generateApiTests>false</generateApiTests>
+							<generateModelTests>false</generateModelTests>
+							<apiPackage>
+								${project.groupId}.${project.artifactId}.tenantadminservice.generated.web
+							</apiPackage>
+							<modelPackage>
+								${project.groupId}.${project.artifactId}.tenantadminservice.generated.web.model
 							</modelPackage>
 						</configuration>
 					</execution>

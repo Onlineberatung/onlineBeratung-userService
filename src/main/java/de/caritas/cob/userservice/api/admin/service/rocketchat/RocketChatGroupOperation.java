@@ -2,12 +2,12 @@ package de.caritas.cob.userservice.api.admin.service.rocketchat;
 
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.model.rocketchat.group.GroupMemberDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
-import de.caritas.cob.userservice.api.repository.session.Session;
-import de.caritas.cob.userservice.api.repository.session.SessionStatus;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.model.Session.SessionStatus;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.helper.KeycloakAdminClientService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -18,14 +18,14 @@ import lombok.RequiredArgsConstructor;
 abstract class RocketChatGroupOperation {
 
   private final @NonNull RocketChatFacade rocketChatFacade;
-  private final @NonNull KeycloakAdminClientService keycloakAdminClientService;
+  private final @NonNull IdentityClient identityClient;
 
   protected Consumer<String> logMethod = LogService::logInfo;
 
   void addConsultantToGroupOfSession(Session session, Consultant consultant,
       ConsultingTypeManager consultingTypeManager) {
     var operationConditionProvider =
-        new RocketChatOperationConditionProvider(this.keycloakAdminClientService, session,
+        new RocketChatOperationConditionProvider(this.identityClient, session,
             consultant, consultingTypeManager);
 
     if (operationConditionProvider.canAddToRocketChatGroup()) {

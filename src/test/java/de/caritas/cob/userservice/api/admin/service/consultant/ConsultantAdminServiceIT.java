@@ -5,21 +5,27 @@ import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import de.caritas.cob.userservice.api.UserServiceApplication;
+import de.caritas.cob.userservice.api.admin.model.ConsultantAdminResponseDTO;
+import de.caritas.cob.userservice.api.admin.model.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.admin.model.HalLink.MethodEnum;
+import de.caritas.cob.userservice.api.admin.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantCreatorService;
 import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
 import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
-import de.caritas.cob.userservice.api.model.ConsultantAdminResponseDTO;
-import de.caritas.cob.userservice.api.model.CreateConsultantDTO;
-import de.caritas.cob.userservice.api.model.HalLink.MethodEnum;
-import de.caritas.cob.userservice.api.model.UpdateAdminConsultantDTO;
-import de.caritas.cob.userservice.api.repository.consultant.Consultant;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.ConsultantStatus;
+import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
+import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
+import org.jeasy.random.EasyRandomParameters;
+import org.jeasy.random.FieldPredicates;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +46,12 @@ public class ConsultantAdminServiceIT {
 
   @Autowired
   private ConsultantAdminService consultantAdminService;
+
+  @Autowired
+  private ConsultantRepository consultantRepository;
+
+  @Autowired
+  private ConsultantAgencyRepository consultantAgencyRepository;
 
   @MockBean
   private ConsultantCreatorService consultantCreatorService;
@@ -108,7 +120,7 @@ public class ConsultantAdminServiceIT {
     ConsultantAdminResponseDTO result =
         this.consultantAdminService.createNewConsultant(createConsultantDTO);
 
-    verify(this.consultantCreatorService, times(1)).createNewConsultant(eq(createConsultantDTO));
+    verify(this.consultantCreatorService, times(1)).createNewConsultant(createConsultantDTO);
     assertThat(result.getLinks(), notNullValue());
     assertThat(result.getEmbedded(), notNullValue());
   }
@@ -126,6 +138,41 @@ public class ConsultantAdminServiceIT {
     verify(this.consultantUpdateService, times(1)).updateConsultant(any(), any());
     assertThat(result.getLinks(), notNullValue());
     assertThat(result.getEmbedded(), notNullValue());
+  }
+
+  @Test
+  public void markConsultantForDeletion_Should_setDeleteDateForConsultantAndConsultantAgencies() {
+    var consultant = givenAPersistedConsultantWithMultipleAgencies();
+
+    this.consultantAdminService.markConsultantForDeletion(consultant.getId());
+
+    var deletedConsultant = consultantRepository.findById(consultant.getId());
+    assertThat(deletedConsultant.get().getDeleteDate(), notNullValue());
+    assertThat(deletedConsultant.get().getStatus(), is(ConsultantStatus.IN_DELETION));
+    deletedConsultant.get().getConsultantAgencies().forEach(ca -> {
+      assertThat(ca.getDeleteDate(), notNullValue());
+    });
+  }
+
+  private Consultant givenAPersistedConsultantWithMultipleAgencies() {
+    var parameters = new EasyRandomParameters()
+        .stringLengthRange(1, 17)
+        .excludeField(FieldPredicates.named("consultantAgencies"))
+        .excludeField(FieldPredicates.named("languages"))
+        .excludeField(FieldPredicates.named("consultantMobileTokens"))
+        .excludeField(FieldPredicates.named("deleteDate"))
+        .excludeField(FieldPredicates.named("appointments"))
+        .excludeField(FieldPredicates.named("sessions"));
+    var consultant = new EasyRandom(parameters).nextObject(Consultant.class);
+    consultantRepository.save(consultant);
+    var consultantAgencies = new EasyRandom().objects(ConsultantAgency.class, 10)
+        .peek(agencyRelation -> {
+          agencyRelation.setAgencyId(1L);
+          agencyRelation.setConsultant(consultant);
+          agencyRelation.setDeleteDate(null);
+        }).collect(Collectors.toList());
+    consultantAgencyRepository.saveAll(consultantAgencies);
+    return consultant;
   }
 
 }

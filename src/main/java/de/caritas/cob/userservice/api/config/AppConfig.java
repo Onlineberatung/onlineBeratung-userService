@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.config;
 
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantReindexer;
+import java.time.Clock;
 import javax.persistence.EntityManagerFactory;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
@@ -52,5 +53,10 @@ public class AppConfig {
     FullTextEntityManager manager =
         Search.getFullTextEntityManager(entityManagerFactory.createEntityManager());
     return new ConsultantReindexer(manager);
+  }
+
+  @Bean
+  public Clock clock() {
+    return Clock.systemUTC();
   }
 }
