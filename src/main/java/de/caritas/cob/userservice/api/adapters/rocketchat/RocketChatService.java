@@ -8,23 +8,6 @@ import static org.apache.commons.lang3.ArrayUtils.isNotEmpty;
 import com.mongodb.DBObject;
 import com.mongodb.QueryBuilder;
 import de.caritas.cob.userservice.api.adapters.rocketchat.config.RocketChatConfig;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.MessageResponse;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomResponse;
-import de.caritas.cob.userservice.api.container.RocketChatCredentials;
-import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.exception.httpresponses.RocketChatUnauthorizedException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteGroupException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteUserException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupsListAllException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetUserIdException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.RocketChatUserDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.StandardResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupAddUserBodyDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupCleanHistoryDTO;
@@ -40,15 +23,32 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupsListAl
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.LdapLoginDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.logout.LogoutResponseDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.MessageResponse;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomResponse;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsGetDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsUpdateDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.subscriptions.SubscriptionsGetDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.subscriptions.SubscriptionsUpdateDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.RocketChatUserDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.SetRoomReadOnlyBodyDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserDeleteBodyDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserUpdateRequestDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UsersListReponseDTO;
+import de.caritas.cob.userservice.api.container.RocketChatCredentials;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.exception.httpresponses.RocketChatUnauthorizedException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteUserException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupsListAllException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetUserIdException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.port.out.MessageClient;
 import de.caritas.cob.userservice.api.service.LogService;
 import java.time.LocalDateTime;
@@ -64,7 +64,6 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -128,10 +127,6 @@ public class RocketChatService implements MessageClient {
   private final RocketChatConfig rocketChatConfig;
 
   private final RocketChatMapper mapper;
-  @Value("${rocket.chat.header.auth.token}")
-  private String rocketChatHeaderAuthToken;
-  @Value("${rocket.chat.header.user.id}")
-  private String rocketChatHeaderUserId;
 
   private boolean rotatingTokensInitialized = false;
 
@@ -371,8 +366,8 @@ public class RocketChatService implements MessageClient {
 
     var httpHeaders = new HttpHeaders();
     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-    httpHeaders.add(rocketChatHeaderAuthToken, rocketChatCredentials.getRocketChatToken());
-    httpHeaders.add(rocketChatHeaderUserId, rocketChatCredentials.getRocketChatUserId());
+    httpHeaders.add("X-Auth-Token", rocketChatCredentials.getRocketChatToken());
+    httpHeaders.add("X-User-Id", rocketChatCredentials.getRocketChatUserId());
     return httpHeaders;
   }
 

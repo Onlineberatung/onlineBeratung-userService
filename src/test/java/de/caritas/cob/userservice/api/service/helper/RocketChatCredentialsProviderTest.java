@@ -72,12 +72,6 @@ public class RocketChatCredentialsProviderTest {
   private final static String FIELD_NAME_SYSTEM_USERNAME = "systemUsername";
   private final static String FIELD_NAME_SYSTEM_PASSWORD = "systemPassword";
 
-  private final static String FIELD_NAME_ROCKET_CHAT_HEADER_AUTH_TOKEN =
-      "rocketChatHeaderAuthToken";
-  private final static String FIELD_VALUE_ROCKET_CHAT_HEADER_AUTH_TOKEN = "X-Auth-Token";
-  private final static String FIELD_NAME_ROCKET_CHAT_HEADER_USER_ID = "rocketChatHeaderUserId";
-  private final static String FIELD_VALUE_ROCKET_CHAT_HEADER_USER_ID = "X-User-Id";
-
   /**
    * DATA
    */
@@ -148,10 +142,6 @@ public class RocketChatCredentialsProviderTest {
     setField(rcCredentialHelper, FIELD_NAME_TECHNICAL_PASSWORD, TECHNICAL_USER_PW);
     setField(rcCredentialHelper, FIELD_NAME_SYSTEM_USERNAME, SYSTEM_USER_USERNAME);
     setField(rcCredentialHelper, FIELD_NAME_SYSTEM_PASSWORD, SYSTEM_USER_PW);
-    setField(rcCredentialHelper, FIELD_NAME_ROCKET_CHAT_HEADER_AUTH_TOKEN,
-        FIELD_VALUE_ROCKET_CHAT_HEADER_AUTH_TOKEN);
-    setField(rcCredentialHelper, FIELD_NAME_ROCKET_CHAT_HEADER_USER_ID,
-        FIELD_VALUE_ROCKET_CHAT_HEADER_USER_ID);
 
     rocketChatConfig.setBaseUrl("http://localhost/api/v1");
     setField(rcCredentialHelper, "rocketChatConfig", rocketChatConfig);
@@ -315,8 +305,8 @@ public class RocketChatCredentialsProviderTest {
     // prepare logout intercept for system user
     HttpHeaders headersLogoutSys = new HttpHeaders();
     headersLogoutSys.setContentType(MediaType.APPLICATION_JSON);
-    headersLogoutSys.add(FIELD_VALUE_ROCKET_CHAT_HEADER_AUTH_TOKEN, SYSTEM_USER_A_TOKEN);
-    headersLogoutSys.add(FIELD_VALUE_ROCKET_CHAT_HEADER_USER_ID, SYSTEM_USER_A_ID);
+    headersLogoutSys.add("X-Auth-Token", SYSTEM_USER_A_TOKEN);
+    headersLogoutSys.add("X-User-Id", SYSTEM_USER_A_ID);
     HttpEntity<Void> requestSysLogout = new HttpEntity<>(headersLogoutSys);
     when(restTemplate.postForEntity(ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGOUT),
         ArgumentMatchers.eq(requestSysLogout), ArgumentMatchers.<Class<LogoutResponseDTO>>any()))
@@ -326,8 +316,8 @@ public class RocketChatCredentialsProviderTest {
     // prepare logout intercept for technical user
     HttpHeaders headersLogoutTec = new HttpHeaders();
     headersLogoutTec.setContentType(MediaType.APPLICATION_JSON);
-    headersLogoutTec.add(FIELD_VALUE_ROCKET_CHAT_HEADER_AUTH_TOKEN, TECHNICAL_USER_A_TOKEN);
-    headersLogoutTec.add(FIELD_VALUE_ROCKET_CHAT_HEADER_USER_ID, TECHNICAL_USER_A_ID);
+    headersLogoutTec.add("X-Auth-Token", TECHNICAL_USER_A_TOKEN);
+    headersLogoutTec.add("X-User-Id", TECHNICAL_USER_A_ID);
     HttpEntity<Void> requestTechnicalLogout = new HttpEntity<>(headersLogoutTec);
     when(restTemplate.postForEntity(ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGOUT),
         ArgumentMatchers.eq(requestTechnicalLogout),

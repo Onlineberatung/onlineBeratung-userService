@@ -45,12 +45,6 @@ public class RocketChatCredentialsProvider {
   @Value("${rocket.systemuser.password}")
   private String systemPassword;
 
-  @Value("${rocket.chat.header.auth.token}")
-  private String rocketChatHeaderAuthToken;
-
-  @Value("${rocket.chat.header.user.id}")
-  private String rocketChatHeaderUserId;
-
   private final @NonNull RestTemplate restTemplate;
 
   private final RocketChatConfig rocketChatConfig;
@@ -255,11 +249,11 @@ public class RocketChatCredentialsProvider {
    * @return a HttpHeaders instance with the standard settings
    */
   private HttpHeaders getStandardHttpHeaders(String rcToken, String rcUserId) {
-
     var httpHeaders = new HttpHeaders();
     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-    httpHeaders.add(rocketChatHeaderAuthToken, rcToken);
-    httpHeaders.add(rocketChatHeaderUserId, rcUserId);
+    httpHeaders.add("X-Auth-Token", rcToken);
+    httpHeaders.add("X-User-Id", rcUserId);
+
     return httpHeaders;
   }
 

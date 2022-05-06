@@ -3,8 +3,6 @@ package de.caritas.cob.userservice.api.service;
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.api.testHelper.ExceptionConstants.HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR_EXCEPTION;
 import static de.caritas.cob.userservice.api.testHelper.ExceptionConstants.HTTP_STATUS_CODE_UNAUTHORIZED_EXCEPTION;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_HEADER_AUTH_TOKEN;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_HEADER_USER_ID;
 import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_TECH_AUTH_TOKEN;
 import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_TECH_USER_ID;
 import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_CHAT_USER_DELETE;
@@ -184,11 +182,7 @@ public class RocketChatServiceTest {
   private RestTemplate restTemplate;
 
   @Before
-  public void setup() throws NoSuchFieldException, SecurityException {
-    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_HEADER_AUTH_TOKEN,
-        "X-Auth-Token");
-    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_HEADER_USER_ID,
-        "X-User-Id");
+  public void setup() {
     rocketChatConfig.setBaseUrl("http://localhost/api/v1");
     setField(rocketChatService, "rocketChatConfig", rocketChatConfig);
 
