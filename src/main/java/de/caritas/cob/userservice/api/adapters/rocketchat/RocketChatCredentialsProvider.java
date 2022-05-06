@@ -5,6 +5,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.config.RocketChatConfig;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
@@ -44,12 +45,6 @@ public class RocketChatCredentialsProvider {
   @Value("${rocket.systemuser.password}")
   private String systemPassword;
 
-  @Value("${rocket.chat.api.user.login}")
-  private String rocketChatApiUserLogin;
-
-  @Value("${rocket.chat.api.user.logout}")
-  private String rocketChatApiUserLogout;
-
   @Value("${rocket.chat.header.auth.token}")
   private String rocketChatHeaderAuthToken;
 
@@ -57,6 +52,11 @@ public class RocketChatCredentialsProvider {
   private String rocketChatHeaderUserId;
 
   private final @NonNull RestTemplate restTemplate;
+
+  private final RocketChatConfig rocketChatConfig;
+
+  private static final String ENDPOINT_USER_LOGIN = "/login";
+  private static final String ENDPOINT_USER_LOGOUT = "/logout";
 
   // Tokens
   private final AtomicReference<RocketChatCredentials> techUserA = new AtomicReference<>();
@@ -207,7 +207,8 @@ public class RocketChatCredentialsProvider {
       HttpEntity<MultiValueMap<String, String>> request =
           new HttpEntity<>(map, headers);
 
-      return restTemplate.postForEntity(rocketChatApiUserLogin, request, LoginResponseDTO.class);
+      var url = rocketChatConfig.getApiUrl(ENDPOINT_USER_LOGIN);
+      return restTemplate.postForEntity(url, request, LoginResponseDTO.class);
     } catch (Exception ex) {
       throw new RocketChatLoginException(
           String.format("Could not login user (%s) in Rocket.Chat", username));
@@ -227,8 +228,8 @@ public class RocketChatCredentialsProvider {
 
       HttpEntity<Void> request = new HttpEntity<>(headers);
 
-      ResponseEntity<LogoutResponseDTO> response =
-          restTemplate.postForEntity(rocketChatApiUserLogout, request, LogoutResponseDTO.class);
+      var url = rocketChatConfig.getApiUrl(ENDPOINT_USER_LOGOUT);
+      var response = restTemplate.postForEntity(url, request, LogoutResponseDTO.class);
 
       return response.getStatusCode() == HttpStatus.OK;
 

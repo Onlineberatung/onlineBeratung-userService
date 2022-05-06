@@ -28,6 +28,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.config.RocketChatConfig;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.DataDTO;
@@ -76,9 +77,6 @@ public class RocketChatCredentialsProviderTest {
   private final static String FIELD_VALUE_ROCKET_CHAT_HEADER_AUTH_TOKEN = "X-Auth-Token";
   private final static String FIELD_NAME_ROCKET_CHAT_HEADER_USER_ID = "rocketChatHeaderUserId";
   private final static String FIELD_VALUE_ROCKET_CHAT_HEADER_USER_ID = "X-User-Id";
-
-  private final String FIELD_NAME_ROCKET_CHAT_API_POST_USER_LOGIN = "rocketChatApiUserLogin";
-  private final String FIELD_NAME_ROCKET_CHAT_API_POST_USER_LOGOUT = "rocketChatApiUserLogout";
 
   /**
    * DATA
@@ -136,6 +134,8 @@ public class RocketChatCredentialsProviderTest {
   private final static String SYSTEM_USER_USERNAME = "sysUserName";
   private final static String SYSTEM_USER_PW = "sysUserPW";
 
+  private final RocketChatConfig rocketChatConfig = new RocketChatConfig();
+
   @InjectMocks
   private RocketChatCredentialsProvider rcCredentialHelper;
 
@@ -148,14 +148,13 @@ public class RocketChatCredentialsProviderTest {
     setField(rcCredentialHelper, FIELD_NAME_TECHNICAL_PASSWORD, TECHNICAL_USER_PW);
     setField(rcCredentialHelper, FIELD_NAME_SYSTEM_USERNAME, SYSTEM_USER_USERNAME);
     setField(rcCredentialHelper, FIELD_NAME_SYSTEM_PASSWORD, SYSTEM_USER_PW);
-    setField(rcCredentialHelper, FIELD_NAME_ROCKET_CHAT_API_POST_USER_LOGIN,
-        RC_URL_CHAT_USER_LOGIN);
-    setField(rcCredentialHelper, FIELD_NAME_ROCKET_CHAT_API_POST_USER_LOGOUT,
-        RC_URL_CHAT_USER_LOGOUT);
     setField(rcCredentialHelper, FIELD_NAME_ROCKET_CHAT_HEADER_AUTH_TOKEN,
         FIELD_VALUE_ROCKET_CHAT_HEADER_AUTH_TOKEN);
     setField(rcCredentialHelper, FIELD_NAME_ROCKET_CHAT_HEADER_USER_ID,
         FIELD_VALUE_ROCKET_CHAT_HEADER_USER_ID);
+
+    rocketChatConfig.setBaseUrl("http://localhost/api/v1");
+    setField(rcCredentialHelper, "rocketChatConfig", rocketChatConfig);
   }
 
   /**
