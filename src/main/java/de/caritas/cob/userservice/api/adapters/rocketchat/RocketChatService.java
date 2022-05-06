@@ -7,6 +7,9 @@ import static org.apache.commons.lang3.ArrayUtils.isNotEmpty;
 
 import com.mongodb.DBObject;
 import com.mongodb.QueryBuilder;
+import de.caritas.cob.userservice.api.adapters.rocketchat.config.RocketChatConfig;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.MessageResponse;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomResponse;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.RocketChatUnauthorizedException;
@@ -46,6 +49,7 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserDeleteBod
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserUpdateRequestDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UsersListReponseDTO;
+import de.caritas.cob.userservice.api.port.out.MessageClient;
 import de.caritas.cob.userservice.api.service.LogService;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -53,6 +57,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import javax.annotation.PostConstruct;
 import lombok.Getter;
@@ -69,6 +74,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
@@ -81,7 +87,17 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Getter
 @Service
 @RequiredArgsConstructor
-public class RocketChatService {
+public class RocketChatService implements MessageClient {
+
+  private static final String ENDPOINT_ROOM_INFO = "/rooms.info?roomId=";
+
+  private static final String ENDPOINT_USER_MUTE = "/method.call/muteUserInRoom";
+
+  private static final String ENDPOINT_USER_UNMUTE = "/method.call/unmuteUserInRoom";
+
+  private static final String ENDPOINT_USER_INFO = "/users.info?userId=";
+
+  private static final String ENDPOINT_USER_UPDATE = "/users.update";
 
   private static final String ERROR_MESSAGE = "Error during rollback: Rocket.Chat group with id "
       + "%s could not be deleted";
@@ -96,6 +112,12 @@ public class RocketChatService {
   private final LocalDateTime localDateTimeFuture = nowInUtc().plusYears(1L);
   private final @NonNull RestTemplate restTemplate;
   private final @NonNull RocketChatCredentialsProvider rcCredentialHelper;
+
+  private final RocketChatClient rocketChatClient;
+
+  private final RocketChatConfig rocketChatConfig;
+
+  private final RocketChatMapper mapper;
   @Value("${rocket.chat.header.auth.token}")
   private String rocketChatHeaderAuthToken;
   @Value("${rocket.chat.header.user.id}")
@@ -150,6 +172,90 @@ public class RocketChatService {
       rcCredentialHelper.updateCredentials();
     } catch (RocketChatLoginException e) {
       log.warn("Unauthorized: {}", e.getMessage());
+    }
+  }
+
+  @Override
+  public boolean muteUserInChat(String username, String roomId) {
+    var url = rocketChatConfig.getApiUrl(ENDPOINT_USER_MUTE);
+    var muteUser = mapper.muteUserOf(username, roomId);
+
+    try {
+      var response = rocketChatClient.postForEntity(url, muteUser, MessageResponse.class);
+      return userWasInRoom(response) && response.getStatusCode().is2xxSuccessful();
+    } catch (HttpClientErrorException exception) {
+      log.error("Muting failed.", exception);
+      return false;
+    }
+  }
+
+  @Override
+  public boolean unmuteUserInChat(String username, String roomId) {
+    var url = rocketChatConfig.getApiUrl(ENDPOINT_USER_UNMUTE);
+    var unmuteUser = mapper.unmuteUserOf(username, roomId);
+
+    try {
+      var response = rocketChatClient.postForEntity(url, unmuteUser, MessageResponse.class);
+      return response.getStatusCode().is2xxSuccessful();
+    } catch (HttpClientErrorException exception) {
+      log.error("Un-muting failed.", exception);
+      return false;
+    }
+  }
+
+  /**
+   * Updates the user data of the given Rocket.Chat user.
+   *
+   * @param requestDTO the input dto
+   * @return the dto containing the user infos
+   */
+  public UserInfoResponseDTO updateUser(UserUpdateRequestDTO requestDTO) {
+    try {
+      return updateUserData(requestDTO).getBody();
+    } catch (RestClientResponseException | RocketChatUserNotInitializedException ex) {
+      throw new InternalServerErrorException(
+          String.format("Could not update Rocket.Chat user of user id %s", requestDTO.getUserId()),
+          ex, LogService::logRocketChatError);
+    }
+  }
+
+  @Override
+  public boolean updateUser(String chatUserId, String displayName) {
+    var url = rocketChatConfig.getApiUrl(ENDPOINT_USER_UPDATE);
+    var updateUser = mapper.updateUserOf(chatUserId, displayName);
+
+    try {
+      var response = rocketChatClient.postForEntity(url, chatUserId, updateUser, Void.class);
+      return response.getStatusCode().is2xxSuccessful();
+    } catch (HttpClientErrorException exception) {
+      log.error("Setting display failed.", exception);
+      return false;
+    }
+  }
+
+  @Override
+  public Optional<Map<String, Object>> findUser(String chatUserId) {
+    var url = rocketChatConfig.getApiUrl(ENDPOINT_USER_INFO + chatUserId);
+
+    try {
+      var response = rocketChatClient.getForEntity(url, UserInfoResponseDTO.class);
+      return mapper.mapOfUserResponse(response);
+    } catch (HttpClientErrorException exception) {
+      log.error("User Info failed.", exception);
+      return Optional.empty();
+    }
+  }
+
+  @Override
+  public Optional<Map<String, Object>> getChatInfo(String roomId) {
+    var url = rocketChatConfig.getApiUrl(ENDPOINT_ROOM_INFO + roomId);
+
+    try {
+      var response = rocketChatClient.getForEntity(url, RoomResponse.class);
+      return mapper.mapOfRoomResponse(response);
+    } catch (HttpClientErrorException exception) {
+      log.error("Chat Info failed.", exception);
+      return Optional.empty();
     }
   }
 
@@ -715,22 +821,6 @@ public class RocketChatService {
         .isSuccess();
   }
 
-  /**
-   * Updates the user data of the given Rocket.Chat user.
-   *
-   * @param requestDTO the input dto
-   * @return the dto containing the user infos
-   */
-  public UserInfoResponseDTO updateUser(UserUpdateRequestDTO requestDTO) {
-    try {
-      return updateUserData(requestDTO).getBody();
-    } catch (RestClientResponseException | RocketChatUserNotInitializedException ex) {
-      throw new InternalServerErrorException(
-          String.format("Could not update Rocket.Chat user of user id %s", requestDTO.getUserId()),
-          ex, LogService::logRocketChatError);
-    }
-  }
-
   private ResponseEntity<UserInfoResponseDTO> updateUserData(UserUpdateRequestDTO requestDTO)
       throws RocketChatUserNotInitializedException {
     HttpEntity<UserUpdateRequestDTO> request = buildRocketChatUserUpdateRequestEntity(requestDTO);
@@ -921,6 +1011,16 @@ public class RocketChatService {
       return extractUserIdFromResponse(response.getBody().getUsers());
     } else {
       throw new RocketChatGetUserIdException(USERS_LIST_ERROR_MESSAGE);
+    }
+  }
+
+  private boolean userWasInRoom(ResponseEntity<MessageResponse> response) {
+    var body = response.getBody();
+    if (nonNull(body)) {
+      var message = body.getMessage();
+      return isNull(message) || !message.contains("error-user-not-in-room");
+    } else {
+      return true;
     }
   }
 

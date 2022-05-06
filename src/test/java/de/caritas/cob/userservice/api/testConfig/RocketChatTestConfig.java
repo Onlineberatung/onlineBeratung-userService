@@ -1,5 +1,8 @@
 package de.caritas.cob.userservice.api.testConfig;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatClient;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatMapper;
+import de.caritas.cob.userservice.api.adapters.rocketchat.config.RocketChatConfig;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupResponseDTO;
@@ -23,8 +26,11 @@ public class RocketChatTestConfig {
 
   @Bean
   public RocketChatService rocketChatService(RestTemplate restTemplate,
-      RocketChatCredentialsProvider rocketChatCredentialsProvider) {
-    return new RocketChatService(restTemplate, rocketChatCredentialsProvider) {
+      RocketChatCredentialsProvider rocketChatCredentialsProvider,
+      RocketChatConfig rocketChatConfig, RocketChatClient rocketChatClient,
+      RocketChatMapper rocketChatMapper) {
+    return new RocketChatService(restTemplate, rocketChatCredentialsProvider, rocketChatClient,
+        rocketChatConfig, rocketChatMapper) {
       @Override
       public ResponseEntity<LoginResponseDTO> loginUserFirstTime(String username, String password) {
         var loginResponseDTO = new LoginResponseDTO();
