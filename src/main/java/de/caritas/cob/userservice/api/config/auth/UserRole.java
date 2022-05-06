@@ -16,7 +16,9 @@ public enum UserRole {
   PEER_CONSULTANT("peer-consultant"),
   MAIN_CONSULTANT("main-consultant"),
   GROUP_CHAT_CONSULTANT("group-chat-consultant"),
-  USER_ADMIN("user-admin");
+  USER_ADMIN("user-admin"),
+  SINGLE_TENANT_ADMIN("single-tenant-admin"),
+  TENANT_ADMIN("tenant-admin");
 
   private final String value;
 
