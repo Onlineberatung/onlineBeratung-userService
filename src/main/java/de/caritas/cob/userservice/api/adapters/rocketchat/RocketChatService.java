@@ -131,7 +131,7 @@ public class RocketChatService implements MessageClient {
   private boolean rotatingTokensInitialized = false;
 
   @PostConstruct
-  @Scheduled(cron = "${rocket.credentialscheduler.cron}")
+  @Scheduled(cron = "#{rocketChatConfig.credentialCron}")
   @Profile("!testing")
   public void updateCredentials() {
     if (rotatingTokensInitialized) {
