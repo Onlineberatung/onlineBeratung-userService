@@ -31,6 +31,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -959,6 +960,7 @@ public class RocketChatServiceTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void setRoomReadOnly_Should_performRocketChatSetRoomReadOnly() throws Exception {
     when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
     when(restTemplate.exchange(eq(RC_URL_GROUPS_SET_READ_ONLY), eq(HttpMethod.POST), any(),
@@ -971,8 +973,10 @@ public class RocketChatServiceTest {
         HttpEntity.class);
     verify(this.restTemplate, times(1)).exchange(eq(RC_URL_GROUPS_SET_READ_ONLY),
         eq(HttpMethod.POST), captor.capture(), eq(GroupResponseDTO.class));
-    assertThat(captor.getValue().getBody().isReadOnly(), is(true));
-    assertThat(captor.getValue().getBody().getRoomId(), is(RC_GROUP_ID));
+    var body = captor.getValue().getBody();
+    assertNotNull(body);
+    assertThat(body.isReadOnly(), is(true));
+    assertThat(body.getRoomId(), is(RC_GROUP_ID));
   }
 
   @Test
@@ -991,6 +995,7 @@ public class RocketChatServiceTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void setRoomWriteable_Should_performRocketChatSetRoomReadOnly() throws Exception {
     when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
     when(restTemplate.exchange(eq(RC_URL_GROUPS_SET_READ_ONLY), eq(HttpMethod.POST), any(),
@@ -1003,8 +1008,10 @@ public class RocketChatServiceTest {
         HttpEntity.class);
     verify(this.restTemplate, times(1)).exchange(eq(RC_URL_GROUPS_SET_READ_ONLY),
         eq(HttpMethod.POST), captor.capture(), eq(GroupResponseDTO.class));
-    assertThat(captor.getValue().getBody().isReadOnly(), is(false));
-    assertThat(captor.getValue().getBody().getRoomId(), is(RC_GROUP_ID));
+    var body = captor.getValue().getBody();
+    assertNotNull(body);
+    assertThat(body.isReadOnly(), is(false));
+    assertThat(body.getRoomId(), is(RC_GROUP_ID));
   }
 
   @Test

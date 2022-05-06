@@ -23,8 +23,6 @@ public class FieldConstants {
   /**
    * RocketChat
    */
-  public static final String FIELD_NAME_ROCKET_CHAT_HEADER_AUTH_TOKEN = "rocketChatHeaderAuthToken";
-  public static final String FIELD_NAME_ROCKET_CHAT_HEADER_USER_ID = "rocketChatHeaderUserId";
   public static final String FIELD_NAME_ROCKET_CHAT_TECH_AUTH_TOKEN = "technUserAuthToken";
   public static final String FIELD_NAME_ROCKET_CHAT_TECH_USER_ID = "technUserId";
   public static final String RC_URL_GROUPS_DELETE = "http://localhost/api/v1/groups.delete";
