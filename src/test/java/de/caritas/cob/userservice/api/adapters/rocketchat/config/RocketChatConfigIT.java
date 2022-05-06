@@ -9,7 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles("testing")
-public class RocketChatConfigIT {
+class RocketChatConfigIT {
 
   @SpyBean
   private RocketChatConfig underTest;
