@@ -49,6 +49,8 @@ public class RocketChatCredentialsProvider {
 
   private final RocketChatConfig rocketChatConfig;
 
+  private static final String HEADER_AUTH_TOKEN = "X-Auth-Token";
+  private static final String HEADER_USER_ID = "X-User-Id";
   private static final String ENDPOINT_USER_LOGIN = "/login";
   private static final String ENDPOINT_USER_LOGOUT = "/logout";
 
@@ -251,8 +253,8 @@ public class RocketChatCredentialsProvider {
   private HttpHeaders getStandardHttpHeaders(String rcToken, String rcUserId) {
     var httpHeaders = new HttpHeaders();
     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-    httpHeaders.add("X-Auth-Token", rcToken);
-    httpHeaders.add("X-User-Id", rcUserId);
+    httpHeaders.add(HEADER_AUTH_TOKEN, rcToken);
+    httpHeaders.add(HEADER_USER_ID, rcUserId);
 
     return httpHeaders;
   }
