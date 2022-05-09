@@ -5,13 +5,13 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import de.caritas.cob.userservice.api.admin.hallink.HalLinkBuilder;
 import de.caritas.cob.userservice.api.admin.mapper.ConsultantAdminMapper;
-import de.caritas.cob.userservice.api.admin.model.ConsultantAdminResponseDTO;
-import de.caritas.cob.userservice.api.admin.model.ConsultantDTO;
-import de.caritas.cob.userservice.api.admin.model.ConsultantLinks;
-import de.caritas.cob.userservice.api.admin.model.HalLink;
-import de.caritas.cob.userservice.api.admin.model.HalLink.MethodEnum;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantLinks;
+import de.caritas.cob.userservice.api.adapters.web.dto.HalLink;
+import de.caritas.cob.userservice.api.adapters.web.dto.HalLink.MethodEnum;
 import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.generated.api.admin.controller.UseradminApi;
+import de.caritas.cob.userservice.generated.api.adapters.web.controller.UseradminApi;
 
 /**
  * Builder class to generate a {@link ConsultantAdminResponseDTO} containing available hal links and

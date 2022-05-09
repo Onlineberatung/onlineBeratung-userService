@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.admin.mapper;
 
-import de.caritas.cob.userservice.api.admin.model.ConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

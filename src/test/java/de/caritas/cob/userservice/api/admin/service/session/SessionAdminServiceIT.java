@@ -6,9 +6,9 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
 import de.caritas.cob.userservice.api.UserServiceApplication;
-import de.caritas.cob.userservice.api.admin.model.SessionAdminDTO;
-import de.caritas.cob.userservice.api.admin.model.SessionAdminResultDTO;
-import de.caritas.cob.userservice.api.admin.model.SessionFilter;
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionAdminDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionAdminResultDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionFilter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

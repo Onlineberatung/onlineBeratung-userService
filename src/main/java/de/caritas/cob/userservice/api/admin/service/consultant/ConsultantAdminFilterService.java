@@ -2,10 +2,10 @@ package de.caritas.cob.userservice.api.admin.service.consultant;
 
 import static java.util.Objects.nonNull;
 
-import de.caritas.cob.userservice.api.admin.model.ConsultantFilter;
-import de.caritas.cob.userservice.api.admin.model.ConsultantSearchResultDTO;
-import de.caritas.cob.userservice.api.admin.model.Sort;
-import de.caritas.cob.userservice.api.admin.model.Sort.OrderEnum;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantFilter;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSearchResultDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.Sort;
+import de.caritas.cob.userservice.api.adapters.web.dto.Sort.OrderEnum;
 import de.caritas.cob.userservice.api.admin.service.consultant.querybuilder.ConsultantFilterQueryBuilder;
 import de.caritas.cob.userservice.api.model.Consultant;
 import javax.persistence.EntityManagerFactory;
