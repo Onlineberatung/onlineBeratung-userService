@@ -3,7 +3,10 @@ package de.caritas.cob.userservice.api.adapters.rocketchat.config;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 import java.util.Arrays;
+import javax.validation.constraints.AssertTrue;
+import javax.validation.constraints.NotBlank;
 import lombok.Data;
+import org.apache.logging.log4j.core.util.CronExpression;
 import org.hibernate.validator.constraints.URL;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -27,11 +30,20 @@ public class RocketChatConfig {
   @URL
   private String baseUrl;
 
+  @NotBlank
+  private String credentialCron;
+
   @Bean("rocketChatRestTemplate")
   public RestTemplate rocketChatRestTemplate(RestTemplateBuilder restTemplateBuilder) {
     return restTemplateBuilder
         .defaultHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON.toString())
         .build();
+  }
+
+  @AssertTrue
+  @SuppressWarnings("unused")
+  private boolean isCronExpression() {
+    return CronExpression.isValidExpression(credentialCron);
   }
 
   public String getApiUrl(String path) {

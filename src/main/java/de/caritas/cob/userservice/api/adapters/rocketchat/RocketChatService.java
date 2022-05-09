@@ -8,23 +8,6 @@ import static org.apache.commons.lang3.ArrayUtils.isNotEmpty;
 import com.mongodb.DBObject;
 import com.mongodb.QueryBuilder;
 import de.caritas.cob.userservice.api.adapters.rocketchat.config.RocketChatConfig;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.MessageResponse;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomResponse;
-import de.caritas.cob.userservice.api.container.RocketChatCredentials;
-import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.exception.httpresponses.RocketChatUnauthorizedException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteGroupException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteUserException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupsListAllException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetUserIdException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.RocketChatUserDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.StandardResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupAddUserBodyDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupCleanHistoryDTO;
@@ -40,15 +23,32 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupsListAl
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.LdapLoginDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.logout.LogoutResponseDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.MessageResponse;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomResponse;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsGetDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsUpdateDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.subscriptions.SubscriptionsGetDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.subscriptions.SubscriptionsUpdateDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.RocketChatUserDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.SetRoomReadOnlyBodyDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserDeleteBodyDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserUpdateRequestDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UsersListReponseDTO;
+import de.caritas.cob.userservice.api.container.RocketChatCredentials;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.exception.httpresponses.RocketChatUnauthorizedException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteUserException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupsListAllException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetUserIdException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.port.out.MessageClient;
 import de.caritas.cob.userservice.api.service.LogService;
 import java.time.LocalDateTime;
@@ -64,7 +64,6 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -89,15 +88,25 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RequiredArgsConstructor
 public class RocketChatService implements MessageClient {
 
+  private static final String ENDPOINT_GROUP_CREATE = "/groups.create";
+  private static final String ENDPOINT_GROUP_DELETE = "/groups.delete";
+  private static final String ENDPOINT_GROUP_INVITE = "/groups.invite";
+  private static final String ENDPOINT_GROUP_KICK = "/groups.kick";
+  private static final String ENDPOINT_GROUP_MEMBERS = "/groups.members";
+  private static final String ENDPOINT_GROUP_READ_ONLY = "/groups.setReadOnly";
+  private static final String ENDPOINT_GROUP_LIST = "/groups.listAll";
+  private static final String ENDPOINT_ROOM_CLEAN_HISTORY = "/rooms.cleanHistory";
+  private static final String ENDPOINT_ROOM_GET = "/rooms.get";
   private static final String ENDPOINT_ROOM_INFO = "/rooms.info?roomId=";
-
+  private static final String ENDPOINT_SUBSCRIPTION_GET = "/subscriptions.get";
   private static final String ENDPOINT_USER_MUTE = "/method.call/muteUserInRoom";
-
   private static final String ENDPOINT_USER_UNMUTE = "/method.call/unmuteUserInRoom";
-
   private static final String ENDPOINT_USER_INFO = "/users.info?userId=";
-
   private static final String ENDPOINT_USER_UPDATE = "/users.update";
+  private static final String ENDPOINT_USER_DELETE = "/users.delete";
+  private static final String ENDPOINT_USER_LIST = "/users.list";
+  private static final String ENDPOINT_USER_LOGIN = "/login";
+  private static final String ENDPOINT_USER_LOGOUT = "/logout";
 
   private static final String ERROR_MESSAGE = "Error during rollback: Rocket.Chat group with id "
       + "%s could not be deleted";
@@ -118,47 +127,11 @@ public class RocketChatService implements MessageClient {
   private final RocketChatConfig rocketChatConfig;
 
   private final RocketChatMapper mapper;
-  @Value("${rocket.chat.header.auth.token}")
-  private String rocketChatHeaderAuthToken;
-  @Value("${rocket.chat.header.user.id}")
-  private String rocketChatHeaderUserId;
-  @Value("${rocket.chat.api.group.create.url}")
-  private String rocketChatApiGroupCreateUrl;
-  @Value("${rocket.chat.api.group.delete.url}")
-  private String rocketChatApiGroupDeleteUrl;
-  @Value("${rocket.chat.api.group.add.user}")
-  private String rocketChatApiGroupAddUserUrl;
-  @Value("${rocket.chat.api.group.remove.user}")
-  private String rocketChatApiGroupRemoveUserUrl;
-  @Value("${rocket.chat.api.group.get.member}")
-  private String rocketChatApiGetGroupMembersUrl;
-  @Value("${rocket.chat.api.group.list.all}")
-  private String rocketChatApiGetGroupsListAll;
-  @Value("${rocket.chat.api.subscriptions.get}")
-  private String rocketChatApiSubscriptionsGet;
-  @Value("${rocket.chat.api.rooms.get}")
-  private String rocketChatApiRoomsGet;
-  @Value("${rocket.chat.api.user.login}")
-  private String rocketChatApiUserLogin;
-  @Value("${rocket.chat.api.user.logout}")
-  private String rocketChatApiUserLogout;
-  @Value("${rocket.chat.api.user.info}")
-  private String rocketChatApiUserInfo;
-  @Value("${rocket.chat.api.user.update}")
-  private String rocketChatApiUserUpdate;
-  @Value("${rocket.chat.api.user.delete}")
-  private String rocketChatApiUserDelete;
-  @Value("${rocket.chat.api.user.list}")
-  private String rocketChatApiUsersListGet;
-  @Value("${rocket.chat.api.rooms.clean.history}")
-  private String rocketChatApiCleanRoomHistory;
-  @Value("${rocket.chat.api.group.set.readOnly}")
-  private String rocketChatApiGroupSetReadOnly;
 
   private boolean rotatingTokensInitialized = false;
 
   @PostConstruct
-  @Scheduled(cron = "${rocket.credentialscheduler.cron}")
+  @Scheduled(cron = "#{rocketChatConfig.credentialCron}")
   @Profile("!testing")
   public void updateCredentials() {
     if (rotatingTokensInitialized) {
@@ -276,8 +249,8 @@ public class RocketChatService implements MessageClient {
       var groupCreateBodyDto = new GroupCreateBodyDTO(name, false);
       HttpEntity<GroupCreateBodyDTO> request =
           new HttpEntity<>(groupCreateBodyDto, headers);
-      response =
-          restTemplate.postForObject(rocketChatApiGroupCreateUrl, request, GroupResponseDTO.class);
+      var url = rocketChatConfig.getApiUrl(ENDPOINT_GROUP_CREATE);
+      response = restTemplate.postForObject(url, request, GroupResponseDTO.class);
 
     } catch (RestClientResponseException ex) {
       throw new RocketChatCreateGroupException(ex);
@@ -362,8 +335,8 @@ public class RocketChatService implements MessageClient {
       var groupDeleteBodyDto = new GroupDeleteBodyDTO(groupId);
       HttpEntity<GroupDeleteBodyDTO> request =
           new HttpEntity<>(groupDeleteBodyDto, headers);
-      response = restTemplate.postForObject(rocketChatApiGroupDeleteUrl, request,
-          GroupDeleteResponseDTO.class);
+      var url = rocketChatConfig.getApiUrl(ENDPOINT_GROUP_DELETE);
+      response = restTemplate.postForObject(url, request, GroupDeleteResponseDTO.class);
 
     } catch (Exception ex) {
       log.error(
@@ -393,8 +366,8 @@ public class RocketChatService implements MessageClient {
 
     var httpHeaders = new HttpHeaders();
     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-    httpHeaders.add(rocketChatHeaderAuthToken, rocketChatCredentials.getRocketChatToken());
-    httpHeaders.add(rocketChatHeaderUserId, rocketChatCredentials.getRocketChatUserId());
+    httpHeaders.add("X-Auth-Token", rocketChatCredentials.getRocketChatToken());
+    httpHeaders.add("X-User-Id", rocketChatCredentials.getRocketChatUserId());
     return httpHeaders;
   }
 
@@ -449,7 +422,8 @@ public class RocketChatService implements MessageClient {
 
       HttpEntity<LdapLoginDTO> request = new HttpEntity<>(ldapLoginDTO, headers);
 
-      return restTemplate.postForEntity(rocketChatApiUserLogin, request, LoginResponseDTO.class);
+      var url = rocketChatConfig.getApiUrl(ENDPOINT_USER_LOGIN);
+      return restTemplate.postForEntity(url, request, LoginResponseDTO.class);
     } catch (Exception ex) {
       throw new RocketChatLoginException(
           String.format("Could not login user (%s) in Rocket.Chat for the first time", username));
@@ -469,8 +443,8 @@ public class RocketChatService implements MessageClient {
 
       HttpEntity<Void> request = new HttpEntity<>(headers);
 
-      ResponseEntity<LogoutResponseDTO> response =
-          restTemplate.postForEntity(rocketChatApiUserLogout, request, LogoutResponseDTO.class);
+      var url = rocketChatConfig.getApiUrl(ENDPOINT_USER_LOGOUT);
+      var response = restTemplate.postForEntity(url, request, LogoutResponseDTO.class);
 
       return response.getStatusCode() == HttpStatus.OK;
 
@@ -500,8 +474,8 @@ public class RocketChatService implements MessageClient {
       var body = new GroupAddUserBodyDTO(rcUserId, rcGroupId);
       HttpEntity<GroupAddUserBodyDTO> request = new HttpEntity<>(body, header);
 
-      response =
-          restTemplate.postForObject(rocketChatApiGroupAddUserUrl, request, GroupResponseDTO.class);
+      var url = rocketChatConfig.getApiUrl(ENDPOINT_GROUP_INVITE);
+      response = restTemplate.postForObject(url, request, GroupResponseDTO.class);
 
     } catch (Exception ex) {
       throw new RocketChatAddUserToGroupException(String.format(
@@ -542,8 +516,8 @@ public class RocketChatService implements MessageClient {
       HttpEntity<GroupRemoveUserBodyDTO> request =
           new HttpEntity<>(body, header);
 
-      response = restTemplate.postForObject(rocketChatApiGroupRemoveUserUrl, request,
-          GroupResponseDTO.class);
+      var url = rocketChatConfig.getApiUrl(ENDPOINT_GROUP_KICK);
+      response = restTemplate.postForObject(url, request, GroupResponseDTO.class);
 
     } catch (Exception ex) {
       throw new RocketChatRemoveUserFromGroupException(String.format(
@@ -654,8 +628,10 @@ public class RocketChatService implements MessageClient {
   }
 
   private String buildGetGroupMembersPath(String rcGroupId) {
+    var url = rocketChatConfig.getApiUrl(ENDPOINT_GROUP_MEMBERS);
+
     return UriComponentsBuilder
-        .fromUriString(rocketChatApiGetGroupMembersUrl)
+        .fromUriString(url)
         .queryParam("roomId", rcGroupId)
         .queryParam("count", 0)
         .build().encode().toUriString();
@@ -699,8 +675,8 @@ public class RocketChatService implements MessageClient {
           (isNotEmpty(users)) ? users : new String[]{});
       HttpEntity<GroupCleanHistoryDTO> request = new HttpEntity<>(body, header);
 
-      response = restTemplate.postForObject(rocketChatApiCleanRoomHistory, request,
-          StandardResponseDTO.class);
+      var url = rocketChatConfig.getApiUrl(ENDPOINT_ROOM_CLEAN_HISTORY);
+      response = restTemplate.postForObject(url, request, StandardResponseDTO.class);
 
     } catch (Exception ex) {
       throw new RocketChatRemoveSystemMessagesException(
@@ -728,8 +704,8 @@ public class RocketChatService implements MessageClient {
       var header = getStandardHttpHeaders(rocketChatCredentials);
       HttpEntity<Void> request = new HttpEntity<>(header);
 
-      response = restTemplate.exchange(rocketChatApiSubscriptionsGet, HttpMethod.GET, request,
-          SubscriptionsGetDTO.class);
+      var url = rocketChatConfig.getApiUrl(ENDPOINT_SUBSCRIPTION_GET);
+      response = restTemplate.exchange(url, HttpMethod.GET, request, SubscriptionsGetDTO.class);
 
     } catch (HttpStatusCodeException ex) {
       if (ex.getStatusCode().equals(HttpStatus.UNAUTHORIZED)) {
@@ -759,8 +735,8 @@ public class RocketChatService implements MessageClient {
     try {
       var header = getStandardHttpHeaders(rocketChatCredentials);
       HttpEntity<Void> request = new HttpEntity<>(header);
-      response =
-          restTemplate.exchange(rocketChatApiRoomsGet, HttpMethod.GET, request, RoomsGetDTO.class);
+      var url = rocketChatConfig.getApiUrl(ENDPOINT_ROOM_GET);
+      response = restTemplate.exchange(url, HttpMethod.GET, request, RoomsGetDTO.class);
 
     } catch (Exception ex) {
       throw new InternalServerErrorException(String.format(
@@ -792,7 +768,7 @@ public class RocketChatService implements MessageClient {
       HttpEntity<Void> request = new HttpEntity<>(header);
 
       var fields = "{\"userRooms\":1}";
-      String url = rocketChatApiUserInfo + "?userId=" + rcUserId + "&fields={fields}";
+      var url = rocketChatConfig.getApiUrl(ENDPOINT_USER_INFO + rcUserId) + "&fields={fields}";
       response = restTemplate
           .exchange(url, HttpMethod.GET, request, UserInfoResponseDTO.class, fields);
 
@@ -825,8 +801,8 @@ public class RocketChatService implements MessageClient {
       throws RocketChatUserNotInitializedException {
     HttpEntity<UserUpdateRequestDTO> request = buildRocketChatUserUpdateRequestEntity(requestDTO);
 
-    ResponseEntity<UserInfoResponseDTO> response = restTemplate
-        .exchange(rocketChatApiUserUpdate, HttpMethod.POST, request, UserInfoResponseDTO.class);
+    var url = rocketChatConfig.getApiUrl(ENDPOINT_USER_UPDATE);
+    var response = restTemplate.exchange(url, HttpMethod.POST, request, UserInfoResponseDTO.class);
 
     if (isResponseNotSuccess(response)) {
       throw new InternalServerErrorException(
@@ -868,8 +844,8 @@ public class RocketChatService implements MessageClient {
     var header = getStandardHttpHeaders(technicalUser);
     HttpEntity<UserDeleteBodyDTO> request = new HttpEntity<>(requestDTO, header);
 
-    ResponseEntity<UserInfoResponseDTO> response = restTemplate
-        .exchange(rocketChatApiUserDelete, HttpMethod.POST, request, UserInfoResponseDTO.class);
+    var url = rocketChatConfig.getApiUrl(ENDPOINT_USER_DELETE);
+    var response = restTemplate.exchange(url, HttpMethod.POST, request, UserInfoResponseDTO.class);
 
     if (isResponseNotSuccess(response)) {
       throw new InternalServerErrorException(
@@ -908,8 +884,8 @@ public class RocketChatService implements MessageClient {
     var header = getStandardHttpHeaders(systemUser);
     HttpEntity<SetRoomReadOnlyBodyDTO> request = new HttpEntity<>(requestDTO, header);
 
-    ResponseEntity<GroupResponseDTO> response = restTemplate
-        .exchange(rocketChatApiGroupSetReadOnly, HttpMethod.POST, request, GroupResponseDTO.class);
+    var url = rocketChatConfig.getApiUrl(ENDPOINT_GROUP_READ_ONLY);
+    var response = restTemplate.exchange(url, HttpMethod.POST, request, GroupResponseDTO.class);
 
     GroupResponseDTO responseBody = response.getBody();
     if (nonNull(responseBody) && !responseBody.isSuccess()) {
@@ -965,7 +941,7 @@ public class RocketChatService implements MessageClient {
       var technicalUser = rcCredentialHelper.getTechnicalUser();
       var header = getStandardHttpHeaders(technicalUser);
       HttpEntity<GroupAddUserBodyDTO> request = new HttpEntity<>(header);
-      var url = rocketChatApiGetGroupsListAll + "?query={query}";
+      var url = rocketChatConfig.getApiUrl(ENDPOINT_GROUP_LIST) + "?query={query}";
       response = restTemplate.exchange(url,
           HttpMethod.GET,
           request,
@@ -1037,7 +1013,8 @@ public class RocketChatService implements MessageClient {
   }
 
   private String buildUsersListGetUrl() {
-    return rocketChatApiUsersListGet + "?query={query}&fields={fields}";
+    var url = rocketChatConfig.getApiUrl(ENDPOINT_USER_LIST);
+    return url + "?query={query}&fields={fields}";
   }
 
   private String buildUsernameQuery(String username) {
