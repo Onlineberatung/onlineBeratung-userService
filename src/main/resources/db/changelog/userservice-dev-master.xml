@@ -29,4 +29,5 @@
 	<include file="db/changelog/changeset/0022_delete_date_for_consultant_search/0022_changeSet.xml"/>
 	<include file="db/changelog/changeset/0023_consultant_status/0023_changeSet.xml"/>
 	<include file="db/changelog/changeset/0024_consultant_walk_through/0024_changeSet.xml"/>
+	<include file="db/changelog/changeset/0025_public_private_key/0025_changeSet.xml"/>
 </databaseChangeLog>
