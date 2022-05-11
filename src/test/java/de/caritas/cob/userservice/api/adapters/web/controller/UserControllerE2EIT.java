@@ -55,6 +55,7 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserInfoRespo
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.DeleteUserAccountDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.E2eKeyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.EmailDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.EnquiryMessageDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.LanguageResponseDTO;
@@ -252,6 +253,8 @@ public class UserControllerE2EIT {
   private List<ConsultantAgency> consultantAgencies = new ArrayList<>();
 
   private OneTimePasswordDTO oneTimePasswordDTO;
+
+  private E2eKeyDTO e2eKeyDTO;
 
   private EmailDTO emailDTO;
 
@@ -2165,6 +2168,49 @@ public class UserControllerE2EIT {
   }
 
   @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  public void updateE2eInChatsShouldRespondWithNoContent() throws Exception {
+    givenAValidConsultant(true);
+    givenACorrectlyFormattedE2eKeyDTO();
+
+    mockMvc.perform(
+        put("/users/chat/e2e")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(e2eKeyDTO))
+    ).andExpect(status().isNoContent());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  public void updateE2eInChatsShouldRespondWithBadRequestIfE2eKeyHasWrongFormat() throws Exception {
+    givenAValidConsultant(true);
+    givenAWronglyFormattedE2eKeyDTO();
+
+    mockMvc.perform(
+        put("/users/chat/e2e")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(e2eKeyDTO))
+    ).andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  public void updateE2eInChatsShouldRespondWithBadRequestIfPayloadIsEmpty() throws Exception {
+    givenAValidConsultant(true);
+
+    mockMvc.perform(
+        put("/users/chat/e2e")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+    ).andExpect(status().isBadRequest());
+  }
+
+  @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void activateTwoFactorAuthForUserShouldRespondWithOK() throws Exception {
     givenAValidConsultant(true);
@@ -2406,6 +2452,16 @@ public class UserControllerE2EIT {
     oneTimePasswordDTO = new OneTimePasswordDTO();
     oneTimePasswordDTO.setOtp(RandomStringUtils.randomNumeric(6));
     oneTimePasswordDTO.setSecret(RandomStringUtils.randomAlphanumeric(32));
+  }
+
+  private void givenACorrectlyFormattedE2eKeyDTO() {
+    e2eKeyDTO = new E2eKeyDTO();
+    e2eKeyDTO.setPublicKey(RandomStringUtils.randomNumeric(32));
+  }
+
+  private void givenAWronglyFormattedE2eKeyDTO() {
+    e2eKeyDTO = new E2eKeyDTO();
+    e2eKeyDTO.setPublicKey(RandomStringUtils.randomNumeric(8));
   }
 
   private void givenAValidKeycloakSetupEmailResponse(String username) {
