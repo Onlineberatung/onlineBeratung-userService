@@ -131,6 +131,20 @@ class TenantResolverTest {
   }
 
   @Test
+  void resolve_Should_ResolveTenantId_ForTenantSuperAdminUserRole() {
+    // given
+    when(authenticatedRequest.getUserPrincipal()).thenReturn(token);
+    when(token.getAccount()
+        .getKeycloakSecurityContext().getToken()).thenReturn(accessToken);
+
+    when(accessToken.getRealmAccess().getRoles()).thenReturn(Sets.newLinkedHashSet("tenant-admin"));
+    Long resolved = tenantResolver.resolve(authenticatedRequest);
+    // then
+    assertThat(resolved).isEqualTo(TECHNICAL_CONTEXT);
+  }
+
+
+  @Test
   void resolve_Should_ThrowAccessDeniedException_IfTokenDoesNotHaveRealmTechnicalRoleAndTenantIdNotExistInClaims() {
     // given, when
     when(authenticatedRequest.getUserPrincipal()).thenReturn(token);
