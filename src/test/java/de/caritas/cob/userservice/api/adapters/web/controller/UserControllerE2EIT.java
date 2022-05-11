@@ -2169,7 +2169,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  public void updateE2eInChatsShouldRespondWithNoContent() throws Exception {
+  void updateE2eInChatsShouldRespondWithNoContent() throws Exception {
     givenAValidConsultant(true);
     givenACorrectlyFormattedE2eKeyDTO();
 
@@ -2184,7 +2184,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  public void updateE2eInChatsShouldRespondWithBadRequestIfE2eKeyHasWrongFormat() throws Exception {
+  void updateE2eInChatsShouldRespondWithBadRequestIfE2eKeyHasWrongFormat() throws Exception {
     givenAValidConsultant(true);
     givenAWronglyFormattedE2eKeyDTO();
 
@@ -2199,7 +2199,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  public void updateE2eInChatsShouldRespondWithBadRequestIfPayloadIsEmpty() throws Exception {
+  void updateE2eInChatsShouldRespondWithBadRequestIfPayloadIsEmpty() throws Exception {
     givenAValidConsultant(true);
 
     mockMvc.perform(
