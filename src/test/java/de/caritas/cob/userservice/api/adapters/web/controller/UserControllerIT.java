@@ -135,6 +135,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.util.Sets;
 import de.caritas.cob.userservice.api.actions.registry.ActionContainer;
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
@@ -149,6 +150,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.SessionConsultantForUserD
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.validation.MandatoryFieldsProvider;
@@ -184,6 +186,7 @@ import de.caritas.cob.userservice.api.facade.sessionlist.SessionListFacade;
 import de.caritas.cob.userservice.api.facade.userdata.AskerDataProvider;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataProvider;
+import de.caritas.cob.userservice.api.facade.userdata.KeycloakUserDataProvider;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
@@ -230,6 +233,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.service.spi.ServiceException;
 import org.jeasy.random.EasyRandom;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -247,6 +251,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 
 @RunWith(SpringRunner.class)
@@ -333,6 +338,9 @@ public class UserControllerIT {
 
   @Autowired
   private MockMvc mvc;
+
+  @Autowired
+  private UserController userController;
 
   @MockBean
   private ValidatedUserAccountProvider accountProvider;
@@ -436,6 +444,11 @@ public class UserControllerIT {
   @MockBean
   @SuppressWarnings("unused")
   private AskerDataProvider askerDataProvider;
+
+  @MockBean
+  @SuppressWarnings("unused")
+  private KeycloakUserDataProvider keycloakUserDataProvider;
+
   @MockBean
   @SuppressWarnings("unused")
   private VideoChatConfig videoChatConfig;
@@ -456,6 +469,12 @@ public class UserControllerIT {
     setInternalState(UserController.class, "log", logger);
     setInternalState(LogService.class, "LOGGER", logger);
     setInternalState(ApiResponseEntityExceptionHandler.class, "log", logger);
+  }
+
+  @After
+  public void tearDown() {
+    ReflectionTestUtils
+        .setField(userController, "multiTenancyEnabled", false);
   }
 
   /**
@@ -1258,6 +1277,21 @@ public class UserControllerIT {
             .cookie(RC_TOKEN_COOKIE)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
+  }
+
+  @Test
+  public void getUserData_ForSingleTenantAdmin_Should_ReturnUserDataFromKeycloak()
+      throws Exception {
+    ReflectionTestUtils
+        .setField(userController, "multiTenancyEnabled", true);
+    when(authenticatedUser.isSingleTenantAdmin()).thenReturn(true);
+    when(keycloakUserDataProvider.retrieveAuthenticatedUserData()).thenReturn(new UserDataResponseDTO());
+
+    mvc.perform(get(PATH_USER_DATA)
+            .contentType(MediaType.APPLICATION_JSON)
+            .cookie(RC_TOKEN_COOKIE)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().is(HttpStatus.OK.value()));
   }
 
   /**
