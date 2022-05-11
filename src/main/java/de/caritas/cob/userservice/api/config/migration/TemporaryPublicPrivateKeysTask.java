@@ -29,7 +29,7 @@ public class TemporaryPublicPrivateKeysTask implements CustomTaskChange {
     try {
       rocketChatService = BeanAwareSpringLiquibase.getBean(RocketChatService.class);
     } catch (InstantiationException e) {
-      throw new RuntimeException(e);
+      throw new SetupException(e);
     }
   }
 
