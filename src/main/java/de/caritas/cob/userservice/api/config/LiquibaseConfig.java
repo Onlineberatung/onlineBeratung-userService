@@ -1,7 +1,6 @@
 package de.caritas.cob.userservice.api.config;
 
 import javax.sql.DataSource;
-import liquibase.exception.LiquibaseException;
 import liquibase.integration.spring.SpringLiquibase;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -13,8 +12,7 @@ import org.springframework.context.annotation.Configuration;
 public class LiquibaseConfig {
 
   @Bean
-  public SpringLiquibase liquibase(DataSource dataSource, LiquibaseProperties liquibaseProperties)
-      throws LiquibaseException {
+  public SpringLiquibase liquibase(DataSource dataSource, LiquibaseProperties liquibaseProperties) {
 
     var liquibase = new BeanAwareSpringLiquibase();
     liquibase.setContexts(liquibaseProperties.getContexts());

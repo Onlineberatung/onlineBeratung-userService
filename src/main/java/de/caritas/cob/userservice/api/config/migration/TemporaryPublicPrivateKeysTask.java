@@ -7,14 +7,16 @@ import liquibase.database.Database;
 import liquibase.exception.SetupException;
 import liquibase.exception.ValidationErrors;
 import liquibase.resource.ResourceAccessor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class TemporaryPublicPrivateKeysTask implements CustomTaskChange {
 
   private RocketChatService rocketChatService;
 
   @Override
   public void execute(Database database) {
-    System.out.println(rocketChatService.findUser(""));
+    log.info("{}", rocketChatService.findUser(""));
   }
 
   @Override
@@ -26,13 +28,14 @@ public class TemporaryPublicPrivateKeysTask implements CustomTaskChange {
   public void setUp() throws SetupException {
     try {
       rocketChatService = BeanAwareSpringLiquibase.getBean(RocketChatService.class);
-    } catch (Exception e) {
+    } catch (InstantiationException e) {
       throw new RuntimeException(e);
     }
   }
 
   @Override
   public void setFileOpener(ResourceAccessor resourceAccessor) {
+    log.info("setFileOpener called");
   }
 
   @Override
