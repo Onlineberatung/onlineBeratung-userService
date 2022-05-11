@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.adapters.rocketchat.task;
+package de.caritas.cob.userservice.api.config.migration;
 
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.config.BeanAwareSpringLiquibase;
