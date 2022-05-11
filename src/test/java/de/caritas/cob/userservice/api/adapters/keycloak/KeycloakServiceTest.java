@@ -7,6 +7,7 @@ import static java.util.Collections.singletonList;
 import static org.apache.commons.lang3.RandomStringUtils.random;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -15,6 +16,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -104,6 +106,10 @@ public class KeycloakServiceTest {
   private UsernameTranscoder usernameTranscoder;
   @Mock
   private UserHelper userHelper;
+
+  @Mock
+  UsersResource usersResource;
+
 
   EasyRandom easyRandom = new EasyRandom();
 
@@ -363,7 +369,6 @@ public class KeycloakServiceTest {
   public void createKeycloakUser_Should_throwExpectedStatusException_When_keycloakResponseHasEmailErrorMessage() {
     var emailError = givenADuplicatedEmailErrorMessage();
     UserDTO userDTO = new EasyRandom().nextObject(UserDTO.class);
-    UsersResource usersResource = mock(UsersResource.class);
     ErrorRepresentation errorRepresentation = mock(ErrorRepresentation.class);
     when(errorRepresentation.getErrorMessage()).thenReturn(emailError);
     Response response = mock(Response.class);
@@ -793,6 +798,37 @@ public class KeycloakServiceTest {
 
     verify(userRepresentation, times(1)).setEmail("anotherEmail");
     verify(userResource, times(1)).update(any());
+  }
+
+  @Test
+  public void getById_Should_getUserById() {
+
+    // given
+    UserRepresentation userRepresentation = mock(UserRepresentation.class);
+    UserResource userResource = mock(UserResource.class);
+    UsersResource usersResource = mock(UsersResource.class);
+    when(userResource.toRepresentation()).thenReturn(userRepresentation);
+    when(keycloakClient.getUsersResource()).thenReturn(usersResource);
+    when(usersResource.get("userId")).thenReturn(userResource);
+
+    // when
+    UserRepresentation userId = this.keycloakService.getById("userId");
+
+    // then
+    verify(keycloakClient, times(1)).getUsersResource();
+    assertThat(userId, equalTo(userRepresentation));
+  }
+
+  @Test
+  public void getById_Should_ThrowKeycloakExceptionIfUserNotFound() {
+
+    // given
+    UsersResource usersResource = mock(UsersResource.class);
+    when(keycloakClient.getUsersResource()).thenReturn(usersResource);
+    when(usersResource.get("userId")).thenReturn(null);
+
+    // when, then
+    assertThrows(KeycloakException.class, () -> this.keycloakService.getById("userId"));
   }
 
   private String givenADuplicatedEmailErrorMessage() {

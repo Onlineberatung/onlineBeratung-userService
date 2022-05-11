@@ -231,7 +231,6 @@ import java.util.Set;
 import javax.servlet.http.Cookie;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.assertj.core.util.Lists;
 import org.hibernate.service.spi.ServiceException;
 import org.jeasy.random.EasyRandom;
 import org.junit.After;

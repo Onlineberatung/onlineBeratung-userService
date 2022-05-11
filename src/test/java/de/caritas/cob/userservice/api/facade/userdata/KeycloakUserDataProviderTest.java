@@ -6,7 +6,6 @@ import static org.junit.Assert.assertThrows;
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -37,38 +36,12 @@ class KeycloakUserDataProviderTest {
   }
 
   @Test
-  void retrieveData_Should_ThrowExceptionIfMoreThanOneKeycloakUserRepresentationFound() {
-    // given
-    Mockito.when(authenticatedUser.isAnonymous()).thenReturn(false);
-    Mockito.when(authenticatedUser.getUsername()).thenReturn("username");
-    UserRepresentation userRepresentation = giveUserRepresentation();
-    Mockito.when(keycloakService.findByUsername("username")).thenReturn(
-        Lists.newArrayList(userRepresentation, userRepresentation));
-    // when, then
-    assertThrows(IllegalArgumentException.class,
-        () -> keycloakUserDataProvider.retrieveAuthenticatedUserData());
-  }
-
-  @Test
-  void retrieveData_Should_ThrowExceptionIfNoneKeycloakUserRepresentationFound() {
-    // given
-    Mockito.when(authenticatedUser.isAnonymous()).thenReturn(false);
-    Mockito.when(authenticatedUser.getUsername()).thenReturn("username");
-    Mockito.when(keycloakService.findByUsername("username")).thenReturn(
-        Lists.newArrayList());
-    // when, then
-    assertThrows(IllegalArgumentException.class,
-        () -> keycloakUserDataProvider.retrieveAuthenticatedUserData());
-  }
-
-  @Test
   void retrieveData_Should_CallKeycloakAndFindExactlyOneUser() {
     // given
     Mockito.when(authenticatedUser.isAnonymous()).thenReturn(false);
-    Mockito.when(authenticatedUser.getUsername()).thenReturn("username");
+    Mockito.when(authenticatedUser.getUserId()).thenReturn("userId");
     UserRepresentation userRepresentation = giveUserRepresentation();
-    Mockito.when(keycloakService.findByUsername("username")).thenReturn(
-        Lists.newArrayList(userRepresentation));
+    Mockito.when(keycloakService.getById("userId")).thenReturn(userRepresentation);
     // when
     UserDataResponseDTO userDataResponseDTO = keycloakUserDataProvider.retrieveAuthenticatedUserData();
     // then

@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
-import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -23,20 +22,12 @@ public class KeycloakUserDataProvider {
 
   public UserDataResponseDTO retrieveAuthenticatedUserData() {
     assertCalledInAuthenticatedUserContext();
-    var user = identityClient.findByUsername(
-        authenticatedUser.getUsername());
-    assertUniqueUserWasFound(user);
-    return userDataResponseDtoOf(user.get(0));
+    var user = identityClient.getById(authenticatedUser.getUserId());
+    return userDataResponseDtoOf(user);
   }
 
   private void assertCalledInAuthenticatedUserContext() {
     Assert.isTrue(!authenticatedUser.isAnonymous(), "Cannot retrieve keycloak data for anonymous users");
-  }
-
-  private void assertUniqueUserWasFound(List<UserRepresentation> user) {
-    Assert.notEmpty(user, "user representation should be non empty");
-    Assert.isTrue(!user.isEmpty(), "no user representation found");
-    Assert.isTrue(user.size() == 1, "user representation should be unique");
   }
 
   private UserDataResponseDTO userDataResponseDtoOf(UserRepresentation keycloakUser) {
