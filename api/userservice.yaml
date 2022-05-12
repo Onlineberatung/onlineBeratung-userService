@@ -227,6 +227,47 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /users/sessions/room:
+    get:
+      tags:
+        - user-controller
+      summary: 'Returns sessions for given RocketChat group or feedback group IDs.
+      [Authorization: Role: user, consultant]'
+      operationId: getSessionsForGroupOrFeedbackGroupIds
+      parameters:
+        - name: RCToken
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: rcGroupIds[]
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+      responses:
+        200:
+          description: OK - successful operation
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/UserSessionListResponseDTO'
+        204:
+          description: NO CONTENT - no sessions for given group ids
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /users/sessions/{sessionId}/archive:
     put:
       tags:

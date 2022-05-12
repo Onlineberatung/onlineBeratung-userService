@@ -27,6 +27,9 @@ public interface ChatRepository extends CrudRepository<Chat, Long> {
 
   Optional<Chat> findByGroupId(String groupId);
 
+  @Query(value = "SELECT * FROM chat c WHERE c.rc_group_id IN :group_ids", nativeQuery = true)
+  List<Chat> findByGroupIds(@Param(value = "group_ids") Set<String> groupIds);
+
   List<Chat> findByChatOwner(Consultant chatOwner);
 
   List<Chat> findAllByActiveIsTrue();

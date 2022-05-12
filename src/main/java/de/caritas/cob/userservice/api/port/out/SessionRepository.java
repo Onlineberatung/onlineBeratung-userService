@@ -1,8 +1,8 @@
 package de.caritas.cob.userservice.api.port.out;
 
 import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.api.model.Session.RegistrationType;
 import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.model.Session.RegistrationType;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
 import java.util.List;
@@ -10,7 +10,9 @@ import java.util.Optional;
 import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 public interface SessionRepository extends CrudRepository<Session, Long> {
 
@@ -146,8 +148,14 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
    */
   Optional<Session> findByGroupId(String groupId);
 
+  @Query(value =
+      "SELECT * "
+          + "FROM session s "
+          + "WHERE s.rc_group_id IN :group_ids OR s.rc_feedback_group_id IN :group_ids", nativeQuery = true)
+  List<Session> findByGroupOrFeedbackGroupIds(@Param(value = "group_ids") Set<String> groupIds);
+
   /**
-   * Find all {@link Session}s by a agency ID and SessionStatus where consultant is null.
+   * Find all {@link Session}s by an agency ID and SessionStatus where consultant is null.
    *
    * @param agencyId      the id to search for
    * @param sessionStatus {@link SessionStatus}

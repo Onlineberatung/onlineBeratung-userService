@@ -2675,6 +2675,48 @@ public class UserControllerAuthorizationIT {
     verify(consultantAgencyService).getAgenciesOfConsultant("65c1095e-b977-493a-a34f-064b729d1d6c");
   }
 
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
+  void getSessionsForGroupOrFeedbackGroupIds_should_return_forbidden_and_call_no_methods_when_no_user_or_consultant_authority()
+      throws Exception {
+    mvc.perform(get("/users/sessions/room?rcGroupIds=mzAdWzQEobJ2PkoxP")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+    verifyNoInteractions(identityManager);
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
+  void getSessionsForGroupOrFeedbackGroupIds_should_return_forbidden_and_call_no_methods_when_no_csrf_token_given()
+      throws Exception {
+    mvc.perform(get("/users/sessions/room?rcGroupIds=mzAdWzQEobJ2PkoxP")
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+    verifyNoInteractions(identityManager);
+  }
+
+  @Test
+  void getSessionsForGroupOrFeedbackGroupIds_should_return_unauthorized_and_call_no_methods_when_no_keycloak_authorization()
+      throws Exception {
+    mvc.perform(get("/users/sessions/room?rcGroupIds=mzAdWzQEobJ2PkoxP")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isUnauthorized());
+
+    verifyNoMoreInteractions(authenticatedUser, sessionService, sessionRepository);
+  }
+
   private UpdateConsultantDTO givenAMinimalUpdateConsultantDto(String email) {
     return new UpdateConsultantDTO()
         .email(email).firstname("firstname").lastname("lastname");

@@ -310,6 +310,42 @@ public class UserController implements UsersApi {
   }
 
   /**
+   * Returns a list of sessions for the currently authenticated/logged in user and given RocketChat
+   * group, or feedback group IDs.
+   *
+   * @param rcToken Rocket.Chat token (required)
+   * @return {@link ResponseEntity} of {@link UserSessionListResponseDTO}
+   */
+  @Override
+  public ResponseEntity<UserSessionListResponseDTO> getSessionsForGroupOrFeedbackGroupIds(
+      @RequestHeader String rcToken, @RequestParam(value = "rcGroupIds") List<String> rcGroupIds) {
+
+    String userId;
+    String rcUserId;
+    if (authenticatedUser.isConsultant()) {
+      var consultant = userAccountProvider.retrieveValidatedConsultant();
+      userId = consultant.getId();
+      rcUserId = consultant.getRocketChatId();
+    } else {
+      var user = userAccountProvider.retrieveValidatedUser();
+      userId = user.getUserId();
+      rcUserId = user.getRcUserId();
+    }
+
+    var rocketChatCredentials = RocketChatCredentials.builder()
+        .rocketChatUserId(rcUserId)
+        .rocketChatToken(rcToken)
+        .build();
+
+    var userSessionList = sessionListFacade.retrieveSessionsForAuthenticatedUserByGroupIds(userId,
+        rcGroupIds, rocketChatCredentials, authenticatedUser.getRoles());
+
+    return isNotEmpty(userSessionList.getSessions())
+        ? new ResponseEntity<>(userSessionList, HttpStatus.OK)
+        : new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
+
+  /**
    * Updates the absence (and its message) for the calling consultant.
    *
    * @param absence {@link AbsenceDTO}
