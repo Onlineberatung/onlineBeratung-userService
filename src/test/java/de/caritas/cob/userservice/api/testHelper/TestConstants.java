@@ -163,17 +163,17 @@ public class TestConstants {
   public static final List<SubscriptionsUpdateDTO> SUBSCRIPTIONS_UPDATE_LIST_DTO_WITH_ONE_FEEDBACK_UNREAD =
       Arrays.asList(
           new SubscriptionsUpdateDTO("A", true, false, 0, 0, 0, NOW, RC_GROUP_ID, "A", "A", "P",
-              null, null, null, null),
+              null, null, null, null, null),
           new SubscriptionsUpdateDTO("A", true, false, 0, 0, 0, NOW, RC_GROUP_ID_2, "A", "A", "P",
-              null, null, null, null),
+              null, null, null, null, null),
           new SubscriptionsUpdateDTO("A", true, false, 0, 0, 0, NOW, RC_GROUP_ID_3, "A", "A", "P",
-              null, null, null, null),
+              null, null, null, null, null),
           new SubscriptionsUpdateDTO("A", true, false, 1, 0, 0, NOW, RC_FEEDBACK_GROUP_ID, "A", "A",
-              "P", null, null, null, null),
+              "P", null, null, null, null, null),
           new SubscriptionsUpdateDTO("A", true, false, 0, 0, 0, NOW, RC_FEEDBACK_GROUP_ID_2, "A",
-              "A", "P", null, null, null, null),
+              "A", "P", null, null, null, null, null),
           new SubscriptionsUpdateDTO("A", true, false, 0, 0, 0, NOW, RC_FEEDBACK_GROUP_ID_3, "A",
-              "A", "P", null, null, null, null));
+              "A", "P", null, null, null, null, null));
 
 
   /**

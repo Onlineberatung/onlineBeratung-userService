@@ -94,6 +94,7 @@ public class RocketChatService implements MessageClient {
   private static final String ENDPOINT_GROUP_KICK = "/groups.kick";
   private static final String ENDPOINT_GROUP_MEMBERS = "/groups.members";
   private static final String ENDPOINT_GROUP_READ_ONLY = "/groups.setReadOnly";
+  private static final String ENDPOINT_GROUP_KEY_UPDATE = "/e2e.updateGroupKey";
   private static final String ENDPOINT_GROUP_LIST = "/groups.listAll";
   private static final String ENDPOINT_ROOM_CLEAN_HISTORY = "/rooms.cleanHistory";
   private static final String ENDPOINT_ROOM_GET = "/rooms.get";
@@ -719,6 +720,34 @@ public class RocketChatService implements MessageClient {
     } else {
       var error = "Could not get Rocket.Chat subscriptions for user id %s";
       throw new InternalServerErrorException(error, LogService::logRocketChatError);
+    }
+  }
+
+  @Override
+  public Optional<List<Map<String, String>>> findAllChats(String chatUserId) {
+    var url = rocketChatConfig.getApiUrl(ENDPOINT_SUBSCRIPTION_GET);
+
+    try {
+      var response = rocketChatClient.getForEntity(url, chatUserId, SubscriptionsGetDTO.class);
+      return mapper.mapOfSubscriptionsResponse(response);
+    } catch (HttpClientErrorException exception) {
+      log.error("Subscriptions Get failed.", exception);
+      return Optional.empty();
+    }
+  }
+
+  @Override
+  public boolean updateChatE2eKey(String chatUserId, String roomId, String key) {
+    var url = rocketChatConfig.getApiUrl(ENDPOINT_GROUP_KEY_UPDATE);
+    var updateUser = mapper.updateGroupKeyOf(chatUserId, roomId, key);
+
+    try {
+      var response = rocketChatClient.postForEntity(url, chatUserId, updateUser,
+          StandardResponseDTO.class);
+      return response.getStatusCode().is2xxSuccessful();
+    } catch (HttpClientErrorException exception) {
+      log.error("Updating E2E group key failed.", exception);
+      return false;
     }
   }
 

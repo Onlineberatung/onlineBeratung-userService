@@ -5,8 +5,10 @@ import de.caritas.cob.userservice.api.port.in.Messaging;
 import de.caritas.cob.userservice.api.port.out.ChatRepository;
 import de.caritas.cob.userservice.api.port.out.MessageClient;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +40,51 @@ public class Messenger implements Messaging {
           messageClient.unmuteUserInChat(username, chat.getGroupId())
       );
     });
+  }
+
+  @Override
+  public boolean updateE2eKeys(String chatUserId, String publicKey) {
+    var allUpdated = new AtomicBoolean(true);
+
+    messageClient.findAllChats(chatUserId).ifPresent(chats -> {
+      if (allChatsAreEncrypted(chats)) {
+        var userHash = generateUserHash(chatUserId);
+        chats.forEach(chat -> {
+          var oldEncryptedKey = chat.get("e2eKey");
+          var decryptedKey = decrypt(userHash, oldEncryptedKey);
+          var newEncryptedKey = encrypt(publicKey, decryptedKey);
+          var userId = chat.get("userId");
+          var roomId = chat.get("roomId");
+          if (!messageClient.updateChatE2eKey(userId, roomId, newEncryptedKey)) {
+            allUpdated.set(false);
+          }
+        });
+      } else {
+        allUpdated.set(false);
+      }
+    });
+
+    return allUpdated.get();
+  }
+
+  private boolean allChatsAreEncrypted(List<Map<String, String>> chats) {
+    return chats.stream().allMatch(map -> map.containsKey("e2eKey"));
+  }
+
+  @Override
+  public String generateUserHash(String chatUserId) {
+    //TODO: implement
+    return chatUserId;
+  }
+
+  private String decrypt(String userHash, String encryptedKey) {
+    //TODO: implement
+    return encryptedKey;
+  }
+
+  private String encrypt(String publicKey, String decryptedKey) {
+    //TODO: implement
+    return decryptedKey;
   }
 
   @Override

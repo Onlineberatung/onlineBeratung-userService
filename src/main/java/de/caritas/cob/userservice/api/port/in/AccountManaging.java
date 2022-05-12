@@ -10,7 +10,7 @@ public interface AccountManaging {
 
   boolean existsAdviceSeeker(String id);
 
-  Optional<User> findAdviceSeeker(String id);
+  Optional<Map<String, Object>> findAdviceSeeker(String id);
 
   Optional<User> findAdviceSeekerByChatUserId(String chatId);
 
