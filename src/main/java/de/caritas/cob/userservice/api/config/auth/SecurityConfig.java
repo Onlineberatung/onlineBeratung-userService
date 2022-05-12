@@ -96,7 +96,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .antMatchers("/users/sessions/askers")
         .hasAnyAuthority(ANONYMOUS_DEFAULT, USER_DEFAULT)
         .antMatchers("/users/email", "/users/mails/messages/new",
-            "/users/password/change", "/users/chat/{chatId:[0-9]+}",
+            "/users/password/change", "/users/chat/{chatId:[0-9]+}", "/users/chat/e2e",
             "/users/chat/{chatId:[0-9]+}/join", "/users/chat/{chatId:[0-9]+}/members",
             "/users/chat/{chatId:[0-9]+}/leave", "/users/twoFactorAuth", "/users/2fa/**",
             "/users/mobile/app/token", "/users/consultants/toggleWalkThrough"
@@ -165,8 +165,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   /**
    * Adds additional filter for tenant feature if enabled that sets tenant_id into current thread.
    *
-   * @param httpSecurity
-   * @return
+   * @param httpSecurity - httpSecurity
+   * @return httpSecurity
    */
   private HttpSecurity enableTenantFilterIfMultitenancyEnabled(HttpSecurity httpSecurity) {
     if (multitenancy) {
