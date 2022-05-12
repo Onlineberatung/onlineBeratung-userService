@@ -18,6 +18,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResp
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateChatResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateEnquiryMessageResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.DeleteUserAccountDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.E2eKeyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.EmailDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.EnquiryMessageDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.LanguageResponseDTO;
@@ -724,6 +725,11 @@ public class UserController implements UsersApi {
     }
 
     return new ResponseEntity<>(HttpStatus.CONFLICT);
+  }
+
+  @Override
+  public ResponseEntity<Void> updateE2eInChats(E2eKeyDTO e2eKeyDTO) {
+    return ResponseEntity.noContent().build();
   }
 
   /**

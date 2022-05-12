@@ -1054,6 +1054,31 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /users/chat/e2e:
+    put:
+      tags:
+        - user-controller
+      summary: 'Updates E2E keys in all user''s chats [authorities: consultant or user]'
+      operationId: updateE2eInChats
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/E2eKeyDTO'
+        required: true
+      responses:
+        204:
+          description: NO CONTENT - successful operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request resp. provided password is wrong
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /users/chat/new:
     post:
       tags:
@@ -2338,6 +2363,16 @@ components:
           type: string
         utcOffset:
           type: string
+
+    E2eKeyDTO:
+      type: object
+      required:
+        - publicKey
+      properties:
+        publicKey:
+          type: string
+          minLength: 32
+          maxLength: 32
 
     UpdateChatResponseDTO:
       type: object
