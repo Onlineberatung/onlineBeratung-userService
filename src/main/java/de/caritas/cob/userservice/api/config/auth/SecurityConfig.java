@@ -60,7 +60,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
    */
   public SecurityConfig(
       @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-          KeycloakClientRequestFactory keycloakClientRequestFactory,
+      KeycloakClientRequestFactory keycloakClientRequestFactory,
       CsrfSecurityProperties csrfSecurityProperties, @Nullable HttpTenantFilter tenantFilter) {
     this.keycloakClientRequestFactory = keycloakClientRequestFactory;
     this.csrfSecurityProperties = csrfSecurityProperties;
@@ -106,6 +106,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
             "/users/askers/consultingType/new", "/users/account", "/users/mobiletoken",
             "/users/sessions/{sessionId:[0-9]+}/data")
         .hasAuthority(USER_DEFAULT)
+        .regexMatchers(HttpMethod.GET, "/users/sessions/room\\?rcGroupIds=[\\dA-Za-z-,]+")
+        .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT)
         .antMatchers("/users/sessions/open", "/users/sessions/consultants/new",
             "/users/sessions/new/{sessionId:[0-9]+}", "/users/consultants/absences",
             "/users/sessions/consultants", "/users/sessions/teams",
@@ -226,7 +228,9 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   }
 
   /**
-   * see above: {@link SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
+   * see above:
+   * {@link
+   * SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Bean
@@ -238,7 +242,9 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   }
 
   /**
-   * see above: {@link SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
+   * see above:
+   * {@link
+   * SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Bean
@@ -250,7 +256,9 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   }
 
   /**
-   * see above: {@link SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
+   * see above:
+   * {@link
+   * SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Bean

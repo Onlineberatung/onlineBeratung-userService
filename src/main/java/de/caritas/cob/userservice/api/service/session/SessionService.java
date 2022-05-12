@@ -8,25 +8,25 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import com.neovisionaries.i18n.LanguageCode;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionConsultantForUserDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.SessionConsultantForUserDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
-import de.caritas.cob.userservice.api.model.Session.RegistrationType;
 import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.port.out.SessionRepository;
+import de.caritas.cob.userservice.api.model.Session.RegistrationType;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
@@ -292,7 +292,7 @@ public class SessionService {
   public List<ConsultantSessionResponseDTO> getActiveAndDoneSessionsForConsultant(
       Consultant consultant) {
     return Stream.of(getSessionsForConsultantByStatus(consultant, SessionStatus.IN_PROGRESS),
-        getSessionsForConsultantByStatus(consultant, SessionStatus.DONE))
+            getSessionsForConsultantByStatus(consultant, SessionStatus.DONE))
         .flatMap(Collection::stream)
         .map(session -> new SessionMapper().toConsultantSessionDto(session))
         .collect(Collectors.toList());
@@ -333,6 +333,31 @@ public class SessionService {
    */
   public void deleteSession(Session session) {
     sessionRepository.delete(session);
+  }
+
+  /**
+   * Retrieves user sessions by user ID and rocket chat group, or feedback group IDs
+   *
+   * @param userId     the user ID
+   * @param rcGroupIds rocket chat group or feedback group IDs
+   * @param roles      the roles of the given user
+   * @return {@link UserSessionResponseDTO}
+   */
+  public List<UserSessionResponseDTO> getSessionsByUserAndGroupOrFeedbackGroupIds(String userId,
+      Set<String> rcGroupIds,
+      Set<String> roles) {
+
+    var sessions = sessionRepository.findByGroupOrFeedbackGroupIds(rcGroupIds);
+    if (sessions.isEmpty()) {
+      return emptyList();
+    }
+    sessions.forEach(s -> checkUserPermissionForSession(s, userId, roles));
+    Set<Long> agencyIds = sessions.stream()
+        .map(Session::getAgencyId)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toSet());
+    List<AgencyDTO> agencies = agencyService.getAgencies(new ArrayList<>(agencyIds));
+    return convertToUserSessionResponseDTO(sessions, agencies);
   }
 
   /**

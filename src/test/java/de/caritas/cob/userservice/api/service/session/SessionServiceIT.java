@@ -9,9 +9,11 @@ import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
+import java.util.Collections;
+import java.util.Set;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +52,24 @@ public class SessionServiceIT {
         .findByIdAndDeleteDateIsNull("fb77d849-470f-4cec-89ca-6aa673bacb88")
         .get();
     sessionService.fetchSessionForConsultant(1L, consultant);
+  }
+
+  @Test(expected = ForbiddenException.class)
+  public void getSessionsByUserAndGroupOrFeedbackGroupIdsShouldBeForbiddenIfUserHasNotRequiredRole() {
+    sessionService.getSessionsByUserAndGroupOrFeedbackGroupIds(
+        "9c4057d0-05ad-4e86-a47c-dc5bdeec03b9", Set.of("9faSTWZ5gurHLXy4R"),
+        Collections.emptySet());
+  }
+
+  @Test
+  public void getSessionsByUserAndGroupOrFeedbackGroupIdsShouldFetchAgencyForSession() {
+    var sessions = sessionService.getSessionsByUserAndGroupOrFeedbackGroupIds(
+        "9c4057d0-05ad-4e86-a47c-dc5bdeec03b9", Set.of("9faSTWZ5gurHLXy4R"), Set.of("user"));
+
+    assertEquals(1, sessions.size());
+    var userSession = sessions.get(0);
+    assertEquals("9faSTWZ5gurHLXy4R", userSession.getSession().getFeedbackGroupId());
+    assertEquals("eOMtThyhVNLWUZNRcBaQKxI", userSession.getAgency().getName());
   }
 
   @Test

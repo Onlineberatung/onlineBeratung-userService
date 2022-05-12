@@ -49,6 +49,10 @@ import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginRespons
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.MessageResponse;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomResponse;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsGetDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsUpdateDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.subscriptions.SubscriptionsGetDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.subscriptions.SubscriptionsUpdateDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.RocketChatUserDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UpdateUser;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserInfoResponseDTO;
@@ -373,6 +377,122 @@ public class UserControllerE2EIT {
     assertEquals(LanguageCode.de, savedSession.get().getLanguageCode());
 
     restoreSession();
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
+  public void getSessionsForGroupOrFeedbackGroupIdsShouldFindSessionsByGroupOrFeedbackGroup()
+      throws Exception {
+    givenAUserWithSessions();
+    givenNoRocketChatSubscriptionUpdates();
+    givenNoRocketChatRoomUpdates();
+
+    mockMvc.perform(
+            get("/users/sessions/room?rcGroupIds=mzAdWzQEobJ2PkoxP,9faSTWZ5gurHLXy4R")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("sessions[0].session.feedbackGroupId", is("9faSTWZ5gurHLXy4R")))
+        .andExpect(jsonPath("sessions[1].session.groupId", is("mzAdWzQEobJ2PkoxP")))
+        .andExpect(jsonPath("sessions", hasSize(2)));
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void getSessionsForGroupOrFeedbackGroupIdsShouldFindSessionsByGroupOrFeedbackGroupForConsultant()
+      throws Exception {
+    givenAConsultantWithSessions();
+    givenNoRocketChatSubscriptionUpdates();
+    givenNoRocketChatRoomUpdates();
+
+    mockMvc.perform(
+            get("/users/sessions/room?rcGroupIds=YWKxhFX5K2HPpsFbs,4SPkApB8So88c7tQ3")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("sessions[0].session.groupId", is("YWKxhFX5K2HPpsFbs")))
+        .andExpect(jsonPath("sessions[1].session.feedbackGroupId", is("4SPkApB8So88c7tQ3")))
+        .andExpect(jsonPath("sessions", hasSize(2)));
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
+  public void getSessionsForGroupOrFeedbackGroupIdsShouldFindSessionByGroupId()
+      throws Exception {
+    givenAUserWithSessions();
+    givenNoRocketChatSubscriptionUpdates();
+    givenNoRocketChatRoomUpdates();
+
+    mockMvc.perform(
+            get("/users/sessions/room?rcGroupIds=mzAdWzQEobJ2PkoxP")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("sessions[0].session.groupId", is("mzAdWzQEobJ2PkoxP")))
+        .andExpect(jsonPath("sessions", hasSize(1)));
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
+  public void getSessionsForGroupOrFeedbackGroupIdsShouldBeForbiddenIfUserDoesNotParticipateInSession()
+      throws Exception {
+    givenAUserWithSessions();
+    givenNoRocketChatSubscriptionUpdates();
+    givenNoRocketChatRoomUpdates();
+
+    mockMvc.perform(
+            get("/users/sessions/room?rcGroupIds=4SPkApB8So88c7tQ3")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void getSessionsForGroupOrFeedbackGroupIdsShouldBeForbiddenIfConsultantDoesNotParticipateInSession()
+      throws Exception {
+    givenAConsultantWithSessions();
+    givenNoRocketChatSubscriptionUpdates();
+    givenNoRocketChatRoomUpdates();
+
+    mockMvc.perform(
+            get("/users/sessions/room?rcGroupIds=QBv2xym9qQ2DoAxkR")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void getSessionsForGroupOrFeedbackGroupIdsShouldBeNoContentIfNoSessionsFoundFourIds()
+      throws Exception {
+    givenAConsultantWithSessions();
+    givenNoRocketChatSubscriptionUpdates();
+    givenNoRocketChatRoomUpdates();
+
+    mockMvc.perform(
+            get("/users/sessions/room?rcGroupIds=doesNotExist")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isNoContent());
   }
 
   @Test
@@ -3091,6 +3211,22 @@ public class UserControllerE2EIT {
         .thenReturn(ResponseEntity.ok().build());
   }
 
+  private void givenNoRocketChatRoomUpdates() {
+    var response = new RoomsGetDTO();
+    var roomsUpdate = new RoomsUpdateDTO[0];
+    response.setUpdate(roomsUpdate);
+    when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(HttpEntity.class),
+        eq(RoomsGetDTO.class))).thenReturn(ResponseEntity.ok(response));
+  }
+
+  private void givenNoRocketChatSubscriptionUpdates() {
+    var response = new SubscriptionsGetDTO();
+    var subscriptionsUpdate = new SubscriptionsUpdateDTO[0];
+    response.setUpdate(subscriptionsUpdate);
+    when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(HttpEntity.class),
+        eq(SubscriptionsGetDTO.class))).thenReturn(ResponseEntity.ok(response));
+  }
+
   private void givenAUserWithASessionNotEnquired() {
     user = userRepository.findById("552d3f10-1b6d-47ee-aec5-b88fbf988f9e").orElseThrow();
     when(authenticatedUser.getUserId()).thenReturn(user.getUserId());
@@ -3098,6 +3234,20 @@ public class UserControllerE2EIT {
         .filter(s -> isNull(s.getEnquiryMessageDate()))
         .findFirst()
         .orElseThrow();
+  }
+
+  private void givenAUserWithSessions() {
+    user = userRepository.findById("9c4057d0-05ad-4e86-a47c-dc5bdeec03b9").orElseThrow();
+    when(authenticatedUser.getUserId()).thenReturn(user.getUserId());
+    when(authenticatedUser.getRoles()).thenReturn(Set.of("user"));
+  }
+
+  private void givenAConsultantWithSessions() {
+    consultant = consultantRepository.findById("bad14912-cf9f-4c16-9d0e-fe8ede9b60dc")
+        .orElseThrow();
+    when(authenticatedUser.isConsultant()).thenReturn(true);
+    when(authenticatedUser.getUserId()).thenReturn(consultant.getId());
+    when(authenticatedUser.getRoles()).thenReturn(Set.of("consultant"));
   }
 
   private void givenAnEnquiryMessageDto(boolean isLanguageSet) {

@@ -2,23 +2,24 @@ package de.caritas.cob.userservice.api.service;
 
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.ChatDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionConsultantForConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateChatResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserChatDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.adapters.web.dto.ChatDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UserChatDTO;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.Chat.ChatInterval;
-import de.caritas.cob.userservice.api.port.out.ChatRepository;
 import de.caritas.cob.userservice.api.model.ChatAgency;
-import de.caritas.cob.userservice.api.port.out.ChatAgencyRepository;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.port.out.ChatAgencyRepository;
+import de.caritas.cob.userservice.api.port.out.ChatRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -26,7 +27,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -132,6 +132,18 @@ public class ChatService {
    */
   public Optional<Chat> getChat(Long chatId) {
     return chatRepository.findById(chatId);
+  }
+
+  /**
+   * Returns an {@link List} of {@link UserSessionResponseDTO} for the provided group IDs.
+   *
+   * @param groupIds a list of rocket chat group or feedback group IDs
+   * @return {@link List<UserSessionResponseDTO>}
+   */
+  public List<UserSessionResponseDTO> getChatSessionsByGroupIds(Set<String> groupIds) {
+    return chatRepository.findByGroupIds(groupIds).stream()
+        .map(this::convertChatToUserSessionResponseDTO)
+        .collect(Collectors.toList());
   }
 
   /**

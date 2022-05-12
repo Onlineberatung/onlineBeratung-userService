@@ -2,20 +2,22 @@ package de.caritas.cob.userservice.api.service.sessionlist;
 
 import static java.util.Objects.nonNull;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsLastMessageDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserChatDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
 import de.caritas.cob.userservice.api.facade.sessionlist.RocketChatRoomInformationProvider;
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
-import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UserChatDTO;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsLastMessageDTO;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +45,27 @@ public class UserSessionListService {
 
     List<UserSessionResponseDTO> sessions = sessionService.getSessionsForUserId(userId);
     List<UserSessionResponseDTO> chats = chatService.getChatsForUserId(userId);
+
+    return mergeUserSessionsAndChats(sessions, chats, rocketChatCredentials);
+  }
+
+  /**
+   * Returns a list of {@link UserSessionResponseDTO} for given user ID and rocket chat group or
+   * feedback group IDs.
+   *
+   * @param userId                the ID of an user
+   * @param rcGroupIds            the rocket chat group or feedback group IDs
+   * @param rocketChatCredentials the credentials for accessing rocket chat
+   * @param roles                 the roles of given user
+   * @return {@link UserSessionResponseDTO}
+   */
+  public List<UserSessionResponseDTO> retrieveSessionsForAuthenticatedUserAndGroupIds(String userId,
+      List<String> rcGroupIds, RocketChatCredentials rocketChatCredentials, Set<String> roles) {
+
+    var groupIds = new HashSet<>(rcGroupIds);
+    var sessions = sessionService.getSessionsByUserAndGroupOrFeedbackGroupIds(userId, groupIds,
+        roles);
+    var chats = chatService.getChatSessionsByGroupIds(groupIds);
 
     return mergeUserSessionsAndChats(sessions, chats, rocketChatCredentials);
   }
