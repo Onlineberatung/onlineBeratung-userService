@@ -3,15 +3,14 @@ package de.caritas.cob.userservice.api.admin.service.consultant;
 import static java.util.Objects.requireNonNull;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantLinks;
+import de.caritas.cob.userservice.api.adapters.web.dto.HalLink;
+import de.caritas.cob.userservice.api.adapters.web.dto.HalLink.MethodEnum;
 import de.caritas.cob.userservice.api.admin.hallink.HalLinkBuilder;
-import de.caritas.cob.userservice.api.admin.mapper.ConsultantAdminMapper;
-import de.caritas.cob.userservice.api.admin.model.ConsultantAdminResponseDTO;
-import de.caritas.cob.userservice.api.admin.model.ConsultantDTO;
-import de.caritas.cob.userservice.api.admin.model.ConsultantLinks;
-import de.caritas.cob.userservice.api.admin.model.HalLink;
-import de.caritas.cob.userservice.api.admin.model.HalLink.MethodEnum;
 import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.generated.api.admin.controller.UseradminApi;
+import de.caritas.cob.userservice.generated.api.adapters.web.controller.UseradminApi;
 
 /**
  * Builder class to generate a {@link ConsultantAdminResponseDTO} containing available hal links and
@@ -42,7 +41,6 @@ public class ConsultantResponseDTOBuilder implements HalLinkBuilder {
    * @return the generated {@link ConsultantAdminResponseDTO}
    */
   public ConsultantAdminResponseDTO buildResponseDTO() {
-    var consultantDTO = new ConsultantAdminMapper(this.consultant).mapData();
     var consultantLinks = new ConsultantLinks()
         .self(buildSelfLink())
         .update(buildUpdateLink())
@@ -51,8 +49,25 @@ public class ConsultantResponseDTOBuilder implements HalLinkBuilder {
         .addAgency(buildAddAgencyLink());
 
     return new ConsultantAdminResponseDTO()
-        .embedded(consultantDTO)
+        .embedded(buildConsultantDTO(consultant))
         .links(consultantLinks);
+  }
+
+  private ConsultantDTO buildConsultantDTO(Consultant consultant) {
+    return new ConsultantDTO()
+        .id(consultant.getId())
+        .username(consultant.getUsername())
+        .firstname(consultant.getFirstName())
+        .lastname(consultant.getLastName())
+        .email(consultant.getEmail())
+        .formalLanguage(consultant.isLanguageFormal())
+        .teamConsultant(consultant.isTeamConsultant())
+        .absent(consultant.isAbsent())
+        .absenceMessage(consultant.getAbsenceMessage())
+        .createDate(String.valueOf(consultant.getCreateDate()))
+        .updateDate(String.valueOf(consultant.getUpdateDate()))
+        .deleteDate(String.valueOf(consultant.getDeleteDate()))
+        .status(String.valueOf(consultant.getStatus()));
   }
 
   private HalLink buildSelfLink() {

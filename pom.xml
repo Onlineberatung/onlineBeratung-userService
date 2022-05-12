@@ -467,8 +467,8 @@
 							</configOptions>
 							<inputSpec>${project.basedir}/api/useradminservice.yaml</inputSpec>
 							<generatorName>spring</generatorName>
-							<apiPackage>${project.groupId}.${project.artifactId}.generated.api.admin.controller</apiPackage>
-							<modelPackage>${project.groupId}.${project.artifactId}.api.admin.model</modelPackage>
+							<apiPackage>${adapters.web.generated.path}.controller</apiPackage>
+							<modelPackage>${adapters.web.dto.path}</modelPackage>
 							<generateSupportingFiles>true</generateSupportingFiles>
 							<output>target/generated-sources</output>
 							<typeMappings>

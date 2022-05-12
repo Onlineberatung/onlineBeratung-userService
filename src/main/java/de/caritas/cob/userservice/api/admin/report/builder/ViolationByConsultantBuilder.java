@@ -2,9 +2,9 @@ package de.caritas.cob.userservice.api.admin.report.builder;
 
 import static java.util.Objects.nonNull;
 
-import de.caritas.cob.userservice.api.admin.model.AdditionalInformationDTO;
-import de.caritas.cob.userservice.api.admin.model.ViolationDTO;
-import de.caritas.cob.userservice.api.admin.model.ViolationDTO.ViolationTypeEnum;
+import de.caritas.cob.userservice.api.adapters.web.dto.AdditionalInformationDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ViolationDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ViolationDTO.ViolationTypeEnum;
 import de.caritas.cob.userservice.api.model.Consultant;
 
 /**

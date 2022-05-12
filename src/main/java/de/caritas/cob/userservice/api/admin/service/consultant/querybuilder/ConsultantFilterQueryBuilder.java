@@ -2,7 +2,7 @@ package de.caritas.cob.userservice.api.admin.service.consultant.querybuilder;
 
 import static java.util.Objects.nonNull;
 
-import de.caritas.cob.userservice.api.admin.model.ConsultantFilter;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.search.Query;
 import org.hibernate.search.query.dsl.BooleanJunction;
