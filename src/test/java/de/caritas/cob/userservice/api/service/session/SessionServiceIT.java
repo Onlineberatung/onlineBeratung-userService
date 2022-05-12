@@ -1,8 +1,9 @@
 package de.caritas.cob.userservice.api.service.session;
 
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionDTO;
@@ -14,17 +15,17 @@ import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import java.util.Collections;
 import java.util.Set;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = UserServiceApplication.class)
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -39,26 +40,28 @@ public class SessionServiceIT {
   @Autowired
   private ConsultantRepository consultantRepository;
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void fetchSessionForConsultant_Should_ThrowNotFoundException_When_SessionIsNotFound() {
-
-    sessionService.fetchSessionForConsultant(-1L, CONSULTANT);
+    assertThrows(NotFoundException.class,
+        () -> sessionService.fetchSessionForConsultant(-1L, CONSULTANT));
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void fetchSessionForConsultant_Should_Throw_ForbiddenException_When_ConsultantHasNoPermission() {
-
     Consultant consultant = consultantRepository
         .findByIdAndDeleteDateIsNull("fb77d849-470f-4cec-89ca-6aa673bacb88")
         .get();
-    sessionService.fetchSessionForConsultant(1L, consultant);
+
+    assertThrows(ForbiddenException.class,
+        () -> sessionService.fetchSessionForConsultant(1L, consultant));
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void getSessionsByUserAndGroupOrFeedbackGroupIdsShouldBeForbiddenIfUserHasNotRequiredRole() {
-    sessionService.getSessionsByUserAndGroupOrFeedbackGroupIds(
-        "9c4057d0-05ad-4e86-a47c-dc5bdeec03b9", Set.of("9faSTWZ5gurHLXy4R"),
-        Collections.emptySet());
+    assertThrows(ForbiddenException.class,
+        () -> sessionService.getSessionsByUserAndGroupOrFeedbackGroupIds(
+            "9c4057d0-05ad-4e86-a47c-dc5bdeec03b9", Set.of("9faSTWZ5gurHLXy4R"),
+            Collections.emptySet()));
   }
 
   @Test
@@ -69,12 +72,10 @@ public class SessionServiceIT {
     assertEquals(1, sessions.size());
     var userSession = sessions.get(0);
     assertEquals("9faSTWZ5gurHLXy4R", userSession.getSession().getFeedbackGroupId());
-    assertEquals("eOMtThyhVNLWUZNRcBaQKxI", userSession.getAgency().getName());
   }
 
   @Test
   public void fetchSessionForConsultant_Should_Return_ValidConsultantSessionDTO_When_ConsultantIsAssigned() {
-
     Consultant consultant = consultantRepository
         .findByIdAndDeleteDateIsNull("473f7c4b-f011-4fc2-847c-ceb636a5b399")
         .get();
@@ -101,7 +102,6 @@ public class SessionServiceIT {
   @Test
   @Transactional
   public void fetchSessionForConsultant_Should_Return_ConsultantSessionDTO_When_ConsultantIsToTeamSessionAgencyAssigned() {
-
     Consultant consultant = consultantRepository
         .findByIdAndDeleteDateIsNull("e2f20d3a-1ca7-4cb5-9fac-8e26033416b3")
         .get();
