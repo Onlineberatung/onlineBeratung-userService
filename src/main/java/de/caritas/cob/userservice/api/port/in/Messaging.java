@@ -15,4 +15,8 @@ public interface Messaging {
   Optional<Map<String, Object>> findChatMetaInfo(long chatId, String userId);
 
   void unbanUsersInChat(Long chatId, String id);
+
+  String generateUserHash(String chatUserId);
+
+  boolean updateE2eKeys(String chatUserId, String publicKey);
 }

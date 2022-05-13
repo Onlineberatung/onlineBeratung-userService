@@ -50,6 +50,7 @@ public class UserServiceMapper {
     map.put("username", user.getUsername());
     map.put("email", user.getEmail());
     map.put("encourage2fa", user.getEncourage2fa());
+    map.put("chatUserId", user.getRcUserId());
 
     return map;
   }
@@ -62,6 +63,7 @@ public class UserServiceMapper {
     map.put("email", consultant.getEmail());
     map.put("encourage2fa", consultant.getEncourage2fa());
     map.put("walkThroughEnabled", consultant.getWalkThroughEnabled());
+    map.put("chatUserId", consultant.getRocketChatId());
 
     if (additionalMap.containsKey("displayName")) {
       var displayName = (String) additionalMap.get("displayName");

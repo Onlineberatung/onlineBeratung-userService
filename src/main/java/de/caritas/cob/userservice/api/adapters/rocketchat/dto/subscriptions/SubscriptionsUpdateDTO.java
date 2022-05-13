@@ -39,5 +39,7 @@ public class SubscriptionsUpdateDTO {
   @JsonProperty("_updatedAt")
   private Date updatedAt;
   private String[] roles;
+  @JsonProperty("E2EKey")
+  private String e2eKey;
 
 }

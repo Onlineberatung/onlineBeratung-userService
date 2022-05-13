@@ -765,6 +765,23 @@ public class UserController implements UsersApi {
 
   @Override
   public ResponseEntity<Void> updateE2eInChats(E2eKeyDTO e2eKeyDTO) {
+    var userId = authenticatedUser.getUserId();
+    var user = authenticatedUser.isConsultant()
+        ? accountManager.findConsultant(userId).orElseThrow()
+        : accountManager.findAdviceSeeker(userId).orElseThrow();
+
+    var chatUserId = userDtoMapper.chatUserIdOf(user);
+    var username = authenticatedUser.getUsername();
+    if (isNull(chatUserId)) {
+      var message = String.format("Chat-user ID of user %s unknown", username);
+      throw new InternalServerErrorException(message);
+    }
+
+    if (!messenger.updateE2eKeys(chatUserId, e2eKeyDTO.getPublicKey())) {
+      var message = String.format("Could not update E2E keys in user %s's chats", username);
+      throw new InternalServerErrorException(message);
+    }
+
     return ResponseEntity.noContent().build();
   }
 

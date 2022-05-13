@@ -47,6 +47,7 @@ import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.actions.chat.StopChatActionCommand;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.StandardResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.MessageResponse;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomResponse;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsGetDTO;
@@ -277,6 +278,8 @@ public class UserControllerE2EIT {
   private DeleteUserAccountDTO deleteUserAccountDto;
 
   private UserInfoResponseDTO userInfoResponse;
+
+  private SubscriptionsGetDTO subscriptionsGetResponse;
 
   private String infix;
 
@@ -2292,11 +2295,16 @@ public class UserControllerE2EIT {
   void updateE2eInChatsShouldRespondWithNoContent() throws Exception {
     givenAValidConsultant(true);
     givenACorrectlyFormattedE2eKeyDTO();
+    givenAValidRocketChatSystemUser();
+    givenAValidRocketChatInfoUserResponse();
+    givenAValidRocketChatGetSubscriptionsResponse();
+    givenValidRocketChatGroupKeyUpdateResponses();
 
     mockMvc.perform(
         put("/users/chat/e2e")
             .cookie(CSRF_COOKIE)
             .header(CSRF_HEADER, CSRF_VALUE)
+            .header("rcToken", RandomStringUtils.randomAlphabetic(16))
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(e2eKeyDTO))
     ).andExpect(status().isNoContent());
@@ -2956,6 +2964,39 @@ public class UserControllerE2EIT {
         endsWith(urlSuffix), eq(HttpMethod.GET),
         any(HttpEntity.class), eq(UserInfoResponseDTO.class))
     ).thenReturn(ResponseEntity.ok(userInfoResponse));
+  }
+
+  private void givenAValidRocketChatGetSubscriptionsResponse() {
+    subscriptionsGetResponse = new SubscriptionsGetDTO();
+    subscriptionsGetResponse.setSuccess(true);
+
+    int size = easyRandom.nextInt(5);
+    var updates = new ArrayList<SubscriptionsUpdateDTO>(size);
+    for (int i = 0; i <= size; i++) {
+      var subscriptionsUpdateDTO = easyRandom.nextObject(SubscriptionsUpdateDTO.class);
+      subscriptionsUpdateDTO.setRoomId(RandomStringUtils.randomAlphanumeric(8));
+      subscriptionsUpdateDTO.setE2eKey(RandomStringUtils.randomAlphanumeric(32));
+      var user = new RocketChatUserDTO();
+      user.setId(RandomStringUtils.randomAlphanumeric(17));
+      subscriptionsUpdateDTO.setUser(user);
+      updates.add(subscriptionsUpdateDTO);
+    }
+    subscriptionsGetResponse.setUpdate(updates.toArray(new SubscriptionsUpdateDTO[0]));
+
+    var urlSuffix = "/api/v1/subscriptions.get";
+    when(rocketChatRestTemplate.exchange(
+        endsWith(urlSuffix), eq(HttpMethod.GET),
+        any(HttpEntity.class), eq(SubscriptionsGetDTO.class))
+    ).thenReturn(ResponseEntity.ok(subscriptionsGetResponse));
+  }
+
+  private void givenValidRocketChatGroupKeyUpdateResponses() {
+    var urlSuffix = "/api/v1/e2e.updateGroupKey";
+    var response = easyRandom.nextObject(StandardResponseDTO.class);
+
+    when(rocketChatRestTemplate.postForEntity(
+        endsWith(urlSuffix), any(HttpEntity.class), eq(StandardResponseDTO.class)
+    )).thenReturn(ResponseEntity.ok(response));
   }
 
   private void givenAValidRocketChatUpdateUserResponse() {
