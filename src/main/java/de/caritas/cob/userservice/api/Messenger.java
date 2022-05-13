@@ -5,6 +5,7 @@ import de.caritas.cob.userservice.api.port.in.Messaging;
 import de.caritas.cob.userservice.api.port.out.ChatRepository;
 import de.caritas.cob.userservice.api.port.out.MessageClient;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
+import de.caritas.cob.userservice.api.service.StringConverter;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,6 +24,8 @@ public class Messenger implements Messaging {
   private final ChatRepository chatRepository;
 
   private final UserServiceMapper mapper;
+
+  private final StringConverter stringConverter;
 
   @Override
   public boolean banUserFromChat(String adviceSeekerId, long chatId) {
@@ -47,18 +50,21 @@ public class Messenger implements Messaging {
     var allUpdated = new AtomicBoolean(true);
 
     messageClient.findAllChats(chatUserId).ifPresent(chats -> {
-      if (allChatsAreEncrypted(chats)) {
-        var userHash = generateUserHash(chatUserId);
-        chats.forEach(chat -> {
-          var oldEncryptedKey = chat.get("e2eKey");
-          var decryptedKey = decrypt(userHash, oldEncryptedKey);
-          var newEncryptedKey = encrypt(publicKey, decryptedKey);
+      if (allChatsAreTmpEncrypted(chats)) {
+        var masterKey = stringConverter.hashOf(chatUserId);
+        for (var chat : chats) {
+          var roomKeyId = chat.get("e2eKey");
+          var keyId = roomKeyId.substring(4, 16);
+          var encryptedRoomKey = roomKeyId.substring(16);
+          var roomKey = stringConverter.decrypt(encryptedRoomKey, masterKey);
+          var updatedE2eKey = "tmp." + keyId + stringConverter.encrypt(roomKey, publicKey);
           var userId = chat.get("userId");
           var roomId = chat.get("roomId");
-          if (!messageClient.updateChatE2eKey(userId, roomId, newEncryptedKey)) {
+          if (!messageClient.updateChatE2eKey(userId, roomId, updatedE2eKey)) {
             allUpdated.set(false);
+            break;
           }
-        });
+        }
       } else {
         allUpdated.set(false);
       }
@@ -67,24 +73,10 @@ public class Messenger implements Messaging {
     return allUpdated.get();
   }
 
-  private boolean allChatsAreEncrypted(List<Map<String, String>> chats) {
-    return chats.stream().allMatch(map -> map.containsKey("e2eKey"));
-  }
-
-  @Override
-  public String generateUserHash(String chatUserId) {
-    //TODO: implement
-    return chatUserId;
-  }
-
-  private String decrypt(String userHash, String encryptedKey) {
-    //TODO: implement
-    return encryptedKey;
-  }
-
-  private String encrypt(String publicKey, String decryptedKey) {
-    //TODO: implement
-    return decryptedKey;
+  private boolean allChatsAreTmpEncrypted(List<Map<String, String>> chatMaps) {
+    return chatMaps.stream().allMatch(chatMap ->
+        chatMap.containsKey("e2eKey") && chatMap.get("e2eKey").matches("tmp\\..{12,}")
+    );
   }
 
   @Override

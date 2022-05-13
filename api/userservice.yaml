@@ -2412,8 +2412,8 @@ components:
       properties:
         publicKey:
           type: string
-          minLength: 32
-          maxLength: 32
+          minLength: 64
+          maxLength: 64
 
     UpdateChatResponseDTO:
       type: object

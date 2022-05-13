@@ -97,6 +97,7 @@ import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
+import de.caritas.cob.userservice.api.service.StringConverter;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.BasicConsultingTypeResponseDTO;
 import java.net.URI;
@@ -116,6 +117,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.PositiveOrZero;
 import lombok.NonNull;
 import lombok.SneakyThrows;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.Matchers;
 import org.jeasy.random.EasyRandom;
@@ -204,6 +206,9 @@ public class UserControllerE2EIT {
 
   @Autowired
   private IdentityConfig identityConfig;
+
+  @Autowired
+  private StringConverter stringConverter;
 
   @MockBean
   private AuthenticatedUser authenticatedUser;
@@ -2584,12 +2589,12 @@ public class UserControllerE2EIT {
 
   private void givenACorrectlyFormattedE2eKeyDTO() {
     e2eKeyDTO = new E2eKeyDTO();
-    e2eKeyDTO.setPublicKey(RandomStringUtils.randomNumeric(32));
+    e2eKeyDTO.setPublicKey(RandomStringUtils.randomAlphanumeric(64));
   }
 
   private void givenAWronglyFormattedE2eKeyDTO() {
     e2eKeyDTO = new E2eKeyDTO();
-    e2eKeyDTO.setPublicKey(RandomStringUtils.randomNumeric(8));
+    e2eKeyDTO.setPublicKey(RandomStringUtils.randomAlphanumeric(8));
   }
 
   private void givenAValidKeycloakSetupEmailResponse(String username) {
@@ -2975,7 +2980,9 @@ public class UserControllerE2EIT {
     for (int i = 0; i <= size; i++) {
       var subscriptionsUpdateDTO = easyRandom.nextObject(SubscriptionsUpdateDTO.class);
       subscriptionsUpdateDTO.setRoomId(RandomStringUtils.randomAlphanumeric(8));
-      subscriptionsUpdateDTO.setE2eKey(RandomStringUtils.randomAlphanumeric(32));
+      var secret = DigestUtils.sha256Hex(consultant.getRocketChatId());
+      var e2eKey = "tmp.1234567890ab" + stringConverter.encrypt("MeinRoomKey", secret);
+      subscriptionsUpdateDTO.setE2eKey(e2eKey);
       var user = new RocketChatUserDTO();
       user.setId(RandomStringUtils.randomAlphanumeric(17));
       subscriptionsUpdateDTO.setUser(user);
