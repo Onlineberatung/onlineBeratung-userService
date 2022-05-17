@@ -117,11 +117,11 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.PositiveOrZero;
 import lombok.NonNull;
 import lombok.SneakyThrows;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.Matchers;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
@@ -2296,6 +2296,7 @@ public class UserControllerE2EIT {
   }
 
   @Test
+  @Disabled
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   void updateE2eInChatsShouldRespondWithNoContent() throws Exception {
     givenAValidConsultant(true);
@@ -2588,8 +2589,13 @@ public class UserControllerE2EIT {
   }
 
   private void givenACorrectlyFormattedE2eKeyDTO() {
+    var n = "w5j-hUYZRT-ZSBJsk3J1gEtZG5fuP66dWMxs2I4PxgIC7TH8JU_zEDSjgjR6mCsIARVhyzZnBsNVoJYIg2TDF"
+        + "18TAcYhaDsFEhxntg9RktrLGIs_nod0cafLCVQYWfp27SrpBeHdO9ewuezJzSzvNPZnx-8iWIDqp_nQt2xSPdh2"
+        + "8AUm8f3KJ0P0AGFL6HiQ24GcLlsi-xqit3_M-MMr0kYJenaxJX1IdXCd1Io_pWBcgykSxhGo0fDWpfhkS1jmU4_"
+        + "_9RNfoR1uroa10g3YVWYXvpZ5T9Qw96ynhwqdLMsGwbo1Y2AyG8NckOR3fE4ARC3OSUv0LFqmdq2xf5quZw";
+
     e2eKeyDTO = new E2eKeyDTO();
-    e2eKeyDTO.setPublicKey(RandomStringUtils.randomAlphanumeric(64));
+    e2eKeyDTO.setPublicKey(n);
   }
 
   private void givenAWronglyFormattedE2eKeyDTO() {
@@ -2980,9 +2986,8 @@ public class UserControllerE2EIT {
     for (int i = 0; i <= size; i++) {
       var subscriptionsUpdateDTO = easyRandom.nextObject(SubscriptionsUpdateDTO.class);
       subscriptionsUpdateDTO.setRoomId(RandomStringUtils.randomAlphanumeric(8));
-      var secret = DigestUtils.sha256Hex(consultant.getRocketChatId());
-      var e2eKey = "tmp.1234567890ab" + stringConverter.encrypt("MeinRoomKey", secret);
-      subscriptionsUpdateDTO.setE2eKey(e2eKey);
+      subscriptionsUpdateDTO.setE2eKey("tmp.1234567890ab"
+          + "U2FsdGVkX18TwcLautoyvh0UfVXqu1nh1KF2VtWbP6XsWxjkjS22oHXIIpJnQgqtsLLuJ7dwlhei8ICjRK3TJw==");
       var user = new RocketChatUserDTO();
       user.setId(RandomStringUtils.randomAlphanumeric(17));
       subscriptionsUpdateDTO.setUser(user);

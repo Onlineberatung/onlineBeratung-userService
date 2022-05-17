@@ -56,8 +56,11 @@ public class Messenger implements Messaging {
           var roomKeyId = chat.get("e2eKey");
           var keyId = roomKeyId.substring(4, 16);
           var encryptedRoomKey = roomKeyId.substring(16);
-          var roomKey = stringConverter.decrypt(encryptedRoomKey, masterKey);
-          var updatedE2eKey = "tmp." + keyId + stringConverter.encrypt(roomKey, publicKey);
+          var roomKey = stringConverter.aesDecrypt(encryptedRoomKey, masterKey);
+          var rsaEncrypted = stringConverter.rsaBcEncrypt(roomKey, publicKey);
+          var intArray = stringConverter.int8Array(rsaEncrypted);
+          var jsonStringified = stringConverter.jsonStringify(intArray);
+          var updatedE2eKey = keyId + stringConverter.encodeBase64Ascii(jsonStringified);
           var userId = chat.get("userId");
           var roomId = chat.get("roomId");
           if (!messageClient.updateChatE2eKey(userId, roomId, updatedE2eKey)) {
