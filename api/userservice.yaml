@@ -1770,8 +1770,7 @@ components:
           example: 8ertjlasdKJA
           description: asker Rocket.Chat ID
         lastMessage:
-          type: string
-          example: Thanks for the answer
+          $ref: '#/components/schemas/LastMessageDTO'
         messageDate:
           type: integer
           format: int64
@@ -1876,6 +1875,14 @@ components:
         - "FINISHED_CONVERSATION"
         - "USER_MUTED"
         - "USER_UNMUTED"
+
+    LastMessageDTO:
+      type: object
+      properties:
+        message:
+          type: string
+        type:
+          type: string
 
     ConsultantSessionDTO:
       type: object
