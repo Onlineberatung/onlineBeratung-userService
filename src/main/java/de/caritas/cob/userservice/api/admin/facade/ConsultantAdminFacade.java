@@ -2,7 +2,6 @@ package de.caritas.cob.userservice.api.admin.facade;
 
 import static de.caritas.cob.userservice.api.admin.model.AgencyTypeDTO.AgencyTypeEnum.DEFAULT_AGENCY;
 import static de.caritas.cob.userservice.api.admin.model.AgencyTypeDTO.AgencyTypeEnum.TEAM_AGENCY;
-import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.REQUESTED_SORT_FIELD_DOES_NOT_EXIST;
 import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantResponseDTO;
@@ -17,12 +16,12 @@ import de.caritas.cob.userservice.api.admin.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.admin.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.admin.model.Sort;
 import de.caritas.cob.userservice.api.admin.model.Sort.FieldEnum;
+import de.caritas.cob.userservice.api.admin.model.Sort.OrderEnum;
 import de.caritas.cob.userservice.api.admin.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.admin.service.agency.ConsultantAgencyAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFilterService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
-import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import java.util.function.Predicate;
@@ -78,7 +77,8 @@ public class ConsultantAdminFacade {
         .noneMatch(providedSortFieldIgnoringCase(sort));
 
     if (containsNoValidField) {
-      throw new CustomValidationHttpStatusException(REQUESTED_SORT_FIELD_DOES_NOT_EXIST);
+      sort.setField(FieldEnum.LASTNAME);
+      sort.setOrder(OrderEnum.ASC);
     }
   }
 
