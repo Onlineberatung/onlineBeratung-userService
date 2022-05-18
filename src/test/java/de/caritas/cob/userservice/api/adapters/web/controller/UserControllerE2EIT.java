@@ -97,7 +97,6 @@ import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
-import de.caritas.cob.userservice.api.service.StringConverter;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.BasicConsultingTypeResponseDTO;
 import java.net.URI;
@@ -121,7 +120,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.Matchers;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
@@ -207,9 +205,6 @@ public class UserControllerE2EIT {
   @Autowired
   private IdentityConfig identityConfig;
 
-  @Autowired
-  private StringConverter stringConverter;
-
   @MockBean
   private AuthenticatedUser authenticatedUser;
 
@@ -284,6 +279,7 @@ public class UserControllerE2EIT {
 
   private UserInfoResponseDTO userInfoResponse;
 
+  @SuppressWarnings("FieldCanBeLocal")
   private SubscriptionsGetDTO subscriptionsGetResponse;
 
   private String infix;
@@ -2296,7 +2292,6 @@ public class UserControllerE2EIT {
   }
 
   @Test
-  @Disabled
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   void updateE2eInChatsShouldRespondWithNoContent() throws Exception {
     givenAValidConsultant(true);
@@ -2986,8 +2981,8 @@ public class UserControllerE2EIT {
     for (int i = 0; i <= size; i++) {
       var subscriptionsUpdateDTO = easyRandom.nextObject(SubscriptionsUpdateDTO.class);
       subscriptionsUpdateDTO.setRoomId(RandomStringUtils.randomAlphanumeric(8));
-      subscriptionsUpdateDTO.setE2eKey("tmp.1234567890ab"
-          + "U2FsdGVkX18TwcLautoyvh0UfVXqu1nh1KF2VtWbP6XsWxjkjS22oHXIIpJnQgqtsLLuJ7dwlhei8ICjRK3TJw==");
+      subscriptionsUpdateDTO.setE2eKey(
+          "tmp.1234567890abU2FsdGVkX1+3tjZ5PaAKTMSKZS4v8t8BwGmmhqoMj68=");
       var user = new RocketChatUserDTO();
       user.setId(RandomStringUtils.randomAlphanumeric(17));
       subscriptionsUpdateDTO.setUser(user);
