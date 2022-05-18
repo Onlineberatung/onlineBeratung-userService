@@ -48,7 +48,7 @@ public class StringConverter {
 
   public byte[] rsaBcEncrypt(final String s, final String mod) {
     try {
-      var cypher = Cipher.getInstance(RSA_TRANSFORMATION, "BC");
+      var cypher = Cipher.getInstance(RSA_TRANSFORMATION);
       var oaepSpec = new OAEPParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256,
           PSource.PSpecified.DEFAULT);
 
@@ -103,7 +103,7 @@ public class StringConverter {
   public String jsonStringify(int[] intArray) {
     var sb = new StringBuilder("{");
     for (int i = 0; i < intArray.length; i++) {
-      sb.append("'").append(i).append("':").append(intArray[i]);
+      sb.append("\"").append(i).append("\":").append(intArray[i]);
       if (i != intArray.length - 1) {
         sb.append(",");
       }

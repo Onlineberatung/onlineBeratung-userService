@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,18 +51,18 @@ public class StringConverterTest {
   }
 
   @Test
-  void rsaEncryptShouldEncrypt() {
-    var n = "w5j-hUYZRT-ZSBJsk3J1gEtZG5fuP66dWMxs2I4PxgIC7TH8JU_zEDSjgjR6mCsIARVhyzZnBsNVoJYIg2TDF"
-        + "18TAcYhaDsFEhxntg9RktrLGIs_nod0cafLCVQYWfp27SrpBeHdO9ewuezJzSzvNPZnx-8iWIDqp_nQt2xSPdh2"
-        + "8AUm8f3KJ0P0AGFL6HiQ24GcLlsi-xqit3_M-MMr0kYJenaxJX1IdXCd1Io_pWBcgykSxhGo0fDWpfhkS1jmU4_"
-        + "_9RNfoR1uroa10g3YVWYXvpZ5T9Qw96ynhwqdLMsGwbo1Y2AyG8NckOR3fE4ARC3OSUv0LFqmdq2xf5quZw";
+  void rsaEncryptShouldFollowFrontendImplementation() {
+    var n = "l43bSozKXGPm5Fjm6bv-gO6LbPruG4fPABMfoD-IkFTgorlTTK7u1qD9RPKjlJZt41t8Z6rCfXQGwd4aJ1sIt"
+        + "7A93anv1Ai5LO90ciu7jNjTbieKtAOojcGgFwQSOn1WK_8xfakaXp9SVo3vvqB8Nk-k92EANRR4JqNmepSC5Sci"
+        + "Hr2h94c7ghaa8cazLJN1XQfgeOPa0xOqzCI_tMVhFwt3TGdZcA3bZ2UFxhdwy8W7b0942nG2PC6eXQDbbVyhJwR"
+        + "OAgM61q_DwNtOz6lOzzSC2RTiFbdGP0sHtJqAYWTAmeC8M69rufCwpzt4AV3V2H7_2h-XTRIjuVZ-pZ1xjw";
     var encryptedBytes = underTest.rsaBcEncrypt("MeinRoomKey", n);
 
     var intArray = underTest.int8Array(encryptedBytes);
     var jsonStringified = underTest.jsonStringify(intArray);
-    var l = encryptedBytes.length;
-    var b = Base64.getEncoder().encodeToString(encryptedBytes);
-    assertNotNull(encryptedBytes);
+    var updatedE2eKey = "0123456789ab" + underTest.encodeBase64Ascii(jsonStringified);
+
+    assertNotNull(updatedE2eKey);
   }
 
   @Test
@@ -122,7 +121,7 @@ public class StringConverterTest {
 
     var jsonStringified = underTest.jsonStringify(intArray);
 
-    assertEquals("{'0':185,'1':195,'2':67}", jsonStringified);
+    assertEquals("{\"0\":185,\"1\":195,\"2\":67}", jsonStringified);
   }
 
   @Test
