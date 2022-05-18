@@ -1879,9 +1879,9 @@ components:
     LastMessageDTO:
       type: object
       properties:
-        message:
+        msg:
           type: string
-        type:
+        t:
           type: string
 
     ConsultantSessionDTO:

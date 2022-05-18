@@ -104,7 +104,7 @@ public class AvailableLastMessageUpdaterTest {
             mock(Consumer.class), session, GROUP_ID);
 
     var expectedLastMessage = new LastMessageDTO();
-    expectedLastMessage.setMessage("So geht es weiter");
+    expectedLastMessage.setMsg("So geht es weiter");
     assertThat(session.getLastMessage(), is(expectedLastMessage));
   }
 
@@ -121,8 +121,8 @@ public class AvailableLastMessageUpdaterTest {
             mock(Consumer.class), session, GROUP_ID);
 
     var expectedLastMessage = new LastMessageDTO();
-    expectedLastMessage.setMessage("e2e_encrypted_message");
-    expectedLastMessage.setType("e2e");
+    expectedLastMessage.setMsg("e2e_encrypted_message");
+    expectedLastMessage.setT("e2e");
     assertThat(session.getLastMessage(), is(expectedLastMessage));
   }
 }

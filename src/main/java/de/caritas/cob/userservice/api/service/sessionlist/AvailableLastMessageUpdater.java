@@ -53,17 +53,17 @@ public class AvailableLastMessageUpdater {
 
   private LastMessageDTO extractLastMessage(RoomsLastMessageDTO roomsLastMessage, String groupId) {
     var lastMessage = new LastMessageDTO();
-    lastMessage.setType(roomsLastMessage.getType());
+    lastMessage.setT(roomsLastMessage.getType());
 
     if (isLastMessageFurtherStepsAlias(roomsLastMessage)) {
-      lastMessage.setMessage(FURTHER_STEPS_MESSAGE);
+      lastMessage.setMsg(FURTHER_STEPS_MESSAGE);
       return lastMessage;
     }
 
     if (isNotBlank(roomsLastMessage.getMessage())) {
       var message = sessionListAnalyser.prepareMessageForSessionList(
           roomsLastMessage.getMessage(), groupId);
-      lastMessage.setMessage(message);
+      lastMessage.setMsg(message);
       return lastMessage;
     }
     return null;
