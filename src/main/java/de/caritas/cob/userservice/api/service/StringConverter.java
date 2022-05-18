@@ -1,13 +1,5 @@
 package de.caritas.cob.userservice.api.service;
 
-import com.nimbusds.jose.EncryptionMethod;
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWEAlgorithm;
-import com.nimbusds.jose.JWEHeader;
-import com.nimbusds.jose.JWEObject;
-import com.nimbusds.jose.Payload;
-import com.nimbusds.jose.crypto.RSAEncrypter;
-import com.nimbusds.jose.jwk.RSAKey;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.DigestException;
@@ -18,7 +10,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.RSAPublicKeySpec;
-import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Base64;
 import javax.crypto.Cipher;
@@ -46,7 +37,7 @@ public class StringConverter {
     return DigestUtils.sha256Hex(chatUserId);
   }
 
-  public byte[] rsaBcEncrypt(final String s, final String mod) {
+  public byte[] rsaEncrypt(final String s, final String mod) {
     try {
       var cypher = Cipher.getInstance(RSA_TRANSFORMATION);
       var oaepSpec = new OAEPParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256,
@@ -55,7 +46,7 @@ public class StringConverter {
       var exponentBytes = Base64.getDecoder().decode("AQAB");
       var exponent = new BigInteger(1, exponentBytes);
 
-      var modulusBytes = Base64.getUrlDecoder().decode(mod); // or base64URLDecode(secret);
+      var modulusBytes = Base64.getUrlDecoder().decode(mod);
       var modulus = new BigInteger(1, modulusBytes);
 
       var rsaPublicKeySpec = new RSAPublicKeySpec(modulus, exponent, oaepSpec);
@@ -67,27 +58,6 @@ public class StringConverter {
     } catch (GeneralSecurityException exception) {
       log.error("Could not RSA-encrypt string '{}': {}", s, exception);
       return null;
-    }
-  }
-
-  public byte[] rsaNimbusEncrypt(final String s, final String publicKey) {
-    try {
-      var rsaKey = RSAKey.parse(publicKey);
-      var encrypter = new RSAEncrypter(rsaKey);
-      var header = new JWEHeader(
-          JWEAlgorithm.RSA_OAEP_256,
-          EncryptionMethod.A256CBC_HS512
-      );
-
-      var payload = new Payload(s);
-      var jwe = new JWEObject(header, payload);
-      jwe.encrypt(encrypter);
-
-      var t = jwe.getCipherText().toString();
-
-      return jwe.getCipherText().decode();
-    } catch (ParseException | JOSEException e) {
-      throw new RuntimeException(e);
     }
   }
 
@@ -112,34 +82,10 @@ public class StringConverter {
     return sb.append("}").toString();
   }
 
-  public String encodeBase64Ascii(String s) { // also known as btoa in JavaScript
+  public String base64AsciiEncode(String s) { // also known as btoa in JavaScript
     var asciiBytes = s.getBytes(StandardCharsets.US_ASCII);
 
     return Base64.getEncoder().encodeToString(asciiBytes);
-  }
-
-  private static byte[] base64URLDecode(String base64URLEncodedString) {
-    int size = base64URLEncodedString.length();
-    String tempResult = base64URLEncodedString;
-    tempResult = tempResult.replace("-", "+");
-    tempResult = tempResult.replace("_", "/");
-
-    int padding = size % 4;
-    switch (padding) {
-      case 0:
-        break;
-      case 2:
-        tempResult = tempResult.concat("==");
-        break;
-      case 3:
-        tempResult = tempResult.concat("=");
-        break;
-
-      default:
-        throw new IllegalArgumentException("Invalid base64urlencoded string");
-    }
-
-    return tempResult.getBytes();
   }
 
   public String aesDecrypt(String s, String secret) {

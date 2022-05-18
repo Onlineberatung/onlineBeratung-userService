@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.nio.charset.StandardCharsets;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -56,29 +55,13 @@ public class StringConverterTest {
         + "7A93anv1Ai5LO90ciu7jNjTbieKtAOojcGgFwQSOn1WK_8xfakaXp9SVo3vvqB8Nk-k92EANRR4JqNmepSC5Sci"
         + "Hr2h94c7ghaa8cazLJN1XQfgeOPa0xOqzCI_tMVhFwt3TGdZcA3bZ2UFxhdwy8W7b0942nG2PC6eXQDbbVyhJwR"
         + "OAgM61q_DwNtOz6lOzzSC2RTiFbdGP0sHtJqAYWTAmeC8M69rufCwpzt4AV3V2H7_2h-XTRIjuVZ-pZ1xjw";
-    var encryptedBytes = underTest.rsaBcEncrypt("MeinRoomKey", n);
+    var encryptedBytes = underTest.rsaEncrypt("MeinRoomKey", n);
 
     var intArray = underTest.int8Array(encryptedBytes);
     var jsonStringified = underTest.jsonStringify(intArray);
-    var updatedE2eKey = "0123456789ab" + underTest.encodeBase64Ascii(jsonStringified);
+    var updatedE2eKey = "0123456789ab" + underTest.base64AsciiEncode(jsonStringified);
 
     assertNotNull(updatedE2eKey);
-  }
-
-  @Test
-  void rsaEncryptByNimbusShouldEncrypt() {
-    var publicKeyJson = "{\"alg\":\"RSA-OAEP-256\",\"e\":\"AQAB\",\"ext\":true,"
-        + "\"key_ops\":[\"encrypt\"],\"kty\":\"RSA\","
-        + "\"n\":\"w5j-hUYZRT-ZSBJsk3J1gEtZG5fuP66dWMxs2I4PxgIC7TH8JU_zEDSjgjR6mCsIARVhyzZnBsNVoJY"
-        + "Ig2TDF18TAcYhaDsFEhxntg9RktrLGIs_nod0cafLCVQYWfp27SrpBeHdO9ewuezJzSzvNPZnx-8iWIDqp_nQt2"
-        + "xSPdh28AUm8f3KJ0P0AGFL6HiQ24GcLlsi-xqit3_M-MMr0kYJenaxJX1IdXCd1Io_pWBcgykSxhGo0fDWpfhkS"
-        + "1jmU4__9RNfoR1uroa10g3YVWYXvpZ5T9Qw96ynhwqdLMsGwbo1Y2AyG8NckOR3fE4ARC3OSUv0LFqmdq2xf5qu"
-        + "Zw\"}";
-    var encryptedString = underTest.rsaNimbusEncrypt("MeinRoomKey", publicKeyJson);
-
-    var l = encryptedString.length;
-    var s = new String(encryptedString, StandardCharsets.UTF_8);
-    assertNotNull(encryptedString);
   }
 
   @Test
@@ -97,7 +80,7 @@ public class StringConverterTest {
 
   @Test
   void int8ArrayShouldConvertNegativeByteToItsUnsignedInteger() {
-    var negativeInt = -easyRandom.nextInt(255);
+    var negativeInt = -easyRandom.nextInt(256);
     byte[] byteArray = {(byte) negativeInt};
 
     var intArray = underTest.int8Array(byteArray);
@@ -129,7 +112,7 @@ public class StringConverterTest {
     var s = "fkefuurj6dbf";
     var t = "GUefu&dEEurj6dbf";
 
-    assertEquals("ZmtlZnV1cmo2ZGJm", underTest.encodeBase64Ascii(s));
-    assertEquals("R1VlZnUmZEVFdXJqNmRiZg==", underTest.encodeBase64Ascii(t));
+    assertEquals("ZmtlZnV1cmo2ZGJm", underTest.base64AsciiEncode(s));
+    assertEquals("R1VlZnUmZEVFdXJqNmRiZg==", underTest.base64AsciiEncode(t));
   }
 }

@@ -53,16 +53,10 @@ public class Messenger implements Messaging {
       if (allChatsAreTmpEncrypted(chats)) {
         var masterKey = stringConverter.hashOf(chatUserId);
         for (var chat : chats) {
-          var roomKeyId = chat.get("e2eKey");
-          var keyId = roomKeyId.substring(4, 16);
-          var encryptedRoomKey = roomKeyId.substring(16);
-          var roomKey = stringConverter.aesDecrypt(encryptedRoomKey, masterKey);
-          var rsaEncrypted = stringConverter.rsaBcEncrypt(roomKey, publicKey);
-          var intArray = stringConverter.int8Array(rsaEncrypted);
-          var jsonStringified = stringConverter.jsonStringify(intArray);
-          var updatedE2eKey = keyId + stringConverter.encodeBase64Ascii(jsonStringified);
-          var userId = chat.get("userId");
-          var roomId = chat.get("roomId");
+          var roomKeyId = mapper.e2eKeyOf(chat).orElseThrow();
+          var updatedE2eKey = createE2eKey(publicKey, masterKey, roomKeyId);
+          var userId = mapper.userIdOf(chat);
+          var roomId = mapper.roomIdOf(chat);
           if (!messageClient.updateChatE2eKey(userId, roomId, updatedE2eKey)) {
             allUpdated.set(false);
             break;
@@ -76,10 +70,19 @@ public class Messenger implements Messaging {
     return allUpdated.get();
   }
 
+  private String createE2eKey(String publicKey, String masterKey, String roomKeyId) {
+    var keyId = roomKeyId.substring(4, 16);
+    var encryptedRoomKey = roomKeyId.substring(16);
+    var roomKey = stringConverter.aesDecrypt(encryptedRoomKey, masterKey);
+    var rsaEncrypted = stringConverter.rsaEncrypt(roomKey, publicKey);
+    var intArray = stringConverter.int8Array(rsaEncrypted);
+    var jsonStringified = stringConverter.jsonStringify(intArray);
+
+    return keyId + stringConverter.base64AsciiEncode(jsonStringified);
+  }
+
   private boolean allChatsAreTmpEncrypted(List<Map<String, String>> chatMaps) {
-    return chatMaps.stream().allMatch(chatMap ->
-        chatMap.containsKey("e2eKey") && chatMap.get("e2eKey").matches("tmp\\..{12,}")
-    );
+    return chatMaps.stream().allMatch(chatMap -> mapper.e2eKeyOf(chatMap).isPresent());
   }
 
   @Override
