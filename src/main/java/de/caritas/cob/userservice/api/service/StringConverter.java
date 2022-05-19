@@ -108,6 +108,7 @@ public class StringConverter {
     }
   }
 
+  @SuppressWarnings("java:S4790") // Using weak hashing algorithms is security-sensitive
   private byte[][] generateKeyAndIV(byte[] salt, byte[] password)
       throws NoSuchAlgorithmException {
     var md = MessageDigest.getInstance("MD5");
