@@ -17,7 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceMapperTest {
+class UserServiceMapperTest {
 
   @InjectMocks
   private UserServiceMapper userServiceMapper;
@@ -27,7 +27,7 @@ public class UserServiceMapperTest {
   private UsernameTranscoder usernameTranscoder;
 
   @Test
-  public void saveWalkThroughEnabled() {
+  void saveWalkThroughEnabled() {
     Map<String, Object> requestData = new HashMap<>();
     requestData.put("walkThroughEnabled", true);
     requestData.put("id", "1");
@@ -39,7 +39,7 @@ public class UserServiceMapperTest {
   }
 
   @Test
-  public void e2eKeyOfShouldMapIfKeyExists() {
+  void e2eKeyOfShouldMapIfKeyExists() {
     var map = Map.of("e2eKey", "tmp." + RandomStringUtils.randomAlphanumeric(16));
 
     var e2eKey = userServiceMapper.e2eKeyOf(map);
@@ -49,7 +49,7 @@ public class UserServiceMapperTest {
   }
 
   @Test
-  public void e2eKeyOfShouldNotMapIfKeyFormatIsWrong() {
+  void e2eKeyOfShouldNotMapIfKeyFormatIsWrong() {
     var map = Map.of("e2eKey", RandomStringUtils.randomAlphanumeric(16));
 
     var e2eKey = userServiceMapper.e2eKeyOf(map);
@@ -58,7 +58,7 @@ public class UserServiceMapperTest {
   }
 
   @Test
-  public void e2eKeyOfShouldNotMapIfKeyDoesNotExist() {
+  void e2eKeyOfShouldNotMapIfKeyDoesNotExist() {
     var map = Map.of("notE2eKey", RandomStringUtils.randomAlphanumeric(16));
 
     var e2eKey = userServiceMapper.e2eKeyOf(map);

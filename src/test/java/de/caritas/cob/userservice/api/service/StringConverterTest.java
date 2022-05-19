@@ -11,7 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class StringConverterTest {
+class StringConverterTest {
 
   private static final EasyRandom easyRandom = new EasyRandom();
 
