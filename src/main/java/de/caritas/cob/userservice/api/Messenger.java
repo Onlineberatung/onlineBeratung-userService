@@ -5,10 +5,11 @@ import de.caritas.cob.userservice.api.port.in.Messaging;
 import de.caritas.cob.userservice.api.port.out.ChatRepository;
 import de.caritas.cob.userservice.api.port.out.MessageClient;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
+import de.caritas.cob.userservice.api.service.StringConverter;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,8 @@ public class Messenger implements Messaging {
   private final ChatRepository chatRepository;
 
   private final UserServiceMapper mapper;
+
+  private final StringConverter stringConverter;
 
   @Override
   public boolean banUserFromChat(String adviceSeekerId, long chatId) {
@@ -43,48 +46,43 @@ public class Messenger implements Messaging {
   }
 
   @Override
-  public boolean updateE2eKeys(String chatUserId, String publicKey) {
-    var allUpdated = new AtomicBoolean(true);
+  public Boolean updateE2eKeys(String chatUserId, String publicKey) {
+    var allUpdated = new AtomicReference<>(true);
 
     messageClient.findAllChats(chatUserId).ifPresent(chats -> {
-      if (allChatsAreEncrypted(chats)) {
-        var userHash = generateUserHash(chatUserId);
-        chats.forEach(chat -> {
-          var oldEncryptedKey = chat.get("e2eKey");
-          var decryptedKey = decrypt(userHash, oldEncryptedKey);
-          var newEncryptedKey = encrypt(publicKey, decryptedKey);
-          var userId = chat.get("userId");
-          var roomId = chat.get("roomId");
-          if (!messageClient.updateChatE2eKey(userId, roomId, newEncryptedKey)) {
+      if (allChatsAreTmpEncrypted(chats)) {
+        var masterKey = stringConverter.hashOf(chatUserId);
+        for (var chat : chats) {
+          var roomKeyId = mapper.e2eKeyOf(chat).orElseThrow();
+          var updatedE2eKey = createE2eKey(publicKey, masterKey, roomKeyId);
+          var userId = mapper.userIdOf(chat);
+          var roomId = mapper.roomIdOf(chat);
+          if (!messageClient.updateChatE2eKey(userId, roomId, updatedE2eKey)) {
             allUpdated.set(false);
+            break;
           }
-        });
+        }
       } else {
-        allUpdated.set(false);
+        allUpdated.set(null);
       }
     });
 
     return allUpdated.get();
   }
 
-  private boolean allChatsAreEncrypted(List<Map<String, String>> chats) {
-    return chats.stream().allMatch(map -> map.containsKey("e2eKey"));
+  private String createE2eKey(String publicKey, String masterKey, String roomKeyId) {
+    var keyId = roomKeyId.substring(4, 16);
+    var encryptedRoomKey = roomKeyId.substring(16);
+    var roomKey = stringConverter.aesDecrypt(encryptedRoomKey, masterKey);
+    var rsaEncrypted = stringConverter.rsaEncrypt(roomKey, publicKey);
+    var intArray = stringConverter.int8Array(rsaEncrypted);
+    var jsonStringified = stringConverter.jsonStringify(intArray);
+
+    return keyId + stringConverter.base64AsciiEncode(jsonStringified);
   }
 
-  @Override
-  public String generateUserHash(String chatUserId) {
-    //TODO: implement
-    return chatUserId;
-  }
-
-  private String decrypt(String userHash, String encryptedKey) {
-    //TODO: implement
-    return encryptedKey;
-  }
-
-  private String encrypt(String publicKey, String decryptedKey) {
-    //TODO: implement
-    return decryptedKey;
+  private boolean allChatsAreTmpEncrypted(List<Map<String, String>> chatMaps) {
+    return chatMaps.stream().allMatch(chatMap -> mapper.e2eKeyOf(chatMap).isPresent());
   }
 
   @Override

@@ -31,6 +31,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.endsWith;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -279,6 +281,7 @@ public class UserControllerE2EIT {
 
   private UserInfoResponseDTO userInfoResponse;
 
+  @SuppressWarnings("FieldCanBeLocal")
   private SubscriptionsGetDTO subscriptionsGetResponse;
 
   private String infix;
@@ -318,6 +321,7 @@ public class UserControllerE2EIT {
     passwordDto = null;
     deleteUserAccountDto = null;
     userInfoResponse = null;
+    subscriptionsGetResponse = null;
     identityConfig.setDisplayNameAllowedForConsultants(false);
     infix = null;
   }
@@ -2297,7 +2301,8 @@ public class UserControllerE2EIT {
     givenACorrectlyFormattedE2eKeyDTO();
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
-    givenAValidRocketChatGetSubscriptionsResponse();
+    var subscriptionSize = easyRandom.nextInt(4) + 1;
+    givenAValidRocketChatGetSubscriptionsResponse(subscriptionSize);
     givenValidRocketChatGroupKeyUpdateResponses();
 
     mockMvc.perform(
@@ -2308,6 +2313,116 @@ public class UserControllerE2EIT {
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(e2eKeyDTO))
     ).andExpect(status().isNoContent());
+
+    var urlSuffix = "/api/v1/users.info?userId=" + consultant.getRocketChatId();
+    verify(rocketChatRestTemplate).exchange(endsWith(urlSuffix), eq(HttpMethod.GET),
+        any(HttpEntity.class), eq(UserInfoResponseDTO.class));
+
+    urlSuffix = "/api/v1/subscriptions.get";
+    verify(rocketChatRestTemplate).exchange(endsWith(urlSuffix), eq(HttpMethod.GET),
+        any(HttpEntity.class), eq(SubscriptionsGetDTO.class));
+
+    urlSuffix = "/api/v1/e2e.updateGroupKey";
+    verify(rocketChatRestTemplate, times(subscriptionSize))
+        .postForEntity(endsWith(urlSuffix), any(HttpEntity.class), eq(StandardResponseDTO.class));
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  void updateE2eInChatsShouldRespondWithNoContentOnEmptySubscriptions() throws Exception {
+    givenAValidConsultant(true);
+    givenACorrectlyFormattedE2eKeyDTO();
+    givenAValidRocketChatSystemUser();
+    givenAValidRocketChatInfoUserResponse();
+    givenAValidRocketChatGetSubscriptionsResponse(0);
+
+    mockMvc.perform(
+        put("/users/chat/e2e")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .header("rcToken", RandomStringUtils.randomAlphabetic(16))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(e2eKeyDTO))
+    ).andExpect(status().isNoContent());
+
+    var urlSuffix = "/api/v1/users.info?userId=" + consultant.getRocketChatId();
+    verify(rocketChatRestTemplate).exchange(endsWith(urlSuffix), eq(HttpMethod.GET),
+        any(HttpEntity.class), eq(UserInfoResponseDTO.class));
+
+    urlSuffix = "/api/v1/subscriptions.get";
+    verify(rocketChatRestTemplate).exchange(endsWith(urlSuffix), eq(HttpMethod.GET),
+        any(HttpEntity.class), eq(SubscriptionsGetDTO.class));
+
+    urlSuffix = "/api/v1/e2e.updateGroupKey";
+    verify(rocketChatRestTemplate, never())
+        .postForEntity(endsWith(urlSuffix), any(HttpEntity.class), eq(StandardResponseDTO.class));
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  void updateE2eInChatsShouldRespondWithInternalServerErrorIfNotTemporarilyEncrypted()
+      throws Exception {
+    givenAValidConsultant(true);
+    givenACorrectlyFormattedE2eKeyDTO();
+    givenAValidRocketChatSystemUser();
+    givenAValidRocketChatInfoUserResponse();
+    givenARocketChatGetSubscriptionsResponseIncludingNoneTemporary();
+
+    mockMvc.perform(
+            put("/users/chat/e2e")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header("rcToken", RandomStringUtils.randomAlphabetic(16))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(e2eKeyDTO))
+        )
+        .andExpect(status().isInternalServerError());
+
+    var urlSuffix = "/api/v1/users.info?userId=" + consultant.getRocketChatId();
+    verify(rocketChatRestTemplate).exchange(endsWith(urlSuffix), eq(HttpMethod.GET),
+        any(HttpEntity.class), eq(UserInfoResponseDTO.class));
+
+    urlSuffix = "/api/v1/subscriptions.get";
+    verify(rocketChatRestTemplate).exchange(endsWith(urlSuffix), eq(HttpMethod.GET),
+        any(HttpEntity.class), eq(SubscriptionsGetDTO.class));
+
+    urlSuffix = "/api/v1/e2e.updateGroupKey";
+    verify(rocketChatRestTemplate, never())
+        .postForEntity(endsWith(urlSuffix), any(HttpEntity.class), eq(StandardResponseDTO.class));
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  void updateE2eInChatsShouldRespondWithInternalServerErrorIfSubscriptionUpdateFailed()
+      throws Exception {
+    givenAValidConsultant(true);
+    givenACorrectlyFormattedE2eKeyDTO();
+    givenAValidRocketChatSystemUser();
+    givenAValidRocketChatInfoUserResponse();
+    givenAValidRocketChatGetSubscriptionsResponse(easyRandom.nextInt(4) + 1);
+    givenFailedRocketChatGroupKeyUpdateResponses();
+
+    mockMvc.perform(
+            put("/users/chat/e2e")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header("rcToken", RandomStringUtils.randomAlphabetic(16))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(e2eKeyDTO))
+        )
+        .andExpect(status().isInternalServerError());
+
+    var urlSuffix = "/api/v1/users.info?userId=" + consultant.getRocketChatId();
+    verify(rocketChatRestTemplate).exchange(endsWith(urlSuffix), eq(HttpMethod.GET),
+        any(HttpEntity.class), eq(UserInfoResponseDTO.class));
+
+    urlSuffix = "/api/v1/subscriptions.get";
+    verify(rocketChatRestTemplate).exchange(endsWith(urlSuffix), eq(HttpMethod.GET),
+        any(HttpEntity.class), eq(SubscriptionsGetDTO.class));
+
+    urlSuffix = "/api/v1/e2e.updateGroupKey";
+    verify(rocketChatRestTemplate)
+        .postForEntity(endsWith(urlSuffix), any(HttpEntity.class), eq(StandardResponseDTO.class));
   }
 
   @Test
@@ -2583,13 +2698,18 @@ public class UserControllerE2EIT {
   }
 
   private void givenACorrectlyFormattedE2eKeyDTO() {
+    var n = "w5j-hUYZRT-ZSBJsk3J1gEtZG5fuP66dWMxs2I4PxgIC7TH8JU_zEDSjgjR6mCsIARVhyzZnBsNVoJYIg2TDF"
+        + "18TAcYhaDsFEhxntg9RktrLGIs_nod0cafLCVQYWfp27SrpBeHdO9ewuezJzSzvNPZnx-8iWIDqp_nQt2xSPdh2"
+        + "8AUm8f3KJ0P0AGFL6HiQ24GcLlsi-xqit3_M-MMr0kYJenaxJX1IdXCd1Io_pWBcgykSxhGo0fDWpfhkS1jmU4_"
+        + "_9RNfoR1uroa10g3YVWYXvpZ5T9Qw96ynhwqdLMsGwbo1Y2AyG8NckOR3fE4ARC3OSUv0LFqmdq2xf5quZw";
+
     e2eKeyDTO = new E2eKeyDTO();
-    e2eKeyDTO.setPublicKey(RandomStringUtils.randomNumeric(32));
+    e2eKeyDTO.setPublicKey(n);
   }
 
   private void givenAWronglyFormattedE2eKeyDTO() {
     e2eKeyDTO = new E2eKeyDTO();
-    e2eKeyDTO.setPublicKey(RandomStringUtils.randomNumeric(8));
+    e2eKeyDTO.setPublicKey(RandomStringUtils.randomAlphanumeric(8));
   }
 
   private void givenAValidKeycloakSetupEmailResponse(String username) {
@@ -2966,16 +3086,40 @@ public class UserControllerE2EIT {
     ).thenReturn(ResponseEntity.ok(userInfoResponse));
   }
 
-  private void givenAValidRocketChatGetSubscriptionsResponse() {
+  private void givenAValidRocketChatGetSubscriptionsResponse(int subscriptionSize) {
     subscriptionsGetResponse = new SubscriptionsGetDTO();
     subscriptionsGetResponse.setSuccess(true);
 
-    int size = easyRandom.nextInt(5);
+    var updates = new ArrayList<SubscriptionsUpdateDTO>(subscriptionSize);
+    for (int i = 0; i < subscriptionSize; i++) {
+      var subscriptionsUpdateDTO = easyRandom.nextObject(SubscriptionsUpdateDTO.class);
+      subscriptionsUpdateDTO.setRoomId(RandomStringUtils.randomAlphanumeric(8));
+      subscriptionsUpdateDTO.setE2eKey(
+          "tmp.1234567890abU2FsdGVkX1+3tjZ5PaAKTMSKZS4v8t8BwGmmhqoMj68=");
+      var user = new RocketChatUserDTO();
+      user.setId(RandomStringUtils.randomAlphanumeric(17));
+      subscriptionsUpdateDTO.setUser(user);
+      updates.add(subscriptionsUpdateDTO);
+    }
+    subscriptionsGetResponse.setUpdate(updates.toArray(new SubscriptionsUpdateDTO[0]));
+
+    var urlSuffix = "/api/v1/subscriptions.get";
+    when(rocketChatRestTemplate.exchange(
+        endsWith(urlSuffix), eq(HttpMethod.GET),
+        any(HttpEntity.class), eq(SubscriptionsGetDTO.class))
+    ).thenReturn(ResponseEntity.ok(subscriptionsGetResponse));
+  }
+
+  private void givenARocketChatGetSubscriptionsResponseIncludingNoneTemporary() {
+    subscriptionsGetResponse = new SubscriptionsGetDTO();
+    subscriptionsGetResponse.setSuccess(true);
+
+    var size = easyRandom.nextInt(5);
     var updates = new ArrayList<SubscriptionsUpdateDTO>(size);
     for (int i = 0; i <= size; i++) {
       var subscriptionsUpdateDTO = easyRandom.nextObject(SubscriptionsUpdateDTO.class);
       subscriptionsUpdateDTO.setRoomId(RandomStringUtils.randomAlphanumeric(8));
-      subscriptionsUpdateDTO.setE2eKey(RandomStringUtils.randomAlphanumeric(32));
+      subscriptionsUpdateDTO.setE2eKey(RandomStringUtils.randomAlphanumeric(60));
       var user = new RocketChatUserDTO();
       user.setId(RandomStringUtils.randomAlphanumeric(17));
       subscriptionsUpdateDTO.setUser(user);
@@ -2997,6 +3141,14 @@ public class UserControllerE2EIT {
     when(rocketChatRestTemplate.postForEntity(
         endsWith(urlSuffix), any(HttpEntity.class), eq(StandardResponseDTO.class)
     )).thenReturn(ResponseEntity.ok(response));
+  }
+
+  private void givenFailedRocketChatGroupKeyUpdateResponses() {
+    var urlSuffix = "/api/v1/e2e.updateGroupKey";
+
+    when(rocketChatRestTemplate.postForEntity(
+        endsWith(urlSuffix), any(HttpEntity.class), eq(StandardResponseDTO.class)
+    )).thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
   }
 
   private void givenAValidRocketChatUpdateUserResponse() {

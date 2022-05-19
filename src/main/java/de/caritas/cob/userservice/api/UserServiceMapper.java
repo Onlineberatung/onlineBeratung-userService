@@ -179,6 +179,20 @@ public class UserServiceMapper {
     return (List<String>) chatMetaInfoMap.get("mutedUsers");
   }
 
+  public Optional<String> e2eKeyOf(Map<String, String> chatMap) {
+    return chatMap.containsKey("e2eKey") && chatMap.get("e2eKey").matches("tmp\\..{12,}")
+        ? Optional.of(chatMap.get("e2eKey"))
+        : Optional.empty();
+  }
+
+  public String roomIdOf(Map<String, String> chatMap) {
+    return chatMap.get("roomId");
+  }
+
+  public String userIdOf(Map<String, String> chatMap) {
+    return chatMap.get("userId");
+  }
+
   public String consultantIdOf(Map<String, Object> appointmentMap) {
     return (String) appointmentMap.get("consultantId");
   }
