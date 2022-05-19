@@ -54,8 +54,8 @@ class LogstashAppenderTest {
     logstashAppender.append(loggingEvent);
     logstashAppender.append(loggingEvent);
     // then
-    verify(streamingEncoder, timeout(500).times(3)).encode(eq(loggingEvent), any(OutputStream.class));
-    verify(closeableHttpClientMock, timeout(500).times(2)).execute(any(HttpPut.class));
+    verify(streamingEncoder, timeout(1000).times(3)).encode(eq(loggingEvent), any(OutputStream.class));
+    verify(closeableHttpClientMock, timeout(1000).times(2)).execute(any(HttpPut.class));
   }
 
   @Test
