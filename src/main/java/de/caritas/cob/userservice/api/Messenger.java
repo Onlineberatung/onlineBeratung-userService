@@ -9,7 +9,7 @@ import de.caritas.cob.userservice.api.service.StringConverter;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -46,8 +46,8 @@ public class Messenger implements Messaging {
   }
 
   @Override
-  public boolean updateE2eKeys(String chatUserId, String publicKey) {
-    var allUpdated = new AtomicBoolean(true);
+  public Boolean updateE2eKeys(String chatUserId, String publicKey) {
+    var allUpdated = new AtomicReference<>(true);
 
     messageClient.findAllChats(chatUserId).ifPresent(chats -> {
       if (allChatsAreTmpEncrypted(chats)) {
@@ -63,7 +63,7 @@ public class Messenger implements Messaging {
           }
         }
       } else {
-        allUpdated.set(false);
+        allUpdated.set(null);
       }
     });
 

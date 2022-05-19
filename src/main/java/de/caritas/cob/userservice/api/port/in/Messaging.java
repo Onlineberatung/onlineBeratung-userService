@@ -16,5 +16,5 @@ public interface Messaging {
 
   void unbanUsersInChat(Long chatId, String id);
 
-  boolean updateE2eKeys(String chatUserId, String publicKey);
+  Boolean updateE2eKeys(String chatUserId, String publicKey);
 }
