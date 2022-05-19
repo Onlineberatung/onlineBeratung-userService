@@ -13,17 +13,19 @@ import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
@@ -102,6 +104,45 @@ public class UnauthorizedMembersProviderTest {
         .forEach(consultant ->
             when(consultantService.getConsultantByRcUserId(consultant.getRocketChatId()))
                 .thenReturn(Optional.of(consultant)));
+  }
+
+  @Test
+  public void obtainConsultantsToRemoveShouldNotIncludeConsultantToAssignIfNotAssignedAlready()
+      throws RocketChatUserNotInitializedException {
+
+    var consultant = easyRandom.nextObject(Consultant.class);
+    when(rocketChatCredentialsProvider.getTechnicalUser()).thenReturn(techUserRcCredentials);
+
+    var consultantsToRemove = unauthorizedMembersProvider.obtainConsultantsToRemove(
+        RC_GROUP_ID, SESSION_WITH_ASKER_AND_CONSULTANT, consultant, initialMemberList
+    );
+
+    consultantsToRemove.forEach(consultantToRemove -> {
+      assertNotEquals(consultantToRemove.getId(), consultant.getId());
+      assertNotEquals(consultantToRemove.getRocketChatId(), consultant.getRocketChatId());
+    });
+  }
+
+  @Test
+  public void obtainConsultantsToRemoveShouldNotIncludeConsultantToAssignIfAlreadyAssigned()
+      throws RocketChatUserNotInitializedException {
+
+    var consultant = easyRandom.nextObject(Consultant.class);
+    when(rocketChatCredentialsProvider.getTechnicalUser()).thenReturn(techUserRcCredentials);
+    var memberList = new ArrayList<>(initialMemberList);
+    var consultantAsGroupMember = new GroupMemberDTO(
+        consultant.getRocketChatId(), null, consultant.getUsername(), null, null
+    );
+    memberList.add(consultantAsGroupMember);
+
+    var consultantsToRemove = unauthorizedMembersProvider.obtainConsultantsToRemove(
+        RC_GROUP_ID, SESSION_WITH_ASKER_AND_CONSULTANT, consultant, memberList
+    );
+
+    consultantsToRemove.forEach(consultantToRemove -> {
+      assertNotEquals(consultantToRemove.getId(), consultant.getId());
+      assertNotEquals(consultantToRemove.getRocketChatId(), consultant.getRocketChatId());
+    });
   }
 
   @Test
