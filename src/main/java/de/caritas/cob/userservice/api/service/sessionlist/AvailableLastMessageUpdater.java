@@ -39,7 +39,9 @@ public class AvailableLastMessageUpdater {
       Consumer<Date> latestMessageSetter, SessionDTO session, String groupId) {
 
     var roomsLastMessage = rocketChatRoomInformation.getLastMessagesRoom().get(groupId);
-    session.setLastMessage(extractLastMessage(roomsLastMessage, groupId));
+    var lastMessage = extractLastMessage(roomsLastMessage, groupId);
+    session.setE2eLastMessage(lastMessage);
+    session.setLastMessage(lastMessage != null ? lastMessage.getMsg() : "");
 
     session.setMessageDate(Helper.getUnixTimestampFromDate(
         rocketChatRoomInformation.getLastMessagesRoom().get(groupId).getTimestamp()));

@@ -105,7 +105,8 @@ public class AvailableLastMessageUpdaterTest {
 
     var expectedLastMessage = new LastMessageDTO();
     expectedLastMessage.setMsg("So geht es weiter");
-    assertThat(session.getLastMessage(), is(expectedLastMessage));
+    assertThat(session.getE2eLastMessage(), is(expectedLastMessage));
+    assertThat(session.getLastMessage(), is(expectedLastMessage.getMsg()));
   }
 
   @Test
@@ -123,6 +124,7 @@ public class AvailableLastMessageUpdaterTest {
     var expectedLastMessage = new LastMessageDTO();
     expectedLastMessage.setMsg("e2e_encrypted_message");
     expectedLastMessage.setT("e2e");
-    assertThat(session.getLastMessage(), is(expectedLastMessage));
+    assertThat(session.getE2eLastMessage(), is(expectedLastMessage));
+    assertThat(session.getLastMessage(), is(expectedLastMessage.getMsg()));
   }
 }

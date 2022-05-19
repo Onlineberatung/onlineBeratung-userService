@@ -1769,8 +1769,10 @@ components:
           type: string
           example: 8ertjlasdKJA
           description: asker Rocket.Chat ID
-        lastMessage:
+        e2eLastMessage:
           $ref: '#/components/schemas/LastMessageDTO'
+        lastMessage:
+          type: string
         messageDate:
           type: integer
           format: int64
