@@ -84,6 +84,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -256,39 +257,43 @@ public class EmailNotificationFacadeTest {
     setInternalState(NewMessageEmailSupplier.class, "log", logger);
   }
 
-  /**
-   * Method: sendNewEnquiryEmailNotification
-   */
   @Test
   public void sendNewEnquiryEmailNotification_Should_SendEmailNotificationViaMailServiceHelperToConsultants() {
-
     givenNewEnquiryMailSupplierReturnNonEmptyMails();
-    emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION, null);
+    var session = givenEnquirySession();
 
-    verify(mailService, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
+    emailNotificationFacade.sendNewEnquiryEmailNotification(session, null);
+
+    verify(mailService).sendEmailNotification(Mockito.any(MailsDTO.class));
 
   }
 
   @Test
   public void sendNewEnquiryEmailNotification_ShouldNot_SendEmailNotificationViaMailServiceHelperToUser() {
-
     givenNewEnquiryMailSupplierReturnNonEmptyMails();
+    var session = givenEnquirySession();
 
-    emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION, null);
+    emailNotificationFacade.sendNewEnquiryEmailNotification(session, null);
 
-    verify(mailService, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
+    verify(mailService).sendEmailNotification(Mockito.any(MailsDTO.class));
   }
 
   @Test
   public void sendNewEnquiryEmailNotification_Should_SetCurrentTenantContextFromSession() {
-
     assertThat(TenantContext.getCurrentTenant()).isNull();
     givenNewEnquiryMailSupplierReturnNonEmptyMails();
+    var session = givenEnquirySession();
 
-    SESSION.setTenantId(1L);
-    emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION, null);
+    session.setTenantId(1L);
+    emailNotificationFacade.sendNewEnquiryEmailNotification(session, null);
 
-    verify(mailService, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
+    verify(mailService).sendEmailNotification(Mockito.any(MailsDTO.class));
+  }
+
+  private Session givenEnquirySession() {
+    var session = new EasyRandom().nextObject(Session.class);
+    session.setConsultant(null);
+    return session;
   }
 
   private void givenNewEnquiryMailSupplierReturnNonEmptyMails() {
@@ -304,9 +309,6 @@ public class EmailNotificationFacadeTest {
 
   @Test
   public void sendNewEnquiryEmailNotification_ShouldNot_SendEmailWhenGeneratedEmailListIsEmpty() {
-
-    when(newEnquiryEmailSupplier.generateEmails()).thenReturn(Lists.newArrayList());
-
     emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION, null);
 
     verify(mailService, times(0)).sendEmailNotification(Mockito.any(MailsDTO.class));
@@ -314,13 +316,12 @@ public class EmailNotificationFacadeTest {
 
   @Test
   public void sendNewEnquiryEmailNotification_Should_LogError_WhenSendEmailFails() {
-
+    var session = givenEnquirySession();
     EmailNotificationException emailNotificationException =
         new EmailNotificationException(new Exception());
-
     when(newEnquiryEmailSupplier.generateEmails()).thenThrow(emailNotificationException);
 
-    emailNotificationFacade.sendNewEnquiryEmailNotification(SESSION, null);
+    emailNotificationFacade.sendNewEnquiryEmailNotification(session, null);
 
     verify(logger).error(anyString(), any(), any(Exception.class));
   }
@@ -339,8 +340,8 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID, null);
 
-    verify(consultantAgencyService, times(1)).findConsultantsByAgencyId(AGENCY_ID);
-    verify(mailService, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
+    verify(consultantAgencyService).findConsultantsByAgencyId(AGENCY_ID);
+    verify(mailService).sendEmailNotification(Mockito.any(MailsDTO.class));
   }
 
   @Test
@@ -354,8 +355,8 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID, null);
 
-    verify(consultantAgencyService, times(1)).findConsultantsByAgencyId(AGENCY_ID);
-    verify(mailService, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
+    verify(consultantAgencyService).findConsultantsByAgencyId(AGENCY_ID);
+    verify(mailService).sendEmailNotification(Mockito.any(MailsDTO.class));
   }
 
   @Test
@@ -425,7 +426,7 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID, null);
 
-    verify(mailService, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
+    verify(mailService).sendEmailNotification(Mockito.any(MailsDTO.class));
   }
 
   @Test
@@ -478,7 +479,7 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, CONSULTANT_ROLES,
         CONSULTANT_ID, null);
 
-    verify(mailService, times(1)).sendEmailNotification(Mockito.any(MailsDTO.class));
+    verify(mailService).sendEmailNotification(Mockito.any(MailsDTO.class));
   }
 
   @Test
@@ -492,7 +493,7 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID, null);
 
-    verify(mailService, times(1)).sendEmailNotification(Mockito.any());
+    verify(mailService).sendEmailNotification(Mockito.any());
   }
 
   @Test
@@ -505,7 +506,7 @@ public class EmailNotificationFacadeTest {
 
     emailNotificationFacade.sendNewMessageNotification(RC_GROUP_ID, USER_ROLES, USER_ID, null);
 
-    verify(mailService, times(1)).sendEmailNotification(Mockito.any());
+    verify(mailService).sendEmailNotification(Mockito.any());
   }
 
   /**
@@ -526,7 +527,7 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade
         .sendNewFeedbackMessageNotification(RC_FEEDBACK_GROUP_ID, CONSULTANT_ID, null);
 
-    verify(mailService, times(1)).sendEmailNotification(Mockito.any());
+    verify(mailService).sendEmailNotification(Mockito.any());
 
   }
 
@@ -539,7 +540,7 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendNewFeedbackMessageNotification(RC_FEEDBACK_GROUP_ID,
         CONSULTANT_ID_2, null);
 
-    verify(mailService, times(1)).sendEmailNotification(Mockito.any());
+    verify(mailService).sendEmailNotification(Mockito.any());
 
   }
 
@@ -585,7 +586,7 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendAssignEnquiryEmailNotification(CONSULTANT, CONSULTANT_ID_2,
         USERNAME, null);
 
-    verify(mailService, times(1)).sendEmailNotification(Mockito.any());
+    verify(mailService).sendEmailNotification(Mockito.any());
   }
 
   @Test
@@ -642,6 +643,14 @@ public class EmailNotificationFacadeTest {
     emailNotificationFacade.sendNewFeedbackMessageNotification(GROUP_MEMBER_1_RC_ID, USER_ID, null);
 
     verify(logger, atLeastOnce()).error(anyString(), anyString(), any(Exception.class));
+  }
+
+  @Test
+  public void sendNewEnquiryEmailNotification_Should_notSendAnyMail_When_sessionHasAlreadyAConsultantAssigned() {
+    emailNotificationFacade
+        .sendNewEnquiryEmailNotification(new EasyRandom().nextObject(Session.class), null);
+
+    verifyNoInteractions(newEnquiryEmailSupplier);
   }
 
 }

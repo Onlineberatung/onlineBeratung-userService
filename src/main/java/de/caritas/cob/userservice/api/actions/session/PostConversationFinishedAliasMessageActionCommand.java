@@ -3,10 +3,11 @@ package de.caritas.cob.userservice.api.actions.session;
 import static de.caritas.cob.userservice.messageservice.generated.web.model.MessageType.FINISHED_CONVERSATION;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace;
 
 import de.caritas.cob.userservice.api.actions.ActionCommand;
-import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import de.caritas.cob.userservice.messageservice.generated.ApiClient;
@@ -14,12 +15,14 @@ import de.caritas.cob.userservice.messageservice.generated.web.MessageController
 import de.caritas.cob.userservice.messageservice.generated.web.model.AliasOnlyMessageDTO;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
  * Action to post a conversation finished alias message in rocket chat via the message service.
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class PostConversationFinishedAliasMessageActionCommand implements ActionCommand<Session> {
@@ -44,9 +47,14 @@ public class PostConversationFinishedAliasMessageActionCommand implements Action
   @Override
   public void execute(Session actionTarget) {
     if (nonNull(actionTarget) && isNotBlank(actionTarget.getGroupId())) {
-      addDefaultHeaders(messageControllerApi.getApiClient());
-      this.messageControllerApi.saveAliasOnlyMessage(actionTarget.getGroupId(),
-          new AliasOnlyMessageDTO().messageType(FINISHED_CONVERSATION));
+      try {
+        addDefaultHeaders(messageControllerApi.getApiClient());
+        this.messageControllerApi.saveAliasOnlyMessage(actionTarget.getGroupId(),
+            new AliasOnlyMessageDTO().messageType(FINISHED_CONVERSATION));
+      } catch (Exception e) {
+        log.error("Unable to post conversation finished message");
+        log.error(getStackTrace(e));
+      }
     }
   }
 
