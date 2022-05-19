@@ -57,7 +57,7 @@ public class StringConverter {
       return cypher.doFinal(bytes);
     } catch (GeneralSecurityException exception) {
       log.error("Could not RSA-encrypt string '{}': {}", s, exception);
-      return null;
+      return new byte[0];
     }
   }
 
