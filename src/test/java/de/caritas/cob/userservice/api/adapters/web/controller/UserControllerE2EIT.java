@@ -2302,7 +2302,7 @@ public class UserControllerE2EIT {
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
     var subscriptionSize = easyRandom.nextInt(4) + 1;
-    givenAValidRocketChatGetSubscriptionsResponse(subscriptionSize);
+    givenAValidRocketChatGetSubscriptionsResponse(subscriptionSize, true);
     givenValidRocketChatGroupKeyUpdateResponses();
 
     mockMvc.perform(
@@ -2334,7 +2334,7 @@ public class UserControllerE2EIT {
     givenACorrectlyFormattedE2eKeyDTO();
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
-    givenAValidRocketChatGetSubscriptionsResponse(0);
+    givenAValidRocketChatGetSubscriptionsResponse(0, true);
 
     mockMvc.perform(
         put("/users/chat/e2e")
@@ -2344,6 +2344,38 @@ public class UserControllerE2EIT {
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(e2eKeyDTO))
     ).andExpect(status().isNoContent());
+
+    var urlSuffix = "/api/v1/users.info?userId=" + consultant.getRocketChatId();
+    verify(rocketChatRestTemplate).exchange(endsWith(urlSuffix), eq(HttpMethod.GET),
+        any(HttpEntity.class), eq(UserInfoResponseDTO.class));
+
+    urlSuffix = "/api/v1/subscriptions.get";
+    verify(rocketChatRestTemplate).exchange(endsWith(urlSuffix), eq(HttpMethod.GET),
+        any(HttpEntity.class), eq(SubscriptionsGetDTO.class));
+
+    urlSuffix = "/api/v1/e2e.updateGroupKey";
+    verify(rocketChatRestTemplate, never())
+        .postForEntity(endsWith(urlSuffix), any(HttpEntity.class), eq(StandardResponseDTO.class));
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  void updateE2eInChatsShouldRespondWithInternalServerErrorOnNoE2eKeySubscriptions()
+      throws Exception {
+    givenAValidConsultant(true);
+    givenACorrectlyFormattedE2eKeyDTO();
+    givenAValidRocketChatSystemUser();
+    givenAValidRocketChatInfoUserResponse();
+    givenAValidRocketChatGetSubscriptionsResponse(easyRandom.nextInt(4) + 1, false);
+
+    mockMvc.perform(
+        put("/users/chat/e2e")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .header("rcToken", RandomStringUtils.randomAlphabetic(16))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(e2eKeyDTO))
+    ).andExpect(status().isInternalServerError());
 
     var urlSuffix = "/api/v1/users.info?userId=" + consultant.getRocketChatId();
     verify(rocketChatRestTemplate).exchange(endsWith(urlSuffix), eq(HttpMethod.GET),
@@ -2399,7 +2431,7 @@ public class UserControllerE2EIT {
     givenACorrectlyFormattedE2eKeyDTO();
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
-    givenAValidRocketChatGetSubscriptionsResponse(easyRandom.nextInt(4) + 1);
+    givenAValidRocketChatGetSubscriptionsResponse(easyRandom.nextInt(4) + 1, true);
     givenFailedRocketChatGroupKeyUpdateResponses();
 
     mockMvc.perform(
@@ -3086,7 +3118,7 @@ public class UserControllerE2EIT {
     ).thenReturn(ResponseEntity.ok(userInfoResponse));
   }
 
-  private void givenAValidRocketChatGetSubscriptionsResponse(int subscriptionSize) {
+  private void givenAValidRocketChatGetSubscriptionsResponse(int subscriptionSize, boolean isE2e) {
     subscriptionsGetResponse = new SubscriptionsGetDTO();
     subscriptionsGetResponse.setSuccess(true);
 
@@ -3094,8 +3126,12 @@ public class UserControllerE2EIT {
     for (int i = 0; i < subscriptionSize; i++) {
       var subscriptionsUpdateDTO = easyRandom.nextObject(SubscriptionsUpdateDTO.class);
       subscriptionsUpdateDTO.setRoomId(RandomStringUtils.randomAlphanumeric(8));
-      subscriptionsUpdateDTO.setE2eKey(
-          "tmp.1234567890abU2FsdGVkX1+3tjZ5PaAKTMSKZS4v8t8BwGmmhqoMj68=");
+      if (isE2e) {
+        subscriptionsUpdateDTO.setE2eKey(
+            "tmp.1234567890abU2FsdGVkX1+3tjZ5PaAKTMSKZS4v8t8BwGmmhqoMj68=");
+      } else {
+        subscriptionsUpdateDTO.setE2eKey(null);
+      }
       var user = new RocketChatUserDTO();
       user.setId(RandomStringUtils.randomAlphanumeric(17));
       subscriptionsUpdateDTO.setUser(user);
