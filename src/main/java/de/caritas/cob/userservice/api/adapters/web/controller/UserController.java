@@ -717,8 +717,10 @@ public class UserController implements UsersApi {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
-    var consultant = this.userAccountProvider.retrieveValidatedConsultantById(consultantId);
-    assignSessionFacade.assignSession(session.get(), consultant);
+    var consultantToAssign = userAccountProvider.retrieveValidatedConsultantById(consultantId);
+    var authConsultant = consultantService.getConsultant(authenticatedUser.getUserId())
+        .orElseThrow();
+    assignSessionFacade.assignSession(session.get(), consultantToAssign, authConsultant);
 
     return new ResponseEntity<>(HttpStatus.OK);
   }

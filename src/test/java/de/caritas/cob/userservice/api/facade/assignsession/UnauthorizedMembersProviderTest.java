@@ -146,6 +146,33 @@ public class UnauthorizedMembersProviderTest {
   }
 
   @Test
+  public void obtainConsultantsToRemoveShouldNotIncludeConsultantToKeep()
+      throws RocketChatUserNotInitializedException {
+
+    var consultant = easyRandom.nextObject(Consultant.class);
+    when(rocketChatCredentialsProvider.getTechnicalUser()).thenReturn(techUserRcCredentials);
+    var memberList = new ArrayList<>(initialMemberList);
+    var consultantAsGroupMember = new GroupMemberDTO(
+        consultant.getRocketChatId(), null, consultant.getUsername(), null, null
+    );
+    memberList.add(consultantAsGroupMember);
+    var consultantToKeep = easyRandom.nextObject(Consultant.class);
+    var consultantToKeepAsGroupMember = new GroupMemberDTO(
+        consultantToKeep.getRocketChatId(), null, consultantToKeep.getUsername(), null, null
+    );
+    memberList.add(consultantToKeepAsGroupMember);
+
+    var consultantsToRemove = unauthorizedMembersProvider.obtainConsultantsToRemove(
+        RC_GROUP_ID, SESSION_WITH_ASKER_AND_CONSULTANT, consultant, memberList, consultantToKeep
+    );
+
+    consultantsToRemove.forEach(consultantToRemove -> {
+      assertNotEquals(consultantToRemove.getId(), consultantToKeep.getId());
+      assertNotEquals(consultantToRemove.getRocketChatId(), consultantToKeep.getRocketChatId());
+    });
+  }
+
+  @Test
   public void obtainConsultantsToRemove_Should_ReturnCorrectUnauthorizedMemberList_When_SessionIsNoTeamSession()
       throws RocketChatUserNotInitializedException {
     newConsultant.setTeamConsultant(false);

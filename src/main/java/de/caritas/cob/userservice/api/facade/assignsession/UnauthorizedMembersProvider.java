@@ -2,15 +2,16 @@ package de.caritas.cob.userservice.api.facade.assignsession;
 
 import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS;
 import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.VIEW_ALL_PEER_SESSIONS;
+import static java.util.Objects.nonNull;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -48,8 +49,12 @@ public class UnauthorizedMembersProvider {
    */
   @Transactional
   public List<Consultant> obtainConsultantsToRemove(String rcGroupId, Session session,
-      Consultant consultant, List<GroupMemberDTO> memberList) {
+      Consultant consultant, List<GroupMemberDTO> memberList, Consultant consultantToKeep) {
     var authorizedMembers = obtainAuthorizedMembers(rcGroupId, session, consultant);
+    if (nonNull(consultantToKeep)) {
+      authorizedMembers.add(consultantToKeep.getRocketChatId());
+    }
+
     return memberList.stream()
         .map(GroupMemberDTO::get_id)
         .filter(memberRcId -> !authorizedMembers.contains(memberRcId))
@@ -57,6 +62,12 @@ public class UnauthorizedMembersProvider {
         .filter(Optional::isPresent)
         .map(Optional::get)
         .collect(Collectors.toList());
+  }
+
+  public List<Consultant> obtainConsultantsToRemove(String rcGroupId, Session session,
+      Consultant consultant, List<GroupMemberDTO> memberList) {
+
+    return obtainConsultantsToRemove(rcGroupId, session, consultant, memberList, null);
   }
 
   private List<String> obtainAuthorizedMembers(String rcGroupId, Session session,
