@@ -118,7 +118,10 @@ public class RocketChatMapper {
       var list = new ArrayList<Map<String, String>>(updates.length);
       for (var update : updates) {
         var map = new HashMap<String, String>();
-        map.put("e2eKey", update.getE2eKey());
+        var e2eKey = update.getE2eKey();
+        if (nonNull(e2eKey)) {
+          map.put("e2eKey", e2eKey);
+        }
         map.put("userId", update.getUser().getId());
         map.put("roomId", update.getRoomId());
         list.add(map);
