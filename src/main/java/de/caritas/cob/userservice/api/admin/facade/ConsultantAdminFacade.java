@@ -24,9 +24,7 @@ import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminSe
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -172,6 +170,10 @@ public class ConsultantAdminFacade {
    */
   public void markConsultantAgencyForDeletion(String consultantId, Long agencyId) {
     this.consultantAgencyAdminService.markConsultantAgencyForDeletion(consultantId, agencyId);
+  }
+
+  public void markConsultantAgenciesForDeletion(String consultantId) {
+    consultantAgencyAdminService.markConsultantAgenciesForDeletion(consultantId);
   }
 
   /**

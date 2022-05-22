@@ -358,6 +358,37 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+    put:
+      tags:
+        - admin-user-controller
+      summary: 'Set consultant-agency relations [Authorization: Role: user-admin]'
+      operationId: setConsultantAgencies
+      description: Existing relations are deleted, passed relations added.
+      parameters:
+        - name: consultantId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CreateConsultantAgencyDTO'
+        required: true
+      responses:
+        200:
+          description: OK - consultant-agency relations have been set
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /useradmin/consultants/{consultantId}/agencies/{agencyId}:
     delete:
       tags:

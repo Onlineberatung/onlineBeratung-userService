@@ -13,7 +13,7 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteGroup
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.port.out.ChatRepository;
 import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionTargetType;
 import java.util.Collection;
 import java.util.List;

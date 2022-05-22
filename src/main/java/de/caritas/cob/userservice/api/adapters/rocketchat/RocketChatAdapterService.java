@@ -4,10 +4,10 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.adapters.rocketchat.config.RocketChatConfig;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.MessageResponse;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.RoomResponse;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.MessageResponse;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomResponse;
 import de.caritas.cob.userservice.api.port.out.MessageClient;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.user.UserInfoResponseDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserInfoResponseDTO;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;

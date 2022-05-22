@@ -5,7 +5,7 @@ import static de.caritas.cob.userservice.api.workflow.delete.model.DeletionSourc
 import de.caritas.cob.userservice.api.actions.ActionCommand;
 import de.caritas.cob.userservice.api.workflow.delete.action.DeleteRocketChatUserAction;
 import de.caritas.cob.userservice.api.workflow.delete.model.AskerDeletionWorkflowDTO;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import lombok.NonNull;
 import org.springframework.stereotype.Component;
 

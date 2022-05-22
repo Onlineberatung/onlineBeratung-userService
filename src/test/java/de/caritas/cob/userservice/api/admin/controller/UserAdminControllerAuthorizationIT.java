@@ -34,6 +34,8 @@ import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.admin.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.admin.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.admin.model.UpdateAdminConsultantDTO;
+import java.util.List;
+import java.util.UUID;
 import javax.servlet.http.Cookie;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
@@ -60,6 +62,10 @@ public class UserAdminControllerAuthorizationIT {
   private static final String CSRF_HEADER = "csrfHeader";
   private static final String CSRF_VALUE = "test";
   private static final Cookie CSRF_COOKIE = new Cookie("csrfCookie", CSRF_VALUE);
+
+  private static final ObjectMapper objectMapper = new ObjectMapper();
+
+  private static final EasyRandom easyRandom = new EasyRandom();
 
   @Autowired
   private MockMvc mvc;
@@ -347,13 +353,13 @@ public class UserAdminControllerAuthorizationIT {
   public void createConsultant_Should_ReturnOkAndCallConsultantAdminFilterService_When_userAdminAuthority()
       throws Exception {
     CreateConsultantDTO createConsultantDTO =
-        new EasyRandom().nextObject(CreateConsultantDTO.class);
+        easyRandom.nextObject(CreateConsultantDTO.class);
 
     mvc.perform(post(GET_CONSULTANT_PATH)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(new ObjectMapper().writeValueAsString(createConsultantDTO)))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(createConsultantDTO)))
         .andExpect(status().isOk());
 
     verify(consultantAdminFacade, times(1)).createNewConsultant(any());
@@ -394,13 +400,13 @@ public class UserAdminControllerAuthorizationIT {
   public void updateConsultant_Should_ReturnOkAndCallConsultantAdminFilterService_When_userAdminAuthority()
       throws Exception {
     UpdateAdminConsultantDTO updateConsultantDTO =
-        new EasyRandom().nextObject(UpdateAdminConsultantDTO.class);
+        easyRandom.nextObject(UpdateAdminConsultantDTO.class);
 
     mvc.perform(put(GET_CONSULTANT_PATH + "consultantId")
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(new ObjectMapper().writeValueAsString(updateConsultantDTO)))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(updateConsultantDTO)))
         .andExpect(status().isOk());
 
     verify(consultantAdminFacade, times(1)).updateConsultant(anyString(), any());
@@ -441,25 +447,86 @@ public class UserAdminControllerAuthorizationIT {
   public void createConsultantAgency_Should_ReturnCreatedAndCallConsultantAdminFilterService_When_userAdminAuthority()
       throws Exception {
     CreateConsultantAgencyDTO createConsultantAgencyDTO =
-        new EasyRandom().nextObject(CreateConsultantAgencyDTO.class);
+        easyRandom.nextObject(CreateConsultantAgencyDTO.class);
 
     mvc.perform(post(String.format(CONSULTANT_AGENCY_PATH, "consultantId"))
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(new ObjectMapper().writeValueAsString(createConsultantAgencyDTO)))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(createConsultantAgencyDTO)))
         .andExpect(status().isCreated());
 
     verify(consultantAdminFacade, times(1)).createNewConsultantAgency(anyString(), any());
   }
 
   @Test
+  public void setConsultantAgenciesShouldReturnUnauthorizedAndCallNoMethodsWhenNoKeycloakAuthPresent()
+      throws Exception {
+    mvc.perform(
+        put("/useradmin/consultants/{consultantId}/agencies", UUID.randomUUID().toString())
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE))
+        .andExpect(status().isUnauthorized());
+
+    verifyNoMoreInteractions(consultantAdminFacade);
+  }
+
+  @Test
+  @WithMockUser(authorities = {
+      AuthorityValue.ANONYMOUS_DEFAULT,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+      AuthorityValue.CONSULTANT_DEFAULT,
+      AuthorityValue.CREATE_NEW_CHAT,
+      AuthorityValue.START_CHAT,
+      AuthorityValue.STOP_CHAT,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.UPDATE_CHAT,
+      AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.USER_DEFAULT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS,
+      AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_PEER_SESSION
+  })
+  public void setConsultantAgenciesShouldReturnForbiddenAndCallNoMethodsIfNotUserAdmin()
+      throws Exception {
+    mvc.perform(
+        put("/useradmin/consultants/{consultantId}/agencies", UUID.randomUUID().toString())
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+    ).andExpect(status().isForbidden());
+
+    verifyNoMoreInteractions(consultantAdminFacade);
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
+  public void setConsultantAgenciesShouldReturnOkAndCallConsultantAdminFacade()
+      throws Exception {
+    var agencies = List.of(
+        easyRandom.nextObject(CreateConsultantAgencyDTO.class)
+    );
+
+    mvc.perform(
+        put("/useradmin/consultants/{consultantId}/agencies", UUID.randomUUID().toString())
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(agencies)))
+        .andExpect(status().isOk());
+
+    verify(consultantAdminFacade).createNewConsultantAgency(anyString(), any());
+    verify(consultantAdminFacade).markConsultantAgenciesForDeletion(anyString());
+  }
+
+  @Test
   public void changeAgencyType_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
       throws Exception {
     mvc.perform(post(AGENCY_CHANGE_TYPE_PATH)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(consultantAdminFacade);

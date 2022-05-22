@@ -17,4 +17,8 @@ public interface AccountManaging {
   Optional<Map<String, Object>> findConsultant(String id);
 
   Optional<Map<String, Object>> findConsultantByUsername(String username);
+
+  Map<String, Object> findConsultantsByInfix(
+      String infix, int pageNumber, int pageSize, String fieldName, boolean isAscending
+  );
 }

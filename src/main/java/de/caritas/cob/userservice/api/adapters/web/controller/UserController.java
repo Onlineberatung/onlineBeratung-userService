@@ -91,6 +91,8 @@ import de.caritas.cob.userservice.api.workflow.delete.action.asker.DeleteSingleR
 import de.caritas.cob.userservice.api.workflow.delete.model.SessionDeletionWorkflowDTO;
 import de.caritas.cob.userservice.generated.api.adapters.web.controller.UsersApi;
 import io.swagger.annotations.Api;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -647,8 +649,18 @@ public class UserController implements UsersApi {
   @Override
   public ResponseEntity<ConsultantSearchResultDTO> searchConsultants(
       String query, Integer page, Integer perPage, String field, String order) {
+    var decodedInfix = URLDecoder.decode(query, StandardCharsets.UTF_8).trim();
+    var isAscending = order.equalsIgnoreCase("asc");
+    var mappedField = consultantDtoMapper.mappedFieldOf(field);
 
-    return ResponseEntity.ok(new ConsultantSearchResultDTO());
+    var resultMap = accountManager.findConsultantsByInfix(
+        decodedInfix, page - 1, perPage, mappedField, isAscending
+    );
+    var result = consultantDtoMapper.consultantSearchResultOf(
+        resultMap, query, page, perPage, field, order
+    );
+
+    return ResponseEntity.ok(result);
   }
 
   /**

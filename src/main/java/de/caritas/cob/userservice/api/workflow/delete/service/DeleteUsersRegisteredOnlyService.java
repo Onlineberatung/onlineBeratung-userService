@@ -9,7 +9,7 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetUserIdEx
 import de.caritas.cob.userservice.api.helper.DateCalculator;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.helper.CustomLocalDateTime;
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionTargetType;
 import java.time.LocalDateTime;
