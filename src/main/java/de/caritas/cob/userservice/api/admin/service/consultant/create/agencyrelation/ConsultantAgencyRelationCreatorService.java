@@ -73,8 +73,6 @@ public class ConsultantAgencyRelationCreatorService {
   private void createNewConsultantAgency(ConsultantAgencyCreationInput input,
       Consumer<String> logMethod) {
     var consultant = this.retrieveConsultant(input.getConsultantId());
-    consultant.setStatus(ConsultantStatus.IN_PROGRESS);
-    consultantRepository.save(consultant);
 
     var agency = retrieveAgency(input.getAgencyId());
     if (consultingTypeManager.isConsultantBoundedToAgency(agency.getConsultingType())) {
@@ -82,6 +80,11 @@ public class ConsultantAgencyRelationCreatorService {
     }
 
     ensureConsultingTypeRoles(input, agency);
+
+    consultantAgencyService.saveConsultantAgency(buildConsultantAgency(consultant, agency.getId()));
+    consultant.setStatus(ConsultantStatus.IN_PROGRESS);
+    consultantRepository.save(consultant);
+
     rocketChatAsyncHelper.addConsultantToSessions(consultant, agency, logMethod, TenantContext.getCurrentTenant());
 
     if (isTeamAgencyButNotTeamConsultant(agency, consultant)) {
@@ -89,7 +92,7 @@ public class ConsultantAgencyRelationCreatorService {
       consultantRepository.save(consultant);
     }
 
-    consultantAgencyService.saveConsultantAgency(buildConsultantAgency(consultant, agency.getId()));
+
   }
 
   private void ensureConsultingTypeRoles(ConsultantAgencyCreationInput input, AgencyDTO agency) {

@@ -4,19 +4,25 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO;
 import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.admin.model.ConsultantFilter;
+import de.caritas.cob.userservice.api.admin.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.admin.model.Sort;
 import de.caritas.cob.userservice.api.admin.model.Sort.FieldEnum;
 import de.caritas.cob.userservice.api.admin.model.Sort.OrderEnum;
 import de.caritas.cob.userservice.api.admin.service.agency.AgencyAdminService;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.RolesDTO;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -53,6 +59,9 @@ public class ConsultantAdminFacadeIT {
 
   @MockBean
   private AgencyAdminService agencyAdminService;
+
+  @MockBean
+  private ConsultingTypeManager consultingTypeManager;
 
   @Test
   public void findFilteredConsultants_Should_retrieveDeletedAgencyRelations_When_consultantIsDeleted() {
@@ -142,6 +151,57 @@ public class ConsultantAdminFacadeIT {
     mockAgencyServiceResponse(consultantAgencies);
 
     return consultant;
+  }
+
+  @Test
+  public void findFilteredConsultants_Should_retrieveConsultantAfterAddingRelationToAgency() {
+
+    var consultantId = "id";
+    var agencyId = 999L;
+    givenConsultantWithoutAgency(consultantId);
+    when(consultingTypeManager.isConsultantBoundedToAgency(anyInt())).thenReturn(false);
+    when(consultingTypeManager
+        .getConsultingTypeSettings(anyInt())).thenReturn(getExtendedConsultingTypeResponse());
+
+    CreateConsultantAgencyDTO consultantAgencyDto = new CreateConsultantAgencyDTO();
+    consultantAgencyDto.agencyId(agencyId);
+
+    ConsultantFilter consultantFilter = new ConsultantFilter();
+    consultantFilter.setAgencyId(agencyId);
+
+    var searchResult = this.consultantAdminFacade
+        .findFilteredConsultants(1, 100, consultantFilter,
+            new Sort().field(FieldEnum.FIRSTNAME).order(OrderEnum.ASC));
+
+    assertThat(searchResult.getEmbedded(), hasSize(0));
+
+    consultantAdminFacade.createNewConsultantAgency(consultantId, consultantAgencyDto);
+
+    searchResult = this.consultantAdminFacade
+        .findFilteredConsultants(1, 100, consultantFilter,
+            new Sort().field(FieldEnum.FIRSTNAME).order(OrderEnum.ASC));
+    assertThat(searchResult.getEmbedded(), hasSize(1));
+
+  }
+
+  private ExtendedConsultingTypeResponseDTO getExtendedConsultingTypeResponse() {
+    ExtendedConsultingTypeResponseDTO e = new ExtendedConsultingTypeResponseDTO();
+    e.setRoles(new RolesDTO());
+    return e;
+  }
+
+  private void givenConsultantWithoutAgency(String id) {
+    Consultant newConsultant = new Consultant();
+    newConsultant.setStatus(ConsultantStatus.CREATED);
+    newConsultant.setLastName("lastName");
+    newConsultant.setWalkThroughEnabled(false);
+    newConsultant.setFirstName("firstName");
+    newConsultant.setEmail("email@email.com");
+    newConsultant.setRocketChatId("rocketChatId");
+    newConsultant.setEncourage2fa(false);
+    newConsultant.setUsername("username");
+    newConsultant.setId(id);
+    consultantRepository.save(newConsultant);
   }
 
 }
