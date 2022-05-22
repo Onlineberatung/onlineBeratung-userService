@@ -3,16 +3,18 @@ package de.caritas.cob.userservice.api.model;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public class Memento<T> {
+public class Memento<T> implements Supplier<Optional<T>> {
+
+  private final Supplier<T> loadAbsent;
 
   private T value;
-  private final Supplier<T> loadAbsent;
 
   public Memento(Supplier<T> loadAbsent) {
     this.loadAbsent = loadAbsent;
   }
 
-  public Optional<T> getValue() {
+  @Override
+  public Optional<T> get() {
     if (value != null) {
       return Optional.of(value);
     }

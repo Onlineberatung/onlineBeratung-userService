@@ -448,13 +448,13 @@ public class SessionService {
   }
 
   private void checkPermissionsForGroupOrFeedbackGroupSessions(Session session, String userId,
-      Set<String> roles, Memento<Consultant> mementoConsultant) {
+      Set<String> roles, Supplier<Optional<Consultant>> consultantSupplier) {
     checkForUserOrConsultantRole(roles);
     checkIfUserAndNotOwnerOfSession(session, userId, roles);
     if (!roles.contains(UserRole.CONSULTANT.getValue())) {
       return;
     }
-    var consultant = mementoConsultant.getValue()
+    var consultant = consultantSupplier.get()
         .orElseThrow(newBadRequestException(userId));
     if (isConsultantAssignedToSession(session, consultant) || (isTeamSessionOrNew(session)
         && isConsultantAssignedToSessionAgency(consultant, session))) {
