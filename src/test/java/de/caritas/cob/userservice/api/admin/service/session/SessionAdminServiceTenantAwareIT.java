@@ -49,7 +49,7 @@ public class SessionAdminServiceTenantAwareIT {
         .findSessions(2, 100, new SessionFilter());
 
     assertThat(firstPage.getEmbedded(), hasSize(100));
-    assertThat(secondPage.getEmbedded(), hasSize(51));
+    assertThat(secondPage.getEmbedded(), hasSize(52));
   }
 
 }
