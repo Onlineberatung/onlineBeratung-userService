@@ -22,6 +22,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.Memento;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.RegistrationType;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
@@ -38,6 +39,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.ws.rs.BadRequestException;
@@ -351,7 +353,13 @@ public class SessionService {
     if (sessions.isEmpty()) {
       return emptyList();
     }
-    sessions.forEach(s -> checkPermissionsForGroupOrFeedbackGroupSessions(s, userId, roles));
+    // prevent loading of the same consultant for every session
+    var mementoConsultant = new Memento<>(
+        () -> consultantService.getConsultant(userId).orElse(null));
+    sessions.forEach(
+        session -> checkPermissionsForGroupOrFeedbackGroupSessions(session, userId, roles,
+            mementoConsultant));
+
     Set<Long> agencyIds = sessions.stream()
         .map(Session::getAgencyId)
         .filter(Objects::nonNull)
@@ -440,14 +448,14 @@ public class SessionService {
   }
 
   private void checkPermissionsForGroupOrFeedbackGroupSessions(Session session, String userId,
-      Set<String> roles) {
+      Set<String> roles, Memento<Consultant> mementoConsultant) {
     checkForUserOrConsultantRole(roles);
     checkIfUserAndNotOwnerOfSession(session, userId, roles);
     if (!roles.contains(UserRole.CONSULTANT.getValue())) {
       return;
     }
-
-    var consultant = loadConsultantOrThrow(userId);
+    var consultant = mementoConsultant.getValue()
+        .orElseThrow(newBadRequestException(userId));
     if (isConsultantAssignedToSession(session, consultant) || (isTeamSessionOrNew(session)
         && isConsultantAssignedToSessionAgency(consultant, session))) {
       return;
@@ -462,8 +470,12 @@ public class SessionService {
   }
 
   private Consultant loadConsultantOrThrow(String userId) {
-    return this.consultantService.getConsultant(userId).orElseThrow(() -> new BadRequestException(
-        String.format("Consultant with id %s does not exist", userId)));
+    return consultantService.getConsultant(userId).orElseThrow(newBadRequestException(userId));
+  }
+
+  private Supplier<BadRequestException> newBadRequestException(String userId) {
+    return () -> new BadRequestException(
+        String.format("Consultant with id %s does not exist", userId));
   }
 
   private ConsultantSessionDTO toConsultantSessionDTO(Session session) {
