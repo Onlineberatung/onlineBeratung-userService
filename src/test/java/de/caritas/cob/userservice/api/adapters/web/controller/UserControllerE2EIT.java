@@ -506,6 +506,44 @@ public class UserControllerE2EIT {
   }
 
   @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void getSessionsForGroupOrFeedbackGroupIdsShouldReturnSessionsForNewEnquiriesOfConsultantInAgency()
+      throws Exception {
+    givenAConsultantWithSessionsOfNewEnquiries();
+    givenNoRocketChatSubscriptionUpdates();
+    givenNoRocketChatRoomUpdates();
+
+    mockMvc.perform(
+            get("/users/sessions/room?rcGroupIds=XJrRTzFg8Ac5BwE86")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("sessions[0].session.groupId", is("XJrRTzFg8Ac5BwE86")))
+        .andExpect(jsonPath("sessions", hasSize(1)));
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void getSessionsForGroupOrFeedbackGroupIdsShouldReturnForbiddenForNewEnquiriesForConsultantsNotInAgency()
+      throws Exception {
+    givenAConsultantWithSessions();
+    givenNoRocketChatSubscriptionUpdates();
+    givenNoRocketChatRoomUpdates();
+
+    mockMvc.perform(
+            get("/users/sessions/room?rcGroupIds=mzAdWzQEobJ2PkoxP")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
   @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
   void searchConsultantsShouldRespondWithBadRequestIfQueryIsNotGiven() throws Exception {
     mockMvc.perform(
@@ -3529,6 +3567,14 @@ public class UserControllerE2EIT {
 
   private void givenAConsultantWithSessions() {
     consultant = consultantRepository.findById("bad14912-cf9f-4c16-9d0e-fe8ede9b60dc")
+        .orElseThrow();
+    when(authenticatedUser.isConsultant()).thenReturn(true);
+    when(authenticatedUser.getUserId()).thenReturn(consultant.getId());
+    when(authenticatedUser.getRoles()).thenReturn(Set.of("consultant"));
+  }
+
+  private void givenAConsultantWithSessionsOfNewEnquiries() {
+    consultant = consultantRepository.findById("94c3e0b1-0677-4fd2-a7ea-56a71aefd0e8")
         .orElseThrow();
     when(authenticatedUser.isConsultant()).thenReturn(true);
     when(authenticatedUser.getUserId()).thenReturn(consultant.getId());

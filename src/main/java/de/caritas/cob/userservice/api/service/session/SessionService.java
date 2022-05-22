@@ -351,7 +351,7 @@ public class SessionService {
     if (sessions.isEmpty()) {
       return emptyList();
     }
-    sessions.forEach(s -> checkUserPermissionForSession(s, userId, roles));
+    sessions.forEach(s -> checkPermissionsForGroupOrFeedbackGroupSessions(s, userId, roles));
     Set<Long> agencyIds = sessions.stream()
         .map(Session::getAgencyId)
         .filter(Objects::nonNull)
@@ -407,9 +407,7 @@ public class SessionService {
   private void checkIfConsultantAndNotAssignedToSessionOrAgency(Session session, String userId,
       Set<String> roles) {
     if (roles.contains(UserRole.CONSULTANT.getValue())) {
-      var consultant = this.consultantService.getConsultant(userId)
-          .orElseThrow(() -> new BadRequestException(String
-              .format("Consultant with id %s does not exist", userId)));
+      var consultant = loadConsultantOrThrow(userId);
       checkPermissionForConsultantSession(session, consultant);
     }
   }
@@ -439,6 +437,33 @@ public class SessionService {
             () -> new NotFoundException(String.format("Session with id %s not found.", sessionId)));
     checkPermissionForConsultantSession(session, consultant);
     return toConsultantSessionDTO(session);
+  }
+
+  private void checkPermissionsForGroupOrFeedbackGroupSessions(Session session, String userId,
+      Set<String> roles) {
+    checkForUserOrConsultantRole(roles);
+    checkIfUserAndNotOwnerOfSession(session, userId, roles);
+    if (!roles.contains(UserRole.CONSULTANT.getValue())) {
+      return;
+    }
+
+    var consultant = loadConsultantOrThrow(userId);
+    if (isConsultantAssignedToSession(session, consultant) || (isTeamSessionOrNew(session)
+        && isConsultantAssignedToSessionAgency(consultant, session))) {
+      return;
+    }
+    throw new ForbiddenException(
+        String.format("No permission for session %s by consultant %s", session.getId(),
+            consultant.getId()));
+  }
+
+  private boolean isTeamSessionOrNew(Session session) {
+    return session.isTeamSession() || SessionStatus.NEW == session.getStatus();
+  }
+
+  private Consultant loadConsultantOrThrow(String userId) {
+    return this.consultantService.getConsultant(userId).orElseThrow(() -> new BadRequestException(
+        String.format("Consultant with id %s does not exist", userId)));
   }
 
   private ConsultantSessionDTO toConsultantSessionDTO(Session session) {
