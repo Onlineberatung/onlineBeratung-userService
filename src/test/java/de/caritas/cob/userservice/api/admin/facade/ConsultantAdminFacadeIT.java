@@ -157,12 +157,12 @@ public class ConsultantAdminFacadeIT {
   public void findFilteredConsultants_Should_retrieveConsultantAfterAddingRelationToAgency() {
 
     var consultantId = "id";
-    var agencyId = 999L;
     givenConsultantWithoutAgency(consultantId);
     when(consultingTypeManager.isConsultantBoundedToAgency(anyInt())).thenReturn(false);
     when(consultingTypeManager
         .getConsultingTypeSettings(anyInt())).thenReturn(getExtendedConsultingTypeResponse());
 
+    var agencyId = 999L;
     CreateConsultantAgencyDTO consultantAgencyDto = new CreateConsultantAgencyDTO();
     consultantAgencyDto.agencyId(agencyId);
 
