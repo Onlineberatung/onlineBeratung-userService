@@ -82,8 +82,10 @@ public class ConsultantAgencyRelationCreatorService {
     ensureConsultingTypeRoles(input, agency);
 
     consultantAgencyService.saveConsultantAgency(buildConsultantAgency(consultant, agency.getId()));
-    consultant.setStatus(ConsultantStatus.IN_PROGRESS);
-    consultantRepository.save(consultant);
+    if (!ConsultantStatus.IN_PROGRESS.equals(consultant.getStatus())) {
+      consultant.setStatus(ConsultantStatus.IN_PROGRESS);
+      consultantRepository.save(consultant);
+    }
 
     rocketChatAsyncHelper.addConsultantToSessions(consultant, agency, logMethod, TenantContext.getCurrentTenant());
 
