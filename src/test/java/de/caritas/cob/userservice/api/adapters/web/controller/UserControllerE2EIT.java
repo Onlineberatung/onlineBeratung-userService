@@ -489,7 +489,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void getSessionsForGroupOrFeedbackGroupIdsShouldBeNoContentIfNoSessionsFoundFourIds()
+  public void getSessionsForGroupOrFeedbackGroupIdsShouldBeNoContentIfNoSessionsFoundForIds()
       throws Exception {
     givenAConsultantWithSessions();
     givenNoRocketChatSubscriptionUpdates();
