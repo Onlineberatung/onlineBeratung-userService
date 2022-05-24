@@ -725,6 +725,27 @@ public class UserController implements UsersApi {
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
+  @Override
+  public ResponseEntity<Void> removeFromSession(Long sessionId, UUID consultantId) {
+    var consultantMap = accountManager.findConsultant(consultantId.toString()).orElseThrow(() ->
+        new NotFoundException(String.format("Consultant (%s) not found", consultantId))
+    );
+
+    var sessionMap = messenger.findSession(sessionId).orElseThrow(() ->
+        new NotFoundException(String.format("Session (%s) not found", sessionId))
+    );
+
+    var chatId = consultantDtoMapper.chatIdOf(sessionMap);
+    var chatUserId = userDtoMapper.chatUserIdOf(consultantMap);
+    if (!messenger.removeUserFromSession(chatUserId, chatId)) {
+      var message = String.format(
+          "Could not remove consultant (%s) from session (%s)", consultantId, sessionId);
+      throw new InternalServerErrorException(message);
+    }
+
+    return ResponseEntity.noContent().build();
+  }
+
   /**
    * Changes the (Keycloak) password of the currently authenticated user.
    *

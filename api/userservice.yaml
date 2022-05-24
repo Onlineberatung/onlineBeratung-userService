@@ -978,9 +978,9 @@ paths:
     delete:
       tags:
         - user-controller
-      summary: 'Free a session from the passed consultant 
+      summary: 'Remove a consultant from a session 
         [Auth: ASSIGN_CONSULTANT_TO_ENQUIRY or ASSIGN_CONSULTANT_TO_SESSION]'
-      operationId: freeFromSession
+      operationId: removeFromSession
       parameters:
         - name: sessionId
           in: path
@@ -995,6 +995,7 @@ paths:
           required: true
           schema:
             type: string
+            format: UUID
       responses:
         204:
           description: NO CONTENT - successful operation

@@ -1,9 +1,16 @@
 package de.caritas.cob.userservice.api;
 
+import static java.util.Objects.nonNull;
+
 import de.caritas.cob.userservice.api.model.Chat;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.port.in.IdentityManaging;
 import de.caritas.cob.userservice.api.port.in.Messaging;
 import de.caritas.cob.userservice.api.port.out.ChatRepository;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.MessageClient;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.service.StringConverter;
 import java.util.List;
@@ -18,14 +25,13 @@ import org.springframework.stereotype.Service;
 public class Messenger implements Messaging {
 
   private final MessageClient messageClient;
-
   private final UserRepository userRepository;
-
+  private final ConsultantRepository consultantRepository;
   private final ChatRepository chatRepository;
-
+  private final SessionRepository sessionRepository;
   private final UserServiceMapper mapper;
-
   private final StringConverter stringConverter;
+  private final IdentityManaging identityManager;
 
   @Override
   public boolean banUserFromChat(String adviceSeekerId, long chatId) {
@@ -83,6 +89,46 @@ public class Messenger implements Messaging {
 
   private boolean allChatsAreTmpEncrypted(List<Map<String, String>> chatMaps) {
     return chatMaps.stream().allMatch(chatMap -> mapper.e2eKeyOf(chatMap).isPresent());
+  }
+
+  @Override
+  public boolean removeUserFromSession(String chatUserId, String chatId) {
+    var session = sessionRepository.findByGroupId(chatId).orElseThrow();
+    var assignee = session.getConsultant();
+    var consultant = consultantRepository.findByRocketChatIdAndDeleteDateIsNull(chatUserId)
+        .orElseThrow();
+    var seesPeer = identityManager.canViewPeerSessions(consultant.getId());
+    var seesFeedback = identityManager.canViewFeedbackSessions(consultant.getId());
+
+    if (isAssigned(chatUserId, assignee)) {
+      return true;
+    }
+
+    if (isInAgency(session, consultant) && isInTeam(session, consultant, seesPeer, seesFeedback)) {
+      return true;
+    }
+
+    return messageClient.removeUserFromSession(chatUserId, chatId, session.getFeedbackGroupId());
+  }
+
+  private boolean isAssigned(String chatUserId, Consultant assignedConsultant) {
+    return nonNull(assignedConsultant) && chatUserId.equals(assignedConsultant.getRocketChatId());
+  }
+
+  private boolean isInAgency(Session session, Consultant consultant) {
+    return session.isTeamSession() && consultant.isInAgency(session.getAgencyId());
+  }
+
+  private boolean isInTeam(Session session, Consultant consultant, boolean seesPeer,
+      boolean seesFeedback) {
+    return session.hasFeedbackChat() ? (seesPeer || seesFeedback) : consultant.isTeamConsultant();
+  }
+
+  @Override
+  public Optional<Map<String, String>> findSession(Long sessionId) {
+    var session = sessionRepository.findById(sessionId);
+
+    return mapper.mapOf(session);
   }
 
   @Override

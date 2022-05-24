@@ -531,6 +531,23 @@ public class RocketChatService implements MessageClient {
     }
   }
 
+  public boolean removeUserFromSession(String chatUserId, String... chatIds) {
+    for (var chatId : chatIds) {
+      if (nonNull(chatId)) {
+        try {
+          addTechnicalUserToGroup(chatId);
+          removeUserFromGroup(chatUserId, chatId);
+          removeTechnicalUserFromGroup(chatId);
+        } catch (Exception exception) {
+          log.error("error", exception);
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
   /**
    * Removes the technical user from the given Rocket.Chat group id.
    *

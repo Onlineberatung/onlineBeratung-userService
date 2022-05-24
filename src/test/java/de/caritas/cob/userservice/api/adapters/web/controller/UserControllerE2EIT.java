@@ -106,6 +106,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -123,11 +124,15 @@ import org.hamcrest.Matchers;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.RoleMappingResource;
+import org.keycloak.admin.client.resource.RoleScopeResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.admin.client.token.TokenManager;
+import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -139,6 +144,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -149,12 +156,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplateHandler;
 
 @SpringBootTest
+@ExtendWith(OutputCaptureExtension.class)
 @AutoConfigureMockMvc
 @ActiveProfiles("testing")
 @AutoConfigureTestDatabase
@@ -1685,6 +1694,100 @@ public class UserControllerE2EIT {
   }
 
   @Test
+  @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
+  public void removeFromSessionShouldReturnForbiddenIfSessionIdFormatIsInvalid() throws Exception {
+    givenAValidConsultant(true);
+    var sessionId = RandomStringUtils.randomAlphabetic(8);
+
+    mockMvc.perform(
+            delete("/users/sessions/{sessionId}/consultant/{consultantId}", sessionId,
+                consultant.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
+  public void removeFromSessionShouldReturnBadRequestIfConsultantIdFormatIsInvalid()
+      throws Exception {
+    var consultantId = RandomStringUtils.randomAlphanumeric(8);
+
+    mockMvc.perform(
+            delete("/users/sessions/1/consultant/{consultantId}", consultantId)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
+  public void removeFromSessionShouldReturnNotFoundIfConsultantDoesNotExist() throws Exception {
+    givenAValidSession();
+
+    mockMvc.perform(
+            delete("/users/sessions/{sessionId}/consultant/{consultantId}",
+                session.getId(), UUID.randomUUID().toString())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
+  public void removeFromSessionShouldReturnNotFoundIfSessionDoesNotExist() throws Exception {
+    givenAValidConsultant(true);
+    givenAValidRocketChatSystemUser();
+    givenAValidRocketChatInfoUserResponse();
+
+    mockMvc.perform(
+            delete("/users/sessions/{sessionId}/consultant/{consultantId}",
+                RandomStringUtils.randomNumeric(5, 6), consultant.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
+  public void removeFromSessionShouldReturnNoContent(CapturedOutput logOutput) throws Exception {
+    givenAValidConsultant(true);
+    givenAValidRocketChatSystemUser();
+    givenAValidRocketChatInfoUserResponse();
+    givenAValidSession();
+    givenKeycloakUserRoles(consultant.getId(), "consultant");
+
+    mockMvc.perform(
+            delete("/users/sessions/{sessionId}/consultant/{consultantId}", session.getId(),
+                consultant.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
+
+    var output = logOutput.getOut();
+    int occurrencesOfAddTech = StringUtils.countOccurrencesOf(output,
+        "RocketChatTestConfig.addTechnicalUserToGroup(" + session.getGroupId() + ") called");
+    assertEquals(1, occurrencesOfAddTech);
+    int occurrencesOfRemoval = StringUtils.countOccurrencesOf(output,
+        "RocketChatTestConfig.removeUserFromGroup("
+            + consultant.getRocketChatId() + "," + session.getGroupId()
+            + ") called");
+    assertEquals(1, occurrencesOfRemoval);
+    int occurrencesOfRemoveTech = StringUtils.countOccurrencesOf(output,
+        "RocketChatTestConfig.removeTechnicalUserFromGroup(" + session.getGroupId() + ") called");
+    assertEquals(1, occurrencesOfRemoveTech);
+  }
+
+  @Test
   @WithMockUser(authorities = AuthorityValue.UPDATE_CHAT)
   public void banFromChatShouldReturnClientErrorIfUserIdHasInvalidFormat() throws Exception {
     var invalidUserId = RandomStringUtils.randomAlphabetic(16);
@@ -2632,6 +2735,23 @@ public class UserControllerE2EIT {
     when(keycloak.realm(anyString())).thenReturn(realmResource);
   }
 
+  private void givenKeycloakUserRoles(String userId, String... roles) {
+    var realmResource = mock(RealmResource.class);
+    var usersResource = mock(UsersResource.class);
+    var userResource = mock(UserResource.class);
+    var roleMappingResource = mock(RoleMappingResource.class);
+    var roleScopeResource = mock(RoleScopeResource.class);
+    var roleRepresentationList = Arrays.stream(roles)
+        .map(role -> new RoleRepresentation(role, "", false))
+        .collect(Collectors.toList());
+    when(roleScopeResource.listAll()).thenReturn(roleRepresentationList);
+    when(roleMappingResource.realmLevel()).thenReturn(roleScopeResource);
+    when(userResource.roles()).thenReturn(roleMappingResource);
+    when(usersResource.get(userId)).thenReturn(userResource);
+    when(realmResource.users()).thenReturn(usersResource);
+    when(keycloak.realm(anyString())).thenReturn(realmResource);
+  }
+
   private void givenAValidKeycloakEmailChangeByUsernameResponse(String username) {
     var usernameTranscoder = new UsernameTranscoder();
     var userRepresentation = new UserRepresentation();
@@ -3483,6 +3603,10 @@ public class UserControllerE2EIT {
         .filter(s -> isNull(s.getEnquiryMessageDate()))
         .findFirst()
         .orElseThrow();
+  }
+
+  private void givenAValidSession() {
+    session = sessionRepository.findById(1L).orElseThrow();
   }
 
   private void givenAUserWithSessions() {

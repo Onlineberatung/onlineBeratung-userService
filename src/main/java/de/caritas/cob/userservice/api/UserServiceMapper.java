@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
+import com.google.api.client.util.ArrayMap;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Appointment;
@@ -11,6 +12,7 @@ import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Consultant.ConsultantBase;
 import de.caritas.cob.userservice.api.model.ConsultantAgency.ConsultantAgencyBase;
 import de.caritas.cob.userservice.api.model.ConsultantStatus;
+import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.User;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -163,6 +165,20 @@ public class UserServiceMapper {
     map.put("agencies", agencies);
 
     return map;
+  }
+
+  public Optional<Map<String, String>> mapOf(Optional<Session> optionalSession) {
+    if (optionalSession.isEmpty()) {
+      return Optional.empty();
+    }
+
+    var session = optionalSession.get();
+    var map = new ArrayMap<String, String>();
+    if (nonNull(session.getGroupId())) {
+      map.put("chatId", session.getGroupId());
+    }
+
+    return Optional.of(map);
   }
 
   private boolean isAgencyUnique(HashSet<Long> agencyIdsAdded, Long agencyId) {
