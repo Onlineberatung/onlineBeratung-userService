@@ -48,6 +48,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestExceptio
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.facade.CreateChatFacade;
+import de.caritas.cob.userservice.api.model.EnquiryData;
 import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
 import de.caritas.cob.userservice.api.facade.CreateNewConsultingTypeFacade;
 import de.caritas.cob.userservice.api.facade.CreateUserFacade;
@@ -247,10 +248,10 @@ public class UserController implements UsersApi {
         .rocketChatUserId(rcUserId)
         .build();
     var language = consultantDtoMapper.languageOf(enquiryMessage.getLanguage());
+    var enquiryData = new EnquiryData(user, sessionId, enquiryMessage.getMessage(), language,
+        rocketChatCredentials, enquiryMessage.getT());
 
-    var response = createEnquiryMessageFacade.createEnquiryMessage(
-        user, sessionId, enquiryMessage.getMessage(), language, rocketChatCredentials
-    );
+    var response = createEnquiryMessageFacade.createEnquiryMessage(enquiryData);
 
     return new ResponseEntity<>(response, HttpStatus.CREATED);
   }

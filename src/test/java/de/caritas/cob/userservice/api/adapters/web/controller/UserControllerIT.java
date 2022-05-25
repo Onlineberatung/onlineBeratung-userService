@@ -169,6 +169,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.RocketChatUnauthorizedException;
 import de.caritas.cob.userservice.api.facade.CreateChatFacade;
+import de.caritas.cob.userservice.api.model.EnquiryData;
 import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
 import de.caritas.cob.userservice.api.facade.CreateNewConsultingTypeFacade;
 import de.caritas.cob.userservice.api.facade.CreateUserFacade;
@@ -851,8 +852,7 @@ public class UserControllerIT {
         .thenReturn(USER);
     doThrow(new ConflictException(ERROR))
         .when(createEnquiryMessageFacade)
-        .createEnquiryMessage(Mockito.any(), Mockito.any(),
-            Mockito.any(), Mockito.any(), Mockito.any());
+        .createEnquiryMessage(any(EnquiryData.class));
 
     mvc.perform(post(PATH_CREATE_ENQUIRY_MESSAGE)
             .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
@@ -869,11 +869,14 @@ public class UserControllerIT {
         .thenReturn(USER_ID);
     when(accountProvider.retrieveValidatedUser())
         .thenReturn(USER);
-    when(createEnquiryMessageFacade.createEnquiryMessage(
-        any(User.class), eq(SESSION_ID), eq(MESSAGE), any(), any(RocketChatCredentials.class))
-    ).thenReturn(
-        new CreateEnquiryMessageResponseDTO().rcGroupId(RC_GROUP_ID).sessionId(SESSION_ID)
-    );
+    var expectedRCCredentials = RocketChatCredentials.builder()
+        .rocketChatToken(RC_TOKEN)
+        .rocketChatUserId(RC_USER_ID)
+        .build();
+    var expectedEnquiryData = new EnquiryData(USER, SESSION_ID, MESSAGE, null,
+        expectedRCCredentials);
+    when(createEnquiryMessageFacade.createEnquiryMessage(eq(expectedEnquiryData))).thenReturn(
+        new CreateEnquiryMessageResponseDTO().rcGroupId(RC_GROUP_ID).sessionId(SESSION_ID));
 
     mvc.perform(
             post(PATH_CREATE_ENQUIRY_MESSAGE)

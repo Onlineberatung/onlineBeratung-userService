@@ -1807,8 +1807,10 @@ components:
           type: string
           example: 8ertjlasdKJA
           description: asker Rocket.Chat ID
-        lastMessage:
+        e2eLastMessage:
           $ref: '#/components/schemas/LastMessageDTO'
+        lastMessage:
+          type: string
         messageDate:
           type: integer
           format: int64
@@ -1882,6 +1884,8 @@ components:
         rcUserId:
           type: string
           example: "ag89h3tjkerg94t"
+        t:
+          type: string
 
     VideoCallMessageDTO:
       type: object
@@ -2118,6 +2122,8 @@ components:
           example: Lorem ipsum dolor sit amet, consetetur...
         language:
           $ref: '#/components/schemas/LanguageCode'
+        t:
+          type: string
 
     CreateEnquiryMessageResponseDTO:
       type: object
