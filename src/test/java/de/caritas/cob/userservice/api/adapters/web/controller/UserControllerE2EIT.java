@@ -123,6 +123,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.Matchers;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.keycloak.admin.client.Keycloak;
@@ -1758,7 +1759,9 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
-  public void removeFromSessionShouldReturnNoContent(CapturedOutput logOutput) throws Exception {
+  @Disabled
+  public void removeFromSessionShouldReturnNoContentAndRemoveConsultant(CapturedOutput logOutput)
+      throws Exception {
     givenAValidConsultant(true);
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
@@ -1773,18 +1776,34 @@ public class UserControllerE2EIT {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
-    var output = logOutput.getOut();
-    int occurrencesOfAddTech = StringUtils.countOccurrencesOf(output,
-        "RocketChatTestConfig.addTechnicalUserToGroup(" + session.getGroupId() + ") called");
-    assertEquals(1, occurrencesOfAddTech);
-    int occurrencesOfRemoval = StringUtils.countOccurrencesOf(output,
-        "RocketChatTestConfig.removeUserFromGroup("
-            + consultant.getRocketChatId() + "," + session.getGroupId()
-            + ") called");
-    assertEquals(1, occurrencesOfRemoval);
-    int occurrencesOfRemoveTech = StringUtils.countOccurrencesOf(output,
-        "RocketChatTestConfig.removeTechnicalUserFromGroup(" + session.getGroupId() + ") called");
-    assertEquals(1, occurrencesOfRemoveTech);
+    verifyRocketChatTechUserAddedToGroup(logOutput, session.getGroupId(), 1);
+    verifyRocketChatUserRemovedFromGroup(logOutput, session.getGroupId(),
+        consultant.getRocketChatId(), 1);
+    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getGroupId(), 1);
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
+  public void removeFromSessionShouldReturnNoContentAndIgnoreRemovalIfAssigned(
+      CapturedOutput logOutput) throws Exception {
+    givenAValidConsultant(true);
+    givenAValidSession();
+    givenAValidRocketChatSystemUser();
+    givenAValidRocketChatInfoUserResponse(session.getConsultant());
+    givenKeycloakUserRoles(session.getConsultant().getId(), "consultant");
+
+    mockMvc.perform(
+            delete("/users/sessions/{sessionId}/consultant/{consultantId}", session.getId(),
+                session.getConsultant().getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
+
+    verifyRocketChatTechUserAddedToGroup(logOutput, session.getGroupId(), 0);
+    verifyRocketChatUserRemovedFromGroup(logOutput, session.getGroupId(),
+        session.getConsultant().getRocketChatId(), 0);
+    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getGroupId(), 0);
   }
 
   @Test
@@ -3190,6 +3209,10 @@ public class UserControllerE2EIT {
   }
 
   private void givenAValidRocketChatInfoUserResponse() {
+    givenAValidRocketChatInfoUserResponse(consultant);
+  }
+
+  private void givenAValidRocketChatInfoUserResponse(Consultant consultant) {
     userInfoResponse = new UserInfoResponseDTO();
     userInfoResponse.setSuccess(true);
 
@@ -3641,5 +3664,26 @@ public class UserControllerE2EIT {
   private void restoreSession() {
     session.setEnquiryMessageDate(null);
     sessionRepository.save(session);
+  }
+
+  private void verifyRocketChatTechUserAddedToGroup(CapturedOutput logOutput, String groupId,
+      int count) {
+    int occurrencesOfAddTech = StringUtils.countOccurrencesOf(logOutput.getOut(),
+        "RocketChatTestConfig.addTechnicalUserToGroup(" + groupId + ") called");
+    assertEquals(count, occurrencesOfAddTech);
+  }
+
+  private void verifyRocketChatTechUserRemovedFromGroup(CapturedOutput logOutput, String groupId,
+      int count) {
+    int occurrencesOfRemoveTech = StringUtils.countOccurrencesOf(logOutput.getOut(),
+        "RocketChatTestConfig.removeTechnicalUserFromGroup(" + groupId + ") called");
+    assertEquals(count, occurrencesOfRemoveTech);
+  }
+
+  private void verifyRocketChatUserRemovedFromGroup(CapturedOutput logOutput, String groupId,
+      String chatUserId, int count) {
+    int occurrencesOfRemoval = StringUtils.countOccurrencesOf(logOutput.getOut(),
+        "RocketChatTestConfig.removeUserFromGroup(" + chatUserId + "," + groupId + ") called");
+    assertEquals(count, occurrencesOfRemoval);
   }
 }

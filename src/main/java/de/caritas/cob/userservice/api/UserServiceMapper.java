@@ -277,4 +277,10 @@ public class UserServiceMapper {
         .distinct()
         .collect(Collectors.toList());
   }
+
+  public List<String> chatUserIdOf(List<Map<String, String>> groupMembers) {
+    return groupMembers.stream()
+        .map(map -> map.get("chatUserId"))
+        .collect(Collectors.toList());
+  }
 }

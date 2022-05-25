@@ -21,4 +21,6 @@ public interface Messaging {
   boolean removeUserFromSession(String chatUserId, String chatId);
 
   Optional<Map<String, String>> findSession(Long sessionId);
+
+  boolean isInChat(String chatId, String chatUserId);
 }

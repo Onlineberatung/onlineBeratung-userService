@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api;
 
-import static java.util.Objects.nonNull;
+import static java.util.Objects.isNull;
 
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.Consultant;
@@ -16,6 +16,7 @@ import de.caritas.cob.userservice.api.service.StringConverter;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -94,34 +95,50 @@ public class Messenger implements Messaging {
   @Override
   public boolean removeUserFromSession(String chatUserId, String chatId) {
     var session = sessionRepository.findByGroupId(chatId).orElseThrow();
-    var assignee = session.getConsultant();
     var consultant = consultantRepository.findByRocketChatIdAndDeleteDateIsNull(chatUserId)
         .orElseThrow();
-    var seesPeer = identityManager.canViewPeerSessions(consultant.getId());
-    var seesFeedback = identityManager.canViewFeedbackSessions(consultant.getId());
+    var removedOrIgnored = new AtomicBoolean(true);
 
-    if (isAssigned(chatUserId, assignee)) {
-      return true;
+    if (!consultant.isIn(session)) {
+      if (isInChat(chatId, chatUserId) && !isTeaming(session, consultant) && !isPeering(session,
+          consultant)) {
+        removedOrIgnored.set(messageClient.removeUserFromSession(chatUserId, chatId));
+      }
+
+      var feedbackChatId = session.getFeedbackGroupId();
+      if (isInChat(feedbackChatId, chatUserId) && !isMain(session, consultant)) {
+        removedOrIgnored.set(messageClient.removeUserFromSession(chatUserId, feedbackChatId));
+      }
     }
 
-    if (isInAgency(session, consultant) && isInTeam(session, consultant, seesPeer, seesFeedback)) {
-      return true;
+    return removedOrIgnored.get();
+  }
+
+  private boolean isTeaming(Session session, Consultant consultant) {
+    return session.isTeamSession() && !session.hasFeedbackChat()
+        && consultant.isInAgency(session.getAgencyId()) && consultant.isTeamConsultant();
+  }
+
+  private boolean isPeering(Session session, Consultant consultant) {
+    return session.isTeamSession() && session.hasFeedbackChat()
+        && consultant.isInAgency(session.getAgencyId())
+        && identityManager.canViewPeerSessions(consultant.getId());
+  }
+
+  private boolean isMain(Session session, Consultant consultant) {
+    return session.isTeamSession() && consultant.isInAgency(session.getAgencyId())
+        && identityManager.canViewFeedbackSessions(consultant.getId());
+  }
+
+  public boolean isInChat(String chatId, String chatUserId) {
+    if (isNull(chatId)) {
+      return false;
     }
 
-    return messageClient.removeUserFromSession(chatUserId, chatId, session.getFeedbackGroupId());
-  }
+    var groupMembers = messageClient.findMembers(chatId).orElseThrow();
+    var chatUserIds = mapper.chatUserIdOf(groupMembers);
 
-  private boolean isAssigned(String chatUserId, Consultant assignedConsultant) {
-    return nonNull(assignedConsultant) && chatUserId.equals(assignedConsultant.getRocketChatId());
-  }
-
-  private boolean isInAgency(Session session, Consultant consultant) {
-    return session.isTeamSession() && consultant.isInAgency(session.getAgencyId());
-  }
-
-  private boolean isInTeam(Session session, Consultant consultant, boolean seesPeer,
-      boolean seesFeedback) {
-    return session.hasFeedbackChat() ? (seesPeer || seesFeedback) : consultant.isTeamConsultant();
+    return chatUserIds.contains(chatUserId);
   }
 
   @Override

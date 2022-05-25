@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.model;
 
 import static de.caritas.cob.userservice.api.model.Consultant.EMAIL_ANALYZER;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.neovisionaries.i18n.LanguageCode;
@@ -207,11 +208,20 @@ public class Consultant implements TenantAware {
   }
 
   @JsonIgnore
-  public boolean isInAgency(Long agencyId) {
-    return getConsultantAgencies().stream()
+  public boolean isInAgency(long agencyId) {
+    if (isNull(consultantAgencies)) {
+      return false;
+    }
+
+    return consultantAgencies.stream()
         .map(ConsultantAgency::getAgencyId)
         .collect(Collectors.toSet())
         .contains(agencyId);
+  }
+
+  @JsonIgnore
+  public boolean isIn(Session session) {
+    return nonNull(sessions) && nonNull(session) && sessions.contains(session);
   }
 
   @Override

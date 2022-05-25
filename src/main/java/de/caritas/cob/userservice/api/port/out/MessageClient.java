@@ -20,5 +20,7 @@ public interface MessageClient {
 
   boolean updateChatE2eKey(String chatUserId, String roomId, String key);
 
-  boolean removeUserFromSession(String chatUserId, String... chatIds);
+  boolean removeUserFromSession(String chatUserId, String chatId);
+
+  Optional<List<Map<String, String>>> findMembers(String chatId);
 }
