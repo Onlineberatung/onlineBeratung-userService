@@ -64,6 +64,7 @@ public class UnauthorizedMembersProvider {
         .collect(Collectors.toList());
   }
 
+  @Transactional
   public List<Consultant> obtainConsultantsToRemove(String rcGroupId, Session session,
       Consultant consultant, List<GroupMemberDTO> memberList) {
 
