@@ -1737,7 +1737,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
-  public void removeFromSessionShouldReturnForbiddenIfSessionIdFormatIsInvalid() throws Exception {
+  void removeFromSessionShouldReturnForbiddenIfSessionIdFormatIsInvalid() throws Exception {
     givenAValidConsultant(true);
     var sessionId = RandomStringUtils.randomAlphabetic(8);
 
@@ -1753,7 +1753,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
-  public void removeFromSessionShouldReturnBadRequestIfConsultantIdFormatIsInvalid()
+  void removeFromSessionShouldReturnBadRequestIfConsultantIdFormatIsInvalid()
       throws Exception {
     var consultantId = RandomStringUtils.randomAlphanumeric(8);
 
@@ -1768,7 +1768,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
-  public void removeFromSessionShouldReturnNotFoundIfConsultantDoesNotExist() throws Exception {
+  void removeFromSessionShouldReturnNotFoundIfConsultantDoesNotExist() throws Exception {
     givenAValidSession();
 
     mockMvc.perform(
@@ -1783,7 +1783,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
-  public void removeFromSessionShouldReturnNotFoundIfSessionDoesNotExist() throws Exception {
+  void removeFromSessionShouldReturnNotFoundIfSessionDoesNotExist() throws Exception {
     givenAValidConsultant(true);
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
@@ -1800,7 +1800,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
-  public void removeFromSessionShouldReturnNoContentAndIgnoreRemovalIfNotInChat(
+  void removeFromSessionShouldReturnNoContentAndIgnoreRemovalIfNotInChat(
       CapturedOutput logOutput) throws Exception {
     givenAValidConsultant(true);
     givenAValidRocketChatSystemUser();
@@ -1831,7 +1831,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
-  public void removeFromSessionShouldReturnNoContentAndIgnoreRemovalIfNotTeaming(
+  void removeFromSessionShouldReturnNoContentAndIgnoreRemovalIfNotTeaming(
       CapturedOutput logOutput) throws Exception {
     givenAValidConsultant(true);
     givenAValidRocketChatSystemUser();
@@ -1862,7 +1862,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
-  public void removeFromSessionShouldReturnNoContentAndRemoveConsultantFromSessionNotFromFeedbackChat(
+  void removeFromSessionShouldReturnNoContentAndRemoveConsultantFromSessionNotFromFeedbackChat(
       CapturedOutput logOutput) throws Exception {
     givenAValidConsultant(true);
     givenAValidRocketChatSystemUser();
@@ -1893,7 +1893,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
-  public void removeFromSessionShouldReturnNoContentAndRemoveConsultantFromSessionAndFeedbackChat(
+  void removeFromSessionShouldReturnNoContentAndRemoveConsultantFromSessionAndFeedbackChat(
       CapturedOutput logOutput) throws Exception {
     givenAValidConsultant(true);
     givenAValidRocketChatSystemUser();
@@ -1925,7 +1925,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
-  public void removeFromSessionShouldReturnNoContentAndIgnoreRemovalIfAssigned(
+  void removeFromSessionShouldReturnNoContentAndIgnoreRemovalIfAssigned(
       CapturedOutput logOutput) throws Exception {
     givenAValidConsultant(true);
     givenAValidSession();
