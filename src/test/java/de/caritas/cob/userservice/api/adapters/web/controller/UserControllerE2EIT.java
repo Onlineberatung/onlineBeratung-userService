@@ -50,6 +50,8 @@ import de.caritas.cob.userservice.api.actions.chat.StopChatActionCommand;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.StandardResponseDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.MessageResponse;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomResponse;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsGetDTO;
@@ -123,7 +125,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.Matchers;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.keycloak.admin.client.Keycloak;
@@ -291,13 +292,15 @@ public class UserControllerE2EIT {
 
   private UserInfoResponseDTO userInfoResponse;
 
+  private GroupMemberResponseDTO groupMemberResponseDTO;
+
   @SuppressWarnings("FieldCanBeLocal")
   private SubscriptionsGetDTO subscriptionsGetResponse;
 
   private String infix;
 
   @AfterEach
-  public void reset() {
+  void reset() {
     if (nonNull(user)) {
       user.setDeleteDate(null);
       userRepository.save(user);
@@ -1068,7 +1071,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("languages", is(notNullValue())))
         .andExpect(jsonPath("encourage2fa").doesNotExist())
         .andExpect(jsonPath("absenceMessage", is(nullValue())))
-        .andExpect(jsonPath("agencies", hasSize(1)))
+        .andExpect(jsonPath("agencies", hasSize(2)))
         .andExpect(jsonPath("agencies[0].id", is(consultantAgency.getAgencyId().intValue())))
         .andExpect(jsonPath("agencies[0].name", is(notNullValue())))
         .andExpect(jsonPath("agencies[0].postcode", is(notNullValue())))
@@ -1173,7 +1176,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("languages", is(notNullValue())))
         .andExpect(jsonPath("encourage2fa").doesNotExist())
         .andExpect(jsonPath("absenceMessage", is(nullValue())))
-        .andExpect(jsonPath("agencies", hasSize(1)))
+        .andExpect(jsonPath("agencies", hasSize(2)))
         .andExpect(jsonPath("agencies[0].id", is(consultantAgency.getAgencyId().intValue())))
         .andExpect(jsonPath("agencies[0].name", is(notNullValue())))
         .andExpect(jsonPath("agencies[0].postcode", is(notNullValue())))
@@ -1278,7 +1281,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("languages", is(notNullValue())))
         .andExpect(jsonPath("encourage2fa").doesNotExist())
         .andExpect(jsonPath("absenceMessage", is(nullValue())))
-        .andExpect(jsonPath("agencies", hasSize(1)))
+        .andExpect(jsonPath("agencies", hasSize(2)))
         .andExpect(jsonPath("agencies[0].id", is(consultantAgency.getAgencyId().intValue())))
         .andExpect(jsonPath("agencies[0].name", is(notNullValue())))
         .andExpect(jsonPath("agencies[0].postcode", is(notNullValue())))
@@ -1797,13 +1800,15 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
-  @Disabled
-  public void removeFromSessionShouldReturnNoContentAndRemoveConsultant(CapturedOutput logOutput)
+  public void removeFromSessionShouldReturnNoContentAndRemoveConsultantFromSessionNotFromFeedbackChat(
+      CapturedOutput logOutput)
       throws Exception {
     givenAValidConsultant(true);
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
     givenAValidSession();
+    givenAPositiveRocketChatGroupMemberResponse(session.getGroupId(), consultant.getRocketChatId());
+    givenAnEmptyRocketChatGroupMemberResponse(session.getFeedbackGroupId());
     givenKeycloakUserRoles(consultant.getId(), "consultant");
 
     mockMvc.perform(
@@ -1818,6 +1823,37 @@ public class UserControllerE2EIT {
     verifyRocketChatUserRemovedFromGroup(logOutput, session.getGroupId(),
         consultant.getRocketChatId(), 1);
     verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getGroupId(), 1);
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
+  public void removeFromSessionShouldReturnNoContentAndRemoveConsultantFromSessionAndFeedbackChat(
+      CapturedOutput logOutput) throws Exception {
+    givenAValidConsultant(true);
+    givenAValidRocketChatSystemUser();
+    givenAValidRocketChatInfoUserResponse();
+    givenAValidSession();
+    givenAPositiveRocketChatGroupMemberResponse(session.getGroupId(), consultant.getRocketChatId());
+    givenAPositiveRocketChatGroupMemberResponse(session.getFeedbackGroupId(),
+        consultant.getRocketChatId());
+    givenKeycloakUserRoles(consultant.getId(), "consultant");
+
+    mockMvc.perform(
+            delete("/users/sessions/{sessionId}/consultant/{consultantId}", session.getId(),
+                consultant.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
+
+    verifyRocketChatTechUserAddedToGroup(logOutput, session.getGroupId(), 1);
+    verifyRocketChatUserRemovedFromGroup(logOutput, session.getGroupId(),
+        consultant.getRocketChatId(), 1);
+    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getGroupId(), 1);
+    verifyRocketChatTechUserAddedToGroup(logOutput, session.getFeedbackGroupId(), 1);
+    verifyRocketChatUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(),
+        consultant.getRocketChatId(), 1);
+    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(), 1);
   }
 
   @Test
@@ -3299,6 +3335,37 @@ public class UserControllerE2EIT {
     ).thenReturn(ResponseEntity.ok(userInfoResponse));
   }
 
+  private void givenAPositiveRocketChatGroupMemberResponse(String chatId, String chatUserId) {
+    groupMemberResponseDTO = new GroupMemberResponseDTO();
+    groupMemberResponseDTO.setSuccess(true);
+
+    var groupMember = easyRandom.nextObject(GroupMemberDTO.class);
+    if (nonNull(chatUserId)) {
+      groupMember.set_id(chatUserId);
+    }
+    GroupMemberDTO[] groupMembers = {groupMember};
+    groupMemberResponseDTO.setMembers(groupMembers);
+
+    var urlSuffix = "/api/v1/groups.members?roomId=" + chatId + "&count=0";
+    when(restTemplate.exchange(
+        endsWith(urlSuffix), eq(HttpMethod.GET),
+        any(HttpEntity.class), eq(GroupMemberResponseDTO.class))
+    ).thenReturn(ResponseEntity.ok(groupMemberResponseDTO));
+  }
+
+  private void givenAnEmptyRocketChatGroupMemberResponse(String chatId) {
+    groupMemberResponseDTO = new GroupMemberResponseDTO();
+    groupMemberResponseDTO.setSuccess(true);
+    GroupMemberDTO[] groupMembers = {};
+    groupMemberResponseDTO.setMembers(groupMembers);
+
+    var urlSuffix = "/api/v1/groups.members?roomId=" + chatId + "&count=0";
+    when(restTemplate.exchange(
+        endsWith(urlSuffix), eq(HttpMethod.GET),
+        any(HttpEntity.class), eq(GroupMemberResponseDTO.class))
+    ).thenReturn(ResponseEntity.ok(groupMemberResponseDTO));
+  }
+
   private void givenAValidRocketChatGetSubscriptionsResponse(int subscriptionSize, boolean isE2e) {
     subscriptionsGetResponse = new SubscriptionsGetDTO();
     subscriptionsGetResponse.setSuccess(true);
@@ -3648,8 +3715,9 @@ public class UserControllerE2EIT {
     updateConsultantDTO.languages(languages);
   }
 
-  private void givenAValidRocketChatSystemUser() {
+  private void givenAValidRocketChatSystemUser() throws RocketChatUserNotInitializedException {
     when(rocketChatCredentialsProvider.getSystemUserSneaky()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
+    when(rocketChatCredentialsProvider.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
   }
 
   private void givenValidRocketChatTechUserResponse() throws RocketChatUserNotInitializedException {

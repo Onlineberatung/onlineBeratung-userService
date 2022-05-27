@@ -99,7 +99,7 @@ public class Messenger implements Messaging {
         .orElseThrow();
     var removedOrIgnored = new AtomicBoolean(true);
 
-    if (!consultant.isIn(session)) {
+    if (!session.isAdvisedBy(consultant)) {
       if (isInChat(chatId, chatUserId) && !isTeaming(session, consultant) && !isPeering(session,
           consultant)) {
         removedOrIgnored.set(messageClient.removeUserFromSession(chatUserId, chatId));
