@@ -99,35 +99,37 @@ public class Messenger implements Messaging {
         .orElseThrow();
     var removedOrIgnored = new AtomicBoolean(true);
 
-    if (!session.isAdvisedBy(consultant)) {
+    if (!session.isAdvisedBy(consultant) && !isResponsible(session, consultant)) {
       if (isInChat(chatId, chatUserId) && !isTeaming(session, consultant) && !isPeering(session,
           consultant)) {
         removedOrIgnored.set(messageClient.removeUserFromSession(chatUserId, chatId));
       }
 
       var feedbackChatId = session.getFeedbackGroupId();
-      if (isInChat(feedbackChatId, chatUserId) && !isMain(session, consultant)) {
-        removedOrIgnored.set(messageClient.removeUserFromSession(chatUserId, feedbackChatId));
+      if (isInChat(feedbackChatId, chatUserId) && !isMain(consultant)) {
+        removedOrIgnored.compareAndExchange(true,
+            messageClient.removeUserFromSession(chatUserId, feedbackChatId)
+        );
       }
     }
 
     return removedOrIgnored.get();
   }
 
+  private boolean isResponsible(Session session, Consultant consultant) {
+    return session.isTeamSession() && consultant.isInAgency(session.getAgencyId());
+  }
+
   private boolean isTeaming(Session session, Consultant consultant) {
-    return session.isTeamSession() && !session.hasFeedbackChat()
-        && consultant.isInAgency(session.getAgencyId()) && consultant.isTeamConsultant();
+    return !session.hasFeedbackChat() && consultant.isTeamConsultant();
   }
 
   private boolean isPeering(Session session, Consultant consultant) {
-    return session.isTeamSession() && session.hasFeedbackChat()
-        && consultant.isInAgency(session.getAgencyId())
-        && identityManager.canViewPeerSessions(consultant.getId());
+    return session.hasFeedbackChat() && identityManager.canViewPeerSessions(consultant.getId());
   }
 
-  private boolean isMain(Session session, Consultant consultant) {
-    return session.isTeamSession() && consultant.isInAgency(session.getAgencyId())
-        && identityManager.canViewFeedbackSessions(consultant.getId());
+  private boolean isMain(Consultant consultant) {
+    return identityManager.canViewFeedbackSessions(consultant.getId());
   }
 
   public boolean isInChat(String chatId, String chatUserId) {

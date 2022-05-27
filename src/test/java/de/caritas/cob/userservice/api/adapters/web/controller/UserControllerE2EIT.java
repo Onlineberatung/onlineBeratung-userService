@@ -1800,9 +1800,70 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
+  public void removeFromSessionShouldReturnNoContentAndIgnoreRemovalIfNotInChat(
+      CapturedOutput logOutput) throws Exception {
+    givenAValidConsultant(true);
+    givenAValidRocketChatSystemUser();
+    givenAValidRocketChatInfoUserResponse();
+    givenAValidSession();
+    givenAnEmptyRocketChatGroupMemberResponse(session.getGroupId());
+    givenAnEmptyRocketChatGroupMemberResponse(session.getFeedbackGroupId());
+    givenKeycloakUserRoles(consultant.getId(), "consultant");
+
+    mockMvc.perform(
+            delete("/users/sessions/{sessionId}/consultant/{consultantId}", session.getId(),
+                consultant.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
+
+    verifyRocketChatTechUserAddedToGroup(logOutput, session.getGroupId(), 0);
+    verifyRocketChatUserRemovedFromGroup(logOutput, session.getGroupId(),
+        session.getConsultant().getRocketChatId(), 0);
+    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getGroupId(), 0);
+
+    verifyRocketChatTechUserAddedToGroup(logOutput, session.getFeedbackGroupId(), 0);
+    verifyRocketChatUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(),
+        consultant.getRocketChatId(), 0);
+    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(), 0);
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
+  public void removeFromSessionShouldReturnNoContentAndIgnoreRemovalIfNotTeaming(
+      CapturedOutput logOutput) throws Exception {
+    givenAValidConsultant(true);
+    givenAValidRocketChatSystemUser();
+    givenAValidRocketChatInfoUserResponse();
+    givenAValidSession();
+    givenAnEmptyRocketChatGroupMemberResponse(session.getGroupId());
+    givenAnEmptyRocketChatGroupMemberResponse(session.getFeedbackGroupId());
+    givenKeycloakUserRoles(consultant.getId(), "consultant");
+
+    mockMvc.perform(
+            delete("/users/sessions/{sessionId}/consultant/{consultantId}", session.getId(),
+                consultant.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
+
+    verifyRocketChatTechUserAddedToGroup(logOutput, session.getGroupId(), 0);
+    verifyRocketChatUserRemovedFromGroup(logOutput, session.getGroupId(),
+        session.getConsultant().getRocketChatId(), 0);
+    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getGroupId(), 0);
+
+    verifyRocketChatTechUserAddedToGroup(logOutput, session.getFeedbackGroupId(), 0);
+    verifyRocketChatUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(),
+        consultant.getRocketChatId(), 0);
+    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(), 0);
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
   public void removeFromSessionShouldReturnNoContentAndRemoveConsultantFromSessionNotFromFeedbackChat(
-      CapturedOutput logOutput)
-      throws Exception {
+      CapturedOutput logOutput) throws Exception {
     givenAValidConsultant(true);
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
@@ -1823,6 +1884,11 @@ public class UserControllerE2EIT {
     verifyRocketChatUserRemovedFromGroup(logOutput, session.getGroupId(),
         consultant.getRocketChatId(), 1);
     verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getGroupId(), 1);
+
+    verifyRocketChatTechUserAddedToGroup(logOutput, session.getFeedbackGroupId(), 0);
+    verifyRocketChatUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(),
+        consultant.getRocketChatId(), 0);
+    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(), 0);
   }
 
   @Test
@@ -1850,6 +1916,7 @@ public class UserControllerE2EIT {
     verifyRocketChatUserRemovedFromGroup(logOutput, session.getGroupId(),
         consultant.getRocketChatId(), 1);
     verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getGroupId(), 1);
+
     verifyRocketChatTechUserAddedToGroup(logOutput, session.getFeedbackGroupId(), 1);
     verifyRocketChatUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(),
         consultant.getRocketChatId(), 1);
@@ -1878,6 +1945,11 @@ public class UserControllerE2EIT {
     verifyRocketChatUserRemovedFromGroup(logOutput, session.getGroupId(),
         session.getConsultant().getRocketChatId(), 0);
     verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getGroupId(), 0);
+
+    verifyRocketChatTechUserAddedToGroup(logOutput, session.getFeedbackGroupId(), 0);
+    verifyRocketChatUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(),
+        consultant.getRocketChatId(), 0);
+    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(), 0);
   }
 
   @Test
