@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.facade.assignsession;
 
 import static de.caritas.cob.userservice.api.testHelper.AsyncVerification.verifyAsync;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_WITH_AGENCY;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.FEEDBACKSESSION_WITH_CONSULTANT;
 import static java.util.Arrays.asList;
@@ -89,7 +90,7 @@ public class AssignSessionFacadeTest {
 
     var thrown = assertThrows(InternalServerErrorException.class,
         () -> assignSessionFacade.assignSession(FEEDBACKSESSION_WITH_CONSULTANT,
-            CONSULTANT_WITH_AGENCY)
+            CONSULTANT_WITH_AGENCY, CONSULTANT)
     );
 
     assertEquals(exception.getMessage(), thrown.getMessage());
@@ -122,9 +123,10 @@ public class AssignSessionFacadeTest {
     consultantToRemove.setRocketChatId("otherRcId");
     when(this.authenticatedUser.getUserId()).thenReturn("authenticatedUserId");
     when(unauthorizedMembersProvider.obtainConsultantsToRemove(any(), any(), any(),
-        any())).thenReturn(List.of(consultantToRemove));
+        any(), any())).thenReturn(List.of(consultantToRemove));
+    var consultantToKeep = new EasyRandom().nextObject(Consultant.class);
 
-    this.assignSessionFacade.assignSession(session, consultant);
+    assignSessionFacade.assignSession(session, consultant, consultantToKeep);
 
     verify(sessionToConsultantVerifier, times(1)).verifyPreconditionsForAssignment(
         argThat(consultantSessionDTO ->
@@ -162,10 +164,11 @@ public class AssignSessionFacadeTest {
     Consultant consultantToRemove = new EasyRandom().nextObject(Consultant.class);
     consultantToRemove.setRocketChatId("otherRcId");
     when(this.authenticatedUser.getUserId()).thenReturn("authenticatedUserId");
-    when(unauthorizedMembersProvider.obtainConsultantsToRemove(any(), any(), any(), any()))
+    when(unauthorizedMembersProvider.obtainConsultantsToRemove(any(), any(), any(), any(), any()))
         .thenReturn(List.of(consultantToRemove));
+    var consultantToKeep = new EasyRandom().nextObject(Consultant.class);
 
-    this.assignSessionFacade.assignSession(session, consultant);
+    assignSessionFacade.assignSession(session, consultant, consultantToKeep);
 
     verify(sessionToConsultantVerifier, times(1)).verifyPreconditionsForAssignment(
         argThat(consultantSessionDTO ->
@@ -205,7 +208,7 @@ public class AssignSessionFacadeTest {
     consultantToRemove.setRocketChatId("otherRcId");
     when(this.authenticatedUser.getUserId()).thenReturn("authenticatedUserId");
 
-    this.assignSessionFacade.assignSession(session, consultant);
+    this.assignSessionFacade.assignSession(session, consultant, CONSULTANT);
 
     verify(statisticsService, times(1)).fireEvent(any(AssignSessionStatisticsEvent.class));
 

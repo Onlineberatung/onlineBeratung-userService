@@ -531,6 +531,20 @@ public class RocketChatService implements MessageClient {
     }
   }
 
+  public boolean removeUserFromSession(String chatUserId, String chatId) {
+    try {
+      addTechnicalUserToGroup(chatId);
+      removeUserFromGroup(chatUserId, chatId);
+      removeTechnicalUserFromGroup(chatId);
+
+      return true;
+    } catch (Exception exception) {
+      log.error("error", exception);
+
+      return false;
+    }
+  }
+
   /**
    * Removes the technical user from the given Rocket.Chat group id.
    *
@@ -594,6 +608,18 @@ public class RocketChatService implements MessageClient {
           && !member.get_id().equals(rcCredentialHelper.getSystemUser().getRocketChatUserId())) {
         removeUserFromGroup(member.get_id(), rcGroupId);
       }
+    }
+  }
+
+  @Override
+  public Optional<List<Map<String, String>>> findMembers(String chatId) {
+    try {
+      var members = getMembersOfGroup(chatId);
+      var memberMaps = mapper.mapOf(members);
+
+      return Optional.of(memberMaps);
+    } catch (RocketChatGetGroupMembersException exception) {
+      return Optional.empty();
     }
   }
 

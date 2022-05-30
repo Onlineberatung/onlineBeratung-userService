@@ -50,6 +50,8 @@ import de.caritas.cob.userservice.api.actions.chat.StopChatActionCommand;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.StandardResponseDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.MessageResponse;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomResponse;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsGetDTO;
@@ -106,6 +108,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -123,11 +126,15 @@ import org.hamcrest.Matchers;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.RoleMappingResource;
+import org.keycloak.admin.client.resource.RoleScopeResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.admin.client.token.TokenManager;
+import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -139,6 +146,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -149,12 +158,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplateHandler;
 
 @SpringBootTest
+@ExtendWith(OutputCaptureExtension.class)
 @AutoConfigureMockMvc
 @ActiveProfiles("testing")
 @AutoConfigureTestDatabase
@@ -281,13 +292,15 @@ public class UserControllerE2EIT {
 
   private UserInfoResponseDTO userInfoResponse;
 
+  private GroupMemberResponseDTO groupMemberResponseDTO;
+
   @SuppressWarnings("FieldCanBeLocal")
   private SubscriptionsGetDTO subscriptionsGetResponse;
 
   private String infix;
 
   @AfterEach
-  public void reset() {
+  void reset() {
     if (nonNull(user)) {
       user.setDeleteDate(null);
       userRepository.save(user);
@@ -1058,7 +1071,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("languages", is(notNullValue())))
         .andExpect(jsonPath("encourage2fa").doesNotExist())
         .andExpect(jsonPath("absenceMessage", is(nullValue())))
-        .andExpect(jsonPath("agencies", hasSize(1)))
+        .andExpect(jsonPath("agencies", hasSize(2)))
         .andExpect(jsonPath("agencies[0].id", is(consultantAgency.getAgencyId().intValue())))
         .andExpect(jsonPath("agencies[0].name", is(notNullValue())))
         .andExpect(jsonPath("agencies[0].postcode", is(notNullValue())))
@@ -1163,7 +1176,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("languages", is(notNullValue())))
         .andExpect(jsonPath("encourage2fa").doesNotExist())
         .andExpect(jsonPath("absenceMessage", is(nullValue())))
-        .andExpect(jsonPath("agencies", hasSize(1)))
+        .andExpect(jsonPath("agencies", hasSize(2)))
         .andExpect(jsonPath("agencies[0].id", is(consultantAgency.getAgencyId().intValue())))
         .andExpect(jsonPath("agencies[0].name", is(notNullValue())))
         .andExpect(jsonPath("agencies[0].postcode", is(notNullValue())))
@@ -1268,7 +1281,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("languages", is(notNullValue())))
         .andExpect(jsonPath("encourage2fa").doesNotExist())
         .andExpect(jsonPath("absenceMessage", is(nullValue())))
-        .andExpect(jsonPath("agencies", hasSize(1)))
+        .andExpect(jsonPath("agencies", hasSize(2)))
         .andExpect(jsonPath("agencies[0].id", is(consultantAgency.getAgencyId().intValue())))
         .andExpect(jsonPath("agencies[0].name", is(notNullValue())))
         .andExpect(jsonPath("agencies[0].postcode", is(notNullValue())))
@@ -1720,6 +1733,222 @@ public class UserControllerE2EIT {
         de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode.fromValue(
             language.getLanguageCode().toString())
     )));
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
+  void removeFromSessionShouldReturnForbiddenIfSessionIdFormatIsInvalid() throws Exception {
+    givenAValidConsultant(true);
+    var sessionId = RandomStringUtils.randomAlphabetic(8);
+
+    mockMvc.perform(
+            delete("/users/sessions/{sessionId}/consultant/{consultantId}", sessionId,
+                consultant.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
+  void removeFromSessionShouldReturnBadRequestIfConsultantIdFormatIsInvalid() throws Exception {
+    var consultantId = RandomStringUtils.randomAlphanumeric(8);
+
+    mockMvc.perform(
+            delete("/users/sessions/1/consultant/{consultantId}", consultantId)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
+  void removeFromSessionShouldReturnNotFoundIfConsultantDoesNotExist() throws Exception {
+    givenAValidSession();
+
+    mockMvc.perform(
+            delete("/users/sessions/{sessionId}/consultant/{consultantId}",
+                session.getId(), UUID.randomUUID().toString())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
+  void removeFromSessionShouldReturnNotFoundIfSessionDoesNotExist() throws Exception {
+    givenAValidConsultant(true);
+    givenAValidRocketChatSystemUser();
+    givenAValidRocketChatInfoUserResponse();
+
+    mockMvc.perform(
+            delete("/users/sessions/{sessionId}/consultant/{consultantId}",
+                RandomStringUtils.randomNumeric(5, 6), consultant.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
+  void removeFromSessionShouldReturnNoContentAndIgnoreRemovalIfNotInChat(CapturedOutput logOutput)
+      throws Exception {
+    givenAValidConsultant(true);
+    givenAValidRocketChatSystemUser();
+    givenAValidRocketChatInfoUserResponse();
+    givenAValidSession();
+    givenAnEmptyRocketChatGroupMemberResponse(session.getGroupId());
+    givenAnEmptyRocketChatGroupMemberResponse(session.getFeedbackGroupId());
+    givenKeycloakUserRoles(consultant.getId(), "consultant");
+
+    mockMvc.perform(
+            delete("/users/sessions/{sessionId}/consultant/{consultantId}", session.getId(),
+                consultant.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
+
+    verifyRocketChatTechUserAddedToGroup(logOutput, session.getGroupId(), 0);
+    verifyRocketChatUserRemovedFromGroup(logOutput, session.getGroupId(),
+        session.getConsultant().getRocketChatId(), 0);
+    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getGroupId(), 0);
+
+    verifyRocketChatTechUserAddedToGroup(logOutput, session.getFeedbackGroupId(), 0);
+    verifyRocketChatUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(),
+        consultant.getRocketChatId(), 0);
+    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(), 0);
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
+  void removeFromSessionShouldReturnNoContentAndIgnoreRemovalIfNotTeaming(CapturedOutput logOutput)
+      throws Exception {
+    givenAValidConsultant(true);
+    givenAValidRocketChatSystemUser();
+    givenAValidRocketChatInfoUserResponse();
+    givenAValidSession();
+    givenAnEmptyRocketChatGroupMemberResponse(session.getGroupId());
+    givenAnEmptyRocketChatGroupMemberResponse(session.getFeedbackGroupId());
+    givenKeycloakUserRoles(consultant.getId(), "consultant");
+
+    mockMvc.perform(
+            delete("/users/sessions/{sessionId}/consultant/{consultantId}", session.getId(),
+                consultant.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
+
+    verifyRocketChatTechUserAddedToGroup(logOutput, session.getGroupId(), 0);
+    verifyRocketChatUserRemovedFromGroup(logOutput, session.getGroupId(),
+        session.getConsultant().getRocketChatId(), 0);
+    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getGroupId(), 0);
+
+    verifyRocketChatTechUserAddedToGroup(logOutput, session.getFeedbackGroupId(), 0);
+    verifyRocketChatUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(),
+        consultant.getRocketChatId(), 0);
+    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(), 0);
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
+  void removeFromSessionShouldReturnNoContentAndRemoveConsultantFromSessionNotFromFeedbackChat(
+      CapturedOutput logOutput) throws Exception {
+    givenAValidConsultant(true);
+    givenAValidRocketChatSystemUser();
+    givenAValidRocketChatInfoUserResponse();
+    givenAValidSession();
+    givenAPositiveRocketChatGroupMemberResponse(session.getGroupId(), consultant.getRocketChatId());
+    givenAnEmptyRocketChatGroupMemberResponse(session.getFeedbackGroupId());
+    givenKeycloakUserRoles(consultant.getId(), "consultant");
+
+    mockMvc.perform(
+            delete("/users/sessions/{sessionId}/consultant/{consultantId}", session.getId(),
+                consultant.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
+
+    verifyRocketChatTechUserAddedToGroup(logOutput, session.getGroupId(), 1);
+    verifyRocketChatUserRemovedFromGroup(logOutput, session.getGroupId(),
+        consultant.getRocketChatId(), 1);
+    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getGroupId(), 1);
+
+    verifyRocketChatTechUserAddedToGroup(logOutput, session.getFeedbackGroupId(), 0);
+    verifyRocketChatUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(),
+        consultant.getRocketChatId(), 0);
+    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(), 0);
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
+  void removeFromSessionShouldReturnNoContentAndRemoveConsultantFromSessionAndFeedbackChat(
+      CapturedOutput logOutput) throws Exception {
+    givenAValidConsultant(true);
+    givenAValidRocketChatSystemUser();
+    givenAValidRocketChatInfoUserResponse();
+    givenAValidSession();
+    givenAPositiveRocketChatGroupMemberResponse(session.getGroupId(), consultant.getRocketChatId());
+    givenAPositiveRocketChatGroupMemberResponse(session.getFeedbackGroupId(),
+        consultant.getRocketChatId());
+    givenKeycloakUserRoles(consultant.getId(), "consultant");
+
+    mockMvc.perform(
+            delete("/users/sessions/{sessionId}/consultant/{consultantId}", session.getId(),
+                consultant.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
+
+    verifyRocketChatTechUserAddedToGroup(logOutput, session.getGroupId(), 1);
+    verifyRocketChatUserRemovedFromGroup(logOutput, session.getGroupId(),
+        consultant.getRocketChatId(), 1);
+    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getGroupId(), 1);
+
+    verifyRocketChatTechUserAddedToGroup(logOutput, session.getFeedbackGroupId(), 1);
+    verifyRocketChatUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(),
+        consultant.getRocketChatId(), 1);
+    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(), 1);
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
+  void removeFromSessionShouldReturnNoContentAndIgnoreRemovalIfAssigned(CapturedOutput logOutput)
+      throws Exception {
+    givenAValidConsultant(true);
+    givenAValidSession();
+    givenAValidRocketChatSystemUser();
+    givenAValidRocketChatInfoUserResponse(session.getConsultant());
+    givenKeycloakUserRoles(session.getConsultant().getId(), "consultant");
+
+    mockMvc.perform(
+            delete("/users/sessions/{sessionId}/consultant/{consultantId}", session.getId(),
+                session.getConsultant().getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
+
+    verifyRocketChatTechUserAddedToGroup(logOutput, session.getGroupId(), 0);
+    verifyRocketChatUserRemovedFromGroup(logOutput, session.getGroupId(),
+        session.getConsultant().getRocketChatId(), 0);
+    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getGroupId(), 0);
+
+    verifyRocketChatTechUserAddedToGroup(logOutput, session.getFeedbackGroupId(), 0);
+    verifyRocketChatUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(),
+        consultant.getRocketChatId(), 0);
+    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(), 0);
   }
 
   @Test
@@ -2702,6 +2931,23 @@ public class UserControllerE2EIT {
     when(keycloak.realm(anyString())).thenReturn(realmResource);
   }
 
+  private void givenKeycloakUserRoles(String userId, String... roles) {
+    var realmResource = mock(RealmResource.class);
+    var usersResource = mock(UsersResource.class);
+    var userResource = mock(UserResource.class);
+    var roleMappingResource = mock(RoleMappingResource.class);
+    var roleScopeResource = mock(RoleScopeResource.class);
+    var roleRepresentationList = Arrays.stream(roles)
+        .map(role -> new RoleRepresentation(role, "", false))
+        .collect(Collectors.toList());
+    when(roleScopeResource.listAll()).thenReturn(roleRepresentationList);
+    when(roleMappingResource.realmLevel()).thenReturn(roleScopeResource);
+    when(userResource.roles()).thenReturn(roleMappingResource);
+    when(usersResource.get(userId)).thenReturn(userResource);
+    when(realmResource.users()).thenReturn(usersResource);
+    when(keycloak.realm(anyString())).thenReturn(realmResource);
+  }
+
   private void givenAValidKeycloakEmailChangeByUsernameResponse(String username) {
     var usernameTranscoder = new UsernameTranscoder();
     var userRepresentation = new UserRepresentation();
@@ -3140,6 +3386,10 @@ public class UserControllerE2EIT {
   }
 
   private void givenAValidRocketChatInfoUserResponse() {
+    givenAValidRocketChatInfoUserResponse(consultant);
+  }
+
+  private void givenAValidRocketChatInfoUserResponse(Consultant consultant) {
     userInfoResponse = new UserInfoResponseDTO();
     userInfoResponse.setSuccess(true);
 
@@ -3154,6 +3404,37 @@ public class UserControllerE2EIT {
         endsWith(urlSuffix), eq(HttpMethod.GET),
         any(HttpEntity.class), eq(UserInfoResponseDTO.class))
     ).thenReturn(ResponseEntity.ok(userInfoResponse));
+  }
+
+  private void givenAPositiveRocketChatGroupMemberResponse(String chatId, String chatUserId) {
+    groupMemberResponseDTO = new GroupMemberResponseDTO();
+    groupMemberResponseDTO.setSuccess(true);
+
+    var groupMember = easyRandom.nextObject(GroupMemberDTO.class);
+    if (nonNull(chatUserId)) {
+      groupMember.set_id(chatUserId);
+    }
+    GroupMemberDTO[] groupMembers = {groupMember};
+    groupMemberResponseDTO.setMembers(groupMembers);
+
+    var urlSuffix = "/api/v1/groups.members?roomId=" + chatId + "&count=0";
+    when(restTemplate.exchange(
+        endsWith(urlSuffix), eq(HttpMethod.GET),
+        any(HttpEntity.class), eq(GroupMemberResponseDTO.class))
+    ).thenReturn(ResponseEntity.ok(groupMemberResponseDTO));
+  }
+
+  private void givenAnEmptyRocketChatGroupMemberResponse(String chatId) {
+    groupMemberResponseDTO = new GroupMemberResponseDTO();
+    groupMemberResponseDTO.setSuccess(true);
+    GroupMemberDTO[] groupMembers = {};
+    groupMemberResponseDTO.setMembers(groupMembers);
+
+    var urlSuffix = "/api/v1/groups.members?roomId=" + chatId + "&count=0";
+    when(restTemplate.exchange(
+        endsWith(urlSuffix), eq(HttpMethod.GET),
+        any(HttpEntity.class), eq(GroupMemberResponseDTO.class))
+    ).thenReturn(ResponseEntity.ok(groupMemberResponseDTO));
   }
 
   private void givenAValidRocketChatGetSubscriptionsResponse(int subscriptionSize, boolean isE2e) {
@@ -3505,8 +3786,9 @@ public class UserControllerE2EIT {
     updateConsultantDTO.languages(languages);
   }
 
-  private void givenAValidRocketChatSystemUser() {
+  private void givenAValidRocketChatSystemUser() throws RocketChatUserNotInitializedException {
     when(rocketChatCredentialsProvider.getSystemUserSneaky()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
+    when(rocketChatCredentialsProvider.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
   }
 
   private void givenValidRocketChatTechUserResponse() throws RocketChatUserNotInitializedException {
@@ -3559,6 +3841,10 @@ public class UserControllerE2EIT {
         .orElseThrow();
   }
 
+  private void givenAValidSession() {
+    session = sessionRepository.findById(1L).orElseThrow();
+  }
+
   private void givenAUserWithSessions() {
     user = userRepository.findById("9c4057d0-05ad-4e86-a47c-dc5bdeec03b9").orElseThrow();
     when(authenticatedUser.getUserId()).thenReturn(user.getUserId());
@@ -3599,5 +3885,26 @@ public class UserControllerE2EIT {
   private void restoreSession() {
     session.setEnquiryMessageDate(null);
     sessionRepository.save(session);
+  }
+
+  private void verifyRocketChatTechUserAddedToGroup(CapturedOutput logOutput, String groupId,
+      int count) {
+    int occurrencesOfAddTech = StringUtils.countOccurrencesOf(logOutput.getOut(),
+        "RocketChatTestConfig.addTechnicalUserToGroup(" + groupId + ") called");
+    assertEquals(count, occurrencesOfAddTech);
+  }
+
+  private void verifyRocketChatTechUserRemovedFromGroup(CapturedOutput logOutput, String groupId,
+      int count) {
+    int occurrencesOfRemoveTech = StringUtils.countOccurrencesOf(logOutput.getOut(),
+        "RocketChatTestConfig.removeTechnicalUserFromGroup(" + groupId + ") called");
+    assertEquals(count, occurrencesOfRemoveTech);
+  }
+
+  private void verifyRocketChatUserRemovedFromGroup(CapturedOutput logOutput, String groupId,
+      String chatUserId, int count) {
+    int occurrencesOfRemoval = StringUtils.countOccurrencesOf(logOutput.getOut(),
+        "RocketChatTestConfig.removeUserFromGroup(" + chatUserId + "," + groupId + ") called");
+    assertEquals(count, occurrencesOfRemoval);
   }
 }

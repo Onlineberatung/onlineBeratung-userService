@@ -5,6 +5,7 @@ import static java.util.Objects.nonNull;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupUpdateKeyDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.Message;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomResponse;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -140,5 +142,14 @@ public class RocketChatMapper {
     updateGroupKey.setKey(key);
 
     return updateGroupKey;
+  }
+
+  public List<Map<String, String>> mapOf(List<GroupMemberDTO> members) {
+    return members.stream()
+        .map(member ->
+            Map.of(
+                "chatUserId", member.get_id()
+            )
+        ).collect(Collectors.toList());
   }
 }

@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -203,6 +204,18 @@ public class Consultant implements TenantAware {
 
       return languages;
     }
+  }
+
+  @JsonIgnore
+  public boolean isInAgency(long agencyId) {
+    if (isNull(consultantAgencies)) {
+      return false;
+    }
+
+    return consultantAgencies.stream()
+        .map(ConsultantAgency::getAgencyId)
+        .collect(Collectors.toSet())
+        .contains(agencyId);
   }
 
   @Override
