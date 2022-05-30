@@ -13,7 +13,6 @@ import de.caritas.cob.userservice.api.port.out.MessageClient;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.service.StringConverter;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -57,9 +56,9 @@ public class Messenger implements Messaging {
     var allUpdated = new AtomicReference<>(true);
 
     messageClient.findAllChats(chatUserId).ifPresent(chats -> {
-      if (allChatsAreTmpEncrypted(chats)) {
-        var masterKey = stringConverter.hashOf(chatUserId);
-        for (var chat : chats) {
+      var masterKey = stringConverter.hashOf(chatUserId);
+      for (var chat : chats) {
+        if (mapper.e2eKeyOf(chat).isPresent()) {
           var roomKeyId = mapper.e2eKeyOf(chat).orElseThrow();
           var updatedE2eKey = createE2eKey(publicKey, masterKey, roomKeyId);
           var userId = mapper.userIdOf(chat);
@@ -69,8 +68,6 @@ public class Messenger implements Messaging {
             break;
           }
         }
-      } else {
-        allUpdated.set(null);
       }
     });
 
@@ -86,10 +83,6 @@ public class Messenger implements Messaging {
     var jsonStringified = stringConverter.jsonStringify(intArray);
 
     return keyId + stringConverter.base64AsciiEncode(jsonStringified);
-  }
-
-  private boolean allChatsAreTmpEncrypted(List<Map<String, String>> chatMaps) {
-    return chatMaps.stream().allMatch(chatMap -> mapper.e2eKeyOf(chatMap).isPresent());
   }
 
   @Override

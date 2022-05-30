@@ -801,12 +801,7 @@ public class UserController implements UsersApi {
       throw new InternalServerErrorException(message);
     }
 
-    var updated = messenger.updateE2eKeys(chatUserId, e2eKeyDTO.getPublicKey());
-    if (isNull(updated)) {
-      var message = String.format("Getting temporary E2E keys in user %s's chats failed", username);
-      throw new InternalServerErrorException(message);
-    }
-    if (!updated) {
+    if (!messenger.updateE2eKeys(chatUserId, e2eKeyDTO.getPublicKey())) {
       var message = String.format("Setting E2E keys in user %s's chats failed", username);
       throw new InternalServerErrorException(message);
     }
