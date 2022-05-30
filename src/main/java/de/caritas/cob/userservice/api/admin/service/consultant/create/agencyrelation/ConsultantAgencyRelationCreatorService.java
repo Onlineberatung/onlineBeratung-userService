@@ -10,6 +10,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestExceptio
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.ConsultantAgencyStatus;
 import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
@@ -72,6 +73,11 @@ public class ConsultantAgencyRelationCreatorService {
 
   private void createNewConsultantAgency(ConsultantAgencyCreationInput input,
       Consumer<String> logMethod) {
+    prepareConsultantAgencyRelation(input);
+    completeConsultantAgencyAssigment(input, logMethod);
+  }
+
+  public void prepareConsultantAgencyRelation(ConsultantAgencyCreationInput input) {
     var consultant = this.retrieveConsultant(input.getConsultantId());
 
     var agency = retrieveAgency(input.getAgencyId());
@@ -80,21 +86,28 @@ public class ConsultantAgencyRelationCreatorService {
     }
 
     ensureConsultingTypeRoles(input, agency);
-
     consultantAgencyService.saveConsultantAgency(buildConsultantAgency(consultant, agency.getId()));
+
+  }
+
+  public void completeConsultantAgencyAssigment(ConsultantAgencyCreationInput input,
+      Consumer<String> logMethod) {
+
+    Consultant consultant = this.retrieveConsultant(input.getConsultantId());
+    AgencyDTO agency = retrieveAgency(input.getAgencyId());
+
     if (!ConsultantStatus.IN_PROGRESS.equals(consultant.getStatus())) {
       consultant.setStatus(ConsultantStatus.IN_PROGRESS);
       consultantRepository.save(consultant);
     }
 
-    rocketChatAsyncHelper.addConsultantToSessions(consultant, agency, logMethod, TenantContext.getCurrentTenant());
+    rocketChatAsyncHelper
+        .addConsultantToSessions(consultant, agency, logMethod, TenantContext.getCurrentTenant());
 
     if (isTeamAgencyButNotTeamConsultant(agency, consultant)) {
       consultant.setTeamConsultant(true);
       consultantRepository.save(consultant);
     }
-
-
   }
 
   private void ensureConsultingTypeRoles(ConsultantAgencyCreationInput input, AgencyDTO agency) {
@@ -162,6 +175,7 @@ public class ConsultantAgencyRelationCreatorService {
         .createDate(nowInUtc())
         .updateDate(nowInUtc())
         .tenantId(consultant.getTenantId())
+        .status(ConsultantAgencyStatus.IN_PROGRESS)
         .build();
   }
 

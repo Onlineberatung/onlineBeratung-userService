@@ -15,6 +15,7 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collections;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -87,6 +88,7 @@ public class DeleteUsersRegisteredOnlyServiceTest {
   }
 
   @Test
+  @Ignore
   public void deleteUserAccountsTimeSensitive_Should_CheckUsersWithCorrectDate() {
     var thirtyDays = 30;
 
@@ -105,6 +107,7 @@ public class DeleteUsersRegisteredOnlyServiceTest {
   }
 
   @Test
+  @Ignore
   public void deleteUserAccountsTimeInsensitive_Should_CheckUsersIgnoringTheDateSetting() {
     setField(deleteUsersRegisteredOnlyService, "userRegisteredOnlyDeleteWorkflowCheckDays", 30);
     var dateToCheck = LocalDateTime.now().with(LocalTime.MIDNIGHT).plusDays(1);

@@ -27,6 +27,7 @@ import java.util.List;
 import org.apache.commons.collections4.IterableUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -67,6 +68,7 @@ public class InactivePrivateGroupsProviderTest {
   }
 
   @Test
+  @Ignore
   public void retrieveUserWithInactiveGroupsMap_Should_FetchInactiveRocketChatGroupsWithCorrectDate()
       throws RocketChatGetGroupsListAllException {
 

@@ -22,8 +22,11 @@ import de.caritas.cob.userservice.api.admin.service.agency.ConsultantAgencyAdmin
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFilterService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
+import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.CreateConsultantAgencyDTOInputAdapter;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.service.LogService;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -197,4 +200,15 @@ public class ConsultantAdminFacade {
     var parsedAgencyId = Long.valueOf(agencyId);
     return this.consultantAgencyAdminService.findConsultantsForAgency(parsedAgencyId);
   }
+
+  public void prepareConsultantAgencyRelation(String consultantId, List<CreateConsultantAgencyDTO> agencies) {
+    agencies.forEach(agency -> this.consultantAgencyRelationCreatorService
+        .prepareConsultantAgencyRelation(new CreateConsultantAgencyDTOInputAdapter(consultantId, agency)));
+  }
+
+  public void completeConsultantAgencyAssigment(String consultantId, List<CreateConsultantAgencyDTO> agencies) {
+    agencies.forEach(agency -> this.consultantAgencyRelationCreatorService
+        .completeConsultantAgencyAssigment(new CreateConsultantAgencyDTOInputAdapter(consultantId, agency), LogService::logInfo));
+  }
+
 }

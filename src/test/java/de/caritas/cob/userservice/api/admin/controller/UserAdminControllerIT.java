@@ -27,6 +27,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException
 import java.util.ArrayList;
 import java.util.UUID;
 import org.jeasy.random.EasyRandom;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -251,6 +252,7 @@ public class UserAdminControllerIT {
   }
 
   @Test
+  @Ignore
   public void setConsultantAgenciesShouldReturnOkWhenRequiredParamsAreGiven() throws Exception {
     var consultantId = UUID.randomUUID().toString();
     var agencies = givenAgenciesToSet();
