@@ -35,6 +35,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -347,6 +348,7 @@ public class UserControllerE2EIT {
     givenValidRocketChatTechUserResponse();
     givenValidRocketChatCreationResponse();
     givenAnEnquiryMessageDto(true);
+    givenASuccessfulMessageResponse(null);
 
     mockMvc.perform(
             post("/users/sessions/{sessionId}/enquiry/new", session.getId())
@@ -360,7 +362,8 @@ public class UserControllerE2EIT {
         )
         .andExpect(status().isCreated())
         .andExpect(jsonPath("sessionId", is(session.getId().intValue())))
-        .andExpect(jsonPath("rcGroupId", is("rcGroupId")));
+        .andExpect(jsonPath("rcGroupId", is("rcGroupId")))
+        .andExpect(jsonPath("t", is(nullValue())));
 
     var savedSession = sessionRepository.findById(session.getId());
     assertTrue(savedSession.isPresent());
@@ -380,6 +383,7 @@ public class UserControllerE2EIT {
     givenValidRocketChatTechUserResponse();
     givenValidRocketChatCreationResponse();
     givenAnEnquiryMessageDto(false);
+    givenASuccessfulMessageResponse(null);
 
     mockMvc.perform(
             post("/users/sessions/{sessionId}/enquiry/new", session.getId())
@@ -393,11 +397,40 @@ public class UserControllerE2EIT {
         )
         .andExpect(status().isCreated())
         .andExpect(jsonPath("sessionId", is(session.getId().intValue())))
-        .andExpect(jsonPath("rcGroupId", is("rcGroupId")));
+        .andExpect(jsonPath("rcGroupId", is("rcGroupId")))
+        .andExpect(jsonPath("t", is(nullValue())));
 
     var savedSession = sessionRepository.findById(session.getId());
     assertTrue(savedSession.isPresent());
     assertEquals(LanguageCode.de, savedSession.get().getLanguageCode());
+
+    restoreSession();
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
+  public void createEnquiryMessageWithShouldReturnIfMessageWasSentWithE2Ee()
+      throws Exception {
+    givenAUserWithASessionNotEnquired();
+    givenValidRocketChatTechUserResponse();
+    givenValidRocketChatCreationResponse();
+    givenAnEnquiryMessageDto(false);
+    givenASuccessfulMessageResponse("e2e");
+
+    mockMvc.perform(
+            post("/users/sessions/{sessionId}/enquiry/new", session.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+                .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(enquiryMessageDTO))
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("sessionId", is(session.getId().intValue())))
+        .andExpect(jsonPath("rcGroupId", is("rcGroupId")))
+        .andExpect(jsonPath("t", is("e2e")));
 
     restoreSession();
   }
@@ -3064,7 +3097,7 @@ public class UserControllerE2EIT {
 
     when(keycloakRestTemplate.postForEntity(
         endsWith(urlSuffix), any(HttpEntity.class), eq(SuccessWithEmail.class)
-    )).thenReturn(new ResponseEntity<>(successWithEmail, HttpStatus.CREATED));
+    )).thenReturn(new ResponseEntity<>(successWithEmail, CREATED));
   }
 
   private void givenAKeycloakSetupEmailInvalidCodeResponse() {
@@ -3849,6 +3882,16 @@ public class UserControllerE2EIT {
     response.setUpdate(roomsUpdate);
     when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(HttpEntity.class),
         eq(RoomsGetDTO.class))).thenReturn(ResponseEntity.ok(response));
+  }
+
+  private void givenASuccessfulMessageResponse(String messageType) {
+    de.caritas.cob.userservice.messageservice.generated.web.model.MessageResponseDTO messageResponseDTO = easyRandom.nextObject(
+        de.caritas.cob.userservice.messageservice.generated.web.model.MessageResponseDTO.class);
+    messageResponseDTO.setT(messageType);
+    ResponseEntity<Object> response = ResponseEntity.status(CREATED).body(messageResponseDTO);
+    when(restTemplate.exchange(any(RequestEntity.class), eq(ParameterizedTypeReference.forType(
+        de.caritas.cob.userservice.messageservice.generated.web.model.MessageResponseDTO.class)))).thenReturn(
+        response);
   }
 
   private void givenNoRocketChatSubscriptionUpdates() {

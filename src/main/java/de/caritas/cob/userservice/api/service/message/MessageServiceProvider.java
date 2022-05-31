@@ -20,6 +20,7 @@ import de.caritas.cob.userservice.messageservice.generated.ApiClient;
 import de.caritas.cob.userservice.messageservice.generated.web.MessageControllerApi;
 import de.caritas.cob.userservice.messageservice.generated.web.model.AliasOnlyMessageDTO;
 import de.caritas.cob.userservice.messageservice.generated.web.model.MessageDTO;
+import de.caritas.cob.userservice.messageservice.generated.web.model.MessageResponseDTO;
 import de.caritas.cob.userservice.messageservice.generated.web.model.MessageType;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -43,14 +44,15 @@ public class MessageServiceProvider {
    *
    * @param rocketChatData       rocket chat data necessary for sending messages
    * @param exceptionInformation {@link CreateEnquiryExceptionInformation}
+   * @return {@link MessageResponseDTO}
    * @throws RocketChatPostMessageException exception when posting the message fails
    */
-  public void postEnquiryMessage(RocketChatData rocketChatData,
+  public MessageResponseDTO postEnquiryMessage(RocketChatData rocketChatData,
       CreateEnquiryExceptionInformation exceptionInformation)
       throws RocketChatPostMessageException {
 
     try {
-      this.postMessage(rocketChatData);
+      return this.postMessage(rocketChatData);
     } catch (RestClientException exception) {
       throw new RocketChatPostMessageException(
           String.format("Could not post enquiry message to Rocket.Chat group %s with user %s",
@@ -60,13 +62,13 @@ public class MessageServiceProvider {
     }
   }
 
-  private void postMessage(RocketChatData rocketChatData) {
+  private MessageResponseDTO postMessage(RocketChatData rocketChatData) {
     var rcCredentials = rocketChatData.getRocketChatCredentials();
     addDefaultHeaders(this.messageControllerApi.getApiClient());
     var message = new MessageDTO()
         .message(rocketChatData.getMessage())
         .t(rocketChatData.getType());
-    this.messageControllerApi.createMessage(rcCredentials.getRocketChatToken(),
+    return this.messageControllerApi.createMessage(rcCredentials.getRocketChatToken(),
         rcCredentials.getRocketChatUserId(), rocketChatData.getRcGroupId(), message);
   }
 

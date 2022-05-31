@@ -1,8 +1,8 @@
 package de.caritas.cob.userservice.api.facade;
 
+import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.api.model.Session.RegistrationType.ANONYMOUS;
 import static de.caritas.cob.userservice.api.model.Session.RegistrationType.REGISTERED;
-import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.api.testHelper.ExceptionConstants.INTERNAL_SERVER_ERROR_EXCEPTION;
 import static de.caritas.cob.userservice.api.testHelper.ExceptionConstants.RC_ADD_USER_TO_GROUP_EXCEPTION;
 import static de.caritas.cob.userservice.api.testHelper.ExceptionConstants.RC_CHAT_REMOVE_SYSTEM_MESSAGES_EXCEPTION;
@@ -47,6 +47,11 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupResponseDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.RocketChatUserDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
@@ -61,10 +66,6 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInit
 import de.caritas.cob.userservice.api.helper.RocketChatRoomNameGenerator;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.RocketChatUserDTO;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupDTO;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupResponseDTO;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.model.EnquiryData;
@@ -77,7 +78,6 @@ import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.liveevents.LiveEventNotificationService;
 import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.message.RocketChatData;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.UserService;
@@ -86,6 +86,7 @@ import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.Grou
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.MonitoringDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.SessionDataInitializingDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.WelcomeMessageDTO;
+import de.caritas.cob.userservice.messageservice.generated.web.model.MessageResponseDTO;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -166,6 +167,8 @@ public class CreateEnquiryMessageFacadeTest {
               .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
           .initializeFeedbackChat(true).notifications(null)
           .languageFormal(false).roles(null).registration(null);
+
+  private final EasyRandom easyRandom = new EasyRandom();
 
   @InjectMocks
   private CreateEnquiryMessageFacade createEnquiryMessageFacade;
@@ -279,6 +282,9 @@ public class CreateEnquiryMessageFacadeTest {
     when(userHelper.doUsernamesMatch(anyString(), anyString())).thenReturn(true);
     when(rocketChatRoomNameGenerator.generateGroupName(any(Session.class)))
         .thenReturn(session.getId().toString());
+    var messageResponse = createMessageResponse();
+    when(messageServiceProvider.postEnquiryMessage(any(RocketChatData.class),
+        any(CreateEnquiryExceptionInformation.class))).thenReturn(messageResponse);
 
     final var response = createEnquiryMessageFacade.createEnquiryMessage(
         new EnquiryData(user, SESSION_ID, MESSAGE, null, rocketChatCredentials));
@@ -294,6 +300,7 @@ public class CreateEnquiryMessageFacadeTest {
     verify(emailNotificationFacade, atLeastOnce()).sendNewEnquiryEmailNotification(any(), any());
     assertEquals(SESSION_ID, response.getSessionId());
     assertEquals(RC_GROUP_ID, response.getRcGroupId());
+    assertEquals(response.getT(), messageResponse.getT());
     resetRequestAttributes();
   }
 
@@ -553,6 +560,8 @@ public class CreateEnquiryMessageFacadeTest {
         .thenReturn(Optional.of(groupResponseDTO));
     when(rocketChatService.createPrivateGroupWithSystemUser(any()))
         .thenReturn(Optional.of(groupResponseDTO));
+    when(messageServiceProvider.postEnquiryMessage(any(RocketChatData.class),
+        any(CreateEnquiryExceptionInformation.class))).thenReturn(createMessageResponse());
 
     createEnquiryMessageFacade
         .createEnquiryMessage(
@@ -1036,6 +1045,8 @@ public class CreateEnquiryMessageFacadeTest {
     when(userHelper.doUsernamesMatch(anyString(), anyString())).thenReturn(true);
     when(rocketChatRoomNameGenerator.generateGroupName(any(Session.class)))
         .thenReturn(session.getId().toString());
+    when(messageServiceProvider.postEnquiryMessage(any(RocketChatData.class),
+        any(CreateEnquiryExceptionInformation.class))).thenReturn(createMessageResponse());
 
     createEnquiryMessageFacade
         .createEnquiryMessage(
@@ -1079,6 +1090,8 @@ public class CreateEnquiryMessageFacadeTest {
     when(userHelper.doUsernamesMatch(anyString(), anyString())).thenReturn(true);
     when(rocketChatRoomNameGenerator.generateGroupName(any(Session.class)))
         .thenReturn("0");
+    when(messageServiceProvider.postEnquiryMessage(any(RocketChatData.class),
+        any(CreateEnquiryExceptionInformation.class))).thenReturn(createMessageResponse());
 
     createEnquiryMessageFacade.createEnquiryMessage(
         new EnquiryData(user, SESSION_ID, MESSAGE, null, rocketChatCredentials));
@@ -1090,6 +1103,10 @@ public class CreateEnquiryMessageFacadeTest {
 
   private void resetRequestAttributes() {
     RequestContextHolder.setRequestAttributes(null);
+  }
+
+  private MessageResponseDTO createMessageResponse() {
+    return easyRandom.nextObject(MessageResponseDTO.class);
   }
 
 }

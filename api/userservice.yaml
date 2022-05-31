@@ -2161,6 +2161,8 @@ components:
         rcGroupId:
           type: string
           example: fR2Rz7dmWmHdXE8uz
+        t:
+          type: string
 
     AbsenceDTO:
       type: object

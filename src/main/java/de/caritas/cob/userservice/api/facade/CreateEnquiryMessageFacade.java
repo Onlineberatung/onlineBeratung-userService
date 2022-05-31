@@ -107,7 +107,9 @@ public class CreateEnquiryMessageFacade {
 
       var rocketChatData = new RocketChatData(enquiryData.getMessage(),
           enquiryData.getRocketChatCredentials(), rcGroupId, enquiryData.getType());
-      messageServiceProvider.postEnquiryMessage(rocketChatData, createEnquiryExceptionInformation);
+      final var messageResponse = messageServiceProvider.postEnquiryMessage(
+          rocketChatData,
+          createEnquiryExceptionInformation);
       messageServiceProvider.postWelcomeMessageIfConfigured(rcGroupId, enquiryData.getUser(),
           extendedConsultingTypeResponseDTO, createEnquiryExceptionInformation);
       messageServiceProvider.postFurtherStepsOrSaveSessionDataMessageIfConfigured(rcGroupId,
@@ -121,7 +123,8 @@ public class CreateEnquiryMessageFacade {
 
       return new CreateEnquiryMessageResponseDTO()
           .rcGroupId(rcGroupId)
-          .sessionId(enquiryData.getSessionId());
+          .sessionId(enquiryData.getSessionId())
+          .t(messageResponse.getT());
 
     } catch (CreateEnquiryException exception) {
       doRollback(exception.getExceptionInformation(), enquiryData.getRocketChatCredentials());
