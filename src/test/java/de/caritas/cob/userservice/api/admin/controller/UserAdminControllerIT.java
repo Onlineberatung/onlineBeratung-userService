@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.admin.controller;
 
 import static org.hamcrest.Matchers.endsWith;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -27,7 +28,6 @@ import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException
 import java.util.ArrayList;
 import java.util.UUID;
 import org.jeasy.random.EasyRandom;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,8 +117,8 @@ public class UserAdminControllerIT {
   public void getSessions_Should_returnOk_When_requiredPaginationParamsAreGiven()
       throws Exception {
     this.mvc.perform(get(SESSION_PATH)
-            .param(PAGE_PARAM, "0")
-            .param(PER_PAGE_PARAM, "1"))
+        .param(PAGE_PARAM, "0")
+        .param(PER_PAGE_PARAM, "1"))
         .andExpect(status().isOk());
 
     verify(this.sessionAdminService, times(1))
@@ -158,8 +158,8 @@ public class UserAdminControllerIT {
   public void getConsultants_Should_returnOk_When_requiredPaginationParamsAreGiven()
       throws Exception {
     this.mvc.perform(get(FILTERED_CONSULTANTS_PATH)
-            .param(PAGE_PARAM, "0")
-            .param(PER_PAGE_PARAM, "1"))
+        .param(PAGE_PARAM, "0")
+        .param(PER_PAGE_PARAM, "1"))
         .andExpect(status().isOk());
 
     verify(this.consultantAdminFacade, times(1))
@@ -204,7 +204,7 @@ public class UserAdminControllerIT {
   public void createConsultant_Should_returnBadRequest_When_requiredCreateConsultantIsMissing()
       throws Exception {
     this.mvc.perform(post(GET_CONSULTANT_PATH)
-            .contentType(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
 
@@ -227,7 +227,7 @@ public class UserAdminControllerIT {
   public void updateConsultant_Should_returnBadRequest_When_requiredParamsAreMissing()
       throws Exception {
     this.mvc.perform(put(GET_CONSULTANT_PATH + "consultantId")
-            .contentType(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
 
@@ -252,7 +252,6 @@ public class UserAdminControllerIT {
   }
 
   @Test
-  @Ignore
   public void setConsultantAgenciesShouldReturnOkWhenRequiredParamsAreGiven() throws Exception {
     var consultantId = UUID.randomUUID().toString();
     var agencies = givenAgenciesToSet();
@@ -263,10 +262,14 @@ public class UserAdminControllerIT {
             .content(objectMapper.writeValueAsString(agencies))
     ).andExpect(status().isOk());
 
-    verify(consultantAdminFacade, times(agencies.size()))
-        .createNewConsultantAgency(eq(consultantId), any(CreateConsultantAgencyDTO.class));
     verify(consultantAdminFacade)
-        .markConsultantAgenciesForDeletion(consultantId, any());
+        .markConsultantAgenciesForDeletion(any(), anyList());
+    verify(consultantAdminFacade)
+        .filterAgencyListForCreation(any(), anyList());
+    verify(consultantAdminFacade)
+        .prepareConsultantAgencyRelation(any(), anyList());
+    verify(consultantAdminFacade)
+        .completeConsultantAgencyAssigment(any(), anyList());
   }
 
   @Test
@@ -288,7 +291,7 @@ public class UserAdminControllerIT {
         String.format(DELETE_CONSULTANT_AGENCY_PATH, consultantId, agencyId);
 
     this.mvc.perform(delete(consultantAgencyDeletePath)
-            .contentType(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     verify(this.consultantAdminFacade, times(1))
@@ -299,7 +302,7 @@ public class UserAdminControllerIT {
   public void deleteConsultant_Should_returnOk_When_requiredParamIsGiven()
       throws Exception {
     this.mvc.perform(delete(DELETE_CONSULTANT_PATH)
-            .contentType(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     verify(this.consultantAdminFacade, times(1))
@@ -310,7 +313,7 @@ public class UserAdminControllerIT {
   public void deleteAsker_Should_returnOk_When_requiredParamIsGiven()
       throws Exception {
     this.mvc.perform(delete(DELETE_ASKER_PATH)
-            .contentType(MediaType.APPLICATION_JSON))
+        .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     verify(this.userAdminFacade, times(1))
