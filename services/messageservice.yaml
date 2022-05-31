@@ -66,6 +66,10 @@ paths:
       responses:
         201:
           description: CREATED - message was successfully created
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/MessageResponseDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -110,6 +114,10 @@ paths:
       responses:
         201:
           description: CREATED - message was successfully created
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/MessageResponseDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -143,6 +151,10 @@ paths:
       responses:
         201:
           description: CREATED - hint message was successfully created
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/MessageResponseDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -230,6 +242,10 @@ paths:
       responses:
         201:
           description: CREATED - message was successfully created
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/MessageResponseDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -328,6 +344,10 @@ paths:
       responses:
         201:
           description: CREATED - message was successfully created
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/MessageResponseDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -419,6 +439,39 @@ components:
             $ref: '#/components/schemas/AttachmentDTO'
         file:
           $ref: '#/components/schemas/FileDTO'
+
+    MessageResponseDTO:
+      type: object
+      required:
+        - _id
+        - rid
+        - msg
+        - ts
+        - _updatedAt
+      properties:
+        _id:
+          type: string
+          example: "M73fE4WhYF4peYB3s"
+        t:
+          type: string
+          example: "room_changed_privacy"
+        e2e:
+          type: string
+          example: "pending"
+        rid:
+          type: string
+          example: "fR2Rz7dmWmHdXE8uz"
+        msg:
+          type: string
+          example: "Lorem ipsum dolor sit amet, consetetur..."
+        ts:
+          type: string
+          description: "Full qualified timestamp"
+          example: "2018-11-15T09:33:00.057Z"
+        _updatedAt:
+          type: string
+          description: "Full qualified timestamp"
+          example: "2018-11-15T09:33:00.057Z"
 
     AliasMessageDTO:
       type: object
