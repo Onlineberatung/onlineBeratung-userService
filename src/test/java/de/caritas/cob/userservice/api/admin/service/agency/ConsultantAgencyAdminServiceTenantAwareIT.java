@@ -35,6 +35,7 @@ import java.util.Set;
 import org.jeasy.random.EasyRandom;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,7 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 @TestPropertySource(properties = "multitenancy.enabled=true")
 @Transactional
+@Ignore
 public class ConsultantAgencyAdminServiceTenantAwareIT {
 
   public static final String CONSULTANT1_ID = "0b3b1cc6-be98-4787-aa56-212259d811b8";
