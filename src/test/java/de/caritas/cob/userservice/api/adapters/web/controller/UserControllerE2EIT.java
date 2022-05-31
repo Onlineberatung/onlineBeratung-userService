@@ -2627,7 +2627,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  void updateE2eInChatsShouldRespondWithInternalServerErrorOnNoE2eKeySubscriptions()
+  void updateE2eInChatsShouldRespondWithNoContentOnNoE2eKeySubscriptions()
       throws Exception {
     givenAValidConsultant(true);
     givenACorrectlyFormattedE2eKeyDTO();
@@ -2642,7 +2642,7 @@ public class UserControllerE2EIT {
             .header("rcToken", RandomStringUtils.randomAlphabetic(16))
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(e2eKeyDTO))
-    ).andExpect(status().isInternalServerError());
+    ).andExpect(status().isNoContent());
 
     var urlSuffix = "/api/v1/users.info?userId=" + consultant.getRocketChatId();
     verify(rocketChatRestTemplate).exchange(endsWith(urlSuffix), eq(HttpMethod.GET),
@@ -2659,7 +2659,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  void updateE2eInChatsShouldRespondWithInternalServerErrorIfNotTemporarilyEncrypted()
+  void updateE2eInChatsShouldRespondWithNoContentIfNotTemporarilyEncrypted()
       throws Exception {
     givenAValidConsultant(true);
     givenACorrectlyFormattedE2eKeyDTO();
@@ -2675,7 +2675,7 @@ public class UserControllerE2EIT {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(e2eKeyDTO))
         )
-        .andExpect(status().isInternalServerError());
+        .andExpect(status().isNoContent());
 
     var urlSuffix = "/api/v1/users.info?userId=" + consultant.getRocketChatId();
     verify(rocketChatRestTemplate).exchange(endsWith(urlSuffix), eq(HttpMethod.GET),

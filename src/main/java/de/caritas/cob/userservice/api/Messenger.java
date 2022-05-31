@@ -13,15 +13,16 @@ import de.caritas.cob.userservice.api.port.out.MessageClient;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.service.StringConverter;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class Messenger implements Messaging {
 
@@ -57,20 +58,20 @@ public class Messenger implements Messaging {
     var allUpdated = new AtomicReference<>(true);
 
     messageClient.findAllChats(chatUserId).ifPresent(chats -> {
-      if (allChatsAreTmpEncrypted(chats)) {
-        var masterKey = stringConverter.hashOf(chatUserId);
-        for (var chat : chats) {
+      var masterKey = stringConverter.hashOf(chatUserId);
+      for (var chat : chats) {
+        var userId = mapper.userIdOf(chat);
+        var roomId = mapper.roomIdOf(chat);
+        if (mapper.e2eKeyOf(chat).isPresent()) {
           var roomKeyId = mapper.e2eKeyOf(chat).orElseThrow();
           var updatedE2eKey = createE2eKey(publicKey, masterKey, roomKeyId);
-          var userId = mapper.userIdOf(chat);
-          var roomId = mapper.roomIdOf(chat);
           if (!messageClient.updateChatE2eKey(userId, roomId, updatedE2eKey)) {
             allUpdated.set(false);
             break;
           }
+        } else {
+          log.info("Ignoring non-temp chat ({}) of user ({})", roomId, userId);
         }
-      } else {
-        allUpdated.set(null);
       }
     });
 
@@ -86,10 +87,6 @@ public class Messenger implements Messaging {
     var jsonStringified = stringConverter.jsonStringify(intArray);
 
     return keyId + stringConverter.base64AsciiEncode(jsonStringified);
-  }
-
-  private boolean allChatsAreTmpEncrypted(List<Map<String, String>> chatMaps) {
-    return chatMaps.stream().allMatch(chatMap -> mapper.e2eKeyOf(chatMap).isPresent());
   }
 
   @Override
