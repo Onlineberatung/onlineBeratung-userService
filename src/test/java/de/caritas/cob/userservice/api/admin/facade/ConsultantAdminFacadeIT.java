@@ -23,7 +23,9 @@ import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.RolesDTO;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
@@ -203,5 +205,62 @@ public class ConsultantAdminFacadeIT {
     newConsultant.setId(id);
     consultantRepository.save(newConsultant);
   }
+
+  @Test
+  public void testConsultantAgencyForDeletionFiltering() {
+    List<AgencyAdminResponseDTO> result = new ArrayList<AgencyAdminResponseDTO>();
+    AgencyAdminResponseDTO agency1 = new AgencyAdminResponseDTO();
+    agency1.setId(110L);
+    result.add(agency1);
+    AgencyAdminResponseDTO agency2 = new AgencyAdminResponseDTO();
+    agency2.setId(121L);
+    result.add(agency2);
+    when(this.agencyAdminService.retrieveAllAgencies()).thenReturn(result);
+
+    List<CreateConsultantAgencyDTO> newList = new ArrayList<CreateConsultantAgencyDTO>();
+    CreateConsultantAgencyDTO consultantAgency1 = new CreateConsultantAgencyDTO();
+    consultantAgency1.setAgencyId(110L);
+    newList.add(consultantAgency1);
+
+    String consultanId = "45816eb6-984b-411f-a818-996cd16e1f2a";
+    List<Long> filteredList = consultantAdminFacade.filterAgencyListForDeletion(consultanId, newList);
+    assertThat(filteredList.size(), is(1));
+
+    CreateConsultantAgencyDTO consultantAgency2 = new CreateConsultantAgencyDTO();
+    consultantAgency2.setAgencyId(121L);
+    newList.add(consultantAgency2);
+
+    filteredList = consultantAdminFacade.filterAgencyListForDeletion(consultanId, newList);
+    assertThat(filteredList.size(), is(0));
+  }
+
+  @Test
+  public void testConsultantAgencyForCreationFiltering() {
+    List<AgencyAdminResponseDTO> result = new ArrayList<AgencyAdminResponseDTO>();
+    AgencyAdminResponseDTO agency1 = new AgencyAdminResponseDTO();
+    agency1.setId(110L);
+    result.add(agency1);
+    AgencyAdminResponseDTO agency2 = new AgencyAdminResponseDTO();
+    agency2.setId(121L);
+    result.add(agency2);
+    when(this.agencyAdminService.retrieveAllAgencies()).thenReturn(result);
+
+    List<CreateConsultantAgencyDTO> newList = new ArrayList<CreateConsultantAgencyDTO>();
+    CreateConsultantAgencyDTO consultantAgency1 = new CreateConsultantAgencyDTO();
+    consultantAgency1.setAgencyId(110L);
+    newList.add(consultantAgency1);
+
+    String consultantId = "45816eb6-984b-411f-a818-996cd16e1f2a";
+    consultantAdminFacade.filterAgencyListForCreation(consultantId, newList);
+    assertThat(newList.size(), is(0));
+
+    CreateConsultantAgencyDTO consultantAgency2 = new CreateConsultantAgencyDTO();
+    consultantAgency2.setAgencyId(122L);
+    newList.add(consultantAgency2);
+
+    consultantAdminFacade.filterAgencyListForDeletion(consultantId, newList);
+    assertThat(newList.size(), is(1));
+  }
+
 
 }

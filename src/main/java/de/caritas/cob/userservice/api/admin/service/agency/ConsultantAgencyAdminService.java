@@ -222,10 +222,14 @@ public class ConsultantAgencyAdminService {
         .forEach(this::markAsDeleted);
   }
 
-  public void markConsultantAgenciesForDeletion(String consultantId) {
-    consultantAgencyRepository.findByConsultantIdAndDeleteDateIsNull(consultantId).forEach(
-        this::markAsDeleted
-    );
+  public void markConsultantAgenciesForDeletion(String consultantId, List<Long> agencyIds) {
+
+    agencyIds.forEach(agencyId -> {
+      List<ConsultantAgency> result = consultantAgencyRepository
+          .findByConsultantIdAndAgencyIdAndDeleteDateIsNull(consultantId, agencyId);
+      result.forEach(this::markAsDeleted);
+    });
+
   }
 
   private void markAsDeleted(ConsultantAgency consultantAgency) {

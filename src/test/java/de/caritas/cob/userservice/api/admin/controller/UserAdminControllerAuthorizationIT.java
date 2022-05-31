@@ -519,7 +519,7 @@ public class UserAdminControllerAuthorizationIT {
         .andExpect(status().isOk());
 
     verify(consultantAdminFacade).createNewConsultantAgency(anyString(), any());
-    verify(consultantAdminFacade).markConsultantAgenciesForDeletion(anyString());
+    verify(consultantAdminFacade).markConsultantAgenciesForDeletion(anyString(), any());
   }
 
   @Test

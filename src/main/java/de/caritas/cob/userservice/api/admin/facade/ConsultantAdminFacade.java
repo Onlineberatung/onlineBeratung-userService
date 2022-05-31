@@ -177,8 +177,8 @@ public class ConsultantAdminFacade {
     this.consultantAgencyAdminService.markConsultantAgencyForDeletion(consultantId, agencyId);
   }
 
-  public void markConsultantAgenciesForDeletion(String consultantId) {
-    consultantAgencyAdminService.markConsultantAgenciesForDeletion(consultantId);
+  public void markConsultantAgenciesForDeletion(String consultantId, List<Long> agencyIds) {
+    consultantAgencyAdminService.markConsultantAgenciesForDeletion(consultantId, agencyIds);
   }
 
   /**
@@ -201,14 +201,39 @@ public class ConsultantAdminFacade {
     return this.consultantAgencyAdminService.findConsultantsForAgency(parsedAgencyId);
   }
 
-  public void prepareConsultantAgencyRelation(String consultantId, List<CreateConsultantAgencyDTO> agencies) {
+  public void prepareConsultantAgencyRelation(String consultantId,
+      List<CreateConsultantAgencyDTO> agencies) {
     agencies.forEach(agency -> this.consultantAgencyRelationCreatorService
-        .prepareConsultantAgencyRelation(new CreateConsultantAgencyDTOInputAdapter(consultantId, agency)));
+        .prepareConsultantAgencyRelation(
+            new CreateConsultantAgencyDTOInputAdapter(consultantId, agency)));
   }
 
-  public void completeConsultantAgencyAssigment(String consultantId, List<CreateConsultantAgencyDTO> agencies) {
+  public void completeConsultantAgencyAssigment(String consultantId,
+      List<CreateConsultantAgencyDTO> agencies) {
     agencies.forEach(agency -> this.consultantAgencyRelationCreatorService
-        .completeConsultantAgencyAssigment(new CreateConsultantAgencyDTOInputAdapter(consultantId, agency), LogService::logInfo));
+        .completeConsultantAgencyAssigment(
+            new CreateConsultantAgencyDTOInputAdapter(consultantId, agency), LogService::logInfo));
+  }
+
+  public List<Long> filterAgencyListForDeletion(String consultantId,
+      List<CreateConsultantAgencyDTO> newList) {
+    List<Long> newListIds = newList.stream().map(el -> el.getAgencyId()).collect(Collectors.toList());
+    List<Long> persistedAgencyIds = consultantAgencyAdminService
+        .findConsultantAgencies(consultantId).getEmbedded().stream()
+        .map(el -> el.getEmbedded().getId()).collect(Collectors.toList());
+    return persistedAgencyIds.stream().filter(el -> !newListIds.contains(el))
+        .collect(Collectors.toList());
+
+  }
+
+  public void filterAgencyListForCreation(String consultantId,
+      List<CreateConsultantAgencyDTO> newList) {
+    List<Long> persistedAgencyIds = consultantAgencyAdminService
+        .findConsultantAgencies(consultantId).getEmbedded().stream()
+        .map(el -> el.getEmbedded().getId()).collect(Collectors.toList());
+    newList.clear();
+    newList.addAll(newList.stream().filter(el -> !persistedAgencyIds.contains(el.getAgencyId()))
+        .collect(Collectors.toList()));
   }
 
 }
