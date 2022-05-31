@@ -2266,6 +2266,13 @@ components:
           type: boolean
           example: true
           description: indicates should the walkt hrough be enabled
+        emailToggles:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/EmailToggle'
+
     UpdateConsultantDTO:
       type: object
       required:
@@ -2630,6 +2637,23 @@ components:
       enum:
         - EMAIL
         - APP
+
+    EmailToggle:
+      type: object
+      required:
+        - name
+        - state
+      properties:
+        name:
+          $ref: '#/components/schemas/EmailType'
+        state:
+          type: boolean
+          nullable: false
+
+    EmailType:
+      type: string
+      enum:
+        - DAILY_ENQUIRY
 
   securitySchemes:
     Bearer:
