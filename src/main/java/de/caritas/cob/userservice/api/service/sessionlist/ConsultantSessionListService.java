@@ -16,7 +16,9 @@ import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,23 @@ public class ConsultantSessionListService {
   private final @NonNull ChatService chatService;
   private final @NonNull ConsultantSessionEnricher consultantSessionEnricher;
   private final @NonNull ConsultantChatEnricher consultantChatEnricher;
+
+  /**
+   * @param consultant  {@link Consultant}
+   * @param rcGroupIds  rocket chat group or feedback group IDs
+   * @param roles       roles of the consultant
+   * @param rcAuthToken rocket chat authentication token
+   * @return List of {@link ConsultantSessionResponseDTO}
+   */
+  public List<ConsultantSessionResponseDTO> retrieveSessionsForConsultantAndGroupIds(
+      Consultant consultant, List<String> rcGroupIds,
+      Set<String> roles, String rcAuthToken) {
+    var groupIds = new HashSet<>(rcGroupIds);
+    var sessions = sessionService.getSessionsByConsultantAndGroupOrFeedbackGroupIds(consultant,
+        groupIds, roles);
+    var chats = chatService.getChatSessionsForConsultantByGroupIds(groupIds);
+    return mergeConsultantSessionsAndChats(consultant, sessions, chats, rcAuthToken);
+  }
 
   /**
    * Returns a list of {@link ConsultantSessionResponseDTO} for the specified consultant id and

@@ -440,7 +440,11 @@ public class UserControllerE2EIT {
         )
         .andExpect(status().isOk())
         .andExpect(jsonPath("sessions[0].session.groupId", is("YWKxhFX5K2HPpsFbs")))
+        .andExpect(jsonPath("sessions[0].session.feedbackRead", is(true)))
+        .andExpect(jsonPath("sessions[0].user.username", is("u25suchtler")))
         .andExpect(jsonPath("sessions[1].session.feedbackGroupId", is("4SPkApB8So88c7tQ3")))
+        .andExpect(jsonPath("sessions[1].session.feedbackRead", is(true)))
+        .andExpect(jsonPath("sessions[1].user.username", is("u25depp")))
         .andExpect(jsonPath("sessions", hasSize(2)));
   }
 
@@ -461,6 +465,29 @@ public class UserControllerE2EIT {
         )
         .andExpect(status().isOk())
         .andExpect(jsonPath("sessions[0].session.groupId", is("mzAdWzQEobJ2PkoxP")))
+        .andExpect(jsonPath("sessions[0].agency", is(notNullValue())))
+        .andExpect(jsonPath("sessions", hasSize(1)));
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
+  public void getSessionsForGroupOrFeedbackGroupIdsShouldContainConsultantOfUserSession()
+      throws Exception {
+    givenAUserWithSessions();
+    givenNoRocketChatSubscriptionUpdates();
+    givenNoRocketChatRoomUpdates();
+
+    mockMvc.perform(
+            get("/users/sessions/room?rcGroupIds=YWKxhFX5K2HPpsFbs")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("sessions[0].session.groupId", is("YWKxhFX5K2HPpsFbs")))
+        .andExpect(jsonPath("sessions[0].consultant.username", is("u25main")))
+        .andExpect(jsonPath("sessions[0].agency", is(notNullValue())))
         .andExpect(jsonPath("sessions", hasSize(1)));
   }
 

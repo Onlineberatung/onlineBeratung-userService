@@ -21,6 +21,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.E2eKeyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.EmailDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.EnquiryMessageDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.GroupSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.LanguageResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.MasterKeyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.MobileTokenDTO;
@@ -48,7 +49,6 @@ import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestExceptio
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.facade.CreateChatFacade;
-import de.caritas.cob.userservice.api.model.EnquiryData;
 import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
 import de.caritas.cob.userservice.api.facade.CreateNewConsultingTypeFacade;
 import de.caritas.cob.userservice.api.facade.CreateUserFacade;
@@ -67,6 +67,7 @@ import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataProvider;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
 import de.caritas.cob.userservice.api.model.Chat;
+import de.caritas.cob.userservice.api.model.EnquiryData;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
@@ -318,31 +319,29 @@ public class UserController implements UsersApi {
    * @return {@link ResponseEntity} of {@link UserSessionListResponseDTO}
    */
   @Override
-  public ResponseEntity<UserSessionListResponseDTO> getSessionsForGroupOrFeedbackGroupIds(
+  public ResponseEntity<GroupSessionListResponseDTO> getSessionsForGroupOrFeedbackGroupIds(
       @RequestHeader String rcToken, @RequestParam(value = "rcGroupIds") List<String> rcGroupIds) {
-
-    String userId;
-    String rcUserId;
+    GroupSessionListResponseDTO groupSessionList;
     if (authenticatedUser.isConsultant()) {
       var consultant = userAccountProvider.retrieveValidatedConsultant();
-      userId = consultant.getId();
-      rcUserId = consultant.getRocketChatId();
+      var rocketChatCredentials = RocketChatCredentials.builder()
+          .rocketChatUserId(consultant.getRocketChatId())
+          .rocketChatToken(rcToken)
+          .build();
+      groupSessionList = sessionListFacade.retrieveSessionsForAuthenticatedConsultantByGroupIds(
+          consultant, rcGroupIds, rocketChatCredentials, authenticatedUser.getRoles());
     } else {
       var user = userAccountProvider.retrieveValidatedUser();
-      userId = user.getUserId();
-      rcUserId = user.getRcUserId();
+      var rocketChatCredentials = RocketChatCredentials.builder()
+          .rocketChatUserId(user.getRcUserId())
+          .rocketChatToken(rcToken)
+          .build();
+      groupSessionList = sessionListFacade.retrieveSessionsForAuthenticatedUserByGroupIds(
+          user.getUserId(), rcGroupIds, rocketChatCredentials, authenticatedUser.getRoles());
     }
 
-    var rocketChatCredentials = RocketChatCredentials.builder()
-        .rocketChatUserId(rcUserId)
-        .rocketChatToken(rcToken)
-        .build();
-
-    var userSessionList = sessionListFacade.retrieveSessionsForAuthenticatedUserByGroupIds(userId,
-        rcGroupIds, rocketChatCredentials, authenticatedUser.getRoles());
-
-    return isNotEmpty(userSessionList.getSessions())
-        ? new ResponseEntity<>(userSessionList, HttpStatus.OK)
+    return isNotEmpty(groupSessionList.getSessions())
+        ? new ResponseEntity<>(groupSessionList, HttpStatus.OK)
         : new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 

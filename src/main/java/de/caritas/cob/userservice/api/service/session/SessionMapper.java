@@ -4,15 +4,17 @@ import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.toIsoTim
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.toUnixTime;
 import static java.util.Objects.nonNull;
 
-import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.GroupSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionConsultantForConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionUserDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
+import de.caritas.cob.userservice.api.helper.SessionDataKeyRegistration;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.helper.SessionDataKeyRegistration;
 import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -98,4 +100,22 @@ public class SessionMapper {
     return sessionDataMap;
   }
 
+  public GroupSessionResponseDTO toGroupSessionResponse(
+      UserSessionResponseDTO userSessionResponse) {
+    return new GroupSessionResponseDTO()
+        .session(userSessionResponse.getSession())
+        .consultant(userSessionResponse.getConsultant())
+        .agency(userSessionResponse.getAgency())
+        .chat(userSessionResponse.getChat())
+        .latestMessage(userSessionResponse.getLatestMessage());
+  }
+
+  public GroupSessionResponseDTO toGroupSessionResponse(
+      ConsultantSessionResponseDTO consultantSessionResponse) {
+    return new GroupSessionResponseDTO()
+        .session(consultantSessionResponse.getSession())
+        .user(consultantSessionResponse.getUser())
+        .chat(consultantSessionResponse.getChat())
+        .latestMessage(consultantSessionResponse.getLatestMessage());
+  }
 }
