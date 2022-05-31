@@ -255,7 +255,7 @@ paths:
           content:
             'application/json':
               schema:
-                $ref: '#/components/schemas/UserSessionListResponseDTO'
+                $ref: '#/components/schemas/GroupSessionListResponseDTO'
         204:
           description: NO CONTENT - no sessions for given group ids
         400:
@@ -1754,6 +1754,33 @@ components:
           $ref: '#/components/schemas/SessionUserDTO'
         consultant:
           $ref: '#/components/schemas/SessionConsultantForConsultantDTO'
+        latestMessage:
+          $ref: '#/components/schemas/Date'
+
+    GroupSessionListResponseDTO:
+      type: object
+      properties:
+        sessions:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupSessionResponseDTO'
+
+    GroupSessionResponseDTO:
+      type: object
+      required:
+        - SessionDTO
+        - UserChatDTO
+      properties:
+        session:
+          $ref: '#/components/schemas/SessionDTO'
+        chat:
+          $ref: '#/components/schemas/UserChatDTO'
+        user:
+          $ref: '#/components/schemas/SessionUserDTO'
+        consultant:
+          $ref: '#/components/schemas/SessionConsultantForUserDTO'
+        agency:
+          $ref: '#/components/schemas/AgencyDTO'
         latestMessage:
           $ref: '#/components/schemas/Date'
 

@@ -146,6 +146,13 @@ public class ChatService {
         .collect(Collectors.toList());
   }
 
+  public List<ConsultantSessionResponseDTO> getChatSessionsForConsultantByGroupIds(
+      Set<String> groupIds) {
+    return chatRepository.findByGroupIds(groupIds).stream()
+        .map(this::convertChatToConsultantSessionResponseDTO)
+        .collect(Collectors.toList());
+  }
+
   /**
    * Delete a {@link Chat}
    *

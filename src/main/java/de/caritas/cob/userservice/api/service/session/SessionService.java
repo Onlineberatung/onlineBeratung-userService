@@ -22,7 +22,6 @@ import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
-import de.caritas.cob.userservice.api.model.Memento;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.RegistrationType;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
@@ -346,26 +345,36 @@ public class SessionService {
    * @return {@link UserSessionResponseDTO}
    */
   public List<UserSessionResponseDTO> getSessionsByUserAndGroupOrFeedbackGroupIds(String userId,
-      Set<String> rcGroupIds,
-      Set<String> roles) {
-
+      Set<String> rcGroupIds, Set<String> roles) {
+    checkForUserOrConsultantRole(roles);
     var sessions = sessionRepository.findByGroupOrFeedbackGroupIds(rcGroupIds);
-    if (sessions.isEmpty()) {
-      return emptyList();
-    }
-    // prevent loading of the same consultant for every session
-    var mementoConsultant = new Memento<>(
-        () -> consultantService.getConsultant(userId).orElse(null));
-    sessions.forEach(
-        session -> checkPermissionsForGroupOrFeedbackGroupSessions(session, userId, roles,
-            mementoConsultant));
+    sessions.forEach(session -> checkIfUserAndNotOwnerOfSession(session, userId, roles));
+    List<AgencyDTO> agencies = fetchAgencies(sessions);
+    return convertToUserSessionResponseDTO(sessions, agencies);
+  }
 
+  private List<AgencyDTO> fetchAgencies(List<Session> sessions) {
     Set<Long> agencyIds = sessions.stream()
         .map(Session::getAgencyId)
         .filter(Objects::nonNull)
         .collect(Collectors.toSet());
-    List<AgencyDTO> agencies = agencyService.getAgencies(new ArrayList<>(agencyIds));
-    return convertToUserSessionResponseDTO(sessions, agencies);
+    return agencyService.getAgencies(new ArrayList<>(agencyIds));
+  }
+
+  /**
+   * Retrieves consultant sessions by consultant ID and rocket chat group, or feedback group IDs
+   *
+   * @param consultant the ID of the consultant
+   * @param rcGroupIds rocket chat group or feedback group IDs
+   * @param roles      the roles of the given consultant
+   * @return {@link ConsultantSessionResponseDTO}
+   */
+  public List<ConsultantSessionResponseDTO> getSessionsByConsultantAndGroupOrFeedbackGroupIds(
+      Consultant consultant, Set<String> rcGroupIds, Set<String> roles) {
+    checkForUserOrConsultantRole(roles);
+    var sessions = sessionRepository.findByGroupOrFeedbackGroupIds(rcGroupIds);
+    sessions.forEach(session -> checkConsultantAssignment(consultant, session));
+    return mapSessionsToConsultantSessionDto(sessions);
   }
 
   /**
@@ -420,6 +429,16 @@ public class SessionService {
     }
   }
 
+  private void checkConsultantAssignment(Consultant consultant, Session session) {
+    if (session.isAdvisedBy(consultant) || (isTeamSessionOrNew(session) && consultant.isInAgency(
+        session.getAgencyId()))) {
+      return;
+    }
+    throw new ForbiddenException(
+        String.format("No permission for session %s by consultant %s", session.getId(),
+            consultant.getId()));
+  }
+
   /**
    * Returns the session for the Rocket.Chat feedback group id.
    *
@@ -445,24 +464,6 @@ public class SessionService {
             () -> new NotFoundException(String.format("Session with id %s not found.", sessionId)));
     checkPermissionForConsultantSession(session, consultant);
     return toConsultantSessionDTO(session);
-  }
-
-  private void checkPermissionsForGroupOrFeedbackGroupSessions(Session session, String userId,
-      Set<String> roles, Supplier<Optional<Consultant>> consultantSupplier) {
-    checkForUserOrConsultantRole(roles);
-    checkIfUserAndNotOwnerOfSession(session, userId, roles);
-    if (!roles.contains(UserRole.CONSULTANT.getValue())) {
-      return;
-    }
-    var consultant = consultantSupplier.get()
-        .orElseThrow(newBadRequestException(userId));
-    if (isConsultantAssignedToSession(session, consultant) || (isTeamSessionOrNew(session)
-        && isConsultantAssignedToSessionAgency(consultant, session))) {
-      return;
-    }
-    throw new ForbiddenException(
-        String.format("No permission for session %s by consultant %s", session.getId(),
-            consultant.getId()));
   }
 
   private boolean isTeamSessionOrNew(Session session) {
@@ -499,23 +500,12 @@ public class SessionService {
   }
 
   private void checkPermissionForConsultantSession(Session session, Consultant consultant) {
-
-    if (!isConsultantAssignedToSession(session, consultant)
-        && !(session.isTeamSession() && isConsultantAssignedToSessionAgency(consultant, session))) {
+    if (!session.isAdvisedBy(consultant) && !(session.isTeamSession() && consultant.isInAgency(
+        session.getAgencyId()))) {
       throw new ForbiddenException(String
           .format("No permission for session %s by consultant %s", session.getId(),
               consultant.getId()));
     }
-  }
-
-  private boolean isConsultantAssignedToSession(Session session, Consultant consultant) {
-    return nonNull(session.getConsultant())
-        && session.getConsultant().getId().equals(consultant.getId());
-  }
-
-  private boolean isConsultantAssignedToSessionAgency(Consultant consultant, Session session) {
-    return consultant.getConsultantAgencies().stream()
-        .anyMatch(consultantAgency -> consultantAgency.getAgencyId().equals(session.getAgencyId()));
   }
 
   /**
