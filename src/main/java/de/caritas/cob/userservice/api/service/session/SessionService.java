@@ -430,8 +430,8 @@ public class SessionService {
   }
 
   private void checkConsultantAssignment(Consultant consultant, Session session) {
-    if (isConsultantAssignedToSession(session, consultant) || (isTeamSessionOrNew(session)
-        && isConsultantAssignedToSessionAgency(consultant, session))) {
+    if (session.isAdvisedBy(consultant) || (isTeamSessionOrNew(session) && consultant.isInAgency(
+        session.getAgencyId()))) {
       return;
     }
     throw new ForbiddenException(
@@ -500,23 +500,12 @@ public class SessionService {
   }
 
   private void checkPermissionForConsultantSession(Session session, Consultant consultant) {
-
-    if (!isConsultantAssignedToSession(session, consultant)
-        && !(session.isTeamSession() && isConsultantAssignedToSessionAgency(consultant, session))) {
+    if (!session.isAdvisedBy(consultant) && !(session.isTeamSession() && consultant.isInAgency(
+        session.getAgencyId()))) {
       throw new ForbiddenException(String
           .format("No permission for session %s by consultant %s", session.getId(),
               consultant.getId()));
     }
-  }
-
-  private boolean isConsultantAssignedToSession(Session session, Consultant consultant) {
-    return nonNull(session.getConsultant())
-        && session.getConsultant().getId().equals(consultant.getId());
-  }
-
-  private boolean isConsultantAssignedToSessionAgency(Consultant consultant, Session session) {
-    return consultant.getConsultantAgencies().stream()
-        .anyMatch(consultantAgency -> consultantAgency.getAgencyId().equals(session.getAgencyId()));
   }
 
   /**
