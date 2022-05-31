@@ -217,7 +217,8 @@ public class ConsultantAdminFacade {
 
   public List<Long> filterAgencyListForDeletion(String consultantId,
       List<CreateConsultantAgencyDTO> newList) {
-    List<Long> newListIds = newList.stream().map(el -> el.getAgencyId()).collect(Collectors.toList());
+    List<Long> newListIds = newList.stream().map(el -> el.getAgencyId())
+        .collect(Collectors.toList());
     List<Long> persistedAgencyIds = consultantAgencyAdminService
         .findConsultantAgencies(consultantId).getEmbedded().stream()
         .map(el -> el.getEmbedded().getId()).collect(Collectors.toList());
@@ -231,9 +232,11 @@ public class ConsultantAdminFacade {
     List<Long> persistedAgencyIds = consultantAgencyAdminService
         .findConsultantAgencies(consultantId).getEmbedded().stream()
         .map(el -> el.getEmbedded().getId()).collect(Collectors.toList());
+    List<CreateConsultantAgencyDTO> filteredList = newList.stream()
+        .filter(el -> !persistedAgencyIds.contains(el.getAgencyId()))
+        .collect(Collectors.toList());
     newList.clear();
-    newList.addAll(newList.stream().filter(el -> !persistedAgencyIds.contains(el.getAgencyId()))
-        .collect(Collectors.toList()));
+    newList.addAll(filteredList);
   }
 
 }

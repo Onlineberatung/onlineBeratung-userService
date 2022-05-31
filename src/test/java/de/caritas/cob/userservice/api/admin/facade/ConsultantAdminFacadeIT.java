@@ -223,7 +223,8 @@ public class ConsultantAdminFacadeIT {
     newList.add(consultantAgency1);
 
     String consultanId = "45816eb6-984b-411f-a818-996cd16e1f2a";
-    List<Long> filteredList = consultantAdminFacade.filterAgencyListForDeletion(consultanId, newList);
+    List<Long> filteredList = consultantAdminFacade
+        .filterAgencyListForDeletion(consultanId, newList);
     assertThat(filteredList.size(), is(1));
 
     CreateConsultantAgencyDTO consultantAgency2 = new CreateConsultantAgencyDTO();
@@ -258,7 +259,7 @@ public class ConsultantAdminFacadeIT {
     consultantAgency2.setAgencyId(122L);
     newList.add(consultantAgency2);
 
-    consultantAdminFacade.filterAgencyListForDeletion(consultantId, newList);
+    consultantAdminFacade.filterAgencyListForCreation(consultantId, newList);
     assertThat(newList.size(), is(1));
   }
 
