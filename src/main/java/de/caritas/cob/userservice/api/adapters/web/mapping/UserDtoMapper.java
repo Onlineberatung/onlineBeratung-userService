@@ -66,7 +66,7 @@ public class UserDtoMapper {
 
   public Optional<Map<String, Object>> mapOf(PatchUserDTO patchUserDTO, AuthenticatedUser user) {
     if (isNull(patchUserDTO.getEncourage2fa()) && isNull(patchUserDTO.getDisplayName()) && isNull(
-        patchUserDTO.getWalkThroughEnabled())) {
+        patchUserDTO.getWalkThroughEnabled()) && isNull(patchUserDTO.getEmailToggles())) {
       return Optional.empty();
     }
 

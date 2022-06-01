@@ -67,6 +67,8 @@ import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSearchResultDTO
 import de.caritas.cob.userservice.api.adapters.web.dto.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.E2eKeyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.EmailDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.EmailToggle;
+import de.caritas.cob.userservice.api.adapters.web.dto.EmailType;
 import de.caritas.cob.userservice.api.adapters.web.dto.EnquiryMessageDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.LanguageResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.OneTimePasswordDTO;
@@ -1593,6 +1595,23 @@ public class UserControllerE2EIT {
   public void patchUserDataShouldRespondWithNoContentOnPartialPayload() throws Exception {
     givenAValidUser(true);
     var patchDto = givenAPartialPatchDto();
+
+    mockMvc.perform(
+        patch("/users/data")
+            .cookie(CSRF_COOKIE)
+            .cookie(RC_TOKEN_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(patchDto))
+            .accept(MediaType.APPLICATION_JSON)
+    ).andExpect(status().isNoContent());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
+  public void patchUserDataShouldRespondWithNoContentOnEmailToggle() throws Exception {
+    givenAValidUser(true);
+    var patchDto = givenAnEmailTogglePatchDto();
 
     mockMvc.perform(
         patch("/users/data")
@@ -3808,8 +3827,10 @@ public class UserControllerE2EIT {
     var patchDtoAsMap = new HashMap<String, Object>(1);
     if (easyRandom.nextBoolean()) {
       patchDtoAsMap.put("encourage2fa", null);
-    } else {
+    } else if (easyRandom.nextBoolean()) {
       patchDtoAsMap.put("displayName", "");
+    } else {
+      patchDtoAsMap.put("emailToggles", Set.of(new EmailToggle()));
     }
 
     return patchDtoAsMap;
@@ -3822,6 +3843,17 @@ public class UserControllerE2EIT {
   private HashMap<String, Object> givenAPartialPatchDto() {
     var patchDtoAsMap = new HashMap<String, Object>(1);
     patchDtoAsMap.put("displayName", RandomStringUtils.randomAlphabetic(4));
+
+    return patchDtoAsMap;
+  }
+
+  private HashMap<String, Object> givenAnEmailTogglePatchDto() {
+    var toggle = new EmailToggle();
+    toggle.setName(EmailType.DAILY_ENQUIRY);
+    toggle.setState(true);
+
+    var patchDtoAsMap = new HashMap<String, Object>(1);
+    patchDtoAsMap.put("emailToggles", Set.of(toggle));
 
     return patchDtoAsMap;
   }
