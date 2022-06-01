@@ -110,7 +110,7 @@ public class UserAdminController implements UseradminApi {
   @Override
   public ResponseEntity<Void> setConsultantAgencies(String consultantId,
       List<CreateConsultantAgencyDTO> agencyList) {
-    List<Long> agencyIdsForDeletions = consultantAdminFacade.filterAgencyListForDeletion(consultantId, agencyList);
+    var agencyIdsForDeletions = consultantAdminFacade.filterAgencyListForDeletion(consultantId, agencyList);
     consultantAdminFacade.markConsultantAgenciesForDeletion(consultantId, agencyIdsForDeletions);
     consultantAdminFacade.filterAgencyListForCreation(consultantId, agencyList);
     consultantAdminFacade.prepareConsultantAgencyRelation(consultantId, agencyList);

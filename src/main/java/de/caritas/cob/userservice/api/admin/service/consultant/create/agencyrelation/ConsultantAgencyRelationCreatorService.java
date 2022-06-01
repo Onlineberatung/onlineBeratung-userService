@@ -93,8 +93,8 @@ public class ConsultantAgencyRelationCreatorService {
   public void completeConsultantAgencyAssigment(ConsultantAgencyCreationInput input,
       Consumer<String> logMethod) {
 
-    Consultant consultant = this.retrieveConsultant(input.getConsultantId());
-    AgencyDTO agency = retrieveAgency(input.getAgencyId());
+    var consultant = this.retrieveConsultant(input.getConsultantId());
+    var agency = retrieveAgency(input.getAgencyId());
 
     if (!ConsultantStatus.IN_PROGRESS.equals(consultant.getStatus())) {
       consultant.setStatus(ConsultantStatus.IN_PROGRESS);

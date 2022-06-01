@@ -207,11 +207,11 @@ public class ConsultantAdminFacade {
   }
 
   /**
-   * Creates consultant agencies from given consultant id and agencies list set to status
+   * Creates consultant agencies from given consultant id and agencies list and sets to status
    * IN_PROGRESS.
    *
-   * @param consultantId
-   * @param agencies
+   * @param consultantId given consultant
+   * @param agencies     list of agencies
    */
   public void prepareConsultantAgencyRelation(String consultantId,
       List<CreateConsultantAgencyDTO> agencies) {
@@ -243,12 +243,14 @@ public class ConsultantAdminFacade {
    */
   public List<Long> filterAgencyListForDeletion(String consultantId,
       List<CreateConsultantAgencyDTO> newList) {
-    List<Long> newListIds = newList.stream().map(el -> el.getAgencyId())
+    var newListIds = newList.stream().map(CreateConsultantAgencyDTO::getAgencyId)
         .collect(Collectors.toList());
-    List<Long> persistedAgencyIds = consultantAgencyAdminService
+    var persistedAgencyIds = consultantAgencyAdminService
         .findConsultantAgencies(consultantId).getEmbedded().stream()
-        .map(el -> el.getEmbedded().getId()).collect(Collectors.toList());
-    return persistedAgencyIds.stream().filter(el -> !newListIds.contains(el))
+        .map(agencyAdminResponse -> agencyAdminResponse.getEmbedded().getId())
+        .collect(Collectors.toList());
+    return persistedAgencyIds.stream()
+        .filter(persistedAgencyId -> !newListIds.contains(persistedAgencyId))
         .collect(Collectors.toList());
 
   }
@@ -261,11 +263,12 @@ public class ConsultantAdminFacade {
    */
   public void filterAgencyListForCreation(String consultantId,
       List<CreateConsultantAgencyDTO> newList) {
-    List<Long> persistedAgencyIds = consultantAgencyAdminService
+    var persistedAgencyIds = consultantAgencyAdminService
         .findConsultantAgencies(consultantId).getEmbedded().stream()
-        .map(el -> el.getEmbedded().getId()).collect(Collectors.toList());
-    List<CreateConsultantAgencyDTO> filteredList = newList.stream()
-        .filter(el -> !persistedAgencyIds.contains(el.getAgencyId()))
+        .map(agencyAdminFullResponse -> agencyAdminFullResponse.getEmbedded().getId())
+        .collect(Collectors.toList());
+    var filteredList = newList.stream()
+        .filter(agency -> !persistedAgencyIds.contains(agency.getAgencyId()))
         .collect(Collectors.toList());
     newList.clear();
     newList.addAll(filteredList);
