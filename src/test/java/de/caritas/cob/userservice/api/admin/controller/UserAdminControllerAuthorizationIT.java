@@ -28,12 +28,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
 import de.caritas.cob.userservice.api.admin.facade.UserAdminFacade;
-import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
-import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
-import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.admin.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.admin.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.admin.model.UpdateAdminConsultantDTO;
+import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
+import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
+import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import java.util.List;
 import java.util.UUID;
 import javax.servlet.http.Cookie;
@@ -516,8 +516,10 @@ public class UserAdminControllerAuthorizationIT {
             .content(objectMapper.writeValueAsString(agencies)))
         .andExpect(status().isOk());
 
-    verify(consultantAdminFacade).createNewConsultantAgency(anyString(), any());
-    verify(consultantAdminFacade).markConsultantAgenciesForDeletion(anyString());
+    verify(consultantAdminFacade).markConsultantAgenciesForDeletion(anyString(), any());
+    verify(consultantAdminFacade).filterAgencyListForCreation(anyString(), any());
+    verify(consultantAdminFacade).prepareConsultantAgencyRelation(anyString(), any());
+    verify(consultantAdminFacade).completeConsultantAgencyAssigment(anyString(), any());
   }
 
   @Test

@@ -4,20 +4,28 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO;
 import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.admin.model.ConsultantFilter;
+import de.caritas.cob.userservice.api.admin.model.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.admin.model.Sort;
 import de.caritas.cob.userservice.api.admin.model.Sort.FieldEnum;
 import de.caritas.cob.userservice.api.admin.model.Sort.OrderEnum;
 import de.caritas.cob.userservice.api.admin.service.agency.AgencyAdminService;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.RolesDTO;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
@@ -53,6 +61,9 @@ public class ConsultantAdminFacadeIT {
 
   @MockBean
   private AgencyAdminService agencyAdminService;
+
+  @MockBean
+  private ConsultingTypeManager consultingTypeManager;
 
   @Test
   public void findFilteredConsultants_Should_retrieveDeletedAgencyRelations_When_consultantIsDeleted() {
@@ -143,5 +154,114 @@ public class ConsultantAdminFacadeIT {
 
     return consultant;
   }
+
+  @Test
+  public void findFilteredConsultants_Should_retrieveConsultantAfterAddingRelationToAgency() {
+
+    var consultantId = "id";
+    givenConsultantWithoutAgency(consultantId);
+    when(consultingTypeManager.isConsultantBoundedToAgency(anyInt())).thenReturn(false);
+    when(consultingTypeManager
+        .getConsultingTypeSettings(anyInt())).thenReturn(getExtendedConsultingTypeResponse());
+
+    var agencyId = 999L;
+    CreateConsultantAgencyDTO consultantAgencyDto = new CreateConsultantAgencyDTO();
+    consultantAgencyDto.agencyId(agencyId);
+
+    ConsultantFilter consultantFilter = new ConsultantFilter();
+    consultantFilter.setAgencyId(agencyId);
+
+    var searchResult = this.consultantAdminFacade
+        .findFilteredConsultants(1, 100, consultantFilter,
+            new Sort().field(FieldEnum.FIRSTNAME).order(OrderEnum.ASC));
+
+    assertThat(searchResult.getEmbedded(), hasSize(0));
+
+    consultantAdminFacade.createNewConsultantAgency(consultantId, consultantAgencyDto);
+
+    searchResult = this.consultantAdminFacade
+        .findFilteredConsultants(1, 100, consultantFilter,
+            new Sort().field(FieldEnum.FIRSTNAME).order(OrderEnum.ASC));
+    assertThat(searchResult.getEmbedded(), hasSize(1));
+
+  }
+
+  private ExtendedConsultingTypeResponseDTO getExtendedConsultingTypeResponse() {
+    ExtendedConsultingTypeResponseDTO e = new ExtendedConsultingTypeResponseDTO();
+    e.setRoles(new RolesDTO());
+    return e;
+  }
+
+  private void givenConsultantWithoutAgency(String id) {
+    Consultant newConsultant = new Consultant();
+    newConsultant.setStatus(ConsultantStatus.CREATED);
+    newConsultant.setLastName("lastName");
+    newConsultant.setWalkThroughEnabled(false);
+    newConsultant.setFirstName("firstName");
+    newConsultant.setEmail("email@email.com");
+    newConsultant.setRocketChatId("rocketChatId");
+    newConsultant.setEncourage2fa(false);
+    newConsultant.setUsername("username");
+    newConsultant.setId(id);
+    consultantRepository.save(newConsultant);
+  }
+
+  @Test
+  public void testConsultantAgencyForDeletionFiltering() {
+    List<AgencyAdminResponseDTO> result = new ArrayList<AgencyAdminResponseDTO>();
+    AgencyAdminResponseDTO agency1 = new AgencyAdminResponseDTO();
+    agency1.setId(110L);
+    result.add(agency1);
+    AgencyAdminResponseDTO agency2 = new AgencyAdminResponseDTO();
+    agency2.setId(121L);
+    result.add(agency2);
+    when(this.agencyAdminService.retrieveAllAgencies()).thenReturn(result);
+
+    List<CreateConsultantAgencyDTO> newList = new ArrayList<CreateConsultantAgencyDTO>();
+    CreateConsultantAgencyDTO consultantAgency1 = new CreateConsultantAgencyDTO();
+    consultantAgency1.setAgencyId(110L);
+    newList.add(consultantAgency1);
+
+    String consultanId = "45816eb6-984b-411f-a818-996cd16e1f2a";
+    List<Long> filteredList = consultantAdminFacade
+        .filterAgencyListForDeletion(consultanId, newList);
+    assertThat(filteredList.size(), is(1));
+
+    CreateConsultantAgencyDTO consultantAgency2 = new CreateConsultantAgencyDTO();
+    consultantAgency2.setAgencyId(121L);
+    newList.add(consultantAgency2);
+
+    filteredList = consultantAdminFacade.filterAgencyListForDeletion(consultanId, newList);
+    assertThat(filteredList.size(), is(0));
+  }
+
+  @Test
+  public void testConsultantAgencyForCreationFiltering() {
+    List<AgencyAdminResponseDTO> result = new ArrayList<AgencyAdminResponseDTO>();
+    AgencyAdminResponseDTO agency1 = new AgencyAdminResponseDTO();
+    agency1.setId(110L);
+    result.add(agency1);
+    AgencyAdminResponseDTO agency2 = new AgencyAdminResponseDTO();
+    agency2.setId(121L);
+    result.add(agency2);
+    when(this.agencyAdminService.retrieveAllAgencies()).thenReturn(result);
+
+    List<CreateConsultantAgencyDTO> newList = new ArrayList<CreateConsultantAgencyDTO>();
+    CreateConsultantAgencyDTO consultantAgency1 = new CreateConsultantAgencyDTO();
+    consultantAgency1.setAgencyId(110L);
+    newList.add(consultantAgency1);
+
+    String consultantId = "45816eb6-984b-411f-a818-996cd16e1f2a";
+    consultantAdminFacade.filterAgencyListForCreation(consultantId, newList);
+    assertThat(newList.size(), is(0));
+
+    CreateConsultantAgencyDTO consultantAgency2 = new CreateConsultantAgencyDTO();
+    consultantAgency2.setAgencyId(122L);
+    newList.add(consultantAgency2);
+
+    consultantAdminFacade.filterAgencyListForCreation(consultantId, newList);
+    assertThat(newList.size(), is(1));
+  }
+
 
 }

@@ -3,9 +3,6 @@ package de.caritas.cob.userservice.api.admin.controller;
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
 import de.caritas.cob.userservice.api.admin.facade.UserAdminFacade;
 import de.caritas.cob.userservice.api.admin.hallink.RootDTOBuilder;
-import de.caritas.cob.userservice.api.admin.model.Sort;
-import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
-import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.admin.model.AgencyConsultantResponseDTO;
 import de.caritas.cob.userservice.api.admin.model.AgencyTypeDTO;
 import de.caritas.cob.userservice.api.admin.model.ConsultantAdminResponseDTO;
@@ -17,8 +14,11 @@ import de.caritas.cob.userservice.api.admin.model.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.admin.model.RootDTO;
 import de.caritas.cob.userservice.api.admin.model.SessionAdminResultDTO;
 import de.caritas.cob.userservice.api.admin.model.SessionFilter;
+import de.caritas.cob.userservice.api.admin.model.Sort;
 import de.caritas.cob.userservice.api.admin.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.admin.model.ViolationDTO;
+import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
+import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.generated.api.admin.controller.UseradminApi;
 import io.swagger.annotations.Api;
 import java.util.List;
@@ -110,11 +110,11 @@ public class UserAdminController implements UseradminApi {
   @Override
   public ResponseEntity<Void> setConsultantAgencies(String consultantId,
       List<CreateConsultantAgencyDTO> agencyList) {
-    consultantAdminFacade.markConsultantAgenciesForDeletion(consultantId);
-    agencyList.forEach(agency ->
-        consultantAdminFacade.createNewConsultantAgency(consultantId, agency)
-    );
-
+    var agencyIdsForDeletions = consultantAdminFacade.filterAgencyListForDeletion(consultantId, agencyList);
+    consultantAdminFacade.markConsultantAgenciesForDeletion(consultantId, agencyIdsForDeletions);
+    consultantAdminFacade.filterAgencyListForCreation(consultantId, agencyList);
+    consultantAdminFacade.prepareConsultantAgencyRelation(consultantId, agencyList);
+    consultantAdminFacade.completeConsultantAgencyAssigment(consultantId, agencyList);
     return ResponseEntity.ok().build();
   }
 

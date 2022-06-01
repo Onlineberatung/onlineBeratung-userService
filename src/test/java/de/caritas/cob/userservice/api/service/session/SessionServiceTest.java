@@ -107,7 +107,7 @@ class SessionServiceTest {
       CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", 1L, LanguageCode.de, SessionStatus.NEW,
       nowInUtc(), null, null, null, false, false, false, nowInUtc(), null, null);
   private final ConsultantAgency CONSULTANT_AGENCY_1 = new ConsultantAgency(1L, CONSULTANT, 1L,
-      nowInUtc(), nowInUtc(), nowInUtc(), null);
+      nowInUtc(), nowInUtc(), nowInUtc(), null, null);
   private final Set<ConsultantAgency> CONSULTANT_AGENCY_SET = new HashSet<>();
   private final List<Session> SESSION_LIST_WITH_CONSULTANT = singletonList(SESSION_WITH_CONSULTANT);
   private final String ERROR_MSG = "error";
