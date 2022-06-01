@@ -100,7 +100,6 @@ public class ConsultantAdminFacade {
       var consultants = filteredConsultants.getEmbedded().stream()
           .map(ConsultantAdminResponseDTO::getEmbedded)
           .collect(Collectors.toSet());
-
       consultantAgencyAdminService.appendAgenciesForConsultants(consultants);
     }
   }
