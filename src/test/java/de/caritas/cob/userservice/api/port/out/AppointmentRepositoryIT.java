@@ -17,7 +17,7 @@ import org.springframework.test.context.ActiveProfiles;
 @DataJpaTest
 @ActiveProfiles("testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class AppointmentRepositoryIT {
+class AppointmentRepositoryIT {
 
   private static final EasyRandom easyRandom = new EasyRandom();
 
@@ -38,7 +38,7 @@ public class AppointmentRepositoryIT {
   }
 
   @Test
-  public void saveShouldSaveAppointmentAndReturnId() {
+  void saveShouldSaveAppointmentAndReturnId() {
     givenAValidConsultant();
     givenAValidAppointment(false);
 
@@ -49,7 +49,7 @@ public class AppointmentRepositoryIT {
   }
 
   @Test
-  public void deleteShouldKeepConsultant() {
+  void deleteShouldKeepConsultant() {
     givenAValidConsultant();
     givenAValidAppointment(true);
 
