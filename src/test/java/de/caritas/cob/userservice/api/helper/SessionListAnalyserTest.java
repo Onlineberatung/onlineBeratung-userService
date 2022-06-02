@@ -37,16 +37,6 @@ public class SessionListAnalyserTest {
   @Mock
   private DecryptionService decryptionService;
 
-  /*
-   * Method: prepareMessageForSessionList
-   */
-  @Test
-  public void prepareMessageForSessionList_Should_TruncateMessage() throws CustomCryptoException {
-    when(decryptionService.decrypt(MESSAGE_TOO_LONG, RC_GROUP_ID)).thenReturn(MESSAGE_TOO_LONG);
-    String result = sessionListAnalyser.prepareMessageForSessionList(MESSAGE_TOO_LONG, RC_GROUP_ID);
-    assertEquals(SessionListAnalyser.MAX_MESSAGE_LENGTH_FOR_FRONTEND, result.length());
-  }
-
   @Test
   public void prepareMessageForSessionList_Should_DecryptMessage() throws CustomCryptoException {
     when(decryptionService.decrypt(MESSAGE_TOO_LONG, RC_GROUP_ID)).thenReturn(MESSAGE_TOO_LONG);

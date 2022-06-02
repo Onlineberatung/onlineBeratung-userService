@@ -28,6 +28,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.config.RocketChatConfig;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.DataDTO;
@@ -71,24 +72,10 @@ public class RocketChatCredentialsProviderTest {
   private final static String FIELD_NAME_SYSTEM_USERNAME = "systemUsername";
   private final static String FIELD_NAME_SYSTEM_PASSWORD = "systemPassword";
 
-  private final static String FIELD_NAME_ROCKET_CHAT_HEADER_AUTH_TOKEN =
-      "rocketChatHeaderAuthToken";
-  private final static String FIELD_VALUE_ROCKET_CHAT_HEADER_AUTH_TOKEN = "X-Auth-Token";
-  private final static String FIELD_NAME_ROCKET_CHAT_HEADER_USER_ID = "rocketChatHeaderUserId";
-  private final static String FIELD_VALUE_ROCKET_CHAT_HEADER_USER_ID = "X-User-Id";
-
-  private final String FIELD_NAME_ROCKET_CHAT_API_POST_USER_LOGIN = "rocketChatApiUserLogin";
-  private final String FIELD_NAME_ROCKET_CHAT_API_POST_USER_LOGOUT = "rocketChatApiUserLogout";
-
-  /**
-   * DATA
-   */
-
   private final String RC_URL_CHAT_USER_LOGIN = "http://localhost/api/v1/login";
-  private final String RC_URL_CHAT_USER_LOGOUT = "http://localhost/api/v1/logout";
 
   MultiValueMap<String, String> MULTI_VALUE_MAP_WITH_TECHNICAL_USER_CREDENTIALS =
-      new LinkedMultiValueMap<String, String>() {
+      new LinkedMultiValueMap<>() {
         private static final long serialVersionUID = 1L;
 
         {
@@ -98,7 +85,7 @@ public class RocketChatCredentialsProviderTest {
       };
 
   MultiValueMap<String, String> MULTI_VALUE_MAP_WITH_SYSTEM_USER_CREDENTIALS =
-      new LinkedMultiValueMap<String, String>() {
+      new LinkedMultiValueMap<>() {
         private static final long serialVersionUID = 1L;
 
         {
@@ -136,6 +123,8 @@ public class RocketChatCredentialsProviderTest {
   private final static String SYSTEM_USER_USERNAME = "sysUserName";
   private final static String SYSTEM_USER_PW = "sysUserPW";
 
+  private final RocketChatConfig rocketChatConfig = new RocketChatConfig();
+
   @InjectMocks
   private RocketChatCredentialsProvider rcCredentialHelper;
 
@@ -148,14 +137,9 @@ public class RocketChatCredentialsProviderTest {
     setField(rcCredentialHelper, FIELD_NAME_TECHNICAL_PASSWORD, TECHNICAL_USER_PW);
     setField(rcCredentialHelper, FIELD_NAME_SYSTEM_USERNAME, SYSTEM_USER_USERNAME);
     setField(rcCredentialHelper, FIELD_NAME_SYSTEM_PASSWORD, SYSTEM_USER_PW);
-    setField(rcCredentialHelper, FIELD_NAME_ROCKET_CHAT_API_POST_USER_LOGIN,
-        RC_URL_CHAT_USER_LOGIN);
-    setField(rcCredentialHelper, FIELD_NAME_ROCKET_CHAT_API_POST_USER_LOGOUT,
-        RC_URL_CHAT_USER_LOGOUT);
-    setField(rcCredentialHelper, FIELD_NAME_ROCKET_CHAT_HEADER_AUTH_TOKEN,
-        FIELD_VALUE_ROCKET_CHAT_HEADER_AUTH_TOKEN);
-    setField(rcCredentialHelper, FIELD_NAME_ROCKET_CHAT_HEADER_USER_ID,
-        FIELD_VALUE_ROCKET_CHAT_HEADER_USER_ID);
+
+    rocketChatConfig.setBaseUrl("http://localhost/api/v1");
+    setField(rcCredentialHelper, "rocketChatConfig", rocketChatConfig);
   }
 
   /**
@@ -171,22 +155,19 @@ public class RocketChatCredentialsProviderTest {
 
     // Prepare intercept login technical user
     HttpEntity<MultiValueMap<String, String>> requestTechnical =
-        new HttpEntity<MultiValueMap<String, String>>(
-            MULTI_VALUE_MAP_WITH_TECHNICAL_USER_CREDENTIALS, headers);
+        new HttpEntity<>(MULTI_VALUE_MAP_WITH_TECHNICAL_USER_CREDENTIALS, headers);
 
     when(restTemplate.postForEntity(ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGIN),
         ArgumentMatchers.eq(requestTechnical), ArgumentMatchers.<Class<LoginResponseDTO>>any()))
-        .thenReturn(new ResponseEntity<LoginResponseDTO>(LOGIN_RESPONSE_DTO_TECHNICAL_USER_A,
-            HttpStatus.OK));
+        .thenReturn(new ResponseEntity<>(LOGIN_RESPONSE_DTO_TECHNICAL_USER_A, HttpStatus.OK));
 
     // Prepare intercept login system user
     HttpEntity<MultiValueMap<String, String>> requestSys =
-        new HttpEntity<MultiValueMap<String, String>>(MULTI_VALUE_MAP_WITH_SYSTEM_USER_CREDENTIALS,
-            headers);
+        new HttpEntity<>(MULTI_VALUE_MAP_WITH_SYSTEM_USER_CREDENTIALS, headers);
 
     when(restTemplate.postForEntity(ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGIN),
         ArgumentMatchers.eq(requestSys), ArgumentMatchers.<Class<LoginResponseDTO>>any()))
-        .thenReturn(new ResponseEntity<LoginResponseDTO>(LOGIN_RESPONSE_DTO_SYSTEM_USER_A,
+        .thenReturn(new ResponseEntity<>(LOGIN_RESPONSE_DTO_SYSTEM_USER_A,
             HttpStatus.OK));
 
     // Execute test
@@ -224,8 +205,7 @@ public class RocketChatCredentialsProviderTest {
 
     // Prepare intercept login system user
     HttpEntity<MultiValueMap<String, String>> requestSys =
-        new HttpEntity<MultiValueMap<String, String>>(MULTI_VALUE_MAP_WITH_SYSTEM_USER_CREDENTIALS,
-            headers);
+        new HttpEntity<>(MULTI_VALUE_MAP_WITH_SYSTEM_USER_CREDENTIALS, headers);
 
     when(restTemplate.postForEntity(ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGIN),
         ArgumentMatchers.eq(requestSys), ArgumentMatchers.<Class<LoginResponseDTO>>any()))
@@ -316,10 +296,11 @@ public class RocketChatCredentialsProviderTest {
     // prepare logout intercept for system user
     HttpHeaders headersLogoutSys = new HttpHeaders();
     headersLogoutSys.setContentType(MediaType.APPLICATION_JSON);
-    headersLogoutSys.add(FIELD_VALUE_ROCKET_CHAT_HEADER_AUTH_TOKEN, SYSTEM_USER_A_TOKEN);
-    headersLogoutSys.add(FIELD_VALUE_ROCKET_CHAT_HEADER_USER_ID, SYSTEM_USER_A_ID);
+    headersLogoutSys.add("X-Auth-Token", SYSTEM_USER_A_TOKEN);
+    headersLogoutSys.add("X-User-Id", SYSTEM_USER_A_ID);
     HttpEntity<Void> requestSysLogout = new HttpEntity<>(headersLogoutSys);
-    when(restTemplate.postForEntity(ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGOUT),
+    var rcUrlChatUserLogout = "http://localhost/api/v1/logout";
+    when(restTemplate.postForEntity(ArgumentMatchers.eq(rcUrlChatUserLogout),
         ArgumentMatchers.eq(requestSysLogout), ArgumentMatchers.<Class<LogoutResponseDTO>>any()))
         .thenReturn(new ResponseEntity<>(LOGOUT_RESPONSE_DTO_SYSTEM_USER_A,
             HttpStatus.OK));
@@ -327,10 +308,10 @@ public class RocketChatCredentialsProviderTest {
     // prepare logout intercept for technical user
     HttpHeaders headersLogoutTec = new HttpHeaders();
     headersLogoutTec.setContentType(MediaType.APPLICATION_JSON);
-    headersLogoutTec.add(FIELD_VALUE_ROCKET_CHAT_HEADER_AUTH_TOKEN, TECHNICAL_USER_A_TOKEN);
-    headersLogoutTec.add(FIELD_VALUE_ROCKET_CHAT_HEADER_USER_ID, TECHNICAL_USER_A_ID);
+    headersLogoutTec.add("X-Auth-Token", TECHNICAL_USER_A_TOKEN);
+    headersLogoutTec.add("X-User-Id", TECHNICAL_USER_A_ID);
     HttpEntity<Void> requestTechnicalLogout = new HttpEntity<>(headersLogoutTec);
-    when(restTemplate.postForEntity(ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGOUT),
+    when(restTemplate.postForEntity(ArgumentMatchers.eq(rcUrlChatUserLogout),
         ArgumentMatchers.eq(requestTechnicalLogout),
         ArgumentMatchers.<Class<LogoutResponseDTO>>any()))
         .thenReturn(new ResponseEntity<>(LOGOUT_RESPONSE_DTO_TECHNICAL_USER_A, HttpStatus.OK));
@@ -365,9 +346,9 @@ public class RocketChatCredentialsProviderTest {
     assertNotEquals(systemB.getTimeStampCreated(), systemUser.getTimeStampCreated());
 
     // ensure logout interception was called
-    verify(restTemplate, times(1)).postForEntity(RC_URL_CHAT_USER_LOGOUT, requestTechnicalLogout,
+    verify(restTemplate, times(1)).postForEntity(rcUrlChatUserLogout, requestTechnicalLogout,
         LogoutResponseDTO.class);
-    verify(restTemplate, times(1)).postForEntity(RC_URL_CHAT_USER_LOGOUT, requestSysLogout,
+    verify(restTemplate, times(1)).postForEntity(rcUrlChatUserLogout, requestSysLogout,
         LogoutResponseDTO.class);
     // ensure login interception was called
     verify(restTemplate, times(1)).postForEntity(RC_URL_CHAT_USER_LOGIN, requestSysLogin,

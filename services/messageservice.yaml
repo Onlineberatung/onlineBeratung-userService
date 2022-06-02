@@ -66,6 +66,10 @@ paths:
       responses:
         201:
           description: CREATED - message was successfully created
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/MessageResponseDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -110,6 +114,10 @@ paths:
       responses:
         201:
           description: CREATED - message was successfully created
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/MessageResponseDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -143,6 +151,10 @@ paths:
       responses:
         201:
           description: CREATED - hint message was successfully created
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/MessageResponseDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -230,6 +242,10 @@ paths:
       responses:
         201:
           description: CREATED - message was successfully created
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/MessageResponseDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -258,7 +274,7 @@ paths:
         content:
           'application/json':
             schema:
-              type: string
+              $ref: '#/components/schemas/DraftMessageDTO'
         required: true
       responses:
         200:
@@ -292,7 +308,7 @@ paths:
           content:
             'application/json':
               schema:
-                type: string
+                $ref: '#/components/schemas/DraftMessageDTO'
         204:
           description: NO CONTENT - no messages available
         400:
@@ -328,6 +344,10 @@ paths:
       responses:
         201:
           description: CREATED - message was successfully created
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/MessageResponseDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -352,6 +372,9 @@ components:
         sendNotification:
           type: boolean
           example: "true"
+        t:
+          type: string
+          example: "c"
 
     MessageStreamDTO:
       type: object
@@ -379,6 +402,9 @@ components:
         _id:
           type: string
           example: "M73fE4WhYF4peYB3s"
+        t:
+          type: string
+          example: "room_changed_privacy"
         alias:
           $ref: '#/components/schemas/AliasMessageDTO'
         rid:
@@ -414,6 +440,39 @@ components:
         file:
           $ref: '#/components/schemas/FileDTO'
 
+    MessageResponseDTO:
+      type: object
+      required:
+        - _id
+        - rid
+        - msg
+        - ts
+        - _updatedAt
+      properties:
+        _id:
+          type: string
+          example: "M73fE4WhYF4peYB3s"
+        t:
+          type: string
+          example: "room_changed_privacy"
+        e2e:
+          type: string
+          example: "pending"
+        rid:
+          type: string
+          example: "fR2Rz7dmWmHdXE8uz"
+        msg:
+          type: string
+          example: "Lorem ipsum dolor sit amet, consetetur..."
+        ts:
+          type: string
+          description: "Full qualified timestamp"
+          example: "2018-11-15T09:33:00.057Z"
+        _updatedAt:
+          type: string
+          description: "Full qualified timestamp"
+          example: "2018-11-15T09:33:00.057Z"
+
     AliasMessageDTO:
       type: object
       properties:
@@ -442,9 +501,13 @@ components:
         username:
           type: string
           example: "asker23"
+        displayName:
+          type: string
         rcUserId:
           type: string
           example: "ag89h3tjkerg94t"
+        t:
+          type: string
 
     VideoCallMessageDTO:
       type: object
@@ -460,6 +523,8 @@ components:
         initiatorUserName:
           type: string
           example: "consultant23"
+        rcUserId:
+          type: string
         initiatorRcUserId:
           type: string
           example: "ag89h3tjkerg94t"
@@ -480,6 +545,8 @@ components:
         - "FURTHER_STEPS"
         - "UPDATE_SESSION_DATA"
         - "VIDEOCALL"
+        - "USER_MUTED"
+        - "USER_UNMUTED"
 
     UserDTO:
       type: object
@@ -555,6 +622,18 @@ components:
         type:
           type: string
           example: "image/jepg"
+
+    DraftMessageDTO:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: "Lorem ipsum dolor sit amet, consetetur..."
+        t:
+          type: string
+          example: "c"
 
     MasterKeyDTO:
       type: object

@@ -8,14 +8,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
-import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsLastMessageDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AliasMessageDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.LastMessageDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.MessageType;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.VideoCallMessageDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.VideoCallMessageDTO.EventTypeEnum;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsLastMessageDTO;
+import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
+import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -102,7 +103,28 @@ public class AvailableLastMessageUpdaterTest {
         .updateSessionWithAvailableLastMessage(this.rocketChatRoomInformation, "",
             mock(Consumer.class), session, GROUP_ID);
 
-    assertThat(session.getLastMessage(), is("So geht es weiter"));
+    var expectedLastMessage = new LastMessageDTO();
+    expectedLastMessage.setMsg("So geht es weiter");
+    assertThat(session.getE2eLastMessage(), is(expectedLastMessage));
+    assertThat(session.getLastMessage(), is(expectedLastMessage.getMsg()));
   }
 
+  @Test
+  public void updateSessionWithAvailableLastMessage_should_set_rocket_chat_type() {
+    when(roomsLastMessageDTO.getMessage()).thenReturn("e2e_encrypted_message");
+    when(roomsLastMessageDTO.getType()).thenReturn("e2e");
+    when(sessionListAnalyser.prepareMessageForSessionList("e2e_encrypted_message",
+        GROUP_ID)).thenReturn("e2e_encrypted_message");
+    var session = new SessionDTO();
+
+    this.availableLastMessageUpdater
+        .updateSessionWithAvailableLastMessage(this.rocketChatRoomInformation, "rc4711",
+            mock(Consumer.class), session, GROUP_ID);
+
+    var expectedLastMessage = new LastMessageDTO();
+    expectedLastMessage.setMsg("e2e_encrypted_message");
+    expectedLastMessage.setT("e2e");
+    assertThat(session.getE2eLastMessage(), is(expectedLastMessage));
+    assertThat(session.getLastMessage(), is(expectedLastMessage.getMsg()));
+  }
 }

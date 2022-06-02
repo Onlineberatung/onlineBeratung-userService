@@ -13,11 +13,13 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsP
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+@Slf4j
 @TestConfiguration
 public class RocketChatTestConfig {
 
@@ -68,14 +70,17 @@ public class RocketChatTestConfig {
 
       @Override
       public void addTechnicalUserToGroup(String rcGroupId) {
+        log.info("RocketChatTestConfig.addTechnicalUserToGroup({}) called", rcGroupId);
       }
 
       @Override
       public void removeUserFromGroup(String rcUserId, String rcGroupId) {
+        log.info("RocketChatTestConfig.removeUserFromGroup({},{}) called", rcUserId, rcGroupId);
       }
 
       @Override
       public void removeTechnicalUserFromGroup(String rcGroupId) {
+        log.info("RocketChatTestConfig.removeTechnicalUserFromGroup({}) called", rcGroupId);
       }
 
       @Override

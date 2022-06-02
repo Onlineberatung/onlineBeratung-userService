@@ -56,9 +56,17 @@ public class UserDtoMapper {
     return null;
   }
 
+  public String chatUserIdOf(Map<String, Object> userMap) {
+    if (userMap.containsKey("chatUserId")) {
+      return (String) userMap.get("chatUserId");
+    }
+
+    return null;
+  }
+
   public Optional<Map<String, Object>> mapOf(PatchUserDTO patchUserDTO, AuthenticatedUser user) {
     if (isNull(patchUserDTO.getEncourage2fa()) && isNull(patchUserDTO.getDisplayName()) && isNull(
-        patchUserDTO.getWalkThroughEnabled())) {
+        patchUserDTO.getWalkThroughEnabled()) && isNull(patchUserDTO.getEmailToggles())) {
       return Optional.empty();
     }
 

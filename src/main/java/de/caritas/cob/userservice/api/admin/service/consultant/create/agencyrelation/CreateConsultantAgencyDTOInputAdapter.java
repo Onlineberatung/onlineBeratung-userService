@@ -2,7 +2,7 @@ package de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrel
 
 import static org.hibernate.search.util.impl.CollectionHelper.asSet;
 
-import de.caritas.cob.userservice.api.admin.model.CreateConsultantAgencyDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantAgencyDTO;
 import java.util.Set;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

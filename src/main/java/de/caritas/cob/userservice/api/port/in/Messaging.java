@@ -15,4 +15,12 @@ public interface Messaging {
   Optional<Map<String, Object>> findChatMetaInfo(long chatId, String userId);
 
   void unbanUsersInChat(Long chatId, String id);
+
+  Boolean updateE2eKeys(String chatUserId, String publicKey);
+
+  boolean removeUserFromSession(String chatUserId, String chatId);
+
+  Optional<Map<String, String>> findSession(Long sessionId);
+
+  boolean isInChat(String chatId, String chatUserId);
 }

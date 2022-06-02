@@ -4,8 +4,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 
 import de.caritas.cob.userservice.api.UserServiceApplication;
-import de.caritas.cob.userservice.api.admin.model.SessionAdminResultDTO;
-import de.caritas.cob.userservice.api.admin.model.SessionFilter;
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionAdminResultDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionFilter;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import org.junit.After;
 import org.junit.Before;
@@ -49,7 +49,7 @@ public class SessionAdminServiceTenantAwareIT {
         .findSessions(2, 100, new SessionFilter());
 
     assertThat(firstPage.getEmbedded(), hasSize(100));
-    assertThat(secondPage.getEmbedded(), hasSize(51));
+    assertThat(secondPage.getEmbedded(), hasSize(52));
   }
 
 }
