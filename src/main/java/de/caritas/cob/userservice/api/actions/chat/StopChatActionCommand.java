@@ -70,6 +70,7 @@ public class StopChatActionCommand implements ActionCommand<Chat> {
     removeAllMessages(chat);
     removeRocketChatStandardUsers(chat);
     reinitializeDatabaseChat(chat);
+    rocketChatService.saveRoomSettings(chat.getGroupId(), false);
   }
 
   private void removeAllMessages(Chat chat) {

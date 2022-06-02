@@ -10,6 +10,7 @@ import com.mongodb.QueryBuilder;
 import de.caritas.cob.userservice.api.adapters.rocketchat.config.RocketChatConfig;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.MessageResponse;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomResponse;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomSettingsDTO;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.RocketChatUnauthorizedException;
@@ -55,6 +56,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -94,6 +96,7 @@ public class RocketChatService implements MessageClient {
   private static final String ENDPOINT_USER_MUTE = "/method.call/muteUserInRoom";
 
   private static final String ENDPOINT_USER_UNMUTE = "/method.call/unmuteUserInRoom";
+  private static final String ENDPOINT_SAVE_ROOM_SETTINGS = "/rooms.saveRoomSettings";
 
   private static final String ENDPOINT_USER_INFO = "/users.info?userId=";
 
@@ -1042,5 +1045,19 @@ public class RocketChatService implements MessageClient {
 
   private String buildUsernameQuery(String username) {
     return String.format("{\"username\":{\"$eq\":\"%s\"}}", username.toLowerCase());
+  }
+
+  public boolean saveRoomSettings(String chatId, boolean encrypted) {
+    var url = rocketChatConfig.getApiUrl(ENDPOINT_SAVE_ROOM_SETTINGS);
+
+    var roomSettings = new RoomSettingsDTO(chatId, encrypted);
+
+    try {
+      var response = rocketChatClient.postForEntity(url, roomSettings, MessageResponse.class);
+      return response.getStatusCode().is2xxSuccessful();
+    } catch (HttpClientErrorException exception) {
+      log.error("Saving room settings failed.", exception);
+      return false;
+    }
   }
 }

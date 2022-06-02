@@ -7,7 +7,9 @@ import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
 import de.caritas.cob.userservice.api.model.Chat;
@@ -63,7 +65,10 @@ public class JoinAndLeaveChatFacade {
 
     try {
       rocketChatService.removeUserFromGroup(rcUserId, chat.getGroupId());
-    } catch (RocketChatRemoveUserFromGroupException e) {
+      if (rocketChatService.getStandardMembersOfGroup(chat.getGroupId()).isEmpty()) {
+        rocketChatService.saveRoomSettings(chat.getGroupId(), false);
+      }
+    } catch (RocketChatRemoveUserFromGroupException | RocketChatUserNotInitializedException | RocketChatGetGroupMembersException e) {
       throw new InternalServerErrorException(e.getMessage(), LogService::logInternalServerError);
     }
   }
