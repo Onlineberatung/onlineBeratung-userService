@@ -112,6 +112,7 @@ public class EnquiryNotificationService {
     var mailDTOs = consultantAgencyService
         .findConsultantsByAgencyId(enquiryMailContent.getAgencyId()).stream()
         .map(ConsultantAgency::getConsultant)
+        .filter(Consultant::getNotifyEnquiriesRepeating)
         .map(consultant -> buildMailTO(consultant, enquiryMailContent))
         .collect(Collectors.toList());
 

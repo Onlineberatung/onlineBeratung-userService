@@ -1608,10 +1608,28 @@ public class UserControllerE2EIT {
   }
 
   @Test
-  @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
-  public void patchUserDataShouldRespondWithNoContentOnEmailToggle() throws Exception {
-    givenAValidUser(true);
-    var patchDto = givenAnEmailTogglePatchDto();
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  void patchUserDataShouldRespondWithBadRequestOnUnknownEmailToggle() throws Exception {
+    givenAValidConsultant(true);
+    var patchDtoJson = givenAnUnknownEmailTypeTogglePatchDto();
+
+    mockMvc.perform(
+        patch("/users/data")
+            .cookie(CSRF_COOKIE)
+            .cookie(RC_TOKEN_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(patchDtoJson)
+            .accept(MediaType.APPLICATION_JSON)
+    ).andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  void patchUserDataShouldRespondWithNoContentOnEmailToggleAndChangeDbConsultant()
+      throws Exception {
+    givenAValidConsultant(true);
+    var patchDto = givenAValidEmailTogglePatchDto(false);
 
     mockMvc.perform(
         patch("/users/data")
@@ -1622,6 +1640,9 @@ public class UserControllerE2EIT {
             .content(objectMapper.writeValueAsString(patchDto))
             .accept(MediaType.APPLICATION_JSON)
     ).andExpect(status().isNoContent());
+
+    var dbConsultant = consultantRepository.findById(consultant.getId()).orElseThrow();
+    assertFalse(dbConsultant.getNotifyEnquiriesRepeating());
   }
 
   @Test
@@ -3847,15 +3868,22 @@ public class UserControllerE2EIT {
     return patchDtoAsMap;
   }
 
-  private HashMap<String, Object> givenAnEmailTogglePatchDto() {
+  private HashMap<String, Object> givenAValidEmailTogglePatchDto(boolean state) {
     var toggle = new EmailToggle();
     toggle.setName(EmailType.DAILY_ENQUIRY);
-    toggle.setState(true);
+    toggle.setState(state);
 
     var patchDtoAsMap = new HashMap<String, Object>(1);
     patchDtoAsMap.put("emailToggles", Set.of(toggle));
 
     return patchDtoAsMap;
+  }
+
+  private String givenAnUnknownEmailTypeTogglePatchDto() throws JsonProcessingException {
+    var patchDto = givenAValidEmailTogglePatchDto(true);
+
+    return objectMapper.writeValueAsString(patchDto)
+        .replaceAll("\"[A-Z_]{2,}\"", "\"" + RandomStringUtils.randomAlphanumeric(8)) + "\"";
   }
 
   private void givenAFullPatchDto(boolean encourage2fa) {
@@ -3865,6 +3893,10 @@ public class UserControllerE2EIT {
 
   private void givenAFullPatchDto() {
     patchUserDTO = easyRandom.nextObject(PatchUserDTO.class);
+    if (patchUserDTO.getEmailToggles().size() > 1) {
+      var emailTo = patchUserDTO.getEmailToggles().iterator().next();
+      patchUserDTO.setEmailToggles(Set.of(emailTo));
+    }
   }
 
   private void givenAnUpdateConsultantDtoWithLanguages(String email) {

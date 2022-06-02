@@ -158,6 +158,9 @@ public class Consultant implements TenantAware {
   @Column(name = "encourage_2fa", nullable = false, columnDefinition = "bit default true")
   private Boolean encourage2fa;
 
+  @Column(name = "notify_enquiries_repeating", nullable = false, columnDefinition = "bit default true")
+  private Boolean notifyEnquiriesRepeating;
+
   @Column(name = "tenant_id")
   @Field
   private Long tenantId;

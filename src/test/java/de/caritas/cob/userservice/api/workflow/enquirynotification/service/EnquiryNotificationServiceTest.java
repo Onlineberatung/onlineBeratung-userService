@@ -127,6 +127,19 @@ class EnquiryNotificationServiceTest {
   }
 
   @Test
+  void sendEmailNotificationsForOpenEnquiries_Should_sendNoMails_When_agenciesWithOpenEnquiriesAreNotToBeNotified() {
+    var openEnquiries = openEnquiriesForAgency(2L, nowInUtc().minusHours(13L), 1);
+    when(consultantAgencyService.findConsultantsByAgencyId(2L)).thenReturn(List.of(
+        createConsultantAgencyWithConsultantsMailAddress("consultant3", "firstname3 lastname3",
+            false)));
+    when(sessionRepository.findByStatus(SessionStatus.NEW)).thenReturn(openEnquiries);
+
+    enquiryNotificationService.sendEmailNotificationsForOpenEnquiries();
+
+    verifyNoInteractions(mailService);
+  }
+
+  @Test
   void sendEmailNotificationsForOpenEnquiries_Should_sendNoMails_When_enquiryDateDoesNotExist() {
     var openEnquiries = openEnquiriesForAgency(1L, null, 3);
     when(sessionRepository.findByStatus(SessionStatus.NEW)).thenReturn(openEnquiries);
@@ -150,13 +163,20 @@ class EnquiryNotificationServiceTest {
 
   private ConsultantAgency createConsultantAgencyWithConsultantsMailAddress(String mail,
       String fullName) {
+    return createConsultantAgencyWithConsultantsMailAddress(mail, fullName, true);
+  }
+
+  private ConsultantAgency createConsultantAgencyWithConsultantsMailAddress(String mail,
+      String fullName, boolean notifyEnqRep) {
     var consultant = new Consultant();
     String[] firstNameLastName = fullName.split(" ");
     consultant.setFirstName(firstNameLastName[0]);
     consultant.setLastName(firstNameLastName[1]);
     consultant.setEmail(mail);
+    consultant.setNotifyEnquiriesRepeating(notifyEnqRep);
     var consultantAgency = new ConsultantAgency();
     consultantAgency.setConsultant(consultant);
+
     return consultantAgency;
   }
 

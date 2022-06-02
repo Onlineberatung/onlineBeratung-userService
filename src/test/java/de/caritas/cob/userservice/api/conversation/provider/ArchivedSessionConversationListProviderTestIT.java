@@ -189,6 +189,7 @@ public class ArchivedSessionConversationListProviderTestIT {
     consultant.setLanguageFormal(false);
     consultant.setAbsent(false);
     consultant.setEncourage2fa(true);
+    consultant.setNotifyEnquiriesRepeating(true);
     consultant.setWalkThroughEnabled(true);
     return consultant;
   }

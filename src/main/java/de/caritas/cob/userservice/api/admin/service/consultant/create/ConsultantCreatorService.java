@@ -141,6 +141,7 @@ public class ConsultantCreatorService {
         .teamConsultant(consultantCreationInput.isTeamConsultant())
         .rocketChatId(rocketChatUserId)
         .encourage2fa(true)
+        .notifyEnquiriesRepeating(true)
         .languageFormal(consultantCreationInput.isLanguageFormal())
         .languages(Set.of())
         .createDate(consultantCreationInput.getCreateDate())

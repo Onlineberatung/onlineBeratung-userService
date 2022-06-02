@@ -64,6 +64,7 @@ public class UserServiceMapper {
     map.put("lastName", consultant.getLastName());
     map.put("email", consultant.getEmail());
     map.put("encourage2fa", consultant.getEncourage2fa());
+    map.put("notifyEnquiriesRepeating", consultant.getNotifyEnquiriesRepeating());
     map.put("walkThroughEnabled", consultant.getWalkThroughEnabled());
     map.put("chatUserId", consultant.getRocketChatId());
 
@@ -228,6 +229,9 @@ public class UserServiceMapper {
     }
     if (patchMap.containsKey("walkThroughEnabled")) {
       consultant.setWalkThroughEnabled((Boolean) patchMap.get("walkThroughEnabled"));
+    }
+    if (patchMap.containsKey("notifyEnquiriesRepeating")) {
+      consultant.setNotifyEnquiriesRepeating((Boolean) patchMap.get("notifyEnquiriesRepeating"));
     }
 
     return consultant;
