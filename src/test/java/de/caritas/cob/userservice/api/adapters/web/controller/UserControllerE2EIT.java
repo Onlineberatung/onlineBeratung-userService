@@ -1609,7 +1609,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  public void patchUserDataShouldRespondWithBadRequestOnUnknownEmailToggle() throws Exception {
+  void patchUserDataShouldRespondWithBadRequestOnUnknownEmailToggle() throws Exception {
     givenAValidConsultant(true);
     var patchDtoJson = givenAnUnknownEmailTypeTogglePatchDto();
 
@@ -1626,7 +1626,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  public void patchUserDataShouldRespondWithNoContentOnEmailToggleAndChangeDbConsultant()
+  void patchUserDataShouldRespondWithNoContentOnEmailToggleAndChangeDbConsultant()
       throws Exception {
     givenAValidConsultant(true);
     var patchDto = givenAValidEmailTogglePatchDto(false);
