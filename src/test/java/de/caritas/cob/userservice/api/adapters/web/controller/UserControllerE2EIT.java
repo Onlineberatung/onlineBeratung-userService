@@ -2355,10 +2355,7 @@ class UserControllerE2EIT {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    var urlSuffix = "/api/v1/rooms.saveRoomSettings";
-    verify(rocketChatRestTemplate).exchange(
-        endsWith(urlSuffix), eq(HttpMethod.POST), any(HttpEntity.class), eq(RoomResponse.class)
-    );
+    verify(stopChatActionCommand).execute(chat);
   }
 
   private void givenARealmResource() {
