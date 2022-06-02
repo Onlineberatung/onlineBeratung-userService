@@ -66,6 +66,7 @@ public class ConsultantCreatorServiceTenantAwareIT {
     consultant.setLastName(username);
     consultant.setEmail(username + "@email.com");
     consultant.setEncourage2fa(true);
+    consultant.setNotifyEnquiriesRepeating(true);
     consultant.setWalkThroughEnabled(true);
     consultantRepository.save(consultant);
   }
