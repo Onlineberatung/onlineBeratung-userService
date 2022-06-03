@@ -30,9 +30,7 @@ public class AuthenticatedUserHelper {
    * @return true, if authenticated user has permission for session
    */
   public boolean hasPermissionForSession(Session session) {
-
-    // Session is assigned directly to consultant
-    if (session.getConsultant().getId().equals(authenticatedUser.getUserId())) {
+    if (session.isAdvisedBy(authenticatedUser.getUserId())) {
       return true;
     }
 

@@ -1,7 +1,5 @@
 package de.caritas.cob.userservice.api.service.archive;
 
-import static java.util.Objects.nonNull;
-
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
@@ -39,8 +37,7 @@ public class SessionArchivePermissionChecker {
   }
 
   private boolean hasUserPermission(Session session) {
-    return authenticatedUser.isAdviceSeeker() && nonNull(session.getUser())
-        && session.getUser().getUserId().equals(authenticatedUser.getUserId());
+    return authenticatedUser.isAdviceSeeker() && session.isAdvised(authenticatedUser.getUserId());
   }
 
 }

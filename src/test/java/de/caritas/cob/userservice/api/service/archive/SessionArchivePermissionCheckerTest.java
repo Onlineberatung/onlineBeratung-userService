@@ -1,7 +1,6 @@
 package de.caritas.cob.userservice.api.service.archive;
 
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID_2;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
@@ -10,7 +9,6 @@ import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
 import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.model.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,12 +26,9 @@ class SessionArchivePermissionCheckerTest {
   AuthenticatedUserHelper authenticatedUserHelper;
   @Mock
   Session session;
-  @Mock
-  User user;
 
   @Test
   void checkPermission_Should_ThrowForbiddenException_When_UserHasNeitherConsultantNorUserRole() {
-
     when(authenticatedUser.isAdviceSeeker()).thenReturn(false);
     when(authenticatedUser.isConsultant()).thenReturn(false);
 
@@ -55,8 +50,6 @@ class SessionArchivePermissionCheckerTest {
     when(authenticatedUser.isConsultant()).thenReturn(false);
     when(authenticatedUser.isAdviceSeeker()).thenReturn(true);
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
-    when(user.getUserId()).thenReturn(USER_ID_2);
-    when(session.getUser()).thenReturn(user);
     assertThrows(ForbiddenException.class,
         () -> sessionArchivePermissionChecker.checkPermission(session));
   }
@@ -73,8 +66,7 @@ class SessionArchivePermissionCheckerTest {
     when(authenticatedUser.isConsultant()).thenReturn(false);
     when(authenticatedUser.isAdviceSeeker()).thenReturn(true);
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
-    when(user.getUserId()).thenReturn(USER_ID);
-    when(session.getUser()).thenReturn(user);
+    when(session.isAdvised(USER_ID)).thenReturn(true);
     assertDoesNotThrow(() -> sessionArchivePermissionChecker.checkPermission(session));
   }
 
