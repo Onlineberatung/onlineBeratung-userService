@@ -3029,7 +3029,7 @@ class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.STOP_CHAT)
-  void saveRoomSettingsShouldReturnOkIfEncryptionIsDeactivated() throws Exception {
+  void stopChatShouldReturnOkIfEncryptionIsDeactivated() throws Exception {
     givenAValidUser();
     givenAValidConsultant(true);
     givenAValidChat(true);
