@@ -2250,6 +2250,12 @@ components:
           type: boolean
           example: true
           description: "Is true if the walk through is enabled for the user"
+        emailToggles:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/EmailToggle'
 
     PatchUserDTO:
       type: object
