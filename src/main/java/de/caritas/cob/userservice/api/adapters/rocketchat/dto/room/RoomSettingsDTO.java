@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.adapters.rocketchat.dto.room;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
