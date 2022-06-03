@@ -4,10 +4,8 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID_2;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
@@ -36,17 +34,17 @@ class SessionArchivePermissionCheckerTest {
   @Test
   void checkPermission_Should_ThrowForbiddenException_When_UserHasNeitherConsultantNorUserRole() {
 
-    when(authenticatedUserHelper.authenticatedUserRolesContainAnyRoleOf(any())).thenReturn(false);
+    when(authenticatedUser.isAdviceSeeker()).thenReturn(false);
+    when(authenticatedUser.isConsultant()).thenReturn(false);
+
     assertThrows(ForbiddenException.class,
         () -> sessionArchivePermissionChecker.checkPermission(session));
   }
 
   @Test
   void checkPermission_Should_ThrowForbiddenException_When_UserHasConsultantRoleButNoPermission() {
-    when(authenticatedUserHelper.authenticatedUserRolesContainAnyRoleOf(
-        UserRole.CONSULTANT.getValue())).thenReturn(true);
-    when(authenticatedUserHelper.authenticatedUserRolesContainAnyRoleOf(
-        UserRole.USER.getValue())).thenReturn(false);
+    when(authenticatedUser.isConsultant()).thenReturn(true);
+    when(authenticatedUser.isAdviceSeeker()).thenReturn(false);
     when(authenticatedUserHelper.hasPermissionForSession(session)).thenReturn(false);
     assertThrows(ForbiddenException.class,
         () -> sessionArchivePermissionChecker.checkPermission(session));
@@ -54,10 +52,8 @@ class SessionArchivePermissionCheckerTest {
 
   @Test
   void checkPermission_Should_ThrowForbiddenException_When_UserHasUserRoleButNoPermission() {
-    when(authenticatedUserHelper.authenticatedUserRolesContainAnyRoleOf(
-        UserRole.CONSULTANT.getValue())).thenReturn(false);
-    when(authenticatedUserHelper.authenticatedUserRolesContainAnyRoleOf(
-        UserRole.USER.getValue())).thenReturn(true);
+    when(authenticatedUser.isConsultant()).thenReturn(false);
+    when(authenticatedUser.isAdviceSeeker()).thenReturn(true);
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(user.getUserId()).thenReturn(USER_ID_2);
     when(session.getUser()).thenReturn(user);
@@ -67,18 +63,15 @@ class SessionArchivePermissionCheckerTest {
 
   @Test
   void checkPermission_Should_Not_ThrowForbiddenException_WhenUserHasConsultantRoleAndPermissionForSession() {
-    when(authenticatedUserHelper.authenticatedUserRolesContainAnyRoleOf(
-        UserRole.CONSULTANT.getValue())).thenReturn(true);
+    when(authenticatedUser.isConsultant()).thenReturn(true);
     when(authenticatedUserHelper.hasPermissionForSession(session)).thenReturn(true);
     assertDoesNotThrow(() -> sessionArchivePermissionChecker.checkPermission(session));
   }
 
   @Test
   void checkPermission_Should_Not_ThrowForbiddenException_WhenUserHasUserRoleAndPermissionForSession() {
-    when(authenticatedUserHelper.authenticatedUserRolesContainAnyRoleOf(
-        UserRole.CONSULTANT.getValue())).thenReturn(false);
-    when(authenticatedUserHelper.authenticatedUserRolesContainAnyRoleOf(
-        UserRole.USER.getValue())).thenReturn(true);
+    when(authenticatedUser.isConsultant()).thenReturn(false);
+    when(authenticatedUser.isAdviceSeeker()).thenReturn(true);
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(user.getUserId()).thenReturn(USER_ID);
     when(session.getUser()).thenReturn(user);
