@@ -3708,7 +3708,7 @@ public class UserControllerE2EIT {
     consultant = consultantRepository.findAll().iterator().next();
     if (isAuthUser) {
       when(authenticatedUser.getUserId()).thenReturn(consultant.getId());
-      when(authenticatedUser.isUser()).thenReturn(false);
+      when(authenticatedUser.isAdviceSeeker()).thenReturn(false);
       when(authenticatedUser.isConsultant()).thenReturn(true);
       when(authenticatedUser.getUsername()).thenReturn(consultant.getUsername());
       when(authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.CONSULTANT.getValue()));
@@ -3724,7 +3724,7 @@ public class UserControllerE2EIT {
     user = userRepository.findAll().iterator().next();
     if (isAuthUser) {
       when(authenticatedUser.getUserId()).thenReturn(user.getUserId());
-      when(authenticatedUser.isUser()).thenReturn(true);
+      when(authenticatedUser.isAdviceSeeker()).thenReturn(true);
       when(authenticatedUser.isConsultant()).thenReturn(false);
       when(authenticatedUser.getUsername()).thenReturn(user.getUsername());
       when(authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.USER.getValue()));

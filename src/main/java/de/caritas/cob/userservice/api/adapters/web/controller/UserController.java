@@ -1128,7 +1128,7 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<Void> activateTwoFactorAuthByApp(OneTimePasswordDTO oneTimePasswordDTO) {
-    if (authenticatedUser.isUser() && !identityClientConfig.getOtpAllowedForUsers()) {
+    if (authenticatedUser.isAdviceSeeker() && !identityClientConfig.getOtpAllowedForUsers()) {
       throw new ConflictException("2FA is disabled for user role");
     }
     if (authenticatedUser.isConsultant() && !identityClientConfig.getOtpAllowedForConsultants()) {
