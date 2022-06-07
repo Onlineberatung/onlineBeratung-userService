@@ -592,24 +592,24 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<MonitoringDTO> getMonitoring(@PathVariable Long sessionId) {
-
-    // Check if session exists
-    var session = sessionService.getSession(sessionId);
-    if (session.isEmpty()) {
+    var sessionOptional = sessionService.getSession(sessionId);
+    if (sessionOptional.isEmpty()) {
       log.warn("Bad request: Session with id {} not found", sessionId);
 
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    // Check if consultant has the right to access the session
-    if (!authenticatedUserHelper.hasPermissionForSession(session.get())) {
+    var session = sessionOptional.get();
+    var userId = authenticatedUser.getUserId();
+    if (!session.isAdvisedBy(userId) && !(session.isTeamSession()
+        && consultantAgencyService.isConsultantInAgency(userId, session.getAgencyId()))) {
       log.warn("Bad request: Consultant with id {} has no permission to access session with id {}",
-          authenticatedUser.getUserId(), sessionId);
+          userId, sessionId);
 
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    var responseDTO = monitoringService.getMonitoring(session.get());
+    var responseDTO = monitoringService.getMonitoring(session);
 
     if (nonNull(responseDTO) && MapUtils.isNotEmpty(responseDTO.getProperties())) {
       return new ResponseEntity<>(responseDTO, HttpStatus.OK);

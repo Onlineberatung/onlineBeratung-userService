@@ -1427,8 +1427,8 @@ public class UserControllerIT {
 
     when(sessionService.getSession(Mockito.anyLong()))
         .thenReturn(Optional.of(SESSION));
-    when(authenticatedUserHelper.hasPermissionForSession(SESSION))
-        .thenReturn(true);
+    when(authenticatedUser.getUserId())
+        .thenReturn(SESSION.getConsultant().getId());
     when(monitoringService.getMonitoring(SESSION))
         .thenReturn(MONITORING_DTO);
 
@@ -1446,8 +1446,8 @@ public class UserControllerIT {
 
     when(sessionService.getSession(Mockito.anyLong()))
         .thenReturn(Optional.of(SESSION));
-    when(authenticatedUserHelper.hasPermissionForSession(SESSION))
-        .thenReturn(true);
+    when(authenticatedUser.getUserId())
+        .thenReturn(SESSION.getConsultant().getId());
     when(monitoringService.getMonitoring(SESSION))
         .thenReturn(null);
 
