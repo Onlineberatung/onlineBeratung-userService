@@ -478,9 +478,17 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("sessions[0].session.groupId", is("YWKxhFX5K2HPpsFbs")))
         .andExpect(jsonPath("sessions[0].session.feedbackRead", is(true)))
         .andExpect(jsonPath("sessions[0].user.username", is("u25suchtler")))
+        .andExpect(jsonPath("sessions[0].consultant.id", is("bad14912-cf9f-4c16-9d0e-fe8ede9b60dc")))
+        .andExpect(jsonPath("sessions[0].consultant.firstName", is("Manfred")))
+        .andExpect(jsonPath("sessions[0].consultant.lastName", is("Main")))
+        .andExpect(jsonPath("sessions[0].consultant.username").doesNotExist())
         .andExpect(jsonPath("sessions[1].session.feedbackGroupId", is("4SPkApB8So88c7tQ3")))
         .andExpect(jsonPath("sessions[1].session.feedbackRead", is(true)))
         .andExpect(jsonPath("sessions[1].user.username", is("u25depp")))
+        .andExpect(jsonPath("sessions[1].consultant.id", is("bad14912-cf9f-4c16-9d0e-fe8ede9b60dc")))
+        .andExpect(jsonPath("sessions[1].consultant.firstName", is("Manfred")))
+        .andExpect(jsonPath("sessions[1].consultant.lastName", is("Main")))
+        .andExpect(jsonPath("sessions[1].consultant.username").doesNotExist())
         .andExpect(jsonPath("sessions", hasSize(2)));
   }
 
@@ -523,6 +531,9 @@ public class UserControllerE2EIT {
         .andExpect(status().isOk())
         .andExpect(jsonPath("sessions[0].session.groupId", is("YWKxhFX5K2HPpsFbs")))
         .andExpect(jsonPath("sessions[0].consultant.username", is("u25main")))
+        .andExpect(jsonPath("sessions[0].consultant.id").doesNotExist())
+        .andExpect(jsonPath("sessions[0].consultant.firstName").doesNotExist())
+        .andExpect(jsonPath("sessions[0].consultant.lastName").doesNotExist())
         .andExpect(jsonPath("sessions[0].agency", is(notNullValue())))
         .andExpect(jsonPath("sessions", hasSize(1)));
   }

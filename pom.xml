@@ -404,6 +404,9 @@
 								<importMapping>
 									SessionConsultantForUserDTO=${adapters.web.dto.path}.SessionConsultantForUserDTO
 								</importMapping>
+								<importMapping>
+									GroupSessionConsultantDTO=${adapters.web.dto.path}.GroupSessionConsultantDTO
+								</importMapping>
 								<importMapping>UserChatDTO=${adapters.web.dto.path}.UserChatDTO</importMapping>
 								<importMapping>UserDataResponseDTO=${adapters.web.dto.path}.UserDataResponseDTO
 								</importMapping>
@@ -419,6 +422,9 @@
 								<typeMapping>SessionUserDTO=${adapters.web.dto.path}.SessionUserDTO</typeMapping>
 								<typeMapping>
 									SessionConsultantForUserDTO=${adapters.web.dto.path}.SessionConsultantForUserDTO
+								</typeMapping>
+								<typeMapping>
+									GroupSessionConsultantDTO=${adapters.web.dto.path}.GroupSessionConsultantDTO
 								</typeMapping>
 								<typeMapping>UserChatDTO=${adapters.web.dto.path}.UserChatDTO</typeMapping>
 								<typeMapping>UserDataResponseDTO=${adapters.web.dto.path}.UserDataResponseDTO
