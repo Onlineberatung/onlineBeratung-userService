@@ -1944,6 +1944,7 @@ components:
         - "FINISHED_CONVERSATION"
         - "USER_MUTED"
         - "USER_UNMUTED"
+        - "E2EE_ACTIVATED"
 
     LastMessageDTO:
       type: object
