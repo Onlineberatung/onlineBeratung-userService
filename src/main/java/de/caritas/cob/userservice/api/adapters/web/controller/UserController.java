@@ -629,8 +629,8 @@ public class UserController implements UsersApi {
   public ResponseEntity<Void> updateMonitoring(@PathVariable Long sessionId,
       @RequestBody MonitoringDTO monitoring) {
     var sessionOptional = sessionService.getSession(sessionId);
-    if (sessionOptional.isPresent()) {
 
+    if (sessionOptional.isPresent()) {
       var userId = authenticatedUser.getUserId();
       var session = sessionOptional.get();
       if (session.isAdvisedBy(userId) || (session.isTeamSession()
