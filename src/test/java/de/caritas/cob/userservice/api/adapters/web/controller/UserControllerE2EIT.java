@@ -316,6 +316,7 @@ public class UserControllerE2EIT {
     allLanguages = new HashSet<>();
     consultantsToReset.forEach(consultantToReset -> {
       consultantToReset.setLanguages(null);
+      consultantToReset.setNotifyEnquiriesRepeating(true);
       consultantRepository.save(consultantToReset);
     });
     consultantsToReset = new HashSet<>();
@@ -477,9 +478,17 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("sessions[0].session.groupId", is("YWKxhFX5K2HPpsFbs")))
         .andExpect(jsonPath("sessions[0].session.feedbackRead", is(true)))
         .andExpect(jsonPath("sessions[0].user.username", is("u25suchtler")))
+        .andExpect(jsonPath("sessions[0].consultant.id", is("bad14912-cf9f-4c16-9d0e-fe8ede9b60dc")))
+        .andExpect(jsonPath("sessions[0].consultant.firstName", is("Manfred")))
+        .andExpect(jsonPath("sessions[0].consultant.lastName", is("Main")))
+        .andExpect(jsonPath("sessions[0].consultant.username").doesNotExist())
         .andExpect(jsonPath("sessions[1].session.feedbackGroupId", is("4SPkApB8So88c7tQ3")))
         .andExpect(jsonPath("sessions[1].session.feedbackRead", is(true)))
         .andExpect(jsonPath("sessions[1].user.username", is("u25depp")))
+        .andExpect(jsonPath("sessions[1].consultant.id", is("bad14912-cf9f-4c16-9d0e-fe8ede9b60dc")))
+        .andExpect(jsonPath("sessions[1].consultant.firstName", is("Manfred")))
+        .andExpect(jsonPath("sessions[1].consultant.lastName", is("Main")))
+        .andExpect(jsonPath("sessions[1].consultant.username").doesNotExist())
         .andExpect(jsonPath("sessions", hasSize(2)));
   }
 
@@ -522,6 +531,9 @@ public class UserControllerE2EIT {
         .andExpect(status().isOk())
         .andExpect(jsonPath("sessions[0].session.groupId", is("YWKxhFX5K2HPpsFbs")))
         .andExpect(jsonPath("sessions[0].consultant.username", is("u25main")))
+        .andExpect(jsonPath("sessions[0].consultant.id").doesNotExist())
+        .andExpect(jsonPath("sessions[0].consultant.firstName").doesNotExist())
+        .andExpect(jsonPath("sessions[0].consultant.lastName").doesNotExist())
         .andExpect(jsonPath("sessions[0].agency", is(notNullValue())))
         .andExpect(jsonPath("sessions", hasSize(1)));
   }
@@ -1158,6 +1170,9 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("absent", is(consultant.isAbsent())))
         .andExpect(jsonPath("formalLanguage", is(consultant.isLanguageFormal())))
         .andExpect(jsonPath("e2eEncryptionEnabled", is(false)))
+        .andExpect(jsonPath("emailToggles", hasSize(1)))
+        .andExpect(jsonPath("emailToggles[0].name", is("DAILY_ENQUIRY")))
+        .andExpect(jsonPath("emailToggles[0].state", is(true)))
         .andExpect(jsonPath("inTeamAgency", is(consultant.isTeamConsultant())));
   }
 
@@ -1205,6 +1220,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("absent", is(false)))
         .andExpect(jsonPath("formalLanguage", is(user.isLanguageFormal())))
         .andExpect(jsonPath("e2eEncryptionEnabled", is(false)))
+        .andExpect(jsonPath("emailToggles", is(nullValue())))
         .andExpect(jsonPath("inTeamAgency", is(false)));
   }
 
@@ -1263,6 +1279,9 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("absent", is(consultant.isAbsent())))
         .andExpect(jsonPath("formalLanguage", is(consultant.isLanguageFormal())))
         .andExpect(jsonPath("e2eEncryptionEnabled", is(false)))
+        .andExpect(jsonPath("emailToggles", hasSize(1)))
+        .andExpect(jsonPath("emailToggles[0].name", is("DAILY_ENQUIRY")))
+        .andExpect(jsonPath("emailToggles[0].state", is(true)))
         .andExpect(jsonPath("inTeamAgency", is(consultant.isTeamConsultant())));
   }
 
@@ -1310,6 +1329,7 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("absent", is(false)))
         .andExpect(jsonPath("formalLanguage", is(user.isLanguageFormal())))
         .andExpect(jsonPath("e2eEncryptionEnabled", is(false)))
+        .andExpect(jsonPath("emailToggles", is(nullValue())))
         .andExpect(jsonPath("inTeamAgency", is(false)));
   }
 
@@ -1368,6 +1388,9 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("absent", is(consultant.isAbsent())))
         .andExpect(jsonPath("formalLanguage", is(consultant.isLanguageFormal())))
         .andExpect(jsonPath("e2eEncryptionEnabled", is(false)))
+        .andExpect(jsonPath("emailToggles", hasSize(1)))
+        .andExpect(jsonPath("emailToggles[0].name", is("DAILY_ENQUIRY")))
+        .andExpect(jsonPath("emailToggles[0].state", is(true)))
         .andExpect(jsonPath("inTeamAgency", is(consultant.isTeamConsultant())));
   }
 
@@ -1414,12 +1437,13 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("absent", is(false)))
         .andExpect(jsonPath("formalLanguage", is(user.isLanguageFormal())))
         .andExpect(jsonPath("e2eEncryptionEnabled", is(false)))
+        .andExpect(jsonPath("emailToggles", is(nullValue())))
         .andExpect(jsonPath("inTeamAgency", is(false)));
   }
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  public void getUserDataShouldContainEnabledFlags() throws Exception {
+  public void getUserDataShouldContainSetFlags() throws Exception {
     givenABearerToken();
     givenAValidConsultant(true);
     givenConsultingTypeServiceResponse();
@@ -1428,6 +1452,7 @@ public class UserControllerE2EIT {
     givenKeycloakRespondsOtpHasNotBeenSetup(consultant.getUsername());
     givenEnabledE2EEncryption();
     givenDisplayNameAllowedForConsultants();
+    givenConsultantIsNotToNotify();
 
     mockMvc.perform(
             get("/users/data")
@@ -1435,6 +1460,9 @@ public class UserControllerE2EIT {
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
+        .andExpect(jsonPath("emailToggles", hasSize(1)))
+        .andExpect(jsonPath("emailToggles[0].name", is("DAILY_ENQUIRY")))
+        .andExpect(jsonPath("emailToggles[0].state", is(false)))
         .andExpect(jsonPath("e2eEncryptionEnabled", is(true)))
         .andExpect(jsonPath("isDisplayNameEditable", is(true)));
   }
@@ -3876,7 +3904,17 @@ public class UserControllerE2EIT {
     var patchDtoAsMap = new HashMap<String, Object>(1);
     patchDtoAsMap.put("emailToggles", Set.of(toggle));
 
+    if (!state) {
+      consultantsToReset.add(consultant);
+    }
+
     return patchDtoAsMap;
+  }
+
+  private void givenConsultantIsNotToNotify() {
+    consultant.setNotifyEnquiriesRepeating(false);
+    consultantRepository.save(consultant);
+    consultantsToReset.add(consultant);
   }
 
   private String givenAnUnknownEmailTypeTogglePatchDto() throws JsonProcessingException {
@@ -3893,10 +3931,10 @@ public class UserControllerE2EIT {
 
   private void givenAFullPatchDto() {
     patchUserDTO = easyRandom.nextObject(PatchUserDTO.class);
-    if (patchUserDTO.getEmailToggles().size() > 1) {
-      var emailTo = patchUserDTO.getEmailToggles().iterator().next();
-      patchUserDTO.setEmailToggles(Set.of(emailTo));
-    }
+    var emailTo = new EmailToggle();
+    emailTo.setName(EmailType.DAILY_ENQUIRY);
+    emailTo.setState(true);
+    patchUserDTO.setEmailToggles(Set.of(emailTo));
   }
 
   private void givenAnUpdateConsultantDtoWithLanguages(String email) {

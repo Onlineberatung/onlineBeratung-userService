@@ -1778,11 +1778,35 @@ components:
         user:
           $ref: '#/components/schemas/SessionUserDTO'
         consultant:
-          $ref: '#/components/schemas/SessionConsultantForUserDTO'
+          $ref: '#/components/schemas/GroupSessionConsultantDTO'
         agency:
           $ref: '#/components/schemas/AgencyDTO'
         latestMessage:
           $ref: '#/components/schemas/Date'
+
+    GroupSessionConsultantDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 153918
+        username:
+          type: string
+          example: beraterXYZ
+        displayName:
+          type: string
+        isAbsent:
+          type: boolean
+          example: true
+        absenceMessage:
+          type: string
+          example: Bin nicht da
+        firstName:
+          type: string
+          example: Max
+        lastName:
+          type: string
+          example: Mustermann
 
     Date:
       type: object
@@ -1944,6 +1968,7 @@ components:
         - "FINISHED_CONVERSATION"
         - "USER_MUTED"
         - "USER_UNMUTED"
+        - "E2EE_ACTIVATED"
 
     LastMessageDTO:
       type: object
@@ -2250,6 +2275,12 @@ components:
           type: boolean
           example: true
           description: "Is true if the walk through is enabled for the user"
+        emailToggles:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/EmailToggle'
 
     PatchUserDTO:
       type: object
