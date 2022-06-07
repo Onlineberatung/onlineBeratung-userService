@@ -599,8 +599,7 @@ public class UserController implements UsersApi {
 
     var session = sessionOptional.get();
     var userId = authenticatedUser.getUserId();
-    if (!session.isAdvisedBy(userId) && !(session.isTeamSession()
-        && consultantAgencyService.isConsultantInAgency(userId, session.getAgencyId()))) {
+    if (!session.isAdvisedBy(userId) && !accountManager.isTeamAdvisedBy(sessionId, userId)) {
       log.warn("Bad request: Consultant with id {} has no permission to access session with id {}",
           userId, sessionId);
 
@@ -633,9 +632,7 @@ public class UserController implements UsersApi {
     if (sessionOptional.isPresent()) {
       var userId = authenticatedUser.getUserId();
       var session = sessionOptional.get();
-      if (session.isAdvisedBy(userId) || (session.isTeamSession()
-          && consultantAgencyService.isConsultantInAgency(userId, session.getAgencyId()))
-      ) {
+      if (session.isAdvisedBy(userId) || accountManager.isTeamAdvisedBy(sessionId, userId)) {
         monitoringService.updateMonitoring(session.getId(), monitoring);
         return new ResponseEntity<>(HttpStatus.OK);
 

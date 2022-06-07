@@ -2,16 +2,16 @@ package de.caritas.cob.userservice.api.service.archive;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import de.caritas.cob.userservice.api.AccountManager;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
-import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import java.util.function.Consumer;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class SessionArchiveService {
   private final @NonNull AuthenticatedUser authenticatedUser;
   private final @NonNull RocketChatService rocketChatService;
   private final @NonNull SessionArchiveValidator sessionArchiveValidator;
-  private final @NonNull ConsultantAgencyService consultantAgencyService;
+  private final @NonNull AccountManager accountManager;
 
   /**
    * Archive a session.
@@ -75,10 +75,8 @@ public class SessionArchiveService {
 
   private boolean hasConsultantPermission(Session session) {
     var userId = authenticatedUser.getUserId();
-    var agencyId = session.getAgencyId();
 
-    return session.isAdvisedBy(userId) || session.isTeamSession()
-        && consultantAgencyService.isConsultantInAgency(userId, agencyId);
+    return session.isAdvisedBy(userId) || accountManager.isTeamAdvisedBy(session.getId(), userId);
   }
 
   private Session retrieveSession(Long sessionId) {

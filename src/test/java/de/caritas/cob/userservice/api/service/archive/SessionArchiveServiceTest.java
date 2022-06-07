@@ -7,6 +7,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.AccountManager;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
@@ -42,6 +43,9 @@ public class SessionArchiveServiceTest {
   @Mock
   @SuppressWarnings("unused")
   ConsultantAgencyService consultantAgencyService;
+  @Mock
+  @SuppressWarnings("unused")
+  AccountManager accountManager;
 
   @Test(expected = NotFoundException.class)
   public void archiveSession_Should_ThrowNotFoundException_WhenSessionIsNotFound() {

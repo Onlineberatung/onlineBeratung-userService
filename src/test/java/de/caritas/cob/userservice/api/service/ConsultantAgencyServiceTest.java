@@ -7,7 +7,6 @@ import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -80,30 +79,6 @@ public class ConsultantAgencyServiceTest {
     consultantAgencyService.saveConsultantAgency(CONSULTANT_AGENCY);
     verify(consultantAgencyRepository, times(1)).save(Mockito.any());
 
-  }
-
-  /**
-   * Method: isConsultantInAgency
-   */
-
-  @Test
-  public void isConsultantInAgency_Should_ReturnTrue_WhenConsultantFound() {
-
-    when(consultantAgencyRepository
-        .findByConsultantIdAndAgencyIdAndDeleteDateIsNull(Mockito.anyString(),
-            Mockito.anyLong())).thenReturn(CONSULTANT_AGENY_LIST);
-
-    assertTrue(consultantAgencyService.isConsultantInAgency(CONSULTANT_ID, AGENCY_ID));
-  }
-
-  @Test
-  public void isConsultantInAgency_Should_ReturnFalse_WhenConsultantNotFound() {
-
-    when(consultantAgencyRepository
-        .findByConsultantIdAndAgencyIdAndDeleteDateIsNull(Mockito.anyString(),
-            Mockito.anyLong())).thenReturn(null);
-
-    assertFalse(consultantAgencyService.isConsultantInAgency(CONSULTANT_ID, AGENCY_ID));
   }
 
   /**

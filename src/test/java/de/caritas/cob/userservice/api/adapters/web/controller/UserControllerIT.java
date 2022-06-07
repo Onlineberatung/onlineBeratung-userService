@@ -1549,7 +1549,7 @@ public class UserControllerIT {
         .thenReturn(Optional.of(session));
     when(authenticatedUser.getUserId())
         .thenReturn(CONSULTANT_ID);
-    when(consultantAgencyService.isConsultantInAgency(CONSULTANT_ID, AGENCY_ID))
+    when(accountManager.isTeamAdvisedBy(TEAM_SESSION.getId(), CONSULTANT_ID))
         .thenReturn(false);
 
     mvc.perform(put(PATH_PUT_SESSIONS_MONITORING)
