@@ -13,7 +13,6 @@ import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
@@ -46,15 +45,12 @@ public class SessionArchiveServiceIT {
   @MockBean
   AuthenticatedUser authenticatedUser;
   @MockBean
-  AuthenticatedUserHelper authenticatedUserHelper;
-  @MockBean
   RocketChatService rocketChatService;
 
   @Test
   public void archiveSession_Should_ChangeStatusOfSession_WhenConsultantHasPermission() {
 
     when(authenticatedUser.getUserId()).thenReturn("e2f20d3a-1ca7-4cb5-9fac-8e26033416b3");
-    when(authenticatedUserHelper.hasPermissionForSession(any())).thenReturn(true);
     when(authenticatedUser.isConsultant()).thenReturn(true);
 
     sessionArchiveService.archiveSession(2L);
@@ -74,7 +70,6 @@ public class SessionArchiveServiceIT {
   public void archiveSession_Should_ThrowForbiddenException_WhenConsultantHasNoPermission() {
 
     when(authenticatedUser.getUserId()).thenReturn("88613f5d-0d40-47e0-b323-e792e7fba3ed");
-    when(authenticatedUserHelper.hasPermissionForSession(any())).thenReturn(false);
     when(authenticatedUser.isConsultant()).thenReturn(true);
     sessionArchiveService.archiveSession(1L);
 
@@ -102,7 +97,6 @@ public class SessionArchiveServiceIT {
   public void reactivateSession_Should_ChangeStatusOfSession_WhenConsultantHasPermission() {
 
     when(authenticatedUser.getUserId()).thenReturn("75abe824-fb42-476d-a52a-66660113bdcc");
-    when(authenticatedUserHelper.hasPermissionForSession(any())).thenReturn(true);
     when(authenticatedUser.isConsultant()).thenReturn(true);
 
     sessionArchiveService.dearchiveSession(1209L);
@@ -139,7 +133,6 @@ public class SessionArchiveServiceIT {
   @Test(expected = ConflictException.class)
   public void reactivateSession_Should_ThrowConflictException_WhenSessionIsNotInArchive() {
     when(authenticatedUser.getUserId()).thenReturn("473f7c4b-f011-4fc2-847c-ceb636a5b399");
-    when(authenticatedUserHelper.hasPermissionForSession(any())).thenReturn(true);
     when(authenticatedUser.isConsultant()).thenReturn(true);
     sessionArchiveService.dearchiveSession(1L);
   }

@@ -169,7 +169,6 @@ import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.RocketChatUnauthorizedException;
 import de.caritas.cob.userservice.api.facade.CreateChatFacade;
-import de.caritas.cob.userservice.api.model.EnquiryData;
 import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
 import de.caritas.cob.userservice.api.facade.CreateNewConsultingTypeFacade;
 import de.caritas.cob.userservice.api.facade.CreateUserFacade;
@@ -186,7 +185,6 @@ import de.caritas.cob.userservice.api.facade.userdata.AskerDataProvider;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataProvider;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
@@ -194,6 +192,7 @@ import de.caritas.cob.userservice.api.manager.consultingtype.registration.mandat
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantStatus;
+import de.caritas.cob.userservice.api.model.EnquiryData;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
@@ -364,8 +363,6 @@ public class UserControllerIT {
   private IdentityClient identityClient;
   @MockBean
   private DecryptionService encryptionService;
-  @MockBean
-  private AuthenticatedUserHelper authenticatedUserHelper;
   @MockBean
   private ConsultingTypeManager consultingTypeManager;
   @MockBean
@@ -1412,8 +1409,6 @@ public class UserControllerIT {
 
     when(sessionService.getSession(Mockito.anyLong()))
         .thenReturn(Optional.of(SESSION));
-    when(authenticatedUserHelper.hasPermissionForSession(SESSION))
-        .thenReturn(false);
 
     mvc.perform(get(PATH_GET_MONITORING)
             .accept(MediaType.APPLICATION_JSON))
@@ -1480,8 +1475,8 @@ public class UserControllerIT {
 
     when(sessionService.getSession(Mockito.anyLong()))
         .thenReturn(Optional.of(SESSION));
-    when(authenticatedUserHelper.hasPermissionForSession(SESSION))
-        .thenReturn(true);
+    when(authenticatedUser.getUserId())
+        .thenReturn(CONSULTANT_ID);
     doThrow(new ServiceException(ERROR))
         .when(monitoringService).updateMonitoring(Mockito.any(),
             Mockito.any());
@@ -1499,8 +1494,8 @@ public class UserControllerIT {
 
     when(sessionService.getSession(Mockito.anyLong()))
         .thenReturn(Optional.of(SESSION));
-    when(authenticatedUserHelper.hasPermissionForSession(SESSION))
-        .thenReturn(true);
+    when(authenticatedUser.getUserId())
+        .thenReturn(CONSULTANT_ID);
 
     mvc.perform(put(PATH_PUT_SESSIONS_MONITORING)
             .content(VALID_SESSION_MONITORING_REQUEST_BODY)
@@ -1515,8 +1510,8 @@ public class UserControllerIT {
 
     when(sessionService.getSession(Mockito.anyLong()))
         .thenReturn(Optional.of(TEAM_SESSION));
-    when(authenticatedUserHelper.hasPermissionForSession(TEAM_SESSION))
-        .thenReturn(true);
+    when(authenticatedUser.getUserId())
+        .thenReturn(CONSULTANT_ID);
 
     mvc.perform(put(PATH_PUT_SESSIONS_MONITORING)
             .content(VALID_SESSION_MONITORING_REQUEST_BODY)
@@ -1547,8 +1542,11 @@ public class UserControllerIT {
   public void updateMonitoring_Should_ReturnUnauthorized_WhenConsultantIsNotAssignedToAgencyOfTeamSession()
       throws Exception {
 
+    var session = easyRandom.nextObject(Session.class);
+    session.setId(TEAM_SESSION.getId());
+
     when(sessionService.getSession(Mockito.anyLong()))
-        .thenReturn(Optional.of(TEAM_SESSION));
+        .thenReturn(Optional.of(session));
     when(authenticatedUser.getUserId())
         .thenReturn(CONSULTANT_ID);
     when(consultantAgencyService.isConsultantInAgency(CONSULTANT_ID, AGENCY_ID))

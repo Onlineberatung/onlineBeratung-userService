@@ -65,7 +65,6 @@ import de.caritas.cob.userservice.api.facade.userdata.AskerDataProvider;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataProvider;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.EnquiryData;
 import de.caritas.cob.userservice.api.model.Session;
@@ -140,7 +139,6 @@ public class UserController implements UsersApi {
   private final @NotNull AssignSessionFacade assignSessionFacade;
   private final @NotNull AssignEnquiryFacade assignEnquiryFacade;
   private final @NotNull DecryptionService decryptionService;
-  private final @NotNull AuthenticatedUserHelper authenticatedUserHelper;
   private final @NotNull ChatService chatService;
   private final @NotNull StartChatFacade startChatFacade;
   private final @NotNull GetChatFacade getChatFacade;
@@ -630,20 +628,21 @@ public class UserController implements UsersApi {
   @Override
   public ResponseEntity<Void> updateMonitoring(@PathVariable Long sessionId,
       @RequestBody MonitoringDTO monitoring) {
+    var sessionOptional = sessionService.getSession(sessionId);
+    if (sessionOptional.isPresent()) {
 
-    var session = sessionService.getSession(sessionId);
-
-    if (session.isPresent()) {
-
-      // Check if calling consultant has the permission to update the monitoring values
-      if (authenticatedUserHelper.hasPermissionForSession(session.get())) {
-        monitoringService.updateMonitoring(session.get().getId(), monitoring);
+      var userId = authenticatedUser.getUserId();
+      var session = sessionOptional.get();
+      if (session.isAdvisedBy(userId) || (session.isTeamSession()
+          && consultantAgencyService.isConsultantInAgency(userId, session.getAgencyId()))
+      ) {
+        monitoringService.updateMonitoring(session.getId(), monitoring);
         return new ResponseEntity<>(HttpStatus.OK);
 
       } else {
         log.warn(
             "Unauthorized: Consultant with id {} is not authorized to update monitoring of session {}",
-            authenticatedUser.getUserId(), sessionId
+            userId, sessionId
         );
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
       }
