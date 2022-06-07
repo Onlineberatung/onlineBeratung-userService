@@ -2,8 +2,8 @@ package de.caritas.cob.userservice.api.service.archive;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
 import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 public class SessionArchivePermissionChecker {
 
   private final @NonNull AuthenticatedUser authenticatedUser;
-  private final @NonNull AuthenticatedUserHelper authenticatedUserHelper;
+  private final @NonNull ConsultantAgencyService consultantAgencyService;
 
   /**
    * Check if authenticated user has permission for session.
@@ -24,20 +24,20 @@ public class SessionArchivePermissionChecker {
    * @param session the session to check
    */
   public void checkPermission(Session session) {
-    if (!hasConsultantPermission(session) && !hasUserPermission(session)) {
-      throw new ForbiddenException(
-          String.format("Archive/reactivate session %s is not allowed for user with id %s",
-              session.getId(), authenticatedUser.getUserId()));
+    if (!hasConsultantPermission(session) && !session.isAdvised(authenticatedUser.getUserId())) {
+      var template = "Archive/reactivate session %s is not allowed for user with id %s";
+      var message = String.format(template, session.getId(), authenticatedUser.getUserId());
+
+      throw new ForbiddenException(message);
     }
   }
 
   private boolean hasConsultantPermission(Session session) {
-    return authenticatedUser.isConsultant()
-        && authenticatedUserHelper.hasPermissionForSession(session);
-  }
+    var userId = authenticatedUser.getUserId();
+    var agencyId = session.getAgencyId();
 
-  private boolean hasUserPermission(Session session) {
-    return authenticatedUser.isAdviceSeeker() && session.isAdvised(authenticatedUser.getUserId());
+    return session.isAdvisedBy(userId) || session.isTeamSession()
+        && consultantAgencyService.isConsultantInAgency(userId, agencyId);
   }
 
 }

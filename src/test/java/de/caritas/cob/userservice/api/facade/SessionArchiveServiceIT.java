@@ -20,6 +20,7 @@ import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.archive.SessionArchiveService;
 import de.caritas.cob.userservice.api.testConfig.ConsultingTypeManagerTestConfig;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,12 +93,9 @@ public class SessionArchiveServiceIT {
 
   @Test(expected = ConflictException.class)
   public void archiveSession_Should_ThrowConflictException_WhenSessionIsNotInProgress() {
+    when(authenticatedUser.getUserId()).thenReturn("75abe824-fb42-476d-a52a-66660113bdcc");
 
-    when(authenticatedUser.getUserId()).thenReturn("88613f5d-0d40-47e0-b323-e792e7fba3ed");
-    when(authenticatedUserHelper.hasPermissionForSession(any())).thenReturn(true);
-    when(authenticatedUser.isConsultant()).thenReturn(true);
-
-    sessionArchiveService.archiveSession(200L);
+    sessionArchiveService.archiveSession(1214L);
   }
 
   @Test
@@ -133,24 +131,9 @@ public class SessionArchiveServiceIT {
   }
 
   @Test(expected = ForbiddenException.class)
-  public void reactivateSession_Should_ThrowForbiddenException_WhenConsultantHasNoPermission() {
-
-    when(authenticatedUser.getUserId()).thenReturn("94c3e0b1-0677-4fd2-a7ea-56a71aefd0e8");
-    when(authenticatedUserHelper.hasPermissionForSession(any())).thenReturn(false);
-    when(authenticatedUser.isConsultant()).thenReturn(true);
-    sessionArchiveService.dearchiveSession(1210L);
-
-    verify(sessionRepository, times(0)).save(any());
-  }
-
-  @Test(expected = ForbiddenException.class)
   public void reactivateSession_Should_ThrowForbiddenException_WhenUserHasNoPermission() {
-
-    when(authenticatedUser.getUserId()).thenReturn("94c3e0b1-0677-4fd2-a7ea-56a71aefd0e8");
-    when(authenticatedUser.isAdviceSeeker()).thenReturn(true);
+    when(authenticatedUser.getUserId()).thenReturn(UUID.randomUUID().toString());
     sessionArchiveService.dearchiveSession(1210L);
-
-    verify(sessionRepository, times(0)).save(any());
   }
 
   @Test(expected = ConflictException.class)
