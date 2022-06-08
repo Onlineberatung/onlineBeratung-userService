@@ -25,7 +25,6 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.LoginRespons
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.logout.LogoutResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.MessageResponse;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomResponse;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomSettingsDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsGetDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsUpdateDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.subscriptions.SubscriptionsGetDTO;
@@ -1080,11 +1079,10 @@ public class RocketChatService implements MessageClient {
 
   public boolean saveRoomSettings(String chatId, boolean encrypted) {
     var url = rocketChatConfig.getApiUrl(ENDPOINT_SAVE_ROOM_SETTINGS);
-
-    var roomSettings = new RoomSettingsDTO(chatId, encrypted);
+    var mapOfRoomSettings = mapper.mapOfRoomSettings(chatId, encrypted);
 
     try {
-      var response = rocketChatClient.postForEntity(url, roomSettings, MessageResponse.class);
+      var response = rocketChatClient.postForEntity(url, mapOfRoomSettings, MessageResponse.class);
       return response.getStatusCode().is2xxSuccessful();
     } catch (HttpClientErrorException exception) {
       log.error("Saving room settings failed.", exception);
