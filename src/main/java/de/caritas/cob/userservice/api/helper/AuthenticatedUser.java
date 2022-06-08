@@ -34,7 +34,7 @@ public class AuthenticatedUser {
   private Set<String> grantedAuthorities;
 
   @JsonIgnore
-  public boolean isUser() {
+  public boolean isAdviceSeeker() {
     return nonNull(roles) && roles.contains(UserRole.USER.getValue());
   }
 

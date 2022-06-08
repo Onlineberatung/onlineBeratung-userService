@@ -11,6 +11,7 @@ import de.caritas.cob.userservice.api.port.in.AccountManaging;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.MessageClient;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.HashMap;
@@ -42,6 +43,8 @@ public class AccountManager implements AccountManaging {
   private final AgencyService agencyService;
 
   private final ConsultantAgencyRepository consultantAgencyRepository;
+
+  private final SessionRepository sessionRepository;
 
   @Override
   public Optional<Map<String, Object>> findConsultant(String id) {
@@ -88,6 +91,14 @@ public class AccountManager implements AccountManaging {
     var agencies = agencyService.getAgenciesWithoutCaching(agencyIds);
 
     return userServiceMapper.mapOf(consultantPage, fullConsultants, agencies, consultingAgencies);
+  }
+
+  @Override
+  public boolean isTeamAdvisedBy(Long sessionId, String consultantId) {
+    var session = sessionRepository.findById(sessionId).orElseThrow();
+
+    return session.isTeamSession() && consultantAgencyRepository
+        .existsByConsultantIdAndAgencyIdAndDeleteDateIsNull(consultantId, session.getAgencyId());
   }
 
   @Override

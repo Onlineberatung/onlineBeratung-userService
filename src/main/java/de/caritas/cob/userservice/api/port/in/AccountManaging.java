@@ -21,4 +21,6 @@ public interface AccountManaging {
   Map<String, Object> findConsultantsByInfix(
       String infix, int pageNumber, int pageSize, String fieldName, boolean isAscending
   );
+
+  boolean isTeamAdvisedBy(Long sessionId, String consultantId);
 }
