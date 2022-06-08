@@ -27,7 +27,7 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 @Import(JpaAuditingConfiguration.class)
-public class UserRepositoryIT {
+class UserRepositoryIT {
 
   private User user;
 
@@ -42,7 +42,7 @@ public class UserRepositoryIT {
   }
 
   @Test
-  public void findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThanShouldReturnUserSubsetOnPastDate() {
+  void findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThanShouldReturnUserSubsetOnPastDate() {
     final LocalDateTime dateCheck = LocalDateTime.of(2019, 1, 1, 0, 0, 0, 0);
     final String USER_ID_SHOULD_IN_LIST_1 = "abc9a0a1-c936-45ee-9141-d73dfc0a3999";
     final String USER_ID_SHOULD_IN_LIST_2 = "def9a0a1-c936-45ee-9141-d73dfc0a3888";
@@ -59,7 +59,7 @@ public class UserRepositoryIT {
   }
 
   @Test
-  public void findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThanShouldReturnAllUsersOnTomorrowAsDate() {
+  void findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThanShouldReturnAllUsersOnTomorrowAsDate() {
     var startOfTomorrow = LocalDateTime.now().with(LocalTime.MIDNIGHT).plusDays(1);
 
     var users = userRepository.findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThan(
@@ -70,7 +70,7 @@ public class UserRepositoryIT {
   }
 
   @Test
-  public void saveShouldWriteAuditingData() {
+  void saveShouldWriteAuditingData() {
     givenPersistedUser();
 
     assertNotNull(user.getCreateDate());

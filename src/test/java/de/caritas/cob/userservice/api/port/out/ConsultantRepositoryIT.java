@@ -34,7 +34,7 @@ import org.springframework.test.context.ActiveProfiles;
 @DataJpaTest
 @ActiveProfiles("testing")
 @AutoConfigureTestDatabase
-public class ConsultantRepositoryIT {
+class ConsultantRepositoryIT {
 
   private static final EasyRandom easyRandom = new EasyRandom();
 
@@ -68,7 +68,7 @@ public class ConsultantRepositoryIT {
   }
 
   @Test
-  public void deleteShouldDeleteConsultantAndAppointment() {
+  void deleteShouldDeleteConsultantAndAppointment() {
     givenACreatedConsultantWithAnAppointment();
 
     assertTrue(underTest.existsById(consultant.getId()));
@@ -84,7 +84,7 @@ public class ConsultantRepositoryIT {
   }
 
   @Test
-  public void saveShouldSaveConsultantWithDefaultLanguage() {
+  void saveShouldSaveConsultantWithDefaultLanguage() {
     givenAnExistingConsultantSpeaking();
 
     var languages = consultant.getLanguages();
@@ -94,7 +94,7 @@ public class ConsultantRepositoryIT {
   }
 
   @Test
-  public void saveShouldSaveConsultantWithOneLanguage() {
+  void saveShouldSaveConsultantWithOneLanguage() {
     givenAnExistingConsultantSpeaking(LanguageCode.en);
 
     var optionalConsultant = underTest.findById(consultant.getId());
@@ -107,7 +107,7 @@ public class ConsultantRepositoryIT {
   }
 
   @Test
-  public void saveShouldSaveConsultantWithMultipleLanguages() {
+  void saveShouldSaveConsultantWithMultipleLanguages() {
     givenAnExistingConsultantSpeaking(LanguageCode.en, LanguageCode.tr);
 
     var optionalConsultant = underTest.findById(consultant.getId());
@@ -125,7 +125,7 @@ public class ConsultantRepositoryIT {
   }
 
   @Test
-  public void saveShouldSaveLessLanguages() {
+  void saveShouldSaveLessLanguages() {
     givenAnExistingConsultantSpeaking(LanguageCode.en, LanguageCode.tr);
 
     var optionalConsultant = underTest.findById(consultant.getId());
@@ -142,7 +142,7 @@ public class ConsultantRepositoryIT {
   }
 
   @Test
-  public void saveShouldEmptyLanguagesToDefault() {
+  void saveShouldEmptyLanguagesToDefault() {
     givenAnExistingConsultantSpeaking(LanguageCode.en, LanguageCode.tr);
 
     var optionalConsultant = underTest.findById(consultant.getId());
@@ -161,7 +161,7 @@ public class ConsultantRepositoryIT {
   }
 
   @Test
-  public void saveShouldNotChangeTheDefaultBehaviourOnManualSettingDefault() {
+  void saveShouldNotChangeTheDefaultBehaviourOnManualSettingDefault() {
     givenAnExistingConsultantSpeaking();
 
     var optionalConsultant = underTest.findById(consultant.getId());

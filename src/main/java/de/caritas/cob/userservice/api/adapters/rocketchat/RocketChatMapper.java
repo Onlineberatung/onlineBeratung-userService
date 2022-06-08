@@ -9,6 +9,7 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberD
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupUpdateKeyDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.Message;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomResponse;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomSettingsDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.subscriptions.SubscriptionsGetDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.MuteUnmuteUser;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UpdateUser;
@@ -151,5 +152,15 @@ public class RocketChatMapper {
                 "chatUserId", member.get_id()
             )
         ).collect(Collectors.toList());
+  }
+
+  public Map<String, Object> mapOfRoomSettings(String chatId,  boolean encrypted) {
+    var roomSettings = new RoomSettingsDTO(chatId, encrypted);
+    var map = new HashMap<String, Object>();
+
+    map.put("rid", roomSettings.getRid());
+    map.put("encrypted", roomSettings.isEncrypted());
+
+    return map;
   }
 }

@@ -102,6 +102,7 @@ public class RocketChatService implements MessageClient {
   private static final String ENDPOINT_SUBSCRIPTION_GET = "/subscriptions.get";
   private static final String ENDPOINT_USER_MUTE = "/method.call/muteUserInRoom";
   private static final String ENDPOINT_USER_UNMUTE = "/method.call/unmuteUserInRoom";
+  private static final String ENDPOINT_SAVE_ROOM_SETTINGS = "/rooms.saveRoomSettings";
   private static final String ENDPOINT_USER_INFO = "/users.info?userId=";
   private static final String ENDPOINT_USER_UPDATE = "/users.update";
   private static final String ENDPOINT_USER_DELETE = "/users.delete";
@@ -1074,5 +1075,18 @@ public class RocketChatService implements MessageClient {
 
   private String buildUsernameQuery(String username) {
     return String.format("{\"username\":{\"$eq\":\"%s\"}}", username.toLowerCase());
+  }
+
+  public boolean saveRoomSettings(String chatId, boolean encrypted) {
+    var url = rocketChatConfig.getApiUrl(ENDPOINT_SAVE_ROOM_SETTINGS);
+    var mapOfRoomSettings = mapper.mapOfRoomSettings(chatId, encrypted);
+
+    try {
+      var response = rocketChatClient.postForEntity(url, mapOfRoomSettings, MessageResponse.class);
+      return response.getStatusCode().is2xxSuccessful();
+    } catch (HttpClientErrorException exception) {
+      log.error("Saving room settings failed.", exception);
+      return false;
+    }
   }
 }

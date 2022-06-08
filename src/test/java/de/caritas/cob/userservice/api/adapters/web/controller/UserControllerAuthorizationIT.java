@@ -116,7 +116,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("testing")
-public class UserControllerAuthorizationIT {
+class UserControllerAuthorizationIT {
 
   private static final EasyRandom easyRandom = new EasyRandom();
   private static final ObjectMapper objectMapper = new ObjectMapper();

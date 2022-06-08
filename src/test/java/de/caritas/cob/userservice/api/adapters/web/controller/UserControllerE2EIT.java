@@ -173,7 +173,7 @@ import org.springframework.web.util.UriTemplateHandler;
 @AutoConfigureMockMvc
 @ActiveProfiles("testing")
 @AutoConfigureTestDatabase
-public class UserControllerE2EIT {
+class UserControllerE2EIT {
 
   private static final EasyRandom easyRandom = new EasyRandom();
   private static final String CSRF_HEADER = "csrfHeader";
@@ -349,7 +349,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
-  public void createEnquiryMessageWithLanguageShouldSaveLanguageAndRespondWithCreated()
+  void createEnquiryMessageWithLanguageShouldSaveLanguageAndRespondWithCreated()
       throws Exception {
     givenAUserWithASessionNotEnquired();
     givenValidRocketChatTechUserResponse();
@@ -384,7 +384,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
-  public void createEnquiryMessageWithoutLanguageShouldSaveDefaultLanguageAndRespondWithCreated()
+  void createEnquiryMessageWithoutLanguageShouldSaveDefaultLanguageAndRespondWithCreated()
       throws Exception {
     givenAUserWithASessionNotEnquired();
     givenValidRocketChatTechUserResponse();
@@ -482,14 +482,16 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("sessions[0].session.groupId", is("YWKxhFX5K2HPpsFbs")))
         .andExpect(jsonPath("sessions[0].session.feedbackRead", is(true)))
         .andExpect(jsonPath("sessions[0].user.username", is("u25suchtler")))
-        .andExpect(jsonPath("sessions[0].consultant.id", is("bad14912-cf9f-4c16-9d0e-fe8ede9b60dc")))
+        .andExpect(
+            jsonPath("sessions[0].consultant.id", is("bad14912-cf9f-4c16-9d0e-fe8ede9b60dc")))
         .andExpect(jsonPath("sessions[0].consultant.firstName", is("Manfred")))
         .andExpect(jsonPath("sessions[0].consultant.lastName", is("Main")))
         .andExpect(jsonPath("sessions[0].consultant.username").doesNotExist())
         .andExpect(jsonPath("sessions[1].session.feedbackGroupId", is("4SPkApB8So88c7tQ3")))
         .andExpect(jsonPath("sessions[1].session.feedbackRead", is(true)))
         .andExpect(jsonPath("sessions[1].user.username", is("u25depp")))
-        .andExpect(jsonPath("sessions[1].consultant.id", is("bad14912-cf9f-4c16-9d0e-fe8ede9b60dc")))
+        .andExpect(
+            jsonPath("sessions[1].consultant.id", is("bad14912-cf9f-4c16-9d0e-fe8ede9b60dc")))
         .andExpect(jsonPath("sessions[1].consultant.firstName", is("Manfred")))
         .andExpect(jsonPath("sessions[1].consultant.lastName", is("Main")))
         .andExpect(jsonPath("sessions[1].consultant.username").doesNotExist())
@@ -1038,7 +1040,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser
-  public void getLanguagesShouldRespondWithBadRequestIfAgencyIdIsNotGiven() throws Exception {
+  void getLanguagesShouldRespondWithBadRequestIfAgencyIdIsNotGiven() throws Exception {
     mockMvc.perform(
             get("/users/consultants/languages")
                 .cookie(CSRF_COOKIE)
@@ -1051,7 +1053,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser
-  public void getLanguagesShouldRespondWithDefaultLanguageAndOkWhenOnlyDefaultInDatabase()
+  void getLanguagesShouldRespondWithDefaultLanguageAndOkWhenOnlyDefaultInDatabase()
       throws Exception {
     var agencyId = givenAnAgencyIdWithDefaultLanguageOnly();
 
@@ -1070,7 +1072,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser
-  public void getLanguagesShouldRespondWithMultipleLanguageAndOkWhenMultipleLanguagesInDatabase()
+  void getLanguagesShouldRespondWithMultipleLanguageAndOkWhenMultipleLanguagesInDatabase()
       throws Exception {
     var agencyId = givenAnAgencyWithMultipleLanguages();
 
@@ -1092,7 +1094,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser
-  public void getConsultantPublicDataShouldRespondWithOk() throws Exception {
+  void getConsultantPublicDataShouldRespondWithOk() throws Exception {
     givenAConsultantWithMultipleAgencies();
 
     mockMvc.perform(
@@ -1121,7 +1123,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void getUserDataShouldRespondWithConsultantDataAndStatusOkWhen2faByAppIsActive()
+  void getUserDataShouldRespondWithConsultantDataAndStatusOkWhen2faByAppIsActive()
       throws Exception {
     givenABearerToken();
     givenAValidConsultant(true);
@@ -1182,7 +1184,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
-  public void getUserDataShouldRespondWithUserDataAndStatusOkWhen2faByAppIsActive()
+  void getUserDataShouldRespondWithUserDataAndStatusOkWhen2faByAppIsActive()
       throws Exception {
     givenABearerToken();
     givenAValidUser(true);
@@ -1230,7 +1232,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void getUserDataShouldRespondWithConsultantDataAndStatusOkWhen2faByEmailIsActive()
+  void getUserDataShouldRespondWithConsultantDataAndStatusOkWhen2faByEmailIsActive()
       throws Exception {
     givenABearerToken();
     givenAValidConsultant(true);
@@ -1291,7 +1293,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
-  public void getUserDataShouldRespondWithUserDataAndStatusOkWhen2faByEmailIsActive()
+  void getUserDataShouldRespondWithUserDataAndStatusOkWhen2faByEmailIsActive()
       throws Exception {
     givenABearerToken();
     givenAValidUser(true);
@@ -1339,7 +1341,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void getUserDataShouldRespondWithConsultantDataAndStatusOkWhen2faIsNotActivated()
+  void getUserDataShouldRespondWithConsultantDataAndStatusOkWhen2faIsNotActivated()
       throws Exception {
     givenABearerToken();
     givenAValidConsultant(true);
@@ -1400,7 +1402,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
-  public void getUserDataShouldRespondWithUserDataAndStatusOkWhen2faIsNotActivated()
+  void getUserDataShouldRespondWithUserDataAndStatusOkWhen2faIsNotActivated()
       throws Exception {
     givenABearerToken();
     givenAValidUser(true);
@@ -1447,7 +1449,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  public void getUserDataShouldContainSetFlags() throws Exception {
+  void getUserDataShouldContainEnabledFlags() throws Exception {
     givenABearerToken();
     givenAValidConsultant(true);
     givenConsultingTypeServiceResponse();
@@ -1473,7 +1475,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
-  public void patchUserDataShouldSaveAdviceSeekerAndRespondWithNoContent() throws Exception {
+  void patchUserDataShouldSaveAdviceSeekerAndRespondWithNoContent() throws Exception {
     givenAValidUser(true);
     givenAFullPatchDto();
 
@@ -1494,7 +1496,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void patchUserDataShouldSaveConsultantAndRespondWithNoContent() throws Exception {
+  void patchUserDataShouldSaveConsultantAndRespondWithNoContent() throws Exception {
     givenAValidConsultant(true);
     givenAFullPatchDto();
     givenAValidRocketChatUpdateUserResponse();
@@ -1527,7 +1529,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void patchUserDataShouldOverrideDefaultAndRespondWithNoContent() throws Exception {
+  void patchUserDataShouldOverrideDefaultAndRespondWithNoContent() throws Exception {
     givenAValidConsultant(true);
     givenAFullPatchDto(false);
     givenAValidRocketChatUpdateUserResponse();
@@ -1549,7 +1551,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void patchUserDataShouldOverridePreviousValueAndRespondWithNoContentEachTime()
+  void patchUserDataShouldOverridePreviousValueAndRespondWithNoContentEachTime()
       throws Exception {
     givenAValidConsultant(true);
 
@@ -1591,7 +1593,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void patchUserDataShouldRespondWithBadRequestOnNullInMandatoryDtoFields()
+  void patchUserDataShouldRespondWithBadRequestOnNullInMandatoryDtoFields()
       throws Exception {
     givenAValidConsultant(true);
     var patchDto = givenAnInvalidPatchDto();
@@ -1608,7 +1610,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
-  public void patchUserDataShouldRespondWithBadRequestOnEmptyPayload() throws Exception {
+  void patchUserDataShouldRespondWithBadRequestOnEmptyPayload() throws Exception {
     givenAValidUser(true);
     var patchDto = givenAnEmptyPatchDto();
 
@@ -1624,7 +1626,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
-  public void patchUserDataShouldRespondWithNoContentOnPartialPayload() throws Exception {
+  void patchUserDataShouldRespondWithNoContentOnPartialPayload() throws Exception {
     givenAValidUser(true);
     var patchDto = givenAPartialPatchDto();
 
@@ -1680,6 +1682,7 @@ public class UserControllerE2EIT {
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
   public void deactivateAndFlagUserAccountForDeletionShouldDeactivateAndRespondWithOkIf2faIsOff()
+
       throws Exception {
     givenAValidUser(true);
     givenADeleteUserAccountDto();
@@ -1701,7 +1704,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
-  public void deactivateAndFlagUserAccountForDeletionShouldDeactivateAndRespondWithOkIf2faIsOn()
+  void deactivateAndFlagUserAccountForDeletionShouldDeactivateAndRespondWithOkIf2faIsOn()
       throws Exception {
     givenAValidUser(true);
     givenADeleteUserAccountDto();
@@ -1723,7 +1726,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
-  public void deactivateAndFlagUserAccountForDeletionShouldRespondWithBadRequestIfPasswordIsFalse()
+  void deactivateAndFlagUserAccountForDeletionShouldRespondWithBadRequestIfPasswordIsFalse()
       throws Exception {
     givenAValidUser(true);
     givenADeleteUserAccountDto();
@@ -1745,7 +1748,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
-  public void updatePasswordShouldUpdatePasswordAndRespondWithOkIf2faIsOff() throws Exception {
+  void updatePasswordShouldUpdatePasswordAndRespondWithOkIf2faIsOff() throws Exception {
     givenAValidUser(true);
     givenAPasswordDto();
     givenAValidKeycloakLoginResponse();
@@ -1762,7 +1765,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
-  public void updatePasswordShouldUpdatePasswordAndRespondWithOkIf2faIsOn() throws Exception {
+  void updatePasswordShouldUpdatePasswordAndRespondWithOkIf2faIsOn() throws Exception {
     givenAValidUser(true);
     givenAPasswordDto();
     givenAnInvalidKeycloakLoginResponseMissingOtp();
@@ -1779,7 +1782,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
-  public void updatePasswordShouldRespondWithBadRequestIfPasswordIsFalse() throws Exception {
+  void updatePasswordShouldRespondWithBadRequestIfPasswordIsFalse() throws Exception {
     givenAValidUser(true);
     givenAPasswordDto();
     givenAnInvalidKeycloakLoginResponseFailingPassword();
@@ -1796,7 +1799,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void updateUserDataShouldSaveDefaultLanguageAndRespondWithOk() throws Exception {
+  void updateUserDataShouldSaveDefaultLanguageAndRespondWithOk() throws Exception {
     givenAValidConsultant(true);
     givenAMinimalUpdateConsultantDto(consultant.getEmail());
     givenValidRocketChatTechUserResponse();
@@ -1818,7 +1821,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void updateUserDataShouldSaveGivenLanguagesAndRespondWithOk() throws Exception {
+  void updateUserDataShouldSaveGivenLanguagesAndRespondWithOk() throws Exception {
     givenAValidConsultant(true);
     givenAnUpdateConsultantDtoWithLanguages(consultant.getEmail());
     givenValidRocketChatTechUserResponse();
@@ -1844,7 +1847,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void updateUserDataShouldCascadeLanguageDeletionAndRespondWithOk() throws Exception {
+  void updateUserDataShouldCascadeLanguageDeletionAndRespondWithOk() throws Exception {
     givenAValidConsultantSpeaking(easyRandom.nextObject(LanguageCode.class));
     givenAnUpdateConsultantDtoWithLanguages(consultant.getEmail());
     givenValidRocketChatTechUserResponse();
@@ -2085,7 +2088,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.UPDATE_CHAT)
-  public void banFromChatShouldReturnClientErrorIfUserIdHasInvalidFormat() throws Exception {
+  void banFromChatShouldReturnClientErrorIfUserIdHasInvalidFormat() throws Exception {
     var invalidUserId = RandomStringUtils.randomAlphabetic(16);
 
     mockMvc.perform(
@@ -2099,7 +2102,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.UPDATE_CHAT)
-  public void banFromChatShouldReturnClientErrorIfChatIdHasInvalidFormat() throws Exception {
+  void banFromChatShouldReturnClientErrorIfChatIdHasInvalidFormat() throws Exception {
     givenAValidUser();
     var invalidChatId = RandomStringUtils.randomAlphabetic(16);
 
@@ -2114,10 +2117,10 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.UPDATE_CHAT)
-  public void banFromChatShouldReturnBadRequestIfRcTokenIsNotGiven() throws Exception {
+  void banFromChatShouldReturnBadRequestIfRcTokenIsNotGiven() throws Exception {
     givenAValidUser();
     givenAValidConsultant(true);
-    givenAValidChat();
+    givenAValidChat(false);
 
     mockMvc.perform(
             post("/users/{chatUserId}/chat/{chatId}/ban", user.getRcUserId(), chat.getId())
@@ -2129,10 +2132,10 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.UPDATE_CHAT)
-  public void banFromChatShouldReturnNotFoundIfUserDoesNotExist() throws Exception {
+  void banFromChatShouldReturnNotFoundIfUserDoesNotExist() throws Exception {
     var nonExistingUserId = RandomStringUtils.randomAlphanumeric(17);
     givenAValidConsultant(true);
-    givenAValidChat();
+    givenAValidChat(false);
 
     mockMvc.perform(
             post("/users/{chatUserId}/chat/{chatId}/ban", nonExistingUserId, chat.getId())
@@ -2145,7 +2148,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.UPDATE_CHAT)
-  public void banFromChatShouldReturnNotFoundIfChatDoesNotExist() throws Exception {
+  void banFromChatShouldReturnNotFoundIfChatDoesNotExist() throws Exception {
     givenAValidUser();
 
     mockMvc.perform(
@@ -2159,10 +2162,10 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.UPDATE_CHAT)
-  public void banFromChatShouldReturnNoContentIfBanWentWell() throws Exception {
+  void banFromChatShouldReturnNoContentIfBanWentWell() throws Exception {
     givenAValidUser();
     givenAValidConsultant(true);
-    givenAValidChat();
+    givenAValidChat(false);
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatMuteUserInRoomResponse();
 
@@ -2182,11 +2185,11 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.UPDATE_CHAT)
-  public void banFromChatShouldReturnNotFoundIfRocketChatReturnsAnInvalidResponse()
+  void banFromChatShouldReturnNotFoundIfRocketChatReturnsAnInvalidResponse()
       throws Exception {
     givenAValidUser();
     givenAValidConsultant(true);
-    givenAValidChat();
+    givenAValidChat(false);
     givenAValidRocketChatSystemUser();
     givenAnInvalidRocketChatMuteUserInRoomResponse();
 
@@ -2206,10 +2209,10 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
-  public void getChatShouldReturnOkIfUsersAreBannedAndAUserRequested() throws Exception {
+  void getChatShouldReturnOkIfUsersAreBannedAndAUserRequested() throws Exception {
     givenAValidUser(true);
     givenAValidConsultant();
-    givenAValidChat();
+    givenAValidChat(false);
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatRoomResponse(chat.getGroupId(), true);
 
@@ -2230,10 +2233,10 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
-  public void getChatShouldReturnOkIfUsersAreNotBannedAndAUserRequested() throws Exception {
+  void getChatShouldReturnOkIfUsersAreNotBannedAndAUserRequested() throws Exception {
     givenAValidUser(true);
     givenAValidConsultant();
-    givenAValidChat();
+    givenAValidChat(false);
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatRoomResponse(chat.getGroupId(), false);
 
@@ -2254,10 +2257,10 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  public void getChatShouldReturnOkIfUsersAreBannedAndAConsultantRequested() throws Exception {
+  void getChatShouldReturnOkIfUsersAreBannedAndAConsultantRequested() throws Exception {
     givenAValidUser();
     givenAValidConsultant(true);
-    givenAValidChat();
+    givenAValidChat(false);
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatRoomResponse(chat.getGroupId(), true);
 
@@ -2278,10 +2281,10 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  public void getChatShouldReturnOkIfUsersAreNotBannedAndAConsultantRequested() throws Exception {
+  void getChatShouldReturnOkIfUsersAreNotBannedAndAConsultantRequested() throws Exception {
     givenAValidUser();
     givenAValidConsultant(true);
-    givenAValidChat();
+    givenAValidChat(false);
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatRoomResponse(chat.getGroupId(), false);
 
@@ -2302,10 +2305,10 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.STOP_CHAT)
-  public void stopChatShouldReturnOkIfUsersAreNotBanned() throws Exception {
+  void stopChatShouldReturnOkIfUsersAreNotBanned() throws Exception {
     givenAValidUser();
     givenAValidConsultant(true);
-    givenAValidChat();
+    givenAValidChat(false);
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatRoomResponse(chat.getGroupId(), false);
 
@@ -2325,10 +2328,10 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.STOP_CHAT)
-  public void stopChatShouldReturnOkIfUsersAreBanned() throws Exception {
+  void stopChatShouldReturnOkIfUsersAreBanned() throws Exception {
     givenAValidUser();
     givenAValidConsultant(true);
-    givenAValidChat();
+    givenAValidChat(false);
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatRoomResponse(chat.getGroupId(), true);
     givenAValidRocketChatUnmuteResponse();
@@ -2349,7 +2352,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void startTwoFactorAuthByEmailSetupShouldRespondWithNoContent() throws Exception {
+  void startTwoFactorAuthByEmailSetupShouldRespondWithNoContent() throws Exception {
     givenAValidConsultant(true);
     givenAValidEmailDTO();
     givenKeycloakFoundNoEmailInUse();
@@ -2378,7 +2381,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void startTwoFactorAuthByEmailSetupShouldRespondWithNoContentIfEmailIsOwnedByUser()
+  void startTwoFactorAuthByEmailSetupShouldRespondWithNoContentIfEmailIsOwnedByUser()
       throws Exception {
     givenAValidConsultant(true);
     givenAValidEmailDTO();
@@ -2398,7 +2401,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void startTwoFactorAuthByEmailSetupShouldRespondWithBadRequestIfEmailIsNotAvailable()
+  void startTwoFactorAuthByEmailSetupShouldRespondWithBadRequestIfEmailIsNotAvailable()
       throws Exception {
     givenAValidConsultant(true);
     givenAValidEmailDTO();
@@ -2417,7 +2420,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void startTwoFactorAuthByEmailSetupShouldRespondWithBadRequestIfTheEmailFormatIsInvalid()
+  void startTwoFactorAuthByEmailSetupShouldRespondWithBadRequestIfTheEmailFormatIsInvalid()
       throws Exception {
     givenAnInvalidEmailDTO();
 
@@ -2433,7 +2436,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void startTwoFactorAuthByEmailSetupShouldRespondWithBadRequestIfNoPayloadIsGiven()
+  void startTwoFactorAuthByEmailSetupShouldRespondWithBadRequestIfNoPayloadIsGiven()
       throws Exception {
     mockMvc.perform(
             put("/users/2fa/email")
@@ -2446,7 +2449,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void startTwoFactorAuthByEmailSetupShouldRespondWithInternalServerErrorIfKeycloakRespondsWithInvalidParameterError()
+  void startTwoFactorAuthByEmailSetupShouldRespondWithInternalServerErrorIfKeycloakRespondsWithInvalidParameterError()
       throws Exception {
     givenAValidConsultant(true);
     givenAValidEmailDTO();
@@ -2466,7 +2469,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void startTwoFactorAuthByEmailSetupShouldRespondWithInternalServerErrorIfKeycloakRespondsWithAlreadyConfiguredError()
+  void startTwoFactorAuthByEmailSetupShouldRespondWithInternalServerErrorIfKeycloakRespondsWithAlreadyConfiguredError()
       throws Exception {
     givenAValidConsultant(true);
     givenAValidEmailDTO();
@@ -2486,7 +2489,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void finishTwoFactorAuthByEmailSetupForAConsultantShouldRespondWithNoContent()
+  void finishTwoFactorAuthByEmailSetupForAConsultantShouldRespondWithNoContent()
       throws Exception {
     givenAValidConsultant(true);
     givenABearerToken();
@@ -2517,7 +2520,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
-  public void finishTwoFactorAuthByEmailSetupForAUserShouldRespondWithNoContent() throws Exception {
+  void finishTwoFactorAuthByEmailSetupForAUserShouldRespondWithNoContent() throws Exception {
     givenAValidUser(true);
     givenABearerToken();
     givenACorrectlyFormattedTan();
@@ -2547,7 +2550,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void finishTwoFactorAuthByEmailSetupShouldRespondWithBadRequestIfTanLengthIsWrong()
+  void finishTwoFactorAuthByEmailSetupShouldRespondWithBadRequestIfTanLengthIsWrong()
       throws Exception {
     givenAWronglyFormattedTan();
 
@@ -2561,7 +2564,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void finishTwoFactorAuthByEmailSetupShouldRespondWithBadRequestIfTanHasLetters()
+  void finishTwoFactorAuthByEmailSetupShouldRespondWithBadRequestIfTanHasLetters()
       throws Exception {
     givenATanWithLetters();
 
@@ -2575,7 +2578,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void finishTwoFactorAuthByEmailSetupShouldRespondWithNotFoundIfTanIsEmpty()
+  void finishTwoFactorAuthByEmailSetupShouldRespondWithNotFoundIfTanIsEmpty()
       throws Exception {
     mockMvc.perform(
             post("/users/2fa/email/validate/")
@@ -2587,7 +2590,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void finishTwoFactorAuthByEmailSetupShouldRespondWithBadRequestIfTheTanIsInvalid()
+  void finishTwoFactorAuthByEmailSetupShouldRespondWithBadRequestIfTheTanIsInvalid()
       throws Exception {
     givenAValidConsultant(true);
     givenABearerToken();
@@ -2614,7 +2617,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void finishTwoFactorAuthByEmailSetupShouldRespondWithBadRequestIfAnotherOtpConfigIsActive()
+  void finishTwoFactorAuthByEmailSetupShouldRespondWithBadRequestIfAnotherOtpConfigIsActive()
       throws Exception {
     givenAValidConsultant(true);
     givenABearerToken();
@@ -2641,7 +2644,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void finishTwoFactorAuthByEmailSetupShouldRespondWithTooManyRequestsIfTooManyTanAttempts()
+  void finishTwoFactorAuthByEmailSetupShouldRespondWithTooManyRequestsIfTooManyTanAttempts()
       throws Exception {
     givenAValidConsultant(true);
     givenABearerToken();
@@ -2668,7 +2671,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void finishTwoFactorAuthByEmailSetupShouldRespondWithPreconditionFailedIfOtpByEmailHasBeenSetupBefore()
+  void finishTwoFactorAuthByEmailSetupShouldRespondWithPreconditionFailedIfOtpByEmailHasBeenSetupBefore()
       throws Exception {
     givenAValidConsultant(true);
     givenABearerToken();
@@ -2920,7 +2923,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void activateTwoFactorAuthForUserShouldRespondWithOK() throws Exception {
+  void activateTwoFactorAuthForUserShouldRespondWithOK() throws Exception {
     givenAValidConsultant(true);
     givenACorrectlyFormattedOneTimePasswordDTO();
     givenABearerToken();
@@ -2947,7 +2950,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void activateTwoFactorAuthForUserShouldRespondWithBadRequestWhenOtpHasWrongLength()
+  void activateTwoFactorAuthForUserShouldRespondWithBadRequestWhenOtpHasWrongLength()
       throws Exception {
     givenAValidConsultant(true);
     givenAnInvalidOneTimePasswordDTO();
@@ -2964,7 +2967,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void activateTwoFactorAuthForUserShouldRespondWithBadRequestWhenSecretHasWrongLength()
+  void activateTwoFactorAuthForUserShouldRespondWithBadRequestWhenSecretHasWrongLength()
       throws Exception {
     givenAValidConsultant(true);
     givenAWronglyFormattedSecret();
@@ -2981,7 +2984,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void activateTwoFactorAuthForUserShouldRespondWithBadRequestIfTheOtpIsInvalid()
+  void activateTwoFactorAuthForUserShouldRespondWithBadRequestIfTheOtpIsInvalid()
       throws Exception {
     givenAValidConsultant(true);
     givenACorrectlyFormattedOneTimePasswordDTO();
@@ -3000,7 +3003,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void activateTwoFactorAuthForUserShouldRespondWithBadRequestIfParameterInvalid()
+  void activateTwoFactorAuthForUserShouldRespondWithBadRequestIfParameterInvalid()
       throws Exception {
     givenAValidConsultant(true);
     givenACorrectlyFormattedOneTimePasswordDTO();
@@ -3020,7 +3023,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void activateTwoFactorAuthForUserShouldRespondWithBadRequestIfAnotherOtpConfigIsActive()
+  void activateTwoFactorAuthForUserShouldRespondWithBadRequestIfAnotherOtpConfigIsActive()
       throws Exception {
     givenAValidConsultant(true);
     givenACorrectlyFormattedOneTimePasswordDTO();
@@ -3039,7 +3042,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void deactivateTwoFactorAuthByAppShouldRespondWithOK() throws Exception {
+  void deactivateTwoFactorAuthByAppShouldRespondWithOK() throws Exception {
     givenAValidConsultant(true);
     givenABearerToken();
 
@@ -3060,7 +3063,7 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void deactivateTwoFactorAuthByAppShouldRespondWithInternalServerErrorWhenKeycloakIsDown()
+  void deactivateTwoFactorAuthByAppShouldRespondWithInternalServerErrorWhenKeycloakIsDown()
       throws Exception {
     givenAValidConsultant(true);
     givenABearerToken();
@@ -3077,7 +3080,7 @@ public class UserControllerE2EIT {
   }
 
   @Test
-  public void registerUserWithoutConsultingIdShouldSaveMonitoring() throws Exception {
+  void registerUserWithoutConsultingIdShouldSaveMonitoring() throws Exception {
     givenConsultingTypeServiceResponse();
     givenARealmResource();
     givenAUserDTO();
@@ -3089,6 +3092,27 @@ public class UserControllerE2EIT {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userDTO)))
         .andExpect(status().isCreated());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.STOP_CHAT)
+  void stopChatShouldReturnOkIfEncryptionIsDeactivated() throws Exception {
+    givenAValidUser();
+    givenAValidConsultant(true);
+    givenAValidChat(true);
+    givenAValidRocketChatSystemUser();
+    givenAValidRocketChatRoomResponse(chat.getGroupId(), true);
+    givenAValidRocketChatUnmuteResponse();
+
+    mockMvc.perform(
+            put("/users/chat/{chatId}/stop", chat.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(stopChatActionCommand).execute(chat);
   }
 
   private void givenARealmResource() {
@@ -3803,11 +3827,11 @@ public class UserControllerE2EIT {
     }
   }
 
-  private void givenAValidChat() {
+  private void givenAValidChat(boolean isRepetitive) {
     chat = easyRandom.nextObject(Chat.class);
     chat.setId(null);
     chat.setActive(true);
-    chat.setRepetitive(false);
+    chat.setRepetitive(isRepetitive);
     chat.setChatOwner(consultant);
     chat.setConsultingTypeId(easyRandom.nextInt(128));
     chat.setDuration(easyRandom.nextInt(32768));

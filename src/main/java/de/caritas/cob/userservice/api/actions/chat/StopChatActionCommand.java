@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 /**
- * Action to perform all neccessary steps to stop an active group chat.
+ * Action to perform all necessary steps to stop an active group chat.
  */
 @Component
 @RequiredArgsConstructor
@@ -34,7 +34,7 @@ public class StopChatActionCommand implements ActionCommand<Chat> {
 
   /**
    * Stops the given active chat, removes all messages if chat is repetitive and deletes the
-   * complete chat if its not reprtitive.
+   * complete chat if it's not repetitive.
    *
    * @param chat the {@link Chat} to be stopped
    */
@@ -70,6 +70,7 @@ public class StopChatActionCommand implements ActionCommand<Chat> {
     removeAllMessages(chat);
     removeRocketChatStandardUsers(chat);
     reinitializeDatabaseChat(chat);
+    rocketChatService.saveRoomSettings(chat.getGroupId(), false);
   }
 
   private void removeAllMessages(Chat chat) {

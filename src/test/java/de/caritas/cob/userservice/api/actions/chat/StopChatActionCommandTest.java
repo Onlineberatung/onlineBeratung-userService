@@ -158,6 +158,18 @@ class StopChatActionCommandTest {
   }
 
   @Test
+  void stopChat_should_set_encrypted_room_settings_to_false() {
+    Chat chatWithDate = new Chat("topic", 15, CHAT_START_DATETIME, CHAT_START_DATETIME,
+        1, IS_REPETITIVE, CHAT_INTERVAL_WEEKLY, CONSULTANT);
+    chatWithDate.setActive(true);
+    chatWithDate.setGroupId("groupId");
+
+    stopChatActionCommand.execute(chatWithDate);
+
+    verify(rocketChatService).saveRoomSettings("groupId", false);
+  }
+
+  @Test
   void stopChat_Should_throwInternalServerErrorException_When_ChatResetCanNotBePerformedOnRocketChat()
       throws RocketChatUserNotInitializedException, RocketChatGetGroupMembersException, RocketChatRemoveUserFromGroupException {
     Chat chatWithDate = new Chat("topic", 15, CHAT_START_DATETIME, CHAT_START_DATETIME,
