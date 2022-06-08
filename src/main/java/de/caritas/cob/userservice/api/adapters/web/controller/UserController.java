@@ -628,27 +628,21 @@ public class UserController implements UsersApi {
   public ResponseEntity<Void> updateMonitoring(@PathVariable Long sessionId,
       @RequestBody MonitoringDTO monitoring) {
     var sessionOptional = sessionService.getSession(sessionId);
-
-    if (sessionOptional.isPresent()) {
-      var userId = authenticatedUser.getUserId();
-      var session = sessionOptional.get();
-      if (session.isAdvisedBy(userId) || accountManager.isTeamAdvisedBy(sessionId, userId)) {
-        monitoringService.updateMonitoring(session.getId(), monitoring);
-        return new ResponseEntity<>(HttpStatus.OK);
-
-      } else {
-        log.warn(
-            "Unauthorized: Consultant with id {} is not authorized to update monitoring of session {}",
-            userId, sessionId
-        );
-        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-      }
-
-    } else {
+    if (sessionOptional.isEmpty()) {
       log.warn("Bad request: Session with id {} not found", sessionId);
-
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
+
+    var userId = authenticatedUser.getUserId();
+    var session = sessionOptional.get();
+    if (session.isAdvisedBy(userId) || accountManager.isTeamAdvisedBy(sessionId, userId)) {
+      monitoringService.updateMonitoring(session.getId(), monitoring);
+      return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    var message = "Unauthorized: Consultant with id {} is not authorized to update monitoring of session {}";
+    log.warn(message, userId, sessionId);
+    return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
   }
 
   /**
