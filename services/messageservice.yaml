@@ -547,6 +547,7 @@ components:
         - "VIDEOCALL"
         - "USER_MUTED"
         - "USER_UNMUTED"
+        - "E2EE_ACTIVATED"
 
     UserDTO:
       type: object

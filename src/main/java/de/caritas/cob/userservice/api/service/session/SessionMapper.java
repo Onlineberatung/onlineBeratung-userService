@@ -5,6 +5,7 @@ import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.toUnixTi
 import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.GroupSessionConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.GroupSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionConsultantForConsultantDTO;
@@ -102,20 +103,40 @@ public class SessionMapper {
 
   public GroupSessionResponseDTO toGroupSessionResponse(
       UserSessionResponseDTO userSessionResponse) {
-    return new GroupSessionResponseDTO()
+    var response = new GroupSessionResponseDTO()
         .session(userSessionResponse.getSession())
-        .consultant(userSessionResponse.getConsultant())
         .agency(userSessionResponse.getAgency())
         .chat(userSessionResponse.getChat())
         .latestMessage(userSessionResponse.getLatestMessage());
+
+    var sessionConsultant = userSessionResponse.getConsultant();
+    if (sessionConsultant == null) {
+      return response;
+    }
+    var consultant = GroupSessionConsultantDTO.builder()
+        .username(sessionConsultant.getUsername())
+        .displayName(sessionConsultant.getDisplayName())
+        .isAbsent(sessionConsultant.isAbsent())
+        .absenceMessage(sessionConsultant.getAbsenceMessage());
+    return response.consultant(consultant.build());
   }
 
   public GroupSessionResponseDTO toGroupSessionResponse(
       ConsultantSessionResponseDTO consultantSessionResponse) {
-    return new GroupSessionResponseDTO()
+    var response = new GroupSessionResponseDTO()
         .session(consultantSessionResponse.getSession())
         .user(consultantSessionResponse.getUser())
         .chat(consultantSessionResponse.getChat())
         .latestMessage(consultantSessionResponse.getLatestMessage());
+
+    var sessionConsultant = consultantSessionResponse.getConsultant();
+    if (sessionConsultant == null) {
+      return response;
+    }
+    var consultant = GroupSessionConsultantDTO.builder()
+        .id(sessionConsultant.getId())
+        .firstName(sessionConsultant.getFirstName())
+        .lastName(sessionConsultant.getLastName());
+    return response.consultant(consultant.build());
   }
 }
