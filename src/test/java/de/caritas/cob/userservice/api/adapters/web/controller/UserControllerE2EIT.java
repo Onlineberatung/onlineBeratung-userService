@@ -71,6 +71,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.EmailToggle;
 import de.caritas.cob.userservice.api.adapters.web.dto.EmailType;
 import de.caritas.cob.userservice.api.adapters.web.dto.EnquiryMessageDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.LanguageResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.MonitoringDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.OneTimePasswordDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PasswordDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PatchUserDTO;
@@ -302,6 +303,8 @@ public class UserControllerE2EIT {
 
   private String infix;
 
+  private MonitoringDTO monitoringDTO;
+
   @AfterEach
   void reset() {
     if (nonNull(user)) {
@@ -341,6 +344,7 @@ public class UserControllerE2EIT {
     subscriptionsGetResponse = null;
     identityConfig.setDisplayNameAllowedForConsultants(false);
     infix = null;
+    monitoringDTO = null;
   }
 
   @Test
@@ -2854,6 +2858,40 @@ public class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  public void updateMonitoringShouldRespondWithBadRequestIfSessionIsUnknown() throws Exception {
+    givenAValidConsultant(true);
+    givenAValidMonitoringDto();
+
+    mockMvc.perform(
+            put("/users/sessions/monitoring/{sessionId}", 2000)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(monitoringDTO))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  public void updateMonitoringShouldRespondWithUnauthorizedIfNotAdvisedByConsultant()
+      throws Exception {
+    givenAValidConsultant(true);
+    givenAValidSession();
+    givenAValidMonitoringDto();
+
+    mockMvc.perform(
+            put("/users/sessions/monitoring/{sessionId}", session.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(monitoringDTO))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   void updateE2eInChatsShouldRespondWithBadRequestIfE2eKeyHasWrongFormat() throws Exception {
     givenAValidConsultant(true);
     givenAWronglyFormattedE2eKeyDTO();
@@ -3719,6 +3757,11 @@ public class UserControllerE2EIT {
     }
   }
 
+  private void givenAValidMonitoringDto() {
+    monitoringDTO = new MonitoringDTO();
+    monitoringDTO.addProperties("a", "b");
+  }
+
   private void givenATanWithLetters() {
     tan = RandomStringUtils.randomAlphabetic(6);
   }
@@ -3736,7 +3779,7 @@ public class UserControllerE2EIT {
     consultant = consultantRepository.findAll().iterator().next();
     if (isAuthUser) {
       when(authenticatedUser.getUserId()).thenReturn(consultant.getId());
-      when(authenticatedUser.isUser()).thenReturn(false);
+      when(authenticatedUser.isAdviceSeeker()).thenReturn(false);
       when(authenticatedUser.isConsultant()).thenReturn(true);
       when(authenticatedUser.getUsername()).thenReturn(consultant.getUsername());
       when(authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.CONSULTANT.getValue()));
@@ -3752,7 +3795,7 @@ public class UserControllerE2EIT {
     user = userRepository.findAll().iterator().next();
     if (isAuthUser) {
       when(authenticatedUser.getUserId()).thenReturn(user.getUserId());
-      when(authenticatedUser.isUser()).thenReturn(true);
+      when(authenticatedUser.isAdviceSeeker()).thenReturn(true);
       when(authenticatedUser.isConsultant()).thenReturn(false);
       when(authenticatedUser.getUsername()).thenReturn(user.getUsername());
       when(authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.USER.getValue()));

@@ -2,14 +2,16 @@ package de.caritas.cob.userservice.api.service.archive;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import de.caritas.cob.userservice.api.AccountManager;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import java.util.function.Consumer;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +27,8 @@ public class SessionArchiveService {
   private final @NonNull SessionRepository sessionRepository;
   private final @NonNull AuthenticatedUser authenticatedUser;
   private final @NonNull RocketChatService rocketChatService;
-  private final @NonNull SessionArchivePermissionChecker sessionArchivePermissionChecker;
   private final @NonNull SessionArchiveValidator sessionArchiveValidator;
+  private final @NonNull AccountManager accountManager;
 
   /**
    * Archive a session.
@@ -57,9 +59,24 @@ public class SessionArchiveService {
       ThrowingConsumer<String, RocketChatUserNotInitializedException> rcUpdateRoomStateMethod) {
 
     Session session = retrieveSession(sessionId);
-    sessionArchivePermissionChecker.checkPermission(session);
+    checkPermission(session);
     sessionValidateMethod.accept(session);
     executeArchiving(sessionStatusTo, rcUpdateRoomStateMethod, session);
+  }
+
+  public void checkPermission(Session session) {
+    if (!hasConsultantPermission(session) && !session.isAdvised(authenticatedUser.getUserId())) {
+      var template = "Archive/reactivate session %s is not allowed for user with id %s";
+      var message = String.format(template, session.getId(), authenticatedUser.getUserId());
+
+      throw new ForbiddenException(message);
+    }
+  }
+
+  private boolean hasConsultantPermission(Session session) {
+    var userId = authenticatedUser.getUserId();
+
+    return session.isAdvisedBy(userId) || accountManager.isTeamAdvisedBy(session.getId(), userId);
   }
 
   private Session retrieveSession(Long sessionId) {

@@ -434,7 +434,7 @@ public class AppointmentControllerE2EIT {
     consultant = consultantRepository.findAll().iterator().next();
     if (isAuthUser) {
       when(authenticatedUser.getUserId()).thenReturn(consultant.getId());
-      when(authenticatedUser.isUser()).thenReturn(false);
+      when(authenticatedUser.isAdviceSeeker()).thenReturn(false);
       when(authenticatedUser.isConsultant()).thenReturn(true);
       when(authenticatedUser.getUsername()).thenReturn(consultant.getUsername());
       when(authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.CONSULTANT.getValue()));
@@ -444,7 +444,7 @@ public class AppointmentControllerE2EIT {
 
   private void givenAnAnonymousUser() {
     when(authenticatedUser.getUserId()).thenReturn(UUID.randomUUID().toString());
-    when(authenticatedUser.isUser()).thenReturn(false);
+    when(authenticatedUser.isAdviceSeeker()).thenReturn(false);
     when(authenticatedUser.isConsultant()).thenReturn(false);
     when(authenticatedUser.getUsername()).thenReturn(RandomStringUtils.randomAlphabetic(8));
     when(authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.ANONYMOUS.getValue()));
@@ -453,7 +453,7 @@ public class AppointmentControllerE2EIT {
 
   private void givenAnAdviceSeeker() {
     when(authenticatedUser.getUserId()).thenReturn(UUID.randomUUID().toString());
-    when(authenticatedUser.isUser()).thenReturn(true);
+    when(authenticatedUser.isAdviceSeeker()).thenReturn(true);
     when(authenticatedUser.isConsultant()).thenReturn(false);
     when(authenticatedUser.getUsername()).thenReturn(RandomStringUtils.randomAlphabetic(8));
     when(authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.USER.getValue()));
