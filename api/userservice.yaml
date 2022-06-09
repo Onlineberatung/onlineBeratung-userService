@@ -2176,6 +2176,9 @@ components:
           $ref: '#/components/schemas/LanguageCode'
         t:
           type: string
+        org:
+          type: string
+          example: "Lorem ipsum dolor sit amet, consetetur..."
 
     CreateEnquiryMessageResponseDTO:
       type: object

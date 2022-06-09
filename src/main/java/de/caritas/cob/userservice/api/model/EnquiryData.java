@@ -22,5 +22,6 @@ public class EnquiryData {
   private final String language;
   private final RocketChatCredentials rocketChatCredentials;
   private String type;
+  private String org;
 
 }

@@ -106,7 +106,8 @@ public class CreateEnquiryMessageFacade {
           createEnquiryExceptionInformation);
 
       var rocketChatData = new RocketChatData(enquiryData.getMessage(),
-          enquiryData.getRocketChatCredentials(), rcGroupId, enquiryData.getType());
+          enquiryData.getRocketChatCredentials(), rcGroupId, enquiryData.getType(),
+          enquiryData.getOrg());
       final var messageResponse = messageServiceProvider.postEnquiryMessage(
           rocketChatData,
           createEnquiryExceptionInformation);
