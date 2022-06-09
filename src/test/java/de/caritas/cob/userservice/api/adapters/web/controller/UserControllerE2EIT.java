@@ -256,6 +256,9 @@ class UserControllerE2EIT {
   @Captor
   private ArgumentCaptor<HttpEntity<UpdateUser>> updateUserCaptor;
 
+  @Captor
+  private ArgumentCaptor<RequestEntity<Object>> requestCaptor;
+
   private User user;
 
   private Consultant consultant;
@@ -439,6 +442,42 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("rcGroupId", is("rcGroupId")))
         .andExpect(jsonPath("t", is("e2e")));
 
+    restoreSession();
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
+  public void createEnquiryMessageShouldTransmitOriginalMessage()
+      throws Exception {
+    givenAUserWithASessionNotEnquired();
+    givenValidRocketChatTechUserResponse();
+    givenValidRocketChatCreationResponse();
+    givenAnEnquiryMessageDto(false);
+    enquiryMessageDTO.setOrg("this is the original message");
+    givenASuccessfulMessageResponse("e2e");
+
+    mockMvc.perform(
+            post("/users/sessions/{sessionId}/enquiry/new", session.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+                .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(enquiryMessageDTO))
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("sessionId", is(session.getId().intValue())))
+        .andExpect(jsonPath("rcGroupId", is("rcGroupId")))
+        .andExpect(jsonPath("t", is("e2e")));
+
+    var requestMessage = requestCaptor.getAllValues().stream()
+        .map(HttpEntity::getBody)
+        .filter(m -> m instanceof de.caritas.cob.userservice.messageservice.generated.web.model.MessageDTO)
+        .map(m -> (de.caritas.cob.userservice.messageservice.generated.web.model.MessageDTO) m)
+        .findFirst();
+    assertTrue(requestMessage.isPresent());
+    assertEquals("this is the original message", requestMessage.get().getOrg());
     restoreSession();
   }
 
@@ -4058,7 +4097,7 @@ class UserControllerE2EIT {
         de.caritas.cob.userservice.messageservice.generated.web.model.MessageResponseDTO.class);
     messageResponseDTO.setT(messageType);
     ResponseEntity<Object> response = ResponseEntity.status(CREATED).body(messageResponseDTO);
-    when(restTemplate.exchange(any(RequestEntity.class), eq(ParameterizedTypeReference.forType(
+    when(restTemplate.exchange(requestCaptor.capture(), eq(ParameterizedTypeReference.forType(
         de.caritas.cob.userservice.messageservice.generated.web.model.MessageResponseDTO.class)))).thenReturn(
         response);
   }
