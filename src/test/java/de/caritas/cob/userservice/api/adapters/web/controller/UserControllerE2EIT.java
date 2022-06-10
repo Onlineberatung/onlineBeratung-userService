@@ -94,6 +94,8 @@ import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.model.OtpType;
 import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.model.Session.RegistrationType;
+import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.Success;
 import de.caritas.cob.userservice.api.model.SuccessWithEmail;
 import de.caritas.cob.userservice.api.model.User;
@@ -120,6 +122,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import javax.servlet.http.Cookie;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.PositiveOrZero;
@@ -473,12 +476,62 @@ class UserControllerE2EIT {
 
     var requestMessage = requestCaptor.getAllValues().stream()
         .map(HttpEntity::getBody)
-        .filter(m -> m instanceof de.caritas.cob.userservice.messageservice.generated.web.model.MessageDTO)
+        .filter(
+            m -> m instanceof de.caritas.cob.userservice.messageservice.generated.web.model.MessageDTO)
         .map(m -> (de.caritas.cob.userservice.messageservice.generated.web.model.MessageDTO) m)
         .findFirst();
     assertTrue(requestMessage.isPresent());
     assertEquals("this is the original message", requestMessage.get().getOrg());
     restoreSession();
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  public void getSessionsForAuthenticatedConsultantShouldReturnGroupChats() throws Exception {
+    givenAValidUser();
+    givenAValidConsultant(true);
+    givenAValidChat(false);
+    givenAnEmptyRocketChatGetSubscriptionsResponse();
+    givenAValidRocketChatGetRoomsResponse();
+
+    mockMvc.perform(
+            get("/users/sessions/consultants")
+                .queryParam("status", "2")
+                .queryParam("count", "15")
+                .queryParam("filter", "all")
+                .queryParam("offset", "0")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("total", is(1)))
+        .andExpect(jsonPath("sessions", hasSize(1)))
+        .andExpect(jsonPath("sessions[0].chat.groupId", is(chat.getGroupId())))
+        .andExpect(jsonPath("sessions[0].session", is(nullValue())));
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  public void getSessionsForAuthenticatedConsultantShouldNotReturnTeamSessions() throws Exception {
+    givenAValidUser();
+    givenAValidConsultant(true);
+    givenATeamSessionOfAColleagueInProgress();
+    givenAnEmptyRocketChatGetSubscriptionsResponse();
+    givenAValidRocketChatGetRoomsResponse();
+
+    mockMvc.perform(
+        get("/users/sessions/consultants")
+            .queryParam("status", "2")
+            .queryParam("count", "15")
+            .queryParam("filter", "all")
+            .queryParam("offset", "0")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+            .accept(MediaType.APPLICATION_JSON)
+    ).andExpect(status().isNoContent());
   }
 
   @Test
@@ -3694,6 +3747,19 @@ class UserControllerE2EIT {
     ).thenReturn(ResponseEntity.ok(subscriptionsGetResponse));
   }
 
+  private void givenAnEmptyRocketChatGetSubscriptionsResponse() {
+    subscriptionsGetResponse = new SubscriptionsGetDTO();
+    subscriptionsGetResponse.setSuccess(true);
+    SubscriptionsUpdateDTO[] s = {};
+    subscriptionsGetResponse.setUpdate(s);
+
+    var urlSuffix = "/api/v1/subscriptions.get";
+    when(restTemplate.exchange(
+        endsWith(urlSuffix), eq(HttpMethod.GET),
+        any(HttpEntity.class), eq(SubscriptionsGetDTO.class))
+    ).thenReturn(ResponseEntity.ok(subscriptionsGetResponse));
+  }
+
   private void givenARocketChatGetSubscriptionsResponseIncludingNoneTemporary() {
     subscriptionsGetResponse = new SubscriptionsGetDTO();
     subscriptionsGetResponse.setSuccess(true);
@@ -4074,6 +4140,19 @@ class UserControllerE2EIT {
         anyString())).thenReturn(userInfoResponseDTO);
   }
 
+  private void givenAValidRocketChatGetRoomsResponse() {
+    var urlSuffix = "/api/v1/rooms.get";
+    var updateUserResponse = easyRandom.nextObject(RoomsGetDTO.class);
+    RoomsUpdateDTO[] roomsUpdateDTOs = {
+        Arrays.stream(updateUserResponse.getUpdate()).findFirst().orElseThrow()
+    };
+    updateUserResponse.setUpdate(roomsUpdateDTOs);
+
+    when(restTemplate.exchange(
+        endsWith(urlSuffix), eq(HttpMethod.GET), any(HttpEntity.class), eq(RoomsGetDTO.class)
+    )).thenReturn(ResponseEntity.ok(updateUserResponse));
+  }
+
   @SuppressWarnings("unchecked")
   private void givenValidRocketChatCreationResponse() {
     var uriTemplateHandler = mock(UriTemplateHandler.class);
@@ -4117,6 +4196,24 @@ class UserControllerE2EIT {
         .filter(s -> isNull(s.getEnquiryMessageDate()))
         .findFirst()
         .orElseThrow();
+  }
+
+  private void givenATeamSessionOfAColleagueInProgress() {
+    session = new Session();
+    session.setUser(user);
+    session.setConsultant(StreamSupport
+        .stream(consultantRepository.findAll().spliterator(), false)
+        .filter(c -> !c.getId().equals(consultant.getId()))
+        .findFirst()
+        .orElseThrow());
+    session.setConsultingTypeId(1);
+    session.setRegistrationType(RegistrationType.REGISTERED);
+    session.setLanguageCode(LanguageCode.de);
+    session.setPostcode(RandomStringUtils.randomNumeric(5));
+    session.setAgencyId(consultant.getConsultantAgencies().iterator().next().getAgencyId());
+    session.setStatus(SessionStatus.IN_PROGRESS);
+    session.setTeamSession(true);
+    sessionRepository.save(session);
   }
 
   private void givenAValidSession() {
