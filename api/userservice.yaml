@@ -1937,6 +1937,9 @@ components:
           example: "ag89h3tjkerg94t"
         t:
           type: string
+        org:
+          type: string
+          example: "Lorem ipsum dolor sit amet, consetetur..."
 
     VideoCallMessageDTO:
       type: object
