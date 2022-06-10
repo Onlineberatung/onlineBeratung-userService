@@ -487,7 +487,7 @@ class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  public void getSessionsForAuthenticatedConsultantShouldReturnGroupChats() throws Exception {
+  void getSessionsForAuthenticatedConsultantShouldReturnGroupChats() throws Exception {
     givenAValidUser();
     givenAValidConsultant(true);
     givenAValidChat(false);
@@ -514,7 +514,7 @@ class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  public void getSessionsForAuthenticatedConsultantShouldNotReturnTeamSessions() throws Exception {
+  void getSessionsForAuthenticatedConsultantShouldNotReturnTeamSessions() throws Exception {
     givenAValidUser();
     givenAValidConsultant(true);
     givenATeamSessionOfAColleagueInProgress();
