@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.facade;
 
+import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -7,18 +9,22 @@ import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
+import de.caritas.cob.userservice.api.helper.RocketChatRoomNameGenerator;
 import de.caritas.cob.userservice.api.model.Chat;
+import de.caritas.cob.userservice.api.model.ChatAgency;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,6 +35,8 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class JoinAndLeaveChatFacade {
+
+  private static final RocketChatRoomNameGenerator roomNameGenerator = new RocketChatRoomNameGenerator();
 
   private final @NonNull ChatService chatService;
   private final @NonNull ChatPermissionVerifier chatPermissionVerifier;
@@ -66,11 +74,68 @@ public class JoinAndLeaveChatFacade {
     try {
       rocketChatService.removeUserFromGroup(rcUserId, chat.getGroupId());
       if (rocketChatService.getStandardMembersOfGroup(chat.getGroupId()).isEmpty()) {
-        rocketChatService.saveRoomSettings(chat.getGroupId(), false);
+        deleteMessengerChat(chat.getGroupId());
+        chatService.deleteChat(chat);
+        if (chat.isRepetitive()) {
+          var rcGroupId = recreateMessengerChat(chat);
+          recreateChat(chat, rcGroupId);
+        }
       }
-    } catch (RocketChatRemoveUserFromGroupException | RocketChatUserNotInitializedException | RocketChatGetGroupMembersException e) {
+    } catch (RocketChatRemoveUserFromGroupException
+             | RocketChatUserNotInitializedException
+             | RocketChatGetGroupMembersException e) {
       throw new InternalServerErrorException(e.getMessage(), LogService::logInternalServerError);
     }
+  }
+
+  private void deleteMessengerChat(String groupId) {
+    if (!rocketChatService.deleteGroupAsSystemUser(groupId)) {
+      var message = String.format("Could not delete Rocket.Chat group with id %s", groupId);
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  private void recreateChat(Chat chat, String rcGroupId) {
+    final var chatAgencyIds = chat.getChatAgencies().stream()
+        .map(ChatAgency::getAgencyId)
+        .collect(Collectors.toList());
+
+    chat.setId(null);
+    chat.setGroupId(rcGroupId);
+    chat.setStartDate(chat.getStartDate().plusWeeks(1));
+    chat.setUpdateDate(nowInUtc());
+    chat.setActive(false);
+    chat.setChatAgencies(null);
+    chatService.saveChat(chat);
+
+    chatAgencyIds.forEach(chatAgencyId -> {
+      var recreatedChatAgency = new ChatAgency(chat, chatAgencyId);
+      chatService.saveChatAgencyRelation(recreatedChatAgency);
+    });
+  }
+
+  private String recreateMessengerChat(Chat chat) {
+    String rcGroupId = null;
+    var groupName = roomNameGenerator.generateGroupChatName(chat);
+    try {
+      var response = rocketChatService
+          .createPrivateGroupWithSystemUser(groupName)
+          .orElseThrow(() -> new RocketChatCreateGroupException(
+              "RocketChat group is not present while creating chat: " + chat)
+          );
+      rcGroupId = response.getGroup().getId();
+      rocketChatService.addTechnicalUserToGroup(rcGroupId);
+    } catch (RocketChatCreateGroupException
+             | RocketChatAddUserToGroupException
+             | RocketChatUserNotInitializedException e) {
+      if (nonNull(rcGroupId)) {
+        rocketChatService.deleteGroupAsSystemUser(rcGroupId);
+      }
+      throw new InternalServerErrorException("Error while creating private group in Rocket.Chat "
+          + "for group chat: " + chat);
+    }
+
+    return rcGroupId;
   }
 
   private Chat getChat(Long chatId) {
