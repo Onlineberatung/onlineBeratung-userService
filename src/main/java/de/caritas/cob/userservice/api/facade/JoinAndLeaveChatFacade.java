@@ -95,6 +95,7 @@ public class JoinAndLeaveChatFacade {
     }
   }
 
+  @SuppressWarnings("Duplicates")
   private void recreateChat(Chat chat, String rcGroupId) {
     final var chatAgencyIds = chat.getChatAgencies().stream()
         .map(ChatAgency::getAgencyId)
@@ -114,6 +115,7 @@ public class JoinAndLeaveChatFacade {
     });
   }
 
+  @SuppressWarnings("Duplicates")
   private String recreateMessengerChat(Chat chat) {
     String rcGroupId = null;
     var groupName = roomNameGenerator.generateGroupChatName(chat);
