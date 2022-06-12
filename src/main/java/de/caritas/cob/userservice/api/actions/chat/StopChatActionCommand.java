@@ -5,6 +5,7 @@ import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.actions.ActionCommand;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
@@ -14,8 +15,6 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInit
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
-import java.time.LocalDateTime;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -26,8 +25,6 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class StopChatActionCommand implements ActionCommand<Chat> {
-
-  private static final long WEEKLY_PLUS = 1L;
 
   private final @NonNull ChatService chatService;
   private final @NonNull RocketChatService rocketChatService;
@@ -92,13 +89,9 @@ public class StopChatActionCommand implements ActionCommand<Chat> {
   }
 
   private void reinitializeDatabaseChat(Chat chat) {
-    chat.setStartDate(getNextStartDate(chat));
+    chat.setStartDate(chat.nextStart());
     chat.setActive(false);
     chatService.saveChat(chat);
-  }
-
-  private LocalDateTime getNextStartDate(Chat chat) {
-    return chat.getStartDate().plusWeeks(WEEKLY_PLUS);
   }
 
   private void deleteSingleChatGroup(Chat chat) {

@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.actions.chat;
 
-import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_VALUE_WEEKLY_PLUS;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.ACTIVE_CHAT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_INTERVAL_WEEKLY;
@@ -18,6 +17,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
@@ -26,7 +26,6 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserF
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.service.ChatService;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -133,7 +132,6 @@ class StopChatActionCommandTest {
     when(chat.isRepetitive()).thenReturn(true);
     when(chat.getChatInterval()).thenReturn(CHAT_INTERVAL_WEEKLY);
     when(chat.getGroupId()).thenReturn(RC_GROUP_ID);
-    when(chat.getStartDate()).thenReturn(nowInUtc());
 
     stopChatActionCommand.execute(chat);
 
