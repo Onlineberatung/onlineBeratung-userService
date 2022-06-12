@@ -63,7 +63,8 @@ public class StopChatActionCommand implements ActionCommand<Chat> {
     }
   }
 
-  @SuppressWarnings("Duplicates")
+  // duplicated because currently not E2E-testable due to thread change in registry execution
+  @SuppressWarnings({"Duplicates", "java:S4144"})
   private void recreateChat(Chat chat, String rcGroupId) {
     final var chatAgencyIds = chat.getChatAgencies().stream()
         .map(ChatAgency::getAgencyId)
@@ -83,7 +84,7 @@ public class StopChatActionCommand implements ActionCommand<Chat> {
     });
   }
 
-  @SuppressWarnings("Duplicates")
+  @SuppressWarnings({"Duplicates", "java:S4144"})
   private String recreateMessengerChat(Chat chat) {
     String rcGroupId = null;
     var groupName = roomNameGenerator.generateGroupChatName(chat);
