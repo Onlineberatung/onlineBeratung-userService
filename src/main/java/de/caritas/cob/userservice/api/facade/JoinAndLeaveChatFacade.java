@@ -95,7 +95,7 @@ public class JoinAndLeaveChatFacade {
     }
   }
 
-  @SuppressWarnings("Duplicates")
+  @SuppressWarnings({"Duplicates", "java:S4144", "common-java:DuplicatedBlocks"})
   private void recreateChat(Chat chat, String rcGroupId) {
     final var chatAgencyIds = chat.getChatAgencies().stream()
         .map(ChatAgency::getAgencyId)
@@ -115,7 +115,7 @@ public class JoinAndLeaveChatFacade {
     });
   }
 
-  @SuppressWarnings("Duplicates")
+  @SuppressWarnings({"Duplicates", "java:S4144", "common-java:DuplicatedBlocks"})
   private String recreateMessengerChat(Chat chat) {
     String rcGroupId = null;
     var groupName = roomNameGenerator.generateGroupChatName(chat);
