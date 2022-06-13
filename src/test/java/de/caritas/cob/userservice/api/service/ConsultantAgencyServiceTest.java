@@ -46,7 +46,8 @@ public class ConsultantAgencyServiceTest {
   private final Consultant CONSULTANT =
       new Consultant(CONSULTANT_ID, CONSULTANT_ROCKETCHAT_ID, "consultant", "first name",
           "last name", "consultant@cob.de", false, false, null, false, null, null, null,
-          null, null, null, null, null, true, true, null, null, ConsultantStatus.CREATED, false);
+          null, null, null, null, null, true, true, true, true, null, null,
+          ConsultantStatus.CREATED, false);
   private final ConsultantAgency CONSULTANT_AGENCY =
       new ConsultantAgency(AGENCY_ID, CONSULTANT, 1L, nowInUtc(), nowInUtc(), nowInUtc(), null);
   private final List<ConsultantAgency> CONSULTANT_AGENY_LIST = Arrays.asList(CONSULTANT_AGENCY);
