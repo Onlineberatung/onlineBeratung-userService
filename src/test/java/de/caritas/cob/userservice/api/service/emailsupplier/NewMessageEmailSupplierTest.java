@@ -21,7 +21,6 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session;
@@ -70,9 +69,6 @@ public class NewMessageEmailSupplierTest {
 
   @Mock
   private ConsultantService consultantService;
-
-  @Mock
-  private UserHelper userHelper;
 
   @Mock
   private Logger logger;
@@ -222,6 +218,33 @@ public class NewMessageEmailSupplierTest {
     when(session.getUser()).thenReturn(user);
 
     List<MailDTO> generatedMails = this.newMessageEmailSupplier.generateEmails();
+
+    assertThat(generatedMails, hasSize(0));
+  }
+
+  @Test
+  public void generateEmails_Should_ReturnEmailToConsultant_When_NewChatMessageToggleIsOn() {
+    when(roles.contains(UserRole.USER.getValue())).thenReturn(true);
+    when(session.getConsultant()).thenReturn(CONSULTANT);
+    when(session.getUser()).thenReturn(USER);
+    when(session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
+
+    var generatedMails = newMessageEmailSupplier.generateEmails();
+
+    assertThat(generatedMails, hasSize(1));
+  }
+
+  @Test
+  public void generateEmails_Should_ReturnNoEmailToConsultant_When_NewChatMessageToggleIsOff() {
+    when(roles.contains(UserRole.USER.getValue())).thenReturn(true);
+    Consultant consultant = mock(Consultant.class);
+    when(consultant.getNotifyNewChatMessageFromAdviceSeeker()).thenReturn(false);
+    when(consultant.getEmail()).thenReturn("a@b.com");
+    when(session.getConsultant()).thenReturn(consultant);
+    when(session.getUser()).thenReturn(USER);
+    when(session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
+
+    var generatedMails = newMessageEmailSupplier.generateEmails();
 
     assertThat(generatedMails, hasSize(0));
   }
