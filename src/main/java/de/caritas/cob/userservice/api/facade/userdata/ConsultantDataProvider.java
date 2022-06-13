@@ -88,11 +88,19 @@ public class ConsultantDataProvider {
   }
 
   private Set<EmailToggle> emailTogglesOf(Consultant consultant) {
-    var emailToggle = new EmailToggle();
-    emailToggle.setName(EmailType.DAILY_ENQUIRY);
-    emailToggle.setState(consultant.getNotifyEnquiriesRepeating());
+    var enquiryToggle = new EmailToggle();
+    enquiryToggle.setName(EmailType.DAILY_ENQUIRY);
+    enquiryToggle.setState(consultant.getNotifyEnquiriesRepeating());
 
-    return Set.of(emailToggle);
+    var newChatToggle = new EmailToggle();
+    newChatToggle.setName(EmailType.NEW_CHAT_MESSAGE_FROM_ADVICE_SEEKER);
+    newChatToggle.setState(consultant.getNotifyNewChatMessageFromAdviceSeeker());
+
+    var newFeedbackToggle = new EmailToggle();
+    newFeedbackToggle.setName(EmailType.NEW_FEEDBACK_MESSAGE_FROM_ADVICE_SEEKER);
+    newFeedbackToggle.setState(consultant.getNotifyNewFeedbackMessageFromAdviceSeeker());
+
+    return Set.of(enquiryToggle, newChatToggle, newFeedbackToggle);
   }
 
   private List<AgencyDTO> agencyDTOsOf(Consultant consultant) {

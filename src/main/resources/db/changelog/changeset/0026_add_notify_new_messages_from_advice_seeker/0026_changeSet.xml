@@ -1,0 +1,15 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+  <changeSet author="OBI-369" id="OBI-369">
+    <sqlFile
+      path="db/changelog/changeset/0026_add_notify_new_messages_from_advice_seeker/add-notify-new-message-from-advice-seeker.sql"
+      stripComments="true"/>
+    <rollback>
+      <sqlFile
+        path="db/changelog/changeset/0026_add_notify_new_messages_from_advice_seeker/add-notify-new-message-from-advice-seeker-rollback.sql"
+        stripComments="true"/>
+    </rollback>
+  </changeSet>
+</databaseChangeLog>
