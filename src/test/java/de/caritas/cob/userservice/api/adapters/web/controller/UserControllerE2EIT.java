@@ -9,6 +9,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_USER_ID
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
@@ -1270,9 +1271,15 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("absent", is(consultant.isAbsent())))
         .andExpect(jsonPath("formalLanguage", is(consultant.isLanguageFormal())))
         .andExpect(jsonPath("e2eEncryptionEnabled", is(false)))
-        .andExpect(jsonPath("emailToggles", hasSize(1)))
-        .andExpect(jsonPath("emailToggles[0].name", is("DAILY_ENQUIRY")))
+        .andExpect(jsonPath("emailToggles", hasSize(3)))
+        .andExpect(jsonPath("emailToggles[*].name", containsInAnyOrder(
+            "DAILY_ENQUIRY",
+            "NEW_CHAT_MESSAGE_FROM_ADVICE_SEEKER",
+            "NEW_FEEDBACK_MESSAGE_FROM_ADVICE_SEEKER"
+        )))
         .andExpect(jsonPath("emailToggles[0].state", is(true)))
+        .andExpect(jsonPath("emailToggles[1].state", is(true)))
+        .andExpect(jsonPath("emailToggles[2].state", is(true)))
         .andExpect(jsonPath("inTeamAgency", is(consultant.isTeamConsultant())));
   }
 
@@ -1379,9 +1386,15 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("absent", is(consultant.isAbsent())))
         .andExpect(jsonPath("formalLanguage", is(consultant.isLanguageFormal())))
         .andExpect(jsonPath("e2eEncryptionEnabled", is(false)))
-        .andExpect(jsonPath("emailToggles", hasSize(1)))
-        .andExpect(jsonPath("emailToggles[0].name", is("DAILY_ENQUIRY")))
+        .andExpect(jsonPath("emailToggles", hasSize(3)))
+        .andExpect(jsonPath("emailToggles[*].name", containsInAnyOrder(
+            "DAILY_ENQUIRY",
+            "NEW_CHAT_MESSAGE_FROM_ADVICE_SEEKER",
+            "NEW_FEEDBACK_MESSAGE_FROM_ADVICE_SEEKER"
+        )))
         .andExpect(jsonPath("emailToggles[0].state", is(true)))
+        .andExpect(jsonPath("emailToggles[1].state", is(true)))
+        .andExpect(jsonPath("emailToggles[2].state", is(true)))
         .andExpect(jsonPath("inTeamAgency", is(consultant.isTeamConsultant())));
   }
 
@@ -1488,9 +1501,15 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("absent", is(consultant.isAbsent())))
         .andExpect(jsonPath("formalLanguage", is(consultant.isLanguageFormal())))
         .andExpect(jsonPath("e2eEncryptionEnabled", is(false)))
-        .andExpect(jsonPath("emailToggles", hasSize(1)))
-        .andExpect(jsonPath("emailToggles[0].name", is("DAILY_ENQUIRY")))
+        .andExpect(jsonPath("emailToggles", hasSize(3)))
+        .andExpect(jsonPath("emailToggles[*].name", containsInAnyOrder(
+            "DAILY_ENQUIRY",
+            "NEW_CHAT_MESSAGE_FROM_ADVICE_SEEKER",
+            "NEW_FEEDBACK_MESSAGE_FROM_ADVICE_SEEKER"
+        )))
         .andExpect(jsonPath("emailToggles[0].state", is(true)))
+        .andExpect(jsonPath("emailToggles[1].state", is(true)))
+        .andExpect(jsonPath("emailToggles[2].state", is(true)))
         .andExpect(jsonPath("inTeamAgency", is(consultant.isTeamConsultant())));
   }
 
@@ -1543,7 +1562,7 @@ class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  void getUserDataShouldContainEnabledFlags() throws Exception {
+  void getUserDataShouldContainSetFlags() throws Exception {
     givenABearerToken();
     givenAValidConsultant(true);
     givenConsultingTypeServiceResponse();
@@ -1552,7 +1571,7 @@ class UserControllerE2EIT {
     givenKeycloakRespondsOtpHasNotBeenSetup(consultant.getUsername());
     givenEnabledE2EEncryption();
     givenDisplayNameAllowedForConsultants();
-    givenConsultantIsNotToNotify();
+    givenConsultantIsNotToNotifyAboutNewEnquiries();
 
     mockMvc.perform(
             get("/users/data")
@@ -1560,11 +1579,43 @@ class UserControllerE2EIT {
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("emailToggles", hasSize(1)))
-        .andExpect(jsonPath("emailToggles[0].name", is("DAILY_ENQUIRY")))
-        .andExpect(jsonPath("emailToggles[0].state", is(false)))
+        .andExpect(jsonPath("emailToggles", hasSize(3)))
+        .andExpect(jsonPath("emailToggles[?(@.name =~ /DAILY_ENQUIRY/)].state",
+            is(List.of(false)))
+        )
+        .andExpect(jsonPath("emailToggles[?(@.name =~ /NEW_.*_MESSAGE_FROM_ADVICE_SEEKER/)].state",
+            is(List.of(true, true)))
+        )
         .andExpect(jsonPath("e2eEncryptionEnabled", is(true)))
         .andExpect(jsonPath("isDisplayNameEditable", is(true)));
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  void getUserDataShouldContainDisabledFollowUpEmails() throws Exception {
+    givenABearerToken();
+    givenAValidConsultant(true);
+    givenConsultingTypeServiceResponse();
+    givenAValidRocketChatSystemUser();
+    givenAValidRocketChatInfoUserResponse();
+    givenKeycloakRespondsOtpHasNotBeenSetup(consultant.getUsername());
+    givenEnabledE2EEncryption();
+    givenDisplayNameAllowedForConsultants();
+    givenConsultantIsNotToNotifyAboutNewFollowUps();
+
+    mockMvc.perform(
+            get("/users/data")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("emailToggles", hasSize(3)))
+        .andExpect(jsonPath("emailToggles[?(@.name =~ /DAILY_ENQUIRY/)].state",
+            is(List.of(true)))
+        )
+        .andExpect(jsonPath("emailToggles[?(@.name =~ /NEW_.*_MESSAGE_FROM_ADVICE_SEEKER/)].state",
+            is(List.of(false, false)))
+        );
   }
 
   @Test
@@ -4097,8 +4148,15 @@ class UserControllerE2EIT {
     return patchDtoAsMap;
   }
 
-  private void givenConsultantIsNotToNotify() {
+  private void givenConsultantIsNotToNotifyAboutNewEnquiries() {
     consultant.setNotifyEnquiriesRepeating(false);
+    consultantRepository.save(consultant);
+    consultantsToReset.add(consultant);
+  }
+
+  private void givenConsultantIsNotToNotifyAboutNewFollowUps() {
+    consultant.setNotifyNewChatMessageFromAdviceSeeker(false);
+    consultant.setNotifyNewFeedbackMessageFromAdviceSeeker(false);
     consultantRepository.save(consultant);
     consultantsToReset.add(consultant);
   }
