@@ -10,21 +10,19 @@ import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.service.ChatService;
-import lombok.NonNull;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 /**
  * Action to perform all necessary steps to stop an active group chat.
  */
 @Component
-public class StopChatActionCommand extends RecreateChatCapability implements ActionCommand<Chat> {
+@RequiredArgsConstructor
+public class StopChatActionCommand implements ActionCommand<Chat> {
 
-  @Autowired
-  public StopChatActionCommand(@NonNull ChatService chatService,
-      @NonNull RocketChatService rocketChatService) {
-    super(chatService, rocketChatService);
-  }
+  private final ChatService chatService;
+  private final RocketChatService rocketChatService;
+  private final ChatReCreator chatReCreator;
 
   /**
    * Deletes the given active chat and recreates it if repetitive.
@@ -43,8 +41,8 @@ public class StopChatActionCommand extends RecreateChatCapability implements Act
     if (!chat.isRepetitive() || nonNull(chat.nextStart())) {
       deleteChatGroup(chat);
       if (chat.isRepetitive()) {
-        var rcGroupId = recreateMessengerChat(chat);
-        recreateChat(chat, rcGroupId);
+        var rcGroupId = chatReCreator.recreateMessengerChat(chat);
+        chatReCreator.recreateChat(chat, rcGroupId);
       }
     }
   }

@@ -13,17 +13,19 @@ import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.ChatAgency;
 import de.caritas.cob.userservice.api.service.ChatService;
 import java.util.stream.Collectors;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
-@AllArgsConstructor
-public abstract class RecreateChatCapability {
+@Service
+@RequiredArgsConstructor
+public class ChatReCreator {
 
   private static final RocketChatRoomNameGenerator roomNameGenerator = new RocketChatRoomNameGenerator();
 
-  protected ChatService chatService;
-  protected RocketChatService rocketChatService;
+  private final ChatService chatService;
+  private final RocketChatService rocketChatService;
 
-  protected void recreateChat(Chat chat, String rcGroupId) {
+  public void recreateChat(Chat chat, String rcGroupId) {
     final var chatAgencyIds = chat.getChatAgencies().stream()
         .map(ChatAgency::getAgencyId)
         .collect(Collectors.toList());
@@ -42,7 +44,7 @@ public abstract class RecreateChatCapability {
     });
   }
 
-  protected String recreateMessengerChat(Chat chat) {
+  public String recreateMessengerChat(Chat chat) {
     String rcGroupId = null;
     var groupName = roomNameGenerator.generateGroupChatName(chat);
     try {

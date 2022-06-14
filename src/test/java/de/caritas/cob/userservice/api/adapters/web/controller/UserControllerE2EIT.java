@@ -49,7 +49,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.neovisionaries.i18n.LanguageCode;
-import de.caritas.cob.userservice.api.actions.chat.StopChatActionCommand;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.StandardResponseDTO;
@@ -254,10 +253,6 @@ class UserControllerE2EIT {
 
   @MockBean
   private Keycloak keycloak;
-
-  @MockBean
-  @SuppressWarnings("unused")
-  private StopChatActionCommand stopChatActionCommand;
 
   @Captor
   private ArgumentCaptor<HttpEntity<OtpSetupDTO>> otpSetupCaptor;
@@ -2478,6 +2473,7 @@ class UserControllerE2EIT {
     givenAValidChat(false);
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatRoomResponse(chat.getGroupId(), false);
+    givenAValidRocketChatGroupDeleteResponse();
 
     mockMvc.perform(
             put("/users/chat/{chatId}/stop", chat.getId())
@@ -2652,6 +2648,7 @@ class UserControllerE2EIT {
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatRoomResponse(chat.getGroupId(), true);
     givenAValidRocketChatUnmuteResponse();
+    givenAValidRocketChatGroupDeleteResponse();
 
     mockMvc.perform(
             put("/users/chat/{chatId}/stop", chat.getId())
@@ -3418,6 +3415,7 @@ class UserControllerE2EIT {
     givenAValidConsultant(true);
     givenAValidChat(true);
     givenAValidRocketChatSystemUser();
+    givenAValidRocketChatGroupDeleteResponse();
     givenAValidRocketChatRoomResponse(chat.getGroupId(), true);
     givenAValidRocketChatUnmuteResponse();
 
@@ -3429,7 +3427,97 @@ class UserControllerE2EIT {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(stopChatActionCommand).execute(chat);
+    var allChatsAfter = StreamSupport.stream(chatRepository.findAll().spliterator(), false)
+        .sorted(Comparator.comparing(Chat::getUpdateDate).reversed())
+        .collect(Collectors.toList());
+    chat = allChatsAfter.get(0);
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.STOP_CHAT)
+  void stopChatShouldReturnOkAndDeleteOneTimeChatAndChatAgency() throws Exception {
+    givenAValidUser();
+    givenAValidConsultant(true);
+    givenAValidChat(false);
+    givenAValidRocketChatSystemUser();
+    givenAValidRocketChatGroupDeleteResponse();
+    givenAValidRocketChatRoomResponse(chat.getGroupId(), true);
+    givenAValidRocketChatUnmuteResponse();
+
+    mockMvc.perform(
+            put("/users/chat/{chatId}/stop", chat.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    assertFalse(chatRepository.existsById(chat.getId()));
+    assertFalse(chatAgencyRepository.existsById(chatAgency.getId()));
+
+    var urlSuffix = "/api/v1/groups.delete";
+    verify(restTemplate).postForObject(
+        endsWith(urlSuffix), any(HttpEntity.class), eq(GroupDeleteResponseDTO.class)
+    );
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.STOP_CHAT)
+  void stopChatShouldReturnOkAndRecreateChatIfRepetitive() throws Exception {
+    givenAValidUser();
+    givenAValidConsultant(true);
+    givenAValidChat(true);
+    givenAValidRocketChatSystemUser();
+    givenAValidRocketChatGroupDeleteResponse();
+    givenAValidRocketChatRoomResponse(chat.getGroupId(), true);
+    givenAValidRocketChatUnmuteResponse();
+
+    var allChatsBefore = StreamSupport.stream(chatRepository.findAll().spliterator(), false)
+        .collect(Collectors.toSet());
+
+    mockMvc.perform(
+            put("/users/chat/{chatId}/stop", chat.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    var allChatsAfter = StreamSupport.stream(chatRepository.findAll().spliterator(), false)
+        .sorted(Comparator.comparing(Chat::getUpdateDate).reversed())
+        .collect(Collectors.toList());
+
+    assertEquals(allChatsBefore.size(), allChatsAfter.size());
+    var recreatedChat = allChatsAfter.get(0);
+    var keptChats = allChatsAfter.subList(1, allChatsAfter.size());
+    assertFalse(allChatsBefore.contains(recreatedChat));
+    assertTrue(allChatsBefore.containsAll(keptChats));
+
+    assertFalse(chatRepository.existsById(chat.getId()));
+    assertFalse(chatAgencyRepository.existsById(chatAgency.getId()));
+
+    var urlSuffix = "/api/v1/groups.delete";
+    verify(restTemplate).postForObject(
+        endsWith(urlSuffix), any(HttpEntity.class), eq(GroupDeleteResponseDTO.class)
+    );
+
+    assertEquals(chat.getTopic(), recreatedChat.getTopic());
+    assertEquals(chat.getConsultingTypeId(), recreatedChat.getConsultingTypeId());
+    assertEquals(chat.getInitialStartDate().truncatedTo(ChronoUnit.SECONDS),
+        recreatedChat.getInitialStartDate().truncatedTo(ChronoUnit.SECONDS));
+    assertTrue(chat.getStartDate().isBefore(recreatedChat.getStartDate()));
+    assertEquals(chat.getDuration(), recreatedChat.getDuration());
+    assertEquals(chat.isRepetitive(), recreatedChat.isRepetitive());
+    assertEquals(chat.getChatInterval(), recreatedChat.getChatInterval());
+    assertFalse(recreatedChat.isActive());
+    assertEquals(chat.getMaxParticipants(), recreatedChat.getMaxParticipants());
+    assertNotEquals(chat.getGroupId(), recreatedChat.getGroupId());
+    assertNotNull(recreatedChat.getGroupId());
+    assertEquals(chat.getChatOwner(), recreatedChat.getChatOwner());
+    assertTrue(recreatedChat.getChatAgencies().size() > 0);
+    assertTrue(chat.getUpdateDate().isBefore(recreatedChat.getUpdateDate()));
+
+    chat = recreatedChat;
   }
 
   private void givenARealmResource() {

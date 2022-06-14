@@ -3,7 +3,7 @@ package de.caritas.cob.userservice.api.facade;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-import de.caritas.cob.userservice.api.actions.chat.RecreateChatCapability;
+import de.caritas.cob.userservice.api.actions.chat.ChatReCreator;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -20,28 +20,22 @@ import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.concurrent.atomic.AtomicReference;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /**
  * Facade for capsuling to join a chat.
  */
 @Service
-public class JoinAndLeaveChatFacade extends RecreateChatCapability {
+@RequiredArgsConstructor
+public class JoinAndLeaveChatFacade {
 
-  protected ChatPermissionVerifier chatPermissionVerifier;
-  protected ConsultantService consultantService;
-  protected UserService userService;
-
-  @Autowired
-  public JoinAndLeaveChatFacade(ChatService chatService, RocketChatService rocketChatService,
-      ChatPermissionVerifier chatPermissionVerifier, ConsultantService consultantService,
-      UserService userService) {
-    super(chatService, rocketChatService);
-    this.chatPermissionVerifier = chatPermissionVerifier;
-    this.consultantService = consultantService;
-    this.userService = userService;
-  }
+  private final ChatService chatService;
+  private final ChatPermissionVerifier chatPermissionVerifier;
+  private final ConsultantService consultantService;
+  private final UserService userService;
+  private final RocketChatService rocketChatService;
+  private final ChatReCreator chatReCreator;
 
   /**
    * Join a chat.
@@ -76,8 +70,8 @@ public class JoinAndLeaveChatFacade extends RecreateChatCapability {
         deleteMessengerChat(chat.getGroupId());
         chatService.deleteChat(chat);
         if (chat.isRepetitive()) {
-          var rcGroupId = recreateMessengerChat(chat);
-          recreateChat(chat, rcGroupId);
+          var rcGroupId = chatReCreator.recreateMessengerChat(chat);
+          chatReCreator.recreateChat(chat, rcGroupId);
         }
       }
     } catch (RocketChatRemoveUserFromGroupException

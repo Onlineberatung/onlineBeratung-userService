@@ -15,7 +15,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupResponseDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
@@ -25,8 +24,8 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInit
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.ChatAgency;
 import de.caritas.cob.userservice.api.service.ChatService;
-import java.util.Optional;
 import java.util.Set;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,6 +50,9 @@ class StopChatActionCommandTest {
 
   @Mock
   private Chat chat;
+
+  @Mock
+  private ChatReCreator chatReCreator;
 
   @Test
   void stopChat_Should_ThrowConflictException_When_ChatIsAlreadyStopped() {
@@ -108,26 +110,22 @@ class StopChatActionCommandTest {
   }
 
   @Test
-  void stopChatShouldDeleteChatGroupAndRecreateWhenRepetitive()
-      throws RocketChatCreateGroupException, RocketChatUserNotInitializedException, RocketChatAddUserToGroupException {
+  void stopChatShouldDeleteChatGroupAndRecreateWhenRepetitive() {
     Chat chatWithDate = new Chat("topic", 15, CHAT_START_DATETIME, CHAT_START_DATETIME,
         1, IS_REPETITIVE, CHAT_INTERVAL_WEEKLY, CONSULTANT);
     chatWithDate.setActive(true);
     chatWithDate.setGroupId("groupId");
     chatWithDate.setChatAgencies(Set.of(new ChatAgency(chat, 1L)));
     when(rocketChatService.deleteGroupAsSystemUser("groupId")).thenReturn(true);
-    var response = easyRandom.nextObject(GroupResponseDTO.class);
-    when(rocketChatService.createPrivateGroupWithSystemUser(anyString()))
-        .thenReturn(Optional.of(response));
+    var groupId = RandomStringUtils.randomAlphanumeric(17);
+    when(chatReCreator.recreateMessengerChat(any(Chat.class))).thenReturn(groupId);
 
     stopChatActionCommand.execute(chatWithDate);
 
     verify(rocketChatService).deleteGroupAsSystemUser("groupId");
     verify(chatService).deleteChat(chatWithDate);
-    verify(rocketChatService).createPrivateGroupWithSystemUser(anyString());
-    verify(rocketChatService).addTechnicalUserToGroup(anyString());
-    verify(chatService).saveChatAgencyRelation(any(ChatAgency.class));
-    verify(chatService).saveChat(any(Chat.class));
+    verify(chatReCreator).recreateMessengerChat(chatWithDate);
+    verify(chatReCreator).recreateChat(chatWithDate, groupId);
   }
 
   @Test
