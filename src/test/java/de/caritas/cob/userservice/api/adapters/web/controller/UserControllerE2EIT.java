@@ -111,6 +111,7 @@ import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.ConsultingTypeControllerApi;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.BasicConsultingTypeResponseDTO;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -222,7 +223,7 @@ class UserControllerE2EIT {
   private UserAgencyRepository userAgencyRepository;
 
   @Autowired
-  private de.caritas.cob.userservice.consultingtypeservice.generated.web.ConsultingTypeControllerApi consultingTypeControllerApi;
+  private ConsultingTypeControllerApi consultingTypeControllerApi;
 
   @Autowired
   private VideoChatConfig videoChatConfig;
