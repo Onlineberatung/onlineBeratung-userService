@@ -29,11 +29,18 @@ import org.springframework.stereotype.Service;
 @Service
 public class JoinAndLeaveChatFacade extends RecreateChatCapability {
 
+  protected ChatPermissionVerifier chatPermissionVerifier;
+  protected ConsultantService consultantService;
+  protected UserService userService;
+
   @Autowired
   public JoinAndLeaveChatFacade(ChatService chatService, RocketChatService rocketChatService,
       ChatPermissionVerifier chatPermissionVerifier, ConsultantService consultantService,
       UserService userService) {
-    super(chatService, rocketChatService, chatPermissionVerifier, consultantService, userService);
+    super(chatService, rocketChatService);
+    this.chatPermissionVerifier = chatPermissionVerifier;
+    this.consultantService = consultantService;
+    this.userService = userService;
   }
 
   /**

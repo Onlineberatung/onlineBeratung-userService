@@ -8,13 +8,10 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
-import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
 import de.caritas.cob.userservice.api.helper.RocketChatRoomNameGenerator;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.ChatAgency;
 import de.caritas.cob.userservice.api.service.ChatService;
-import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 
@@ -25,9 +22,6 @@ public abstract class RecreateChatCapability {
 
   protected ChatService chatService;
   protected RocketChatService rocketChatService;
-  protected ChatPermissionVerifier chatPermissionVerifier;
-  protected ConsultantService consultantService;
-  protected UserService userService;
 
   protected void recreateChat(Chat chat, String rcGroupId) {
     final var chatAgencyIds = chat.getChatAgencies().stream()

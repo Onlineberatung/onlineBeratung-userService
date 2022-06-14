@@ -23,7 +23,7 @@ public class StopChatActionCommand extends RecreateChatCapability implements Act
   @Autowired
   public StopChatActionCommand(@NonNull ChatService chatService,
       @NonNull RocketChatService rocketChatService) {
-    super(chatService, rocketChatService, null, null, null);
+    super(chatService, rocketChatService);
   }
 
   /**
