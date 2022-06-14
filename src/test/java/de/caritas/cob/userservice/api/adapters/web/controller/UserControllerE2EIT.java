@@ -9,6 +9,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_USER_ID
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
@@ -337,6 +338,8 @@ class UserControllerE2EIT {
     consultantsToReset.forEach(consultantToReset -> {
       consultantToReset.setLanguages(null);
       consultantToReset.setNotifyEnquiriesRepeating(true);
+      consultantToReset.setNotifyNewChatMessageFromAdviceSeeker(true);
+      consultantToReset.setNotifyNewFeedbackMessageFromAdviceSeeker(true);
       consultantRepository.save(consultantToReset);
     });
     consultantsToReset = new HashSet<>();
@@ -1288,9 +1291,15 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("absent", is(consultant.isAbsent())))
         .andExpect(jsonPath("formalLanguage", is(consultant.isLanguageFormal())))
         .andExpect(jsonPath("e2eEncryptionEnabled", is(false)))
-        .andExpect(jsonPath("emailToggles", hasSize(1)))
-        .andExpect(jsonPath("emailToggles[0].name", is("DAILY_ENQUIRY")))
+        .andExpect(jsonPath("emailToggles", hasSize(3)))
+        .andExpect(jsonPath("emailToggles[*].name", containsInAnyOrder(
+            "DAILY_ENQUIRY",
+            "NEW_CHAT_MESSAGE_FROM_ADVICE_SEEKER",
+            "NEW_FEEDBACK_MESSAGE_FROM_ADVICE_SEEKER"
+        )))
         .andExpect(jsonPath("emailToggles[0].state", is(true)))
+        .andExpect(jsonPath("emailToggles[1].state", is(true)))
+        .andExpect(jsonPath("emailToggles[2].state", is(true)))
         .andExpect(jsonPath("inTeamAgency", is(consultant.isTeamConsultant())));
   }
 
@@ -1397,9 +1406,15 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("absent", is(consultant.isAbsent())))
         .andExpect(jsonPath("formalLanguage", is(consultant.isLanguageFormal())))
         .andExpect(jsonPath("e2eEncryptionEnabled", is(false)))
-        .andExpect(jsonPath("emailToggles", hasSize(1)))
-        .andExpect(jsonPath("emailToggles[0].name", is("DAILY_ENQUIRY")))
+        .andExpect(jsonPath("emailToggles", hasSize(3)))
+        .andExpect(jsonPath("emailToggles[*].name", containsInAnyOrder(
+            "DAILY_ENQUIRY",
+            "NEW_CHAT_MESSAGE_FROM_ADVICE_SEEKER",
+            "NEW_FEEDBACK_MESSAGE_FROM_ADVICE_SEEKER"
+        )))
         .andExpect(jsonPath("emailToggles[0].state", is(true)))
+        .andExpect(jsonPath("emailToggles[1].state", is(true)))
+        .andExpect(jsonPath("emailToggles[2].state", is(true)))
         .andExpect(jsonPath("inTeamAgency", is(consultant.isTeamConsultant())));
   }
 
@@ -1506,9 +1521,15 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("absent", is(consultant.isAbsent())))
         .andExpect(jsonPath("formalLanguage", is(consultant.isLanguageFormal())))
         .andExpect(jsonPath("e2eEncryptionEnabled", is(false)))
-        .andExpect(jsonPath("emailToggles", hasSize(1)))
-        .andExpect(jsonPath("emailToggles[0].name", is("DAILY_ENQUIRY")))
+        .andExpect(jsonPath("emailToggles", hasSize(3)))
+        .andExpect(jsonPath("emailToggles[*].name", containsInAnyOrder(
+            "DAILY_ENQUIRY",
+            "NEW_CHAT_MESSAGE_FROM_ADVICE_SEEKER",
+            "NEW_FEEDBACK_MESSAGE_FROM_ADVICE_SEEKER"
+        )))
         .andExpect(jsonPath("emailToggles[0].state", is(true)))
+        .andExpect(jsonPath("emailToggles[1].state", is(true)))
+        .andExpect(jsonPath("emailToggles[2].state", is(true)))
         .andExpect(jsonPath("inTeamAgency", is(consultant.isTeamConsultant())));
   }
 
@@ -1561,7 +1582,7 @@ class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  void getUserDataShouldContainEnabledFlags() throws Exception {
+  void getUserDataShouldContainSetFlags() throws Exception {
     givenABearerToken();
     givenAValidConsultant(true);
     givenConsultingTypeServiceResponse();
@@ -1570,7 +1591,7 @@ class UserControllerE2EIT {
     givenKeycloakRespondsOtpHasNotBeenSetup(consultant.getUsername());
     givenEnabledE2EEncryption();
     givenDisplayNameAllowedForConsultants();
-    givenConsultantIsNotToNotify();
+    givenConsultantIsNotToNotifyAboutNewEnquiries();
 
     mockMvc.perform(
             get("/users/data")
@@ -1578,11 +1599,43 @@ class UserControllerE2EIT {
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("emailToggles", hasSize(1)))
-        .andExpect(jsonPath("emailToggles[0].name", is("DAILY_ENQUIRY")))
-        .andExpect(jsonPath("emailToggles[0].state", is(false)))
+        .andExpect(jsonPath("emailToggles", hasSize(3)))
+        .andExpect(jsonPath("emailToggles[?(@.name =~ /DAILY_ENQUIRY/)].state",
+            is(List.of(false)))
+        )
+        .andExpect(jsonPath("emailToggles[?(@.name =~ /NEW_.*_MESSAGE_FROM_ADVICE_SEEKER/)].state",
+            is(List.of(true, true)))
+        )
         .andExpect(jsonPath("e2eEncryptionEnabled", is(true)))
         .andExpect(jsonPath("isDisplayNameEditable", is(true)));
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  void getUserDataShouldContainDisabledFollowUpEmails() throws Exception {
+    givenABearerToken();
+    givenAValidConsultant(true);
+    givenConsultingTypeServiceResponse();
+    givenAValidRocketChatSystemUser();
+    givenAValidRocketChatInfoUserResponse();
+    givenKeycloakRespondsOtpHasNotBeenSetup(consultant.getUsername());
+    givenEnabledE2EEncryption();
+    givenDisplayNameAllowedForConsultants();
+    givenConsultantIsNotToNotifyAboutNewFollowUps();
+
+    mockMvc.perform(
+            get("/users/data")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("emailToggles", hasSize(3)))
+        .andExpect(jsonPath("emailToggles[?(@.name =~ /DAILY_ENQUIRY/)].state",
+            is(List.of(true)))
+        )
+        .andExpect(jsonPath("emailToggles[?(@.name =~ /NEW_.*_MESSAGE_FROM_ADVICE_SEEKER/)].state",
+            is(List.of(false, false)))
+        );
   }
 
   @Test
@@ -1789,6 +1842,8 @@ class UserControllerE2EIT {
 
     var dbConsultant = consultantRepository.findById(consultant.getId()).orElseThrow();
     assertFalse(dbConsultant.getNotifyEnquiriesRepeating());
+    assertFalse(dbConsultant.getNotifyNewChatMessageFromAdviceSeeker());
+    assertFalse(dbConsultant.getNotifyNewFeedbackMessageFromAdviceSeeker());
   }
 
   @Test
@@ -4269,12 +4324,22 @@ class UserControllerE2EIT {
   }
 
   private HashMap<String, Object> givenAValidEmailTogglePatchDto(boolean state) {
-    var toggle = new EmailToggle();
-    toggle.setName(EmailType.DAILY_ENQUIRY);
-    toggle.setState(state);
+    var dailyEnquiryToggle = new EmailToggle();
+    dailyEnquiryToggle.setName(EmailType.DAILY_ENQUIRY);
+    dailyEnquiryToggle.setState(state);
 
-    var patchDtoAsMap = new HashMap<String, Object>(1);
-    patchDtoAsMap.put("emailToggles", Set.of(toggle));
+    var newChatMessageToggle = new EmailToggle();
+    newChatMessageToggle.setName(EmailType.NEW_CHAT_MESSAGE_FROM_ADVICE_SEEKER);
+    newChatMessageToggle.setState(state);
+
+    var newFeedbackMessageToggle = new EmailToggle();
+    newFeedbackMessageToggle.setName(EmailType.NEW_FEEDBACK_MESSAGE_FROM_ADVICE_SEEKER);
+    newFeedbackMessageToggle.setState(state);
+
+    var patchDtoAsMap = new HashMap<String, Object>(3);
+    patchDtoAsMap.put("emailToggles", Set.of(
+        dailyEnquiryToggle, newChatMessageToggle, newFeedbackMessageToggle)
+    );
 
     if (!state) {
       consultantsToReset.add(consultant);
@@ -4283,8 +4348,15 @@ class UserControllerE2EIT {
     return patchDtoAsMap;
   }
 
-  private void givenConsultantIsNotToNotify() {
+  private void givenConsultantIsNotToNotifyAboutNewEnquiries() {
     consultant.setNotifyEnquiriesRepeating(false);
+    consultantRepository.save(consultant);
+    consultantsToReset.add(consultant);
+  }
+
+  private void givenConsultantIsNotToNotifyAboutNewFollowUps() {
+    consultant.setNotifyNewChatMessageFromAdviceSeeker(false);
+    consultant.setNotifyNewFeedbackMessageFromAdviceSeeker(false);
     consultantRepository.save(consultant);
     consultantsToReset.add(consultant);
   }
@@ -4303,10 +4375,20 @@ class UserControllerE2EIT {
 
   private void givenAFullPatchDto() {
     patchUserDTO = easyRandom.nextObject(PatchUserDTO.class);
-    var emailTo = new EmailToggle();
-    emailTo.setName(EmailType.DAILY_ENQUIRY);
-    emailTo.setState(true);
-    patchUserDTO.setEmailToggles(Set.of(emailTo));
+
+    var dailyEnquiries = new EmailToggle();
+    dailyEnquiries.setName(EmailType.DAILY_ENQUIRY);
+    dailyEnquiries.setState(true);
+
+    var newChat = new EmailToggle();
+    newChat.setName(EmailType.NEW_CHAT_MESSAGE_FROM_ADVICE_SEEKER);
+    newChat.setState(true);
+
+    var newFeedback = new EmailToggle();
+    newFeedback.setName(EmailType.NEW_FEEDBACK_MESSAGE_FROM_ADVICE_SEEKER);
+    newFeedback.setState(true);
+
+    patchUserDTO.setEmailToggles(Set.of(dailyEnquiries, newChat, newFeedback));
   }
 
   private void givenAnUpdateConsultantDtoWithLanguages(String email) {

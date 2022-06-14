@@ -2691,6 +2691,8 @@ components:
       type: string
       enum:
         - DAILY_ENQUIRY
+        - NEW_CHAT_MESSAGE_FROM_ADVICE_SEEKER
+        - NEW_FEEDBACK_MESSAGE_FROM_ADVICE_SEEKER
 
   securitySchemes:
     Bearer:
