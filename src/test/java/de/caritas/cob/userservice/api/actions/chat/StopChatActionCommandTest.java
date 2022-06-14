@@ -26,7 +26,6 @@ import de.caritas.cob.userservice.api.model.ChatAgency;
 import de.caritas.cob.userservice.api.service.ChatService;
 import java.util.Set;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,8 +35,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class StopChatActionCommandTest {
-
-  private static final EasyRandom easyRandom = new EasyRandom();
 
   @InjectMocks
   private StopChatActionCommand stopChatActionCommand;
