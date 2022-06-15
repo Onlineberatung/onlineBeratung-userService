@@ -1,32 +1,31 @@
 package de.caritas.cob.userservice.api.actions.chat;
 
-import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_VALUE_WEEKLY_PLUS;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.ACTIVE_CHAT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_INTERVAL_WEEKLY;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_START_DATETIME;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.IS_REPETITIVE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.model.Chat;
+import de.caritas.cob.userservice.api.model.ChatAgency;
 import de.caritas.cob.userservice.api.service.ChatService;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import java.util.Set;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -48,6 +47,9 @@ class StopChatActionCommandTest {
 
   @Mock
   private Chat chat;
+
+  @Mock
+  private ChatReCreator chatReCreator;
 
   @Test
   void stopChat_Should_ThrowConflictException_When_ChatIsAlreadyStopped() {
@@ -75,22 +77,6 @@ class StopChatActionCommandTest {
   }
 
   @Test
-  void stopChat_Should_ThrowInternalServerError_When_RemoveAllMessagesFails()
-      throws RocketChatRemoveSystemMessagesException {
-    doThrow(new RocketChatRemoveSystemMessagesException("error")).when(rocketChatService)
-        .removeAllMessages(Mockito.any());
-
-    try {
-      stopChatActionCommand.execute(ACTIVE_CHAT);
-      fail("Expected exception: InternalServerErrorException");
-    } catch (InternalServerErrorException internalServerErrorException) {
-      assertTrue(true, "Excepted InternalServerErrorException thrown");
-    }
-
-    verify(rocketChatService, times(1)).removeAllMessages(ACTIVE_CHAT.getGroupId());
-  }
-
-  @Test
   void stopChat_Should_ThrowInternalServerError_When_DeleteRcGroupFails()
       throws RocketChatRemoveSystemMessagesException {
     when(chat.isActive()).thenReturn(true);
@@ -110,77 +96,53 @@ class StopChatActionCommandTest {
   }
 
   @Test
-  void stopChat_Should_ThrowInternalServerError_When_ChatIntervallIsNullOnRepetitiveChats() {
+  void stopChat_Should_NotDeleteGroup_When_ChatIntervallIsNullOnRepetitiveChats() {
     when(chat.isActive()).thenReturn(true);
     when(chat.getGroupId()).thenReturn(RC_GROUP_ID);
     when(chat.isRepetitive()).thenReturn(true);
-    when(chat.getChatInterval()).thenReturn(null);
 
-    try {
-      stopChatActionCommand.execute(chat);
-      fail("Expected exception: InternalServerErrorException");
-    } catch (InternalServerErrorException internalServerErrorException) {
-      assertTrue(true, "Excepted InternalServerErrorException thrown");
-    }
+    stopChatActionCommand.execute(chat);
 
     verify(rocketChatService, times(0)).deleteGroupAsSystemUser(Mockito.any());
   }
 
   @Test
-  void stopChat_Should_RemoveAllMessagesAndUsersAndSetStatusAndStartDateOfChat_When_ChatIsRepetitive()
-      throws Exception {
-    when(chat.isActive()).thenReturn(true);
-    when(chat.isRepetitive()).thenReturn(true);
-    when(chat.getChatInterval()).thenReturn(CHAT_INTERVAL_WEEKLY);
-    when(chat.getGroupId()).thenReturn(RC_GROUP_ID);
-    when(chat.getStartDate()).thenReturn(nowInUtc());
-
-    stopChatActionCommand.execute(chat);
-
-    verify(rocketChatService, times(1)).removeAllMessages(chat.getGroupId());
-    verify(rocketChatService, times(1)).removeAllStandardUsersFromGroup(chat.getGroupId());
-    verify(chat, times(1)).setStartDate(Mockito.any());
-    verify(chat, times(1)).setActive(false);
-    verify(chatService, times(1)).saveChat(chat);
-  }
-
-  @Test
-  void stopChat_Should_ReturnCorrectNextStartDate_When_ChatIsRepetitive() {
+  void stopChatShouldDeleteChatGroupAndRecreateWhenRepetitive() {
     Chat chatWithDate = new Chat("topic", 15, CHAT_START_DATETIME, CHAT_START_DATETIME,
         1, IS_REPETITIVE, CHAT_INTERVAL_WEEKLY, CONSULTANT);
     chatWithDate.setActive(true);
     chatWithDate.setGroupId("groupId");
+    chatWithDate.setChatAgencies(Set.of(new ChatAgency(chat, 1L)));
+    when(rocketChatService.deleteGroupAsSystemUser("groupId")).thenReturn(true);
+    var groupId = RandomStringUtils.randomAlphanumeric(17);
+    when(chatReCreator.recreateMessengerChat(any(Chat.class))).thenReturn(groupId);
 
     stopChatActionCommand.execute(chatWithDate);
 
-    assertEquals(CHAT_START_DATETIME.plusWeeks(FIELD_VALUE_WEEKLY_PLUS),
-        chatWithDate.getStartDate());
+    verify(rocketChatService).deleteGroupAsSystemUser("groupId");
+    verify(chatService).deleteChat(chatWithDate);
+    verify(chatReCreator).recreateMessengerChat(chatWithDate);
+    verify(chatReCreator).recreateChat(chatWithDate, groupId);
   }
 
   @Test
-  void stopChat_should_set_encrypted_room_settings_to_false() {
+  void stopChatShouldDeleteChatGroupAndNotRecreateWhenNotRepetitive()
+      throws RocketChatCreateGroupException, RocketChatUserNotInitializedException, RocketChatAddUserToGroupException {
     Chat chatWithDate = new Chat("topic", 15, CHAT_START_DATETIME, CHAT_START_DATETIME,
-        1, IS_REPETITIVE, CHAT_INTERVAL_WEEKLY, CONSULTANT);
+        1, false, CHAT_INTERVAL_WEEKLY, CONSULTANT);
     chatWithDate.setActive(true);
     chatWithDate.setGroupId("groupId");
+    chatWithDate.setChatAgencies(Set.of(new ChatAgency(chat, 1L)));
+    when(rocketChatService.deleteGroupAsSystemUser("groupId")).thenReturn(true);
 
     stopChatActionCommand.execute(chatWithDate);
 
-    verify(rocketChatService).saveRoomSettings("groupId", false);
-  }
-
-  @Test
-  void stopChat_Should_throwInternalServerErrorException_When_ChatResetCanNotBePerformedOnRocketChat()
-      throws RocketChatUserNotInitializedException, RocketChatGetGroupMembersException, RocketChatRemoveUserFromGroupException {
-    Chat chatWithDate = new Chat("topic", 15, CHAT_START_DATETIME, CHAT_START_DATETIME,
-        1, IS_REPETITIVE, CHAT_INTERVAL_WEEKLY, CONSULTANT);
-    chatWithDate.setActive(true);
-    chatWithDate.setGroupId("groupId");
-    doThrow(new RocketChatRemoveUserFromGroupException("")).when(rocketChatService)
-        .removeAllStandardUsersFromGroup(any());
-
-    assertThrows(InternalServerErrorException.class,
-        () -> stopChatActionCommand.execute(chatWithDate));
+    verify(rocketChatService).deleteGroupAsSystemUser("groupId");
+    verify(chatService).deleteChat(chatWithDate);
+    verify(rocketChatService, never()).createPrivateGroupWithSystemUser(anyString());
+    verify(rocketChatService, never()).addTechnicalUserToGroup(anyString());
+    verify(chatService, never()).saveChatAgencyRelation(any(ChatAgency.class));
+    verify(chatService, never()).saveChat(any(Chat.class));
   }
 
   @Test
