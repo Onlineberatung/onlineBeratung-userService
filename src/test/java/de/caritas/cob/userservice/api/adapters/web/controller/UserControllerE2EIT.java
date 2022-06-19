@@ -11,17 +11,14 @@ import static java.util.Objects.nonNull;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -33,8 +30,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.endsWith;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.CREATED;
@@ -51,12 +46,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.StandardResponseDTO;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupDeleteResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberResponseDTO;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.MessageResponse;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomResponse;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsGetDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsUpdateDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.subscriptions.SubscriptionsGetDTO;
@@ -67,7 +58,6 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserInfoRespo
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.DeleteUserAccountDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.E2eKeyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.EmailDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.EmailToggle;
 import de.caritas.cob.userservice.api.adapters.web.dto.EmailType;
@@ -117,10 +107,8 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -265,58 +253,29 @@ class UserControllerE2EIT {
   private ArgumentCaptor<RequestEntity<Object>> requestCaptor;
 
   private User user;
-
   private Consultant consultant;
-
   private Session session;
-
   private UpdateConsultantDTO updateConsultantDTO;
-
   private EnquiryMessageDTO enquiryMessageDTO;
-
   private Set<de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode> allLanguages = new HashSet<>();
-
   private Set<Consultant> consultantsToReset = new HashSet<>();
-
   private List<String> consultantIdsToDelete = new ArrayList<>();
-
   private List<ConsultantAgency> consultantAgencies = new ArrayList<>();
-
   private OneTimePasswordDTO oneTimePasswordDTO;
-
-  private E2eKeyDTO e2eKeyDTO;
-
   private EmailDTO emailDTO;
-
   private String tan;
-
   private String email;
-
   private PatchUserDTO patchUserDTO;
-
   private UserDTO userDTO;
-
   private Chat chat;
-
   private ChatAgency chatAgency;
-
   private UserAgency userAgency;
-
   private PasswordDTO passwordDto;
-
   private DeleteUserAccountDTO deleteUserAccountDto;
-
   private UserInfoResponseDTO userInfoResponse;
-
-  private GroupDeleteResponseDTO groupDeleteResponse;
-
   private GroupMemberResponseDTO groupMemberResponseDTO;
-
-  @SuppressWarnings("FieldCanBeLocal")
   private SubscriptionsGetDTO subscriptionsGetResponse;
-
   private String infix;
-
   private MonitoringDTO monitoringDTO;
 
   @AfterEach
@@ -366,7 +325,6 @@ class UserControllerE2EIT {
     deleteUserAccountDto = null;
     userInfoResponse = null;
     subscriptionsGetResponse = null;
-    groupDeleteResponse = null;
     identityConfig.setDisplayNameAllowedForConsultants(false);
     infix = null;
     monitoringDTO = null;
@@ -508,8 +466,8 @@ class UserControllerE2EIT {
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   void getSessionsForAuthenticatedConsultantShouldReturnGroupChats() throws Exception {
     givenAValidUser();
-    givenAValidConsultant(true);
-    givenAValidChat(false);
+    givenAValidConsultant();
+    givenAValidChat();
     givenAnEmptyRocketChatGetSubscriptionsResponse();
     givenAValidRocketChatGetRoomsResponse();
 
@@ -535,7 +493,7 @@ class UserControllerE2EIT {
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   void getSessionsForAuthenticatedConsultantShouldNotReturnTeamSessions() throws Exception {
     givenAValidUser();
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenATeamSessionOfAColleagueInProgress();
     givenAnEmptyRocketChatGetSubscriptionsResponse();
     givenAValidRocketChatGetRoomsResponse();
@@ -1237,7 +1195,7 @@ class UserControllerE2EIT {
   void getUserDataShouldRespondWithConsultantDataAndStatusOkWhen2faByAppIsActive()
       throws Exception {
     givenABearerToken();
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenKeycloakRespondsOtpByAppHasBeenSetup(consultant.getUsername());
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
@@ -1352,7 +1310,7 @@ class UserControllerE2EIT {
   void getUserDataShouldRespondWithConsultantDataAndStatusOkWhen2faByEmailIsActive()
       throws Exception {
     givenABearerToken();
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenKeycloakRespondsOtpByEmailHasBeenSetup(consultant.getUsername());
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
@@ -1467,7 +1425,7 @@ class UserControllerE2EIT {
   void getUserDataShouldRespondWithConsultantDataAndStatusOkWhen2faIsNotActivated()
       throws Exception {
     givenABearerToken();
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenKeycloakRespondsOtpHasNotBeenSetup(consultant.getUsername());
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
@@ -1580,7 +1538,7 @@ class UserControllerE2EIT {
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   void getUserDataShouldContainSetFlags() throws Exception {
     givenABearerToken();
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenConsultingTypeServiceResponse();
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
@@ -1610,7 +1568,7 @@ class UserControllerE2EIT {
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   void getUserDataShouldContainDisabledFollowUpEmails() throws Exception {
     givenABearerToken();
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenConsultingTypeServiceResponse();
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
@@ -1658,7 +1616,7 @@ class UserControllerE2EIT {
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   void patchUserDataShouldSaveConsultantAndRespondWithNoContent() throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenAFullPatchDto();
     givenAValidRocketChatUpdateUserResponse();
 
@@ -1691,7 +1649,7 @@ class UserControllerE2EIT {
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   void patchUserDataShouldOverrideDefaultAndRespondWithNoContent() throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenAFullPatchDto(false);
     givenAValidRocketChatUpdateUserResponse();
 
@@ -1714,7 +1672,7 @@ class UserControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   void patchUserDataShouldOverridePreviousValueAndRespondWithNoContentEachTime()
       throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
 
     var savedConsultant = consultantRepository.findById(consultant.getId());
     assertTrue(savedConsultant.isPresent());
@@ -1756,7 +1714,7 @@ class UserControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   void patchUserDataShouldRespondWithBadRequestOnNullInMandatoryDtoFields()
       throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     var patchDto = givenAnInvalidPatchDto();
 
     mockMvc.perform(
@@ -1805,7 +1763,7 @@ class UserControllerE2EIT {
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   void patchUserDataShouldRespondWithBadRequestOnUnknownEmailToggle() throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     var patchDtoJson = givenAnUnknownEmailTypeTogglePatchDto();
 
     mockMvc.perform(
@@ -1823,7 +1781,7 @@ class UserControllerE2EIT {
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   void patchUserDataShouldRespondWithNoContentOnEmailToggleAndChangeDbConsultant()
       throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     var patchDto = givenAValidEmailTogglePatchDto(false);
 
     mockMvc.perform(
@@ -1963,7 +1921,7 @@ class UserControllerE2EIT {
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   void updateUserDataShouldSaveDefaultLanguageAndRespondWithOk() throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenAMinimalUpdateConsultantDto(consultant.getEmail());
     givenValidRocketChatTechUserResponse();
 
@@ -1985,7 +1943,7 @@ class UserControllerE2EIT {
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   void updateUserDataShouldSaveGivenLanguagesAndRespondWithOk() throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenAnUpdateConsultantDtoWithLanguages(consultant.getEmail());
     givenValidRocketChatTechUserResponse();
 
@@ -2036,7 +1994,7 @@ class UserControllerE2EIT {
   @Test
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
   void removeFromSessionShouldReturnForbiddenIfSessionIdFormatIsInvalid() throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     var sessionId = RandomStringUtils.randomAlphabetic(8);
 
     mockMvc.perform(
@@ -2081,7 +2039,7 @@ class UserControllerE2EIT {
   @Test
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
   void removeFromSessionShouldReturnNotFoundIfSessionDoesNotExist() throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
 
@@ -2099,7 +2057,7 @@ class UserControllerE2EIT {
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
   void removeFromSessionShouldReturnNoContentAndIgnoreRemovalIfNotInChat(CapturedOutput logOutput)
       throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
     givenAValidSession();
@@ -2130,7 +2088,7 @@ class UserControllerE2EIT {
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
   void removeFromSessionShouldReturnNoContentAndIgnoreRemovalIfNotTeaming(CapturedOutput logOutput)
       throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
     givenAValidSession();
@@ -2161,7 +2119,7 @@ class UserControllerE2EIT {
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
   void removeFromSessionShouldReturnNoContentAndRemoveConsultantFromSessionNotFromFeedbackChat(
       CapturedOutput logOutput) throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
     givenAValidSession();
@@ -2192,7 +2150,7 @@ class UserControllerE2EIT {
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
   void removeFromSessionShouldReturnNoContentAndRemoveConsultantFromSessionAndFeedbackChat(
       CapturedOutput logOutput) throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
     givenAValidSession();
@@ -2224,7 +2182,7 @@ class UserControllerE2EIT {
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
   void removeFromSessionShouldReturnNoContentAndIgnoreRemovalIfAssigned(CapturedOutput logOutput)
       throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenAValidSession();
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse(session.getConsultant());
@@ -2250,425 +2208,9 @@ class UserControllerE2EIT {
   }
 
   @Test
-  @WithMockUser(authorities = AuthorityValue.UPDATE_CHAT)
-  void banFromChatShouldReturnClientErrorIfUserIdHasInvalidFormat() throws Exception {
-    var invalidUserId = RandomStringUtils.randomAlphabetic(16);
-
-    mockMvc.perform(
-            post("/users/{chatUserId}/chat/{chatId}/ban", invalidUserId, aPositiveLong())
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .header("rcToken", RandomStringUtils.randomAlphabetic(16))
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().is4xxClientError());
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.UPDATE_CHAT)
-  void banFromChatShouldReturnClientErrorIfChatIdHasInvalidFormat() throws Exception {
-    givenAValidUser();
-    var invalidChatId = RandomStringUtils.randomAlphabetic(16);
-
-    mockMvc.perform(
-            post("/users/{chatUserId}/chat/{chatId}/ban", user.getRcUserId(), invalidChatId)
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .header("rcToken", RandomStringUtils.randomAlphabetic(16))
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().is4xxClientError());
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.UPDATE_CHAT)
-  void banFromChatShouldReturnBadRequestIfRcTokenIsNotGiven() throws Exception {
-    givenAValidUser();
-    givenAValidConsultant(true);
-    givenAValidChat(false);
-
-    mockMvc.perform(
-            post("/users/{chatUserId}/chat/{chatId}/ban", user.getRcUserId(), chat.getId())
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isBadRequest());
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.UPDATE_CHAT)
-  void banFromChatShouldReturnNotFoundIfUserDoesNotExist() throws Exception {
-    var nonExistingUserId = RandomStringUtils.randomAlphanumeric(17);
-    givenAValidConsultant(true);
-    givenAValidChat(false);
-
-    mockMvc.perform(
-            post("/users/{chatUserId}/chat/{chatId}/ban", nonExistingUserId, chat.getId())
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .header("rcToken", RandomStringUtils.randomAlphabetic(16))
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNotFound());
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.UPDATE_CHAT)
-  void banFromChatShouldReturnNotFoundIfChatDoesNotExist() throws Exception {
-    givenAValidUser();
-
-    mockMvc.perform(
-            post("/users/{chatUserId}/chat/{chatId}/ban", user.getRcUserId(), aPositiveLong())
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .header("rcToken", RandomStringUtils.randomAlphabetic(16))
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNotFound());
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.UPDATE_CHAT)
-  void banFromChatShouldReturnNoContentIfBanWentWell() throws Exception {
-    givenAValidUser();
-    givenAValidConsultant(true);
-    givenAValidChat(false);
-    givenAValidRocketChatSystemUser();
-    givenAValidRocketChatMuteUserInRoomResponse();
-
-    mockMvc.perform(
-            post("/users/{chatUserId}/chat/{chatId}/ban", user.getRcUserId(), chat.getId())
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .header("rcToken", RandomStringUtils.randomAlphabetic(16))
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNoContent());
-
-    var urlSuffix = "/api/v1/method.call/muteUserInRoom";
-    verify(rocketChatRestTemplate).postForEntity(
-        endsWith(urlSuffix), any(HttpEntity.class), eq(MessageResponse.class)
-    );
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.UPDATE_CHAT)
-  void banFromChatShouldReturnNotFoundIfRocketChatReturnsAnInvalidResponse()
-      throws Exception {
-    givenAValidUser();
-    givenAValidConsultant(true);
-    givenAValidChat(false);
-    givenAValidRocketChatSystemUser();
-    givenAnInvalidRocketChatMuteUserInRoomResponse();
-
-    mockMvc.perform(
-            post("/users/{chatUserId}/chat/{chatId}/ban", user.getRcUserId(), chat.getId())
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .header("rcToken", RandomStringUtils.randomAlphabetic(16))
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNotFound());
-
-    var urlSuffix = "/api/v1/method.call/muteUserInRoom";
-    verify(rocketChatRestTemplate).postForEntity(
-        endsWith(urlSuffix), any(HttpEntity.class), eq(MessageResponse.class)
-    );
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
-  void getChatShouldReturnOkIfUsersAreBannedAndAUserRequested() throws Exception {
-    givenAValidUser(true);
-    givenAValidConsultant();
-    givenAValidChat(false);
-    givenAValidRocketChatSystemUser();
-    givenAValidRocketChatRoomResponse(chat.getGroupId(), true);
-
-    mockMvc.perform(
-            get("/users/chat/{chatId}", chat.getId())
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("groupId", is(chat.getGroupId())))
-        .andExpect(jsonPath("bannedUsers[0]", isA(String.class)));
-
-    var urlSuffix = "/api/v1/rooms.info?roomId=" + chat.getGroupId();
-    verify(rocketChatRestTemplate).exchange(
-        endsWith(urlSuffix), eq(HttpMethod.GET), any(HttpEntity.class), eq(RoomResponse.class)
-    );
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
-  void getChatShouldReturnOkIfUsersAreNotBannedAndAUserRequested() throws Exception {
-    givenAValidUser(true);
-    givenAValidConsultant();
-    givenAValidChat(false);
-    givenAValidRocketChatSystemUser();
-    givenAValidRocketChatRoomResponse(chat.getGroupId(), false);
-
-    mockMvc.perform(
-            get("/users/chat/{chatId}", chat.getId())
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("groupId", is(chat.getGroupId())))
-        .andExpect(jsonPath("bannedUsers", is(empty())));
-
-    var urlSuffix = "/api/v1/rooms.info?roomId=" + chat.getGroupId();
-    verify(rocketChatRestTemplate).exchange(
-        endsWith(urlSuffix), eq(HttpMethod.GET), any(HttpEntity.class), eq(RoomResponse.class)
-    );
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  void getChatShouldReturnOkIfUsersAreBannedAndAConsultantRequested() throws Exception {
-    givenAValidUser();
-    givenAValidConsultant(true);
-    givenAValidChat(false);
-    givenAValidRocketChatSystemUser();
-    givenAValidRocketChatRoomResponse(chat.getGroupId(), true);
-
-    mockMvc.perform(
-            get("/users/chat/{chatId}", chat.getId())
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("groupId", is(chat.getGroupId())))
-        .andExpect(jsonPath("bannedUsers[0]", isA(String.class)));
-
-    var urlSuffix = "/api/v1/rooms.info?roomId=" + chat.getGroupId();
-    verify(rocketChatRestTemplate).exchange(
-        endsWith(urlSuffix), eq(HttpMethod.GET), any(HttpEntity.class), eq(RoomResponse.class)
-    );
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  void getChatShouldReturnOkIfUsersAreNotBannedAndAConsultantRequested() throws Exception {
-    givenAValidUser();
-    givenAValidConsultant(true);
-    givenAValidChat(false);
-    givenAValidRocketChatSystemUser();
-    givenAValidRocketChatRoomResponse(chat.getGroupId(), false);
-
-    mockMvc.perform(
-            get("/users/chat/{chatId}", chat.getId())
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("groupId", is(chat.getGroupId())))
-        .andExpect(jsonPath("bannedUsers", is(empty())));
-
-    var urlSuffix = "/api/v1/rooms.info?roomId=" + chat.getGroupId();
-    verify(rocketChatRestTemplate).exchange(
-        endsWith(urlSuffix), eq(HttpMethod.GET), any(HttpEntity.class), eq(RoomResponse.class)
-    );
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.STOP_CHAT)
-  void stopChatShouldReturnOkIfUsersAreNotBanned() throws Exception {
-    givenAValidUser();
-    givenAValidConsultant(true);
-    givenAValidChat(false);
-    givenAValidRocketChatSystemUser();
-    givenAValidRocketChatRoomResponse(chat.getGroupId(), false);
-    givenAValidRocketChatGroupDeleteResponse();
-
-    mockMvc.perform(
-            put("/users/chat/{chatId}/stop", chat.getId())
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
-
-    var urlSuffix = "/api/v1/rooms.info?roomId=" + chat.getGroupId();
-    verify(rocketChatRestTemplate).exchange(
-        endsWith(urlSuffix), eq(HttpMethod.GET), any(HttpEntity.class), eq(RoomResponse.class)
-    );
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
-  void leaveChatShouldReturnOkAndDeleteOneTimeChatAndChatAgencyIfLastUser(
-      CapturedOutput logOutput) throws Exception {
-    givenAValidUser(true);
-    givenAValidConsultant();
-    givenAValidChat(false);
-    givenAValidRocketChatSystemUser();
-    givenValidRocketChatTechUserResponse();
-    givenAnOnlyTechUserRocketChatGroupMemberResponse(chat.getGroupId());
-    givenAValidRocketChatInfoUserResponse();
-    givenAValidRocketChatGroupDeleteResponse();
-
-    mockMvc.perform(
-            put("/users/chat/{chatId}/leave", chat.getId())
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
-
-    assertFalse(chatRepository.existsById(chat.getId()));
-    assertFalse(chatAgencyRepository.existsById(chatAgency.getId()));
-
-    var urlSuffix = "/api/v1/groups.delete";
-    verify(restTemplate).postForObject(
-        endsWith(urlSuffix), any(HttpEntity.class), eq(GroupDeleteResponseDTO.class)
-    );
-    verifyRocketChatUserRemovedFromGroup(logOutput, chat.getGroupId(), user.getRcUserId(), 1);
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
-  void leaveChatShouldReturnOkAndNotDeleteOneTimeChatOrChatAgencyIfNotLastUser(
-      CapturedOutput logOutput) throws Exception {
-    givenAValidUser(true);
-    givenAValidConsultant();
-    givenAValidChat(false);
-    givenAValidRocketChatSystemUser();
-    givenValidRocketChatTechUserResponse();
-    var chatUserId = RandomStringUtils.randomAlphanumeric(17);
-    givenAPositiveRocketChatGroupMemberResponse(chat.getGroupId(), chatUserId);
-    givenAValidRocketChatInfoUserResponse();
-
-    mockMvc.perform(
-            put("/users/chat/{chatId}/leave", chat.getId())
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
-
-    assertTrue(chatRepository.existsById(chat.getId()));
-    assertTrue(chatAgencyRepository.existsById(chatAgency.getId()));
-
-    var urlSuffix = "/api/v1/groups.delete";
-    verify(restTemplate, never()).postForObject(
-        endsWith(urlSuffix), any(HttpEntity.class), eq(GroupDeleteResponseDTO.class)
-    );
-    verifyRocketChatUserRemovedFromGroup(logOutput, chat.getGroupId(), user.getRcUserId(), 1);
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
-  void leaveChatShouldReturnOkAndDeleteRepetitiveChatAndChatAgencyAsWellAsRecreateIfLastUser(
-      CapturedOutput logOutput) throws Exception {
-    givenAValidUser(true);
-    givenAValidConsultant();
-    givenAValidChat(true);
-    givenAValidRocketChatSystemUser();
-    givenValidRocketChatTechUserResponse();
-    givenAnOnlyTechUserRocketChatGroupMemberResponse(chat.getGroupId());
-    givenAValidRocketChatInfoUserResponse();
-    givenAValidRocketChatGroupDeleteResponse();
-
-    var allChatsBefore = StreamSupport.stream(chatRepository.findAll().spliterator(), false)
-        .collect(Collectors.toSet());
-
-    mockMvc.perform(
-            put("/users/chat/{chatId}/leave", chat.getId())
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
-
-    var allChatsAfter = StreamSupport.stream(chatRepository.findAll().spliterator(), false)
-        .sorted(Comparator.comparing(Chat::getUpdateDate).reversed())
-        .collect(Collectors.toList());
-    assertEquals(allChatsBefore.size(), allChatsAfter.size());
-    var recreatedChat = allChatsAfter.get(0);
-    var keptChats = allChatsAfter.subList(1, allChatsAfter.size());
-    assertFalse(allChatsBefore.contains(recreatedChat));
-    assertTrue(allChatsBefore.containsAll(keptChats));
-
-    assertFalse(chatRepository.existsById(chat.getId()));
-    assertFalse(chatAgencyRepository.existsById(chatAgency.getId()));
-
-    var urlSuffix = "/api/v1/groups.delete";
-    verify(restTemplate).postForObject(
-        endsWith(urlSuffix), any(HttpEntity.class), eq(GroupDeleteResponseDTO.class)
-    );
-    verifyRocketChatUserRemovedFromGroup(logOutput, chat.getGroupId(), user.getRcUserId(), 1);
-
-    assertEquals(chat.getTopic(), recreatedChat.getTopic());
-    assertEquals(chat.getConsultingTypeId(), recreatedChat.getConsultingTypeId());
-    assertEquals(chat.getInitialStartDate().truncatedTo(ChronoUnit.SECONDS),
-        recreatedChat.getInitialStartDate().truncatedTo(ChronoUnit.SECONDS));
-    assertTrue(chat.getStartDate().isBefore(recreatedChat.getStartDate()));
-    assertEquals(chat.getDuration(), recreatedChat.getDuration());
-    assertEquals(chat.isRepetitive(), recreatedChat.isRepetitive());
-    assertEquals(chat.getChatInterval(), recreatedChat.getChatInterval());
-    assertFalse(recreatedChat.isActive());
-    assertEquals(chat.getMaxParticipants(), recreatedChat.getMaxParticipants());
-    assertNotEquals(chat.getGroupId(), recreatedChat.getGroupId());
-    assertNotNull(recreatedChat.getGroupId());
-    assertEquals(chat.getChatOwner(), recreatedChat.getChatOwner());
-    assertTrue(recreatedChat.getChatAgencies().size() > 0);
-    assertTrue(chat.getUpdateDate().isBefore(recreatedChat.getUpdateDate()));
-
-    chat = recreatedChat;
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
-  void leaveChatShouldReturnOkAndNotDeleteRepetitiveChatOrChatAgencyIfNotLastUser(
-      CapturedOutput logOutput) throws Exception {
-    givenAValidUser(true);
-    givenAValidConsultant();
-    givenAValidChat(true);
-    givenAValidRocketChatSystemUser();
-    givenValidRocketChatTechUserResponse();
-    var chatUserId = RandomStringUtils.randomAlphanumeric(17);
-    givenAPositiveRocketChatGroupMemberResponse(chat.getGroupId(), chatUserId);
-    givenAValidRocketChatInfoUserResponse();
-
-    mockMvc.perform(
-            put("/users/chat/{chatId}/leave", chat.getId())
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
-
-    assertTrue(chatRepository.existsById(chat.getId()));
-    assertTrue(chatAgencyRepository.existsById(chatAgency.getId()));
-
-    var urlSuffix = "/api/v1/groups.delete";
-    verify(restTemplate, never()).postForObject(
-        endsWith(urlSuffix), any(HttpEntity.class), eq(GroupDeleteResponseDTO.class)
-    );
-    verifyRocketChatUserRemovedFromGroup(logOutput, chat.getGroupId(), user.getRcUserId(), 1);
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.STOP_CHAT)
-  void stopChatShouldReturnOkIfUsersAreBanned() throws Exception {
-    givenAValidUser();
-    givenAValidConsultant(true);
-    givenAValidChat(false);
-    givenAValidRocketChatSystemUser();
-    givenAValidRocketChatRoomResponse(chat.getGroupId(), true);
-    givenAValidRocketChatUnmuteResponse();
-    givenAValidRocketChatGroupDeleteResponse();
-
-    mockMvc.perform(
-            put("/users/chat/{chatId}/stop", chat.getId())
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
-
-    var urlSuffix = "/api/v1/rooms.info?roomId=" + chat.getGroupId();
-    verify(rocketChatRestTemplate).exchange(
-        endsWith(urlSuffix), eq(HttpMethod.GET), any(HttpEntity.class), eq(RoomResponse.class)
-    );
-  }
-
-  @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   void startTwoFactorAuthByEmailSetupShouldRespondWithNoContent() throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenAValidEmailDTO();
     givenKeycloakFoundNoEmailInUse();
     givenABearerToken();
@@ -2698,7 +2240,7 @@ class UserControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   void startTwoFactorAuthByEmailSetupShouldRespondWithNoContentIfEmailIsOwnedByUser()
       throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenAValidEmailDTO();
     givenKeycloakFoundOwnEmailInUse();
     givenABearerToken();
@@ -2718,7 +2260,7 @@ class UserControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   void startTwoFactorAuthByEmailSetupShouldRespondWithBadRequestIfEmailIsNotAvailable()
       throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenAValidEmailDTO();
     givenKeycloakFoundAnEmailInUse();
     givenABearerToken();
@@ -2766,7 +2308,7 @@ class UserControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   void startTwoFactorAuthByEmailSetupShouldRespondWithInternalServerErrorIfKeycloakRespondsWithInvalidParameterError()
       throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenAValidEmailDTO();
     givenKeycloakFoundNoEmailInUse();
     givenABearerToken();
@@ -2786,7 +2328,7 @@ class UserControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   void startTwoFactorAuthByEmailSetupShouldRespondWithInternalServerErrorIfKeycloakRespondsWithAlreadyConfiguredError()
       throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenAValidEmailDTO();
     givenKeycloakFoundNoEmailInUse();
     givenABearerToken();
@@ -2806,7 +2348,7 @@ class UserControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   void finishTwoFactorAuthByEmailSetupForAConsultantShouldRespondWithNoContent()
       throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenABearerToken();
     givenACorrectlyFormattedTan();
     givenAValidKeycloakSetupEmailResponse(consultant.getUsername());
@@ -2907,7 +2449,7 @@ class UserControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   void finishTwoFactorAuthByEmailSetupShouldRespondWithBadRequestIfTheTanIsInvalid()
       throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenABearerToken();
     givenACorrectlyFormattedTan();
     givenAKeycloakSetupEmailInvalidCodeResponse();
@@ -2934,7 +2476,7 @@ class UserControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   void finishTwoFactorAuthByEmailSetupShouldRespondWithBadRequestIfAnotherOtpConfigIsActive()
       throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenABearerToken();
     givenACorrectlyFormattedTan();
     givenAKeycloakSetupEmailOtpAnotherOtpConfigActiveErrorResponse();
@@ -2961,7 +2503,7 @@ class UserControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   void finishTwoFactorAuthByEmailSetupShouldRespondWithTooManyRequestsIfTooManyTanAttempts()
       throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenABearerToken();
     givenACorrectlyFormattedTan();
     givenAKeycloakSetupEmailTooManyRequestsResponse();
@@ -2988,7 +2530,7 @@ class UserControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   void finishTwoFactorAuthByEmailSetupShouldRespondWithPreconditionFailedIfOtpByEmailHasBeenSetupBefore()
       throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenABearerToken();
     givenACorrectlyFormattedTan();
     givenAKeycloakAlreadySetupEmailResponse();
@@ -3013,171 +2555,8 @@ class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  void updateE2eInChatsShouldRespondWithNoContent() throws Exception {
-    givenAValidConsultant(true);
-    givenACorrectlyFormattedE2eKeyDTO();
-    givenAValidRocketChatSystemUser();
-    givenAValidRocketChatInfoUserResponse();
-    var subscriptionSize = easyRandom.nextInt(4) + 1;
-    givenAValidRocketChatGetSubscriptionsResponse(subscriptionSize, true);
-    givenValidRocketChatGroupKeyUpdateResponses();
-
-    mockMvc.perform(
-        put("/users/chat/e2e")
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .header("rcToken", RandomStringUtils.randomAlphabetic(16))
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(e2eKeyDTO))
-    ).andExpect(status().isNoContent());
-
-    var urlSuffix = "/api/v1/users.info?userId=" + consultant.getRocketChatId();
-    verify(rocketChatRestTemplate).exchange(endsWith(urlSuffix), eq(HttpMethod.GET),
-        any(HttpEntity.class), eq(UserInfoResponseDTO.class));
-
-    urlSuffix = "/api/v1/subscriptions.get";
-    verify(rocketChatRestTemplate).exchange(endsWith(urlSuffix), eq(HttpMethod.GET),
-        any(HttpEntity.class), eq(SubscriptionsGetDTO.class));
-
-    urlSuffix = "/api/v1/e2e.updateGroupKey";
-    verify(rocketChatRestTemplate, times(subscriptionSize))
-        .postForEntity(endsWith(urlSuffix), any(HttpEntity.class), eq(StandardResponseDTO.class));
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  void updateE2eInChatsShouldRespondWithNoContentOnEmptySubscriptions() throws Exception {
-    givenAValidConsultant(true);
-    givenACorrectlyFormattedE2eKeyDTO();
-    givenAValidRocketChatSystemUser();
-    givenAValidRocketChatInfoUserResponse();
-    givenAValidRocketChatGetSubscriptionsResponse(0, true);
-
-    mockMvc.perform(
-        put("/users/chat/e2e")
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .header("rcToken", RandomStringUtils.randomAlphabetic(16))
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(e2eKeyDTO))
-    ).andExpect(status().isNoContent());
-
-    var urlSuffix = "/api/v1/users.info?userId=" + consultant.getRocketChatId();
-    verify(rocketChatRestTemplate).exchange(endsWith(urlSuffix), eq(HttpMethod.GET),
-        any(HttpEntity.class), eq(UserInfoResponseDTO.class));
-
-    urlSuffix = "/api/v1/subscriptions.get";
-    verify(rocketChatRestTemplate).exchange(endsWith(urlSuffix), eq(HttpMethod.GET),
-        any(HttpEntity.class), eq(SubscriptionsGetDTO.class));
-
-    urlSuffix = "/api/v1/e2e.updateGroupKey";
-    verify(rocketChatRestTemplate, never())
-        .postForEntity(endsWith(urlSuffix), any(HttpEntity.class), eq(StandardResponseDTO.class));
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  void updateE2eInChatsShouldRespondWithNoContentOnNoE2eKeySubscriptions()
-      throws Exception {
-    givenAValidConsultant(true);
-    givenACorrectlyFormattedE2eKeyDTO();
-    givenAValidRocketChatSystemUser();
-    givenAValidRocketChatInfoUserResponse();
-    givenAValidRocketChatGetSubscriptionsResponse(easyRandom.nextInt(4) + 1, false);
-
-    mockMvc.perform(
-        put("/users/chat/e2e")
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .header("rcToken", RandomStringUtils.randomAlphabetic(16))
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(e2eKeyDTO))
-    ).andExpect(status().isNoContent());
-
-    var urlSuffix = "/api/v1/users.info?userId=" + consultant.getRocketChatId();
-    verify(rocketChatRestTemplate).exchange(endsWith(urlSuffix), eq(HttpMethod.GET),
-        any(HttpEntity.class), eq(UserInfoResponseDTO.class));
-
-    urlSuffix = "/api/v1/subscriptions.get";
-    verify(rocketChatRestTemplate).exchange(endsWith(urlSuffix), eq(HttpMethod.GET),
-        any(HttpEntity.class), eq(SubscriptionsGetDTO.class));
-
-    urlSuffix = "/api/v1/e2e.updateGroupKey";
-    verify(rocketChatRestTemplate, never())
-        .postForEntity(endsWith(urlSuffix), any(HttpEntity.class), eq(StandardResponseDTO.class));
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  void updateE2eInChatsShouldRespondWithNoContentIfNotTemporarilyEncrypted()
-      throws Exception {
-    givenAValidConsultant(true);
-    givenACorrectlyFormattedE2eKeyDTO();
-    givenAValidRocketChatSystemUser();
-    givenAValidRocketChatInfoUserResponse();
-    givenARocketChatGetSubscriptionsResponseIncludingNoneTemporary();
-
-    mockMvc.perform(
-            put("/users/chat/e2e")
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .header("rcToken", RandomStringUtils.randomAlphabetic(16))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(e2eKeyDTO))
-        )
-        .andExpect(status().isNoContent());
-
-    var urlSuffix = "/api/v1/users.info?userId=" + consultant.getRocketChatId();
-    verify(rocketChatRestTemplate).exchange(endsWith(urlSuffix), eq(HttpMethod.GET),
-        any(HttpEntity.class), eq(UserInfoResponseDTO.class));
-
-    urlSuffix = "/api/v1/subscriptions.get";
-    verify(rocketChatRestTemplate).exchange(endsWith(urlSuffix), eq(HttpMethod.GET),
-        any(HttpEntity.class), eq(SubscriptionsGetDTO.class));
-
-    urlSuffix = "/api/v1/e2e.updateGroupKey";
-    verify(rocketChatRestTemplate, never())
-        .postForEntity(endsWith(urlSuffix), any(HttpEntity.class), eq(StandardResponseDTO.class));
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  void updateE2eInChatsShouldRespondWithInternalServerErrorIfSubscriptionUpdateFailed()
-      throws Exception {
-    givenAValidConsultant(true);
-    givenACorrectlyFormattedE2eKeyDTO();
-    givenAValidRocketChatSystemUser();
-    givenAValidRocketChatInfoUserResponse();
-    givenAValidRocketChatGetSubscriptionsResponse(easyRandom.nextInt(4) + 1, true);
-    givenFailedRocketChatGroupKeyUpdateResponses();
-
-    mockMvc.perform(
-            put("/users/chat/e2e")
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .header("rcToken", RandomStringUtils.randomAlphabetic(16))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(e2eKeyDTO))
-        )
-        .andExpect(status().isInternalServerError());
-
-    var urlSuffix = "/api/v1/users.info?userId=" + consultant.getRocketChatId();
-    verify(rocketChatRestTemplate).exchange(endsWith(urlSuffix), eq(HttpMethod.GET),
-        any(HttpEntity.class), eq(UserInfoResponseDTO.class));
-
-    urlSuffix = "/api/v1/subscriptions.get";
-    verify(rocketChatRestTemplate).exchange(endsWith(urlSuffix), eq(HttpMethod.GET),
-        any(HttpEntity.class), eq(SubscriptionsGetDTO.class));
-
-    urlSuffix = "/api/v1/e2e.updateGroupKey";
-    verify(rocketChatRestTemplate)
-        .postForEntity(endsWith(urlSuffix), any(HttpEntity.class), eq(StandardResponseDTO.class));
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   public void updateMonitoringShouldRespondWithBadRequestIfSessionIsUnknown() throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenAValidMonitoringDto();
 
     mockMvc.perform(
@@ -3194,7 +2573,7 @@ class UserControllerE2EIT {
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   public void updateMonitoringShouldRespondWithUnauthorizedIfNotAdvisedByConsultant()
       throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenAValidSession();
     givenAValidMonitoringDto();
 
@@ -3209,37 +2588,9 @@ class UserControllerE2EIT {
   }
 
   @Test
-  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  void updateE2eInChatsShouldRespondWithBadRequestIfE2eKeyHasWrongFormat() throws Exception {
-    givenAValidConsultant(true);
-    givenAWronglyFormattedE2eKeyDTO();
-
-    mockMvc.perform(
-        put("/users/chat/e2e")
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(e2eKeyDTO))
-    ).andExpect(status().isBadRequest());
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  void updateE2eInChatsShouldRespondWithBadRequestIfPayloadIsEmpty() throws Exception {
-    givenAValidConsultant(true);
-
-    mockMvc.perform(
-        put("/users/chat/e2e")
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-    ).andExpect(status().isBadRequest());
-  }
-
-  @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   void activateTwoFactorAuthForUserShouldRespondWithOK() throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenACorrectlyFormattedOneTimePasswordDTO();
     givenABearerToken();
 
@@ -3267,7 +2618,7 @@ class UserControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   void activateTwoFactorAuthForUserShouldRespondWithBadRequestWhenOtpHasWrongLength()
       throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenAnInvalidOneTimePasswordDTO();
 
     mockMvc.perform(
@@ -3284,7 +2635,7 @@ class UserControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   void activateTwoFactorAuthForUserShouldRespondWithBadRequestWhenSecretHasWrongLength()
       throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenAWronglyFormattedSecret();
 
     mockMvc.perform(
@@ -3301,7 +2652,7 @@ class UserControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   void activateTwoFactorAuthForUserShouldRespondWithBadRequestIfTheOtpIsInvalid()
       throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenACorrectlyFormattedOneTimePasswordDTO();
     givenABearerToken();
     givenAKeycloakSetupOtpValidationErrorResponse();
@@ -3320,7 +2671,7 @@ class UserControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   void activateTwoFactorAuthForUserShouldRespondWithBadRequestIfParameterInvalid()
       throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenACorrectlyFormattedOneTimePasswordDTO();
     givenABearerToken();
     givenAKeycloakSetupOtpInvalidParameterErrorResponse();
@@ -3340,7 +2691,7 @@ class UserControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   void activateTwoFactorAuthForUserShouldRespondWithBadRequestIfAnotherOtpConfigIsActive()
       throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenACorrectlyFormattedOneTimePasswordDTO();
     givenABearerToken();
     givenAKeycloakSetupOtpAnotherOtpConfigActiveErrorResponse();
@@ -3358,7 +2709,7 @@ class UserControllerE2EIT {
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   void deactivateTwoFactorAuthByAppShouldRespondWithOK() throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenABearerToken();
 
     mockMvc.perform(
@@ -3380,7 +2731,7 @@ class UserControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   void deactivateTwoFactorAuthByAppShouldRespondWithInternalServerErrorWhenKeycloakIsDown()
       throws Exception {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     givenABearerToken();
     givenKeycloakIsDown();
 
@@ -3407,118 +2758,6 @@ class UserControllerE2EIT {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userDTO)))
         .andExpect(status().isCreated());
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.STOP_CHAT)
-  void stopChatShouldReturnOkIfEncryptionIsDeactivated() throws Exception {
-    givenAValidUser();
-    givenAValidConsultant(true);
-    givenAValidChat(true);
-    givenAValidRocketChatSystemUser();
-    givenAValidRocketChatGroupDeleteResponse();
-    givenAValidRocketChatRoomResponse(chat.getGroupId(), true);
-    givenAValidRocketChatUnmuteResponse();
-
-    mockMvc.perform(
-            put("/users/chat/{chatId}/stop", chat.getId())
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
-
-    var allChatsAfter = StreamSupport.stream(chatRepository.findAll().spliterator(), false)
-        .sorted(Comparator.comparing(Chat::getUpdateDate).reversed())
-        .collect(Collectors.toList());
-    chat = allChatsAfter.get(0);
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.STOP_CHAT)
-  void stopChatShouldReturnOkAndDeleteOneTimeChatAndChatAgency() throws Exception {
-    givenAValidUser();
-    givenAValidConsultant(true);
-    givenAValidChat(false);
-    givenAValidRocketChatSystemUser();
-    givenAValidRocketChatGroupDeleteResponse();
-    givenAValidRocketChatRoomResponse(chat.getGroupId(), true);
-    givenAValidRocketChatUnmuteResponse();
-
-    mockMvc.perform(
-            put("/users/chat/{chatId}/stop", chat.getId())
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
-
-    assertFalse(chatRepository.existsById(chat.getId()));
-    assertFalse(chatAgencyRepository.existsById(chatAgency.getId()));
-
-    var urlSuffix = "/api/v1/groups.delete";
-    verify(restTemplate).postForObject(
-        endsWith(urlSuffix), any(HttpEntity.class), eq(GroupDeleteResponseDTO.class)
-    );
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.STOP_CHAT)
-  void stopChatShouldReturnOkAndRecreateChatIfRepetitive() throws Exception {
-    givenAValidUser();
-    givenAValidConsultant(true);
-    givenAValidChat(true);
-    givenAValidRocketChatSystemUser();
-    givenAValidRocketChatGroupDeleteResponse();
-    givenAValidRocketChatRoomResponse(chat.getGroupId(), true);
-    givenAValidRocketChatUnmuteResponse();
-
-    var allChatsBefore = StreamSupport.stream(chatRepository.findAll().spliterator(), false)
-        .collect(Collectors.toSet());
-
-    mockMvc.perform(
-            put("/users/chat/{chatId}/stop", chat.getId())
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
-
-    var allChatsAfter = StreamSupport.stream(chatRepository.findAll().spliterator(), false)
-        .sorted(Comparator.comparing(Chat::getUpdateDate).reversed())
-        .collect(Collectors.toList());
-
-    assertEquals(allChatsBefore.size(), allChatsAfter.size());
-    var recreatedChat = allChatsAfter.get(0);
-    var keptChats = allChatsAfter.subList(1, allChatsAfter.size());
-    assertFalse(allChatsBefore.contains(recreatedChat));
-    assertTrue(allChatsBefore.containsAll(keptChats));
-
-    assertFalse(chatRepository.existsById(chat.getId()));
-    assertFalse(chatAgencyRepository.existsById(chatAgency.getId()));
-
-    var urlSuffix = "/api/v1/groups.delete";
-    verify(restTemplate).postForObject(
-        endsWith(urlSuffix), any(HttpEntity.class), eq(GroupDeleteResponseDTO.class)
-    );
-
-    assertEquals(chat.getTopic(), recreatedChat.getTopic());
-    assertEquals(chat.getConsultingTypeId(), recreatedChat.getConsultingTypeId());
-    assertEquals(chat.getInitialStartDate().truncatedTo(ChronoUnit.SECONDS),
-        recreatedChat.getInitialStartDate().truncatedTo(ChronoUnit.SECONDS));
-    assertTrue(chat.getStartDate().isBefore(recreatedChat.getStartDate()));
-    assertEquals(chat.getDuration(), recreatedChat.getDuration());
-    assertEquals(chat.isRepetitive(), recreatedChat.isRepetitive());
-    assertEquals(chat.getChatInterval(), recreatedChat.getChatInterval());
-    assertFalse(recreatedChat.isActive());
-    assertEquals(chat.getMaxParticipants(), recreatedChat.getMaxParticipants());
-    assertNotEquals(chat.getGroupId(), recreatedChat.getGroupId());
-    assertNotNull(recreatedChat.getGroupId());
-    assertEquals(chat.getChatOwner(), recreatedChat.getChatOwner());
-    assertTrue(recreatedChat.getChatAgencies().size() > 0);
-    assertTrue(chat.getUpdateDate().isBefore(recreatedChat.getUpdateDate()));
-
-    chat = recreatedChat;
   }
 
   private void givenARealmResource() {
@@ -3607,21 +2846,6 @@ class UserControllerE2EIT {
     oneTimePasswordDTO = new OneTimePasswordDTO();
     oneTimePasswordDTO.setOtp(RandomStringUtils.randomNumeric(6));
     oneTimePasswordDTO.setSecret(RandomStringUtils.randomAlphanumeric(32));
-  }
-
-  private void givenACorrectlyFormattedE2eKeyDTO() {
-    var n = "w5j-hUYZRT-ZSBJsk3J1gEtZG5fuP66dWMxs2I4PxgIC7TH8JU_zEDSjgjR6mCsIARVhyzZnBsNVoJYIg2TDF"
-        + "18TAcYhaDsFEhxntg9RktrLGIs_nod0cafLCVQYWfp27SrpBeHdO9ewuezJzSzvNPZnx-8iWIDqp_nQt2xSPdh2"
-        + "8AUm8f3KJ0P0AGFL6HiQ24GcLlsi-xqit3_M-MMr0kYJenaxJX1IdXCd1Io_pWBcgykSxhGo0fDWpfhkS1jmU4_"
-        + "_9RNfoR1uroa10g3YVWYXvpZ5T9Qw96ynhwqdLMsGwbo1Y2AyG8NckOR3fE4ARC3OSUv0LFqmdq2xf5quZw";
-
-    e2eKeyDTO = new E2eKeyDTO();
-    e2eKeyDTO.setPublicKey(n);
-  }
-
-  private void givenAWronglyFormattedE2eKeyDTO() {
-    e2eKeyDTO = new E2eKeyDTO();
-    e2eKeyDTO.setPublicKey(RandomStringUtils.randomAlphanumeric(8));
   }
 
   private void givenAValidKeycloakSetupEmailResponse(String username) {
@@ -3971,16 +3195,6 @@ class UserControllerE2EIT {
     )).thenReturn(ResponseEntity.ok(otpInfo));
   }
 
-  private void givenAValidRocketChatUnmuteResponse() {
-    var urlSuffix = "/method.call/unmuteUserInRoom";
-    var messageResponse = easyRandom.nextObject(MessageResponse.class);
-    messageResponse.setSuccess(true);
-
-    when(rocketChatRestTemplate.postForEntity(
-        endsWith(urlSuffix), any(HttpEntity.class), eq(MessageResponse.class)
-    )).thenReturn(ResponseEntity.ok(messageResponse));
-  }
-
   private void givenAValidRocketChatInfoUserResponse() {
     givenAValidRocketChatInfoUserResponse(consultant);
   }
@@ -4002,40 +3216,11 @@ class UserControllerE2EIT {
     ).thenReturn(ResponseEntity.ok(userInfoResponse));
   }
 
-  private void givenAValidRocketChatGroupDeleteResponse() {
-    groupDeleteResponse = new GroupDeleteResponseDTO();
-    groupDeleteResponse.setSuccess(true);
-
-    var urlSuffix = "/api/v1/groups.delete";
-    when(restTemplate.postForObject(endsWith(urlSuffix), any(HttpEntity.class),
-        eq(GroupDeleteResponseDTO.class))
-    ).thenReturn(groupDeleteResponse);
-  }
-
   private void givenAPositiveRocketChatGroupMemberResponse(String chatId, String chatUserId) {
     groupMemberResponseDTO = new GroupMemberResponseDTO();
     groupMemberResponseDTO.setSuccess(true);
 
     var groupMember = easyRandom.nextObject(GroupMemberDTO.class);
-    if (nonNull(chatUserId)) {
-      groupMember.set_id(chatUserId);
-    }
-    GroupMemberDTO[] groupMembers = {groupMember};
-    groupMemberResponseDTO.setMembers(groupMembers);
-
-    var urlSuffix = "/api/v1/groups.members?roomId=" + chatId + "&count=0";
-    when(restTemplate.exchange(
-        endsWith(urlSuffix), eq(HttpMethod.GET),
-        any(HttpEntity.class), eq(GroupMemberResponseDTO.class))
-    ).thenReturn(ResponseEntity.ok(groupMemberResponseDTO));
-  }
-
-  private void givenAnOnlyTechUserRocketChatGroupMemberResponse(String chatId) {
-    groupMemberResponseDTO = new GroupMemberResponseDTO();
-    groupMemberResponseDTO.setSuccess(true);
-
-    var groupMember = easyRandom.nextObject(GroupMemberDTO.class);
-    var chatUserId = RC_CREDENTIALS_TECHNICAL_A.getRocketChatUserId();
     if (nonNull(chatUserId)) {
       groupMember.set_id(chatUserId);
     }
@@ -4062,34 +3247,6 @@ class UserControllerE2EIT {
     ).thenReturn(ResponseEntity.ok(groupMemberResponseDTO));
   }
 
-  private void givenAValidRocketChatGetSubscriptionsResponse(int subscriptionSize, boolean isE2e) {
-    subscriptionsGetResponse = new SubscriptionsGetDTO();
-    subscriptionsGetResponse.setSuccess(true);
-
-    var updates = new ArrayList<SubscriptionsUpdateDTO>(subscriptionSize);
-    for (int i = 0; i < subscriptionSize; i++) {
-      var subscriptionsUpdateDTO = easyRandom.nextObject(SubscriptionsUpdateDTO.class);
-      subscriptionsUpdateDTO.setRoomId(RandomStringUtils.randomAlphanumeric(8));
-      if (isE2e) {
-        subscriptionsUpdateDTO.setE2eKey(
-            "tmp.1234567890abU2FsdGVkX1+3tjZ5PaAKTMSKZS4v8t8BwGmmhqoMj68=");
-      } else {
-        subscriptionsUpdateDTO.setE2eKey(null);
-      }
-      var user = new RocketChatUserDTO();
-      user.setId(RandomStringUtils.randomAlphanumeric(17));
-      subscriptionsUpdateDTO.setUser(user);
-      updates.add(subscriptionsUpdateDTO);
-    }
-    subscriptionsGetResponse.setUpdate(updates.toArray(new SubscriptionsUpdateDTO[0]));
-
-    var urlSuffix = "/api/v1/subscriptions.get";
-    when(rocketChatRestTemplate.exchange(
-        endsWith(urlSuffix), eq(HttpMethod.GET),
-        any(HttpEntity.class), eq(SubscriptionsGetDTO.class))
-    ).thenReturn(ResponseEntity.ok(subscriptionsGetResponse));
-  }
-
   private void givenAnEmptyRocketChatGetSubscriptionsResponse() {
     subscriptionsGetResponse = new SubscriptionsGetDTO();
     subscriptionsGetResponse.setSuccess(true);
@@ -4103,47 +3260,6 @@ class UserControllerE2EIT {
     ).thenReturn(ResponseEntity.ok(subscriptionsGetResponse));
   }
 
-  private void givenARocketChatGetSubscriptionsResponseIncludingNoneTemporary() {
-    subscriptionsGetResponse = new SubscriptionsGetDTO();
-    subscriptionsGetResponse.setSuccess(true);
-
-    var size = easyRandom.nextInt(5);
-    var updates = new ArrayList<SubscriptionsUpdateDTO>(size);
-    for (int i = 0; i <= size; i++) {
-      var subscriptionsUpdateDTO = easyRandom.nextObject(SubscriptionsUpdateDTO.class);
-      subscriptionsUpdateDTO.setRoomId(RandomStringUtils.randomAlphanumeric(8));
-      subscriptionsUpdateDTO.setE2eKey(RandomStringUtils.randomAlphanumeric(60));
-      var user = new RocketChatUserDTO();
-      user.setId(RandomStringUtils.randomAlphanumeric(17));
-      subscriptionsUpdateDTO.setUser(user);
-      updates.add(subscriptionsUpdateDTO);
-    }
-    subscriptionsGetResponse.setUpdate(updates.toArray(new SubscriptionsUpdateDTO[0]));
-
-    var urlSuffix = "/api/v1/subscriptions.get";
-    when(rocketChatRestTemplate.exchange(
-        endsWith(urlSuffix), eq(HttpMethod.GET),
-        any(HttpEntity.class), eq(SubscriptionsGetDTO.class))
-    ).thenReturn(ResponseEntity.ok(subscriptionsGetResponse));
-  }
-
-  private void givenValidRocketChatGroupKeyUpdateResponses() {
-    var urlSuffix = "/api/v1/e2e.updateGroupKey";
-    var response = easyRandom.nextObject(StandardResponseDTO.class);
-
-    when(rocketChatRestTemplate.postForEntity(
-        endsWith(urlSuffix), any(HttpEntity.class), eq(StandardResponseDTO.class)
-    )).thenReturn(ResponseEntity.ok(response));
-  }
-
-  private void givenFailedRocketChatGroupKeyUpdateResponses() {
-    var urlSuffix = "/api/v1/e2e.updateGroupKey";
-
-    when(rocketChatRestTemplate.postForEntity(
-        endsWith(urlSuffix), any(HttpEntity.class), eq(StandardResponseDTO.class)
-    )).thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
-  }
-
   private void givenAValidRocketChatUpdateUserResponse() {
     var urlSuffix = "/api/v1/users.update";
     var updateUserResponse = easyRandom.nextObject(Void.class);
@@ -4151,45 +3267,6 @@ class UserControllerE2EIT {
     when(rocketChatRestTemplate.postForEntity(
         endsWith(urlSuffix), any(HttpEntity.class), eq(Void.class)
     )).thenReturn(ResponseEntity.ok(updateUserResponse));
-  }
-
-  private void givenAValidRocketChatRoomResponse(String roomId, boolean hasBannedUsers) {
-    var urlSuffix = "/rooms.info?roomId=" + roomId;
-    var roomResponse = easyRandom.nextObject(RoomResponse.class);
-    roomResponse.setSuccess(true);
-    if (hasBannedUsers) {
-      roomResponse.getRoom().setMuted(List.of(user.getRcUserId()));
-    } else {
-      roomResponse.getRoom().setMuted(null);
-    }
-
-    when(rocketChatRestTemplate.exchange(
-        endsWith(urlSuffix), eq(HttpMethod.GET), any(HttpEntity.class), eq(RoomResponse.class)
-    )).thenReturn(ResponseEntity.ok(roomResponse));
-  }
-
-  private void givenAValidRocketChatMuteUserInRoomResponse() {
-    var urlSuffix = "/api/v1/method.call/muteUserInRoom";
-    var messageResponse = easyRandom.nextObject(MessageResponse.class);
-    messageResponse.setSuccess(true);
-
-    when(rocketChatRestTemplate.postForEntity(
-        endsWith(urlSuffix), any(HttpEntity.class), eq(MessageResponse.class)
-    )).thenReturn(ResponseEntity.ok(messageResponse));
-  }
-
-  private void givenAnInvalidRocketChatMuteUserInRoomResponse() {
-    var urlSuffix = "/api/v1/method.call/muteUserInRoom";
-    var messageResponse = easyRandom.nextObject(MessageResponse.class);
-    messageResponse.setSuccess(true); // according to Rocket.Chat
-    var message = RandomStringUtils.randomAlphanumeric(8)
-        + "error-user-not-in-room"
-        + RandomStringUtils.randomAlphanumeric(8);
-    messageResponse.setMessage(message);
-
-    when(rocketChatRestTemplate.postForEntity(
-        endsWith(urlSuffix), any(HttpEntity.class), eq(MessageResponse.class)
-    )).thenReturn(ResponseEntity.ok().body(messageResponse));
   }
 
   private void givenAValidEmailDTO() {
@@ -4244,19 +3321,13 @@ class UserControllerE2EIT {
   }
 
   private void givenAValidConsultant() {
-    givenAValidConsultant(false);
-  }
-
-  private void givenAValidConsultant(boolean isAuthUser) {
     consultant = consultantRepository.findAll().iterator().next();
-    if (isAuthUser) {
-      when(authenticatedUser.getUserId()).thenReturn(consultant.getId());
-      when(authenticatedUser.isAdviceSeeker()).thenReturn(false);
-      when(authenticatedUser.isConsultant()).thenReturn(true);
-      when(authenticatedUser.getUsername()).thenReturn(consultant.getUsername());
-      when(authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.CONSULTANT.getValue()));
-      when(authenticatedUser.getGrantedAuthorities()).thenReturn(Set.of("anAuthority"));
-    }
+    when(authenticatedUser.getUserId()).thenReturn(consultant.getId());
+    when(authenticatedUser.isAdviceSeeker()).thenReturn(false);
+    when(authenticatedUser.isConsultant()).thenReturn(true);
+    when(authenticatedUser.getUsername()).thenReturn(consultant.getUsername());
+    when(authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.CONSULTANT.getValue()));
+    when(authenticatedUser.getGrantedAuthorities()).thenReturn(Set.of("anAuthority"));
   }
 
   private void givenAValidUser() {
@@ -4275,11 +3346,11 @@ class UserControllerE2EIT {
     }
   }
 
-  private void givenAValidChat(boolean isRepetitive) {
+  private void givenAValidChat() {
     chat = easyRandom.nextObject(Chat.class);
     chat.setId(null);
     chat.setActive(true);
-    chat.setRepetitive(isRepetitive);
+    chat.setRepetitive(false);
     chat.setChatOwner(consultant);
     chat.setConsultingTypeId(easyRandom.nextInt(128));
     chat.setDuration(easyRandom.nextInt(32768));
@@ -4328,7 +3399,7 @@ class UserControllerE2EIT {
   }
 
   private void givenAValidConsultantSpeaking(LanguageCode languageCode) {
-    givenAValidConsultant(true);
+    givenAValidConsultant();
     consultant.setLanguages(Set.of(new Language(consultant, languageCode)));
     consultant = consultantRepository.save(consultant);
   }
