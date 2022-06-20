@@ -292,7 +292,6 @@ public class TestConstants {
   public static final String CONSULTANT_ID_3 = "ksf93j-3344-32gg-2344-93kd93jaf";
   public static final String MAIN_CONSULTANT_ID = "asdj78wfjsdf";
   public static final String RC_USER_ID_MAIN_CONSULTANT = "xxxyyy";
-  public static final String TEAM_CONSULTANT_ID = "34t789hqeg-q34g8weq9rhg-q34g09";
   public static final String ENCODING_PREFIX = "enc.";
   public static final String USERNAME_CONSULTANT_DECODED = "Consultantname!#123";
   public static final String USERNAME_CONSULTANT_ENCODED =
@@ -758,23 +757,23 @@ public class TestConstants {
           org.assertj.core.util.Arrays.array(ATTACHMENT_DTO), null);
   public static final List<RoomsUpdateDTO> ROOMS_UPDATE_DTO_LIST = Arrays.asList(
       new RoomsUpdateDTO(RC_GROUP_ID, "name1", "fname1", "P", USER_DTO_1, true, false, new Date(),
-          ROOMS_LAST_MESSAGE_DTO_1),
+          ROOMS_LAST_MESSAGE_DTO_1, new Date()),
       new RoomsUpdateDTO(RC_GROUP_ID_2, "name2", "fname2", "P", USER_DTO_2, true, false, new Date(),
-          ROOMS_LAST_MESSAGE_DTO_2),
+          ROOMS_LAST_MESSAGE_DTO_2, new Date()),
       new RoomsUpdateDTO(RC_GROUP_ID_3, "name3", "fname3", "P", USER_DTO_3, true, false, new Date(),
-          ROOMS_LAST_MESSAGE_DTO_3),
+          ROOMS_LAST_MESSAGE_DTO_3, new Date()),
       new RoomsUpdateDTO(RC_FEEDBACK_GROUP_ID, "name1", "fname1", "P", USER_DTO_1, true, false,
-          new Date(), ROOMS_LAST_MESSAGE_DTO_1),
+          new Date(), ROOMS_LAST_MESSAGE_DTO_1, new Date()),
       new RoomsUpdateDTO(RC_FEEDBACK_GROUP_ID_2, "name2", "fname2", "P", USER_DTO_2, true, false,
-          new Date(), ROOMS_LAST_MESSAGE_DTO_2),
+          new Date(), ROOMS_LAST_MESSAGE_DTO_2, new Date()),
       new RoomsUpdateDTO(RC_FEEDBACK_GROUP_ID_3, "name3", "fname3", "P", USER_DTO_3, true, false,
-          new Date(), ROOMS_LAST_MESSAGE_DTO_3),
+          new Date(), ROOMS_LAST_MESSAGE_DTO_3, new Date()),
       new RoomsUpdateDTO(RC_GROUP_ID_4, "name4", "fname4", "P", USER_DTO_1, true, false, new Date(),
-          ROOMS_LAST_MESSAGE_DTO_4),
+          ROOMS_LAST_MESSAGE_DTO_4, new Date()),
       new RoomsUpdateDTO(RC_GROUP_ID_5, "name5", "fname5", "P", USER_DTO_2, true, false, new Date(),
-          ROOMS_LAST_MESSAGE_DTO_5),
+          ROOMS_LAST_MESSAGE_DTO_5, new Date()),
       new RoomsUpdateDTO(RC_GROUP_ID_6, "name6", "fname6", "P", USER_DTO_3, true, false, new Date(),
-          ROOMS_LAST_MESSAGE_DTO_6));
+          ROOMS_LAST_MESSAGE_DTO_6, new Date()));
   public static final Map<String, RoomsLastMessageDTO> ROOMS_LAST_MESSAGE_DTO_MAP = new HashMap<>() {
     {
       put(RC_GROUP_ID, ROOMS_LAST_MESSAGE_DTO_1);
@@ -797,13 +796,13 @@ public class TestConstants {
   public static final List<RoomsUpdateDTO> ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT =
       Collections.singletonList(
           new RoomsUpdateDTO(RC_GROUP_ID, "name1", "fname1", "P", USER_DTO_1, true, false,
-              new Date(), ROOMS_LAST_MESSAGE_DTO_WITH_ATTACHMENT));
+              new Date(), ROOMS_LAST_MESSAGE_DTO_WITH_ATTACHMENT, new Date()));
   public static final List<RoomsUpdateDTO> ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT_FOR_CHAT =
       Arrays.asList(
           new RoomsUpdateDTO(RC_GROUP_ID_4, "name1", "fname1", "P", USER_DTO_1, true, false,
-              new Date(), ROOMS_LAST_MESSAGE_DTO_WITH_ATTACHMENT_FOR_CHAT),
+              new Date(), ROOMS_LAST_MESSAGE_DTO_WITH_ATTACHMENT_FOR_CHAT, new Date()),
           new RoomsUpdateDTO(RC_GROUP_ID_6, "name1", "fname1", "P", USER_DTO_1, true, false,
-              new Date(), ROOMS_LAST_MESSAGE_DTO_WITH_ATTACHMENT_FOR_CHAT));
+              new Date(), ROOMS_LAST_MESSAGE_DTO_WITH_ATTACHMENT_FOR_CHAT, new Date()));
   public static final SessionAttachmentDTO SESSION_ATTACHMENT_DTO_RECEIVED =
       new SessionAttachmentDTO()
           .fileType(ROOMS_LAST_MESSAGE_DTO_1.getFile().getType())
