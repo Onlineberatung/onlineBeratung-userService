@@ -10,9 +10,7 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroup
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.RocketChatRoomNameGenerator;
 import de.caritas.cob.userservice.api.model.Chat;
-import de.caritas.cob.userservice.api.model.ChatAgency;
 import de.caritas.cob.userservice.api.service.ChatService;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,23 +23,13 @@ public class ChatReCreator {
   private final ChatService chatService;
   private final RocketChatService rocketChatService;
 
-  public void recreateChat(Chat chat, String rcGroupId) {
-    final var chatAgencyIds = chat.getChatAgencies().stream()
-        .map(ChatAgency::getAgencyId)
-        .collect(Collectors.toList());
-
-    chat.setId(null);
+  public void updateAsNextChat(Chat chat, String rcGroupId) {
     chat.setGroupId(rcGroupId);
     chat.setStartDate(chat.nextStart());
     chat.setUpdateDate(nowInUtc());
     chat.setActive(false);
-    chat.setChatAgencies(null);
-    chatService.saveChat(chat);
 
-    chatAgencyIds.forEach(chatAgencyId -> {
-      var recreatedChatAgency = new ChatAgency(chat, chatAgencyId);
-      chatService.saveChatAgencyRelation(recreatedChatAgency);
-    });
+    chatService.saveChat(chat);
   }
 
   public String recreateMessengerChat(Chat chat) {

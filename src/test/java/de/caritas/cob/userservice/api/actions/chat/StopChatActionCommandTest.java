@@ -107,7 +107,7 @@ class StopChatActionCommandTest {
   }
 
   @Test
-  void stopChatShouldDeleteChatGroupAndRecreateWhenRepetitive() {
+  void stopChatShouldDeleteChatGroupAndRecreateRespUpdateWhenRepetitive() {
     Chat chatWithDate = new Chat("topic", 15, CHAT_START_DATETIME, CHAT_START_DATETIME,
         1, IS_REPETITIVE, CHAT_INTERVAL_WEEKLY, CONSULTANT);
     chatWithDate.setActive(true);
@@ -120,9 +120,8 @@ class StopChatActionCommandTest {
     stopChatActionCommand.execute(chatWithDate);
 
     verify(rocketChatService).deleteGroupAsSystemUser("groupId");
-    verify(chatService).deleteChat(chatWithDate);
+    verify(chatService, never()).deleteChat(chatWithDate);
     verify(chatReCreator).recreateMessengerChat(chatWithDate);
-    verify(chatReCreator).recreateChat(chatWithDate, groupId);
   }
 
   @Test

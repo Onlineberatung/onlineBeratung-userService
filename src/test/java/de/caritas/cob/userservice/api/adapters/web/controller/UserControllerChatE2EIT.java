@@ -486,14 +486,12 @@ class UserControllerChatE2EIT {
     var allChatsAfter = StreamSupport.stream(chatRepository.findAll().spliterator(), false)
         .sorted(Comparator.comparing(Chat::getUpdateDate).reversed())
         .collect(Collectors.toList());
-    assertEquals(allChatsBefore.size(), allChatsAfter.size());
-    var recreatedChat = allChatsAfter.get(0);
-    var keptChats = allChatsAfter.subList(1, allChatsAfter.size());
-    assertFalse(allChatsBefore.contains(recreatedChat));
-    assertTrue(allChatsBefore.containsAll(keptChats));
 
-    assertFalse(chatRepository.existsById(chat.getId()));
-    assertFalse(chatAgencyRepository.existsById(chatAgency.getId()));
+    assertEquals(allChatsBefore.size(), allChatsAfter.size());
+    assertTrue(allChatsBefore.containsAll(allChatsAfter));
+
+    assertTrue(chatRepository.existsById(chat.getId()));
+    assertTrue(chatAgencyRepository.existsById(chatAgency.getId()));
 
     var urlSuffix = "/api/v1/groups.delete";
     verify(restTemplate).postForObject(
@@ -501,23 +499,25 @@ class UserControllerChatE2EIT {
     );
     verifyRocketChatUserRemovedFromGroup(logOutput, chat.getGroupId(), user.getRcUserId());
 
-    assertEquals(chat.getTopic(), recreatedChat.getTopic());
-    assertEquals(chat.getConsultingTypeId(), recreatedChat.getConsultingTypeId());
-    assertEquals(chat.getInitialStartDate().truncatedTo(ChronoUnit.SECONDS),
-        recreatedChat.getInitialStartDate().truncatedTo(ChronoUnit.SECONDS));
-    assertTrue(chat.getStartDate().isBefore(recreatedChat.getStartDate()));
-    assertEquals(chat.getDuration(), recreatedChat.getDuration());
-    assertEquals(chat.isRepetitive(), recreatedChat.isRepetitive());
-    assertEquals(chat.getChatInterval(), recreatedChat.getChatInterval());
-    assertFalse(recreatedChat.isActive());
-    assertEquals(chat.getMaxParticipants(), recreatedChat.getMaxParticipants());
-    assertNotEquals(chat.getGroupId(), recreatedChat.getGroupId());
-    assertNotNull(recreatedChat.getGroupId());
-    assertEquals(chat.getChatOwner(), recreatedChat.getChatOwner());
-    assertTrue(recreatedChat.getChatAgencies().size() > 0);
-    assertTrue(chat.getUpdateDate().isBefore(recreatedChat.getUpdateDate()));
+    var chatAfter = chatRepository.findById(chat.getId()).orElseThrow();
 
-    chat = recreatedChat;
+    assertEquals(chat.getConsultingTypeId(), chatAfter.getConsultingTypeId());
+    assertEquals(chat.getInitialStartDate().truncatedTo(ChronoUnit.SECONDS),
+        chatAfter.getInitialStartDate().truncatedTo(ChronoUnit.SECONDS));
+    assertEquals(
+        chat.getStartDate().truncatedTo(ChronoUnit.SECONDS).plusWeeks(1),
+        chatAfter.getStartDate().truncatedTo(ChronoUnit.SECONDS)
+    );
+    assertEquals(chat.getDuration(), chatAfter.getDuration());
+    assertEquals(chat.isRepetitive(), chatAfter.isRepetitive());
+    assertEquals(chat.getChatInterval(), chatAfter.getChatInterval());
+    assertFalse(chatAfter.isActive());
+    assertEquals(chat.getMaxParticipants(), chatAfter.getMaxParticipants());
+    assertNotEquals(chat.getGroupId(), chatAfter.getGroupId());
+    assertNotNull(chatAfter.getGroupId());
+    assertEquals(chat.getChatOwner(), chatAfter.getChatOwner());
+    assertTrue(chatAfter.getChatAgencies().size() > 0);
+    assertTrue(chat.getUpdateDate().isBefore(chatAfter.getUpdateDate()));
   }
 
   @Test
@@ -870,36 +870,35 @@ class UserControllerChatE2EIT {
         .collect(Collectors.toList());
 
     assertEquals(allChatsBefore.size(), allChatsAfter.size());
-    var recreatedChat = allChatsAfter.get(0);
-    var keptChats = allChatsAfter.subList(1, allChatsAfter.size());
-    assertFalse(allChatsBefore.contains(recreatedChat));
-    assertTrue(allChatsBefore.containsAll(keptChats));
+    assertTrue(allChatsBefore.containsAll(allChatsAfter));
 
-    assertFalse(chatRepository.existsById(chat.getId()));
-    assertFalse(chatAgencyRepository.existsById(chatAgency.getId()));
+    assertTrue(chatRepository.existsById(chat.getId()));
+    assertTrue(chatAgencyRepository.existsById(chatAgency.getId()));
 
     var urlSuffix = "/api/v1/groups.delete";
     verify(restTemplate).postForObject(
         endsWith(urlSuffix), any(HttpEntity.class), eq(GroupDeleteResponseDTO.class)
     );
 
-    assertEquals(chat.getTopic(), recreatedChat.getTopic());
-    assertEquals(chat.getConsultingTypeId(), recreatedChat.getConsultingTypeId());
-    assertEquals(chat.getInitialStartDate().truncatedTo(ChronoUnit.SECONDS),
-        recreatedChat.getInitialStartDate().truncatedTo(ChronoUnit.SECONDS));
-    assertTrue(chat.getStartDate().isBefore(recreatedChat.getStartDate()));
-    assertEquals(chat.getDuration(), recreatedChat.getDuration());
-    assertEquals(chat.isRepetitive(), recreatedChat.isRepetitive());
-    assertEquals(chat.getChatInterval(), recreatedChat.getChatInterval());
-    assertFalse(recreatedChat.isActive());
-    assertEquals(chat.getMaxParticipants(), recreatedChat.getMaxParticipants());
-    assertNotEquals(chat.getGroupId(), recreatedChat.getGroupId());
-    assertNotNull(recreatedChat.getGroupId());
-    assertEquals(chat.getChatOwner(), recreatedChat.getChatOwner());
-    assertTrue(recreatedChat.getChatAgencies().size() > 0);
-    assertTrue(chat.getUpdateDate().isBefore(recreatedChat.getUpdateDate()));
+    var chatAfter = chatRepository.findById(chat.getId()).orElseThrow();
 
-    chat = recreatedChat;
+    assertEquals(chat.getConsultingTypeId(), chatAfter.getConsultingTypeId());
+    assertEquals(chat.getInitialStartDate().truncatedTo(ChronoUnit.SECONDS),
+        chatAfter.getInitialStartDate().truncatedTo(ChronoUnit.SECONDS));
+    assertEquals(
+        chat.getStartDate().truncatedTo(ChronoUnit.SECONDS).plusWeeks(1),
+        chatAfter.getStartDate().truncatedTo(ChronoUnit.SECONDS)
+    );
+    assertEquals(chat.getDuration(), chatAfter.getDuration());
+    assertEquals(chat.isRepetitive(), chatAfter.isRepetitive());
+    assertEquals(chat.getChatInterval(), chatAfter.getChatInterval());
+    assertFalse(chatAfter.isActive());
+    assertEquals(chat.getMaxParticipants(), chatAfter.getMaxParticipants());
+    assertNotEquals(chat.getGroupId(), chatAfter.getGroupId());
+    assertNotNull(chatAfter.getGroupId());
+    assertEquals(chat.getChatOwner(), chatAfter.getChatOwner());
+    assertTrue(chatAfter.getChatAgencies().size() > 0);
+    assertTrue(chat.getUpdateDate().isBefore(chatAfter.getUpdateDate()));
   }
 
   private long aPositiveLong() {
