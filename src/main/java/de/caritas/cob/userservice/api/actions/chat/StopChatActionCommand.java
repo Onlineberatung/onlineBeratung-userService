@@ -39,10 +39,12 @@ public class StopChatActionCommand implements ActionCommand<Chat> {
     }
 
     if (!chat.isRepetitive() || nonNull(chat.nextStart())) {
-      deleteChatGroup(chat);
+      deleteMessengerChat(chat);
       if (chat.isRepetitive()) {
         var rcGroupId = chatReCreator.recreateMessengerChat(chat);
-        chatReCreator.recreateChat(chat, rcGroupId);
+        chatReCreator.updateAsNextChat(chat, rcGroupId);
+      } else {
+        chatService.deleteChat(chat);
       }
     }
   }
@@ -54,11 +56,10 @@ public class StopChatActionCommand implements ActionCommand<Chat> {
     }
   }
 
-  private void deleteChatGroup(Chat chat) {
+  private void deleteMessengerChat(Chat chat) {
     if (!rocketChatService.deleteGroupAsSystemUser(chat.getGroupId())) {
       throw new InternalServerErrorException(
           String.format("Could not delete Rocket.Chat group with id %s", chat.getGroupId()));
     }
-    chatService.deleteChat(chat);
   }
 }

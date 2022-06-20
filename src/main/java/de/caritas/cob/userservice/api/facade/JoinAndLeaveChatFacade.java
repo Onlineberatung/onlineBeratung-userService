@@ -68,10 +68,11 @@ public class JoinAndLeaveChatFacade {
       rocketChatService.removeUserFromGroup(rcUserId, chat.getGroupId());
       if (rocketChatService.getStandardMembersOfGroup(chat.getGroupId()).isEmpty()) {
         deleteMessengerChat(chat.getGroupId());
-        chatService.deleteChat(chat);
         if (chat.isRepetitive()) {
           var rcGroupId = chatReCreator.recreateMessengerChat(chat);
-          chatReCreator.recreateChat(chat, rcGroupId);
+          chatReCreator.updateAsNextChat(chat, rcGroupId);
+        } else {
+          chatService.deleteChat(chat);
         }
       }
     } catch (RocketChatRemoveUserFromGroupException
