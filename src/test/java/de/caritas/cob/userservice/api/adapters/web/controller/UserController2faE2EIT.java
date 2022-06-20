@@ -691,7 +691,7 @@ class UserController2faE2EIT {
     var usersResource = mock(UsersResource.class);
     var userResource = mock(UserResource.class);
 
-    when(usersResource.search(eq(encodedUsername))).thenReturn(userRepresentationList);
+    when(usersResource.search(encodedUsername)).thenReturn(userRepresentationList);
     when(usersResource.get(keycloakId)).thenReturn(userResource);
 
     var realmResource = mock(RealmResource.class);

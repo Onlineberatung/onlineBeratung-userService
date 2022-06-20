@@ -291,8 +291,7 @@ class UserControllerSessionE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
-  public void createEnquiryMessageWithShouldReturnIfMessageWasSentWithE2Ee()
-      throws Exception {
+  void createEnquiryMessageWithShouldReturnIfMessageWasSentWithE2Ee() throws Exception {
     givenAUserWithASessionNotEnquired();
     givenValidRocketChatTechUserResponse();
     givenValidRocketChatCreationResponse();
@@ -319,8 +318,7 @@ class UserControllerSessionE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
-  public void createEnquiryMessageShouldTransmitOriginalMessage()
-      throws Exception {
+  void createEnquiryMessageShouldTransmitOriginalMessage() throws Exception {
     givenAUserWithASessionNotEnquired();
     givenValidRocketChatTechUserResponse();
     givenValidRocketChatCreationResponse();
@@ -405,7 +403,7 @@ class UserControllerSessionE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
-  public void getSessionsForGroupOrFeedbackGroupIdsShouldFindSessionsByGroupOrFeedbackGroup()
+  void getSessionsForGroupOrFeedbackGroupIdsShouldFindSessionsByGroupOrFeedbackGroup()
       throws Exception {
     givenAUserWithSessions();
     givenNoRocketChatSubscriptionUpdates();
@@ -426,7 +424,7 @@ class UserControllerSessionE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void getSessionsForGroupOrFeedbackGroupIdsShouldFindSessionsByGroupOrFeedbackGroupForConsultant()
+  void getSessionsForGroupOrFeedbackGroupIdsShouldFindSessionsByGroupOrFeedbackGroupForConsultant()
       throws Exception {
     givenAConsultantWithSessions();
     givenNoRocketChatSubscriptionUpdates();
@@ -461,8 +459,7 @@ class UserControllerSessionE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
-  public void getSessionsForGroupOrFeedbackGroupIdsShouldFindSessionByGroupId()
-      throws Exception {
+  void getSessionsForGroupOrFeedbackGroupIdsShouldFindSessionByGroupId() throws Exception {
     givenAUserWithSessions();
     givenNoRocketChatSubscriptionUpdates();
     givenNoRocketChatRoomUpdates();
@@ -482,7 +479,7 @@ class UserControllerSessionE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
-  public void getSessionsForGroupOrFeedbackGroupIdsShouldContainConsultantOfUserSession()
+  void getSessionsForGroupOrFeedbackGroupIdsShouldContainConsultantOfUserSession()
       throws Exception {
     givenAUserWithSessions();
     givenNoRocketChatSubscriptionUpdates();
@@ -507,7 +504,7 @@ class UserControllerSessionE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
-  public void getSessionsForGroupOrFeedbackGroupIdsShouldBeForbiddenIfUserDoesNotParticipateInSession()
+  void getSessionsForGroupOrFeedbackGroupIdsShouldBeForbiddenIfUserDoesNotParticipateInSession()
       throws Exception {
     givenAUserWithSessions();
     givenNoRocketChatSubscriptionUpdates();
@@ -525,7 +522,7 @@ class UserControllerSessionE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void getSessionsForGroupOrFeedbackGroupIdsShouldBeForbiddenIfConsultantDoesNotParticipateInSession()
+  void getSessionsForGroupOrFeedbackGroupIdsShouldBeForbiddenIfConsultantDoesNotParticipateInSession()
       throws Exception {
     givenAConsultantWithSessions();
     givenNoRocketChatSubscriptionUpdates();
@@ -543,7 +540,7 @@ class UserControllerSessionE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void getSessionsForGroupOrFeedbackGroupIdsShouldBeNoContentIfNoSessionsFoundForIds()
+  void getSessionsForGroupOrFeedbackGroupIdsShouldBeNoContentIfNoSessionsFoundForIds()
       throws Exception {
     givenAConsultantWithSessions();
     givenNoRocketChatSubscriptionUpdates();
@@ -561,7 +558,7 @@ class UserControllerSessionE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void getSessionsForGroupOrFeedbackGroupIdsShouldReturnSessionsForNewEnquiriesOfConsultantInAgency()
+  void getSessionsForGroupOrFeedbackGroupIdsShouldReturnSessionsForNewEnquiriesOfConsultantInAgency()
       throws Exception {
     givenAConsultantWithSessionsOfNewEnquiries();
     givenNoRocketChatSubscriptionUpdates();
@@ -581,7 +578,7 @@ class UserControllerSessionE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void getSessionsForGroupOrFeedbackGroupIdsShouldReturnForbiddenForNewEnquiriesForConsultantsNotInAgency()
+  void getSessionsForGroupOrFeedbackGroupIdsShouldReturnForbiddenForNewEnquiriesForConsultantsNotInAgency()
       throws Exception {
     givenAConsultantWithSessions();
     givenNoRocketChatSubscriptionUpdates();
@@ -815,7 +812,7 @@ class UserControllerSessionE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  public void updateMonitoringShouldRespondWithBadRequestIfSessionIsUnknown() throws Exception {
+  void updateMonitoringShouldRespondWithBadRequestIfSessionIsUnknown() throws Exception {
     givenAValidConsultant();
     givenAValidMonitoringDto();
 
@@ -831,7 +828,7 @@ class UserControllerSessionE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  public void updateMonitoringShouldRespondWithUnauthorizedIfNotAdvisedByConsultant()
+  void updateMonitoringShouldRespondWithUnauthorizedIfNotAdvisedByConsultant()
       throws Exception {
     givenAValidConsultant();
     givenAValidSession();
