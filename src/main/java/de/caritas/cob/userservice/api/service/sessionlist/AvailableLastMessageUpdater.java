@@ -48,8 +48,11 @@ public class AvailableLastMessageUpdater {
     latestMessageSetter.accept(roomsLastMessage.getTimestamp());
     session.setAttachment(sessionListAnalyser
         .getAttachmentFromRocketChatMessageIfAvailable(rcUserId, roomsLastMessage));
-    if (nonNull(roomsLastMessage.getAlias())) {
-      session.setVideoCallMessageDTO(roomsLastMessage.getAlias().getVideoCallMessageDTO());
+
+    var alias = roomsLastMessage.getAlias();
+    if (nonNull(alias)) {
+      session.setVideoCallMessageDTO(alias.getVideoCallMessageDTO());
+      session.setLastMessageType(alias.getMessageType());
     }
   }
 

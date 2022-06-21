@@ -1862,6 +1862,8 @@ components:
           $ref: '#/components/schemas/LastMessageDTO'
         lastMessage:
           type: string
+        lastMessageType:
+          $ref: '#/components/schemas/MessageType'
         messageDate:
           type: integer
           format: int64
