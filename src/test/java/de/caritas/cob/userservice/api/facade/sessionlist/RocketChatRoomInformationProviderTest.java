@@ -114,4 +114,19 @@ public class RocketChatRoomInformationProviderTest {
         .get("4711aaGc");
     assertEquals(fallbackDate, fallbackDateOfRoom);
   }
+
+  @Test
+  public void should_not_fail_on_rooms_without_fallback_date() {
+    var roomUpdateWithoutLastMessage = new RoomsUpdateDTO("4711aaGc", "room without last message and date",
+        "fname13", "e2e", USER_DTO_3, true, false, new Date(), null, null);
+    var rooms = new ArrayList<>(ROOMS_UPDATE_DTO_LIST);
+    rooms.add(roomUpdateWithoutLastMessage);
+    when(rocketChatService.getRoomsOfUser(RC_CREDENTIALS)).thenReturn(rooms);
+
+    RocketChatRoomInformation rocketChatRoomInformation = rocketChatRoomInformationProvider.retrieveRocketChatInformation(
+        RC_CREDENTIALS);
+
+    assertNotNull(rocketChatRoomInformation.getGroupIdToLastMessageFallbackDate());
+    assertTrue(rocketChatRoomInformation.getGroupIdToLastMessageFallbackDate().isEmpty());
+  }
 }
