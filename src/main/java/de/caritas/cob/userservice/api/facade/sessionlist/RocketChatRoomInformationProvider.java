@@ -89,6 +89,7 @@ public class RocketChatRoomInformationProvider {
       List<RoomsUpdateDTO> roomsForUpdate) {
     return roomsForUpdate.stream()
         .filter(room -> !isLastMessageAndTimestampForRocketChatRoomAvailable(room))
+        .filter(room -> nonNull(room.getLastMessageDate()))
         .collect(Collectors.toMap(RoomsUpdateDTO::getId, RoomsUpdateDTO::getLastMessageDate));
   }
 
