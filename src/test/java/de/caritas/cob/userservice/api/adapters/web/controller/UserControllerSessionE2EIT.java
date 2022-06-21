@@ -8,6 +8,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_USER_ID
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_USER_ID_HEADER_PARAMETER_NAME;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -365,7 +366,7 @@ class UserControllerSessionE2EIT {
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   void getSessionsForAuthenticatedConsultantShouldReturnGroupChats() throws Exception {
     givenAValidUser();
-    givenAValidConsultant();
+    givenAValidConsultant(true);
     givenAValidChat();
     givenAnEmptyRocketChatGetSubscriptionsResponse();
     givenAValidRocketChatGetRoomsResponse(null, null, "A message");
@@ -393,7 +394,7 @@ class UserControllerSessionE2EIT {
   void getSessionsForAuthenticatedConsultantShouldReturnSessionsLastMessageTypeE2eeActivated()
       throws Exception {
     givenAValidUser();
-    givenAValidConsultant();
+    givenAValidConsultant(true);
     givenASessionInProgress();
     givenAValidRocketChatGetRoomsResponse(session.getGroupId(), MessageType.E2EE_ACTIVATED, null);
     givenAnEmptyRocketChatGetSubscriptionsResponse();
@@ -417,13 +418,12 @@ class UserControllerSessionE2EIT {
         .andExpect(jsonPath("sessions[0].chat", is(nullValue())));
   }
 
-
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   void getSessionsForAuthenticatedConsultantShouldReturnSessionsLastMessageTypeFurtherSteps()
       throws Exception {
     givenAValidUser();
-    givenAValidConsultant();
+    givenAValidConsultant(true);
     givenASessionInProgress();
     givenAValidRocketChatGetRoomsResponse(session.getGroupId(), MessageType.FURTHER_STEPS,
         "A message");
@@ -452,7 +452,7 @@ class UserControllerSessionE2EIT {
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   void getSessionsForAuthenticatedConsultantShouldNotReturnTeamSessions() throws Exception {
     givenAValidUser();
-    givenAValidConsultant();
+    givenAValidConsultant(true);
     givenATeamSessionOfAColleagueInProgress();
     givenAnEmptyRocketChatGetSubscriptionsResponse();
     givenAValidRocketChatGetRoomsResponse(null, null, "A message");
@@ -468,6 +468,35 @@ class UserControllerSessionE2EIT {
             .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
             .accept(MediaType.APPLICATION_JSON)
     ).andExpect(status().isNoContent());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
+  void getSessionsForAuthenticatedUserShouldReturnSessionsLastMessageTypeE2eeActivated()
+      throws Exception {
+    givenAValidUser(true);
+    givenAValidConsultant();
+    givenASessionInProgress();
+    givenAValidRocketChatSystemUser();
+    givenAValidRocketChatGetRoomsResponse(session.getGroupId(), MessageType.E2EE_ACTIVATED, null);
+    givenAnEmptyRocketChatGetSubscriptionsResponse();
+    user.getSessions().forEach(session ->
+        givenAValidRocketChatInfoUserResponse(session.getConsultant())
+    );
+
+    mockMvc.perform(
+            get("/users/sessions/askers")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("sessions", hasSize(2)))
+        .andExpect(jsonPath("sessions[*].session.lastMessageType",
+            containsInAnyOrder("E2EE_ACTIVATED", null)))
+        .andExpect(jsonPath("sessions[0].chat", is(nullValue())))
+        .andExpect(jsonPath("sessions[1].chat", is(nullValue())));
   }
 
   @Test
@@ -666,7 +695,7 @@ class UserControllerSessionE2EIT {
   @Test
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
   void removeFromSessionShouldReturnForbiddenIfSessionIdFormatIsInvalid() throws Exception {
-    givenAValidConsultant();
+    givenAValidConsultant(true);
     var sessionId = RandomStringUtils.randomAlphabetic(8);
 
     mockMvc.perform(
@@ -711,7 +740,7 @@ class UserControllerSessionE2EIT {
   @Test
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
   void removeFromSessionShouldReturnNotFoundIfSessionDoesNotExist() throws Exception {
-    givenAValidConsultant();
+    givenAValidConsultant(true);
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
 
@@ -729,7 +758,7 @@ class UserControllerSessionE2EIT {
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
   void removeFromSessionShouldReturnNoContentAndIgnoreRemovalIfNotInChat(CapturedOutput logOutput)
       throws Exception {
-    givenAValidConsultant();
+    givenAValidConsultant(true);
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
     givenAValidSession();
@@ -760,7 +789,7 @@ class UserControllerSessionE2EIT {
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
   void removeFromSessionShouldReturnNoContentAndIgnoreRemovalIfNotTeaming(CapturedOutput logOutput)
       throws Exception {
-    givenAValidConsultant();
+    givenAValidConsultant(true);
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
     givenAValidSession();
@@ -791,7 +820,7 @@ class UserControllerSessionE2EIT {
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
   void removeFromSessionShouldReturnNoContentAndRemoveConsultantFromSessionNotFromFeedbackChat(
       CapturedOutput logOutput) throws Exception {
-    givenAValidConsultant();
+    givenAValidConsultant(true);
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
     givenAValidSession();
@@ -822,7 +851,7 @@ class UserControllerSessionE2EIT {
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
   void removeFromSessionShouldReturnNoContentAndRemoveConsultantFromSessionAndFeedbackChat(
       CapturedOutput logOutput) throws Exception {
-    givenAValidConsultant();
+    givenAValidConsultant(true);
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
     givenAValidSession();
@@ -854,7 +883,7 @@ class UserControllerSessionE2EIT {
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
   void removeFromSessionShouldReturnNoContentAndIgnoreRemovalIfAssigned(CapturedOutput logOutput)
       throws Exception {
-    givenAValidConsultant();
+    givenAValidConsultant(true);
     givenAValidSession();
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse(session.getConsultant());
@@ -882,7 +911,7 @@ class UserControllerSessionE2EIT {
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   void updateMonitoringShouldRespondWithBadRequestIfSessionIsUnknown() throws Exception {
-    givenAValidConsultant();
+    givenAValidConsultant(true);
     givenAValidMonitoringDto();
 
     mockMvc.perform(
@@ -899,7 +928,7 @@ class UserControllerSessionE2EIT {
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   void updateMonitoringShouldRespondWithUnauthorizedIfNotAdvisedByConsultant()
       throws Exception {
-    givenAValidConsultant();
+    givenAValidConsultant(true);
     givenAValidSession();
     givenAValidMonitoringDto();
 
@@ -1001,17 +1030,35 @@ class UserControllerSessionE2EIT {
   }
 
   private void givenAValidConsultant() {
+    givenAValidConsultant(false);
+  }
+
+  private void givenAValidConsultant(boolean isAuthUser) {
     consultant = consultantRepository.findAll().iterator().next();
-    when(authenticatedUser.getUserId()).thenReturn(consultant.getId());
-    when(authenticatedUser.isAdviceSeeker()).thenReturn(false);
-    when(authenticatedUser.isConsultant()).thenReturn(true);
-    when(authenticatedUser.getUsername()).thenReturn(consultant.getUsername());
-    when(authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.CONSULTANT.getValue()));
-    when(authenticatedUser.getGrantedAuthorities()).thenReturn(Set.of("anAuthority"));
+    if (isAuthUser) {
+      when(authenticatedUser.getUserId()).thenReturn(consultant.getId());
+      when(authenticatedUser.isAdviceSeeker()).thenReturn(false);
+      when(authenticatedUser.isConsultant()).thenReturn(true);
+      when(authenticatedUser.getUsername()).thenReturn(consultant.getUsername());
+      when(authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.CONSULTANT.getValue()));
+      when(authenticatedUser.getGrantedAuthorities()).thenReturn(Set.of("anAuthority"));
+    }
   }
 
   private void givenAValidUser() {
+    givenAValidUser(false);
+  }
+
+  private void givenAValidUser(boolean isAuthUser) {
     user = userRepository.findAll().iterator().next();
+    if (isAuthUser) {
+      when(authenticatedUser.getUserId()).thenReturn(user.getUserId());
+      when(authenticatedUser.isAdviceSeeker()).thenReturn(true);
+      when(authenticatedUser.isConsultant()).thenReturn(false);
+      when(authenticatedUser.getUsername()).thenReturn(user.getUsername());
+      when(authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.USER.getValue()));
+      when(authenticatedUser.getGrantedAuthorities()).thenReturn(Set.of("anotherAuthority"));
+    }
   }
 
   private void givenAValidChat() {
