@@ -22,6 +22,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.ROOMS_UPDA
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.SESSION_ATTACHMENT_DTO_NOT_RECEIVED;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.SESSION_ATTACHMENT_DTO_RECEIVED;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERS_ROOMS_LIST;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -31,12 +32,14 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
 import de.caritas.cob.userservice.api.facade.sessionlist.RocketChatRoomInformationProvider;
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
+import java.util.Date;
+import java.util.Map;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -67,6 +70,7 @@ public class ConsultantSessionEnricherTest {
             .readMessages(MESSAGES_READ_MAP_WITHOUT_UNREADS)
             .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
             .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .groupIdToLastMessageFallbackDate(emptyMap())
             .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
@@ -92,6 +96,7 @@ public class ConsultantSessionEnricherTest {
             .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
             .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
             .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .groupIdToLastMessageFallbackDate(emptyMap())
             .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
@@ -117,6 +122,7 @@ public class ConsultantSessionEnricherTest {
             .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
             .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
             .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .groupIdToLastMessageFallbackDate(emptyMap())
             .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
@@ -145,6 +151,7 @@ public class ConsultantSessionEnricherTest {
         RocketChatRoomInformation.builder()
             .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
             .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .groupIdToLastMessageFallbackDate(emptyMap())
             .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
             .userRooms(USERS_ROOMS_LIST)
             .build();
@@ -172,6 +179,7 @@ public class ConsultantSessionEnricherTest {
         RocketChatRoomInformation.builder()
             .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
             .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .groupIdToLastMessageFallbackDate(emptyMap())
             .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
             .userRooms(USERS_ROOMS_LIST)
             .build();
@@ -199,6 +207,7 @@ public class ConsultantSessionEnricherTest {
         RocketChatRoomInformation.builder()
             .readMessages(MESSAGES_READ_MAP_WITH_ONE_FEEDBACK_UNREAD)
             .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
+            .groupIdToLastMessageFallbackDate(emptyMap())
             .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
             .userRooms(USERS_ROOMS_LIST)
             .build();
@@ -225,6 +234,7 @@ public class ConsultantSessionEnricherTest {
             .readMessages(MESSAGES_READ_MAP_WITHOUT_UNREADS)
             .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
             .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .groupIdToLastMessageFallbackDate(emptyMap())
             .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
@@ -246,6 +256,7 @@ public class ConsultantSessionEnricherTest {
             .readMessages(MESSAGES_READ_MAP_WITHOUT_UNREADS)
             .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
             .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .groupIdToLastMessageFallbackDate(emptyMap())
             .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
@@ -266,6 +277,7 @@ public class ConsultantSessionEnricherTest {
         RocketChatRoomInformation.builder()
             .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
             .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .groupIdToLastMessageFallbackDate(emptyMap())
             .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
             .userRooms(USERS_ROOMS_LIST)
             .build();
@@ -296,6 +308,7 @@ public class ConsultantSessionEnricherTest {
             .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
             .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
             .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .groupIdToLastMessageFallbackDate(emptyMap())
             .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
@@ -320,6 +333,7 @@ public class ConsultantSessionEnricherTest {
             .readMessages(MESSAGES_READ_MAP_WITHOUT_UNREADS)
             .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
             .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .groupIdToLastMessageFallbackDate(emptyMap())
             .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
@@ -346,6 +360,7 @@ public class ConsultantSessionEnricherTest {
             .readMessages(MESSAGES_READ_MAP_WITHOUT_UNREADS)
             .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
             .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .groupIdToLastMessageFallbackDate(emptyMap())
             .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
@@ -368,6 +383,7 @@ public class ConsultantSessionEnricherTest {
             .readMessages(MESSAGES_READ_MAP_WITHOUT_UNREADS)
             .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
             .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .groupIdToLastMessageFallbackDate(emptyMap())
             .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
@@ -394,6 +410,7 @@ public class ConsultantSessionEnricherTest {
         RocketChatRoomInformation.builder()
             .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
             .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .groupIdToLastMessageFallbackDate(emptyMap())
             .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
             .userRooms(USERS_ROOMS_LIST)
             .build();
@@ -417,6 +434,7 @@ public class ConsultantSessionEnricherTest {
         RocketChatRoomInformation.builder()
             .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
             .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .groupIdToLastMessageFallbackDate(emptyMap())
             .readMessages(MESSAGES_READ_MAP_WITHOUT_UNREADS)
             .userRooms(USERS_ROOMS_LIST)
             .build();
@@ -440,6 +458,7 @@ public class ConsultantSessionEnricherTest {
         RocketChatRoomInformation.builder()
             .readMessages(MESSAGES_READ_MAP_WITHOUT_UNREADS)
             .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
+            .groupIdToLastMessageFallbackDate(emptyMap())
             .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
             .userRooms(USERS_ROOMS_LIST)
             .build();
@@ -460,4 +479,27 @@ public class ConsultantSessionEnricherTest {
     assertThat(result.getLatestMessage(), is(toDate(createDate)));
   }
 
+  @Test
+  public void updateRequiredConsultantSessionValues_should_use_fallback_date_if_last_message_is_unavailable() {
+    var fallbackDates = Map.of(RC_GROUP_ID, new Date(1655730882738L));
+    RocketChatRoomInformation rocketChatRoomInformation =
+        RocketChatRoomInformation.builder()
+            .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .groupIdToLastMessageFallbackDate(fallbackDates)
+            .userRooms(USERS_ROOMS_LIST)
+            .build();
+    when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
+        .thenReturn(rocketChatRoomInformation);
+    when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
+        Mockito.any(), Mockito.any())).thenReturn(false);
+    when(consultingTypeManager.getConsultingTypeSettings(anyInt()))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
+
+    ConsultantSessionResponseDTO result = consultantSessionEnricher.updateRequiredConsultantSessionValues(
+        singletonList(CONSULTANT_SESSION_RESPONSE_DTO), RC_TOKEN, CONSULTANT).get(0);
+
+    assertEquals(Long.valueOf(1655730882L), result.getSession().getMessageDate());
+  }
 }

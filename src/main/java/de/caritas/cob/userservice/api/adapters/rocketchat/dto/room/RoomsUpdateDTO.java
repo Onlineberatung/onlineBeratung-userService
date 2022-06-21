@@ -33,5 +33,7 @@ public class RoomsUpdateDTO {
   @JsonProperty("_updatedAt")
   private Date updatedAt;
   private RoomsLastMessageDTO lastMessage;
+  @JsonProperty("lm")
+  private Date lastMessageDate;
 
 }
