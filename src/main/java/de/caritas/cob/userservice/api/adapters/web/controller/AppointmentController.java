@@ -70,7 +70,8 @@ public class AppointmentController implements AppointmentsApi {
 
   @Override
   public ResponseEntity<List<Appointment>> getAppointments() {
-    var appointments = organizer.findAllTodaysAndFutureAppointments().stream()
+    var appointments = organizer.findAllTodaysAndFutureAppointments(currentUser.getUserId())
+        .stream()
         .map(appointmentMap -> mapper.appointmentOf(appointmentMap, currentUser.isConsultant()))
         .collect(Collectors.toList());
 
