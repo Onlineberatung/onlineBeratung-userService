@@ -56,6 +56,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.IdentityManager;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.web.dto.EmailDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.MobileTokenDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.OneTimePasswordDTO;
@@ -93,7 +94,6 @@ import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.archive.SessionArchiveService;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
@@ -2709,6 +2709,48 @@ class UserControllerAuthorizationIT {
   void getSessionsForGroupOrFeedbackGroupIds_should_return_unauthorized_and_call_no_methods_when_no_keycloak_authorization()
       throws Exception {
     mvc.perform(get("/users/sessions/room?rcGroupIds=mzAdWzQEobJ2PkoxP")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isUnauthorized());
+
+    verifyNoMoreInteractions(authenticatedUser, sessionService, sessionRepository);
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USE_FEEDBACK,
+      AuthorityValue.TECHNICAL_DEFAULT,
+      AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+      AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.START_CHAT, AuthorityValue.STOP_CHAT,
+      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS, AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY, AuthorityValue.USER_ADMIN})
+  void getSessionForId_should_return_forbidden_and_call_no_methods_when_no_user_or_consultant_authority()
+      throws Exception {
+    mvc.perform(get("/users/sessions/room/1235678")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+    verifyNoInteractions(identityManager);
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT, AuthorityValue.CONSULTANT_DEFAULT})
+  void getSessionForId_should_return_forbidden_and_call_no_methods_when_no_csrf_token_given()
+      throws Exception {
+    mvc.perform(get("/users/sessions/room/1235678")
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+    verifyNoInteractions(identityManager);
+  }
+
+  @Test
+  void getSessionForId_should_return_unauthorized_and_call_no_methods_when_no_keycloak_authorization()
+      throws Exception {
+    mvc.perform(get("/users/sessions/room/1235678")
             .cookie(CSRF_COOKIE)
             .header(CSRF_HEADER, CSRF_VALUE)
             .accept(MediaType.APPLICATION_JSON))
