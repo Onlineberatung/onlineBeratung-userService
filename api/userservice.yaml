@@ -1585,6 +1585,9 @@ components:
         consultantId:
           type: string
           description: UUID
+        mainTopicId:
+          type: integer
+          example: 15
 
     SessionDataDTO:
       allOf:

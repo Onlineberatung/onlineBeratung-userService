@@ -180,7 +180,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 
   /**
    * Use the KeycloakSpringBootConfigResolver to be able to save the Keycloak settings in the spring
-   * application properties.
+   * applicatiobn properties.
    */
   @Bean
   public KeycloakConfigResolver keyCloakConfigResolver() {
