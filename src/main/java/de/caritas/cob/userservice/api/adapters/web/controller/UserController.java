@@ -1036,7 +1036,7 @@ public class UserController implements UsersApi {
 
     if (Boolean.parseBoolean(validationResult.get("created"))) {
       var patchMap = userDtoMapper.mapOf(validationResult.get("email"), authenticatedUser);
-      accountManager.patchUser(patchMap).orElseThrow();
+      accountManager.patchUser(patchMap);
       return ResponseEntity.noContent().build();
     }
     if (Boolean.parseBoolean(validationResult.get("attemptsLeft"))) {
