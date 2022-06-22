@@ -105,14 +105,9 @@ public class UserSessionListService {
 
     session.setMessagesRead(sessionListAnalyser.areMessagesForRocketChatGroupReadByUser(
         rocketChatRoomInformation.getReadMessages(), groupId));
-    if (sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
-        rocketChatRoomInformation.getLastMessagesRoom(), groupId)) {
-      new AvailableLastMessageUpdater(this.sessionListAnalyser)
-          .updateSessionWithAvailableLastMessage(rocketChatRoomInformation, rcUserId,
-              userSessionDTO::setLatestMessage, session, groupId);
-    } else {
-      userSessionDTO.setLatestMessage(Helper.UNIXTIME_0);
-    }
+    var messageUpdater = new AvailableLastMessageUpdater(this.sessionListAnalyser);
+    messageUpdater.updateSessionWithAvailableLastMessage(userSessionDTO.getSession(),
+        userSessionDTO::setLatestMessage, rocketChatRoomInformation, rcUserId);
     return userSessionDTO;
   }
 
