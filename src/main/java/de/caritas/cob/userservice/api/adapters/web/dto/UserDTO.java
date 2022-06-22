@@ -107,6 +107,10 @@ public class UserDTO implements UserRegistrationDTO {
   @JsonProperty("tenantId")
   private Long tenantId;
 
+  @ApiModelProperty(required = false, example = "\"2\"", position = 13)
+  @JsonProperty("mainTopicId")
+  private Integer mainTopicId;
+
   public UserDTO(String email) {
     this.email = email;
   }
@@ -138,6 +142,8 @@ public class UserDTO implements UserRegistrationDTO {
         + ", state='" + state + '\''
         + ", termsAccepted='" + termsAccepted + '\''
         + ", consultingType='" + consultingType + '\''
+        + ", tenantId='" + tenantId + '\''
+        + ", mainTopicId='" + mainTopicId + '\''
         + '}';
   }
 }

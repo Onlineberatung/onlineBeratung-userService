@@ -196,6 +196,7 @@ public class SessionService {
         .monitoring(retrieveCheckedMonitoringProperty(extendedConsultingTypeResponseDTO))
         .createDate(nowInUtc())
         .updateDate(nowInUtc())
+        .mainTopicId(userDto.getMainTopicId())
         .build();
     return saveSession(session);
   }

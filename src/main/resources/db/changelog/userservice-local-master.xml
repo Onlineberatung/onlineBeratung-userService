@@ -33,4 +33,5 @@
   <include
     file="db/changelog/changeset/0026_add_notify_new_messages_from_advice_seeker/0026_changeSet.xml"/>
   <include file="db/changelog/changeset/0025_consultant_agency_status/0025_changeSet.xml"/>
+  <include file="db/changelog/changeset/0028_session_main_topic/0026_changeSet.xml"/>
 </databaseChangeLog>

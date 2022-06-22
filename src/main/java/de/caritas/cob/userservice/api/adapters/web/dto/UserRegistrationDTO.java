@@ -11,4 +11,6 @@ public interface UserRegistrationDTO {
   boolean isNewUserAccount();
 
   String getConsultantId();
+
+  Integer getMainTopicId();
 }
