@@ -20,6 +20,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERS_ROOM
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_CHAT_RESPONSE_DTO_LIST;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_SESSION_RESPONSE_DTO_LIST;
+import static java.util.Collections.emptyMap;
 import static java.util.Objects.nonNull;
 import static org.jsoup.helper.Validate.fail;
 import static org.junit.Assert.assertEquals;
@@ -65,6 +66,8 @@ public class UserSessionListServiceTest {
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
             .readMessages(MESSAGES_READ_MAP_WITHOUT_UNREADS)
+            .lastMessagesRoom(emptyMap())
+            .groupIdToLastMessageFallbackDate(emptyMap())
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(RC_CREDENTIALS))
         .thenReturn(rocketChatRoomInformation);
@@ -111,6 +114,8 @@ public class UserSessionListServiceTest {
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
             .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
+            .lastMessagesRoom(emptyMap())
+            .groupIdToLastMessageFallbackDate(emptyMap())
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(RC_CREDENTIALS))
         .thenReturn(rocketChatRoomInformation);
@@ -164,8 +169,6 @@ public class UserSessionListServiceTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(RC_CREDENTIALS))
         .thenReturn(rocketChatRoomInformation);
-    when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
-        Mockito.any(), Mockito.any())).thenReturn(true);
 
     List<UserSessionResponseDTO> result =
         userSessionListService.retrieveSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS);
@@ -188,8 +191,6 @@ public class UserSessionListServiceTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(RC_CREDENTIALS))
         .thenReturn(rocketChatRoomInformation);
-    when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
-        Mockito.any(), Mockito.any())).thenReturn(true);
 
     List<UserSessionResponseDTO> result =
         userSessionListService.retrieveSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS);
@@ -212,8 +213,6 @@ public class UserSessionListServiceTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(RC_CREDENTIALS))
         .thenReturn(rocketChatRoomInformation);
-    when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
-        Mockito.any(), Mockito.any())).thenReturn(true);
     when(sessionListAnalyser
         .getAttachmentFromRocketChatMessageIfAvailable(
             Mockito.eq(RC_CREDENTIALS.getRocketChatUserId()),
@@ -237,6 +236,7 @@ public class UserSessionListServiceTest {
         RocketChatRoomInformation.builder()
             .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT_FOR_CHAT)
             .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .groupIdToLastMessageFallbackDate(emptyMap())
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(RC_CREDENTIALS))
         .thenReturn(rocketChatRoomInformation);
