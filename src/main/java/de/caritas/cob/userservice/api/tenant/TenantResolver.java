@@ -1,13 +1,16 @@
 package de.caritas.cob.userservice.api.tenant;
 
+import static de.caritas.cob.userservice.api.config.auth.UserRole.TECHNICAL;
+import static de.caritas.cob.userservice.api.config.auth.UserRole.TENANT_ADMIN;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
-
 import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.SubdomainExtractor;
 import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.keycloak.representations.AccessToken;
-import org.keycloak.representations.AccessToken.Access;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
@@ -49,8 +51,23 @@ public class TenantResolver {
   }
 
   private Long resolveForAuthenticatedUser(HttpServletRequest request) {
-    return isTechnicalUserRole(request) ? TECHNICAL_TENANT_ID
+    return isTechnicalOrTenantSuperAdminUserRole(request) ? TECHNICAL_TENANT_ID
         : resolveForAuthenticatedNonTechnicalUser(request);
+  }
+
+  private boolean isTechnicalOrTenantSuperAdminUserRole(HttpServletRequest request) {
+    return containsAnyRole(request, TECHNICAL.getValue(), TENANT_ADMIN.getValue());
+  }
+
+  private boolean containsAnyRole(HttpServletRequest request, String... expectedRoles) {
+    AccessToken token = ((KeycloakAuthenticationToken) request.getUserPrincipal()).getAccount()
+        .getKeycloakSecurityContext().getToken();
+    if (hasRoles(token)) {
+      Set<String> roles = token.getRealmAccess().getRoles();
+      return containsAny(roles, expectedRoles);
+    } else {
+      return false;
+    }
   }
 
   private Long resolveForAuthenticatedNonTechnicalUser(HttpServletRequest request) {
@@ -69,7 +86,8 @@ public class TenantResolver {
 
     Optional<Long> tenantFromHeader = tenantHeaderSupplier.getTenantFromHeader();
     if (tenantFromHeader.isPresent()) {
-      var currentSubdomain = tenantService.getRestrictedTenantData(tenantFromHeader.get()).getSubdomain();
+      var currentSubdomain = tenantService.getRestrictedTenantData(tenantFromHeader.get())
+          .getSubdomain();
       TenantContext.setCurrentSubdomain(currentSubdomain);
       return tenantFromHeader;
     }
@@ -102,16 +120,12 @@ public class TenantResolver {
     return getUserTenantIdAttribute(claimMap);
   }
 
-  private boolean isTechnicalUserRole(HttpServletRequest request) {
-    AccessToken token = ((KeycloakAuthenticationToken) request.getUserPrincipal()).getAccount()
-        .getKeycloakSecurityContext().getToken();
-    var accountResourceAccess = token.getResourceAccess("account");
-    return hasRoles(accountResourceAccess) && accountResourceAccess.getRoles()
-        .contains("technical");
+  private boolean containsAny(Set<String> roles, String... expectedRoles) {
+    return Arrays.stream(expectedRoles).anyMatch(roles::contains);
   }
 
-  private boolean hasRoles(Access accountResourceAccess) {
-    return accountResourceAccess != null && accountResourceAccess.getRoles() != null;
+  private boolean hasRoles(AccessToken accessToken) {
+    return accessToken.getRealmAccess() != null && accessToken.getRealmAccess().getRoles() != null;
   }
 
   private boolean userIsAuthenticated(HttpServletRequest request) {

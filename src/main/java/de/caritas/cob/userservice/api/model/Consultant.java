@@ -176,6 +176,7 @@ public class Consultant implements TenantAware {
 
   @Column(name = "status", length = 11)
   @Enumerated(EnumType.STRING)
+  @Field
   private ConsultantStatus status = ConsultantStatus.IN_PROGRESS;
 
   @Column(name = "walk_through_enabled", columnDefinition = "tinyint", nullable = false)

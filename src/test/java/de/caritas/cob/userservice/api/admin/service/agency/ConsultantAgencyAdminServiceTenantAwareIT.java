@@ -201,7 +201,7 @@ public class ConsultantAgencyAdminServiceTenantAwareIT {
     ConsultantAgency validRelation = this.consultantAgencyRepository.findAll().iterator().next();
     String consultantId = validRelation.getConsultant().getId();
     Long agencyId = validRelation.getAgencyId();
-    when(this.agencyService.getAgency(any())).thenReturn(new AgencyDTO().teamAgency(false));
+    when(this.agencyService.getAgencyWithoutCaching(any())).thenReturn(new AgencyDTO().teamAgency(false));
 
     this.consultantAgencyAdminService.markConsultantAgencyForDeletion(consultantId, agencyId);
 

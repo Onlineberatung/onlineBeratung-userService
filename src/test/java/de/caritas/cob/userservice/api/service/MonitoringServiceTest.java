@@ -49,7 +49,7 @@ public class MonitoringServiceTest {
   private final Long SESSION_ID = 123L;
   private final Session SESSION =
       new Session(SESSION_ID, null, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, null,
-          null, IN_PROGRESS, null, null, null, null, false, false, false, null, null, null);
+          null, IN_PROGRESS, null, null, null, null, false, false, false, null, null, null, null);
   private final MonitoringDTO MONITORING_DTO = new MonitoringDTO();
 
   @Before

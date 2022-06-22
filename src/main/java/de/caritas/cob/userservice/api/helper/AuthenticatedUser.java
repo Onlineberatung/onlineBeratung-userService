@@ -44,6 +44,16 @@ public class AuthenticatedUser {
   }
 
   @JsonIgnore
+  public boolean isSingleTenantAdmin() {
+    return nonNull(roles) && roles.contains(UserRole.SINGLE_TENANT_ADMIN.getValue());
+  }
+
+  @JsonIgnore
+  public boolean isTenantSuperAdmin() {
+    return nonNull(roles) && roles.contains(UserRole.TENANT_ADMIN.getValue());
+  }
+
+  @JsonIgnore
   public boolean isAnonymous() {
     return nonNull(roles) && roles.contains(UserRole.ANONYMOUS.getValue());
   }

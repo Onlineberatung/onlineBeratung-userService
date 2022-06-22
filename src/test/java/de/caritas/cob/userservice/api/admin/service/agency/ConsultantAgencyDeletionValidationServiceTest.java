@@ -12,12 +12,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
-import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import org.jeasy.random.EasyRandom;
@@ -48,7 +48,7 @@ public class ConsultantAgencyDeletionValidationServiceTest {
     consultantAgency.setDeleteDate(null);
     when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(any()))
         .thenReturn(singletonList(consultantAgency));
-    when(this.agencyService.getAgency(any())).thenReturn(new AgencyDTO().offline(false));
+    when(this.agencyService.getAgencyWithoutCaching(any())).thenReturn(new AgencyDTO().offline(false));
 
     try {
       this.agencyDeletionValidationService.validateAndMarkForDeletion(consultantAgency);
@@ -65,7 +65,7 @@ public class ConsultantAgencyDeletionValidationServiceTest {
     consultantAgency.setDeleteDate(null);
     when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(any()))
         .thenReturn(singletonList(consultantAgency));
-    when(this.agencyService.getAgency(any())).thenReturn(new AgencyDTO().offline(true));
+    when(this.agencyService.getAgencyWithoutCaching(any())).thenReturn(new AgencyDTO().offline(true));
     when(this.sessionRepository.findByAgencyIdAndStatusAndConsultantIsNull(any(), any()))
         .thenReturn(singletonList(mock(Session.class)));
 
@@ -84,7 +84,7 @@ public class ConsultantAgencyDeletionValidationServiceTest {
     consultantAgency.setDeleteDate(null);
     when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(any()))
         .thenReturn(singletonList(consultantAgency));
-    when(this.agencyService.getAgency(any())).thenThrow(new InternalServerErrorException(""));
+    when(this.agencyService.getAgencyWithoutCaching(any())).thenThrow(new InternalServerErrorException(""));
 
     this.agencyDeletionValidationService.validateAndMarkForDeletion(consultantAgency);
   }
@@ -95,7 +95,7 @@ public class ConsultantAgencyDeletionValidationServiceTest {
     consultantAgency.setDeleteDate(null);
     when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(any()))
         .thenReturn(singletonList(consultantAgency));
-    when(this.agencyService.getAgency(any())).thenReturn(new AgencyDTO().offline(true));
+    when(this.agencyService.getAgencyWithoutCaching(any())).thenReturn(new AgencyDTO().offline(true));
 
     assertDoesNotThrow(
         () -> this.agencyDeletionValidationService.validateAndMarkForDeletion(consultantAgency));

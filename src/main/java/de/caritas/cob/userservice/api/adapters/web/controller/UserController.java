@@ -64,6 +64,7 @@ import de.caritas.cob.userservice.api.facade.sessionlist.SessionListFacade;
 import de.caritas.cob.userservice.api.facade.userdata.AskerDataProvider;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataProvider;
+import de.caritas.cob.userservice.api.facade.userdata.KeycloakUserDataProvider;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.EnquiryData;
@@ -104,6 +105,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.MapUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -163,6 +165,9 @@ public class UserController implements UsersApi {
   private final @NonNull ConsultantDataProvider consultantDataProvider;
   private final @NonNull AskerDataProvider askerDataProvider;
   private final @NonNull VideoChatConfig videoChatConfig;
+  private final @NonNull KeycloakUserDataProvider keycloakUserDataProvider;
+  @Value("${multitenancy.enabled}")
+  private boolean multiTenancyEnabled;
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
@@ -371,11 +376,12 @@ public class UserController implements UsersApi {
       accountManager.findConsultant(authenticatedUser.getUserId()).ifPresent(consultantMap ->
           partialUserData.setDisplayName(userDtoMapper.displayNameOf(consultantMap))
       );
+    } else if (multiTenancyEnabled && isTenantAdmin()) {
+      partialUserData = keycloakUserDataProvider.retrieveAuthenticatedUserData();
     } else {
       var user = userAccountProvider.retrieveValidatedUser();
       partialUserData = askerDataProvider.retrieveData(user);
     }
-
     var otpInfoDTO = identityClientConfig.isOtpAllowed(authenticatedUser.getRoles())
         ? identityManager.getOtpCredential(authenticatedUser.getUsername())
         : null;
@@ -388,11 +394,16 @@ public class UserController implements UsersApi {
     return new ResponseEntity<>(fullUserData, HttpStatus.OK);
   }
 
+  private boolean isTenantAdmin() {
+    return authenticatedUser.isSingleTenantAdmin() || authenticatedUser.isTenantSuperAdmin();
+  }
+
   @Override
   public ResponseEntity<Void> patchUser(PatchUserDTO patchUserDTO) {
     var patchMap = userDtoMapper.mapOf(patchUserDTO, authenticatedUser).orElseThrow(() ->
         new BadRequestException("Invalid payload: at least one property must be set")
     );
+
     accountManager.patchUser(patchMap).orElseThrow();
 
     return ResponseEntity.noContent().build();
@@ -1097,7 +1108,7 @@ public class UserController implements UsersApi {
 
     if (Boolean.parseBoolean(validationResult.get("created"))) {
       var patchMap = userDtoMapper.mapOf(validationResult.get("email"), authenticatedUser);
-      accountManager.patchUser(patchMap).orElseThrow();
+      accountManager.patchUser(patchMap);
       return ResponseEntity.noContent().build();
     }
     if (Boolean.parseBoolean(validationResult.get("attemptsLeft"))) {
@@ -1123,6 +1134,12 @@ public class UserController implements UsersApi {
     }
     if (authenticatedUser.isConsultant() && !identityClientConfig.getOtpAllowedForConsultants()) {
       throw new ConflictException("2FA is disabled for consultant role");
+    }
+    if (authenticatedUser.isSingleTenantAdmin() && !identityClientConfig.getOtpAllowedForSingleTenantAdmins()) {
+      throw new ConflictException("2FA is disabled for single tenant admin role");
+    }
+    if (authenticatedUser.isTenantSuperAdmin() && !identityClientConfig.getOtpAllowedForTenantSuperAdmins()) {
+      throw new ConflictException("2FA is disabled for tenant admin role");
     }
 
     var isValid = identityManager.setUpOneTimePassword(

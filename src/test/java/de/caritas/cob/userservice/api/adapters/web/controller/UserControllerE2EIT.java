@@ -848,7 +848,6 @@ class UserControllerE2EIT {
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
   public void deactivateAndFlagUserAccountForDeletionShouldDeactivateAndRespondWithOkIf2faIsOff()
-
       throws Exception {
     givenAValidUser();
     givenADeleteUserAccountDto();

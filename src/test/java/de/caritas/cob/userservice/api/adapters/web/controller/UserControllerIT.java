@@ -4,6 +4,7 @@ import static de.caritas.cob.userservice.api.exception.httpresponses.customheade
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.api.model.Session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_ACCEPT_ENQUIRY;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_ACTIVATE_2FA;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_ARCHIVE_SESSION;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_ARCHIVE_SESSION_INVALID_PATH_VAR;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_CREATE_ENQUIRY_MESSAGE;
@@ -56,6 +57,7 @@ import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_REGIS
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_SEND_NEW_MESSAGE_NOTIFICATION;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_UPDATE_KEY;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_USER_DATA;
+import static de.caritas.cob.userservice.api.testHelper.RequestBodyConstants.ACTIVATE_2FA_BODY;
 import static de.caritas.cob.userservice.api.testHelper.RequestBodyConstants.INVALID_NEW_REGISTRATION_BODY_WITHOUT_AGENCY_ID;
 import static de.caritas.cob.userservice.api.testHelper.RequestBodyConstants.INVALID_NEW_REGISTRATION_BODY_WITHOUT_CONSULTING_TYPE;
 import static de.caritas.cob.userservice.api.testHelper.RequestBodyConstants.INVALID_NEW_REGISTRATION_BODY_WITHOUT_POSTCODE;
@@ -134,6 +136,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.util.Sets;
 import de.caritas.cob.userservice.api.actions.registry.ActionContainer;
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
@@ -150,6 +153,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.validation.MandatoryFieldsProvider;
@@ -184,6 +188,7 @@ import de.caritas.cob.userservice.api.facade.sessionlist.SessionListFacade;
 import de.caritas.cob.userservice.api.facade.userdata.AskerDataProvider;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataProvider;
+import de.caritas.cob.userservice.api.facade.userdata.KeycloakUserDataProvider;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
 import de.caritas.cob.userservice.api.helper.UserHelper;
@@ -229,6 +234,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.service.spi.ServiceException;
 import org.jeasy.random.EasyRandom;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -246,6 +252,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 
 @RunWith(SpringRunner.class)
@@ -301,19 +308,19 @@ public class UserControllerIT {
   private final Session SESSION = new Session(SESSION_ID, USER, TEAM_CONSULTANT,
       CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, AGENCY_ID, null, SessionStatus.IN_PROGRESS,
       nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, false, nowInUtc(),
-      null, null);
+      null, null, null);
   private final Session SESSION_WITHOUT_CONSULTANT =
       new Session(SESSION_ID, USER, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, AGENCY_ID,
           null, SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION,
-          IS_MONITORING, false, nowInUtc(), null, null);
+          IS_MONITORING, false, nowInUtc(), null, null, null);
   private final Session TEAM_SESSION =
       new Session(SESSION_ID, USER, TEAM_CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE,
           AGENCY_ID, null, SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null,
-          IS_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null, null);
+          IS_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null, null, null);
   private final Session TEAM_SESSION_WITHOUT_GROUP_ID =
       new Session(SESSION_ID, USER, TEAM_CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE,
           AGENCY_ID, null, SessionStatus.IN_PROGRESS, nowInUtc(), null, null, null, IS_TEAM_SESSION,
-          IS_MONITORING, false, nowInUtc(), null, null);
+          IS_MONITORING, false, nowInUtc(), null, null, null);
   private final ConsultantResponseDTO CONSULTANT_RESPONSE_DTO = new ConsultantResponseDTO()
       .consultantId(CONSULTANT_ID)
       .firstName(FIRST_NAME)
@@ -332,6 +339,9 @@ public class UserControllerIT {
 
   @Autowired
   private MockMvc mvc;
+
+  @Autowired
+  private UserController userController;
 
   @MockBean
   private ValidatedUserAccountProvider accountProvider;
@@ -433,6 +443,11 @@ public class UserControllerIT {
   @MockBean
   @SuppressWarnings("unused")
   private AskerDataProvider askerDataProvider;
+
+  @MockBean
+  @SuppressWarnings("unused")
+  private KeycloakUserDataProvider keycloakUserDataProvider;
+
   @MockBean
   @SuppressWarnings("unused")
   private VideoChatConfig videoChatConfig;
@@ -453,6 +468,12 @@ public class UserControllerIT {
     setInternalState(UserController.class, "log", logger);
     setInternalState(LogService.class, "LOGGER", logger);
     setInternalState(ApiResponseEntityExceptionHandler.class, "log", logger);
+  }
+
+  @After
+  public void tearDown() {
+    ReflectionTestUtils
+        .setField(userController, "multiTenancyEnabled", false);
   }
 
   /**
@@ -488,7 +509,7 @@ public class UserControllerIT {
   public void registerUser_Should_ReturnBadRequest_WhenProvidedWithConsultingTypeWithMandatoryFieldsAndInvalidState()
       throws Exception {
 
-    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
+    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(anyString()))
         .thenReturn(
             MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(
                 CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS.getRegistration()
@@ -516,6 +537,48 @@ public class UserControllerIT {
   }
 
   @Test
+  public void activateTwoFactorAuthByApp_Should_NotActivateIfSingleTenantAdminButNotConfiguredToUse2Fa()
+      throws Exception {
+    when(authenticatedUser.isSingleTenantAdmin()).thenReturn(true);
+    when(identityClientConfig.getOtpAllowedForSingleTenantAdmins()).thenReturn(false);
+
+    mvc.perform(put(PATH_ACTIVATE_2FA)
+            .content(ACTIVATE_2FA_BODY)
+            .characterEncoding("UTF-8")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isConflict());
+  }
+
+  @Test
+  public void activateTwoFactorAuthByApp_Should_NotActivateIfTenantSuperAdminButNotConfiguredToUse2Fa()
+      throws Exception {
+    when(authenticatedUser.isTenantSuperAdmin()).thenReturn(true);
+    when(identityClientConfig.getOtpAllowedForTenantSuperAdmins()).thenReturn(false);
+
+    mvc.perform(put(PATH_ACTIVATE_2FA)
+            .content(ACTIVATE_2FA_BODY)
+            .characterEncoding("UTF-8")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isConflict());
+  }
+
+  @Test
+  public void activateTwoFactorAuthByApp_Should_Activate()
+      throws Exception {
+    when(authenticatedUser.getUsername()).thenReturn("username");
+    when(identityManager.setUpOneTimePassword(anyString(), anyString(), anyString())).thenReturn(true);
+
+    mvc.perform(put(PATH_ACTIVATE_2FA)
+            .content(ACTIVATE_2FA_BODY)
+            .characterEncoding("UTF-8")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+  }
+
+  @Test
   public void registerUser_Should_ReturnBadRequest_WhenProvidedUsernameIsTooLong()
       throws Exception {
 
@@ -533,7 +596,7 @@ public class UserControllerIT {
   public void registerUser_Should_ReturnCreated_WhenProvidedWithValidRequestBodyAndKeycloakResponseIsSuccessful()
       throws Exception {
 
-    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
+    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(anyString()))
         .thenReturn(MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(
             CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS.getRegistration()
                 .getMandatoryFields()));
@@ -549,7 +612,7 @@ public class UserControllerIT {
   public void registerUser_Should_ReturnCreated_WhenProvidedWithValidU25RequestBodyAndKeycloakResponseIsSuccessful()
       throws Exception {
 
-    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
+    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(anyString()))
         .thenReturn(
             MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(
                 CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS.getRegistration()
@@ -566,7 +629,7 @@ public class UserControllerIT {
   public void registerUser_Should_ReturnConflict_WhenProvidedWithValidRequestBodyAndKeycloakResponseIsConflict()
       throws Exception {
 
-    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
+    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(anyString()))
         .thenReturn(
             MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(
                 CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS.getRegistration()
@@ -585,7 +648,7 @@ public class UserControllerIT {
   public void registerUser_Should_ReturnBadRequest_When_PostcodeIsMissing()
       throws Exception {
 
-    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
+    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(anyString()))
         .thenReturn(MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(
             CONSULTING_TYPE_SETTINGS_SUCHT.getRegistration().getMandatoryFields()));
 
@@ -601,7 +664,7 @@ public class UserControllerIT {
   public void registerUser_Should_ReturnBadRequest_When_PostcodeIsInvalid()
       throws Exception {
 
-    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
+    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(anyString()))
         .thenReturn(MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(
             CONSULTING_TYPE_SETTINGS_SUCHT.getRegistration().getMandatoryFields()));
 
@@ -930,7 +993,7 @@ public class UserControllerIT {
 
     var displayName = RandomStringUtils.randomAlphanumeric(16);
     Map<String, Object> map = Map.of("displayName", displayName);
-    when(userDtoMapper.displayNameOf(eq(map))).thenReturn(displayName);
+    when(userDtoMapper.displayNameOf(map)).thenReturn(displayName);
     when(accountManager.findConsultantByUsername(anyString())).thenReturn(Optional.of(map));
 
     response.getSessions().get(0).getConsultant().setDisplayName(displayName);
@@ -1051,7 +1114,7 @@ public class UserControllerIT {
         .andExpect(status().isUnauthorized());
 
     var stackTrace = ExceptionUtils.getStackTrace(unauthorizedException);
-    verify(logger).warn(eq(stackTrace));
+    verify(logger).warn(stackTrace);
     assertTrue(stackTrace.contains(
         "Could not get Rocket.Chat subscriptions for user ID userId: Token is not active (401 Unauthorized)"
     ));
@@ -1215,6 +1278,21 @@ public class UserControllerIT {
             .cookie(RC_TOKEN_COOKIE)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
+  }
+
+  @Test
+  public void getUserData_ForSingleTenantAdmin_Should_ReturnUserDataFromKeycloak()
+      throws Exception {
+    ReflectionTestUtils
+        .setField(userController, "multiTenancyEnabled", true);
+    when(authenticatedUser.isSingleTenantAdmin()).thenReturn(true);
+    when(keycloakUserDataProvider.retrieveAuthenticatedUserData()).thenReturn(new UserDataResponseDTO());
+
+    mvc.perform(get(PATH_USER_DATA)
+            .contentType(MediaType.APPLICATION_JSON)
+            .cookie(RC_TOKEN_COOKIE)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().is(HttpStatus.OK.value()));
   }
 
   /**
@@ -1733,7 +1811,7 @@ public class UserControllerIT {
   @Test
   public void registerUser_Should_DecodePassword() throws Exception {
 
-    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(Mockito.anyString()))
+    when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(anyString()))
         .thenReturn(MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(
             CONSULTING_TYPE_SETTINGS_WITHOUT_MANDATORY_FIELDS.getRegistration()
                 .getMandatoryFields()));
@@ -2397,7 +2475,7 @@ public class UserControllerIT {
       session.getUser().setSessions(Set.of(session));
     }
 
-    when(sessionService.getSession(eq(sessionId)))
+    when(sessionService.getSession(sessionId))
         .thenReturn(Optional.of(session));
 
     return sessionId;
@@ -2408,7 +2486,7 @@ public class UserControllerIT {
     var actionContainer = (ActionContainer<SessionDeletionWorkflowDTO>) mock(ActionContainer.class);
     when(actionContainer.addActionToExecute(DeleteSingleRoomAndSessionAction.class))
         .thenReturn(actionContainer);
-    when(actionsRegistry.buildContainerForType(eq(SessionDeletionWorkflowDTO.class)))
+    when(actionsRegistry.buildContainerForType(SessionDeletionWorkflowDTO.class))
         .thenReturn(actionContainer);
 
     return actionContainer;
@@ -2419,7 +2497,7 @@ public class UserControllerIT {
     var actionContainer = (ActionContainer<User>) mock(ActionContainer.class);
     when(actionContainer.addActionToExecute(DeactivateKeycloakUserActionCommand.class))
         .thenReturn(actionContainer);
-    when(actionsRegistry.buildContainerForType(eq(User.class)))
+    when(actionsRegistry.buildContainerForType(User.class))
         .thenReturn(actionContainer);
 
     return actionContainer;

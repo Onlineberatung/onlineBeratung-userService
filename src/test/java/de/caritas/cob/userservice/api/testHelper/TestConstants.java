@@ -73,6 +73,8 @@ public class TestConstants {
   public static final String HOST_BASE_URL = "https://beratung.caritas.de";
   public static final String APPLICATION_BASE_URL_FIELD_NAME = "applicationBaseUrl";
   public static final String POSTCODE = "12345";
+  public static final String OTP = "122321";
+  public static final String SECRET = "secretjwNHxEG6dvu5kIjxyMo1GrB1vp";
   public static final String INVALID_POSTCODE = "1234";
   public static final String NAME = "testname";
   public static final String CITY = "testcity";
@@ -353,10 +355,10 @@ public class TestConstants {
       new AuthenticatedUser(CONSULTANT_ID, USERNAME, null, ACCESS_TOKEN, null);
   public static final UserDTO USER_DTO_SUCHT =
       new UserDTO(USERNAME, POSTCODE, AGENCY_ID, PASSWORD, EMAIL, null, null,
-          "true", Integer.toString(CONSULTING_TYPE_ID_SUCHT), "", true, null);
+          "true", Integer.toString(CONSULTING_TYPE_ID_SUCHT), "", true, null, null);
   public static final UserDTO USER_DTO_KREUZBUND =
       new UserDTO(USERNAME, POSTCODE, AGENCY_ID, PASSWORD, EMAIL, null, null,
-          "true", Integer.toString(CONSULTING_TYPE_ID_KREUZBUND), "", true, null);
+          "true", Integer.toString(CONSULTING_TYPE_ID_KREUZBUND), "", true, null, null);
   public static final UserDTO USER_DTO_WITH_AGE =
       new UserDTO(VALID_AGE, null, Integer.toString(CONSULTING_TYPE_ID_U25));
   public static final UserDTO USER_DTO_WITH_INVALID_AGE =
@@ -415,9 +417,9 @@ public class TestConstants {
    * ConsultantAgency
    */
   public static final ConsultantAgency[] CONSULTANT_AGENCY = new ConsultantAgency[]{
-      new ConsultantAgency(1L, CONSULTANT, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc(), null)};
+      new ConsultantAgency(1L, CONSULTANT, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc(), null, null)};
   public static final ConsultantAgency CONSULTANT_AGENCY_2 =
-      new ConsultantAgency(2L, CONSULTANT, AGENCY_ID_2, nowInUtc(), nowInUtc(), nowInUtc(), null);
+      new ConsultantAgency(2L, CONSULTANT, AGENCY_ID_2, nowInUtc(), nowInUtc(), nowInUtc(), null, null);
   public static final Set<ConsultantAgency> CONSULTANT_AGENCY_SET =
       new HashSet<>(Arrays.asList(CONSULTANT_AGENCY));
   public static final Consultant CONSULTANT_WITH_AGENCY = new Consultant(CONSULTANT_ID,
@@ -449,52 +451,53 @@ public class TestConstants {
   public static final Long ENQUIRY_ID_2 = 2L;
   public static final Session SESSION =
       new Session(SESSION_ID, null, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, null,
-          null, IN_PROGRESS, null, null, null, null, false, false, false, nowInUtc(), null, null);
+          null, IN_PROGRESS, null, null, null, null, false, false, false, nowInUtc(), null, null, null);
   public static final Session SESSION_WITH_CONSULTANT =
       new Session(SESSION_ID, null, CONSULTANT_2, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE,
           AGENCY_ID, null, IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, false, false, false,
-          nowInUtc(), null, null);
+          nowInUtc(), null, null, null);
   public static final Session SESSION_WITH_ASKER_AND_CONSULTANT =
       new Session(SESSION_ID, USER_WITH_RC_ID, CONSULTANT_2, CONSULTING_TYPE_ID_SUCHT, REGISTERED,
           POSTCODE, AGENCY_ID, null, IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, false, false,
-          false, nowInUtc(), null, null);
+          false, nowInUtc(), null, null, null);
   public static final Session TEAM_SESSION_WITH_ASKER_AND_CONSULTANT =
       new Session(SESSION_ID, USER_WITH_RC_ID, CONSULTANT_2, CONSULTING_TYPE_ID_SUCHT, REGISTERED,
           POSTCODE, AGENCY_ID, null, IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, true, false,
-          false, nowInUtc(), null, null);
+          false, nowInUtc(), null, null, null);
   public static final Session FEEDBACK_SESSION_WITH_ASKER_AND_CONSULTANT =
       new Session(SESSION_ID, USER_WITH_RC_ID, CONSULTANT_2, CONSULTING_TYPE_ID_SUCHT, REGISTERED,
           POSTCODE, AGENCY_ID, null, IN_PROGRESS, nowInUtc(), RC_GROUP_ID, RC_FEEDBACK_GROUP_ID_2,
-          null, true, false, false, nowInUtc(), null, null);
+          null, true, false, false, nowInUtc(), null, null, null);
   public static final Session ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT =
       new Session(SESSION_ID, null, null, CONSULTING_TYPE_ID_SUCHT, ANONYMOUS, POSTCODE, AGENCY_ID,
           null, SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null, false, false, false,
-          nowInUtc(), null, null);
+          nowInUtc(), null, null, null);
   public static final Session SESSION_WITHOUT_CONSULTANT = new Session(SESSION_ID, USER_WITH_RC_ID,
       null, CONSULTING_TYPE_ID_U25, REGISTERED, POSTCODE, AGENCY_ID, null, SessionStatus.NEW, null,
-      RC_GROUP_ID, null, null, IS_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null, null);
+      RC_GROUP_ID, null, null, IS_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null, null, null);
   public static final Session FEEDBACKSESSION_WITHOUT_CONSULTANT = new Session(SESSION_ID,
       USER_WITH_RC_ID, null, CONSULTING_TYPE_ID_U25, REGISTERED, POSTCODE, AGENCY_ID, null,
       SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null, IS_TEAM_SESSION,
-      IS_MONITORING, false, nowInUtc(), null, null);
+      IS_MONITORING, false, nowInUtc(), null, null, null);
   public static final Session FEEDBACKSESSION_WITH_CONSULTANT =
       new Session(SESSION_ID, USER_WITH_RC_ID, CONSULTANT_2, CONSULTING_TYPE_ID_U25, REGISTERED,
           POSTCODE, AGENCY_ID, null, IN_PROGRESS, nowInUtc(), RC_GROUP_ID, RC_FEEDBACK_GROUP_ID,
-          null, IS_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null, null);
+          null, IS_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null, null, null);
   public static final Session SESSION_WITHOUT_CONSULTANT_NO_RC_USER_ID =
       new Session(TEAM_SESSION_ID, USER_NO_RC_USER_ID_2, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED,
           POSTCODE, AGENCY_ID, null, SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null,
-          IS_NO_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null, null);
+          IS_NO_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null, null, null);
   public static final Session U25_SESSION_WITHOUT_CONSULTANT = new Session(SESSION_ID,
       USER_WITH_RC_ID, null, CONSULTING_TYPE_ID_U25, REGISTERED, POSTCODE, AGENCY_ID, null,
       SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null, IS_TEAM_SESSION,
-      IS_MONITORING, false, nowInUtc(), null, null);
+      IS_MONITORING, false, nowInUtc(), null, null, null);
   public static final List<Session> SESSION_LIST = Collections.singletonList(SESSION);
   public static final Set<Session> SESSION_SET = new HashSet<>(
       Arrays.asList(U25_SESSION_WITHOUT_CONSULTANT, SESSION_WITHOUT_CONSULTANT_NO_RC_USER_ID));
   public static final User USER_WITH_SESSIONS =
       new User(USER_ID, null, USERNAME, EMAIL, RC_USER_ID, IS_LANGUAGE_FORMAL, SESSION_SET, null,
           null, null, null, null, null, nowInUtc(), null);
+
   public static final SessionDTO SESSION_DTO_SUCHT = new SessionDTO()
       .id(SESSION_ID)
       .agencyId(AGENCY_ID)

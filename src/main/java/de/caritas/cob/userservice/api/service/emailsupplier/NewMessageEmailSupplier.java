@@ -112,7 +112,7 @@ public class NewMessageEmailSupplier implements EmailSupplier {
     } else {
       if (isNotBlank(session.getConsultant().getEmail())) {
         return singletonList(new ConsultantAgency(null, session.getConsultant(), null,
-            nowInUtc(), nowInUtc(), null, null));
+            nowInUtc(), nowInUtc(), null, null, null));
       }
     }
     return emptyList();

@@ -9,9 +9,12 @@ import de.caritas.cob.userservice.api.admin.service.rocketchat.RocketChatAddToGr
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.ConsultantAgencyStatus;
 import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
+import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
@@ -39,6 +42,7 @@ public class RocketChatAsyncHelper {
   private final @NonNull IdentityClient identityClient;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
   private final @NonNull ConsultantRepository consultantRepository;
+  private final @NonNull ConsultantAgencyRepository consultantAgencyRepository;
   private final @NonNull MailService mailService;
   @Value("${app.base.url}")
   private String applicationBaseUrl;
@@ -56,18 +60,30 @@ public class RocketChatAsyncHelper {
           .onSessions(relevantSessions)
           .withConsultant(consultant)
           .addToGroupsOrRollbackOnFailure();
-      updateConsultantStatus(consultant, ConsultantStatus.CREATED);
+      updateConsultantStatus(consultant, agency);
     } catch (Exception e) {
-      updateConsultantStatus(consultant, ConsultantStatus.ERROR);
+      consultant.setStatus(ConsultantStatus.ERROR);
+      consultantRepository.save(consultant);
       sendErrorEmail(consultant, e);
       log.error("Error happened during rocket chat session assignments", e);
     }
     TenantContext.clear();
   }
 
-  private void updateConsultantStatus(Consultant consultant, ConsultantStatus status) {
-    consultant.setStatus(status);
-    consultantRepository.save(consultant);
+  private void updateConsultantStatus(Consultant consultant, AgencyDTO agencyDTO) {
+    ConsultantAgency consultantAgency = consultantAgencyRepository
+        .findByConsultantIdAndAgencyIdAndStatusAndDeleteDateIsNull(consultant.getId(),
+            agencyDTO.getId(), ConsultantAgencyStatus.IN_PROGRESS);
+
+    consultantAgency.setStatus(ConsultantAgencyStatus.CREATED);
+    List<ConsultantAgency> consultantAgencies = consultantAgencyRepository
+        .findByConsultantIdAndStatusAndDeleteDateIsNull(consultant.getId(),
+            ConsultantAgencyStatus.IN_PROGRESS);
+    if (consultantAgencies.size() == 0) {
+      consultant.setStatus(ConsultantStatus.CREATED);
+      consultantRepository.save(consultant);
+    }
+
   }
 
   private void sendErrorEmail(Consultant consultant, Exception exception) {

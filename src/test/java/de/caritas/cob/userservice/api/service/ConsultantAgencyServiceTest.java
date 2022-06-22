@@ -49,13 +49,13 @@ public class ConsultantAgencyServiceTest {
           null, null, null, null, null, true, true, true, true, null, null,
           ConsultantStatus.CREATED, false);
   private final ConsultantAgency CONSULTANT_AGENCY =
-      new ConsultantAgency(AGENCY_ID, CONSULTANT, 1L, nowInUtc(), nowInUtc(), nowInUtc(), null);
+      new ConsultantAgency(AGENCY_ID, CONSULTANT, 1L, nowInUtc(), nowInUtc(), nowInUtc(), null, null);
   private final List<ConsultantAgency> CONSULTANT_AGENY_LIST = Arrays.asList(CONSULTANT_AGENCY);
   private final ConsultantAgency NULL_CONSULTANT_AGENCY = null;
   private final List<ConsultantAgency> CONSULTANT_AGENCY_NULL_LIST =
       Arrays.asList(NULL_CONSULTANT_AGENCY);
   private final ConsultantAgency CONSULTANT_NULL_AGENCY = new ConsultantAgency(AGENCY_ID, null, 1L,
-      nowInUtc(), nowInUtc(), nowInUtc(), null);
+      nowInUtc(), nowInUtc(), nowInUtc(), null, null);
   private final List<ConsultantAgency> CONSULTANT_NULL_AGENCY_LIST =
       Arrays.asList(CONSULTANT_NULL_AGENCY);
   private final String ERROR = "error";

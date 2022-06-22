@@ -5,6 +5,8 @@ import static de.caritas.cob.userservice.api.adapters.web.dto.AgencyTypeDTO.Agen
 import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.Sort.FieldEnum;
+import de.caritas.cob.userservice.api.adapters.web.dto.Sort.OrderEnum;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyConsultantResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyTypeDTO;
@@ -20,9 +22,14 @@ import de.caritas.cob.userservice.api.admin.service.agency.ConsultantAgencyAdmin
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFilterService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
+import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.CreateConsultantAgencyDTOInputAdapter;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.service.LogService;
+import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -60,19 +67,39 @@ public class ConsultantAdminFacade {
    */
   public ConsultantSearchResultDTO findFilteredConsultants(Integer page, Integer perPage,
       ConsultantFilter consultantFilter, Sort sort) {
+    sort = getValidSorter(sort);
     var filteredConsultants = this.consultantAdminFilterService
         .findFilteredConsultants(page, perPage, consultantFilter, sort);
-    retriveAndMergeAgenciesToConsultants(filteredConsultants);
+    retrieveAndMergeAgenciesToConsultants(filteredConsultants);
 
     return filteredConsultants;
   }
 
-  private void retriveAndMergeAgenciesToConsultants(ConsultantSearchResultDTO filteredConsultants) {
+  private Sort getValidSorter(Sort sort) {
+    if (sort == null || Stream.of(FieldEnum.values())
+        .noneMatch(providedSortFieldIgnoringCase(sort))) {
+      sort = new Sort();
+      sort.setField(FieldEnum.LASTNAME);
+      sort.setOrder(OrderEnum.ASC);
+    }
+    return sort;
+  }
+
+  private Predicate<FieldEnum> providedSortFieldIgnoringCase(Sort sort) {
+    return field -> {
+      if (nonNull(sort.getField())) {
+        return field.getValue().equalsIgnoreCase(sort.getField().getValue());
+      }
+      return false;
+    };
+  }
+
+  private void retrieveAndMergeAgenciesToConsultants(
+      ConsultantSearchResultDTO filteredConsultants) {
     if (nonNull(filteredConsultants)) {
       var consultants = filteredConsultants.getEmbedded().stream()
           .map(ConsultantAdminResponseDTO::getEmbedded)
           .collect(Collectors.toSet());
-
       consultantAgencyAdminService.appendAgenciesForConsultants(consultants);
     }
   }
@@ -149,8 +176,14 @@ public class ConsultantAdminFacade {
     this.consultantAgencyAdminService.markConsultantAgencyForDeletion(consultantId, agencyId);
   }
 
-  public void markConsultantAgenciesForDeletion(String consultantId) {
-    consultantAgencyAdminService.markConsultantAgenciesForDeletion(consultantId);
+  /**
+   * Marks given list of agencies assigned to given consultant for deletion.
+   *
+   * @param consultantId given consultant id
+   * @param agencyIds    agencies that need to be removed from consultant
+   */
+  public void markConsultantAgenciesForDeletion(String consultantId, List<Long> agencyIds) {
+    consultantAgencyAdminService.markConsultantAgenciesForDeletion(consultantId, agencyIds);
   }
 
   /**
@@ -172,4 +205,73 @@ public class ConsultantAdminFacade {
     var parsedAgencyId = Long.valueOf(agencyId);
     return this.consultantAgencyAdminService.findConsultantsForAgency(parsedAgencyId);
   }
+
+  /**
+   * Creates consultant agencies from given consultant id and agencies list and sets to status
+   * IN_PROGRESS.
+   *
+   * @param consultantId given consultant
+   * @param agencies     list of agencies
+   */
+  public void prepareConsultantAgencyRelation(String consultantId,
+      List<CreateConsultantAgencyDTO> agencies) {
+    agencies.forEach(agency -> this.consultantAgencyRelationCreatorService
+        .prepareConsultantAgencyRelation(
+            new CreateConsultantAgencyDTOInputAdapter(consultantId, agency)));
+  }
+
+  /**
+   * Completes the assigment process of a consultant to given list of agencies and sets status of
+   * each relation to CREATED if successfully executed.
+   *
+   * @param consultantId
+   * @param agencies
+   */
+  public void completeConsultantAgencyAssigment(String consultantId,
+      List<CreateConsultantAgencyDTO> agencies) {
+    agencies.forEach(agency -> this.consultantAgencyRelationCreatorService
+        .completeConsultantAgencyAssigment(
+            new CreateConsultantAgencyDTOInputAdapter(consultantId, agency), LogService::logInfo));
+  }
+
+  /**
+   * Determines which agencies should be set for deletion process.
+   *
+   * @param consultantId given consultant
+   * @param newList      new list agencies that consultant belongs to
+   * @return filtered list of existing @{@link ConsultantAgency} ready for deletion
+   */
+  public List<Long> filterAgencyListForDeletion(String consultantId,
+      List<CreateConsultantAgencyDTO> newList) {
+    var newListIds = newList.stream().map(CreateConsultantAgencyDTO::getAgencyId)
+        .collect(Collectors.toList());
+    var persistedAgencyIds = consultantAgencyAdminService
+        .findConsultantAgencies(consultantId).getEmbedded().stream()
+        .map(agencyAdminResponse -> agencyAdminResponse.getEmbedded().getId())
+        .collect(Collectors.toList());
+    return persistedAgencyIds.stream()
+        .filter(persistedAgencyId -> !newListIds.contains(persistedAgencyId))
+        .collect(Collectors.toList());
+
+  }
+
+  /**
+   * Determines which from new agencies should be created.
+   *
+   * @param consultantId given consultant
+   * @param newList      new list of agencies that consultant belongs to
+   */
+  public void filterAgencyListForCreation(String consultantId,
+      List<CreateConsultantAgencyDTO> newList) {
+    var persistedAgencyIds = consultantAgencyAdminService
+        .findConsultantAgencies(consultantId).getEmbedded().stream()
+        .map(agencyAdminFullResponse -> agencyAdminFullResponse.getEmbedded().getId())
+        .collect(Collectors.toList());
+    var filteredList = newList.stream()
+        .filter(agency -> !persistedAgencyIds.contains(agency.getAgencyId()))
+        .collect(Collectors.toList());
+    newList.clear();
+    newList.addAll(filteredList);
+  }
+
 }

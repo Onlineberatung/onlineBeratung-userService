@@ -125,32 +125,32 @@ public class EmailNotificationFacadeTest {
   private final User USER = new User(USER_ID, null, USERNAME_ENCODED, "email@email.de", false);
   private final User USER_NO_EMAIL = new User(USER_ID, null, "username", "", false);
   private final ConsultantAgency CONSULTANT_AGENCY =
-      new ConsultantAgency(1L, CONSULTANT, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc(), null);
+      new ConsultantAgency(1L, CONSULTANT, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc(), null, null);
   private final ConsultantAgency CONSULTANT_AGENCY_2 =
-      new ConsultantAgency(1L, CONSULTANT2, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc(), null);
+      new ConsultantAgency(1L, CONSULTANT2, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc(), null, null);
   private final ConsultantAgency ABSENT_CONSULTANT_AGENCY =
       new ConsultantAgency(1L, ABSENT_CONSULTANT, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc(),
-          null);
+          null, null);
   private final Session SESSION =
       new Session(1L, USER, CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, "88045",
           AGENCY_ID, null, SessionStatus.INITIAL, nowInUtc(), RC_GROUP_ID, null, null,
-          IS_NO_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null, null);
+          IS_NO_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null, null, null);
   private final Session SESSION_WITHOUT_CONSULTANT =
       new Session(1L, USER, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED, "88045", AGENCY_ID, null,
           SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING,
-          false, nowInUtc(), null, null);
+          false, nowInUtc(), null, null, null);
   private final Session SESSION_IN_PROGRESS = new Session(1L, USER, CONSULTANT,
       CONSULTING_TYPE_ID_SUCHT, REGISTERED, "88045", AGENCY_ID, null, SessionStatus.IN_PROGRESS,
       nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, false, nowInUtc(),
-      null, null);
+      null, null, null);
   private final Session SESSION_IN_PROGRESS_NO_EMAIL = new Session(1L, USER_NO_EMAIL,
       CONSULTANT_NO_EMAIL, CONSULTING_TYPE_ID_SUCHT, REGISTERED, "88045", AGENCY_ID, null,
       SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION,
-      IS_MONITORING, false, nowInUtc(), null, null);
+      IS_MONITORING, false, nowInUtc(), null, null, null);
   private final Session TEAM_SESSION =
       new Session(1L, USER, CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, "12345", AGENCY_ID,
           null, SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, IS_TEAM_SESSION,
-          IS_MONITORING, false, nowInUtc(), null, null);
+          IS_MONITORING, false, nowInUtc(), null, null, null);
   private final AgencyDTO AGENCY_DTO = new AgencyDTO()
       .id(AGENCY_ID)
       .name(AGENCY_NAME)
