@@ -45,19 +45,19 @@ public class AuthenticatedUserHelperTest {
       null, null, null, null, null, true, null, null, ConsultantStatus.CREATED, false);
   private final Session SESSION = new Session(SESSION_ID, null, CONSULTANT,
       CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, AGENCY_ID, null, SessionStatus.NEW,
-      nowInUtc(), null, null, null, false, false, false, nowInUtc(), null, null);
+      nowInUtc(), null, null, null, false, false, false, nowInUtc(), null, null, null);
   private final Session SESSION_WITH_DIFFERENT_CONSULTANT =
       new Session(SESSION_ID, null, TEAM_CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE,
           AGENCY_ID, null, SessionStatus.NEW, nowInUtc(), null, null, null, false, false, false,
-          nowInUtc(), null, null);
+          nowInUtc(), null, null, null);
   private final Session TEAM_SESSION =
       new Session(TEAM_SESSION_ID, null, TEAM_CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED,
           POSTCODE, AGENCY_ID, null, SessionStatus.IN_PROGRESS, nowInUtc(), null, null, null,
-          IS_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null, null);
+          IS_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null, null, null);
   private final Session TEAM_SESSION_WITH_DIFFERENT_CONSULTANT =
       new Session(TEAM_SESSION_ID, null, CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE,
           AGENCY_ID, null, SessionStatus.IN_PROGRESS, nowInUtc(), null, null, null, IS_TEAM_SESSION,
-          IS_MONITORING, false, nowInUtc(), null, null);
+          IS_MONITORING, false, nowInUtc(), null, null, null);
 
   @InjectMocks
   private AuthenticatedUserHelper authenticatedUserHelper;
