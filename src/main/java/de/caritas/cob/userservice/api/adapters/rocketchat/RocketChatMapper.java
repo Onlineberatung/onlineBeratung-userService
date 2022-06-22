@@ -5,17 +5,23 @@ import static java.util.Objects.nonNull;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupUpdateKeyDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.Message;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.MuteUnmuteUser;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomResponse;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomSettingsDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.subscriptions.SubscriptionsGetDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.MuteUnmuteUser;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UpdateUser;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.User;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserInfoResponseDTO;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -105,5 +111,56 @@ public class RocketChatMapper {
     }
 
     return Optional.empty();
+  }
+
+  public Optional<List<Map<String, String>>> mapOfSubscriptionsResponse(
+      ResponseEntity<SubscriptionsGetDTO> subscriptionsResponse) {
+    var body = subscriptionsResponse.getBody();
+    if (nonNull(body)) {
+      var updates = body.getUpdate();
+      var list = new ArrayList<Map<String, String>>(updates.length);
+      for (var update : updates) {
+        var map = new HashMap<String, String>();
+        var e2eKey = update.getE2eKey();
+        if (nonNull(e2eKey)) {
+          map.put("e2eKey", e2eKey);
+        }
+        map.put("userId", update.getUser().getId());
+        map.put("roomId", update.getRoomId());
+        list.add(map);
+      }
+
+      return Optional.of(list);
+    }
+
+    return Optional.empty();
+  }
+
+  public GroupUpdateKeyDTO updateGroupKeyOf(String chatUserId, String roomId, String key) {
+    var updateGroupKey = new GroupUpdateKeyDTO();
+    updateGroupKey.setUid(chatUserId);
+    updateGroupKey.setRid(roomId);
+    updateGroupKey.setKey(key);
+
+    return updateGroupKey;
+  }
+
+  public List<Map<String, String>> mapOf(List<GroupMemberDTO> members) {
+    return members.stream()
+        .map(member ->
+            Map.of(
+                "chatUserId", member.get_id()
+            )
+        ).collect(Collectors.toList());
+  }
+
+  public Map<String, Object> mapOfRoomSettings(String chatId,  boolean encrypted) {
+    var roomSettings = new RoomSettingsDTO(chatId, encrypted);
+    var map = new HashMap<String, Object>();
+
+    map.put("rid", roomSettings.getRid());
+    map.put("encrypted", roomSettings.isEncrypted());
+
+    return map;
   }
 }

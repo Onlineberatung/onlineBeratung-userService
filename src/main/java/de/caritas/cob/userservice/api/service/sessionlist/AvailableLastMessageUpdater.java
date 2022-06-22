@@ -4,11 +4,12 @@ import static de.caritas.cob.userservice.api.adapters.web.dto.MessageType.FURTHE
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsLastMessageDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.LastMessageDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
-import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsLastMessageDTO;
 import java.util.Date;
 import java.util.function.Consumer;
 import lombok.NonNull;
@@ -38,25 +39,37 @@ public class AvailableLastMessageUpdater {
       Consumer<Date> latestMessageSetter, SessionDTO session, String groupId) {
 
     var roomsLastMessage = rocketChatRoomInformation.getLastMessagesRoom().get(groupId);
-    session.setLastMessage(extractLastMessageFrom(roomsLastMessage, groupId));
+    var lastMessage = extractLastMessage(roomsLastMessage, groupId);
+    session.setE2eLastMessage(lastMessage);
+    session.setLastMessage(lastMessage != null ? lastMessage.getMsg() : "");
 
     session.setMessageDate(Helper.getUnixTimestampFromDate(
         rocketChatRoomInformation.getLastMessagesRoom().get(groupId).getTimestamp()));
     latestMessageSetter.accept(roomsLastMessage.getTimestamp());
     session.setAttachment(sessionListAnalyser
         .getAttachmentFromRocketChatMessageIfAvailable(rcUserId, roomsLastMessage));
-    if (nonNull(roomsLastMessage.getAlias())) {
-      session.setVideoCallMessageDTO(roomsLastMessage.getAlias().getVideoCallMessageDTO());
+
+    var alias = roomsLastMessage.getAlias();
+    if (nonNull(alias)) {
+      session.setVideoCallMessageDTO(alias.getVideoCallMessageDTO());
+      session.setLastMessageType(alias.getMessageType());
     }
   }
 
-  private String extractLastMessageFrom(RoomsLastMessageDTO roomsLastMessageDTO, String groupId) {
-    if (isLastMessageFurtherStepsAlias(roomsLastMessageDTO)) {
-      return FURTHER_STEPS_MESSAGE;
+  private LastMessageDTO extractLastMessage(RoomsLastMessageDTO roomsLastMessage, String groupId) {
+    var lastMessage = new LastMessageDTO();
+    lastMessage.setT(roomsLastMessage.getType());
+
+    if (isLastMessageFurtherStepsAlias(roomsLastMessage)) {
+      lastMessage.setMsg(FURTHER_STEPS_MESSAGE);
+      return lastMessage;
     }
-    if (isNotBlank(roomsLastMessageDTO.getMessage())) {
-      return sessionListAnalyser
-          .prepareMessageForSessionList(roomsLastMessageDTO.getMessage(), groupId);
+
+    if (isNotBlank(roomsLastMessage.getMessage())) {
+      var message = sessionListAnalyser.prepareMessageForSessionList(
+          roomsLastMessage.getMessage(), groupId);
+      lastMessage.setMsg(message);
+      return lastMessage;
     }
     return null;
   }

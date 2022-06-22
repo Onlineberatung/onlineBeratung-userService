@@ -2,8 +2,8 @@ package de.caritas.cob.userservice.api.admin.hallink;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
-import de.caritas.cob.userservice.api.admin.model.HalLink;
-import de.caritas.cob.userservice.api.admin.model.HalLink.MethodEnum;
+import de.caritas.cob.userservice.api.adapters.web.dto.HalLink;
+import de.caritas.cob.userservice.api.adapters.web.dto.HalLink.MethodEnum;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpEntity;
 

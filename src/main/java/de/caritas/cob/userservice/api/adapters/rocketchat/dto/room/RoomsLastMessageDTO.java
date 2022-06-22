@@ -36,6 +36,8 @@ public class RoomsLastMessageDTO {
   private Date updatedAt;
   @JsonProperty("msg")
   private String message;
+  @JsonProperty("t")
+  private String type;
   @JsonProperty("file")
   private FileDTO file;
   @JsonProperty("attachments")

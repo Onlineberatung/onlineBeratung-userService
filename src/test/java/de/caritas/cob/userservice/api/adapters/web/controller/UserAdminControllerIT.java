@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.admin.controller;
+package de.caritas.cob.userservice.api.adapters.web.controller;
 
 import static org.hamcrest.Matchers.endsWith;
 import static org.mockito.ArgumentMatchers.any;
@@ -16,11 +16,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantAgencyDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
 import de.caritas.cob.userservice.api.admin.facade.UserAdminFacade;
-import de.caritas.cob.userservice.api.admin.model.CreateConsultantAgencyDTO;
-import de.caritas.cob.userservice.api.admin.model.CreateConsultantDTO;
-import de.caritas.cob.userservice.api.admin.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.config.auth.RoleAuthorizationAuthorityMapper;

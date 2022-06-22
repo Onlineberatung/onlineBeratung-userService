@@ -199,7 +199,7 @@ public class ConsultantAgencyAdminServiceIT {
   public void findConsultantsForAgency_Should_returnExpectedConsultants_When_agencyHasConsultatns() {
     var consultantsOfAgency = this.consultantAgencyAdminService.findConsultantsForAgency(1L);
 
-    assertThat(consultantsOfAgency.getEmbedded(), hasSize(3));
+    assertThat(consultantsOfAgency.getEmbedded(), hasSize(4));
     consultantsOfAgency.getEmbedded().forEach(consultant -> {
       assertThat(consultant.getEmbedded(), notNullValue());
       assertThat(consultant.getLinks(), notNullValue());

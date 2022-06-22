@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.admin.service.consultant;
 
-import de.caritas.cob.userservice.api.admin.model.ConsultantFilter;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantFilter;
 import de.caritas.cob.userservice.api.admin.service.consultant.querybuilder.ConsultantFilterQueryBuilder;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.tenant.TenantContext;

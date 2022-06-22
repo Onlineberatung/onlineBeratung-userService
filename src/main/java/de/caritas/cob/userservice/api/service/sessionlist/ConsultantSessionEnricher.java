@@ -5,15 +5,16 @@ import static de.caritas.cob.userservice.api.model.Session.RegistrationType.ANON
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
 import de.caritas.cob.userservice.api.facade.sessionlist.RocketChatRoomInformationProvider;
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
+import java.util.Date;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -59,8 +60,8 @@ public class ConsultantSessionEnricher {
 
   private void enrichConsultantSession(ConsultantSessionResponseDTO consultantSessionResponseDTO,
       RocketChatRoomInformation rocketChatRoomInformation, Consultant consultant) {
-    SessionDTO session = consultantSessionResponseDTO.getSession();
-    String groupId = session.getGroupId();
+    var session = consultantSessionResponseDTO.getSession();
+    var groupId = session.getGroupId();
 
     session.setMonitoring(getMonitoringProperty(session));
 
@@ -74,7 +75,9 @@ public class ConsultantSessionEnricher {
               consultant.getRocketChatId(), consultantSessionResponseDTO::setLatestMessage, session,
               groupId);
     } else {
-      setFallbackDate(consultantSessionResponseDTO, session);
+      var fallbackDate = rocketChatRoomInformation.getGroupIdToLastMessageFallbackDate()
+          .get(groupId);
+      setFallbackDate(consultantSessionResponseDTO, session, fallbackDate);
     }
 
     // Due to a Rocket.Chat bug the read state is only set, when a message was posted
@@ -107,7 +110,13 @@ public class ConsultantSessionEnricher {
   }
 
   private void setFallbackDate(ConsultantSessionResponseDTO consultantSessionResponseDTO,
-      SessionDTO session) {
+      SessionDTO session, Date fallbackDate) {
+    if (nonNull(fallbackDate)) {
+      session.setMessageDate(Helper.getUnixTimestampFromDate(fallbackDate));
+      consultantSessionResponseDTO.setLatestMessage(fallbackDate);
+      return;
+    }
+
     session.setMessageDate(Helper.UNIXTIME_0.getTime());
     if (ANONYMOUS.name().equals(session.getRegistrationType())) {
       consultantSessionResponseDTO.setLatestMessage(toDate(session.getCreateDate()));

@@ -45,7 +45,7 @@ import org.springframework.web.client.RestTemplate;
 @AutoConfigureMockMvc
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class ConversationControllerE2EIT {
+class ConversationControllerE2EIT {
 
   private static final EasyRandom easyRandom = new EasyRandom();
   private static final String CSRF_HEADER = "csrfHeader";
@@ -87,7 +87,7 @@ public class ConversationControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void getRegisteredEnquiriesShouldExposeDefaultLanguageAndRespondWithOk() throws Exception {
+  void getRegisteredEnquiriesShouldExposeDefaultLanguageAndRespondWithOk() throws Exception {
     givenAConsultantWithMultipleAgencies();
     givenRocketChatSubscriptionUpdate();
     givenRocketChatRoomsGet();
@@ -111,7 +111,7 @@ public class ConversationControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void getRegisteredEnquiriesShouldExposeSetLanguageAndRespondWithOk() throws Exception {
+  void getRegisteredEnquiriesShouldExposeSetLanguageAndRespondWithOk() throws Exception {
     givenAConsultantWithMultipleAgencies();
     givenASessionWithASetLanguage();
     givenRocketChatSubscriptionUpdate();

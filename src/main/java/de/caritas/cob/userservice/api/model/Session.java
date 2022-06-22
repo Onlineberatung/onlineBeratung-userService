@@ -1,8 +1,10 @@
 package de.caritas.cob.userservice.api.model;
 
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.neovisionaries.i18n.LanguageCode;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -183,5 +185,20 @@ public class Session implements TenantAware {
   @Override
   public int hashCode() {
     return Objects.hash(id);
+  }
+
+  @JsonIgnore
+  public boolean isAdvisedBy(Consultant consultant) {
+    return nonNull(this.consultant) && nonNull(consultant) && this.consultant.equals(consultant);
+  }
+
+  @JsonIgnore
+  public boolean isAdvisedBy(String consultantId) {
+    return nonNull(consultant) && nonNull(consultantId) && consultantId.equals(consultant.getId());
+  }
+
+  @JsonIgnore
+  public boolean isAdvised(String adviceSeekerId) {
+    return nonNull(user) && nonNull(adviceSeekerId) && adviceSeekerId.equals(user.getUserId());
   }
 }

@@ -3,42 +3,13 @@ package de.caritas.cob.userservice.api.service;
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.api.testHelper.ExceptionConstants.HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR_EXCEPTION;
 import static de.caritas.cob.userservice.api.testHelper.ExceptionConstants.HTTP_STATUS_CODE_UNAUTHORIZED_EXCEPTION;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_CLEAN_ROOM_HISTORY;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_GET_GROUP_MEMBERS;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_GROUPS_LIST_ALL_GET_URL;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_GROUP_CREATE_URL;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_GROUP_DELETE_URL;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_POST_ADD_USER_URL;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_POST_USER_LOGIN;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_POST_USER_LOGOUT;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_ROOMS_GET_URL;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_SET_GROUP_READ_ONLY;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_SUBSCRIPTIONS_GET_URL;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_USERS_LIST_GET_URL;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_USER_DELETE_URL;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_USER_INFO;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_API_USER_UPDATE_URL;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_HEADER_AUTH_TOKEN;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_HEADER_USER_ID;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_REMOVE_USER_FROM_GROUP_URL;
 import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_TECH_AUTH_TOKEN;
 import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_TECH_USER_ID;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_CHAT_ADD_USER;
 import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_CHAT_USER_DELETE;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_CHAT_USER_LOGIN;
 import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_CHAT_USER_LOGOUT;
 import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_CHAT_USER_UPDATE;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_CLEAN_ROOM_HISTORY;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_GROUPS_CREATE;
 import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_GROUPS_DELETE;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_GROUPS_LIST_ALL;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_GROUPS_MEMBERS_GET;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_GROUPS_REMOVE_USER;
 import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_GROUPS_SET_READ_ONLY;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_ROOMS_GET;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_SUBSCRIPTIONS_GET;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_USERS_INFO_GET;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.RC_URL_USERS_LIST_GET;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.ERROR;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.GROUP_MEMBER_DTO_LIST;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.GROUP_MEMBER_USER_1;
@@ -60,6 +31,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -77,20 +49,9 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
-import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.exception.httpresponses.RocketChatUnauthorizedException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteGroupException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteUserException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupsListAllException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetUserIdException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.RocketChatUserDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.config.RocketChatConfig;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.StandardResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupDeleteResponseDTO;
@@ -105,12 +66,24 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsGetDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsUpdateDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.subscriptions.SubscriptionsGetDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.subscriptions.SubscriptionsUpdateDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.RocketChatUserDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.SetRoomReadOnlyBodyDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserUpdateRequestDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UsersListReponseDTO;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.exception.httpresponses.RocketChatUnauthorizedException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteUserException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupsListAllException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetUserIdException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -199,6 +172,7 @@ public class RocketChatServiceTest {
   private final LocalDateTime DATETIME_OLDEST = nowInUtc();
   private final LocalDateTime DATETIME_LATEST = nowInUtc();
   private final String PASSWORD = "password";
+  private final RocketChatConfig rocketChatConfig = new RocketChatConfig();
   @Mock
   Logger logger;
   @Mock
@@ -209,37 +183,9 @@ public class RocketChatServiceTest {
   private RestTemplate restTemplate;
 
   @Before
-  public void setup() throws NoSuchFieldException, SecurityException {
-    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_HEADER_AUTH_TOKEN,
-        "X-Auth-Token");
-    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_HEADER_USER_ID,
-        "X-User-Id");
-    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_POST_USER_LOGIN, RC_URL_CHAT_USER_LOGIN);
-    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_POST_USER_LOGOUT,
-        RC_URL_CHAT_USER_LOGOUT);
-    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_POST_ADD_USER_URL, RC_URL_CHAT_ADD_USER);
-    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_REMOVE_USER_FROM_GROUP_URL,
-        RC_URL_GROUPS_REMOVE_USER);
-    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_GROUP_DELETE_URL, RC_URL_GROUPS_DELETE);
-    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_GROUP_CREATE_URL, RC_URL_GROUPS_CREATE);
-    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_CLEAN_ROOM_HISTORY,
-        RC_URL_CLEAN_ROOM_HISTORY);
-    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_SUBSCRIPTIONS_GET_URL,
-        RC_URL_SUBSCRIPTIONS_GET);
-    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_USERS_LIST_GET_URL,
-        RC_URL_USERS_LIST_GET);
-    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_GROUPS_LIST_ALL_GET_URL,
-        RC_URL_GROUPS_LIST_ALL);
-    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_ROOMS_GET_URL, RC_URL_ROOMS_GET);
-    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_USER_INFO, RC_URL_USERS_INFO_GET);
-    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_USER_DELETE_URL,
-        RC_URL_CHAT_USER_DELETE);
-    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_USER_UPDATE_URL,
-        RC_URL_CHAT_USER_UPDATE);
-    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_GET_GROUP_MEMBERS,
-        RC_URL_GROUPS_MEMBERS_GET);
-    setField(rocketChatService, FIELD_NAME_ROCKET_CHAT_API_SET_GROUP_READ_ONLY,
-        RC_URL_GROUPS_SET_READ_ONLY);
+  public void setup() {
+    rocketChatConfig.setBaseUrl("http://localhost/api/v1");
+    setField(rocketChatService, "rocketChatConfig", rocketChatConfig);
 
     setInternalState(RocketChatService.class, "log", logger);
   }
@@ -1014,6 +960,7 @@ public class RocketChatServiceTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void setRoomReadOnly_Should_performRocketChatSetRoomReadOnly() throws Exception {
     when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
     when(restTemplate.exchange(eq(RC_URL_GROUPS_SET_READ_ONLY), eq(HttpMethod.POST), any(),
@@ -1026,8 +973,10 @@ public class RocketChatServiceTest {
         HttpEntity.class);
     verify(this.restTemplate, times(1)).exchange(eq(RC_URL_GROUPS_SET_READ_ONLY),
         eq(HttpMethod.POST), captor.capture(), eq(GroupResponseDTO.class));
-    assertThat(captor.getValue().getBody().isReadOnly(), is(true));
-    assertThat(captor.getValue().getBody().getRoomId(), is(RC_GROUP_ID));
+    var body = captor.getValue().getBody();
+    assertNotNull(body);
+    assertThat(body.isReadOnly(), is(true));
+    assertThat(body.getRoomId(), is(RC_GROUP_ID));
   }
 
   @Test
@@ -1046,6 +995,7 @@ public class RocketChatServiceTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void setRoomWriteable_Should_performRocketChatSetRoomReadOnly() throws Exception {
     when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
     when(restTemplate.exchange(eq(RC_URL_GROUPS_SET_READ_ONLY), eq(HttpMethod.POST), any(),
@@ -1058,8 +1008,10 @@ public class RocketChatServiceTest {
         HttpEntity.class);
     verify(this.restTemplate, times(1)).exchange(eq(RC_URL_GROUPS_SET_READ_ONLY),
         eq(HttpMethod.POST), captor.capture(), eq(GroupResponseDTO.class));
-    assertThat(captor.getValue().getBody().isReadOnly(), is(false));
-    assertThat(captor.getValue().getBody().getRoomId(), is(RC_GROUP_ID));
+    var body = captor.getValue().getBody();
+    assertNotNull(body);
+    assertThat(body.isReadOnly(), is(false));
+    assertThat(body.getRoomId(), is(RC_GROUP_ID));
   }
 
   @Test

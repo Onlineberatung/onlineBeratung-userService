@@ -3,7 +3,7 @@ package de.caritas.cob.userservice.api.admin.service.consultant.create;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.UserServiceApplication;
-import de.caritas.cob.userservice.api.admin.model.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.admin.service.tenant.TenantAdminService;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.model.Consultant;
@@ -66,6 +66,9 @@ public class ConsultantCreatorServiceTenantAwareIT {
     consultant.setLastName(username);
     consultant.setEmail(username + "@email.com");
     consultant.setEncourage2fa(true);
+    consultant.setNotifyEnquiriesRepeating(true);
+    consultant.setNotifyNewChatMessageFromAdviceSeeker(true);
+    consultant.setNotifyNewFeedbackMessageFromAdviceSeeker(true);
     consultant.setWalkThroughEnabled(true);
     consultantRepository.save(consultant);
   }

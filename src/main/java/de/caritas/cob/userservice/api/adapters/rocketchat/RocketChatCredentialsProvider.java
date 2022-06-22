@@ -5,6 +5,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.config.RocketChatConfig;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
@@ -44,19 +45,14 @@ public class RocketChatCredentialsProvider {
   @Value("${rocket.systemuser.password}")
   private String systemPassword;
 
-  @Value("${rocket.chat.api.user.login}")
-  private String rocketChatApiUserLogin;
-
-  @Value("${rocket.chat.api.user.logout}")
-  private String rocketChatApiUserLogout;
-
-  @Value("${rocket.chat.header.auth.token}")
-  private String rocketChatHeaderAuthToken;
-
-  @Value("${rocket.chat.header.user.id}")
-  private String rocketChatHeaderUserId;
-
   private final @NonNull RestTemplate restTemplate;
+
+  private final RocketChatConfig rocketChatConfig;
+
+  private static final String HEADER_AUTH_TOKEN = "X-Auth-Token";
+  private static final String HEADER_USER_ID = "X-User-Id";
+  private static final String ENDPOINT_USER_LOGIN = "/login";
+  private static final String ENDPOINT_USER_LOGOUT = "/logout";
 
   // Tokens
   private final AtomicReference<RocketChatCredentials> techUserA = new AtomicReference<>();
@@ -207,7 +203,8 @@ public class RocketChatCredentialsProvider {
       HttpEntity<MultiValueMap<String, String>> request =
           new HttpEntity<>(map, headers);
 
-      return restTemplate.postForEntity(rocketChatApiUserLogin, request, LoginResponseDTO.class);
+      var url = rocketChatConfig.getApiUrl(ENDPOINT_USER_LOGIN);
+      return restTemplate.postForEntity(url, request, LoginResponseDTO.class);
     } catch (Exception ex) {
       throw new RocketChatLoginException(
           String.format("Could not login user (%s) in Rocket.Chat", username));
@@ -227,8 +224,8 @@ public class RocketChatCredentialsProvider {
 
       HttpEntity<Void> request = new HttpEntity<>(headers);
 
-      ResponseEntity<LogoutResponseDTO> response =
-          restTemplate.postForEntity(rocketChatApiUserLogout, request, LogoutResponseDTO.class);
+      var url = rocketChatConfig.getApiUrl(ENDPOINT_USER_LOGOUT);
+      var response = restTemplate.postForEntity(url, request, LogoutResponseDTO.class);
 
       return response.getStatusCode() == HttpStatus.OK;
 
@@ -254,11 +251,11 @@ public class RocketChatCredentialsProvider {
    * @return a HttpHeaders instance with the standard settings
    */
   private HttpHeaders getStandardHttpHeaders(String rcToken, String rcUserId) {
-
     var httpHeaders = new HttpHeaders();
     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-    httpHeaders.add(rocketChatHeaderAuthToken, rcToken);
-    httpHeaders.add(rocketChatHeaderUserId, rcUserId);
+    httpHeaders.add(HEADER_AUTH_TOKEN, rcToken);
+    httpHeaders.add(HEADER_USER_ID, rcUserId);
+
     return httpHeaders;
   }
 

@@ -3,7 +3,7 @@ package de.caritas.cob.userservice.api.admin.service.session.pageprovider;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 
-import de.caritas.cob.userservice.api.admin.model.SessionFilter;
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionFilter;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;

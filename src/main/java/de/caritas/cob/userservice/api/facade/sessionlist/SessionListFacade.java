@@ -1,24 +1,28 @@
 package de.caritas.cob.userservice.api.facade.sessionlist;
 
+import static java.util.Comparator.comparing;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
-import de.caritas.cob.userservice.api.container.RocketChatCredentials;
-import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.GroupSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
+import de.caritas.cob.userservice.api.container.RocketChatCredentials;
+import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
 import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.api.service.session.SessionFilter;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
+import de.caritas.cob.userservice.api.service.session.SessionFilter;
+import de.caritas.cob.userservice.api.service.session.SessionMapper;
 import de.caritas.cob.userservice.api.service.sessionlist.ConsultantSessionListService;
 import de.caritas.cob.userservice.api.service.sessionlist.UserSessionListService;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,10 +59,56 @@ public class SessionListFacade {
 
     List<UserSessionResponseDTO> userSessions = userSessionListService
         .retrieveSessionsForAuthenticatedUser(userId, rocketChatCredentials);
-    userSessions.sort(Comparator.comparing(UserSessionResponseDTO::getLatestMessage).reversed());
+    userSessions.sort(comparing(UserSessionResponseDTO::getLatestMessage).reversed());
 
     return new UserSessionListResponseDTO().sessions(userSessions);
 
+  }
+
+  /**
+   * Returns a list of {@link UserSessionListResponseDTO} for the specified user ID and rocket chat
+   * group, or feedback group IDs, with the session list sorted by last message date descending.
+   *
+   * @param userId                the user ID
+   * @param rcGroupIds            the group or feedback group IDs
+   * @param rocketChatCredentials the rocket chat credentials
+   * @param roles                 the roles of given user
+   * @return {@link UserSessionListResponseDTO}
+   */
+  public GroupSessionListResponseDTO retrieveSessionsForAuthenticatedUserByGroupIds(String userId,
+      List<String> rcGroupIds, RocketChatCredentials rocketChatCredentials, Set<String> roles) {
+    List<UserSessionResponseDTO> userSessions = userSessionListService.retrieveSessionsForAuthenticatedUserAndGroupIds(
+        userId, rcGroupIds, rocketChatCredentials, roles);
+    userSessions.sort(comparing(UserSessionResponseDTO::getLatestMessage).reversed());
+
+    SessionMapper sessionMapper = new SessionMapper();
+    var sessions = userSessions.stream()
+        .map(sessionMapper::toGroupSessionResponse)
+        .collect(Collectors.toList());
+
+    return new GroupSessionListResponseDTO().sessions(sessions);
+  }
+
+  /**
+   * @param consultant            the authenticated consultant
+   * @param rcGroupIds            the group or feedback group IDs
+   * @param rocketChatCredentials the rocket chat credentials
+   * @param roles                 the roles of given consultant
+   * @return {@link GroupSessionListResponseDTO}
+   */
+  public GroupSessionListResponseDTO retrieveSessionsForAuthenticatedConsultantByGroupIds(
+      Consultant consultant, List<String> rcGroupIds, RocketChatCredentials rocketChatCredentials,
+      Set<String> roles) {
+    List<ConsultantSessionResponseDTO> consultantSessions = consultantSessionListService.retrieveSessionsForConsultantAndGroupIds(
+        consultant, rcGroupIds, roles, rocketChatCredentials.getRocketChatToken());
+    consultantSessions.sort(comparing(ConsultantSessionResponseDTO::getLatestMessage).reversed());
+
+    SessionMapper sessionMapper = new SessionMapper();
+    var sessions = consultantSessions.stream()
+        .map(sessionMapper::toGroupSessionResponse)
+        .collect(Collectors.toList());
+
+    return new GroupSessionListResponseDTO().sessions(sessions);
   }
 
   /**
@@ -67,7 +117,8 @@ public class SessionListFacade {
    *
    * @param consultant                {@link Consultant}
    * @param rcAuthToken               Rocket.Chat Token
-   * @param sessionListQueryParameter session list query parameters as {@link SessionListQueryParameter}
+   * @param sessionListQueryParameter session list query parameters as
+   *                                  {@link SessionListQueryParameter}
    * @return the response dto
    */
   public ConsultantSessionListResponseDTO retrieveSessionsDtoForAuthenticatedConsultant(
@@ -139,9 +190,10 @@ public class SessionListFacade {
    *
    * @param consultant                the {@link Consultant}
    * @param rcAuthToken               the Rocket.Chat auth token
-   * @param sessionListQueryParameter session list query parameters as {@link SessionListQueryParameter}
-   * @return a {@link ConsultantSessionListResponseDTO} with a {@link List} of {@link
-   * ConsultantSessionResponseDTO}
+   * @param sessionListQueryParameter session list query parameters as
+   *                                  {@link SessionListQueryParameter}
+   * @return a {@link ConsultantSessionListResponseDTO} with a {@link List} of
+   * {@link ConsultantSessionResponseDTO}
    */
   public ConsultantSessionListResponseDTO retrieveTeamSessionsDtoForAuthenticatedConsultant(
       Consultant consultant, String rcAuthToken,
@@ -165,7 +217,7 @@ public class SessionListFacade {
   }
 
   private void sortSessionsByLastMessageDateDesc(List<ConsultantSessionResponseDTO> sessions) {
-    sessions.sort(Comparator.comparing(ConsultantSessionResponseDTO::getLatestMessage).reversed());
+    sessions.sort(comparing(ConsultantSessionResponseDTO::getLatestMessage).reversed());
   }
 
   private void removeAllChatsAndSessionsWithoutUnreadFeedback(

@@ -8,25 +8,25 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import com.neovisionaries.i18n.LanguageCode;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionConsultantForUserDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.UpdateFeedbackGroupIdException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.SessionConsultantForUserDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
-import de.caritas.cob.userservice.api.model.Session.RegistrationType;
 import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.port.out.SessionRepository;
+import de.caritas.cob.userservice.api.model.Session.RegistrationType;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.ws.rs.BadRequestException;
@@ -292,7 +293,7 @@ public class SessionService {
   public List<ConsultantSessionResponseDTO> getActiveAndDoneSessionsForConsultant(
       Consultant consultant) {
     return Stream.of(getSessionsForConsultantByStatus(consultant, SessionStatus.IN_PROGRESS),
-        getSessionsForConsultantByStatus(consultant, SessionStatus.DONE))
+            getSessionsForConsultantByStatus(consultant, SessionStatus.DONE))
         .flatMap(Collection::stream)
         .map(session -> new SessionMapper().toConsultantSessionDto(session))
         .collect(Collectors.toList());
@@ -333,6 +334,47 @@ public class SessionService {
    */
   public void deleteSession(Session session) {
     sessionRepository.delete(session);
+  }
+
+  /**
+   * Retrieves user sessions by user ID and rocket chat group, or feedback group IDs
+   *
+   * @param userId     the user ID
+   * @param rcGroupIds rocket chat group or feedback group IDs
+   * @param roles      the roles of the given user
+   * @return {@link UserSessionResponseDTO}
+   */
+  public List<UserSessionResponseDTO> getSessionsByUserAndGroupOrFeedbackGroupIds(String userId,
+      Set<String> rcGroupIds, Set<String> roles) {
+    checkForUserOrConsultantRole(roles);
+    var sessions = sessionRepository.findByGroupOrFeedbackGroupIds(rcGroupIds);
+    sessions.forEach(session -> checkIfUserAndNotOwnerOfSession(session, userId, roles));
+    List<AgencyDTO> agencies = fetchAgencies(sessions);
+    return convertToUserSessionResponseDTO(sessions, agencies);
+  }
+
+  private List<AgencyDTO> fetchAgencies(List<Session> sessions) {
+    Set<Long> agencyIds = sessions.stream()
+        .map(Session::getAgencyId)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toSet());
+    return agencyService.getAgencies(new ArrayList<>(agencyIds));
+  }
+
+  /**
+   * Retrieves consultant sessions by consultant ID and rocket chat group, or feedback group IDs
+   *
+   * @param consultant the ID of the consultant
+   * @param rcGroupIds rocket chat group or feedback group IDs
+   * @param roles      the roles of the given consultant
+   * @return {@link ConsultantSessionResponseDTO}
+   */
+  public List<ConsultantSessionResponseDTO> getSessionsByConsultantAndGroupOrFeedbackGroupIds(
+      Consultant consultant, Set<String> rcGroupIds, Set<String> roles) {
+    checkForUserOrConsultantRole(roles);
+    var sessions = sessionRepository.findByGroupOrFeedbackGroupIds(rcGroupIds);
+    sessions.forEach(session -> checkConsultantAssignment(consultant, session));
+    return mapSessionsToConsultantSessionDto(sessions);
   }
 
   /**
@@ -382,11 +424,19 @@ public class SessionService {
   private void checkIfConsultantAndNotAssignedToSessionOrAgency(Session session, String userId,
       Set<String> roles) {
     if (roles.contains(UserRole.CONSULTANT.getValue())) {
-      var consultant = this.consultantService.getConsultant(userId)
-          .orElseThrow(() -> new BadRequestException(String
-              .format("Consultant with id %s does not exist", userId)));
+      var consultant = loadConsultantOrThrow(userId);
       checkPermissionForConsultantSession(session, consultant);
     }
+  }
+
+  private void checkConsultantAssignment(Consultant consultant, Session session) {
+    if (session.isAdvisedBy(consultant) || (isTeamSessionOrNew(session) && consultant.isInAgency(
+        session.getAgencyId()))) {
+      return;
+    }
+    throw new ForbiddenException(
+        String.format("No permission for session %s by consultant %s", session.getId(),
+            consultant.getId()));
   }
 
   /**
@@ -416,6 +466,19 @@ public class SessionService {
     return toConsultantSessionDTO(session);
   }
 
+  private boolean isTeamSessionOrNew(Session session) {
+    return session.isTeamSession() || SessionStatus.NEW == session.getStatus();
+  }
+
+  private Consultant loadConsultantOrThrow(String userId) {
+    return consultantService.getConsultant(userId).orElseThrow(newBadRequestException(userId));
+  }
+
+  private Supplier<BadRequestException> newBadRequestException(String userId) {
+    return () -> new BadRequestException(
+        String.format("Consultant with id %s does not exist", userId));
+  }
+
   private ConsultantSessionDTO toConsultantSessionDTO(Session session) {
 
     return new ConsultantSessionDTO()
@@ -437,23 +500,12 @@ public class SessionService {
   }
 
   private void checkPermissionForConsultantSession(Session session, Consultant consultant) {
-
-    if (!isConsultantAssignedToSession(session, consultant)
-        && !(session.isTeamSession() && isConsultantAssignedToSessionAgency(consultant, session))) {
+    if (!session.isAdvisedBy(consultant) && !(session.isTeamSession() && consultant.isInAgency(
+        session.getAgencyId()))) {
       throw new ForbiddenException(String
           .format("No permission for session %s by consultant %s", session.getId(),
               consultant.getId()));
     }
-  }
-
-  private boolean isConsultantAssignedToSession(Session session, Consultant consultant) {
-    return nonNull(session.getConsultant())
-        && session.getConsultant().getId().equals(consultant.getId());
-  }
-
-  private boolean isConsultantAssignedToSessionAgency(Consultant consultant, Session session) {
-    return consultant.getConsultantAgencies().stream()
-        .anyMatch(consultantAgency -> consultantAgency.getAgencyId().equals(session.getAgencyId()));
   }
 
   /**

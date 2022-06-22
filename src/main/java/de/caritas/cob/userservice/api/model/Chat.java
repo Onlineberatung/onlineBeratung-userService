@@ -2,6 +2,8 @@ package de.caritas.cob.userservice.api.model;
 
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
@@ -124,5 +126,19 @@ public class Chat {
   @Override
   public int hashCode() {
     return Objects.hash(id);
+  }
+
+  @JsonIgnore
+  public LocalDateTime nextStart() {
+    if (!repetitive) {
+      return null;
+    }
+
+    if (!ChatInterval.WEEKLY.equals(chatInterval)) {
+      var message = "Repetitive chat with id %s does not have a valid interval.";
+      throw new InternalServerErrorException(String.format(message, id));
+    }
+
+    return startDate.plusWeeks(1);
   }
 }
