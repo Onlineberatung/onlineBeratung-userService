@@ -494,7 +494,7 @@ class UserControllerSessionE2EIT {
         .andExpect(status().isOk())
         .andExpect(jsonPath("sessions", hasSize(2)))
         .andExpect(jsonPath("sessions[*].session.lastMessageType",
-            containsInAnyOrder("E2EE_ACTIVATED", null)))
+            containsInAnyOrder("E2EE_ACTIVATED", "FURTHER_STEPS")))
         .andExpect(jsonPath("sessions[0].chat", is(nullValue())))
         .andExpect(jsonPath("sessions[1].chat", is(nullValue())));
   }
