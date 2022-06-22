@@ -111,7 +111,6 @@ public class UserDTO implements UserRegistrationDTO {
   @JsonProperty("mainTopicId")
   private Integer mainTopicId;
 
-
   public UserDTO(String email) {
     this.email = email;
   }

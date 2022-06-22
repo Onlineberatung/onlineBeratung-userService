@@ -2,12 +2,12 @@
 <databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
-  <changeSet author="aalicic" id="consultantStatus">
+  <changeSet author="tkuzynow" id="sessionMainTopic">
     <rollback>
-      <sqlFile path="db/changelog/changeset/0026_session_main_topic/session-main-topic-rollback.sql"
+      <sqlFile path="db/changelog/changeset/0028_session_main_topic/session-main-topic-rollback.sql"
         stripComments="true"/>
     </rollback>
-    <sqlFile path="db/changelog/changeset/0026_session_main_topic/session-main-topic.sql"
+    <sqlFile path="db/changelog/changeset/0028_session_main_topic/session-main-topic.sql"
       stripComments="true"/>
   </changeSet>
 </databaseChangeLog>
