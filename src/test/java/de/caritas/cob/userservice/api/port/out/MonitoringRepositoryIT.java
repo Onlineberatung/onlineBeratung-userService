@@ -18,7 +18,7 @@ import org.springframework.test.context.TestPropertySource;
 @DataJpaTest
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class MonitoringRepositoryIT {
+class MonitoringRepositoryIT {
 
   private static final EasyRandom easyRandom = new EasyRandom();
 
@@ -39,7 +39,7 @@ public class MonitoringRepositoryIT {
   }
 
   @Test
-  public void saveShouldSaveMonitoring() {
+  void saveShouldSaveMonitoring() {
     givenASession();
     givenValidMonitoring();
 

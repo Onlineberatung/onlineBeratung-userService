@@ -11,6 +11,7 @@ import de.caritas.cob.userservice.api.port.in.AccountManaging;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.MessageClient;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.HashMap;
@@ -42,6 +43,8 @@ public class AccountManager implements AccountManaging {
   private final AgencyService agencyService;
 
   private final ConsultantAgencyRepository consultantAgencyRepository;
+
+  private final SessionRepository sessionRepository;
 
   @Override
   public Optional<Map<String, Object>> findConsultant(String id) {
@@ -91,6 +94,14 @@ public class AccountManager implements AccountManaging {
   }
 
   @Override
+  public boolean isTeamAdvisedBy(Long sessionId, String consultantId) {
+    var session = sessionRepository.findById(sessionId).orElseThrow();
+
+    return session.isTeamSession() && consultantAgencyRepository
+        .existsByConsultantIdAndAgencyIdAndDeleteDateIsNull(consultantId, session.getAgencyId());
+  }
+
+  @Override
   public Optional<Map<String, Object>> patchUser(Map<String, Object> patchMap) {
     var id = (String) patchMap.get("id");
     var userMap = new HashMap<String, Object>();
@@ -107,12 +118,17 @@ public class AccountManager implements AccountManaging {
 
   @Override
   public boolean existsAdviceSeeker(String id) {
-    return findAdviceSeeker(id).isPresent();
+    return userRepository.findByUserIdAndDeleteDateIsNull(id).isPresent();
   }
 
   @Override
-  public Optional<User> findAdviceSeeker(String id) {
-    return userRepository.findByUserIdAndDeleteDateIsNull(id);
+  public Optional<Map<String, Object>> findAdviceSeeker(String id) {
+    var userMap = new HashMap<String, Object>();
+    userRepository.findByUserIdAndDeleteDateIsNull(id).ifPresent(user ->
+        userMap.putAll(userServiceMapper.mapOf(user))
+    );
+
+    return userMap.isEmpty() ? Optional.empty() : Optional.of(userMap);
   }
 
   @Override

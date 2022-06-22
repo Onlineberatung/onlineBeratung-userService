@@ -49,21 +49,6 @@ public class ConsultantAgencyService {
   }
 
   /**
-   * Checks if provided consultant is assigned to provided agency.
-   *
-   * @param consultantId consultant ID
-   * @param agencyId     agency ID
-   * @return true if provided consultant is assigned to provided agency
-   */
-  public boolean isConsultantInAgency(String consultantId, Long agencyId) {
-    List<ConsultantAgency> agencyList =
-        consultantAgencyRepository.findByConsultantIdAndAgencyIdAndDeleteDateIsNull(
-            consultantId, agencyId);
-
-    return isNotEmpty(agencyList);
-  }
-
-  /**
    * Returns a {@link List} of {@link ConsultantAgency} for the provided agency IDs.
    *
    * @param agencyIds list of agency Ids

@@ -78,6 +78,7 @@ import static de.caritas.cob.userservice.api.testHelper.RequestBodyConstants.VAL
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.ABSENCE_MESSAGE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CITY;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SUCHT;
@@ -139,6 +140,7 @@ import com.google.api.client.util.Sets;
 import de.caritas.cob.userservice.api.actions.registry.ActionContainer;
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.ApiResponseEntityExceptionHandler;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantResponseDTO;
@@ -148,6 +150,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.MonitoringDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.NewRegistrationResponseDto;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionConsultantForUserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO;
@@ -156,7 +159,6 @@ import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.validation.MandatoryFieldsProvider;
 import de.caritas.cob.userservice.api.adapters.web.mapping.ConsultantDtoMapper;
 import de.caritas.cob.userservice.api.adapters.web.mapping.UserDtoMapper;
-import de.caritas.cob.userservice.api.admin.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
 import de.caritas.cob.userservice.api.config.auth.Authority;
@@ -188,7 +190,6 @@ import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataProvider;
 import de.caritas.cob.userservice.api.facade.userdata.KeycloakUserDataProvider;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
@@ -196,6 +197,7 @@ import de.caritas.cob.userservice.api.manager.consultingtype.registration.mandat
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantStatus;
+import de.caritas.cob.userservice.api.model.EnquiryData;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
@@ -214,7 +216,6 @@ import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.archive.SessionArchiveService;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import de.caritas.cob.userservice.api.workflow.delete.action.asker.DeleteSingleRoomAndSessionAction;
@@ -269,7 +270,7 @@ public class UserControllerIT {
   private final Consultant TEAM_CONSULTANT =
       new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, "consultant", "first name", "last name",
           "consultant@cob.de", false, true, "", false, null, null, null, null, null,
-          null, null, null, true, null, null, ConsultantStatus.CREATED, false);
+          null, null, null, true, true, true, true, null, null, ConsultantStatus.CREATED, false);
   private final Set<String> ROLES_WITH_USER =
       new HashSet<>(Arrays.asList("dummyRoleA", UserRole.USER.getValue(), "dummyRoleB"));
   private final SessionDTO SESSION_DTO = new SessionDTO()
@@ -372,8 +373,6 @@ public class UserControllerIT {
   private IdentityClient identityClient;
   @MockBean
   private DecryptionService encryptionService;
-  @MockBean
-  private AuthenticatedUserHelper authenticatedUserHelper;
   @MockBean
   private ConsultingTypeManager consultingTypeManager;
   @MockBean
@@ -913,8 +912,7 @@ public class UserControllerIT {
         .thenReturn(USER);
     doThrow(new ConflictException(ERROR))
         .when(createEnquiryMessageFacade)
-        .createEnquiryMessage(Mockito.any(), Mockito.any(),
-            Mockito.any(), Mockito.any(), Mockito.any());
+        .createEnquiryMessage(any(EnquiryData.class));
 
     mvc.perform(post(PATH_CREATE_ENQUIRY_MESSAGE)
             .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
@@ -931,11 +929,14 @@ public class UserControllerIT {
         .thenReturn(USER_ID);
     when(accountProvider.retrieveValidatedUser())
         .thenReturn(USER);
-    when(createEnquiryMessageFacade.createEnquiryMessage(
-        any(User.class), eq(SESSION_ID), eq(MESSAGE), any(), any(RocketChatCredentials.class))
-    ).thenReturn(
-        new CreateEnquiryMessageResponseDTO().rcGroupId(RC_GROUP_ID).sessionId(SESSION_ID)
-    );
+    var expectedRCCredentials = RocketChatCredentials.builder()
+        .rocketChatToken(RC_TOKEN)
+        .rocketChatUserId(RC_USER_ID)
+        .build();
+    var expectedEnquiryData = new EnquiryData(USER, SESSION_ID, MESSAGE, null,
+        expectedRCCredentials);
+    when(createEnquiryMessageFacade.createEnquiryMessage(eq(expectedEnquiryData))).thenReturn(
+        new CreateEnquiryMessageResponseDTO().rcGroupId(RC_GROUP_ID).sessionId(SESSION_ID));
 
     mvc.perform(
             post(PATH_CREATE_ENQUIRY_MESSAGE)
@@ -1486,8 +1487,6 @@ public class UserControllerIT {
 
     when(sessionService.getSession(Mockito.anyLong()))
         .thenReturn(Optional.of(SESSION));
-    when(authenticatedUserHelper.hasPermissionForSession(SESSION))
-        .thenReturn(false);
 
     mvc.perform(get(PATH_GET_MONITORING)
             .accept(MediaType.APPLICATION_JSON))
@@ -1501,8 +1500,8 @@ public class UserControllerIT {
 
     when(sessionService.getSession(Mockito.anyLong()))
         .thenReturn(Optional.of(SESSION));
-    when(authenticatedUserHelper.hasPermissionForSession(SESSION))
-        .thenReturn(true);
+    when(authenticatedUser.getUserId())
+        .thenReturn(SESSION.getConsultant().getId());
     when(monitoringService.getMonitoring(SESSION))
         .thenReturn(MONITORING_DTO);
 
@@ -1520,8 +1519,8 @@ public class UserControllerIT {
 
     when(sessionService.getSession(Mockito.anyLong()))
         .thenReturn(Optional.of(SESSION));
-    when(authenticatedUserHelper.hasPermissionForSession(SESSION))
-        .thenReturn(true);
+    when(authenticatedUser.getUserId())
+        .thenReturn(SESSION.getConsultant().getId());
     when(monitoringService.getMonitoring(SESSION))
         .thenReturn(null);
 
@@ -1554,8 +1553,8 @@ public class UserControllerIT {
 
     when(sessionService.getSession(Mockito.anyLong()))
         .thenReturn(Optional.of(SESSION));
-    when(authenticatedUserHelper.hasPermissionForSession(SESSION))
-        .thenReturn(true);
+    when(authenticatedUser.getUserId())
+        .thenReturn(CONSULTANT_ID);
     doThrow(new ServiceException(ERROR))
         .when(monitoringService).updateMonitoring(Mockito.any(),
             Mockito.any());
@@ -1573,8 +1572,8 @@ public class UserControllerIT {
 
     when(sessionService.getSession(Mockito.anyLong()))
         .thenReturn(Optional.of(SESSION));
-    when(authenticatedUserHelper.hasPermissionForSession(SESSION))
-        .thenReturn(true);
+    when(authenticatedUser.getUserId())
+        .thenReturn(CONSULTANT_ID);
 
     mvc.perform(put(PATH_PUT_SESSIONS_MONITORING)
             .content(VALID_SESSION_MONITORING_REQUEST_BODY)
@@ -1589,8 +1588,8 @@ public class UserControllerIT {
 
     when(sessionService.getSession(Mockito.anyLong()))
         .thenReturn(Optional.of(TEAM_SESSION));
-    when(authenticatedUserHelper.hasPermissionForSession(TEAM_SESSION))
-        .thenReturn(true);
+    when(authenticatedUser.getUserId())
+        .thenReturn(CONSULTANT_ID);
 
     mvc.perform(put(PATH_PUT_SESSIONS_MONITORING)
             .content(VALID_SESSION_MONITORING_REQUEST_BODY)
@@ -1621,11 +1620,14 @@ public class UserControllerIT {
   public void updateMonitoring_Should_ReturnUnauthorized_WhenConsultantIsNotAssignedToAgencyOfTeamSession()
       throws Exception {
 
+    var session = easyRandom.nextObject(Session.class);
+    session.setId(TEAM_SESSION.getId());
+
     when(sessionService.getSession(Mockito.anyLong()))
-        .thenReturn(Optional.of(TEAM_SESSION));
+        .thenReturn(Optional.of(session));
     when(authenticatedUser.getUserId())
         .thenReturn(CONSULTANT_ID);
-    when(consultantAgencyService.isConsultantInAgency(CONSULTANT_ID, AGENCY_ID))
+    when(accountManager.isTeamAdvisedBy(TEAM_SESSION.getId(), CONSULTANT_ID))
         .thenReturn(false);
 
     mvc.perform(put(PATH_PUT_SESSIONS_MONITORING)
@@ -1741,8 +1743,12 @@ public class UserControllerIT {
         .thenReturn(Optional.of(SESSION));
     when(authenticatedUser.getGrantedAuthorities())
         .thenReturn(AUTHORITIES_ASSIGN_SESSION_AND_ENQUIRY);
+    when(authenticatedUser.getUserId())
+        .thenReturn(CONSULTANT.getId());
+    when(consultantService.getConsultant(anyString()))
+        .thenReturn(Optional.of(CONSULTANT));
     doThrow(new ConflictException(""))
-        .when(assignSessionFacade).assignSession(SESSION, TEAM_CONSULTANT);
+        .when(assignSessionFacade).assignSession(SESSION, TEAM_CONSULTANT, CONSULTANT);
 
     mvc.perform(put(PATH_PUT_ASSIGN_SESSION)
             .contentType(MediaType.APPLICATION_JSON)

@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
+import com.google.api.client.util.ArrayMap;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Appointment;
@@ -11,6 +12,7 @@ import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Consultant.ConsultantBase;
 import de.caritas.cob.userservice.api.model.ConsultantAgency.ConsultantAgencyBase;
 import de.caritas.cob.userservice.api.model.ConsultantStatus;
+import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.User;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -50,6 +52,7 @@ public class UserServiceMapper {
     map.put("username", user.getUsername());
     map.put("email", user.getEmail());
     map.put("encourage2fa", user.getEncourage2fa());
+    map.put("chatUserId", user.getRcUserId());
 
     return map;
   }
@@ -61,7 +64,13 @@ public class UserServiceMapper {
     map.put("lastName", consultant.getLastName());
     map.put("email", consultant.getEmail());
     map.put("encourage2fa", consultant.getEncourage2fa());
+    map.put("notifyEnquiriesRepeating", consultant.getNotifyEnquiriesRepeating());
+    map.put("notifyNewChatMessageFromAdviceSeeker",
+        consultant.getNotifyNewChatMessageFromAdviceSeeker());
+    map.put("notifyNewFeedbackMessageFromAdviceSeeker",
+        consultant.getNotifyNewFeedbackMessageFromAdviceSeeker());
     map.put("walkThroughEnabled", consultant.getWalkThroughEnabled());
+    map.put("chatUserId", consultant.getRocketChatId());
 
     if (additionalMap.containsKey("displayName")) {
       var displayName = (String) additionalMap.get("displayName");
@@ -163,6 +172,20 @@ public class UserServiceMapper {
     return map;
   }
 
+  public Optional<Map<String, String>> mapOf(Optional<Session> optionalSession) {
+    if (optionalSession.isEmpty()) {
+      return Optional.empty();
+    }
+
+    var session = optionalSession.get();
+    var map = new ArrayMap<String, String>();
+    if (nonNull(session.getGroupId())) {
+      map.put("chatId", session.getGroupId());
+    }
+
+    return Optional.of(map);
+  }
+
   private boolean isAgencyUnique(HashSet<Long> agencyIdsAdded, Long agencyId) {
     return !agencyIdsAdded.contains(agencyId);
   }
@@ -175,6 +198,20 @@ public class UserServiceMapper {
   @SuppressWarnings("unchecked")
   public List<String> bannedUsernamesOfMap(Map<String, Object> chatMetaInfoMap) {
     return (List<String>) chatMetaInfoMap.get("mutedUsers");
+  }
+
+  public Optional<String> e2eKeyOf(Map<String, String> chatMap) {
+    return chatMap.containsKey("e2eKey") && chatMap.get("e2eKey").matches("tmp\\..{12,}")
+        ? Optional.of(chatMap.get("e2eKey"))
+        : Optional.empty();
+  }
+
+  public String roomIdOf(Map<String, String> chatMap) {
+    return chatMap.get("roomId");
+  }
+
+  public String userIdOf(Map<String, String> chatMap) {
+    return chatMap.get("userId");
   }
 
   public String consultantIdOf(Map<String, Object> appointmentMap) {
@@ -196,6 +233,17 @@ public class UserServiceMapper {
     }
     if (patchMap.containsKey("walkThroughEnabled")) {
       consultant.setWalkThroughEnabled((Boolean) patchMap.get("walkThroughEnabled"));
+    }
+    if (patchMap.containsKey("notifyEnquiriesRepeating")) {
+      consultant.setNotifyEnquiriesRepeating((Boolean) patchMap.get("notifyEnquiriesRepeating"));
+    }
+    if (patchMap.containsKey("notifyNewChatMessageFromAdviceSeeker")) {
+      var notify = (Boolean) patchMap.get("notifyNewChatMessageFromAdviceSeeker");
+      consultant.setNotifyNewChatMessageFromAdviceSeeker(notify);
+    }
+    if (patchMap.containsKey("notifyNewFeedbackMessageFromAdviceSeeker")) {
+      var notify = (Boolean) patchMap.get("notifyNewFeedbackMessageFromAdviceSeeker");
+      consultant.setNotifyNewFeedbackMessageFromAdviceSeeker(notify);
     }
 
     return consultant;
@@ -243,6 +291,12 @@ public class UserServiceMapper {
     return consultantAgencies.stream()
         .map(ConsultantAgencyBase::getAgencyId)
         .distinct()
+        .collect(Collectors.toList());
+  }
+
+  public List<String> chatUserIdOf(List<Map<String, String>> groupMembers) {
+    return groupMembers.stream()
+        .map(map -> map.get("chatUserId"))
         .collect(Collectors.toList());
   }
 }

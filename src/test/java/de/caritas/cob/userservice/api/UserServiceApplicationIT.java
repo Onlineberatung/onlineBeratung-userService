@@ -6,7 +6,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles("testing")
-public class UserServiceApplicationIT {
+class UserServiceApplicationIT {
 
   @Test
   void contextLoads() {

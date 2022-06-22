@@ -18,10 +18,10 @@ import de.caritas.cob.userservice.api.adapters.web.dto.HalLink.MethodEnum;
 import de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.web.dto.LanguageResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PaginationLinks;
+import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
-import de.caritas.cob.userservice.api.admin.model.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.generated.api.admin.controller.UseradminApi;
+import de.caritas.cob.userservice.generated.api.adapters.web.controller.UseradminApi;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -232,5 +232,13 @@ public class ConsultantDtoMapper {
     }
 
     throw new IllegalArgumentException("Mapping of field '" + field + "' not supported.");
+  }
+
+  public String chatIdOf(Map<String, String> sessionMap) {
+    if (sessionMap.containsKey("chatId")) {
+      return sessionMap.get("chatId");
+    }
+
+    return null;
   }
 }

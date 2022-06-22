@@ -9,11 +9,11 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO;
 import de.caritas.cob.userservice.api.UserServiceApplication;
-import de.caritas.cob.userservice.api.admin.model.ConsultantFilter;
-import de.caritas.cob.userservice.api.admin.model.CreateConsultantAgencyDTO;
-import de.caritas.cob.userservice.api.admin.model.Sort;
-import de.caritas.cob.userservice.api.admin.model.Sort.FieldEnum;
-import de.caritas.cob.userservice.api.admin.model.Sort.OrderEnum;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantFilter;
+import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantAgencyDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.Sort;
+import de.caritas.cob.userservice.api.adapters.web.dto.Sort.FieldEnum;
+import de.caritas.cob.userservice.api.adapters.web.dto.Sort.OrderEnum;
 import de.caritas.cob.userservice.api.admin.service.agency.AgencyAdminService;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.Consultant;
@@ -203,6 +203,9 @@ public class ConsultantAdminFacadeIT {
     newConsultant.setEncourage2fa(false);
     newConsultant.setUsername("username");
     newConsultant.setId(id);
+    newConsultant.setNotifyEnquiriesRepeating(false);
+    newConsultant.setNotifyNewChatMessageFromAdviceSeeker(false);
+    newConsultant.setNotifyNewFeedbackMessageFromAdviceSeeker(false);
     consultantRepository.save(newConsultant);
   }
 

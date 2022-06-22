@@ -5,17 +5,19 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 import com.neovisionaries.i18n.LanguageCode;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.EmailToggle;
+import de.caritas.cob.userservice.api.adapters.web.dto.EmailType;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.api.model.Language;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.Language;
 import de.caritas.cob.userservice.api.model.Session.RegistrationType;
-import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.util.List;
@@ -77,11 +79,28 @@ public class ConsultantDataProvider {
         .userRoles(authenticatedUser.getRoles())
         .grantedAuthorities(authenticatedUser.getGrantedAuthorities())
         .isWalkThroughEnabled(consultant.getWalkThroughEnabled())
+        .emailToggles(emailTogglesOf(consultant))
         .hasAnonymousConversations(
             hasAtLeastOneTypeWithAllowedAnonymousConversations(agencyDTOsOf(consultant))
         )
         .hasArchive(hasArchive(consultant))
         .build();
+  }
+
+  private Set<EmailToggle> emailTogglesOf(Consultant consultant) {
+    var enquiryToggle = new EmailToggle();
+    enquiryToggle.setName(EmailType.DAILY_ENQUIRY);
+    enquiryToggle.setState(consultant.getNotifyEnquiriesRepeating());
+
+    var newChatToggle = new EmailToggle();
+    newChatToggle.setName(EmailType.NEW_CHAT_MESSAGE_FROM_ADVICE_SEEKER);
+    newChatToggle.setState(consultant.getNotifyNewChatMessageFromAdviceSeeker());
+
+    var newFeedbackToggle = new EmailToggle();
+    newFeedbackToggle.setName(EmailType.NEW_FEEDBACK_MESSAGE_FROM_ADVICE_SEEKER);
+    newFeedbackToggle.setState(consultant.getNotifyNewFeedbackMessageFromAdviceSeeker());
+
+    return Set.of(enquiryToggle, newChatToggle, newFeedbackToggle);
   }
 
   private List<AgencyDTO> agencyDTOsOf(Consultant consultant) {

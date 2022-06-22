@@ -8,10 +8,10 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
-import de.caritas.cob.userservice.api.admin.model.AgencyAdminResponseDTO;
-import de.caritas.cob.userservice.api.admin.model.AgencyConsultantResponseDTO;
-import de.caritas.cob.userservice.api.admin.model.ConsultantAgencyResponseDTO;
-import de.caritas.cob.userservice.api.admin.model.ConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyAdminResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyConsultantResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAgencyResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.model.Consultant;

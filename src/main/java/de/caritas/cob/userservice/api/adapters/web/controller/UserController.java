@@ -18,8 +18,10 @@ import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResp
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateChatResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateEnquiryMessageResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.DeleteUserAccountDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.E2eKeyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.EmailDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.EnquiryMessageDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.GroupSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.LanguageResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.MasterKeyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.MobileTokenDTO;
@@ -64,8 +66,8 @@ import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataProvider;
 import de.caritas.cob.userservice.api.facade.userdata.KeycloakUserDataProvider;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
 import de.caritas.cob.userservice.api.model.Chat;
+import de.caritas.cob.userservice.api.model.EnquiryData;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
@@ -139,7 +141,6 @@ public class UserController implements UsersApi {
   private final @NotNull AssignSessionFacade assignSessionFacade;
   private final @NotNull AssignEnquiryFacade assignEnquiryFacade;
   private final @NotNull DecryptionService decryptionService;
-  private final @NotNull AuthenticatedUserHelper authenticatedUserHelper;
   private final @NotNull ChatService chatService;
   private final @NotNull StartChatFacade startChatFacade;
   private final @NotNull GetChatFacade getChatFacade;
@@ -251,10 +252,10 @@ public class UserController implements UsersApi {
         .rocketChatUserId(rcUserId)
         .build();
     var language = consultantDtoMapper.languageOf(enquiryMessage.getLanguage());
+    var enquiryData = new EnquiryData(user, sessionId, enquiryMessage.getMessage(), language,
+        rocketChatCredentials, enquiryMessage.getT(), enquiryMessage.getOrg());
 
-    var response = createEnquiryMessageFacade.createEnquiryMessage(
-        user, sessionId, enquiryMessage.getMessage(), language, rocketChatCredentials
-    );
+    var response = createEnquiryMessageFacade.createEnquiryMessage(enquiryData);
 
     return new ResponseEntity<>(response, HttpStatus.CREATED);
   }
@@ -310,6 +311,40 @@ public class UserController implements UsersApi {
 
     return isNotEmpty(userSessionsDTO.getSessions())
         ? new ResponseEntity<>(userSessionsDTO, HttpStatus.OK)
+        : new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
+
+  /**
+   * Returns a list of sessions for the currently authenticated/logged in user and given RocketChat
+   * group, or feedback group IDs.
+   *
+   * @param rcToken Rocket.Chat token (required)
+   * @return {@link ResponseEntity} of {@link UserSessionListResponseDTO}
+   */
+  @Override
+  public ResponseEntity<GroupSessionListResponseDTO> getSessionsForGroupOrFeedbackGroupIds(
+      @RequestHeader String rcToken, @RequestParam(value = "rcGroupIds") List<String> rcGroupIds) {
+    GroupSessionListResponseDTO groupSessionList;
+    if (authenticatedUser.isConsultant()) {
+      var consultant = userAccountProvider.retrieveValidatedConsultant();
+      var rocketChatCredentials = RocketChatCredentials.builder()
+          .rocketChatUserId(consultant.getRocketChatId())
+          .rocketChatToken(rcToken)
+          .build();
+      groupSessionList = sessionListFacade.retrieveSessionsForAuthenticatedConsultantByGroupIds(
+          consultant, rcGroupIds, rocketChatCredentials, authenticatedUser.getRoles());
+    } else {
+      var user = userAccountProvider.retrieveValidatedUser();
+      var rocketChatCredentials = RocketChatCredentials.builder()
+          .rocketChatUserId(user.getRcUserId())
+          .rocketChatToken(rcToken)
+          .build();
+      groupSessionList = sessionListFacade.retrieveSessionsForAuthenticatedUserByGroupIds(
+          user.getUserId(), rcGroupIds, rocketChatCredentials, authenticatedUser.getRoles());
+    }
+
+    return isNotEmpty(groupSessionList.getSessions())
+        ? new ResponseEntity<>(groupSessionList, HttpStatus.OK)
         : new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
@@ -566,24 +601,23 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<MonitoringDTO> getMonitoring(@PathVariable Long sessionId) {
-
-    // Check if session exists
-    var session = sessionService.getSession(sessionId);
-    if (session.isEmpty()) {
+    var sessionOptional = sessionService.getSession(sessionId);
+    if (sessionOptional.isEmpty()) {
       log.warn("Bad request: Session with id {} not found", sessionId);
 
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    // Check if consultant has the right to access the session
-    if (!authenticatedUserHelper.hasPermissionForSession(session.get())) {
+    var session = sessionOptional.get();
+    var userId = authenticatedUser.getUserId();
+    if (!session.isAdvisedBy(userId) && !accountManager.isTeamAdvisedBy(sessionId, userId)) {
       log.warn("Bad request: Consultant with id {} has no permission to access session with id {}",
-          authenticatedUser.getUserId(), sessionId);
+          userId, sessionId);
 
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    var responseDTO = monitoringService.getMonitoring(session.get());
+    var responseDTO = monitoringService.getMonitoring(session);
 
     if (nonNull(responseDTO) && MapUtils.isNotEmpty(responseDTO.getProperties())) {
       return new ResponseEntity<>(responseDTO, HttpStatus.OK);
@@ -604,29 +638,22 @@ public class UserController implements UsersApi {
   @Override
   public ResponseEntity<Void> updateMonitoring(@PathVariable Long sessionId,
       @RequestBody MonitoringDTO monitoring) {
-
-    var session = sessionService.getSession(sessionId);
-
-    if (session.isPresent()) {
-
-      // Check if calling consultant has the permission to update the monitoring values
-      if (authenticatedUserHelper.hasPermissionForSession(session.get())) {
-        monitoringService.updateMonitoring(session.get().getId(), monitoring);
-        return new ResponseEntity<>(HttpStatus.OK);
-
-      } else {
-        log.warn(
-            "Unauthorized: Consultant with id {} is not authorized to update monitoring of session {}",
-            authenticatedUser.getUserId(), sessionId
-        );
-        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-      }
-
-    } else {
+    var sessionOptional = sessionService.getSession(sessionId);
+    if (sessionOptional.isEmpty()) {
       log.warn("Bad request: Session with id {} not found", sessionId);
-
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
+
+    var userId = authenticatedUser.getUserId();
+    var session = sessionOptional.get();
+    if (session.isAdvisedBy(userId) || accountManager.isTeamAdvisedBy(sessionId, userId)) {
+      monitoringService.updateMonitoring(session.getId(), monitoring);
+      return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    var message = "Unauthorized: Consultant with id {} is not authorized to update monitoring of session {}";
+    log.warn(message, userId, sessionId);
+    return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
   }
 
   /**
@@ -691,10 +718,33 @@ public class UserController implements UsersApi {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
-    var consultant = this.userAccountProvider.retrieveValidatedConsultantById(consultantId);
-    assignSessionFacade.assignSession(session.get(), consultant);
+    var consultantToAssign = userAccountProvider.retrieveValidatedConsultantById(consultantId);
+    var authConsultant = consultantService.getConsultant(authenticatedUser.getUserId())
+        .orElseThrow();
+    assignSessionFacade.assignSession(session.get(), consultantToAssign, authConsultant);
 
     return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<Void> removeFromSession(Long sessionId, UUID consultantId) {
+    var consultantMap = accountManager.findConsultant(consultantId.toString()).orElseThrow(() ->
+        new NotFoundException(String.format("Consultant (%s) not found", consultantId))
+    );
+
+    var sessionMap = messenger.findSession(sessionId).orElseThrow(() ->
+        new NotFoundException(String.format("Session (%s) not found", sessionId))
+    );
+
+    var chatId = consultantDtoMapper.chatIdOf(sessionMap);
+    var chatUserId = userDtoMapper.chatUserIdOf(consultantMap);
+    if (!messenger.removeUserFromSession(chatUserId, chatId)) {
+      var message = String.format(
+          "Could not remove consultant (%s) from session (%s)", consultantId, sessionId);
+      throw new InternalServerErrorException(message);
+    }
+
+    return ResponseEntity.noContent().build();
   }
 
   /**
@@ -735,6 +785,28 @@ public class UserController implements UsersApi {
     }
 
     return new ResponseEntity<>(HttpStatus.CONFLICT);
+  }
+
+  @Override
+  public ResponseEntity<Void> updateE2eInChats(E2eKeyDTO e2eKeyDTO) {
+    var userId = authenticatedUser.getUserId();
+    var user = authenticatedUser.isConsultant()
+        ? accountManager.findConsultant(userId).orElseThrow()
+        : accountManager.findAdviceSeeker(userId).orElseThrow();
+
+    var chatUserId = userDtoMapper.chatUserIdOf(user);
+    var username = authenticatedUser.getUsername();
+    if (isNull(chatUserId)) {
+      var message = String.format("Chat-user ID of user %s unknown", username);
+      throw new InternalServerErrorException(message);
+    }
+
+    if (!messenger.updateE2eKeys(chatUserId, e2eKeyDTO.getPublicKey())) {
+      var message = String.format("Setting E2E keys in user %s's chats failed", username);
+      throw new InternalServerErrorException(message);
+    }
+
+    return ResponseEntity.noContent().build();
   }
 
   /**
@@ -1057,7 +1129,7 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<Void> activateTwoFactorAuthByApp(OneTimePasswordDTO oneTimePasswordDTO) {
-    if (authenticatedUser.isUser() && !identityClientConfig.getOtpAllowedForUsers()) {
+    if (authenticatedUser.isAdviceSeeker() && !identityClientConfig.getOtpAllowedForUsers()) {
       throw new ConflictException("2FA is disabled for user role");
     }
     if (authenticatedUser.isConsultant() && !identityClientConfig.getOtpAllowedForConsultants()) {

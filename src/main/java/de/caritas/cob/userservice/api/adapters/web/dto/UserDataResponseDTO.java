@@ -75,4 +75,6 @@ public class UserDataResponseDTO {
   private Boolean e2eEncryptionEnabled;
 
   private Boolean isWalkThroughEnabled;
+
+  private Set<EmailToggle> emailToggles;
 }

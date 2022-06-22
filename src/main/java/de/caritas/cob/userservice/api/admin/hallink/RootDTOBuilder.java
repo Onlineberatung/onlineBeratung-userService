@@ -2,12 +2,12 @@ package de.caritas.cob.userservice.api.admin.hallink;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-import de.caritas.cob.userservice.api.admin.controller.UserAdminController;
-import de.caritas.cob.userservice.api.admin.model.HalLink;
-import de.caritas.cob.userservice.api.admin.model.HalLink.MethodEnum;
-import de.caritas.cob.userservice.api.admin.model.RootDTO;
-import de.caritas.cob.userservice.api.admin.model.RootLinks;
-import de.caritas.cob.userservice.generated.api.admin.controller.UseradminApi;
+import de.caritas.cob.userservice.api.adapters.web.controller.UserAdminController;
+import de.caritas.cob.userservice.api.adapters.web.dto.HalLink;
+import de.caritas.cob.userservice.api.adapters.web.dto.HalLink.MethodEnum;
+import de.caritas.cob.userservice.api.adapters.web.dto.RootDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.RootLinks;
+import de.caritas.cob.userservice.generated.api.adapters.web.controller.UseradminApi;
 
 /**
  * Builder to create the root navigation hal DTO.

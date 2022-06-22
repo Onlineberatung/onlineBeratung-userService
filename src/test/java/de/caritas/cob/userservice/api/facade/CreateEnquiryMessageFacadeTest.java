@@ -68,6 +68,7 @@ import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.EnquiryData;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
@@ -77,6 +78,7 @@ import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.liveevents.LiveEventNotificationService;
 import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
+import de.caritas.cob.userservice.api.service.message.RocketChatData;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
@@ -84,6 +86,7 @@ import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.Grou
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.MonitoringDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.SessionDataInitializingDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.WelcomeMessageDTO;
+import de.caritas.cob.userservice.messageservice.generated.web.model.MessageResponseDTO;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -165,6 +168,8 @@ public class CreateEnquiryMessageFacadeTest {
               .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
           .initializeFeedbackChat(true).notifications(null)
           .languageFormal(false).roles(null).registration(null);
+
+  private final EasyRandom easyRandom = new EasyRandom();
 
   @InjectMocks
   private CreateEnquiryMessageFacade createEnquiryMessageFacade;
@@ -278,20 +283,25 @@ public class CreateEnquiryMessageFacadeTest {
     when(userHelper.doUsernamesMatch(anyString(), anyString())).thenReturn(true);
     when(rocketChatRoomNameGenerator.generateGroupName(any(Session.class)))
         .thenReturn(session.getId().toString());
+    var messageResponse = createMessageResponse();
+    when(messageServiceProvider.postEnquiryMessage(any(RocketChatData.class),
+        any(CreateEnquiryExceptionInformation.class))).thenReturn(messageResponse);
 
-    final var response = createEnquiryMessageFacade
-        .createEnquiryMessage(user, SESSION_ID, MESSAGE, null, rocketChatCredentials);
+    final var response = createEnquiryMessageFacade.createEnquiryMessage(
+        new EnquiryData(user, SESSION_ID, MESSAGE, null, rocketChatCredentials));
 
     verify(userService, atLeastOnce()).updateRocketChatIdInDatabase(any(), anyString());
     verify(consultantAgencyService, atLeastOnce()).findConsultantsByAgencyId(anyLong());
     verify(consultingTypeManager, atLeastOnce()).getConsultingTypeSettings(anyInt());
-    verify(messageServiceProvider, atLeastOnce()).postEnquiryMessage(any(), any(), any(), any());
+    verify(messageServiceProvider, atLeastOnce()).postEnquiryMessage(any(RocketChatData.class),
+        any(CreateEnquiryExceptionInformation.class));
     verify(messageServiceProvider, atLeastOnce())
         .postWelcomeMessageIfConfigured(any(), any(), any(), any());
     verify(sessionService, atLeastOnce()).saveSession(any());
     verify(emailNotificationFacade, atLeastOnce()).sendNewEnquiryEmailNotification(any(), any());
     assertEquals(SESSION_ID, response.getSessionId());
     assertEquals(RC_GROUP_ID, response.getRcGroupId());
+    assertEquals(response.getT(), messageResponse.getT());
     resetRequestAttributes();
   }
 
@@ -302,8 +312,8 @@ public class CreateEnquiryMessageFacadeTest {
     when(sessionService.getSession(SESSION_ID))
         .thenReturn(Optional.of(SESSION_WITH_ENQUIRY_MESSAGE));
     when(rocketChatService.getUserInfo(RC_USER_ID)).thenReturn(USER_INFO_RESPONSE_DTO);
-    createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, null,
-        RC_CREDENTIALS);
+    createEnquiryMessageFacade.createEnquiryMessage(
+        new EnquiryData(USER, SESSION_ID, MESSAGE, null, RC_CREDENTIALS));
     resetRequestAttributes();
   }
 
@@ -313,8 +323,8 @@ public class CreateEnquiryMessageFacadeTest {
     when(rocketChatService.getUserInfo(RC_USER_ID)).thenReturn(USER_INFO_RESPONSE_DTO);
     when(userHelper.doUsernamesMatch(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.empty());
-    createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, null,
-        RC_CREDENTIALS);
+    createEnquiryMessageFacade.createEnquiryMessage(
+        new EnquiryData(USER, SESSION_ID, MESSAGE, null, RC_CREDENTIALS));
     resetRequestAttributes();
   }
 
@@ -327,8 +337,8 @@ public class CreateEnquiryMessageFacadeTest {
     when(userHelper.doUsernamesMatch(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(anonymousSession));
 
-    createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, null,
-        RC_CREDENTIALS);
+    createEnquiryMessageFacade.createEnquiryMessage(
+        new EnquiryData(USER, SESSION_ID, MESSAGE, null, RC_CREDENTIALS));
     resetRequestAttributes();
   }
 
@@ -339,8 +349,8 @@ public class CreateEnquiryMessageFacadeTest {
     when(rocketChatService.getUserInfo(RC_USER_ID)).thenReturn(USER_INFO_RESPONSE_DTO);
     when(sessionService.getSession(SESSION_ID)).thenThrow(new InternalServerErrorException(MESSAGE))
         .thenReturn(Optional.of(SESSION_WITHOUT_CONSULTANT));
-    createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, null,
-        RC_CREDENTIALS);
+    createEnquiryMessageFacade.createEnquiryMessage(
+        new EnquiryData(USER, SESSION_ID, MESSAGE, null, RC_CREDENTIALS));
     resetRequestAttributes();
   }
 
@@ -366,7 +376,8 @@ public class CreateEnquiryMessageFacadeTest {
         .thenThrow(new RocketChatCreateGroupException(ERROR));
 
     createEnquiryMessageFacade
-        .createEnquiryMessage(user, SESSION_ID, MESSAGE, null, rocketChatCredentials);
+        .createEnquiryMessage(
+            new EnquiryData(user, SESSION_ID, MESSAGE, null, rocketChatCredentials));
     resetRequestAttributes();
   }
 
@@ -393,7 +404,8 @@ public class CreateEnquiryMessageFacadeTest {
     when(userHelper.doUsernamesMatch(anyString(), anyString())).thenReturn(true);
 
     createEnquiryMessageFacade
-        .createEnquiryMessage(user, SESSION_ID, MESSAGE, null, rocketChatCredentials);
+        .createEnquiryMessage(
+            new EnquiryData(user, SESSION_ID, MESSAGE, null, rocketChatCredentials));
     resetRequestAttributes();
   }
 
@@ -413,7 +425,8 @@ public class CreateEnquiryMessageFacadeTest {
     when(userHelper.doUsernamesMatch(anyString(), anyString())).thenReturn(true);
 
     createEnquiryMessageFacade
-        .createEnquiryMessage(user, SESSION_ID, MESSAGE, null, rocketChatCredentials);
+        .createEnquiryMessage(
+            new EnquiryData(user, SESSION_ID, MESSAGE, null, rocketChatCredentials));
     verify(rocketChatService, atLeast(1)).rollbackGroup(RC_GROUP_ID, rocketChatCredentials);
     resetRequestAttributes();
   }
@@ -446,7 +459,8 @@ public class CreateEnquiryMessageFacadeTest {
         .addUserToGroup(anyString(), anyString());
 
     createEnquiryMessageFacade
-        .createEnquiryMessage(user, SESSION_ID, MESSAGE, null, rocketChatCredentials);
+        .createEnquiryMessage(
+            new EnquiryData(user, SESSION_ID, MESSAGE, null, rocketChatCredentials));
     resetRequestAttributes();
   }
 
@@ -463,14 +477,14 @@ public class CreateEnquiryMessageFacadeTest {
     when(rocketChatService.createPrivateGroup(Mockito.anyString(), Mockito.eq(RC_CREDENTIALS)))
         .thenReturn(Optional.of(GROUP_RESPONSE_DTO));
     doThrow(RC_POST_MESSAGE_EXCEPTION).when(messageServiceProvider)
-        .postEnquiryMessage(Mockito.anyString(),
-            Mockito.any(), Mockito.anyString(), Mockito.any());
+        .postEnquiryMessage(any(RocketChatData.class),
+            any(CreateEnquiryExceptionInformation.class));
     when(rocketChatRoomNameGenerator.generateGroupName(Mockito.any(Session.class)))
         .thenReturn(SESSION_WITHOUT_ENQUIRY_MESSAGE.getId().toString());
 
     try {
-      createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, null,
-          RC_CREDENTIALS);
+      createEnquiryMessageFacade.createEnquiryMessage(
+          new EnquiryData(USER, SESSION_ID, MESSAGE, null, RC_CREDENTIALS));
     } catch (Exception e) {
       assertThat(e, instanceOf(InternalServerErrorException.class));
     }
@@ -498,8 +512,8 @@ public class CreateEnquiryMessageFacadeTest {
             GROUP_RESPONSE_DTO.getGroup().getId());
 
     try {
-      createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, null,
-          RC_CREDENTIALS);
+      createEnquiryMessageFacade.createEnquiryMessage(
+          new EnquiryData(USER, SESSION_ID, MESSAGE, null, RC_CREDENTIALS));
     } catch (Exception e) {
       assertThat(e, instanceOf(InternalServerErrorException.class));
     }
@@ -513,8 +527,8 @@ public class CreateEnquiryMessageFacadeTest {
 
     when(rocketChatService.getUserInfo(RC_USER_ID)).thenReturn(USER_INFO_RESPONSE_DTO_2);
 
-    createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, null,
-        RC_CREDENTIALS);
+    createEnquiryMessageFacade.createEnquiryMessage(
+        new EnquiryData(USER, SESSION_ID, MESSAGE, null, RC_CREDENTIALS));
     resetRequestAttributes();
   }
 
@@ -547,9 +561,12 @@ public class CreateEnquiryMessageFacadeTest {
         .thenReturn(Optional.of(groupResponseDTO));
     when(rocketChatService.createPrivateGroupWithSystemUser(any()))
         .thenReturn(Optional.of(groupResponseDTO));
+    when(messageServiceProvider.postEnquiryMessage(any(RocketChatData.class),
+        any(CreateEnquiryExceptionInformation.class))).thenReturn(createMessageResponse());
 
     createEnquiryMessageFacade
-        .createEnquiryMessage(user, SESSION_ID, MESSAGE, null, rocketChatCredentials);
+        .createEnquiryMessage(
+            new EnquiryData(user, SESSION_ID, MESSAGE, null, rocketChatCredentials));
 
     verify(spySession, times(1)).setGroupId(groupResponseDTO.getGroup().getId());
     verify(spySession, times(1))
@@ -588,7 +605,8 @@ public class CreateEnquiryMessageFacadeTest {
         .thenReturn(Optional.of(groupResponseDTO));
 
     createEnquiryMessageFacade
-        .createEnquiryMessage(user, SESSION_ID, MESSAGE, null, rocketChatCredentials);
+        .createEnquiryMessage(
+            new EnquiryData(user, SESSION_ID, MESSAGE, null, rocketChatCredentials));
     resetRequestAttributes();
   }
 
@@ -620,7 +638,8 @@ public class CreateEnquiryMessageFacadeTest {
         .thenReturn(Optional.of(groupResponseDTO));
 
     createEnquiryMessageFacade
-        .createEnquiryMessage(user, SESSION_ID, MESSAGE, null, rocketChatCredentials);
+        .createEnquiryMessage(
+            new EnquiryData(user, SESSION_ID, MESSAGE, null, rocketChatCredentials));
     resetRequestAttributes();
 
   }
@@ -654,7 +673,8 @@ public class CreateEnquiryMessageFacadeTest {
     when(rocketChatService.createPrivateGroup(Mockito.anyString(), any()))
         .thenReturn(Optional.of(groupResponseDTO));
     createEnquiryMessageFacade
-        .createEnquiryMessage(user, SESSION_ID, MESSAGE, null, rocketChatCredentials);
+        .createEnquiryMessage(
+            new EnquiryData(user, SESSION_ID, MESSAGE, null, rocketChatCredentials));
     resetRequestAttributes();
   }
 
@@ -688,7 +708,8 @@ public class CreateEnquiryMessageFacadeTest {
         .thenReturn(Optional.empty());
 
     createEnquiryMessageFacade
-        .createEnquiryMessage(user, SESSION_ID, MESSAGE, null, rocketChatCredentials);
+        .createEnquiryMessage(
+            new EnquiryData(user, SESSION_ID, MESSAGE, null, rocketChatCredentials));
     resetRequestAttributes();
   }
 
@@ -703,8 +724,8 @@ public class CreateEnquiryMessageFacadeTest {
     when(userHelper.doUsernamesMatch(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
 
     try {
-      createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, null,
-          RC_CREDENTIALS);
+      createEnquiryMessageFacade.createEnquiryMessage(
+          new EnquiryData(USER, SESSION_ID, MESSAGE, null, RC_CREDENTIALS));
     } catch (Exception e) {
       assertThat(e, instanceOf(InternalServerErrorException.class));
     }
@@ -734,8 +755,8 @@ public class CreateEnquiryMessageFacadeTest {
             Mockito.any());
 
     try {
-      createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, null,
-          RC_CREDENTIALS);
+      createEnquiryMessageFacade.createEnquiryMessage(
+          new EnquiryData(USER, SESSION_ID, MESSAGE, null, RC_CREDENTIALS));
     } catch (Exception e) {
       assertThat(e, instanceOf(InternalServerErrorException.class));
     }
@@ -759,8 +780,8 @@ public class CreateEnquiryMessageFacadeTest {
         .thenReturn(SESSION_WITHOUT_ENQUIRY_MESSAGE.getId().toString());
 
     try {
-      createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, null,
-          RC_CREDENTIALS);
+      createEnquiryMessageFacade.createEnquiryMessage(
+          new EnquiryData(USER, SESSION_ID, MESSAGE, null, RC_CREDENTIALS));
     } catch (Exception e) {
       assertThat(e, instanceOf(InternalServerErrorException.class));
     }
@@ -796,8 +817,8 @@ public class CreateEnquiryMessageFacadeTest {
             Mockito.any(), Mockito.any());
 
     try {
-      createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, null,
-          RC_CREDENTIALS);
+      createEnquiryMessageFacade.createEnquiryMessage(
+          new EnquiryData(USER, SESSION_ID, MESSAGE, null, RC_CREDENTIALS));
     } catch (Exception e) {
       assertThat(e, instanceOf(InternalServerErrorException.class));
     }
@@ -832,8 +853,8 @@ public class CreateEnquiryMessageFacadeTest {
             FEEDBACK_GROUP_RESPONSE_DTO_2.getGroup().getId());
 
     try {
-      createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, null,
-          RC_CREDENTIALS);
+      createEnquiryMessageFacade.createEnquiryMessage(
+          new EnquiryData(USER, SESSION_ID, MESSAGE, null, RC_CREDENTIALS));
     } catch (Exception e) {
       assertThat(e, instanceOf(InternalServerErrorException.class));
     }
@@ -866,8 +887,8 @@ public class CreateEnquiryMessageFacadeTest {
     when(sessionService.saveSession(spySession)).thenThrow(INTERNAL_SERVER_ERROR_EXCEPTION);
 
     try {
-      createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, null,
-          RC_CREDENTIALS);
+      createEnquiryMessageFacade.createEnquiryMessage(
+          new EnquiryData(USER, SESSION_ID, MESSAGE, null, RC_CREDENTIALS));
     } catch (Exception e) {
       assertThat(e, instanceOf(InternalServerErrorException.class));
     }
@@ -908,8 +929,8 @@ public class CreateEnquiryMessageFacadeTest {
             Mockito.any(), Mockito.any(), Mockito.any());
 
     try {
-      createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, null,
-          RC_CREDENTIALS);
+      createEnquiryMessageFacade.createEnquiryMessage(
+          new EnquiryData(USER, SESSION_ID, MESSAGE, null, RC_CREDENTIALS));
     } catch (Exception e) {
       assertThat(e, instanceOf(InternalServerErrorException.class));
     }
@@ -945,12 +966,12 @@ public class CreateEnquiryMessageFacadeTest {
     RocketChatPostMessageException rocketChatPostMessageException =
         new RocketChatPostMessageException(MESSAGE, createEnquiryExceptionInformation);
     doThrow(rocketChatPostMessageException).when(messageServiceProvider)
-        .postEnquiryMessage(Mockito.anyString(),
-            Mockito.any(), Mockito.anyString(), Mockito.any());
+        .postEnquiryMessage(any(RocketChatData.class),
+            any(CreateEnquiryExceptionInformation.class));
 
     try {
-      createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, null,
-          RC_CREDENTIALS);
+      createEnquiryMessageFacade.createEnquiryMessage(
+          new EnquiryData(USER, SESSION_ID, MESSAGE, null, RC_CREDENTIALS));
     } catch (Exception e) {
       assertThat(e, instanceOf(InternalServerErrorException.class));
     }
@@ -982,8 +1003,8 @@ public class CreateEnquiryMessageFacadeTest {
         .updateRocketChatIdInDatabase(USER, RC_CREDENTIALS.getRocketChatUserId());
 
     try {
-      createEnquiryMessageFacade.createEnquiryMessage(USER, SESSION_ID, MESSAGE, null,
-          RC_CREDENTIALS);
+      createEnquiryMessageFacade.createEnquiryMessage(
+          new EnquiryData(USER, SESSION_ID, MESSAGE, null, RC_CREDENTIALS));
     } catch (Exception e) {
       assertThat(e, instanceOf(InternalServerErrorException.class));
     }
@@ -1025,11 +1046,15 @@ public class CreateEnquiryMessageFacadeTest {
     when(userHelper.doUsernamesMatch(anyString(), anyString())).thenReturn(true);
     when(rocketChatRoomNameGenerator.generateGroupName(any(Session.class)))
         .thenReturn(session.getId().toString());
+    when(messageServiceProvider.postEnquiryMessage(any(RocketChatData.class),
+        any(CreateEnquiryExceptionInformation.class))).thenReturn(createMessageResponse());
 
     createEnquiryMessageFacade
-        .createEnquiryMessage(user, SESSION_ID, MESSAGE, null, rocketChatCredentials);
+        .createEnquiryMessage(
+            new EnquiryData(user, SESSION_ID, MESSAGE, null, rocketChatCredentials));
 
-    verify(messageServiceProvider, times(1)).postEnquiryMessage(any(), any(), any(), any());
+    verify(messageServiceProvider, times(1)).postEnquiryMessage(any(RocketChatData.class),
+        any(CreateEnquiryExceptionInformation.class));
     verify(messageServiceProvider, times(1))
         .postWelcomeMessageIfConfigured(any(), any(), any(), any());
     verify(messageServiceProvider, times(1))
@@ -1066,9 +1091,11 @@ public class CreateEnquiryMessageFacadeTest {
     when(userHelper.doUsernamesMatch(anyString(), anyString())).thenReturn(true);
     when(rocketChatRoomNameGenerator.generateGroupName(any(Session.class)))
         .thenReturn("0");
+    when(messageServiceProvider.postEnquiryMessage(any(RocketChatData.class),
+        any(CreateEnquiryExceptionInformation.class))).thenReturn(createMessageResponse());
 
-    createEnquiryMessageFacade
-        .createEnquiryMessage(user, SESSION_ID, MESSAGE, null, rocketChatCredentials);
+    createEnquiryMessageFacade.createEnquiryMessage(
+        new EnquiryData(user, SESSION_ID, MESSAGE, null, rocketChatCredentials));
 
     verify(session).setStatus(SessionStatus.IN_PROGRESS);
     resetRequestAttributes();
@@ -1077,6 +1104,10 @@ public class CreateEnquiryMessageFacadeTest {
 
   private void resetRequestAttributes() {
     RequestContextHolder.setRequestAttributes(null);
+  }
+
+  private MessageResponseDTO createMessageResponse() {
+    return easyRandom.nextObject(MessageResponseDTO.class);
   }
 
 }

@@ -95,6 +95,7 @@ public class NewMessageEmailSupplier implements EmailSupplier {
     if (isNotEmpty(consultantList)) {
       return consultantList.stream()
           .filter(agency -> !agency.getConsultant().getEmail().isEmpty())
+          .filter(agency -> agency.getConsultant().getNotifyNewChatMessageFromAdviceSeeker())
           .map(this::toNewConsultantMessageMailDTO)
           .collect(Collectors.toList());
     }

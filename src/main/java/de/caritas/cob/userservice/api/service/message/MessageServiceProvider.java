@@ -4,8 +4,8 @@ import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
-import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostFurtherStepsMessageException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostMessageException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostWelcomeMessageException;
@@ -15,12 +15,12 @@ import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.messageservice.generated.ApiClient;
 import de.caritas.cob.userservice.messageservice.generated.web.MessageControllerApi;
 import de.caritas.cob.userservice.messageservice.generated.web.model.AliasOnlyMessageDTO;
 import de.caritas.cob.userservice.messageservice.generated.web.model.MessageDTO;
+import de.caritas.cob.userservice.messageservice.generated.web.model.MessageResponseDTO;
 import de.caritas.cob.userservice.messageservice.generated.web.model.MessageType;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -42,32 +42,35 @@ public class MessageServiceProvider {
   /**
    * Posts an enquiry message via the MessageService to the given Rocket.Chat group ID.
    *
-   * @param message               Message
-   * @param rocketChatCredentials {@link RocketChatCredentials}
-   * @param rcGroupId             Rocket.Chat group ID
-   * @param exceptionInformation  {@link CreateEnquiryExceptionInformation}
+   * @param rocketChatData       rocket chat data necessary for sending messages
+   * @param exceptionInformation {@link CreateEnquiryExceptionInformation}
+   * @return {@link MessageResponseDTO}
    * @throws RocketChatPostMessageException exception when posting the message fails
    */
-  public void postEnquiryMessage(String message, RocketChatCredentials rocketChatCredentials,
-      String rcGroupId, CreateEnquiryExceptionInformation exceptionInformation)
+  public MessageResponseDTO postEnquiryMessage(RocketChatData rocketChatData,
+      CreateEnquiryExceptionInformation exceptionInformation)
       throws RocketChatPostMessageException {
 
     try {
-      this.postMessage(message, rocketChatCredentials, rcGroupId);
-
+      return this.postMessage(rocketChatData);
     } catch (RestClientException exception) {
       throw new RocketChatPostMessageException(
           String.format("Could not post enquiry message to Rocket.Chat group %s with user %s",
-              rcGroupId,
-              rocketChatCredentials.getRocketChatUserId()), exception, exceptionInformation);
+              rocketChatData.getRcGroupId(),
+              rocketChatData.getRocketChatCredentials().getRocketChatUserId()), exception,
+          exceptionInformation);
     }
   }
 
-  private void postMessage(String message, RocketChatCredentials rcCredentials, String rcGroupId) {
-
+  private MessageResponseDTO postMessage(RocketChatData rocketChatData) {
+    var rcCredentials = rocketChatData.getRocketChatCredentials();
     addDefaultHeaders(this.messageControllerApi.getApiClient());
-    this.messageControllerApi.createMessage(rcCredentials.getRocketChatToken(),
-        rcCredentials.getRocketChatUserId(), rcGroupId, new MessageDTO().message(message));
+    var message = new MessageDTO()
+        .message(rocketChatData.getMessage())
+        .org(rocketChatData.getOrg())
+        .t(rocketChatData.getType());
+    return this.messageControllerApi.createMessage(rcCredentials.getRocketChatToken(),
+        rcCredentials.getRocketChatUserId(), rocketChatData.getRcGroupId(), message);
   }
 
   /**
@@ -106,9 +109,9 @@ public class MessageServiceProvider {
 
   private void postMessageAsSystemUser(String message, String rcGroupId)
       throws RocketChatUserNotInitializedException {
-
-    var systemUser = rocketChatCredentialsProvider.getSystemUser();
-    this.postMessage(message, systemUser, rcGroupId);
+    var systemUserCredentials = rocketChatCredentialsProvider.getSystemUser();
+    var rocketChatData = new RocketChatData(message, systemUserCredentials, rcGroupId);
+    this.postMessage(rocketChatData);
   }
 
   /**

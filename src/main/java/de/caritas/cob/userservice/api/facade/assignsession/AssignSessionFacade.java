@@ -47,20 +47,22 @@ public class AssignSessionFacade {
    * <p>If the statistics function is enabled, the assignment of the session is processed as a
    * statistical event.
    */
-  public void assignSession(Session session, Consultant consultant) {
+  public void assignSession(Session session, Consultant consultantToAssign,
+      Consultant authConsultant) {
     var consultantSessionDTO = ConsultantSessionDTO.builder()
-        .consultant(consultant)
+        .consultant(consultantToAssign)
         .session(session)
         .build();
     sessionToConsultantVerifier.verifyPreconditionsForAssignment(consultantSessionDTO);
 
-    updateSessionInDatabase(session, consultant);
-    addNewConsultantToRocketChatGroup(session, consultant);
-    removeUnauthorizedMembersFromGroups(session, consultant);
-    sendEmailForConsultantChange(session, consultant);
+    updateSessionInDatabase(session, consultantToAssign);
+    addNewConsultantToRocketChatGroup(session, consultantToAssign);
+    removeUnauthorizedMembersFromGroups(session, consultantToAssign, authConsultant);
+    sendEmailForConsultantChange(session, consultantToAssign);
 
     statisticsService.fireEvent(
-        new AssignSessionStatisticsEvent(consultant.getId(), UserRole.CONSULTANT, session.getId()));
+        new AssignSessionStatisticsEvent(consultantToAssign.getId(), UserRole.CONSULTANT,
+            session.getId()));
   }
 
   private void updateSessionInDatabase(Session session, Consultant consultant) {
@@ -81,22 +83,24 @@ public class AssignSessionFacade {
     rocketChatFacade.removeSystemMessagesFromRocketChatGroup(rcGroupId);
   }
 
-  private void removeUnauthorizedMembersFromGroups(Session session, Consultant consultant) {
+  private void removeUnauthorizedMembersFromGroups(Session session, Consultant consultant,
+      Consultant consultantToKeep) {
     var memberList = rocketChatFacade.retrieveRocketChatMembers(session.getGroupId());
-    removeUnauthorizedMembersFromGroup(session, consultant, memberList);
+    removeUnauthorizedMembersFromGroup(session, consultant, memberList, consultantToKeep);
 
     if (session.hasFeedbackChat()) {
       var feedbackMemberList = rocketChatFacade
           .retrieveRocketChatMembers(session.getFeedbackGroupId());
-      removeUnauthorizedMembersFromFeedbackGroup(session, consultant, feedbackMemberList);
+      removeUnauthorizedMembersFromFeedbackGroup(session, consultant, feedbackMemberList,
+          consultantToKeep);
     }
   }
 
   private void removeUnauthorizedMembersFromGroup(Session session, Consultant consultant,
-      List<GroupMemberDTO> memberList) {
+      List<GroupMemberDTO> memberList, Consultant consultantToKeep) {
     var consultantsToRemoveFromRocketChat =
         unauthorizedMembersProvider.obtainConsultantsToRemove(session.getGroupId(), session,
-            consultant, memberList);
+            consultant, memberList, consultantToKeep);
 
     RocketChatRemoveFromGroupOperationService
         .getInstance(this.rocketChatFacade, this.identityClient, this.consultingTypeManager)
@@ -105,10 +109,10 @@ public class AssignSessionFacade {
   }
 
   private void removeUnauthorizedMembersFromFeedbackGroup(Session session,
-      Consultant consultant, List<GroupMemberDTO> memberList) {
+      Consultant consultant, List<GroupMemberDTO> memberList, Consultant consultantToKeep) {
     var consultantsToRemoveFromRocketChat =
         unauthorizedMembersProvider.obtainConsultantsToRemove(session.getFeedbackGroupId(), session,
-            consultant, memberList);
+            consultant, memberList, consultantToKeep);
 
     RocketChatRemoveFromGroupOperationService
         .getInstance(this.rocketChatFacade, this.identityClient, this.consultingTypeManager)
@@ -119,7 +123,8 @@ public class AssignSessionFacade {
   private void sendEmailForConsultantChange(Session session, Consultant consultant) {
     if (!authenticatedUser.getUserId().equals(consultant.getId())) {
       emailNotificationFacade.sendAssignEnquiryEmailNotification(consultant,
-          authenticatedUser.getUserId(), session.getUser().getUsername(), TenantContext.getCurrentTenantData());
+          authenticatedUser.getUserId(), session.getUser().getUsername(),
+          TenantContext.getCurrentTenantData());
     }
   }
 

@@ -7,7 +7,6 @@ import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -47,7 +46,8 @@ public class ConsultantAgencyServiceTest {
   private final Consultant CONSULTANT =
       new Consultant(CONSULTANT_ID, CONSULTANT_ROCKETCHAT_ID, "consultant", "first name",
           "last name", "consultant@cob.de", false, false, null, false, null, null, null,
-          null, null, null, null, null, true, null, null, ConsultantStatus.CREATED, false);
+          null, null, null, null, null, true, true, true, true, null, null,
+          ConsultantStatus.CREATED, false);
   private final ConsultantAgency CONSULTANT_AGENCY =
       new ConsultantAgency(AGENCY_ID, CONSULTANT, 1L, nowInUtc(), nowInUtc(), nowInUtc(), null, null);
   private final List<ConsultantAgency> CONSULTANT_AGENY_LIST = Arrays.asList(CONSULTANT_AGENCY);
@@ -80,30 +80,6 @@ public class ConsultantAgencyServiceTest {
     consultantAgencyService.saveConsultantAgency(CONSULTANT_AGENCY);
     verify(consultantAgencyRepository, times(1)).save(Mockito.any());
 
-  }
-
-  /**
-   * Method: isConsultantInAgency
-   */
-
-  @Test
-  public void isConsultantInAgency_Should_ReturnTrue_WhenConsultantFound() {
-
-    when(consultantAgencyRepository
-        .findByConsultantIdAndAgencyIdAndDeleteDateIsNull(Mockito.anyString(),
-            Mockito.anyLong())).thenReturn(CONSULTANT_AGENY_LIST);
-
-    assertTrue(consultantAgencyService.isConsultantInAgency(CONSULTANT_ID, AGENCY_ID));
-  }
-
-  @Test
-  public void isConsultantInAgency_Should_ReturnFalse_WhenConsultantNotFound() {
-
-    when(consultantAgencyRepository
-        .findByConsultantIdAndAgencyIdAndDeleteDateIsNull(Mockito.anyString(),
-            Mockito.anyLong())).thenReturn(null);
-
-    assertFalse(consultantAgencyService.isConsultantInAgency(CONSULTANT_ID, AGENCY_ID));
   }
 
   /**

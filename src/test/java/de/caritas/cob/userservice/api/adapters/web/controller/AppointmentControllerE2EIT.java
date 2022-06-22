@@ -48,7 +48,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 @ActiveProfiles("testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class AppointmentControllerE2EIT {
+class AppointmentControllerE2EIT {
 
   private static final EasyRandom easyRandom = new EasyRandom();
   private static final String CSRF_HEADER = "csrfHeader";
@@ -88,7 +88,7 @@ public class AppointmentControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  public void getAppointmentShouldReturnOk() throws Exception {
+  void getAppointmentShouldReturnOk() throws Exception {
     givenAValidConsultant(true);
     givenASavedAppointment();
 
@@ -107,7 +107,7 @@ public class AppointmentControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
-  public void getAppointmentShouldReturnOkAndOnlyStatusForAdviceSeeker() throws Exception {
+  void getAppointmentShouldReturnOkAndOnlyStatusForAdviceSeeker() throws Exception {
     givenAnAdviceSeeker();
     givenAValidConsultant(false);
     givenASavedAppointment();
@@ -127,7 +127,7 @@ public class AppointmentControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.ANONYMOUS_DEFAULT)
-  public void getAppointmentShouldReturnOkAndOnlyStatusForAnonymous() throws Exception {
+  void getAppointmentShouldReturnOkAndOnlyStatusForAnonymous() throws Exception {
     givenAnAnonymousUser();
     givenAValidConsultant(false);
     givenASavedAppointment();
@@ -147,7 +147,7 @@ public class AppointmentControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  public void getAppointmentShouldReturnClientErrorOnWrongIdFormat() throws Exception {
+  void getAppointmentShouldReturnClientErrorOnWrongIdFormat() throws Exception {
     givenAValidConsultant(true);
 
     mockMvc.perform(
@@ -160,7 +160,7 @@ public class AppointmentControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  public void getAppointmentShouldReturnNotFoundIfIdUnknown() throws Exception {
+  void getAppointmentShouldReturnNotFoundIfIdUnknown() throws Exception {
     givenAValidConsultant(true);
 
     mockMvc.perform(
@@ -173,7 +173,7 @@ public class AppointmentControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  public void putAppointmentShouldReturnUpdateAppointmentAndReturnOk() throws Exception {
+  void putAppointmentShouldReturnUpdateAppointmentAndReturnOk() throws Exception {
     givenAValidConsultant(true);
     givenASavedAppointment();
     givenAValidAppointmentDto(savedAppointment.getId(), null);
@@ -204,7 +204,7 @@ public class AppointmentControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  public void putAppointmentShouldReturnBadRequestIfIdsDiffer() throws Exception {
+  void putAppointmentShouldReturnBadRequestIfIdsDiffer() throws Exception {
     givenAValidConsultant(true);
     givenASavedAppointment();
     givenAValidAppointmentDto(savedAppointment.getId(), null);
@@ -222,7 +222,7 @@ public class AppointmentControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  public void putAppointmentShouldReturnNotFoundIfIdIsUnknown() throws Exception {
+  void putAppointmentShouldReturnNotFoundIfIdIsUnknown() throws Exception {
     givenAValidConsultant(true);
     var id = UUID.randomUUID();
     givenAValidAppointmentDto(id, null);
@@ -240,7 +240,7 @@ public class AppointmentControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  public void deleteAppointmentShouldReturnNotFoundIfAppointmentDoesNotExist() throws Exception {
+  void deleteAppointmentShouldReturnNotFoundIfAppointmentDoesNotExist() throws Exception {
     givenAValidAppointmentDto();
 
     mockMvc.perform(
@@ -254,7 +254,7 @@ public class AppointmentControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  public void deleteAppointmentShouldDeleteAppointmentAndReturnNoContent() throws Exception {
+  void deleteAppointmentShouldDeleteAppointmentAndReturnNoContent() throws Exception {
     givenAValidConsultant(true);
     givenASavedAppointment();
 
@@ -271,7 +271,7 @@ public class AppointmentControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  public void getAppointmentsShouldReturnOk() throws Exception {
+  void getAppointmentsShouldReturnOk() throws Exception {
     when(clock.instant()).thenReturn(Instant.now());
     mockMvc.perform(
             get("/appointments")
@@ -285,7 +285,7 @@ public class AppointmentControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  public void postAppointmentShouldReturnCreated() throws Exception {
+  void postAppointmentShouldReturnCreated() throws Exception {
     givenAValidAppointmentDto(null, AppointmentStatus.CREATED);
     givenAValidConsultant(true);
 
@@ -308,7 +308,7 @@ public class AppointmentControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  public void postAppointmentShouldReturnBadRequestIfIdIsSet() throws Exception {
+  void postAppointmentShouldReturnBadRequestIfIdIsSet() throws Exception {
     givenAValidAppointmentDto(UUID.randomUUID(), AppointmentStatus.CREATED);
     givenAValidConsultant(true);
 
@@ -325,7 +325,7 @@ public class AppointmentControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  public void postAppointmentShouldReturnBadRequestIfStatusIsNull() throws Exception {
+  void postAppointmentShouldReturnBadRequestIfStatusIsNull() throws Exception {
     givenAnAppointmentMissingStatus();
     givenAValidConsultant(true);
 
@@ -342,7 +342,7 @@ public class AppointmentControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  public void postAppointmentShouldReturnBadRequestIfDatetimeIsNull() throws Exception {
+  void postAppointmentShouldReturnBadRequestIfDatetimeIsNull() throws Exception {
     givenAnAppointmentMissingDatetime();
     givenAValidConsultant(true);
 
@@ -434,7 +434,7 @@ public class AppointmentControllerE2EIT {
     consultant = consultantRepository.findAll().iterator().next();
     if (isAuthUser) {
       when(authenticatedUser.getUserId()).thenReturn(consultant.getId());
-      when(authenticatedUser.isUser()).thenReturn(false);
+      when(authenticatedUser.isAdviceSeeker()).thenReturn(false);
       when(authenticatedUser.isConsultant()).thenReturn(true);
       when(authenticatedUser.getUsername()).thenReturn(consultant.getUsername());
       when(authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.CONSULTANT.getValue()));
@@ -444,7 +444,7 @@ public class AppointmentControllerE2EIT {
 
   private void givenAnAnonymousUser() {
     when(authenticatedUser.getUserId()).thenReturn(UUID.randomUUID().toString());
-    when(authenticatedUser.isUser()).thenReturn(false);
+    when(authenticatedUser.isAdviceSeeker()).thenReturn(false);
     when(authenticatedUser.isConsultant()).thenReturn(false);
     when(authenticatedUser.getUsername()).thenReturn(RandomStringUtils.randomAlphabetic(8));
     when(authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.ANONYMOUS.getValue()));
@@ -453,7 +453,7 @@ public class AppointmentControllerE2EIT {
 
   private void givenAnAdviceSeeker() {
     when(authenticatedUser.getUserId()).thenReturn(UUID.randomUUID().toString());
-    when(authenticatedUser.isUser()).thenReturn(true);
+    when(authenticatedUser.isAdviceSeeker()).thenReturn(true);
     when(authenticatedUser.isConsultant()).thenReturn(false);
     when(authenticatedUser.getUsername()).thenReturn(RandomStringUtils.randomAlphabetic(8));
     when(authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.USER.getValue()));

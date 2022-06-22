@@ -25,7 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("testing")
-public class AppointmentControllerAuthorizationIT {
+class AppointmentControllerAuthorizationIT {
 
   private static final EasyRandom easyRandom = new EasyRandom();
   private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -45,7 +45,7 @@ public class AppointmentControllerAuthorizationIT {
   }
 
   @Test
-  public void getAppointmentShouldReturnForbiddenWhenNoCsrfTokens() throws Exception {
+  void getAppointmentShouldReturnForbiddenWhenNoCsrfTokens() throws Exception {
     mvc.perform(
         get("/appointments/{id}", UUID.randomUUID())
             .contentType(MediaType.APPLICATION_JSON)
@@ -54,7 +54,7 @@ public class AppointmentControllerAuthorizationIT {
   }
 
   @Test
-  public void putAppointmentShouldReturnForbiddenWhenNoCsrfTokens() throws Exception {
+  void putAppointmentShouldReturnForbiddenWhenNoCsrfTokens() throws Exception {
     givenAValidAppointment();
 
     mvc.perform(
@@ -67,7 +67,7 @@ public class AppointmentControllerAuthorizationIT {
   }
 
   @Test
-  public void putAppointmentShouldReturnUnauthorizedWhenNoKeycloakAuthorization() throws Exception {
+  void putAppointmentShouldReturnUnauthorizedWhenNoKeycloakAuthorization() throws Exception {
     givenAValidAppointment();
 
     mvc.perform(
@@ -98,7 +98,7 @@ public class AppointmentControllerAuthorizationIT {
       AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS,
       AuthorityValue.VIEW_ALL_PEER_SESSIONS
   })
-  public void putAppointmentsShouldReturnForbiddenWhenNoConsultantAuthority() throws Exception {
+  void putAppointmentsShouldReturnForbiddenWhenNoConsultantAuthority() throws Exception {
     givenAValidAppointment();
 
     mvc.perform(
@@ -112,7 +112,7 @@ public class AppointmentControllerAuthorizationIT {
   }
 
   @Test
-  public void deleteAppointmentShouldReturnForbiddenWhenNoCsrfTokens() throws Exception {
+  void deleteAppointmentShouldReturnForbiddenWhenNoCsrfTokens() throws Exception {
     mvc.perform(
         delete("/appointments/{id}", UUID.randomUUID())
             .contentType(MediaType.APPLICATION_JSON)
@@ -121,7 +121,7 @@ public class AppointmentControllerAuthorizationIT {
   }
 
   @Test
-  public void deleteAppointmentShouldReturnUnauthorizedWhenNoKeycloakAuthorization()
+  void deleteAppointmentShouldReturnUnauthorizedWhenNoKeycloakAuthorization()
       throws Exception {
     mvc.perform(
         delete("/appointments/{id}", UUID.randomUUID())
@@ -149,7 +149,7 @@ public class AppointmentControllerAuthorizationIT {
       AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS,
       AuthorityValue.VIEW_ALL_PEER_SESSIONS
   })
-  public void deleteAppointmentsShouldReturnForbiddenWhenNoConsultantAuthority() throws Exception {
+  void deleteAppointmentsShouldReturnForbiddenWhenNoConsultantAuthority() throws Exception {
     mvc.perform(
         delete("/appointments/{id}", UUID.randomUUID())
             .cookie(CSRF_COOKIE)
@@ -159,7 +159,7 @@ public class AppointmentControllerAuthorizationIT {
   }
 
   @Test
-  public void getAppointmentsShouldReturnForbiddenWhenNoCsrfTokens() throws Exception {
+  void getAppointmentsShouldReturnForbiddenWhenNoCsrfTokens() throws Exception {
     mvc.perform(
         get("/appointments")
             .contentType(MediaType.APPLICATION_JSON)
@@ -168,7 +168,7 @@ public class AppointmentControllerAuthorizationIT {
   }
 
   @Test
-  public void getAppointmentsShouldReturnUnauthorizedWhenNoKeycloakAuthorization()
+  void getAppointmentsShouldReturnUnauthorizedWhenNoKeycloakAuthorization()
       throws Exception {
     mvc.perform(
         get("/appointments")
@@ -196,7 +196,7 @@ public class AppointmentControllerAuthorizationIT {
       AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS,
       AuthorityValue.VIEW_ALL_PEER_SESSIONS
   })
-  public void getAppointmentsShouldReturnForbiddenWhenNoConsultantAuthority() throws Exception {
+  void getAppointmentsShouldReturnForbiddenWhenNoConsultantAuthority() throws Exception {
     mvc.perform(
         get("/appointments")
             .cookie(CSRF_COOKIE)
@@ -206,7 +206,7 @@ public class AppointmentControllerAuthorizationIT {
   }
 
   @Test
-  public void postAppointmentsShouldReturnForbiddenWhenNoCsrfTokens() throws Exception {
+  void postAppointmentsShouldReturnForbiddenWhenNoCsrfTokens() throws Exception {
     mvc.perform(
         post("/appointments")
             .contentType(MediaType.APPLICATION_JSON)
@@ -215,7 +215,7 @@ public class AppointmentControllerAuthorizationIT {
   }
 
   @Test
-  public void postAppointmentsShouldReturnUnauthorizedWhenNoKeycloakAuthorization()
+  void postAppointmentsShouldReturnUnauthorizedWhenNoKeycloakAuthorization()
       throws Exception {
     mvc.perform(
         post("/appointments")
@@ -243,7 +243,7 @@ public class AppointmentControllerAuthorizationIT {
       AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS,
       AuthorityValue.VIEW_ALL_PEER_SESSIONS
   })
-  public void postAppointmentsShouldReturnForbiddenWhenNoConsultantAuthority() throws Exception {
+  void postAppointmentsShouldReturnForbiddenWhenNoConsultantAuthority() throws Exception {
     mvc.perform(
         post("/appointments")
             .cookie(CSRF_COOKIE)
