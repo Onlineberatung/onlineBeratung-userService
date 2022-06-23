@@ -41,6 +41,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import javax.ws.rs.BadRequestException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -354,6 +355,24 @@ public class SessionService {
     return convertToUserSessionResponseDTO(sessions, agencies);
   }
 
+  /**
+   * Retrieves user sessions by user ID and session IDs
+   *
+   * @param userId     the user ID
+   * @param sessionIds the session IDs
+   * @param roles      the roles of the given user
+   * @return {@link UserSessionResponseDTO}
+   */
+  public List<UserSessionResponseDTO> getSessionsByUserAndSessionIds(String userId,
+      Set<Long> sessionIds, Set<String> roles) {
+    checkForUserOrConsultantRole(roles);
+    var sessions = StreamSupport.stream(sessionRepository.findAllById(sessionIds).spliterator(),
+        false).collect(Collectors.toList());
+    sessions.forEach(session -> checkIfUserAndNotOwnerOfSession(session, userId, roles));
+    List<AgencyDTO> agencies = fetchAgencies(sessions);
+    return convertToUserSessionResponseDTO(sessions, agencies);
+  }
+
   private List<AgencyDTO> fetchAgencies(List<Session> sessions) {
     Set<Long> agencyIds = sessions.stream()
         .map(Session::getAgencyId)
@@ -374,6 +393,23 @@ public class SessionService {
       Consultant consultant, Set<String> rcGroupIds, Set<String> roles) {
     checkForUserOrConsultantRole(roles);
     var sessions = sessionRepository.findByGroupOrFeedbackGroupIds(rcGroupIds);
+    sessions.forEach(session -> checkConsultantAssignment(consultant, session));
+    return mapSessionsToConsultantSessionDto(sessions);
+  }
+
+  /**
+   * Retrieves consultant sessions by session IDs
+   *
+   * @param consultant the ID of the consultant
+   * @param sessionIds the session IDs
+   * @param roles      the roles of the given consultant
+   * @return {@link ConsultantSessionResponseDTO}
+   */
+  public List<ConsultantSessionResponseDTO> getSessionsByIds(Consultant consultant,
+      Set<Long> sessionIds, Set<String> roles) {
+    checkForUserOrConsultantRole(roles);
+    var sessions = StreamSupport.stream(sessionRepository.findAllById(sessionIds).spliterator(),
+        false).collect(Collectors.toList());
     sessions.forEach(session -> checkConsultantAssignment(consultant, session));
     return mapSessionsToConsultantSessionDto(sessions);
   }
