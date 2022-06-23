@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
+import static java.util.Collections.singletonList;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
@@ -341,6 +342,35 @@ public class UserController implements UsersApi {
           .build();
       groupSessionList = sessionListFacade.retrieveSessionsForAuthenticatedUserByGroupIds(
           user.getUserId(), rcGroupIds, rocketChatCredentials, authenticatedUser.getRoles());
+    }
+
+    return isNotEmpty(groupSessionList.getSessions())
+        ? new ResponseEntity<>(groupSessionList, HttpStatus.OK)
+        : new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
+
+  @Override
+  public ResponseEntity<GroupSessionListResponseDTO> getSessionForId(String rcToken,
+      Long sessionId) {
+    GroupSessionListResponseDTO groupSessionList;
+    if (authenticatedUser.isConsultant()) {
+      var consultant = userAccountProvider.retrieveValidatedConsultant();
+      var rocketChatCredentials = RocketChatCredentials.builder()
+          .rocketChatUserId(consultant.getRocketChatId())
+          .rocketChatToken(rcToken)
+          .build();
+      groupSessionList = sessionListFacade.retrieveSessionsForAuthenticatedConsultantBySessionIds(
+          consultant, singletonList(sessionId), rocketChatCredentials,
+          authenticatedUser.getRoles());
+    } else {
+      var user = userAccountProvider.retrieveValidatedUser();
+      var rocketChatCredentials = RocketChatCredentials.builder()
+          .rocketChatUserId(user.getRcUserId())
+          .rocketChatToken(rcToken)
+          .build();
+      groupSessionList = sessionListFacade.retrieveSessionsForAuthenticatedUserBySessionIds(
+          user.getUserId(), singletonList(sessionId), rocketChatCredentials,
+          authenticatedUser.getRoles());
     }
 
     return isNotEmpty(groupSessionList.getSessions())

@@ -70,6 +70,28 @@ public class UserSessionListService {
     return mergeUserSessionsAndChats(sessions, chats, rocketChatCredentials);
   }
 
+  /**
+   * Returns a list of {@link UserSessionResponseDTO} for given user ID and session IDs.
+   *
+   * @param userId                the ID of an user
+   * @param sessionIds            the session IDs
+   * @param rocketChatCredentials the credentials for accessing rocket chat
+   * @param roles                 the roles of given user
+   * @return {@link UserSessionResponseDTO}
+   */
+  public List<UserSessionResponseDTO> retrieveSessionsForAuthenticatedUserAndSessionIds(
+      String userId, List<Long> sessionIds, RocketChatCredentials rocketChatCredentials,
+      Set<String> roles) {
+
+    var uniqueSessionIds = new HashSet<>(sessionIds);
+    var sessions = sessionService.getSessionsByUserAndSessionIds(userId, uniqueSessionIds, roles);
+    var groupIds = sessions.stream()
+        .map(sessionResponse -> sessionResponse.getSession().getGroupId())
+        .collect(Collectors.toSet());
+    var chats = chatService.getChatSessionsByGroupIds(groupIds);
+    return mergeUserSessionsAndChats(sessions, chats, rocketChatCredentials);
+  }
+
   private List<UserSessionResponseDTO> mergeUserSessionsAndChats(
       List<UserSessionResponseDTO> sessions, List<UserSessionResponseDTO> chats,
       RocketChatCredentials rocketChatCredentials) {
