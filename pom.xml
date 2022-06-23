@@ -28,7 +28,7 @@
     <skip.integration-tests>false</skip.integration-tests>
 
     <commons-collections4.version>4.4</commons-collections4.version>
-    <commons-csv.version>1.8</commons-csv.version>
+    <commons-csv.version>1.9.0</commons-csv.version>
     <commons-text.version>1.9</commons-text.version>
     <commons-validator.version>1.7</commons-validator.version>
     <easy-random-core.version>5.0.0</easy-random-core.version>
@@ -36,18 +36,18 @@
     <hibernate.search.orm.version>5.11.10.Final</hibernate.search.orm.version>
     <jackson.databind.nullable.version>0.2.2</jackson.databind.nullable.version>
     <javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
-    <json-unit.version>2.28.0</json-unit.version>
+    <json-unit.version>2.35.0</json-unit.version>
     <jsoup.version>1.14.3</jsoup.version>
     <keycloak.version>17.0.0</keycloak.version>
-    <liquibase-maven-plugin.version>4.6.1</liquibase-maven-plugin.version>
+    <liquibase-maven-plugin.version>4.12.0</liquibase-maven-plugin.version>
     <log4j.version>2.17.2
     </log4j.version> <!-- force safe version due to https://logging.apache.org/log4j/2.x/security.html -->
-    <logstash-logback-encoder.version>7.0.1</logstash-logback-encoder.version>
-    <mongodb-driver.version>3.12.10</mongodb-driver.version>
+    <logstash-logback-encoder.version>7.2</logstash-logback-encoder.version>
+    <mongodb-driver.version>3.12.11</mongodb-driver.version>
     <openapi.generator.maven.plugin.version>5.3.0</openapi.generator.maven.plugin.version>
     <passay.version>1.6.1</passay.version>
     <plantuml.version>1.2021.16</plantuml.version>
-    <powermock.version>2.0.2</powermock.version>
+    <powermock.version>2.0.9</powermock.version>
     <nv-i18n.version>1.29</nv-i18n.version>
     <rabbitmq-mock.version>1.1.1</rabbitmq-mock.version>
     <reflections.version>0.10.2</reflections.version>
