@@ -801,7 +801,7 @@ public class UserController implements UsersApi {
       throw new InternalServerErrorException(message);
     }
 
-    if (!messenger.updateE2eKeys(chatUserId, e2eKeyDTO.getPublicKey())) {
+    if (Boolean.FALSE.equals(messenger.updateE2eKeys(chatUserId, e2eKeyDTO.getPublicKey()))) {
       var message = String.format("Setting E2E keys in user %s's chats failed", username);
       throw new InternalServerErrorException(message);
     }
@@ -1129,10 +1129,10 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<Void> activateTwoFactorAuthByApp(OneTimePasswordDTO oneTimePasswordDTO) {
-    if (authenticatedUser.isAdviceSeeker() && !identityClientConfig.getOtpAllowedForUsers()) {
+    if (authenticatedUser.isAdviceSeeker() && Boolean.FALSE.equals(identityClientConfig.getOtpAllowedForUsers())) {
       throw new ConflictException("2FA is disabled for user role");
     }
-    if (authenticatedUser.isConsultant() && !identityClientConfig.getOtpAllowedForConsultants()) {
+    if (authenticatedUser.isConsultant() && Boolean.FALSE.equals(identityClientConfig.getOtpAllowedForConsultants())) {
       throw new ConflictException("2FA is disabled for consultant role");
     }
     if (authenticatedUser.isSingleTenantAdmin() && !identityClientConfig.getOtpAllowedForSingleTenantAdmins()) {

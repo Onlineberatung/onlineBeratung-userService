@@ -129,6 +129,7 @@ public class SessionListFacade {
         .retrieveSessionsForAuthenticatedConsultant(consultant, rcAuthToken,
             sessionListQueryParameter);
 
+
     /* Sort the session list by latest Rocket.Chat message if session is in progress (no enquiry).
      * The latest answer is on top.
      *

@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.admin.report.service;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.AdminAgencyControllerApi;
@@ -38,8 +39,7 @@ public class AgencyAdminServiceTest {
 
     HttpHeaders defaultHeaders = (HttpHeaders) ReflectionTestUtils
         .getField(controllerApi.getApiClient(), "defaultHeaders");
-    assertEquals(defaultHeaders.get("header1").get(0), "header1");
 
+    assertThat(defaultHeaders.get("header1").get(0), is("header1"));
   }
-
 }

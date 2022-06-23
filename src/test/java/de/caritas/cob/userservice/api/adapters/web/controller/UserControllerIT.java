@@ -935,7 +935,7 @@ public class UserControllerIT {
         .build();
     var expectedEnquiryData = new EnquiryData(USER, SESSION_ID, MESSAGE, null,
         expectedRCCredentials);
-    when(createEnquiryMessageFacade.createEnquiryMessage(eq(expectedEnquiryData))).thenReturn(
+    when(createEnquiryMessageFacade.createEnquiryMessage(expectedEnquiryData)).thenReturn(
         new CreateEnquiryMessageResponseDTO().rcGroupId(RC_GROUP_ID).sessionId(SESSION_ID));
 
     mvc.perform(

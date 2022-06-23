@@ -36,7 +36,7 @@ public class StatisticsService {
   @Async
   public void fireEvent(StatisticsEvent statisticsEvent) {
 
-    if (statisticsEnabled) {
+    if (Boolean.TRUE.equals(statisticsEnabled)) {
       statisticsEvent
           .getPayload()
           .ifPresentOrElse(

@@ -5,15 +5,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.List;
 import java.util.Optional;
@@ -59,11 +58,11 @@ public class RelevantUserAccountIdsByChatProviderTest {
     List<GroupMemberDTO> groupMembers = asList(
         memberDTOWithRcId("rc1"), memberDTOWithRcId("rc2"), memberDTOWithRcId("rc3"));
     when(this.rocketChatService.getMembersOfGroup(any())).thenReturn(groupMembers);
-    when(this.consultantService.getConsultantByRcUserId(eq("rc1")))
+    when(this.consultantService.getConsultantByRcUserId("rc1"))
         .thenReturn(Optional.of(consultantWithId("consultant1")));
-    when(this.userService.findUserByRcUserId(eq("rc2")))
+    when(this.userService.findUserByRcUserId("rc2"))
         .thenReturn(Optional.of(userWithId("user1")));
-    when(this.userService.findUserByRcUserId(eq("rc3")))
+    when(this.userService.findUserByRcUserId("rc3"))
         .thenReturn(Optional.of(userWithId("user2")));
 
     List<String> collectedUserIds = this.byChatProvider.collectUserIds("groupId");
@@ -100,9 +99,9 @@ public class RelevantUserAccountIdsByChatProviderTest {
     List<GroupMemberDTO> groupMembers = asList(
         memberDTOWithRcId("rc1"), memberDTOWithRcId("rc2"), memberDTOWithRcId("rc3"));
     when(this.rocketChatService.getMembersOfGroup(any())).thenReturn(groupMembers);
-    when(this.consultantService.getConsultantByRcUserId(eq("rc1")))
+    when(this.consultantService.getConsultantByRcUserId("rc1"))
         .thenReturn(Optional.of(consultantWithId("consultant1")));
-    when(this.userService.findUserByRcUserId(eq("rc3")))
+    when(this.userService.findUserByRcUserId("rc3"))
         .thenReturn(Optional.of(userWithId("user2")));
 
     List<String> collectedUserIds = this.byChatProvider.collectUserIds("groupId");

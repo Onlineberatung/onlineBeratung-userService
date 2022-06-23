@@ -41,13 +41,13 @@ public class SessionServiceIT {
   private ConsultantRepository consultantRepository;
 
   @Test
-  public void fetchSessionForConsultant_Should_ThrowNotFoundException_When_SessionIsNotFound() {
+  void fetchSessionForConsultant_Should_ThrowNotFoundException_When_SessionIsNotFound() {
     assertThrows(NotFoundException.class,
         () -> sessionService.fetchSessionForConsultant(-1L, CONSULTANT));
   }
 
   @Test
-  public void fetchSessionForConsultant_Should_Throw_ForbiddenException_When_ConsultantHasNoPermission() {
+  void fetchSessionForConsultant_Should_Throw_ForbiddenException_When_ConsultantHasNoPermission() {
     Consultant consultant = consultantRepository
         .findByIdAndDeleteDateIsNull("fb77d849-470f-4cec-89ca-6aa673bacb88")
         .get();
@@ -57,7 +57,7 @@ public class SessionServiceIT {
   }
 
   @Test
-  public void getSessionsByUserAndGroupOrFeedbackGroupIdsShouldBeForbiddenIfUserHasNotRequiredRole() {
+  void getSessionsByUserAndGroupOrFeedbackGroupIdsShouldBeForbiddenIfUserHasNotRequiredRole() {
     assertThrows(ForbiddenException.class,
         () -> sessionService.getSessionsByUserAndGroupOrFeedbackGroupIds(
             "9c4057d0-05ad-4e86-a47c-dc5bdeec03b9", Set.of("9faSTWZ5gurHLXy4R"),
@@ -65,7 +65,7 @@ public class SessionServiceIT {
   }
 
   @Test
-  public void getSessionsByUserAndGroupOrFeedbackGroupIdsShouldFetchAgencyForSession() {
+  void getSessionsByUserAndGroupOrFeedbackGroupIdsShouldFetchAgencyForSession() {
     var sessions = sessionService.getSessionsByUserAndGroupOrFeedbackGroupIds(
         "9c4057d0-05ad-4e86-a47c-dc5bdeec03b9", Set.of("9faSTWZ5gurHLXy4R"), Set.of("user"));
 
@@ -75,7 +75,7 @@ public class SessionServiceIT {
   }
 
   @Test
-  public void fetchSessionForConsultant_Should_Return_ValidConsultantSessionDTO_When_ConsultantIsAssigned() {
+  void fetchSessionForConsultant_Should_Return_ValidConsultantSessionDTO_When_ConsultantIsAssigned() {
     Consultant consultant = consultantRepository
         .findByIdAndDeleteDateIsNull("473f7c4b-f011-4fc2-847c-ceb636a5b399")
         .get();
@@ -101,7 +101,7 @@ public class SessionServiceIT {
 
   @Test
   @Transactional
-  public void fetchSessionForConsultant_Should_Return_ConsultantSessionDTO_When_ConsultantIsToTeamSessionAgencyAssigned() {
+  void fetchSessionForConsultant_Should_Return_ConsultantSessionDTO_When_ConsultantIsToTeamSessionAgencyAssigned() {
     Consultant consultant = consultantRepository
         .findByIdAndDeleteDateIsNull("e2f20d3a-1ca7-4cb5-9fac-8e26033416b3")
         .get();

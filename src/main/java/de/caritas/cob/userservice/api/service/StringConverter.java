@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service;
 
+import de.caritas.cob.userservice.api.exception.DecryptionException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.DigestException;
@@ -104,7 +105,7 @@ public class StringConverter {
 
       return new String(decryptedData, StandardCharsets.UTF_8);
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new DecryptionException(e.getMessage());
     }
   }
 
@@ -136,7 +137,7 @@ public class StringConverter {
 
       return result;
     } catch (DigestException e) {
-      throw new RuntimeException(e);
+      throw new DecryptionException(e.getMessage());
     } finally {
       Arrays.fill(generatedData, (byte) 0);
     }
