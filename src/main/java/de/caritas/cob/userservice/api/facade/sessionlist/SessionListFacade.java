@@ -112,6 +112,18 @@ public class SessionListFacade {
     return new GroupSessionListResponseDTO().sessions(sessions);
   }
 
+  public GroupSessionListResponseDTO retrieveChatsForUserByChatIds(List<Long> chatIds, RocketChatCredentials rocketChatCredentials) {
+    var userChatSessions = userSessionListService.retrieveChatsForUserAndChatIds(chatIds, rocketChatCredentials);
+    userChatSessions.sort(comparing(UserSessionResponseDTO::getLatestMessage).reversed());
+
+    SessionMapper sessionMapper = new SessionMapper();
+    var sessions = userChatSessions.stream()
+        .map(sessionMapper::toGroupSessionResponse)
+        .collect(Collectors.toList());
+
+    return new GroupSessionListResponseDTO().sessions(sessions);
+  }
+
   /**
    * @param consultant            the authenticated consultant
    * @param rcGroupIds            the group or feedback group IDs
@@ -146,6 +158,20 @@ public class SessionListFacade {
       Set<String> roles) {
     List<ConsultantSessionResponseDTO> consultantSessions = consultantSessionListService.retrieveSessionsForConsultantAndSessionIds(
         consultant, sessionIds, roles, rocketChatCredentials.getRocketChatToken());
+    consultantSessions.sort(comparing(ConsultantSessionResponseDTO::getLatestMessage).reversed());
+
+    SessionMapper sessionMapper = new SessionMapper();
+    var sessions = consultantSessions.stream()
+        .map(sessionMapper::toGroupSessionResponse)
+        .collect(Collectors.toList());
+
+    return new GroupSessionListResponseDTO().sessions(sessions);
+  }
+
+  public GroupSessionListResponseDTO retrieveChatsForConsultantByChatIds(Consultant consultant,
+      List<Long> chatIds, RocketChatCredentials rocketChatCredentials) {
+    List<ConsultantSessionResponseDTO> consultantSessions = consultantSessionListService.retrieveChatsForConsultantAndChatIds(
+        consultant, chatIds,  rocketChatCredentials.getRocketChatToken());
     consultantSessions.sort(comparing(ConsultantSessionResponseDTO::getLatestMessage).reversed());
 
     SessionMapper sessionMapper = new SessionMapper();

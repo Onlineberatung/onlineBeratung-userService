@@ -92,6 +92,15 @@ public class UserSessionListService {
     return mergeUserSessionsAndChats(sessions, chats, rocketChatCredentials);
   }
 
+  public List<UserSessionResponseDTO> retrieveChatsForUserAndChatIds(List<Long> chatIds, RocketChatCredentials rocketChatCredentials) {
+    var uniqueChatIds = new HashSet<>(chatIds);
+    var chats = chatService.getChatSessionsByIds(uniqueChatIds);
+    var rocketChatRoomInformation = rocketChatRoomInformationProvider.retrieveRocketChatInformation(
+        rocketChatCredentials);
+    return updateUserChatValues(chats, rocketChatRoomInformation,
+        rocketChatCredentials.getRocketChatUserId());
+  }
+
   private List<UserSessionResponseDTO> mergeUserSessionsAndChats(
       List<UserSessionResponseDTO> sessions, List<UserSessionResponseDTO> chats,
       RocketChatCredentials rocketChatCredentials) {

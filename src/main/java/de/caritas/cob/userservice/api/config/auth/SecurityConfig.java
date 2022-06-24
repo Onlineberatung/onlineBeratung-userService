@@ -114,6 +114,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT)
         .antMatchers(HttpMethod.GET, "/users/sessions/room/{sessionId:[0-9]+}")
         .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT)
+        .antMatchers(HttpMethod.GET, "/users/chat/room/{chatId:[0-9]+}")
+        .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT)
         .antMatchers("/users/sessions/open", "/users/sessions/consultants/new",
             "/users/sessions/new/{sessionId:[0-9]+}", "/users/consultants/absences",
             "/users/sessions/consultants", "/users/sessions/teams",
