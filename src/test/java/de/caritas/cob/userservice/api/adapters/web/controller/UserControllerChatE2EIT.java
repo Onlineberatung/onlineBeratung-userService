@@ -2,10 +2,14 @@ package de.caritas.cob.userservice.api.adapters.web.controller;
 
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS_SYSTEM_A;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS_TECHNICAL_A;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_TOKEN;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_TOKEN_HEADER_PARAMETER_NAME;
 import static java.util.Objects.nonNull;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isA;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -33,6 +37,8 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberD
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.MessageResponse;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomResponse;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsGetDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsUpdateDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.subscriptions.SubscriptionsGetDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.subscriptions.SubscriptionsUpdateDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.RocketChatUserDTO;
@@ -901,6 +907,54 @@ class UserControllerChatE2EIT {
     assertTrue(chat.getUpdateDate().isBefore(chatAfter.getUpdateDate()));
   }
 
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
+  void getChatByIdShouldFindChatByChatId()
+      throws Exception {
+    givenAValidUser(true);
+    givenAValidConsultant(false);
+    givenNoRocketChatSubscriptionUpdates();
+    givenNoRocketChatRoomUpdates();
+    givenAValidChat(false);
+
+    mockMvc.perform(
+            get("/users/chat/room/{chatId}", chat.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("sessions[0].session", is(nullValue())))
+        .andExpect(jsonPath("sessions[0].chat", is(notNullValue())))
+        .andExpect(jsonPath("sessions[0].consultant", is(nullValue())));
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  void getChatByIdShouldFindChatByChatIdForConsultant()
+      throws Exception {
+    givenAValidUser();
+    givenAValidConsultant(true);
+    givenNoRocketChatSubscriptionUpdates();
+    givenNoRocketChatRoomUpdates();
+    givenAValidChat(false);
+
+    mockMvc.perform(
+            get("/users/chat/room/{chatId}", chat.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("sessions[0].session", is(nullValue())))
+        .andExpect(jsonPath("sessions[0].chat", is(notNullValue())))
+        .andExpect(jsonPath("sessions[0].consultant.firstName", is("Emiration")))
+        .andExpect(jsonPath("sessions[0].consultant.lastName", is("Consultant")))
+        .andExpect(jsonPath("sessions[0].consultant.id", is("0b3b1cc6-be98-4787-aa56-212259d811b9")));
+  }
+
   private long aPositiveLong() {
     return Math.abs(easyRandom.nextLong());
   }
@@ -1190,5 +1244,21 @@ class UserControllerChatE2EIT {
     int occurrencesOfRemoval = StringUtils.countOccurrencesOf(logOutput.getOut(),
         "RocketChatTestConfig.removeUserFromGroup(" + chatUserId + "," + groupId + ") called");
     assertEquals(1, occurrencesOfRemoval);
+  }
+
+  private void givenNoRocketChatSubscriptionUpdates() {
+    var response = new SubscriptionsGetDTO();
+    var subscriptionsUpdate = new SubscriptionsUpdateDTO[0];
+    response.setUpdate(subscriptionsUpdate);
+    when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(HttpEntity.class),
+        eq(SubscriptionsGetDTO.class))).thenReturn(ResponseEntity.ok(response));
+  }
+
+  private void givenNoRocketChatRoomUpdates() {
+    var response = new RoomsGetDTO();
+    var roomsUpdate = new RoomsUpdateDTO[0];
+    response.setUpdate(roomsUpdate);
+    when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(HttpEntity.class),
+        eq(RoomsGetDTO.class))).thenReturn(ResponseEntity.ok(response));
   }
 }
