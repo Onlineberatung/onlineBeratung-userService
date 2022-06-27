@@ -378,6 +378,33 @@ public class UserController implements UsersApi {
         : new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
+  @Override
+  public ResponseEntity<GroupSessionListResponseDTO> getChatById(String rcToken, Long chatId) {
+    GroupSessionListResponseDTO groupSessionList;
+    if (authenticatedUser.isConsultant()) {
+      var consultant = userAccountProvider.retrieveValidatedConsultant();
+      var rocketChatCredentials = RocketChatCredentials.builder()
+          .rocketChatUserId(consultant.getRocketChatId())
+          .rocketChatToken(rcToken)
+          .build();
+      groupSessionList = sessionListFacade.retrieveChatsForConsultantByChatIds(consultant,
+          singletonList(chatId), rocketChatCredentials
+      );
+    } else {
+      var user = userAccountProvider.retrieveValidatedUser();
+      var rocketChatCredentials = RocketChatCredentials.builder()
+          .rocketChatUserId(user.getRcUserId())
+          .rocketChatToken(rcToken)
+          .build();
+      groupSessionList = sessionListFacade.retrieveChatsForUserByChatIds(singletonList(chatId),
+          rocketChatCredentials);
+    }
+
+    return isNotEmpty(groupSessionList.getSessions())
+        ? new ResponseEntity<>(groupSessionList, HttpStatus.OK)
+        : new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
+
   /**
    * Updates the absence (and its message) for the calling consultant.
    *
