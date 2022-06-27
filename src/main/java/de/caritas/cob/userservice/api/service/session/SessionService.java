@@ -467,13 +467,33 @@ public class SessionService {
   }
 
   private void checkConsultantAssignment(Consultant consultant, Session session) {
-    if (session.isAdvisedBy(consultant) || (isTeamSessionOrNew(session) && consultant.isInAgency(
-        session.getAgencyId()))) {
+    if (session.isAdvisedBy(consultant) || isAllowedToAdvise(consultant, session)
+        || isAnonymousEnquiryAndAllowedToAdviseConsultingType(consultant, session)) {
       return;
     }
     throw new ForbiddenException(
         String.format("No permission for session %s by consultant %s", session.getId(),
             consultant.getId()));
+  }
+
+  private boolean isAllowedToAdvise(Consultant consultant, Session session) {
+    return isTeamSessionOrNew(session) && session.getAgencyId() != null && consultant.isInAgency(
+        session.getAgencyId());
+  }
+
+  private boolean isAnonymousEnquiryAndAllowedToAdviseConsultingType(Consultant consultant,
+      Session session) {
+    if (session.getStatus() != SessionStatus.NEW
+        || session.getRegistrationType() != RegistrationType.ANONYMOUS) {
+      return false;
+    }
+    var agencyIdsOfConsultant = consultant.getConsultantAgencies().stream()
+        .map(ConsultantAgency::getAgencyId)
+        .collect(Collectors.toList());
+    var consultingTypes = agencyService.getAgencies(agencyIdsOfConsultant).stream()
+        .map(AgencyDTO::getConsultingType)
+        .collect(Collectors.toSet());
+    return consultingTypes.contains(session.getConsultingTypeId());
   }
 
   /**
