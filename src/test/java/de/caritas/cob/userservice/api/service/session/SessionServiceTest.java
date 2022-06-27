@@ -667,6 +667,23 @@ class SessionServiceTest {
   }
 
   @Test
+  void getSessionsByIds_should_find_new_anonymous_enquiry_if_consultant_may_advise_consulting_type() {
+    Session anonymousEnquiry = createAnonymousNewEnquiryWithConsultingType(
+        AGENCY_DTO_SUCHT.getConsultingType());
+    when(sessionRepository.findAllById(singleton(anonymousEnquiry.getId()))).thenReturn(
+        singletonList(anonymousEnquiry));
+    when(agencyService.getAgencies(singletonList(4711L))).thenReturn(AGENCY_DTO_LIST);
+    ConsultantAgency agency = new ConsultantAgency();
+    agency.setAgencyId(4711L);
+    var consultant = createConsultantWithAgencies(agency);
+
+    var sessionResponse = sessionService.getSessionsByIds(
+        consultant, singleton(anonymousEnquiry.getId()), singleton(UserRole.CONSULTANT.getValue()));
+
+    assertEquals(1, sessionResponse.size());
+  }
+
+  @Test
   void getSessionsByUserAndGroupOrFeedbackGroupIds_should_find_session_for_anonymous_user_of_session() {
     Session anonymousEnquiry = createAnonymousNewEnquiryWithConsultingType(
         AGENCY_DTO_SUCHT.getConsultingType());
@@ -692,6 +709,7 @@ class SessionServiceTest {
         () -> sessionService.getSessionsByUserAndGroupOrFeedbackGroupIds(
             "someOtherId", singleton("rcGroupId"), singleton(UserRole.ANONYMOUS.getValue())));
   }
+
   @Test
   void getSessionsByUserAndSessionIds_should_find_session_for_anonymous_user_of_session() {
     Session anonymousEnquiry = createAnonymousNewEnquiryWithConsultingType(
