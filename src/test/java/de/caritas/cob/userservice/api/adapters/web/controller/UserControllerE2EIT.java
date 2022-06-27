@@ -116,6 +116,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplateHandler;
+import de.caritas.cob.userservice.topicservice.generated.web.TopicControllerApi;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -188,8 +189,8 @@ class UserControllerE2EIT {
   private RestTemplate rocketChatRestTemplate;
 
   @MockBean
-  @Qualifier("topicControllerApiMain")
-  private de.caritas.cob.userservice.topicservice.generated.web.TopicControllerApi topicControllerApi;
+  @Qualifier("topicControllerApiPrimary")
+  private TopicControllerApi topicControllerApi;
 
   @MockBean
   private Keycloak keycloak;
@@ -492,7 +493,7 @@ class UserControllerE2EIT {
     givenAValidRocketChatSubscriptionsResponse();
     givenAValidRocketChatRoomsResponse();
     givenAValidTopicServiceResponse();
-    when(topicControllerApi.getApiClient()).thenReturn(new ApiClient());
+
 
     mockMvc.perform(
             get("/users/sessions/consultants?status=2&count=15&filter=all&offset=0")
@@ -1226,6 +1227,7 @@ class UserControllerE2EIT {
     roomsGetDTO.setUpdate(new RoomsUpdateDTO[]{});
     var firstTopic = new TopicDTO().id(1L).name("topic name").description("topic desc").status("INACTIVE");
     var secondTopic = new TopicDTO().id(2L).name("topic name 2").description("topic desc 2").status("ACTIVE");
+    when(topicControllerApi.getApiClient()).thenReturn(new ApiClient());
     when(topicControllerApi.getAllTopics()).thenReturn(Lists.newArrayList(firstTopic, secondTopic));
   }
 

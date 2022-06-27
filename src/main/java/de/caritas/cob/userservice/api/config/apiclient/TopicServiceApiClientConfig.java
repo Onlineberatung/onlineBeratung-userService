@@ -16,7 +16,7 @@ public class TopicServiceApiClientConfig {
   private String topicServiceApiUrl;
 
   @Bean
-  @Qualifier("topicControllerApiMain")
+  @Qualifier("topicControllerApiPrimary")
   public TopicControllerApi topicControllerApi(
       ApiClient apiClient) {
     return new TopicControllerApi(apiClient);

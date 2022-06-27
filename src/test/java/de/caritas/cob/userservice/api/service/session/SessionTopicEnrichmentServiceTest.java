@@ -6,6 +6,8 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionTopicDTO;
 import de.caritas.cob.userservice.api.service.consultingtype.TopicService;
+import java.util.Map;
+import org.assertj.core.util.Maps;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,9 +28,7 @@ class SessionTopicEnrichmentServiceTest {
   @Test
   void enrichSessionWithTopicData_Should_EnrichSessionWithTopicDataFromTopicService() {
     // given
-    when(topicService.getAllTopics()).thenReturn(
-        newArrayList(new TopicDTO().id(1L).name("first topic").description("first desc"),
-            new TopicDTO().id(2L).name("second topic").description("second desc")));
+    givenAllTopicsMap();
     var session = new SessionDTO().topic(new SessionTopicDTO().id(1));
 
     // when
@@ -42,9 +42,7 @@ class SessionTopicEnrichmentServiceTest {
   @Test
   void enrichSessionWithTopicData_Should_NotEnrichSessionWithTopicDataFromTopicServiceIfNoMatchingTopicFound() {
     // given
-    when(topicService.getAllTopics()).thenReturn(
-        newArrayList(new TopicDTO().id(1L).name("first topic").description("first desc"),
-            new TopicDTO().id(2L).name("second topic").description("second desc")));
+    givenAllTopicsMap();
     var session = new SessionDTO().topic(new SessionTopicDTO().id(3));
 
     // when
@@ -69,7 +67,6 @@ class SessionTopicEnrichmentServiceTest {
     assertThat(session.getTopic()).isNull();
   }
 
-
   @Test
   void enrichSessionWithTopicData_Should_NotEnrichSessionWithTopicDataFromTopicServiceIfTopicIdNotSet() {
     // given
@@ -83,4 +80,10 @@ class SessionTopicEnrichmentServiceTest {
     assertThat(session.getTopic().getId()).isNull();
   }
 
+  private void givenAllTopicsMap() {
+    Map<Long, TopicDTO> availableTopicsMap = Maps.newHashMap(1L,
+        new TopicDTO().id(1L).name("first topic").description("first desc"));
+    availableTopicsMap.put(2L, new TopicDTO().id(2L).name("second topic").description("second desc"));
+    when(topicService.getAllTopicsMap()).thenReturn(availableTopicsMap);
+  }
 }

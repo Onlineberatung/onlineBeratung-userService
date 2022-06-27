@@ -30,6 +30,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
@@ -38,15 +39,18 @@ import de.caritas.cob.userservice.api.facade.sessionlist.RocketChatRoomInformati
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
+import de.caritas.cob.userservice.api.service.session.SessionTopicEnrichmentService;
 import java.util.Date;
 import java.util.Map;
 import org.jeasy.random.EasyRandom;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ConsultantSessionEnricherTest {
@@ -62,6 +66,15 @@ public class ConsultantSessionEnricherTest {
 
   @Mock
   private ConsultingTypeManager consultingTypeManager;
+
+  @Mock
+  private SessionTopicEnrichmentService sessionTopicEnrichmentService;
+
+  @After
+  public void tearDown() {
+    ReflectionTestUtils
+        .setField(consultantSessionEnricher, "topicsFeatureEnabled", false);
+  }
 
   @Test
   public void updateRequiredConsultantSessionValues_Should_ReturnValidSessionListWithMessagesReadTrue_WhenThereAreNoUnreadMessages() {
@@ -113,6 +126,40 @@ public class ConsultantSessionEnricherTest {
             RC_TOKEN, CONSULTANT).get(0);
 
     assertFalse(result.getSession().getMessagesRead());
+  }
+
+
+  @Test
+  public void updateRequiredConsultantSessionValues_Should_EnrichWithTopicsIfTopicFeatureIsEnabled() {
+    ReflectionTestUtils
+        .setField(consultantSessionEnricher, "topicsFeatureEnabled", true);
+    ReflectionTestUtils
+        .setField(consultantSessionEnricher, "sessionTopicEnrichmentService", sessionTopicEnrichmentService);
+
+    RocketChatRoomInformation rocketChatRoomInformation =
+        RocketChatRoomInformation.builder()
+            .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
+            .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
+            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .groupIdToLastMessageFallbackDate(emptyMap())
+            .userRooms(USERS_ROOMS_LIST)
+            .build();
+    when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
+        .thenReturn(rocketChatRoomInformation);
+
+    when(consultingTypeManager.getConsultingTypeSettings(anyInt()))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
+    when(sessionListAnalyser
+        .areMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
+            RC_GROUP_ID)).thenReturn(false);
+
+    ConsultantSessionResponseDTO result = consultantSessionEnricher
+        .updateRequiredConsultantSessionValues(singletonList(CONSULTANT_SESSION_RESPONSE_DTO),
+            RC_TOKEN, CONSULTANT).get(0);
+
+    assertFalse(result.getSession().getMessagesRead());
+    verify(sessionTopicEnrichmentService).enrichSessionWithTopicData(CONSULTANT_SESSION_RESPONSE_DTO.getSession());
+
   }
 
   @Test

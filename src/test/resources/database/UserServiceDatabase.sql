@@ -1171,3 +1171,6 @@ INSERT INTO session (`id`, `user_id`, `consultant_id`, `consulting_type`, `messa
 VALUES (1215, '1da238c6-cd46-4162-80f1-bff74eafe77f', '34c3x5b1-0677-4fd2-a7ea-56a71aefd099', 0,
         '2020-10-08 09:03:45', '12345', 1, 'DJrRTzFg8Ac2BqE8j', 'E6FohkNfEDPY9bRXc', 2, 0, 1,
         '2020-10-08 09:03:45', '2020-10-08 09:03:45', 1);
+
+UPDATE SESSION set main_topic_id = 1
+where id = 1200;

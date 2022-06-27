@@ -1,13 +1,9 @@
 package de.caritas.cob.userservice.api.service.session;
 
-import com.google.common.collect.Maps;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionTopicDTO;
 import de.caritas.cob.userservice.api.service.consultingtype.TopicService;
-import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +22,7 @@ public class SessionTopicEnrichmentService {
   public SessionDTO enrichSessionWithTopicData(SessionDTO session) {
     if (session.getTopic() != null && session.getTopic().getId() != null) {
       log.debug("Enriching session with topics");
-      var availableTopics = getAvailableTopicsMap();
+      var availableTopics = topicService.getAllTopicsMap();
       log.debug("Enriching session with id: {} with information about the topics", session.getId());
       log.debug("Available topics list has size: {} ", availableTopics.size());
       enrichSession(availableTopics, session);
@@ -46,16 +42,6 @@ public class SessionTopicEnrichmentService {
       log.warn("Did not find matching topic for id: {} in the available topic list",
           sessionDTO.getTopic().getId());
     }
-  }
-
-  private Map<Long, TopicDTO> getAvailableTopicsMap() {
-    var allTopics = topicService.getAllTopics();
-    return allTopics.isEmpty() ? Maps.newHashMap() : getAvailableTopicsMap(allTopics);
-  }
-
-  private Map<Long, TopicDTO> getAvailableTopicsMap(List<TopicDTO> allTopics) {
-    return allTopics.stream()
-        .collect(Collectors.toMap(TopicDTO::getId, Function.identity()));
   }
 
   private SessionTopicDTO convertToSessionTopicDTO(TopicDTO source) {
