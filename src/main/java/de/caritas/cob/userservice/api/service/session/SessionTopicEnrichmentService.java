@@ -60,9 +60,14 @@ public class SessionTopicEnrichmentService {
 
   private SessionTopicDTO convertToSessionTopicDTO(TopicDTO source) {
     SessionTopicDTO sessionTopicDTO = new SessionTopicDTO();
+    sessionTopicDTO.setId(getIdAsInteger(source));
     sessionTopicDTO.setDescription(source.getDescription());
     sessionTopicDTO.setName(source.getName());
     sessionTopicDTO.setStatus(source.getStatus());
     return sessionTopicDTO;
+  }
+
+  private Integer getIdAsInteger(TopicDTO source) {
+    return source.getId() != null ? source.getId().intValue() : null;
   }
 }

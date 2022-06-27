@@ -8,6 +8,8 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.GroupSessionListResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.GroupSessionResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
@@ -16,6 +18,7 @@ import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.service.session.SessionFilter;
 import de.caritas.cob.userservice.api.service.session.SessionMapper;
+import de.caritas.cob.userservice.api.service.session.SessionTopicEnrichmentService;
 import de.caritas.cob.userservice.api.service.sessionlist.ConsultantSessionListService;
 import de.caritas.cob.userservice.api.service.sessionlist.UserSessionListService;
 import java.util.ArrayList;
@@ -23,9 +26,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -38,6 +43,12 @@ public class SessionListFacade {
 
   private final UserSessionListService userSessionListService;
   private final ConsultantSessionListService consultantSessionListService;
+
+  @Value("${feature.topics.enabled}")
+  private boolean topicsFeatureEnabled;
+
+  @Autowired(required = false)
+  SessionTopicEnrichmentService sessionTopicEnrichmentService;
 
   @Autowired
   public SessionListFacade(UserSessionListService userSessionListService,
@@ -153,8 +164,21 @@ public class SessionListFacade {
         .map(sessionMapper::toGroupSessionResponse)
         .collect(Collectors.toList());
 
+    if (topicsFeatureEnabled) {
+      enrichWithTopicDataForGroupSessionResponse(sessions);
+    }
+
     return new GroupSessionListResponseDTO().sessions(sessions);
   }
+
+  private void enrichWithTopicDataForGroupSessionResponse(List<GroupSessionResponseDTO> sessions) {
+    if (sessions != null) {
+      sessions.stream()
+          .map(GroupSessionResponseDTO::getSession)
+          .forEach(sessionTopicEnrichmentService::enrichSessionWithTopicData);
+    }
+  }
+
 
   /**
    * Returns a {@link ConsultantSessionResponseDTO} with the session list for the specified
@@ -195,11 +219,23 @@ public class SessionListFacade {
           consultantSessions);
     }
 
+    if (topicsFeatureEnabled) {
+      enrichWithTopicData(consultantSessionsSublist);
+    }
+
     return new ConsultantSessionListResponseDTO()
         .sessions(consultantSessionsSublist)
         .offset(sessionListQueryParameter.getOffset())
         .count(consultantSessionsSublist.size())
         .total(consultantSessions.size());
+  }
+
+  private void enrichWithTopicData(List<ConsultantSessionResponseDTO> consultantSessionsSublist) {
+    if (consultantSessionsSublist != null) {
+      consultantSessionsSublist.stream()
+          .map(ConsultantSessionResponseDTO::getSession)
+          .forEach(sessionTopicEnrichmentService::enrichSessionWithTopicData);
+    }
   }
 
   private boolean isFeedbackFilter(SessionListQueryParameter sessionListQueryParameter) {

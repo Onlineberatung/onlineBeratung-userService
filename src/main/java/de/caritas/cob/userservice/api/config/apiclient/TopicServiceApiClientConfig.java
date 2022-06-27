@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.config.apiclient;
 
 import de.caritas.cob.userservice.topicservice.generated.ApiClient;
 import de.caritas.cob.userservice.topicservice.generated.web.TopicControllerApi;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
@@ -15,6 +16,7 @@ public class TopicServiceApiClientConfig {
   private String topicServiceApiUrl;
 
   @Bean
+  @Qualifier("topicControllerApiMain")
   public TopicControllerApi topicControllerApi(
       ApiClient apiClient) {
     return new TopicControllerApi(apiClient);

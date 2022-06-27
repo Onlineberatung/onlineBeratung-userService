@@ -19,19 +19,24 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.service.session.SessionFilter;
+import de.caritas.cob.userservice.api.service.session.SessionTopicEnrichmentService;
 import de.caritas.cob.userservice.api.service.sessionlist.ConsultantSessionListService;
 import de.caritas.cob.userservice.api.service.sessionlist.UserSessionListService;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SessionListFacadeTest {
@@ -42,10 +47,18 @@ public class SessionListFacadeTest {
   private ConsultantSessionListService consultantSessionListService;
   @Mock
   private UserSessionListService userSessionListService;
+  @Mock
+  private SessionTopicEnrichmentService sessionTopicEnrichmentService;
 
   /**
    * Method: retrieveSessionsForAuthenticatedUser
    */
+
+  @Before
+  public void setUp() {
+    ReflectionTestUtils.setField(sessionListFacade, "sessionTopicEnrichmentService",
+        sessionTopicEnrichmentService);
+  }
 
   @Test
   public void retrieveSessionsForAuthenticatedUser_Should_ReturnCorrectlySortedSessionList() {
@@ -92,6 +105,32 @@ public class SessionListFacadeTest {
         assertTrue(previousDate <= dto.getChat().getMessageDate());
       }
     }
+  }
+
+
+  @Test
+  public void retrieveSessionsForAuthenticatedConsultant_Should_EnrichWithTopicDataIfTopicsFeatureEnabled() {
+
+    ReflectionTestUtils.setField(sessionListFacade, "topicsFeatureEnabled", true);
+
+    SessionListQueryParameter sessionListQueryParameter = createStandardSessionListQueryParameterObject(
+        OFFSET_0, COUNT_10, SessionFilter.ALL);
+
+    when(consultantSessionListService.retrieveSessionsForAuthenticatedConsultant(CONSULTANT,
+        RC_TOKEN, sessionListQueryParameter))
+        .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
+
+    ConsultantSessionListResponseDTO result =
+        sessionListFacade.retrieveSessionsDtoForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
+            sessionListQueryParameter);
+
+    assertEquals(CONSULTANT_SESSION_RESPONSE_DTO_LIST.size(), result.getSessions().size());
+
+    Mockito.verify(sessionTopicEnrichmentService, Mockito.times(CONSULTANT_SESSION_RESPONSE_DTO_LIST.size())).enrichSessionWithTopicData(Mockito.any(
+        SessionDTO.class));
+
+    ReflectionTestUtils.setField(sessionListFacade, "topicsFeatureEnabled", false);
+
   }
 
   @Test
