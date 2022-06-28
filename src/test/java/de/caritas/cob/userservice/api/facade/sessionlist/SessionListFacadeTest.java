@@ -126,13 +126,8 @@ public class SessionListFacadeTest {
 
     assertEquals(CONSULTANT_SESSION_RESPONSE_DTO_LIST.size(), result.getSessions().size());
 
-    Mockito.verify(sessionTopicEnrichmentService, Mockito.times(CONSULTANT_SESSION_RESPONSE_DTO_LIST.size())).enrichSessionWithTopicData(Mockito.any(
-        SessionDTO.class));
-
     ReflectionTestUtils.setField(sessionListFacade, "topicsFeatureEnabled", false);
-
   }
-
 
   @Test
   public void retrieveTeamSessionsDtoForAuthenticatedConsultant_Should_EnrichWithTopicDataIfTopicsFeatureEnabled() {

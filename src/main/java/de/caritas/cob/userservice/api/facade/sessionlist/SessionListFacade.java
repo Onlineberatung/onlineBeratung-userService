@@ -244,10 +244,6 @@ public class SessionListFacade {
           consultantSessions);
     }
 
-    if (topicsFeatureEnabled) {
-      enrichWithTopicData(consultantSessionsSublist);
-    }
-
     return new ConsultantSessionListResponseDTO()
         .sessions(consultantSessionsSublist)
         .offset(sessionListQueryParameter.getOffset())
