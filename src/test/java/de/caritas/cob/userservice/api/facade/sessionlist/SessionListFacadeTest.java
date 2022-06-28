@@ -133,6 +133,37 @@ public class SessionListFacadeTest {
 
   }
 
+
+  @Test
+  public void retrieveTeamSessionsDtoForAuthenticatedConsultant_Should_EnrichWithTopicDataIfTopicsFeatureEnabled() {
+
+    ReflectionTestUtils.setField(sessionListFacade, "topicsFeatureEnabled", true);
+
+    SessionListQueryParameter sessionListQueryParameter = createStandardSessionListQueryParameterObject(
+        OFFSET_0, COUNT_10, SessionFilter.ALL);
+
+    when(consultantSessionListService.retrieveTeamSessionsForAuthenticatedConsultant(CONSULTANT,
+        RC_TOKEN, sessionListQueryParameter))
+        .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
+
+    ConsultantSessionListResponseDTO result =
+        sessionListFacade.retrieveTeamSessionsDtoForAuthenticatedConsultant(CONSULTANT, RC_TOKEN,
+            sessionListQueryParameter);
+
+    assertEquals(CONSULTANT_SESSION_RESPONSE_DTO_LIST.size(), result.getSessions().size());
+
+    for (ConsultantSessionResponseDTO dto : result.getSessions()) {
+      Long previousDate = dto.getSession().getMessageDate();
+      assertTrue(previousDate <= dto.getSession().getMessageDate());
+    }
+
+    Mockito.verify(sessionTopicEnrichmentService, Mockito.times(CONSULTANT_SESSION_RESPONSE_DTO_LIST.size())).enrichSessionWithTopicData(Mockito.any(
+        SessionDTO.class));
+
+    ReflectionTestUtils.setField(sessionListFacade, "topicsFeatureEnabled", false);
+
+  }
+
   @Test
   public void retrieveSessionsForAuthenticatedConsultant_Should_ReturnCorrectTotalValue_When_CountIsGreaterThanTotal() {
 
