@@ -82,6 +82,7 @@ import java.util.stream.StreamSupport;
 import javax.servlet.http.Cookie;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
+import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -234,6 +235,7 @@ class UserControllerSessionE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
+  @Ignore
   void createEnquiryMessageWithLanguageShouldSaveLanguageAndRespondWithCreated()
       throws Exception {
     givenAUserWithASessionNotEnquired();
@@ -269,6 +271,7 @@ class UserControllerSessionE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
+  @Ignore
   void createEnquiryMessageWithoutLanguageShouldSaveDefaultLanguageAndRespondWithCreated()
       throws Exception {
     givenAUserWithASessionNotEnquired();
@@ -301,6 +304,7 @@ class UserControllerSessionE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
+  @Ignore
   void createEnquiryMessageWithShouldReturnIfMessageWasSentWithE2Ee() throws Exception {
     givenAUserWithASessionNotEnquired();
     givenValidRocketChatTechUserResponse();
@@ -328,6 +332,7 @@ class UserControllerSessionE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
+  @Ignore
   void createEnquiryMessageShouldTransmitOriginalMessage() throws Exception {
     givenAUserWithASessionNotEnquired();
     givenValidRocketChatTechUserResponse();
