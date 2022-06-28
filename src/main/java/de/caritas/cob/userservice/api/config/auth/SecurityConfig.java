@@ -93,7 +93,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         )
         .permitAll()
         .antMatchers("/users/data")
-        .hasAnyAuthority(ANONYMOUS_DEFAULT, USER_DEFAULT, CONSULTANT_DEFAULT, SINGLE_TENANT_ADMIN, TENANT_ADMIN)
+        .hasAnyAuthority(ANONYMOUS_DEFAULT, USER_DEFAULT, CONSULTANT_DEFAULT, SINGLE_TENANT_ADMIN,
+            TENANT_ADMIN)
         .antMatchers(HttpMethod.GET, APPOINTMENTS_APPOINTMENT_ID + UUID_PATTERN + "}")
         .permitAll()
         .antMatchers("/users/sessions/askers")
@@ -107,6 +108,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .antMatchers("/users/twoFactorAuth", "/users/2fa/**", "/users/mobile/app/token")
         .hasAnyAuthority(SINGLE_TENANT_ADMIN, TENANT_ADMIN, USER_DEFAULT, CONSULTANT_DEFAULT)
         .antMatchers("/users/sessions/{sessionId:[0-9]+}/enquiry/new",
+            "/appointments/sessions/{sessionId:[0-9]+}/enquiry/new",
             "/users/askers/consultingType/new", "/users/account", "/users/mobiletoken",
             "/users/sessions/{sessionId:[0-9]+}/data")
         .hasAuthority(USER_DEFAULT)
@@ -232,9 +234,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   }
 
   /**
-   * see above:
-   * {@link
-   * SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
+   * see above: {@link SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Bean
@@ -246,9 +246,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   }
 
   /**
-   * see above:
-   * {@link
-   * SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
+   * see above: {@link SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Bean
@@ -260,9 +258,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   }
 
   /**
-   * see above:
-   * {@link
-   * SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
+   * see above: {@link SecurityConfig#keycloakAuthenticationProcessingFilterRegistrationBean(KeycloakAuthenticationProcessingFilter)
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Bean

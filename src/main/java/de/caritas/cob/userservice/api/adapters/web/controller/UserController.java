@@ -253,7 +253,7 @@ public class UserController implements UsersApi {
         .build();
     var language = consultantDtoMapper.languageOf(enquiryMessage.getLanguage());
     var enquiryData = new EnquiryData(user, sessionId, enquiryMessage.getMessage(), language,
-        rocketChatCredentials, enquiryMessage.getT(), enquiryMessage.getOrg());
+        rocketChatCredentials, enquiryMessage.getT(), enquiryMessage.getOrg(), null);
 
     var response = createEnquiryMessageFacade.createEnquiryMessage(enquiryData);
 

@@ -100,7 +100,6 @@ public class KeycloakConfig {
   @NotBlank
   private String resource;
 
-  @NotBlank
   private String principalAttribute;
 
   @NotNull

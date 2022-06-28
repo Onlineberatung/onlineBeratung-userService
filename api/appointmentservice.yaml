@@ -137,6 +137,56 @@ paths:
       security:
         - Bearer: [ ]
 
+  /appointments/sessions/{sessionId}/enquiry/new:
+    post:
+      tags:
+        - appointment-controller
+      summary: 'Create enquiry appointment for a user [Authorization: Role: user]'
+      operationId: createEnquiryAppointment
+      parameters:
+        - name: sessionId
+          in: path
+          description: Session Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: RCToken
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: RCUserId
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/EnquiryAppointmentDTO'
+        required: true
+      responses:
+        201:
+          description: CREATED - enquiry appointment has been created
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/CreateEnquiryMessageResponseDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        409:
+          description: CONFLICT - message already saved for enquiry
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+
 components:
   schemas:
     Appointment:
@@ -164,3 +214,46 @@ components:
       enum: [
         created, started, paused
       ]
+
+    EnquiryAppointmentDTO:
+      type: object
+      required:
+        - title
+        - userName
+        - counselor
+        - date
+      properties:
+        title:
+          type: string
+          example: Lorem ipsum dolor sit amet, consetetur...
+        userName:
+          type: string
+          example: Lorem ipsum dolor sit amet, consetetur...
+        counselor:
+          type: string
+          example: Lorem ipsum dolor sit amet, consetetur...
+        date:
+          type: string
+          example: Lorem ipsum dolor sit amet, consetetur...
+        duration:
+          type: string
+          example: Lorem ipsum dolor sit amet, consetetur...
+        language:
+          $ref: '#/components/schemas/LanguageCode'
+        t:
+          type: string
+        org:
+          type: string
+          example: "Lorem ipsum dolor sit amet, consetetur..."
+
+    CreateEnquiryMessageResponseDTO:
+      type: object
+      properties:
+        sessionId:
+          type: integer
+          format: int64
+        rcGroupId:
+          type: string
+          example: fR2Rz7dmWmHdXE8uz
+        t:
+          type: string

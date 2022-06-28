@@ -41,6 +41,7 @@ import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.Exte
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -88,8 +89,18 @@ public class CreateEnquiryMessageFacade {
       var extendedConsultingTypeResponseDTO = consultingTypeManager
           .getConsultingTypeSettings(session.getConsultingTypeId());
 
-      List<ConsultantAgency> agencyList =
-          consultantAgencyService.findConsultantsByAgencyId(session.getAgencyId());
+      List<ConsultantAgency> agencyList;
+
+      if (isAppointmentEnquiryMessage(enquiryData)) {
+        agencyList = consultantAgencyService.findConsultantsByAgencyId(session.getAgencyId())
+            .stream().filter(
+                consultantAgency -> consultantAgency.getConsultant().getEmail()
+                    .equals(enquiryData.getAppointmentData().getCounselor()))
+            .collect(Collectors.toList());
+      } else {
+        agencyList =
+            consultantAgencyService.findConsultantsByAgencyId(session.getAgencyId());
+      }
 
       String rcGroupId = createRocketChatRoomAndAddUsers(session, agencyList,
           enquiryData.getRocketChatCredentials());
@@ -104,13 +115,21 @@ public class CreateEnquiryMessageFacade {
 
       saveRocketChatIdForUser(enquiryData.getUser(), enquiryData.getRocketChatCredentials(),
           createEnquiryExceptionInformation);
+      de.caritas.cob.userservice.messageservice.generated.web.model.MessageResponseDTO messageResponse = null;
 
-      var rocketChatData = new RocketChatData(enquiryData.getMessage(),
-          enquiryData.getRocketChatCredentials(), rcGroupId, enquiryData.getType(),
-          enquiryData.getOrg());
-      final var messageResponse = messageServiceProvider.postEnquiryMessage(
-          rocketChatData,
-          createEnquiryExceptionInformation);
+      if (isAppointmentEnquiryMessage(enquiryData)) {
+        messageServiceProvider
+            .postSendAppointmentBookedMessage(rcGroupId, createEnquiryExceptionInformation,
+                enquiryData.getAppointmentData());
+      } else {
+        var rocketChatData = new RocketChatData(enquiryData.getMessage(),
+            enquiryData.getRocketChatCredentials(), rcGroupId, enquiryData.getType(),
+            enquiryData.getOrg());
+        messageResponse = messageServiceProvider.postEnquiryMessage(
+            rocketChatData,
+            createEnquiryExceptionInformation);
+      }
+
       messageServiceProvider.postWelcomeMessageIfConfigured(rcGroupId, enquiryData.getUser(),
           extendedConsultingTypeResponseDTO, createEnquiryExceptionInformation);
       messageServiceProvider.postFurtherStepsOrSaveSessionDataMessageIfConfigured(rcGroupId,
@@ -124,8 +143,8 @@ public class CreateEnquiryMessageFacade {
 
       return new CreateEnquiryMessageResponseDTO()
           .rcGroupId(rcGroupId)
-          .sessionId(enquiryData.getSessionId())
-          .t(messageResponse.getT());
+          .sessionId(enquiryData.getSessionId());
+      //          .t(messageResponse.getT());
 
     } catch (CreateEnquiryException exception) {
       doRollback(exception.getExceptionInformation(), enquiryData.getRocketChatCredentials());
@@ -133,6 +152,10 @@ public class CreateEnquiryMessageFacade {
       throw new InternalServerErrorException(exception.getMessage(), exception);
     }
 
+  }
+
+  private boolean isAppointmentEnquiryMessage(EnquiryData enquiryData) {
+    return enquiryData.getAppointmentData() != null;
   }
 
   private void checkIfKeycloakAndRocketChatUsernamesMatch(String rcUserId, User user) {
