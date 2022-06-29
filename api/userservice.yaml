@@ -2162,6 +2162,8 @@ components:
         consultingType:
           type: integer
           example: 0
+        e2eLastMessage:
+          $ref: '#/components/schemas/LastMessageDTO'
         lastMessage:
           type: string
           example: Thanks for the answer

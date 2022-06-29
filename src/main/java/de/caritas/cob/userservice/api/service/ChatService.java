@@ -61,14 +61,7 @@ public class ChatService {
 
   private ConsultantSessionResponseDTO convertChatToConsultantSessionResponseDTO(Chat chat) {
     return new ConsultantSessionResponseDTO()
-        .chat(new UserChatDTO(chat.getId(), chat.getTopic(),
-            LocalDate.of(chat.getStartDate().getYear(), chat.getStartDate().getMonth(),
-                chat.getStartDate().getDayOfMonth()),
-            LocalTime.of(chat.getStartDate().getHour(), chat.getStartDate().getMinute(),
-                chat.getStartDate().getSecond()),
-            chat.getDuration(), isTrue(chat.isRepetitive()), isTrue(chat.isActive()),
-            chat.getConsultingTypeId(), null, null, false, chat.getGroupId(), null, false,
-            getChatModerators(chat.getChatAgencies()), chat.getStartDate()))
+        .chat(createUserChat(chat))
         .consultant(new SessionConsultantForConsultantDTO()
             .id(chat.getChatOwner().getId())
             .firstName(chat.getChatOwner().getFirstName())
@@ -121,14 +114,18 @@ public class ChatService {
   }
 
   private UserSessionResponseDTO convertChatToUserSessionResponseDTO(Chat chat) {
-    return new UserSessionResponseDTO().chat(new UserChatDTO(chat.getId(), chat.getTopic(),
+    return new UserSessionResponseDTO().chat(createUserChat(chat));
+  }
+
+  private UserChatDTO createUserChat(Chat chat) {
+    return new UserChatDTO(chat.getId(), chat.getTopic(),
         LocalDate.of(chat.getStartDate().getYear(), chat.getStartDate().getMonth(),
             chat.getStartDate().getDayOfMonth()),
         LocalTime.of(chat.getStartDate().getHour(), chat.getStartDate().getMinute(),
             chat.getStartDate().getSecond()),
         chat.getDuration(), isTrue(chat.isRepetitive()), isTrue(chat.isActive()),
         chat.getConsultingTypeId(), null, null, false, chat.getGroupId(), null, false,
-        getChatModerators(chat.getChatAgencies()), chat.getStartDate()));
+        getChatModerators(chat.getChatAgencies()), chat.getStartDate(), null);
   }
 
   /**
