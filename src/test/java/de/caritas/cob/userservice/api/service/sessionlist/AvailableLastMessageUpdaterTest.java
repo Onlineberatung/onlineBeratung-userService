@@ -18,6 +18,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.VideoCallMessageDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.VideoCallMessageDTO.EventTypeEnum;
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
 import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
@@ -165,7 +166,8 @@ public class AvailableLastMessageUpdaterTest {
   @Test
   public void updateChatWithAvailableLastMessage_should_set_fallback_date_if_rc_last_message_is_unavailable() {
     var chat = new UserChatDTO();
-    chat.setStartDateWithTime(LocalDateTime.of(2022, 5, 22, 13, 37));
+    var startDateWithTime = LocalDateTime.of(2022, 5, 22, 13, 37);
+    chat.setStartDateWithTime(startDateWithTime);
     AtomicReference<Date> date = new AtomicReference<>();
 
     this.availableLastMessageUpdater.updateChatWithAvailableLastMessage(chat, date::set,
@@ -173,7 +175,7 @@ public class AvailableLastMessageUpdaterTest {
 
     assertThat(chat.getE2eLastMessage(), is(nullValue()));
     assertThat(chat.getLastMessage(), is(nullValue()));
-    assertThat(date.get().getTime(), is(1653219420000L));
+    assertThat(date.get(), is(Timestamp.valueOf(startDateWithTime)));
   }
 
   private void givenAnE2eRoomsLastMessage() {
