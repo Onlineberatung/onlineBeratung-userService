@@ -16,6 +16,7 @@ public class CacheManagerConfig {
   public static final String CONSULTING_TYPE_CACHE = "consultingTypeCache";
   public static final String TENANT_CACHE = "tenantCache";
   public static final String TENANT_ADMIN_CACHE = "tenantAdminCache";
+  public static final String TOPICS_CACHE = "topicsCache";
 
   @Value("${cache.agencies.configuration.maxEntriesLocalHeap}")
   private long agenciesMaxEntriesLocalHeap;
@@ -53,6 +54,18 @@ public class CacheManagerConfig {
   @Value("${cache.tenant.configuration.timeToLiveSeconds}")
   private long tenantTimeToLiveSeconds;
 
+  @Value("${cache.topic.configuration.maxEntriesLocalHeap}")
+  private long topicMaxEntriesLocalHeap;
+
+  @Value("${cache.topic.configuration.eternal}")
+  private boolean topicEternal;
+
+  @Value("${cache.topic.configuration.timeToIdleSeconds}")
+  private long topicTimeToIdleSeconds;
+
+  @Value("${cache.topic.configuration.timeToLiveSeconds}")
+  private long topicTimeToLiveSeconds;
+
   @Bean
   public CacheManager cacheManager() {
     return new EhCacheCacheManager(ehCacheManager());
@@ -65,6 +78,7 @@ public class CacheManagerConfig {
     config.addCache(buildConsultingTypeCacheConfiguration());
     config.addCache(buildTenantCacheConfiguration());
     config.addCache(buildTenantAdminCacheConfiguration());
+    config.addCache(buildTopicCacheConfiguration());
 
     return net.sf.ehcache.CacheManager.newInstance(config);
   }
@@ -107,6 +121,16 @@ public class CacheManagerConfig {
     tenantCacheConfiguration.setTimeToIdleSeconds(tenantTimeToIdleSeconds);
     tenantCacheConfiguration.setTimeToLiveSeconds(tenantTimeToLiveSeconds);
     return tenantCacheConfiguration;
+  }
+
+  private CacheConfiguration buildTopicCacheConfiguration() {
+    var topicCacheConfiguration = new CacheConfiguration();
+    topicCacheConfiguration.setName(TOPICS_CACHE);
+    topicCacheConfiguration.setMaxEntriesLocalHeap(topicMaxEntriesLocalHeap);
+    topicCacheConfiguration.setEternal(topicEternal);
+    topicCacheConfiguration.setTimeToIdleSeconds(topicTimeToIdleSeconds);
+    topicCacheConfiguration.setTimeToLiveSeconds(topicTimeToLiveSeconds);
+    return topicCacheConfiguration;
   }
 
 }

@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -60,14 +61,7 @@ public class ChatService {
 
   private ConsultantSessionResponseDTO convertChatToConsultantSessionResponseDTO(Chat chat) {
     return new ConsultantSessionResponseDTO()
-        .chat(new UserChatDTO(chat.getId(), chat.getTopic(),
-            LocalDate.of(chat.getStartDate().getYear(), chat.getStartDate().getMonth(),
-                chat.getStartDate().getDayOfMonth()),
-            LocalTime.of(chat.getStartDate().getHour(), chat.getStartDate().getMinute(),
-                chat.getStartDate().getSecond()),
-            chat.getDuration(), isTrue(chat.isRepetitive()), isTrue(chat.isActive()),
-            chat.getConsultingTypeId(), null, null, false, chat.getGroupId(), null, false,
-            getChatModerators(chat.getChatAgencies()), chat.getStartDate()))
+        .chat(createUserChat(chat))
         .consultant(new SessionConsultantForConsultantDTO()
             .id(chat.getChatOwner().getId())
             .firstName(chat.getChatOwner().getFirstName())
@@ -113,15 +107,25 @@ public class ChatService {
         .collect(Collectors.toList());
   }
 
+  public List<UserSessionResponseDTO> getChatSessionsByIds(Set<Long> chatIds) {
+    return StreamSupport.stream(chatRepository.findAllById(chatIds).spliterator(), false)
+        .map(this::convertChatToUserSessionResponseDTO)
+        .collect(Collectors.toList());
+  }
+
   private UserSessionResponseDTO convertChatToUserSessionResponseDTO(Chat chat) {
-    return new UserSessionResponseDTO().chat(new UserChatDTO(chat.getId(), chat.getTopic(),
+    return new UserSessionResponseDTO().chat(createUserChat(chat));
+  }
+
+  private UserChatDTO createUserChat(Chat chat) {
+    return new UserChatDTO(chat.getId(), chat.getTopic(),
         LocalDate.of(chat.getStartDate().getYear(), chat.getStartDate().getMonth(),
             chat.getStartDate().getDayOfMonth()),
         LocalTime.of(chat.getStartDate().getHour(), chat.getStartDate().getMinute(),
             chat.getStartDate().getSecond()),
         chat.getDuration(), isTrue(chat.isRepetitive()), isTrue(chat.isActive()),
         chat.getConsultingTypeId(), null, null, false, chat.getGroupId(), null, false,
-        getChatModerators(chat.getChatAgencies()), chat.getStartDate()));
+        getChatModerators(chat.getChatAgencies()), chat.getStartDate(), null);
   }
 
   /**
@@ -132,6 +136,12 @@ public class ChatService {
    */
   public Optional<Chat> getChat(Long chatId) {
     return chatRepository.findById(chatId);
+  }
+
+  public List<ConsultantSessionResponseDTO> getChatSessionsForConsultantByIds(Set<Long> chatIds) {
+    return StreamSupport.stream(chatRepository.findAllById(chatIds).spliterator(), false)
+        .map(this::convertChatToConsultantSessionResponseDTO)
+        .collect(Collectors.toList());
   }
 
   /**

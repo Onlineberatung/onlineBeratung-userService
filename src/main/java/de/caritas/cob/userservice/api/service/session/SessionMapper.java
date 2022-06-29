@@ -10,6 +10,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.GroupSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionConsultantForConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionTopicDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionUserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.helper.SessionDataKeyRegistration;
@@ -70,7 +71,9 @@ public class SessionMapper {
         .isPeerChat(session.isPeerChat())
         .monitoring(session.isMonitoring())
         .registrationType(session.getRegistrationType().name())
-        .createDate(toIsoTime(session.getCreateDate()));
+        .createDate(toIsoTime(session.getCreateDate()))
+        .topic(new SessionTopicDTO().id(session.getMainTopicId()));
+
   }
 
   private SessionUserDTO convertToSessionUserDTO(Session session) {

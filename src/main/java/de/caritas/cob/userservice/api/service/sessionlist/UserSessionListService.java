@@ -2,18 +2,15 @@ package de.caritas.cob.userservice.api.service.sessionlist;
 
 import static java.util.Objects.nonNull;
 
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsLastMessageDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserChatDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
 import de.caritas.cob.userservice.api.facade.sessionlist.RocketChatRoomInformationProvider;
-import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -21,7 +18,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -70,6 +66,37 @@ public class UserSessionListService {
     return mergeUserSessionsAndChats(sessions, chats, rocketChatCredentials);
   }
 
+  /**
+   * Returns a list of {@link UserSessionResponseDTO} for given user ID and session IDs.
+   *
+   * @param userId                the ID of an user
+   * @param sessionIds            the session IDs
+   * @param rocketChatCredentials the credentials for accessing rocket chat
+   * @param roles                 the roles of given user
+   * @return {@link UserSessionResponseDTO}
+   */
+  public List<UserSessionResponseDTO> retrieveSessionsForAuthenticatedUserAndSessionIds(
+      String userId, List<Long> sessionIds, RocketChatCredentials rocketChatCredentials,
+      Set<String> roles) {
+
+    var uniqueSessionIds = new HashSet<>(sessionIds);
+    var sessions = sessionService.getSessionsByUserAndSessionIds(userId, uniqueSessionIds, roles);
+    var groupIds = sessions.stream()
+        .map(sessionResponse -> sessionResponse.getSession().getGroupId())
+        .collect(Collectors.toSet());
+    var chats = chatService.getChatSessionsByGroupIds(groupIds);
+    return mergeUserSessionsAndChats(sessions, chats, rocketChatCredentials);
+  }
+
+  public List<UserSessionResponseDTO> retrieveChatsForUserAndChatIds(List<Long> chatIds, RocketChatCredentials rocketChatCredentials) {
+    var uniqueChatIds = new HashSet<>(chatIds);
+    var chats = chatService.getChatSessionsByIds(uniqueChatIds);
+    var rocketChatRoomInformation = rocketChatRoomInformationProvider.retrieveRocketChatInformation(
+        rocketChatCredentials);
+    return updateUserChatValues(chats, rocketChatRoomInformation,
+        rocketChatCredentials.getRocketChatUserId());
+  }
+
   private List<UserSessionResponseDTO> mergeUserSessionsAndChats(
       List<UserSessionResponseDTO> sessions, List<UserSessionResponseDTO> chats,
       RocketChatCredentials rocketChatCredentials) {
@@ -105,14 +132,9 @@ public class UserSessionListService {
 
     session.setMessagesRead(sessionListAnalyser.areMessagesForRocketChatGroupReadByUser(
         rocketChatRoomInformation.getReadMessages(), groupId));
-    if (sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
-        rocketChatRoomInformation.getLastMessagesRoom(), groupId)) {
-      new AvailableLastMessageUpdater(this.sessionListAnalyser)
-          .updateSessionWithAvailableLastMessage(rocketChatRoomInformation, rcUserId,
-              userSessionDTO::setLatestMessage, session, groupId);
-    } else {
-      userSessionDTO.setLatestMessage(Helper.UNIXTIME_0);
-    }
+    var messageUpdater = new AvailableLastMessageUpdater(this.sessionListAnalyser);
+    messageUpdater.updateSessionWithAvailableLastMessage(userSessionDTO.getSession(),
+        userSessionDTO::setLatestMessage, rocketChatRoomInformation, rcUserId);
     return userSessionDTO;
   }
 
@@ -126,37 +148,23 @@ public class UserSessionListService {
 
   private UserSessionResponseDTO updateRequiredUserChatValues(
       RocketChatRoomInformation rocketChatRoomInformation, String rcUserId,
-      UserSessionResponseDTO chatDTO) {
-    UserChatDTO chat = chatDTO.getChat();
+      UserSessionResponseDTO sessionResponse) {
+    UserChatDTO chat = sessionResponse.getChat();
     String groupId = chat.getGroupId();
 
     chat.setSubscribed(
         isRocketChatRoomSubscribedByUser(rocketChatRoomInformation.getUserRooms(), groupId));
-    chat.setMessagesRead(sessionListAnalyser
-        .areMessagesForRocketChatGroupReadByUser(rocketChatRoomInformation.getReadMessages(),
-            groupId));
-
-    if (sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
-        rocketChatRoomInformation.getLastMessagesRoom(), groupId)) {
-      updateUserChatValuesForAvailableLastMessage(rocketChatRoomInformation, rcUserId, chatDTO,
-          chat, groupId);
-    } else {
-      chatDTO.setLatestMessage(Timestamp.valueOf(chat.getStartDateWithTime()));
-    }
-    return chatDTO;
+    chat.setMessagesRead(sessionListAnalyser.areMessagesForRocketChatGroupReadByUser(
+        rocketChatRoomInformation.getReadMessages(), groupId));
+    updateUserChatValuesForAvailableLastMessage(rocketChatRoomInformation, rcUserId, sessionResponse, chat);
+    return sessionResponse;
   }
 
   private void updateUserChatValuesForAvailableLastMessage(
       RocketChatRoomInformation rocketChatRoomInformation, String rcUserId,
-      UserSessionResponseDTO chatDTO, UserChatDTO chat, String groupId) {
-    RoomsLastMessageDTO roomsLastMessage = rocketChatRoomInformation.getLastMessagesRoom()
-        .get(groupId);
-    chat.setLastMessage(StringUtils.isNotEmpty(roomsLastMessage.getMessage()) ? sessionListAnalyser
-        .prepareMessageForSessionList(roomsLastMessage.getMessage(), groupId) : null);
-    chat.setMessageDate(Helper.getUnixTimestampFromDate(roomsLastMessage.getTimestamp()));
-    chatDTO.setLatestMessage(roomsLastMessage.getTimestamp());
-    chat.setAttachment(sessionListAnalyser
-        .getAttachmentFromRocketChatMessageIfAvailable(rcUserId, roomsLastMessage));
+      UserSessionResponseDTO sessionResponse, UserChatDTO chat) {
+    new AvailableLastMessageUpdater(sessionListAnalyser).updateChatWithAvailableLastMessage(chat,
+        sessionResponse::setLatestMessage, rocketChatRoomInformation, rcUserId);
   }
 
   private boolean isRocketChatRoomSubscribedByUser(List<String> userRoomsList,

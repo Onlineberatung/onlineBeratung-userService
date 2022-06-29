@@ -19,6 +19,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -47,6 +48,31 @@ public class ConsultantSessionListService {
         groupIds, roles);
     var chats = chatService.getChatSessionsForConsultantByGroupIds(groupIds);
     return mergeConsultantSessionsAndChats(consultant, sessions, chats, rcAuthToken);
+  }
+
+  /**
+   * @param consultant  {@link Consultant}
+   * @param sessionIds  session IDs
+   * @param roles       roles of the consultant
+   * @param rcAuthToken rocket chat authentication token
+   * @return List of {@link ConsultantSessionResponseDTO}
+   */
+  public List<ConsultantSessionResponseDTO> retrieveSessionsForConsultantAndSessionIds(
+      Consultant consultant, List<Long> sessionIds, Set<String> roles, String rcAuthToken) {
+    var uniqueSessionIds = new HashSet<>(sessionIds);
+    var sessions = sessionService.getSessionsByIds(consultant, uniqueSessionIds, roles);
+    var groupIds = sessions.stream()
+        .map(sessionResponse -> sessionResponse.getSession().getGroupId())
+        .collect(Collectors.toSet());
+    var chats = chatService.getChatSessionsForConsultantByGroupIds(groupIds);
+    return mergeConsultantSessionsAndChats(consultant, sessions, chats, rcAuthToken);
+  }
+
+  public List<ConsultantSessionResponseDTO> retrieveChatsForConsultantAndChatIds(
+      Consultant consultant, List<Long> chatIds, String rcAuthToken) {
+    var uniqueChatIds = new HashSet<>(chatIds);
+    var chats = chatService.getChatSessionsForConsultantByIds(uniqueChatIds);
+    return updateConsultantChatValues(chats, rcAuthToken, consultant);
   }
 
   /**
