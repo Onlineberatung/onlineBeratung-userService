@@ -1122,9 +1122,6 @@ VALUES (1, '1da238c6-cd46-4162-80f1-bff74eafe77f', '473f7c4b-f011-4fc2-847c-ceb6
        (1101, '9c4057d0-05ad-4e86-a47c-dc5bdeec03b9', '94c3e0b1-0677-4fd2-a7ea-56a71aefd0e8', 9,
         '2020-11-04 14:56:17', '00000', 639, 'Jn2fnQgSBACCv5pr7', NULL, 2, 1, 0,
         '2020-11-04 14:56:08', '2020-11-04 14:57:28'),
-       (1200, '06c6601f-a5b4-4812-9260-20065390b1f5', NULL, 1, '2020-11-05 14:18:16', '12345', 121,
-        'ix7E7HzXKTgGeQMyb', 'EQBcSwxn4eCAPYQ2J', 1, 1, 1, '2020-11-05 14:17:34',
-        '2020-11-05 14:18:16'),
        (1201, 'def9a0a1-c936-45ee-9141-d73dfc0a3888', NULL, 1, NULL, '12345', 121,
         NULL, NULL, 0, 1, 1, '2018-04-20 11:09:32',
         '2018-04-20 11:09:32'),
@@ -1168,9 +1165,10 @@ VALUES (1, '1da238c6-cd46-4162-80f1-bff74eafe77f', '473f7c4b-f011-4fc2-847c-ceb6
 INSERT INTO session (`id`, `user_id`, `consultant_id`, `consulting_type`, `message_date`,
                      `postcode`, `agency_id`, `rc_group_id`, `rc_feedback_group_id`, `status`,
                      `is_team_session`, `is_monitoring`, `create_date`, `update_date`,`main_topic_id`)
-VALUES (1215, '1da238c6-cd46-4162-80f1-bff74eafe77f', '34c3x5b1-0677-4fd2-a7ea-56a71aefd099', 0,
+VALUES
+        (1200, '06c6601f-a5b4-4812-9260-20065390b1f5', NULL, 1, '2020-11-05 14:18:16', '12345', 121,
+        'ix7E7HzXKTgGeQMyb', 'EQBcSwxn4eCAPYQ2J', 1, 1, 1, '2020-11-05 14:17:34',
+        '2020-11-05 14:18:16', 1),
+        (1215, '1da238c6-cd46-4162-80f1-bff74eafe77f', '34c3x5b1-0677-4fd2-a7ea-56a71aefd099', 0,
         '2020-10-08 09:03:45', '12345', 1, 'DJrRTzFg8Ac2BqE8j', 'E6FohkNfEDPY9bRXc', 2, 0, 1,
         '2020-10-08 09:03:45', '2020-10-08 09:03:45', 1);
-
-UPDATE SESSION set main_topic_id = 1
-where id = 1200;
