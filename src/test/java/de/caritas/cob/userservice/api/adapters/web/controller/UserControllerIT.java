@@ -258,7 +258,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @RunWith(SpringRunner.class)
 @WebMvcTest(UserController.class)
 @AutoConfigureMockMvc(addFilters = false)
-@TestPropertySource(properties = "spring.profiles.active=testing")
+@TestPropertySource(properties = "spring.profiles.active=testing,feature.topics.enabled=true")
 public class UserControllerIT {
 
   private static final Cookie RC_TOKEN_COOKIE = new Cookie(
@@ -935,7 +935,7 @@ public class UserControllerIT {
         .build();
     var expectedEnquiryData = new EnquiryData(USER, SESSION_ID, MESSAGE, null,
         expectedRCCredentials);
-    when(createEnquiryMessageFacade.createEnquiryMessage(eq(expectedEnquiryData))).thenReturn(
+    when(createEnquiryMessageFacade.createEnquiryMessage(expectedEnquiryData)).thenReturn(
         new CreateEnquiryMessageResponseDTO().rcGroupId(RC_GROUP_ID).sessionId(SESSION_ID));
 
     mvc.perform(

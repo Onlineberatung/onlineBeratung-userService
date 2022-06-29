@@ -11,9 +11,12 @@ import de.caritas.cob.userservice.api.facade.sessionlist.RocketChatRoomInformati
 import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.service.session.SessionTopicEnrichmentService;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -27,16 +30,12 @@ public class ConsultantSessionEnricher {
   private final @NonNull RocketChatRoomInformationProvider rocketChatRoomInformationProvider;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
 
-  /**
-   * Enriches the given session with the following information from Rocket.Chat: "last message",
-   * "last message date", and "messages read".
-   *
-   * @param consultantSessionResponseDTOs the session list to be enriched
-   * @param rcToken                       the Rocket.Chat authentication token of the current
-   *                                      consultant
-   * @param consultant                    the {@link Consultant}
-   * @return the enriched {@link ConsultantSessionResponseDTO}s
-   */
+  @Autowired(required = false)
+  private SessionTopicEnrichmentService sessionTopicEnrichmentService;
+
+  @Value("${feature.topics.enabled}")
+  private boolean topicsFeatureEnabled;
+
   public List<ConsultantSessionResponseDTO> updateRequiredConsultantSessionValues(
       List<ConsultantSessionResponseDTO> consultantSessionResponseDTOs, String rcToken,
       Consultant consultant) {
@@ -50,7 +49,6 @@ public class ConsultantSessionEnricher {
     consultantSessionResponseDTOs.forEach(consultantSessionResponseDTO -> this
         .enrichConsultantSession(consultantSessionResponseDTO, rocketChatRoomInformation,
             consultant));
-
     return consultantSessionResponseDTOs;
   }
 
@@ -78,6 +76,13 @@ public class ConsultantSessionEnricher {
       session.setFeedbackRead(!rocketChatRoomInformation.getLastMessagesRoom()
           .containsKey(session.getFeedbackGroupId()));
     }
+    enrichSessionWithTopic(consultantSessionResponseDTO);
+  }
+
+  private void enrichSessionWithTopic(ConsultantSessionResponseDTO consultantSessionResponseDTO) {
+    if (topicsFeatureEnabled) {
+      sessionTopicEnrichmentService.enrichSessionWithTopicData(consultantSessionResponseDTO.getSession());
+    }
   }
 
   private boolean getMonitoringProperty(SessionDTO session) {
@@ -97,5 +102,4 @@ public class ConsultantSessionEnricher {
         && rocketChatRoomInformation.getReadMessages()
         .containsKey(session.getSession().getFeedbackGroupId());
   }
-
 }

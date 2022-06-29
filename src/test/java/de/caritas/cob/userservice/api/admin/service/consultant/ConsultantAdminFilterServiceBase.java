@@ -35,14 +35,14 @@ public class ConsultantAdminFilterServiceBase {
     ConsultantSearchResultDTO consultants = this.consultantAdminFilterService
         .findFilteredConsultants(1, 100, new ConsultantFilter(), new Sort());
 
-    assertThat(consultants.getEmbedded(), hasSize(38));
+    assertThat(consultants.getEmbedded(), hasSize(39));
   }
 
   public void findFilteredConsultants_Should_returnAllConsultants_When_noFilterIsNull() {
     ConsultantSearchResultDTO consultants = this.consultantAdminFilterService
         .findFilteredConsultants(1, 100, null, new Sort());
 
-    assertThat(consultants.getEmbedded(), hasSize(38));
+    assertThat(consultants.getEmbedded(), hasSize(39));
   }
 
   public void findFilteredConsultants_Should_returnOneConsultant_When_perPageIsNegativeValue() {
@@ -76,7 +76,7 @@ public class ConsultantAdminFilterServiceBase {
         .findFilteredConsultants(2, 30, new ConsultantFilter(), null);
 
     assertThat(firstPage.getEmbedded(), hasSize(30));
-    assertThat(secondPage.getEmbedded(), hasSize(8));
+    assertThat(secondPage.getEmbedded(), hasSize(9));
   }
 
   public void findFilteredConsultants_Should_returnExpectedConsultant_When_allFiltersAreSet() {
