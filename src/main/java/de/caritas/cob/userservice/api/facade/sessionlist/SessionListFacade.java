@@ -62,7 +62,6 @@ public class SessionListFacade {
     userSessions.sort(comparing(UserSessionResponseDTO::getLatestMessage).reversed());
 
     return new UserSessionListResponseDTO().sessions(userSessions);
-
   }
 
   /**
@@ -90,6 +89,42 @@ public class SessionListFacade {
   }
 
   /**
+   * Returns a list of {@link UserSessionListResponseDTO} for the specified user ID and session Ids,
+   * with the session list sorted by last message date descending.
+   *
+   * @param userId                the user ID
+   * @param sessionIds            the session IDs
+   * @param rocketChatCredentials the rocket chat credentials
+   * @param roles                 the roles of given user
+   * @return {@link UserSessionListResponseDTO}
+   */
+  public GroupSessionListResponseDTO retrieveSessionsForAuthenticatedUserBySessionIds(String userId,
+      List<Long> sessionIds, RocketChatCredentials rocketChatCredentials, Set<String> roles) {
+    List<UserSessionResponseDTO> userSessions = userSessionListService.retrieveSessionsForAuthenticatedUserAndSessionIds(
+        userId, sessionIds, rocketChatCredentials, roles);
+    userSessions.sort(comparing(UserSessionResponseDTO::getLatestMessage).reversed());
+
+    SessionMapper sessionMapper = new SessionMapper();
+    var sessions = userSessions.stream()
+        .map(sessionMapper::toGroupSessionResponse)
+        .collect(Collectors.toList());
+
+    return new GroupSessionListResponseDTO().sessions(sessions);
+  }
+
+  public GroupSessionListResponseDTO retrieveChatsForUserByChatIds(List<Long> chatIds, RocketChatCredentials rocketChatCredentials) {
+    var userChatSessions = userSessionListService.retrieveChatsForUserAndChatIds(chatIds, rocketChatCredentials);
+    userChatSessions.sort(comparing(UserSessionResponseDTO::getLatestMessage).reversed());
+
+    SessionMapper sessionMapper = new SessionMapper();
+    var sessions = userChatSessions.stream()
+        .map(sessionMapper::toGroupSessionResponse)
+        .collect(Collectors.toList());
+
+    return new GroupSessionListResponseDTO().sessions(sessions);
+  }
+
+  /**
    * @param consultant            the authenticated consultant
    * @param rcGroupIds            the group or feedback group IDs
    * @param rocketChatCredentials the rocket chat credentials
@@ -101,6 +136,42 @@ public class SessionListFacade {
       Set<String> roles) {
     List<ConsultantSessionResponseDTO> consultantSessions = consultantSessionListService.retrieveSessionsForConsultantAndGroupIds(
         consultant, rcGroupIds, roles, rocketChatCredentials.getRocketChatToken());
+    consultantSessions.sort(comparing(ConsultantSessionResponseDTO::getLatestMessage).reversed());
+
+    SessionMapper sessionMapper = new SessionMapper();
+    var sessions = consultantSessions.stream()
+        .map(sessionMapper::toGroupSessionResponse)
+        .collect(Collectors.toList());
+
+    return new GroupSessionListResponseDTO().sessions(sessions);
+  }
+
+  /**
+   * @param consultant            the authenticated consultant
+   * @param sessionIds            the session IDs
+   * @param rocketChatCredentials the rocket chat credentials
+   * @param roles                 the roles of given consultant
+   * @return {@link GroupSessionListResponseDTO}
+   */
+  public GroupSessionListResponseDTO retrieveSessionsForAuthenticatedConsultantBySessionIds(
+      Consultant consultant, List<Long> sessionIds, RocketChatCredentials rocketChatCredentials,
+      Set<String> roles) {
+    List<ConsultantSessionResponseDTO> consultantSessions = consultantSessionListService.retrieveSessionsForConsultantAndSessionIds(
+        consultant, sessionIds, roles, rocketChatCredentials.getRocketChatToken());
+    consultantSessions.sort(comparing(ConsultantSessionResponseDTO::getLatestMessage).reversed());
+
+    SessionMapper sessionMapper = new SessionMapper();
+    var sessions = consultantSessions.stream()
+        .map(sessionMapper::toGroupSessionResponse)
+        .collect(Collectors.toList());
+
+    return new GroupSessionListResponseDTO().sessions(sessions);
+  }
+
+  public GroupSessionListResponseDTO retrieveChatsForConsultantByChatIds(Consultant consultant,
+      List<Long> chatIds, RocketChatCredentials rocketChatCredentials) {
+    List<ConsultantSessionResponseDTO> consultantSessions = consultantSessionListService.retrieveChatsForConsultantAndChatIds(
+        consultant, chatIds,  rocketChatCredentials.getRocketChatToken());
     consultantSessions.sort(comparing(ConsultantSessionResponseDTO::getLatestMessage).reversed());
 
     SessionMapper sessionMapper = new SessionMapper();

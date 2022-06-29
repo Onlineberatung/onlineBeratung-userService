@@ -127,9 +127,6 @@ public class ConsultantSessionEnricherTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
-        Mockito.any(), Mockito.any())).thenReturn(true);
-
     when(consultingTypeManager.getConsultingTypeSettings(anyInt()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 
@@ -157,8 +154,6 @@ public class ConsultantSessionEnricherTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
-        Mockito.any(), Mockito.any())).thenReturn(true);
     when(consultingTypeManager.getConsultingTypeSettings(anyInt()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser
@@ -185,8 +180,6 @@ public class ConsultantSessionEnricherTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
-        Mockito.any(), Mockito.any())).thenReturn(true);
     when(consultingTypeManager.getConsultingTypeSettings(anyInt()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser
@@ -283,8 +276,6 @@ public class ConsultantSessionEnricherTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
-        Mockito.any(), Mockito.any())).thenReturn(true);
     when(consultingTypeManager.getConsultingTypeSettings(anyInt()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
     when(sessionListAnalyser
@@ -359,7 +350,7 @@ public class ConsultantSessionEnricherTest {
         RocketChatRoomInformation.builder()
             .readMessages(MESSAGES_READ_MAP_WITHOUT_UNREADS)
             .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
-            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .lastMessagesRoom(emptyMap())
             .groupIdToLastMessageFallbackDate(emptyMap())
             .userRooms(USERS_ROOMS_LIST)
             .build();
@@ -486,14 +477,12 @@ public class ConsultantSessionEnricherTest {
         RocketChatRoomInformation.builder()
             .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
             .roomsForUpdate(ROOMS_UPDATE_DTO_LIST)
-            .lastMessagesRoom(ROOMS_LAST_MESSAGE_DTO_MAP)
+            .lastMessagesRoom(emptyMap())
             .groupIdToLastMessageFallbackDate(fallbackDates)
             .userRooms(USERS_ROOMS_LIST)
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
-        Mockito.any(), Mockito.any())).thenReturn(false);
     when(consultingTypeManager.getConsultingTypeSettings(anyInt()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING);
 

@@ -1,6 +1,9 @@
 package de.caritas.cob.userservice.api.service.sessionlist;
 
 import static de.caritas.cob.userservice.api.adapters.web.dto.MessageType.FURTHER_STEPS;
+import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.toDate;
+import static de.caritas.cob.userservice.api.model.Session.RegistrationType.ANONYMOUS;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -28,43 +31,38 @@ public class AvailableLastMessageUpdater {
   /**
    * Updates the given session with further Rocket.Chat last message information.
    *
+   * @param session                   the {@link SessionDTO}
+   * @param latestMessageDate         consumer for setting the date of the latest message
    * @param rocketChatRoomInformation the {@link RocketChatRoomInformation}
    * @param rcUserId                  the Rocket.Chat user id
-   * @param latestMessageSetter       the function to set the latest message timestamp
-   * @param session                   the session to be updated
-   * @param groupId                   the Rocket.Chat group id
    */
-  void updateSessionWithAvailableLastMessage(
-      RocketChatRoomInformation rocketChatRoomInformation, String rcUserId,
-      Consumer<Date> latestMessageSetter, SessionDTO session, String groupId) {
-
+  void updateSessionWithAvailableLastMessage(SessionDTO session, Consumer<Date> latestMessageDate,
+      RocketChatRoomInformation rocketChatRoomInformation, String rcUserId) {
+    var groupId = session.getGroupId();
     var roomsLastMessage = rocketChatRoomInformation.getLastMessagesRoom().get(groupId);
+
+    setLastMessage(session, groupId, roomsLastMessage);
+    setLatestMessageDateOrFallback(session, latestMessageDate, rocketChatRoomInformation, groupId,
+        roomsLastMessage);
+    setAttachmentAndVideoCallMessage(session, rcUserId, roomsLastMessage);
+  }
+
+  private void setLastMessage(SessionDTO session, String groupId,
+      RoomsLastMessageDTO roomsLastMessage) {
     var lastMessage = extractLastMessage(roomsLastMessage, groupId);
     session.setE2eLastMessage(lastMessage);
     session.setLastMessage(lastMessage != null ? lastMessage.getMsg() : "");
-
-    session.setMessageDate(Helper.getUnixTimestampFromDate(
-        rocketChatRoomInformation.getLastMessagesRoom().get(groupId).getTimestamp()));
-    latestMessageSetter.accept(roomsLastMessage.getTimestamp());
-    session.setAttachment(sessionListAnalyser
-        .getAttachmentFromRocketChatMessageIfAvailable(rcUserId, roomsLastMessage));
-
-    var alias = roomsLastMessage.getAlias();
-    if (nonNull(alias)) {
-      session.setVideoCallMessageDTO(alias.getVideoCallMessageDTO());
-      session.setLastMessageType(alias.getMessageType());
-    }
   }
 
   private LastMessageDTO extractLastMessage(RoomsLastMessageDTO roomsLastMessage, String groupId) {
     var lastMessage = new LastMessageDTO();
-    lastMessage.setT(roomsLastMessage.getType());
 
-    if (isLastMessageFurtherStepsAlias(roomsLastMessage)) {
+    if (isNull(roomsLastMessage) || isLastMessageFurtherStepsAlias(roomsLastMessage)) {
       lastMessage.setMsg(FURTHER_STEPS_MESSAGE);
       return lastMessage;
     }
 
+    lastMessage.setT(roomsLastMessage.getType());
     if (isNotBlank(roomsLastMessage.getMessage())) {
       var message = sessionListAnalyser.prepareMessageForSessionList(
           roomsLastMessage.getMessage(), groupId);
@@ -80,4 +78,49 @@ public class AvailableLastMessageUpdater {
         .equals(roomsLastMessageDTO.getAlias().getMessageType().name());
   }
 
+  private void setLatestMessageDateOrFallback(SessionDTO session, Consumer<Date> latestMessageDate,
+      RocketChatRoomInformation rocketChatRoomInformation, String groupId,
+      RoomsLastMessageDTO roomsLastMessage) {
+    if (isNull(roomsLastMessage)) {
+      var fallbackDate = rocketChatRoomInformation.getGroupIdToLastMessageFallbackDate()
+          .get(groupId);
+      setFallbackDate(latestMessageDate, session, fallbackDate);
+      return;
+    }
+
+    latestMessageDate.accept(roomsLastMessage.getTimestamp());
+    session.setMessageDate(Helper.getUnixTimestampFromDate(roomsLastMessage.getTimestamp()));
+  }
+
+  private void setFallbackDate(Consumer<Date> latestMessageDate, SessionDTO session,
+      Date fallbackDate) {
+    if (nonNull(fallbackDate)) {
+      session.setMessageDate(Helper.getUnixTimestampFromDate(fallbackDate));
+      latestMessageDate.accept(fallbackDate);
+      return;
+    }
+
+    session.setMessageDate(Helper.UNIXTIME_0.getTime());
+    if (ANONYMOUS.name().equals(session.getRegistrationType())) {
+      latestMessageDate.accept(toDate(session.getCreateDate()));
+    } else {
+      latestMessageDate.accept(Helper.UNIXTIME_0);
+    }
+  }
+
+  private void setAttachmentAndVideoCallMessage(SessionDTO session, String rcUserId,
+      RoomsLastMessageDTO roomsLastMessage) {
+    if (isNull(roomsLastMessage)) {
+      session.setLastMessageType(FURTHER_STEPS);
+      return;
+    }
+    var attachment = sessionListAnalyser.getAttachmentFromRocketChatMessageIfAvailable(rcUserId,
+        roomsLastMessage);
+    session.setAttachment(attachment);
+    var alias = roomsLastMessage.getAlias();
+    if (nonNull(alias)) {
+      session.setVideoCallMessageDTO(alias.getVideoCallMessageDTO());
+      session.setLastMessageType(alias.getMessageType());
+    }
+  }
 }

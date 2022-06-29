@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -113,6 +114,12 @@ public class ChatService {
         .collect(Collectors.toList());
   }
 
+  public List<UserSessionResponseDTO> getChatSessionsByIds(Set<Long> chatIds) {
+    return StreamSupport.stream(chatRepository.findAllById(chatIds).spliterator(), false)
+        .map(this::convertChatToUserSessionResponseDTO)
+        .collect(Collectors.toList());
+  }
+
   private UserSessionResponseDTO convertChatToUserSessionResponseDTO(Chat chat) {
     return new UserSessionResponseDTO().chat(new UserChatDTO(chat.getId(), chat.getTopic(),
         LocalDate.of(chat.getStartDate().getYear(), chat.getStartDate().getMonth(),
@@ -132,6 +139,12 @@ public class ChatService {
    */
   public Optional<Chat> getChat(Long chatId) {
     return chatRepository.findById(chatId);
+  }
+
+  public List<ConsultantSessionResponseDTO> getChatSessionsForConsultantByIds(Set<Long> chatIds) {
+    return StreamSupport.stream(chatRepository.findAllById(chatIds).spliterator(), false)
+        .map(this::convertChatToConsultantSessionResponseDTO)
+        .collect(Collectors.toList());
   }
 
   /**

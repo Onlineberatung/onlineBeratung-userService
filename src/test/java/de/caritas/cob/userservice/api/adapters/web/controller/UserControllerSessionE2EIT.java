@@ -494,7 +494,7 @@ class UserControllerSessionE2EIT {
         .andExpect(status().isOk())
         .andExpect(jsonPath("sessions", hasSize(2)))
         .andExpect(jsonPath("sessions[*].session.lastMessageType",
-            containsInAnyOrder("E2EE_ACTIVATED", null)))
+            containsInAnyOrder("E2EE_ACTIVATED", "FURTHER_STEPS")))
         .andExpect(jsonPath("sessions[0].chat", is(nullValue())))
         .andExpect(jsonPath("sessions[1].chat", is(nullValue())));
   }
@@ -690,6 +690,58 @@ class UserControllerSessionE2EIT {
                 .accept(MediaType.APPLICATION_JSON)
         )
         .andExpect(status().isForbidden());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
+  void getSessionForIdShouldFindSessionsBySessionId()
+      throws Exception {
+    givenAUserWithSessions();
+    givenNoRocketChatSubscriptionUpdates();
+    givenNoRocketChatRoomUpdates();
+
+    mockMvc.perform(
+            get("/users/sessions/room/900")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("sessions[0].session.id", is(900)))
+        .andExpect(jsonPath("sessions[0].session.groupId", is("YWKxhFX5K2HPpsFbs")))
+        .andExpect(jsonPath("sessions[0].consultant.username", is("u25main")))
+        .andExpect(jsonPath("sessions[0].consultant.id").doesNotExist())
+        .andExpect(jsonPath("sessions[0].consultant.firstName").doesNotExist())
+        .andExpect(jsonPath("sessions[0].consultant.lastName").doesNotExist())
+        .andExpect(jsonPath("sessions[0].agency", is(notNullValue())))
+        .andExpect(jsonPath("sessions", hasSize(1)));
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  void getSessionForIdShouldFindSessionsBySessionIdForConsultant()
+      throws Exception {
+    givenAConsultantWithSessions();
+    givenNoRocketChatSubscriptionUpdates();
+    givenNoRocketChatRoomUpdates();
+
+    mockMvc.perform(
+            get("/users/sessions/room/900")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("sessions[0].session.groupId", is("YWKxhFX5K2HPpsFbs")))
+        .andExpect(jsonPath("sessions[0].session.feedbackRead", is(true)))
+        .andExpect(jsonPath("sessions[0].user.username", is("u25suchtler")))
+        .andExpect(jsonPath("sessions[0].consultant.id", is("bad14912-cf9f-4c16-9d0e-fe8ede9b60dc")))
+        .andExpect(jsonPath("sessions[0].consultant.firstName", is("Manfred")))
+        .andExpect(jsonPath("sessions[0].consultant.lastName", is("Main")))
+        .andExpect(jsonPath("sessions[0].consultant.username").doesNotExist())
+        .andExpect(jsonPath("sessions", hasSize(1)));
   }
 
   @Test
