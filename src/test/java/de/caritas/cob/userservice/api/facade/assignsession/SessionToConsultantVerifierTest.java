@@ -46,6 +46,33 @@ public class SessionToConsultantVerifierTest {
   }
 
   @Test
+  public void verifySessionIsNew_Should_throwConflict_When_SessionIsNotNew() {
+    when(sessionToConsultantConditionProvider.isNewSession(any())).thenReturn(false);
+
+    ConsultantSessionDTO consultantSessionDTO = ConsultantSessionDTO.builder()
+        .consultant(mock(Consultant.class))
+        .session(mock(Session.class))
+        .build();
+
+    assertThrows(ConflictException.class, () ->
+        sessionToConsultantVerifier.verifySessionIsNew(consultantSessionDTO));
+  }
+
+  @Test
+  public void verifySessionIsNew_Should_notThrowConflict_When_SessionIsNew() {
+    when(sessionToConsultantConditionProvider.isNewSession(any())).thenReturn(true);
+
+    ConsultantSessionDTO consultantSessionDTO = ConsultantSessionDTO.builder()
+        .consultant(mock(Consultant.class))
+        .session(mock(Session.class))
+        .build();
+
+    assertDoesNotThrow(() ->
+        sessionToConsultantVerifier.verifySessionIsNew(consultantSessionDTO)
+    );
+  }
+
+  @Test
   public void verifyPreconditionsForAssignment_Should_throwException_When_sessionIsNew() {
     when(sessionToConsultantConditionProvider.isNewSession(any())).thenReturn(true);
     ConsultantSessionDTO consultantSessionDTO = ConsultantSessionDTO.builder()
