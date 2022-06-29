@@ -77,4 +77,6 @@ public class UserDataResponseDTO {
   private Boolean isWalkThroughEnabled;
 
   private Set<EmailToggle> emailToggles;
+
+  private Boolean appointmentFeatureActive;
 }
