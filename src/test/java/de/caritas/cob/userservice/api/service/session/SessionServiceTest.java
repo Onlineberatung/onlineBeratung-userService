@@ -666,6 +666,77 @@ class SessionServiceTest {
     assertEquals(1, sessionResponse.size());
   }
 
+  @Test
+  void getSessionsByIds_should_find_new_anonymous_enquiry_if_consultant_may_advise_consulting_type() {
+    Session anonymousEnquiry = createAnonymousNewEnquiryWithConsultingType(
+        AGENCY_DTO_SUCHT.getConsultingType());
+    when(sessionRepository.findAllById(singleton(anonymousEnquiry.getId()))).thenReturn(
+        singletonList(anonymousEnquiry));
+    when(agencyService.getAgencies(singletonList(4711L))).thenReturn(AGENCY_DTO_LIST);
+    ConsultantAgency agency = new ConsultantAgency();
+    agency.setAgencyId(4711L);
+    var consultant = createConsultantWithAgencies(agency);
+
+    var sessionResponse = sessionService.getSessionsByIds(
+        consultant, singleton(anonymousEnquiry.getId()), singleton(UserRole.CONSULTANT.getValue()));
+
+    assertEquals(1, sessionResponse.size());
+  }
+
+  @Test
+  void getSessionsByUserAndGroupOrFeedbackGroupIds_should_find_session_for_anonymous_user_of_session() {
+    Session anonymousEnquiry = createAnonymousNewEnquiryWithConsultingType(
+        AGENCY_DTO_SUCHT.getConsultingType());
+    anonymousEnquiry.setUser(USER);
+    when(sessionRepository.findByGroupOrFeedbackGroupIds(singleton("rcGroupId"))).thenReturn(
+        singletonList(anonymousEnquiry));
+
+    var sessionResponse = sessionService.getSessionsByUserAndGroupOrFeedbackGroupIds(
+        USER_ID, singleton("rcGroupId"), singleton(UserRole.ANONYMOUS.getValue()));
+
+    assertEquals(1, sessionResponse.size());
+  }
+
+  @Test
+  void getSessionsByUserAndGroupOrFeedbackGroupIds_should_fail_if_user_is_not_owner_of_session() {
+    Session anonymousEnquiry = createAnonymousNewEnquiryWithConsultingType(
+        AGENCY_DTO_SUCHT.getConsultingType());
+    anonymousEnquiry.setUser(USER);
+    when(sessionRepository.findByGroupOrFeedbackGroupIds(singleton("rcGroupId"))).thenReturn(
+        singletonList(anonymousEnquiry));
+
+    assertThrows(ForbiddenException.class,
+        () -> sessionService.getSessionsByUserAndGroupOrFeedbackGroupIds(
+            "someOtherId", singleton("rcGroupId"), singleton(UserRole.ANONYMOUS.getValue())));
+  }
+
+  @Test
+  void getSessionsByUserAndSessionIds_should_find_session_for_anonymous_user_of_session() {
+    Session anonymousEnquiry = createAnonymousNewEnquiryWithConsultingType(
+        AGENCY_DTO_SUCHT.getConsultingType());
+    anonymousEnquiry.setUser(USER);
+    when(sessionRepository.findAllById(singleton(anonymousEnquiry.getId()))).thenReturn(
+        singletonList(anonymousEnquiry));
+
+    var sessionResponse = sessionService.getSessionsByUserAndSessionIds(USER_ID,
+        singleton(anonymousEnquiry.getId()), singleton(UserRole.ANONYMOUS.getValue()));
+
+    assertEquals(1, sessionResponse.size());
+  }
+
+  @Test
+  void getSessionsByUserAndSessionIds_should_fail_if_user_is_not_owner_of_session() {
+    Session anonymousEnquiry = createAnonymousNewEnquiryWithConsultingType(
+        AGENCY_DTO_SUCHT.getConsultingType());
+    anonymousEnquiry.setUser(USER);
+    when(sessionRepository.findAllById(singleton(anonymousEnquiry.getId()))).thenReturn(
+        singletonList(anonymousEnquiry));
+
+    assertThrows(ForbiddenException.class,
+        () -> sessionService.getSessionsByUserAndSessionIds("someUserId",
+            singleton(anonymousEnquiry.getId()), singleton(UserRole.ANONYMOUS.getValue())));
+  }
+
   private Session createAnonymousNewEnquiryWithConsultingType(int consultingTypeId) {
     var session = easyRandom.nextObject(Session.class);
     session.setAgencyId(null);
