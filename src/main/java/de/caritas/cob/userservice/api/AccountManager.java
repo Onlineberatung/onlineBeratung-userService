@@ -8,6 +8,7 @@ import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Consultant.ConsultantBase;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.in.AccountManaging;
+import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.MessageClient;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
@@ -39,6 +40,8 @@ public class AccountManager implements AccountManaging {
   private final UsernameTranscoder usernameTranscoder;
 
   private final AgencyService agencyService;
+
+  private final ConsultantAgencyRepository consultantAgencyRepository;
 
   @Override
   public Optional<Map<String, Object>> findConsultant(String id) {
@@ -80,10 +83,11 @@ public class AccountManager implements AccountManaging {
         .collect(Collectors.toList());
     var fullConsultants = consultantRepository.findAllByIdIn(consultantIds);
 
-    var agencyIds = userServiceMapper.agencyIdsOf(fullConsultants);
+    var consultingAgencies = consultantAgencyRepository.findByConsultantIdIn(consultantIds);
+    var agencyIds = userServiceMapper.agencyIdsOf(consultingAgencies);
     var agencies = agencyService.getAgenciesWithoutCaching(agencyIds);
 
-    return userServiceMapper.mapOf(consultantPage, fullConsultants, agencies);
+    return userServiceMapper.mapOf(consultantPage, fullConsultants, agencies, consultingAgencies);
   }
 
   @Override

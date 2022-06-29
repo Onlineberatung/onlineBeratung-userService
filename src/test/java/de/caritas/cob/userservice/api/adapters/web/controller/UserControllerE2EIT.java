@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -45,9 +46,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.actions.chat.StopChatActionCommand;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.MessageResponse;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.RoomResponse;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.UpdateUser;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.MessageResponse;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomResponse;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UpdateUser;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.DeleteUserAccountDTO;
@@ -88,13 +89,14 @@ import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.RocketChatUserDTO;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.user.UserInfoResponseDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.RocketChatUserDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.BasicConsultingTypeResponseDTO;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -467,15 +469,39 @@ public class UserControllerE2EIT {
         .andExpect(jsonPath("_embedded[*]._embedded.username", not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[0]._embedded.status", is("CREATED")))
         .andExpect(jsonPath("_embedded[9]._embedded.status", is("CREATED")))
+        .andExpect(jsonPath("_embedded[0]._embedded.absenceMessage", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.absent", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.formalLanguage", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.teamConsultant", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.createDate", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.updateDate", not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[*]._embedded.email", not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[0]._embedded.agencies[0].id", not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[0]._embedded.agencies[0].name", not(contains(nullValue()))))
         .andExpect(
             jsonPath("_embedded[0]._embedded.agencies[0].postcode", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.agencies[0].city", not(contains(nullValue()))))
+        .andExpect(
+            jsonPath("_embedded[0]._embedded.agencies[0].description", not(contains(nullValue()))))
+        .andExpect(
+            jsonPath("_embedded[0]._embedded.agencies[0].teamAgency", not(contains(nullValue()))))
+        .andExpect(
+            jsonPath("_embedded[0]._embedded.agencies[0].offline", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.agencies[0].consultingType",
+            not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[9]._embedded.agencies[0].id", not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[9]._embedded.agencies[0].name", not(contains(nullValue()))))
         .andExpect(
             jsonPath("_embedded[9]._embedded.agencies[0].postcode", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[9]._embedded.agencies[0].city", not(contains(nullValue()))))
+        .andExpect(
+            jsonPath("_embedded[9]._embedded.agencies[0].description", not(contains(nullValue()))))
+        .andExpect(
+            jsonPath("_embedded[9]._embedded.agencies[0].teamAgency", not(contains(nullValue()))))
+        .andExpect(
+            jsonPath("_embedded[9]._embedded.agencies[0].offline", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[9]._embedded.agencies[0].consultingType",
+            not(contains(nullValue()))))
         .andExpect(jsonPath("_embedded[0]._links.self.href", startsWith(consultantUrlPrefix)))
         .andExpect(jsonPath("_embedded[0]._links.self.method", is("GET")))
         .andExpect(jsonPath("_embedded[0]._links.self.templated", is(false)))
@@ -678,6 +704,76 @@ public class UserControllerE2EIT {
       var currentFirstname = foundConsultant.getEmbedded().getFirstname();
       assertTrue(previousFirstName.compareTo(currentFirstname) <= 0);
       previousFirstName = currentFirstname;
+    }
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
+  void searchConsultantsShouldContainAgenciesMarkedForDeletionIfConsultantDeleted()
+      throws Exception {
+    givenAnInfix();
+    givenConsultantsMatching(1, infix, true, true);
+    givenAgencyServiceReturningDummyAgencies();
+    var consultantsMarkedAsDeleted = consultantRepository.findAllByDeleteDateNotNull();
+    assertEquals(1, consultantsMarkedAsDeleted.size());
+    var onlyConsultant = consultantsMarkedAsDeleted.get(0);
+
+    mockMvc.perform(
+            get("/users/consultants/search")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept("application/hal+json")
+                .param("query", infix)
+                .param("perPage", "1")
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("total", is(1)))
+        .andExpect(jsonPath("_embedded", hasSize(1)))
+        .andExpect(jsonPath("_embedded[0]._embedded.id", is(onlyConsultant.getId())))
+        .andExpect(
+            jsonPath("_embedded[0]._embedded.status", is(onlyConsultant.getStatus().toString())))
+        .andExpect(jsonPath("_embedded[0]._embedded.agencies", hasSize(1)))
+        .andExpect(jsonPath("_embedded[0]._embedded.agencies[0].id", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.agencies[0].name", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.deleteDate", not(contains(nullValue()))))
+        .andExpect(jsonPath("_embedded[0]._embedded.email", is(onlyConsultant.getEmail())));
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
+  void searchConsultantsShouldContainOnlyAgenciesNotMarkedForDeletionIfConsultantNotDeleted()
+      throws Exception {
+    givenAnInfix();
+    var numMatching = easyRandom.nextInt(20) + 1;
+    givenConsultantsMatching(numMatching, infix, true, false);
+    givenAgencyServiceReturningDummyAgencies();
+
+    var response = mockMvc.perform(
+            get("/users/consultants/search")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept("application/hal+json")
+                .param("query", URLEncoder.encode(infix, StandardCharsets.UTF_8))
+        ).andExpect(status().isOk())
+        .andExpect(jsonPath("total", is(numMatching)))
+        .andReturn().getResponse().getContentAsString();
+
+    var searchResult = objectMapper.readValue(response, ConsultantSearchResultDTO.class);
+    var consultantAgenciesMarkedForDeletion = consultantAgencies.stream()
+        .filter(consultantAgency -> nonNull(consultantAgency.getDeleteDate()))
+        .map(ConsultantAgency::getAgencyId)
+        .collect(Collectors.toSet());
+    var consultantAgenciesNotMarkedForDeletion = consultantAgencies.stream()
+        .filter(consultantAgency -> isNull(consultantAgency.getDeleteDate()))
+        .map(ConsultantAgency::getAgencyId)
+        .collect(Collectors.toSet());
+
+    for (var foundConsultant : searchResult.getEmbedded()) {
+      foundConsultant.getEmbedded().getAgencies().forEach(agency -> {
+        var agencyId = agency.getId();
+        assertFalse(consultantAgenciesMarkedForDeletion.contains(agencyId));
+        assertTrue(consultantAgenciesNotMarkedForDeletion.contains(agencyId));
+      });
     }
   }
 
@@ -2395,6 +2491,11 @@ public class UserControllerE2EIT {
   }
 
   private void givenConsultantsMatching(@PositiveOrZero int count, @NotBlank String infix) {
+    givenConsultantsMatching(count, infix, false, false);
+  }
+
+  private void givenConsultantsMatching(@PositiveOrZero int count, @NotBlank String infix,
+      boolean includingAgenciesMarkedAsDeleted, boolean markedAsDeleted) {
     while (count-- > 0) {
       var dbConsultant = consultantRepository.findAll().iterator().next();
       var consultant = new Consultant();
@@ -2405,7 +2506,16 @@ public class UserControllerE2EIT {
       consultant.setFirstName(aStringWithoutInfix(infix));
       consultant.setLastName(aStringWithInfix(infix));
       consultant.setEmail(aValidEmailWithoutInfix(infix));
-      consultant.setStatus(ConsultantStatus.CREATED);
+      if (markedAsDeleted) {
+        consultant.setStatus(ConsultantStatus.IN_DELETION);
+        consultant.setDeleteDate(LocalDateTime.now());
+      } else {
+        consultant.setStatus(ConsultantStatus.CREATED);
+      }
+      consultant.setAbsenceMessage(RandomStringUtils.randomAlphabetic(8));
+      consultant.setAbsent(easyRandom.nextBoolean());
+      consultant.setLanguageFormal(easyRandom.nextBoolean());
+      consultant.setTeamConsultant(easyRandom.nextBoolean());
 
       consultantRepository.save(consultant);
       consultantIdsToDelete.add(consultant.getId());
@@ -2414,6 +2524,10 @@ public class UserControllerE2EIT {
           .consultant(consultant)
           .agencyId(aPositiveLong())
           .build();
+      if (includingAgenciesMarkedAsDeleted) {
+        var deleteDate = easyRandom.nextBoolean() ? null : LocalDateTime.now();
+        consultantAgency.setDeleteDate(deleteDate);
+      }
       consultantAgencyRepository.save(consultantAgency);
       consultantAgencies.add(consultantAgency);
       consultant.setConsultantAgencies(Set.of(consultantAgency));
@@ -2555,6 +2669,11 @@ public class UserControllerE2EIT {
       agency.setId(consultantAgency.getAgencyId());
       agency.setName(RandomStringUtils.randomAlphabetic(16));
       agency.setPostcode(RandomStringUtils.randomNumeric(5));
+      agency.setCity(RandomStringUtils.randomNumeric(8));
+      agency.setDescription(RandomStringUtils.randomNumeric(8));
+      agency.setTeamAgency(easyRandom.nextBoolean());
+      agency.setOffline(easyRandom.nextBoolean());
+      agency.setConsultingType(easyRandom.nextInt());
       agencies.add(agency);
     });
 

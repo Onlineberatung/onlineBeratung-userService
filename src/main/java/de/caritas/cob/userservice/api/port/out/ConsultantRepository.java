@@ -31,14 +31,12 @@ public interface ConsultantRepository extends CrudRepository<Consultant, String>
       value =
           "SELECT c.id as id, c.firstName as firstName, c.lastName as lastName, c.email as email "
               + "FROM Consultant c "
-              + "WHERE c.deleteDate IS NULL"
-              + "  AND ("
-              + "    ?1 = '*' "
-              + "   OR ("
+              + "WHERE"
+              + "  ?1 = '*' "
+              + "  OR ("
               + "    UPPER(c.firstName) LIKE CONCAT('%', UPPER(?1), '%')"
               + "    OR UPPER(c.lastName) LIKE CONCAT('%', UPPER(?1), '%')"
               + "    OR UPPER(c.email) LIKE CONCAT('%', UPPER(?1), '%')"
-              + "   )"
               + "  )"
   )
   Page<ConsultantBase> findAllByInfix(String infix, Pageable pageable);
