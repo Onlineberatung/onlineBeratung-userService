@@ -220,24 +220,24 @@ components:
       required:
         - title
         - userName
-        - counselor
+        - counselorEmail
         - date
       properties:
         title:
           type: string
-          example: Lorem ipsum dolor sit amet, consetetur...
+          example: Intro appointment between counselor and advice seeker
         userName:
           type: string
-          example: Lorem ipsum dolor sit amet, consetetur...
+          example: adviceSeeker1
         counselor:
           type: string
-          example: Lorem ipsum dolor sit amet, consetetur...
+          example: sucht.consultant@email.com
         date:
           type: string
-          example: Lorem ipsum dolor sit amet, consetetur...
+          example: Fri Sep 30 18:31:00 GMT+04:00 2022
         duration:
           type: string
-          example: Lorem ipsum dolor sit amet, consetetur...
+          example: 30
         language:
           $ref: '#/components/schemas/LanguageCode'
         t:
