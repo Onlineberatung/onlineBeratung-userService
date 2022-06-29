@@ -38,7 +38,7 @@ public class SessionToConsultantVerifier {
   }
 
   public void verifySessionIsNew(ConsultantSessionDTO consultantSessionDTO) {
-    if (conditionProvider.isNewSession(consultantSessionDTO.getSession())) {
+    if (!conditionProvider.isNewSession(consultantSessionDTO.getSession())) {
       var message = String.format(
           "Session %s is not new and cannot be accepted by consultant %s.",
           consultantSessionDTO.getSession().getId().toString(),
