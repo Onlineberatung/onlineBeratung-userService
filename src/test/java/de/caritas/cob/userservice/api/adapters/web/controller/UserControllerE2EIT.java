@@ -1223,8 +1223,6 @@ class UserControllerE2EIT {
   }
 
   private void givenAValidTopicServiceResponse() {
-    var roomsGetDTO = new RoomsGetDTO();
-    roomsGetDTO.setUpdate(new RoomsUpdateDTO[]{});
     var firstTopic = new TopicDTO().id(1L).name("topic name").description("topic desc").status("INACTIVE");
     var secondTopic = new TopicDTO().id(2L).name("topic name 2").description("topic desc 2").status("ACTIVE");
     when(topicControllerApi.getApiClient()).thenReturn(new ApiClient());
