@@ -37,6 +37,17 @@ public class SessionToConsultantVerifier {
     }
   }
 
+  public void verifySessionIsNew(ConsultantSessionDTO consultantSessionDTO) {
+    if (conditionProvider.isNewSession(consultantSessionDTO.getSession())) {
+      var message = String.format(
+          "Session %s is not new and cannot be accepted by consultant %s.",
+          consultantSessionDTO.getSession().getId().toString(),
+          consultantSessionDTO.getConsultant().getId());
+
+      throw new ConflictException(message, LogService::logAssignSessionFacadeWarning);
+    }
+  }
+
   /**
    * verifies necessary input data of {@link Session} and {@link Consultant}.
    */

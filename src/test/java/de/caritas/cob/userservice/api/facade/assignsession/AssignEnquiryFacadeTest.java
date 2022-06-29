@@ -1,16 +1,23 @@
 package de.caritas.cob.userservice.api.facade.assignsession;
 
+import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
+import static de.caritas.cob.userservice.api.model.Session.RegistrationType.ANONYMOUS;
 import static de.caritas.cob.userservice.api.model.Session.SessionStatus.IN_PROGRESS;
 import static de.caritas.cob.userservice.api.model.Session.SessionStatus.NEW;
 import static de.caritas.cob.userservice.api.testHelper.AsyncVerification.verifyAsync;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_2;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_WITH_AGENCY;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.FEEDBACKSESSION_WITHOUT_CONSULTANT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.LIST_GROUP_MEMBER_DTO;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.POSTCODE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_FEEDBACK_GROUP_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.ROCKETCHAT_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.ROCKET_CHAT_SYSTEM_USER_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.SESSION_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.SESSION_WITHOUT_CONSULTANT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.U25_SESSION_WITHOUT_CONSULTANT;
 import static java.util.Arrays.asList;
@@ -30,18 +37,19 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
+import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
-import de.caritas.cob.userservice.api.model.Session.RegistrationType;
 import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.model.Session.RegistrationType;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
 import de.caritas.cob.userservice.api.service.statistics.event.AssignSessionStatisticsEvent;
@@ -127,7 +135,7 @@ public class AssignEnquiryFacadeTest {
   }
 
   private void verifyConsultantAndSessionHaveBeenChecked(Session session, Consultant consultant) {
-    verify(sessionToConsultantVerifier, times(1)).verifySessionIsNotInProgress(
+    verify(sessionToConsultantVerifier, times(1)).verifySessionIsNew(
         argThat(consultantSessionDTO ->
             consultantSessionDTO.getConsultant().equals(consultant)
                 && consultantSessionDTO.getSession().equals(session)));
@@ -360,6 +368,24 @@ public class AssignEnquiryFacadeTest {
     verify(rocketChatFacade, times(1)).removeSystemMessagesFromRocketChatGroup(anyString());
   }
 
+  @Test(expected = ConflictException.class)
+  public void assignAnonymousEnquiry_Should_ThrowConflictIfSessionIsInProgress() {
+    var session = givenASessionInProgress();
+    doThrow(new ConflictException(""))
+        .when(sessionToConsultantVerifier).verifySessionIsNew(any(ConsultantSessionDTO.class));
+
+    assignEnquiryFacade.assignAnonymousEnquiry(session, CONSULTANT_WITH_AGENCY);
+  }
+
+  @Test(expected = ConflictException.class)
+  public void assignAnonymousEnquiry_Should_ThrowConflictIfSessionIsDone() {
+    var session = givenADoneSession();
+    doThrow(new ConflictException(""))
+        .when(sessionToConsultantVerifier).verifySessionIsNew(any(ConsultantSessionDTO.class));
+
+    assignEnquiryFacade.assignAnonymousEnquiry(session, CONSULTANT_WITH_AGENCY);
+  }
+
   @Test(expected = InternalServerErrorException.class)
   public void assignAnonymousEnquiry_Should_ReturnInternalServerErrorAndDoARollback_WhenAddConsultantToGroupFails() {
     doThrow(new InternalServerErrorException("")).when(rocketChatFacade)
@@ -375,6 +401,18 @@ public class AssignEnquiryFacadeTest {
         ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT.getStatus());
     verify(sessionService, times(1))
         .updateConsultantAndStatusForSession(ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT, null, NEW);
+  }
+
+  private Session givenADoneSession() {
+    return new Session(SESSION_ID, null, null, CONSULTING_TYPE_ID_SUCHT, ANONYMOUS, POSTCODE,
+        AGENCY_ID, null, SessionStatus.DONE, nowInUtc(), RC_GROUP_ID, null, null, false, false,
+        false, nowInUtc(), null, null);
+  }
+
+  private Session givenASessionInProgress() {
+    return new Session(SESSION_ID, null, CONSULTANT_2, CONSULTING_TYPE_ID_SUCHT, ANONYMOUS,
+        POSTCODE, AGENCY_ID, null, IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, false, false,
+        false, nowInUtc(), null, null);
   }
 
 }

@@ -84,7 +84,7 @@ public class AssignEnquiryFacade {
   private void assignEnquiry(Session session, Consultant consultant) {
     var consultantSessionDTO =
         ConsultantSessionDTO.builder().consultant(consultant).session(session).build();
-    sessionToConsultantVerifier.verifySessionIsNotInProgress(consultantSessionDTO);
+    sessionToConsultantVerifier.verifySessionIsNew(consultantSessionDTO);
     sessionToConsultantVerifier.verifyPreconditionsForAssignment(consultantSessionDTO);
 
     sessionService.updateConsultantAndStatusForSession(session, consultant, IN_PROGRESS);
