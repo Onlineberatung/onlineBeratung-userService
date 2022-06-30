@@ -23,8 +23,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserDtoMapper {
 
-  @Value("${appointment.feature.active}")
-  private boolean appointmentFeatureActive;
+  @Value("${feature.appointment.enabled}")
+  private boolean appointmentFeatureEnabled;
 
   public UserDataResponseDTO userDataOf(UserDataResponseDTO userData, OtpInfoDTO otpInfoDTO,
       boolean isE2eEncEnabled, boolean isDisplayNameAllowed) {
@@ -52,7 +52,7 @@ public class UserDtoMapper {
         isDisplayNameAllowed && userData.getUserRoles().contains(UserRole.CONSULTANT.getValue())
     );
 
-    userData.setAppointmentFeatureActive(appointmentFeatureActive);
+    userData.setAppointmentFeatureEnabled(appointmentFeatureEnabled);
 
     return userData;
   }

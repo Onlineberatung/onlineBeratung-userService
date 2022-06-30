@@ -140,7 +140,7 @@ public class MessageServiceProvider {
     }
   }
 
-  public void postSendAppointmentBookedMessage(String rcGroupId,
+  public MessageResponseDTO postSendAppointmentBookedMessage(String rcGroupId,
       CreateEnquiryExceptionInformation exceptionInformation,
       AppointmentData appointmentData)
       throws RocketChatPostFurtherStepsMessageException {
@@ -148,7 +148,7 @@ public class MessageServiceProvider {
     addDefaultHeaders(this.messageControllerApi.getApiClient());
     try {
       ObjectMapper mapper = new ObjectMapper();
-      this.messageControllerApi.saveAliasMessageWithContent(rcGroupId, new AliasMessageDTO()
+      return this.messageControllerApi.saveAliasMessageWithContent(rcGroupId, new AliasMessageDTO()
           .messageType(MessageType.APPOINTMENT_SET).content(mapper.writeValueAsString(appointmentData)));
 
     } catch (RestClientException | JsonProcessingException exception) {

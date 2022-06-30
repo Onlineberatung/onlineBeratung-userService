@@ -78,5 +78,5 @@ public class UserDataResponseDTO {
 
   private Set<EmailToggle> emailToggles;
 
-  private Boolean appointmentFeatureActive;
+  private Boolean appointmentFeatureEnabled;
 }

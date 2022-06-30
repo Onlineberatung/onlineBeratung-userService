@@ -38,6 +38,7 @@ import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
+import de.caritas.cob.userservice.messageservice.generated.web.model.MessageResponseDTO;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -115,10 +116,10 @@ public class CreateEnquiryMessageFacade {
 
       saveRocketChatIdForUser(enquiryData.getUser(), enquiryData.getRocketChatCredentials(),
           createEnquiryExceptionInformation);
-      de.caritas.cob.userservice.messageservice.generated.web.model.MessageResponseDTO messageResponse = null;
+      MessageResponseDTO messageResponse;
 
       if (isAppointmentEnquiryMessage(enquiryData)) {
-        messageServiceProvider
+        messageResponse = messageServiceProvider
             .postSendAppointmentBookedMessage(rcGroupId, createEnquiryExceptionInformation,
                 enquiryData.getAppointmentData());
       } else {
@@ -143,8 +144,8 @@ public class CreateEnquiryMessageFacade {
 
       return new CreateEnquiryMessageResponseDTO()
           .rcGroupId(rcGroupId)
-          .sessionId(enquiryData.getSessionId());
-      //          .t(messageResponse.getT());
+          .sessionId(enquiryData.getSessionId())
+          .t(messageResponse.getT());
 
     } catch (CreateEnquiryException exception) {
       doRollback(exception.getExceptionInformation(), enquiryData.getRocketChatCredentials());

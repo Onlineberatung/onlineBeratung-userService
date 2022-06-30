@@ -128,21 +128,17 @@ public class AppointmentController implements AppointmentsApi {
         .rocketChatToken(rcToken)
         .rocketChatUserId(rcUserId)
         .build();
-    String language = null;
 
-    AppointmentData appointmentData = new AppointmentData(enquiryAppointmentDTO.getTitle(), enquiryAppointmentDTO.getUserName(), enquiryAppointmentDTO.getCounselor(), enquiryAppointmentDTO.getDate(), enquiryAppointmentDTO.getDuration());
-
-    var enquiryData = new EnquiryData(user, sessionId, null, language,
+    AppointmentData appointmentData = new AppointmentData(enquiryAppointmentDTO.getTitle(), enquiryAppointmentDTO.getUserName(), enquiryAppointmentDTO.getCounselorEmail(), enquiryAppointmentDTO.getDate(), enquiryAppointmentDTO.getDuration());
+    var enquiryData = new EnquiryData(user, sessionId, null, null,
         rocketChatCredentials, enquiryAppointmentDTO.getT(), enquiryAppointmentDTO.getOrg(), appointmentData);
 
     var response = createEnquiryMessageFacade.createEnquiryMessage(enquiryData);
 
-    var consultant = consultantService.getConsultantByEmail(enquiryAppointmentDTO.getCounselor());
+    var consultant = consultantService.getConsultantByEmail(enquiryAppointmentDTO.getCounselorEmail());
     var session = sessionService.getSession(sessionId);
     this.assignEnquiryFacade.assignRegisteredEnquiry(session.get(), consultant.get());
 
     return new ResponseEntity<>(response, HttpStatus.CREATED);
-
-
   }
 }

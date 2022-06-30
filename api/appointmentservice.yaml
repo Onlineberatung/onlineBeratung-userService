@@ -229,7 +229,7 @@ components:
         userName:
           type: string
           example: adviceSeeker1
-        counselor:
+        counselorEmail:
           type: string
           example: sucht.consultant@email.com
         date:
