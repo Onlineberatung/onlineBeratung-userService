@@ -53,8 +53,6 @@ public class ConsultantChatEnricherTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
-        Mockito.any(), Mockito.any())).thenReturn(true);
 
     ConsultantSessionResponseDTO result = consultantChatEnricher
         .updateRequiredConsultantChatValues(
@@ -75,8 +73,6 @@ public class ConsultantChatEnricherTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
-        Mockito.any(), Mockito.any())).thenReturn(true);
 
     ConsultantSessionResponseDTO result = consultantChatEnricher
         .updateRequiredConsultantChatValues(
@@ -97,8 +93,6 @@ public class ConsultantChatEnricherTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
-        Mockito.any(), Mockito.any())).thenReturn(true);
     when(sessionListAnalyser
         .getAttachmentFromRocketChatMessageIfAvailable(
             Mockito.eq(CONSULTANT_2.getRocketChatId()),
@@ -126,8 +120,6 @@ public class ConsultantChatEnricherTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
-        Mockito.any(), Mockito.any())).thenReturn(true);
 
     ConsultantSessionResponseDTO result = consultantChatEnricher
         .updateRequiredConsultantChatValues(
@@ -148,8 +140,6 @@ public class ConsultantChatEnricherTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
-        Mockito.any(), Mockito.any())).thenReturn(true);
 
     ConsultantSessionResponseDTO result = consultantChatEnricher
         .updateRequiredConsultantChatValues(

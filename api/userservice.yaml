@@ -1971,6 +1971,8 @@ components:
           $ref: '#/components/schemas/SessionAttachmentDTO'
         videoCallMessageDTO:
           $ref: '#/components/schemas/VideoCallMessageDTO'
+        topic:
+          $ref: '#/components/schemas/SessionTopicDTO'
 
     SessionAttachmentDTO:
       type: object
@@ -1984,6 +1986,25 @@ components:
         fileReceived:
           type: boolean
           example: true
+
+    SessionTopicDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 12132
+        name:
+          type: string
+          example: "Topic name"
+          maxLength: 100
+        description:
+          type: string
+          example: "Description"
+          maxLength: 200
+        status:
+          type: string
+          example: "Active"
+          maxLength: 10
 
     AliasMessageDTO:
       type: object
@@ -2162,6 +2183,8 @@ components:
         consultingType:
           type: integer
           example: 0
+        e2eLastMessage:
+          $ref: '#/components/schemas/LastMessageDTO'
         lastMessage:
           type: string
           example: Thanks for the answer

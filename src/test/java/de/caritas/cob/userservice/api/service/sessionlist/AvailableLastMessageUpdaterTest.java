@@ -4,7 +4,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -14,13 +13,18 @@ import de.caritas.cob.userservice.api.adapters.web.dto.AliasMessageDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.LastMessageDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.MessageType;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserChatDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.VideoCallMessageDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.VideoCallMessageDTO.EventTypeEnum;
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
 import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import org.junit.Before;
 import org.junit.Test;
@@ -110,8 +114,7 @@ public class AvailableLastMessageUpdaterTest {
 
   @Test
   public void updateSessionWithAvailableLastMessage_should_set_rocket_chat_type() {
-    when(roomsLastMessageDTO.getMessage()).thenReturn("e2e_encrypted_message");
-    when(roomsLastMessageDTO.getType()).thenReturn("e2e");
+    givenAnE2eRoomsLastMessage();
     when(sessionListAnalyser.prepareMessageForSessionList("e2e_encrypted_message",
         GROUP_ID)).thenReturn("e2e_encrypted_message");
 
@@ -137,5 +140,47 @@ public class AvailableLastMessageUpdaterTest {
     assertThat(session.getE2eLastMessage(), is(expectedLastMessage));
     assertThat(session.getLastMessage(), is("So geht es weiter"));
     assertThat(session.getLastMessageType(), is(MessageType.FURTHER_STEPS));
+  }
+
+  @Test
+  public void updateChatWithAvailableLastMessage_should_set_rocket_chat_type() {
+    var chat = new UserChatDTO();
+    chat.setGroupId(GROUP_ID);
+    AtomicReference<Date> date = new AtomicReference<>();
+    givenAnE2eRoomsLastMessage();
+    when(sessionListAnalyser.prepareMessageForSessionList("e2e_encrypted_message",
+        GROUP_ID)).thenReturn("e2e_encrypted_message");
+
+    this.availableLastMessageUpdater.updateChatWithAvailableLastMessage(chat, date::set,
+        this.rocketChatRoomInformation, "rc4711");
+
+    var expectedLastMessage = new LastMessageDTO();
+    expectedLastMessage.setMsg("e2e_encrypted_message");
+    expectedLastMessage.setT("e2e");
+    assertThat(chat.getE2eLastMessage(), is(expectedLastMessage));
+    assertThat(chat.getLastMessage(), is(expectedLastMessage.getMsg()));
+    assertThat(chat.getMessageDate(), is(1655730882L));
+    assertThat(date.get().getTime(), is(1655730882738L));
+  }
+
+  @Test
+  public void updateChatWithAvailableLastMessage_should_set_fallback_date_if_rc_last_message_is_unavailable() {
+    var chat = new UserChatDTO();
+    var startDateWithTime = LocalDateTime.of(2022, 5, 22, 13, 37);
+    chat.setStartDateWithTime(startDateWithTime);
+    AtomicReference<Date> date = new AtomicReference<>();
+
+    this.availableLastMessageUpdater.updateChatWithAvailableLastMessage(chat, date::set,
+        this.rocketChatRoomInformation, "rc4711");
+
+    assertThat(chat.getE2eLastMessage(), is(nullValue()));
+    assertThat(chat.getLastMessage(), is(nullValue()));
+    assertThat(date.get(), is(Timestamp.valueOf(startDateWithTime)));
+  }
+
+  private void givenAnE2eRoomsLastMessage() {
+    when(roomsLastMessageDTO.getTimestamp()).thenReturn(new Date(1655730882738L));
+    when(roomsLastMessageDTO.getMessage()).thenReturn("e2e_encrypted_message");
+    when(roomsLastMessageDTO.getType()).thenReturn("e2e");
   }
 }

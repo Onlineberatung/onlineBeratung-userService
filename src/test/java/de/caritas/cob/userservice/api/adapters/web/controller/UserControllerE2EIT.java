@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.adapters.web.controller;
 
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS_SYSTEM_A;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS_TECHNICAL_A;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_TOKEN;
 import static java.util.Objects.nonNull;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
@@ -33,6 +34,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsGetDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsUpdateDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.subscriptions.SubscriptionsGetDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.subscriptions.SubscriptionsUpdateDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.RocketChatUserDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UpdateUser;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserInfoResponseDTO;
@@ -67,6 +72,8 @@ import de.caritas.cob.userservice.api.port.out.UserAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.ConsultingTypeControllerApi;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.BasicConsultingTypeResponseDTO;
+import de.caritas.cob.userservice.topicservice.generated.ApiClient;
+import de.caritas.cob.userservice.topicservice.generated.web.model.TopicDTO;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -78,6 +85,7 @@ import javax.servlet.http.Cookie;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.assertj.core.util.Lists;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -87,6 +95,7 @@ import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.admin.client.token.TokenManager;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -102,15 +111,19 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplateHandler;
+import de.caritas.cob.userservice.topicservice.generated.web.TopicControllerApi;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("testing")
 @AutoConfigureTestDatabase
+@TestPropertySource(properties = "spring.profiles.active=testing")
+@TestPropertySource(properties = "feature.topics.enabled=true")
 class UserControllerE2EIT {
 
   private static final EasyRandom easyRandom = new EasyRandom();
@@ -174,6 +187,10 @@ class UserControllerE2EIT {
   @MockBean
   @Qualifier("rocketChatRestTemplate")
   private RestTemplate rocketChatRestTemplate;
+
+  @MockBean
+  @Qualifier("topicControllerApiPrimary")
+  private TopicControllerApi topicControllerApi;
 
   @MockBean
   private Keycloak keycloak;
@@ -464,6 +481,40 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("emailToggles", is(nullValue())))
         .andExpect(jsonPath("inTeamAgency", is(false)));
   }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  void getSessionsForAuthenticatedConsultant_ShouldGetSessionsWithTopics()
+      throws Exception {
+    givenABearerToken();
+    givenAValidConsultantWithId("34c3x5b1-0677-4fd2-a7ea-56a71aefd099");
+    givenConsultingTypeServiceResponse();
+    givenAValidRocketChatInfoUserResponse();
+    givenAValidRocketChatSubscriptionsResponse();
+    givenAValidRocketChatRoomsResponse();
+    givenAValidTopicServiceResponse();
+
+
+    mockMvc.perform(
+            get("/users/sessions/consultants?status=2&count=15&filter=all&offset=0")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header("rcToken", RC_TOKEN)
+
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("offset", is(0)))
+        .andExpect(jsonPath("count", is(2)))
+        .andExpect(jsonPath("total", is(2)))
+        .andExpect(jsonPath("sessions", hasSize(2)))
+        .andExpect(jsonPath("sessions[0].session.id", is(1215)))
+        .andExpect(jsonPath("sessions[0].session.agencyId", is(1)))
+        .andExpect(jsonPath("sessions[0].session.topic.id", is(1)))
+        .andExpect(jsonPath("sessions[0].session.topic.name", is("topic name")))
+        .andExpect(jsonPath("sessions[0].session.topic.description", is("topic desc")))
+        .andExpect(jsonPath("sessions[0].session.topic.status", is("INACTIVE")));
+  }
+
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
@@ -847,7 +898,7 @@ class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
-  public void deactivateAndFlagUserAccountForDeletionShouldDeactivateAndRespondWithOkIf2faIsOff()
+  void deactivateAndFlagUserAccountForDeletionShouldDeactivateAndRespondWithOkIf2faIsOff()
       throws Exception {
     givenAValidUser();
     givenADeleteUserAccountDto();
@@ -1162,6 +1213,37 @@ class UserControllerE2EIT {
     ).thenReturn(ResponseEntity.ok(userInfoResponse));
   }
 
+  private void givenAValidRocketChatRoomsResponse() {
+    var roomsGetDTO = new RoomsGetDTO();
+    roomsGetDTO.setUpdate(new RoomsUpdateDTO[]{});
+    when(restTemplate.exchange(
+        Mockito.anyString(), eq(HttpMethod.GET),
+        any(HttpEntity.class), eq(RoomsGetDTO.class))
+    ).thenReturn(ResponseEntity.ok(roomsGetDTO));
+  }
+
+  private void givenAValidTopicServiceResponse() {
+    var firstTopic = new TopicDTO().id(1L).name("topic name").description("topic desc").status("INACTIVE");
+    var secondTopic = new TopicDTO().id(2L).name("topic name 2").description("topic desc 2").status("ACTIVE");
+    when(topicControllerApi.getApiClient()).thenReturn(new ApiClient());
+    when(topicControllerApi.getAllTopics()).thenReturn(Lists.newArrayList(firstTopic, secondTopic));
+  }
+
+  private void givenAValidRocketChatSubscriptionsResponse() {
+    var subscriptionsGetDTO = new SubscriptionsGetDTO();
+    subscriptionsGetDTO.setUpdate(new SubscriptionsUpdateDTO[]{});
+    var urlSuffix = "/subscriptions.get";
+    when(rocketChatRestTemplate.exchange(
+        Mockito.anyString(), eq(HttpMethod.GET),
+        any(HttpEntity.class), eq(SubscriptionsGetDTO.class))
+    ).thenReturn(ResponseEntity.ok(subscriptionsGetDTO));
+
+    when(restTemplate.exchange(
+        Mockito.anyString(), eq(HttpMethod.GET),
+        any(HttpEntity.class), eq(SubscriptionsGetDTO.class))
+    ).thenReturn(ResponseEntity.ok(subscriptionsGetDTO));
+  }
+
   private void givenAValidRocketChatUpdateUserResponse() {
     var urlSuffix = "/api/v1/users.update";
     var updateUserResponse = easyRandom.nextObject(Void.class);
@@ -1187,6 +1269,16 @@ class UserControllerE2EIT {
 
   private void givenAValidConsultant() {
     consultant = consultantRepository.findAll().iterator().next();
+    when(authenticatedUser.getUserId()).thenReturn(consultant.getId());
+    when(authenticatedUser.isAdviceSeeker()).thenReturn(false);
+    when(authenticatedUser.isConsultant()).thenReturn(true);
+    when(authenticatedUser.getUsername()).thenReturn(consultant.getUsername());
+    when(authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.CONSULTANT.getValue()));
+    when(authenticatedUser.getGrantedAuthorities()).thenReturn(Set.of("anAuthority"));
+  }
+
+  private void givenAValidConsultantWithId(String id) {
+    consultant = consultantRepository.findById(id).get();
     when(authenticatedUser.getUserId()).thenReturn(consultant.getId());
     when(authenticatedUser.isAdviceSeeker()).thenReturn(false);
     when(authenticatedUser.isConsultant()).thenReturn(true);
