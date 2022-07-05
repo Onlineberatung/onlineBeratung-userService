@@ -991,7 +991,6 @@ public class UserControllerAuthorizationIT {
       AuthorityValue.ASSIGN_CONSULTANT_TO_PEER_SESSION,
       AuthorityValue.CONSULTANT_DEFAULT,
       AuthorityValue.CREATE_NEW_CHAT,
-      AuthorityValue.TECHNICAL_DEFAULT,
       AuthorityValue.USE_FEEDBACK,
       AuthorityValue.USER_DEFAULT,
       AuthorityValue.START_CHAT,
