@@ -141,7 +141,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         )
         .hasAuthority(UPDATE_CHAT)
         .antMatchers("/useradmin", "/useradmin/**", "/users/consultants/search")
-        .hasAuthority(USER_ADMIN)
+        .hasAnyAuthority(USER_ADMIN, TECHNICAL_DEFAULT)
         .antMatchers(
             "/users/consultants/sessions/{sessionId:[0-9]+}",
             "/users/sessions/{sessionId:[0-9]+}/archive",
