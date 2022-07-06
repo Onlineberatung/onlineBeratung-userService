@@ -819,6 +819,30 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /users/mails/reassignment:
+    post:
+      tags:
+        - user-controller
+      summary: 'Sends a notification e-mail that a reassignment has been requested/confirmed
+          [Authorization: Role: user, consultant]'
+      operationId: sendReassignmentNotification
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/ReassignmentNotificationDTO'
+        required: true
+      responses:
+        200:
+          description: successful operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - invalid token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /users/sessions/monitoring/{sessionId}:
     put:
       tags:
@@ -2714,6 +2738,22 @@ components:
         rcGroupId:
           type: string
           example: fR2Rz7dmWmHdXE8uz
+
+    ReassignmentNotificationDTO:
+      type: object
+      required:
+        - rcGroupId
+        - toConsultantId
+      properties:
+        rcGroupId:
+          type: string
+          example: fR2Rz7dmWmHdXE8uz
+        toConsultantId:
+          type: string
+          format: UUID
+        isConfirmed:
+          type: boolean
+          description: null defines the reassign request
 
     DeleteUserAccountDTO:
       type: object

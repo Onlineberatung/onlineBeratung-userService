@@ -4,6 +4,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
@@ -33,6 +34,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.NewRegistrationResponseDt
 import de.caritas.cob.userservice.api.adapters.web.dto.OneTimePasswordDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PasswordDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PatchUserDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ReassignmentNotificationDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDataDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateChatResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
@@ -651,6 +653,31 @@ public class UserController implements UsersApi {
   }
 
   /**
+   * Sends email notification for reassign request to advice seeker if the property isConfirmed of
+   * {@link ReassignmentNotificationDTO} is null or false. Send email confirmation notification to
+   * consultant if property isConfirmed of {@link * ReassignmentNotificationDTO} is true.
+   *
+   * @param reassignmentNotificationDTO (required)
+   * @return {@link ResponseEntity} containing {@link HttpStatus}
+   */
+  @Override
+  public ResponseEntity<Void> sendReassignmentNotification(
+      @RequestBody ReassignmentNotificationDTO reassignmentNotificationDTO) {
+
+    if (isTrue(reassignmentNotificationDTO.getIsConfirmed())) {
+      emailNotificationFacade.sendReassignConfirmationNotification(
+          reassignmentNotificationDTO.getToConsultantId().toString(),
+          TenantContext.getCurrentTenantData());
+    } else {
+      emailNotificationFacade
+          .sendReassignRequestNotification(reassignmentNotificationDTO.getRcGroupId(),
+              TenantContext.getCurrentTenantData());
+    }
+
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  /**
    * Returns the monitoring for the given session.
    *
    * @param sessionId Session Id (required)
@@ -1192,10 +1219,12 @@ public class UserController implements UsersApi {
     if (authenticatedUser.isConsultant() && !identityClientConfig.getOtpAllowedForConsultants()) {
       throw new ConflictException("2FA is disabled for consultant role");
     }
-    if (authenticatedUser.isSingleTenantAdmin() && !identityClientConfig.getOtpAllowedForSingleTenantAdmins()) {
+    if (authenticatedUser.isSingleTenantAdmin() && !identityClientConfig
+        .getOtpAllowedForSingleTenantAdmins()) {
       throw new ConflictException("2FA is disabled for single tenant admin role");
     }
-    if (authenticatedUser.isTenantSuperAdmin() && !identityClientConfig.getOtpAllowedForTenantSuperAdmins()) {
+    if (authenticatedUser.isTenantSuperAdmin() && !identityClientConfig
+        .getOtpAllowedForTenantSuperAdmins()) {
       throw new ConflictException("2FA is disabled for tenant admin role");
     }
 
