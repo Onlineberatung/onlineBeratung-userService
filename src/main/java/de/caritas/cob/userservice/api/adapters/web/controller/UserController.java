@@ -4,6 +4,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
@@ -885,7 +886,7 @@ public class UserController implements UsersApi {
       throw new InternalServerErrorException(message);
     }
 
-    if (!messenger.updateE2eKeys(chatUserId, e2eKeyDTO.getPublicKey())) {
+    if (isFalse(messenger.updateE2eKeys(chatUserId, e2eKeyDTO.getPublicKey()))) {
       var message = String.format("Setting E2E keys in user %s's chats failed", username);
       throw new InternalServerErrorException(message);
     }
@@ -1213,18 +1214,20 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<Void> activateTwoFactorAuthByApp(OneTimePasswordDTO oneTimePasswordDTO) {
-    if (authenticatedUser.isAdviceSeeker() && !identityClientConfig.getOtpAllowedForUsers()) {
+    if (authenticatedUser.isAdviceSeeker() && isFalse(
+        identityClientConfig.getOtpAllowedForUsers())) {
       throw new ConflictException("2FA is disabled for user role");
     }
-    if (authenticatedUser.isConsultant() && !identityClientConfig.getOtpAllowedForConsultants()) {
+    if (authenticatedUser.isConsultant() && isFalse(
+        identityClientConfig.getOtpAllowedForConsultants())) {
       throw new ConflictException("2FA is disabled for consultant role");
     }
-    if (authenticatedUser.isSingleTenantAdmin() && !identityClientConfig
-        .getOtpAllowedForSingleTenantAdmins()) {
+    if (authenticatedUser.isSingleTenantAdmin() && isFalse(identityClientConfig
+        .getOtpAllowedForSingleTenantAdmins())) {
       throw new ConflictException("2FA is disabled for single tenant admin role");
     }
-    if (authenticatedUser.isTenantSuperAdmin() && !identityClientConfig
-        .getOtpAllowedForTenantSuperAdmins()) {
+    if (authenticatedUser.isTenantSuperAdmin() && isFalse(identityClientConfig
+        .getOtpAllowedForTenantSuperAdmins())) {
       throw new ConflictException("2FA is disabled for tenant admin role");
     }
 

@@ -1135,11 +1135,11 @@ class UserControllerE2EIT {
   }
 
   private Session givenAExistingSession() {
-    var session = new EasyRandom().nextObject(Session.class);
     var user = new EasyRandom().nextObject(User.class);
     user.setSessions(null);
     user.setUserAgencies(null);
     user.setUserMobileTokens(null);
+    var session = new EasyRandom().nextObject(Session.class);
     session.setConsultant(null);
     session.setUser(userRepository.save(user));
     session.setId(null);
