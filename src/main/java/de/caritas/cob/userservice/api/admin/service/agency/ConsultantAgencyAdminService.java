@@ -5,6 +5,7 @@ import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc
 import static java.util.Collections.singletonList;
 import static java.util.Objects.isNull;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyAdminResponseDTO;
@@ -109,8 +110,8 @@ public class ConsultantAgencyAdminService {
       List<ConsultantAgency> consultantAgencies, List<AgencyAdminResponseDTO> agencies) {
     consultants.forEach(consultant -> {
       var agencyIdsOfConsultant = consultantAgencies.stream()
-          .filter(consultantAgency -> consultantAgency.getConsultant().getId()
-              .equals(consultant.getId()))
+          .filter(consultantAgency -> onlyRelevantAgencyRelations(consultant,
+              consultantAgency))
           .map(ConsultantAgency::getAgencyId)
           .collect(Collectors.toSet());
 
@@ -120,6 +121,22 @@ public class ConsultantAgencyAdminService {
 
       consultant.setAgencies(agenciesOfConsultant);
     });
+  }
+
+  private boolean onlyRelevantAgencyRelations(ConsultantDTO consultant,
+      ConsultantAgency consultantAgency) {
+    var isConsultantAgencyRelatedToConsultant = consultant.getId()
+        .equals(consultantAgency.getConsultant().getId());
+    if (isConsultantAgencyRelatedToConsultant) {
+      var isConsultantDeleted = notStringNull(consultant.getDeleteDate());
+      var isConsultantAgencyNotDeleted = isNull(consultantAgency.getDeleteDate());
+      return isConsultantDeleted || isConsultantAgencyNotDeleted;
+    }
+    return false;
+  }
+
+  private boolean notStringNull(String stringToCheck) {
+    return isNotBlank(stringToCheck) && !"null".equals(stringToCheck);
   }
 
   /**
@@ -205,10 +222,14 @@ public class ConsultantAgencyAdminService {
         .forEach(this::markAsDeleted);
   }
 
-  public void markConsultantAgenciesForDeletion(String consultantId) {
-    consultantAgencyRepository.findByConsultantIdAndDeleteDateIsNull(consultantId).forEach(
-        this::markAsDeleted
-    );
+  public void markConsultantAgenciesForDeletion(String consultantId, List<Long> agencyIds) {
+
+    agencyIds.forEach(agencyId -> {
+      List<ConsultantAgency> result = consultantAgencyRepository
+          .findByConsultantIdAndAgencyIdAndDeleteDateIsNull(consultantId, agencyId);
+      result.forEach(this::markAsDeleted);
+    });
+
   }
 
   private void markAsDeleted(ConsultantAgency consultantAgency) {
@@ -236,4 +257,5 @@ public class ConsultantAgencyAdminService {
         .withAgencyId(String.valueOf(agencyId))
         .build();
   }
+
 }

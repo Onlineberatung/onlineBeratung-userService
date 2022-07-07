@@ -268,6 +268,45 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /users/sessions/room/{sessionId}:
+    get:
+      tags:
+        - user-controller
+      summary: 'Returns the session for given ID.
+      [Authorization: Role: user, consultant]'
+      operationId: getSessionForId
+      parameters:
+        - name: RCToken
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: sessionId
+          in: path
+          description: Session Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK - successful operation
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/GroupSessionListResponseDTO'
+        204:
+          description: NO CONTENT - no sessions for given session ID
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /users/sessions/{sessionId}/archive:
     put:
       tags:
@@ -1146,6 +1185,11 @@ paths:
               $ref: '#/components/schemas/E2eKeyDTO'
         required: true
       responses:
+        202:
+          description: 'ACCEPTED - request processed but update not executed. This status is being
+          returned if a new registered advice seeker wants to update e2e in chats. The therfore
+          required user chat id for rocket chat is being initialized as soon as the enquiry
+          message has been written!'
         204:
           description: NO CONTENT - successful operation
         400:
@@ -1464,6 +1508,45 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /users/chat/room/{chatId}:
+    get:
+      tags:
+        - user-controller
+      summary: 'Returns the chat for given ID.
+      [Authorization: Role: user, consultant]'
+      operationId: getChatById
+      parameters:
+        - name: RCToken
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: chatId
+          in: path
+          description: Chat Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK - successful operation
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/GroupSessionListResponseDTO'
+        204:
+          description: NO CONTENT - no chat for given chat ID
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /users/account:
     delete:
       tags:
@@ -1689,6 +1772,9 @@ components:
         consultantId:
           type: string
           description: UUID
+        mainTopicId:
+          type: integer
+          example: 15
 
     SessionDataDTO:
       allOf:
@@ -1862,6 +1948,8 @@ components:
           $ref: '#/components/schemas/LastMessageDTO'
         lastMessage:
           type: string
+        lastMessageType:
+          $ref: '#/components/schemas/MessageType'
         messageDate:
           type: integer
           format: int64
@@ -1888,6 +1976,8 @@ components:
           $ref: '#/components/schemas/SessionAttachmentDTO'
         videoCallMessageDTO:
           $ref: '#/components/schemas/VideoCallMessageDTO'
+        topic:
+          $ref: '#/components/schemas/SessionTopicDTO'
 
     SessionAttachmentDTO:
       type: object
@@ -1901,6 +1991,25 @@ components:
         fileReceived:
           type: boolean
           example: true
+
+    SessionTopicDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 12132
+        name:
+          type: string
+          example: "Topic name"
+          maxLength: 100
+        description:
+          type: string
+          example: "Description"
+          maxLength: 200
+        status:
+          type: string
+          example: "Active"
+          maxLength: 10
 
     AliasMessageDTO:
       type: object
@@ -1972,6 +2081,7 @@ components:
         - "USER_MUTED"
         - "USER_UNMUTED"
         - "E2EE_ACTIVATED"
+        - "MASTER_KEY_LOST"
 
     LastMessageDTO:
       type: object
@@ -2078,6 +2188,8 @@ components:
         consultingType:
           type: integer
           example: 0
+        e2eLastMessage:
+          $ref: '#/components/schemas/LastMessageDTO'
         lastMessage:
           type: string
           example: Thanks for the answer
@@ -2341,15 +2453,15 @@ components:
       type: string
       description: ISO 639-1 code
       enum: [
-        aa, ab, ae, af, ak, am, an, ar, as, av, ay, az, ba, be, bg, bh, bi, bm, bn, bo, br,
-        bs, ca, ce, ch, co, cr, cs, cu, cv, cy, da, de, dv, dz, ee, el, en, eo, es, et, eu,
-        fa, ff, fi, fj, fo, fr, fy, ga, gd, gl, gn, gu, gv, ha, he, hi, ho, hr, ht, hu, hy,
-        hz, ia, id, ie, ig, ii, ik, io, is, it, iu, ja, jv, ka, kg, ki, kj, kk, kl, km, kn,
-        ko, kr, ks, ku, kv, kw, ky, la, lb, lg, li, ln, lo, lt, lu, lv, mg, mh, mi, mk, ml,
-        mn, mr, ms, mt, my, na, nb, nd, ne, ng, nl, nn, no, nr, nv, ny, oc, oj, om, or, os,
-        pa, pi, pl, ps, pt, qu, rm, rn, ro, ru, rw, sa, sc, sd, se, sg, si, sk, sl, sm, sn,
-        so, sq, sr, ss, st, su, sv, sw, ta, te, tg, th, ti, tk, tl, tn, to, tr, ts, tt, tw,
-        ty, ug, uk, ur, uz, ve, vi, vo, wa, wo, xh, yi, yo, za, zh, zu
+          aa, ab, ae, af, ak, am, an, ar, as, av, ay, az, ba, be, bg, bh, bi, bm, bn, bo, br,
+          bs, ca, ce, ch, co, cr, cs, cu, cv, cy, da, de, dv, dz, ee, el, en, eo, es, et, eu,
+          fa, ff, fi, fj, fo, fr, fy, ga, gd, gl, gn, gu, gv, ha, he, hi, ho, hr, ht, hu, hy,
+          hz, ia, id, ie, ig, ii, ik, io, is, it, iu, ja, jv, ka, kg, ki, kj, kk, kl, km, kn,
+          ko, kr, ks, ku, kv, kw, ky, la, lb, lg, li, ln, lo, lt, lu, lv, mg, mh, mi, mk, ml,
+          mn, mr, ms, mt, my, na, nb, nd, ne, ng, nl, nn, no, nr, nv, ny, oc, oj, om, or, os,
+          pa, pi, pl, ps, pt, qu, rm, rn, ro, ru, rw, sa, sc, sd, se, sg, si, sk, sl, sm, sn,
+          so, sq, sr, ss, st, su, sv, sw, ta, te, tg, th, ti, tk, tl, tn, to, tr, ts, tt, tw,
+          ty, ug, uk, ur, uz, ve, vi, vo, wa, wo, xh, yi, yo, za, zh, zu
       ]
 
     LanguageResponseDTO:
@@ -2691,6 +2803,8 @@ components:
       type: string
       enum:
         - DAILY_ENQUIRY
+        - NEW_CHAT_MESSAGE_FROM_ADVICE_SEEKER
+        - NEW_FEEDBACK_MESSAGE_FROM_ADVICE_SEEKER
 
   securitySchemes:
     Bearer:

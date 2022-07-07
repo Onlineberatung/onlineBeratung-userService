@@ -65,6 +65,10 @@ public class UserServiceMapper {
     map.put("email", consultant.getEmail());
     map.put("encourage2fa", consultant.getEncourage2fa());
     map.put("notifyEnquiriesRepeating", consultant.getNotifyEnquiriesRepeating());
+    map.put("notifyNewChatMessageFromAdviceSeeker",
+        consultant.getNotifyNewChatMessageFromAdviceSeeker());
+    map.put("notifyNewFeedbackMessageFromAdviceSeeker",
+        consultant.getNotifyNewFeedbackMessageFromAdviceSeeker());
     map.put("walkThroughEnabled", consultant.getWalkThroughEnabled());
     map.put("chatUserId", consultant.getRocketChatId());
 
@@ -232,6 +236,14 @@ public class UserServiceMapper {
     }
     if (patchMap.containsKey("notifyEnquiriesRepeating")) {
       consultant.setNotifyEnquiriesRepeating((Boolean) patchMap.get("notifyEnquiriesRepeating"));
+    }
+    if (patchMap.containsKey("notifyNewChatMessageFromAdviceSeeker")) {
+      var notify = (Boolean) patchMap.get("notifyNewChatMessageFromAdviceSeeker");
+      consultant.setNotifyNewChatMessageFromAdviceSeeker(notify);
+    }
+    if (patchMap.containsKey("notifyNewFeedbackMessageFromAdviceSeeker")) {
+      var notify = (Boolean) patchMap.get("notifyNewFeedbackMessageFromAdviceSeeker");
+      consultant.setNotifyNewFeedbackMessageFromAdviceSeeker(notify);
     }
 
     return consultant;

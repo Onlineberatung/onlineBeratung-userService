@@ -181,7 +181,9 @@ public class ConsultantAgencyAdminServiceIT {
         assertTrue(isNull(consultantAgency.getDeleteDate()))
     );
 
-    consultantAgencyAdminService.markConsultantAgenciesForDeletion(consultant.getId());
+    consultantAgencyAdminService.markConsultantAgenciesForDeletion(consultant.getId(),
+        consultantAgencies.stream().map(el -> el.getAgencyId()).collect(
+            Collectors.toList()));
 
     var consultantAgencyIds = consultantAgencies.stream()
         .map(ConsultantAgency::getId)

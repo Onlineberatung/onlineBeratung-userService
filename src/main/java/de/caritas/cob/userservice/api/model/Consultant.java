@@ -161,6 +161,12 @@ public class Consultant implements TenantAware {
   @Column(name = "notify_enquiries_repeating", nullable = false, columnDefinition = "bit default true")
   private Boolean notifyEnquiriesRepeating;
 
+  @Column(name = "notify_new_chat_message_from_advice_seeker", nullable = false, columnDefinition = "bit default true")
+  private Boolean notifyNewChatMessageFromAdviceSeeker;
+
+  @Column(name = "notify_new_feedback_message_from_advice_seeker", nullable = false, columnDefinition = "bit default true")
+  private Boolean notifyNewFeedbackMessageFromAdviceSeeker;
+
   @Column(name = "tenant_id")
   @Field
   private Long tenantId;
@@ -170,6 +176,7 @@ public class Consultant implements TenantAware {
 
   @Column(name = "status", length = 11)
   @Enumerated(EnumType.STRING)
+  @Field
   private ConsultantStatus status = ConsultantStatus.IN_PROGRESS;
 
   @Column(name = "walk_through_enabled", columnDefinition = "tinyint", nullable = false)

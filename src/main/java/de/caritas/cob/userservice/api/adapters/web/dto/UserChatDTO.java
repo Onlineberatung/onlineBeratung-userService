@@ -69,4 +69,7 @@ public class UserChatDTO {
   @JsonIgnore
   private LocalDateTime startDateWithTime;
 
+  @ApiModelProperty
+  private LastMessageDTO e2eLastMessage;
+
 }

@@ -201,7 +201,7 @@ public class ConsultantAgencyAdminServiceTenantAwareIT {
     ConsultantAgency validRelation = this.consultantAgencyRepository.findAll().iterator().next();
     String consultantId = validRelation.getConsultant().getId();
     Long agencyId = validRelation.getAgencyId();
-    when(this.agencyService.getAgency(any())).thenReturn(new AgencyDTO().teamAgency(false));
+    when(this.agencyService.getAgencyWithoutCaching(any())).thenReturn(new AgencyDTO().teamAgency(false));
 
     this.consultantAgencyAdminService.markConsultantAgencyForDeletion(consultantId, agencyId);
 
@@ -263,6 +263,8 @@ public class ConsultantAgencyAdminServiceTenantAwareIT {
     consultant.setEmail(easyRandom.nextObject(String.class));
     consultant.setEncourage2fa(true);
     consultant.setNotifyEnquiriesRepeating(true);
+    consultant.setNotifyNewChatMessageFromAdviceSeeker(true);
+    consultant.setNotifyNewFeedbackMessageFromAdviceSeeker(true);
     consultant.setWalkThroughEnabled(true);
     consultant.setTeamConsultant(isTeamConsultant);
     consultant.setConsultantMobileTokens(Sets.newHashSet());

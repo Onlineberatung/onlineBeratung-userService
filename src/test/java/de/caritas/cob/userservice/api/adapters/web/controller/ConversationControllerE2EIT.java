@@ -25,6 +25,7 @@ import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import javax.servlet.http.Cookie;
+import org.assertj.core.util.Lists;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -40,10 +41,12 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.client.RestTemplate;
+import de.caritas.cob.userservice.topicservice.generated.web.TopicControllerApi;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestPropertySource(properties = "spring.profiles.active=testing")
+@TestPropertySource(properties = "feature.topics.enabled=true")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 class ConversationControllerE2EIT {
 
@@ -51,6 +54,9 @@ class ConversationControllerE2EIT {
   private static final String CSRF_HEADER = "csrfHeader";
   private static final String CSRF_VALUE = "test";
   private static final Cookie CSRF_COOKIE = new Cookie("csrfCookie", CSRF_VALUE);
+  public static final String FIRST_TOPIC_NAME = "topic name";
+  public static final String FIRST_TOPIC_DESC = "topic desc";
+  public static final String FIRST_TOPIC_STATUS = "INACTIVE";
 
   @Autowired
   private MockMvc mockMvc;
@@ -67,6 +73,10 @@ class ConversationControllerE2EIT {
   @MockBean
   @Qualifier("restTemplate")
   private RestTemplate restTemplate;
+
+  @MockBean
+  @Qualifier("topicControllerApiPrimary")
+  private TopicControllerApi topicControllerApi;
 
   private Consultant consultant;
 
@@ -91,6 +101,7 @@ class ConversationControllerE2EIT {
     givenAConsultantWithMultipleAgencies();
     givenRocketChatSubscriptionUpdate();
     givenRocketChatRoomsGet();
+    givenAValidTopicServiceResponse();
 
     mockMvc.perform(
             get("/conversations/consultants/enquiries/registered")
@@ -106,7 +117,11 @@ class ConversationControllerE2EIT {
         .andExpect(jsonPath("total", is(1)))
         .andExpect(jsonPath("sessions", hasSize(1)))
         .andExpect(jsonPath("sessions[0].session.agencyId", is(121)))
-        .andExpect(jsonPath("sessions[0].session.language", is("de")));
+        .andExpect(jsonPath("sessions[0].session.language", is("de")))
+        .andExpect(jsonPath("sessions[0].session.topic.id", is(1)))
+        .andExpect(jsonPath("sessions[0].session.topic.name", is(FIRST_TOPIC_NAME)))
+        .andExpect(jsonPath("sessions[0].session.topic.description", is(FIRST_TOPIC_DESC)))
+        .andExpect(jsonPath("sessions[0].session.topic.status", is(FIRST_TOPIC_STATUS)));
   }
 
   @Test
@@ -116,6 +131,7 @@ class ConversationControllerE2EIT {
     givenASessionWithASetLanguage();
     givenRocketChatSubscriptionUpdate();
     givenRocketChatRoomsGet();
+    givenAValidTopicServiceResponse();
 
     mockMvc.perform(
             get("/conversations/consultants/enquiries/registered")
@@ -131,7 +147,24 @@ class ConversationControllerE2EIT {
         .andExpect(jsonPath("total", is(1)))
         .andExpect(jsonPath("sessions", hasSize(1)))
         .andExpect(jsonPath("sessions[0].session.agencyId", is(121)))
-        .andExpect(jsonPath("sessions[0].session.language", is(session.getLanguageCode().name())));
+        .andExpect(jsonPath("sessions[0].session.language", is(session.getLanguageCode().name())))
+        .andExpect(jsonPath("sessions[0].session.topic.id", is(1)))
+        .andExpect(jsonPath("sessions[0].session.topic.name", is(FIRST_TOPIC_NAME)))
+        .andExpect(jsonPath("sessions[0].session.topic.description", is(FIRST_TOPIC_DESC)))
+        .andExpect(jsonPath("sessions[0].session.topic.status", is(FIRST_TOPIC_STATUS)));
+  }
+
+  private void givenAValidTopicServiceResponse() {
+    var roomsGetDTO = new RoomsGetDTO();
+    roomsGetDTO.setUpdate(new RoomsUpdateDTO[]{});
+    var firstTopic = new de.caritas.cob.userservice.topicservice.generated.web.model.TopicDTO().id(
+        1L).name(
+        FIRST_TOPIC_NAME).description(FIRST_TOPIC_DESC).status(FIRST_TOPIC_STATUS);
+    var secondTopic = new de.caritas.cob.userservice.topicservice.generated.web.model.TopicDTO().id(
+        2L).name("topic name 2").description("topic desc 2").status("ACTIVE");
+    when(topicControllerApi.getApiClient()).thenReturn(
+        new de.caritas.cob.userservice.topicservice.generated.ApiClient());
+    when(topicControllerApi.getAllTopics()).thenReturn(Lists.newArrayList(firstTopic, secondTopic));
   }
 
   private void givenAConsultantWithMultipleAgencies() {

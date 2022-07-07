@@ -15,9 +15,11 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.ENCODED_PA
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.GENDER_VALUE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.INVALID_AGE_VALUE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.INVALID_POSTCODE;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.OTP;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.PASSWORD;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.POSTCODE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RELATION_VALUE;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.SECRET;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.STATE_VALUE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.TERMS_ACCEPTED;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME;
@@ -103,4 +105,6 @@ public class RequestBodyConstants {
   public static final String VALID_NEW_REGISTRATION_BODY =
       "{\"postcode\": \"" + POSTCODE + "\", \"agencyId\": " + AGENCY_ID + ", \"consultingType\": \""
           + CONSULTING_TYPE_ID_U25 + "\"}";
+  public static final String ACTIVATE_2FA_BODY = "{\"otp\": \"" + OTP + "\", \"secret\":" + "\""
+      + SECRET + "\"}";
 }

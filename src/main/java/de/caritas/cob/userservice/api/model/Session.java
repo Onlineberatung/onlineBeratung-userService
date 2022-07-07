@@ -170,6 +170,9 @@ public class Session implements TenantAware {
   @Column(name = "tenant_id")
   private Long tenantId;
 
+  @Column(name = "main_topic_id")
+  private Integer mainTopicId;
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {

@@ -4,6 +4,7 @@ import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.T
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_2;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.GROUP_MEMBER_DTO_LIST;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.GROUP_MEMBER_USER_1;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -11,6 +12,7 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
@@ -19,17 +21,17 @@ import static org.springframework.test.util.ReflectionTestUtils.setField;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,7 +43,6 @@ import org.slf4j.Logger;
 public class NewFeedbackEmailSupplierTest {
 
   private static final ObjectMapper MAPPER = new ObjectMapper();
-  private static final EasyRandom EASY_RANDOM = new EasyRandom();
 
   private NewFeedbackEmailSupplier newFeedbackEmailSupplier;
 
@@ -157,6 +158,51 @@ public class NewFeedbackEmailSupplierTest {
   }
 
   @Test
+  public void generateEmails_Should_ReturnExpectedMail_When_ConsultantsFeedbackToggleIsOn()
+      throws RocketChatGetGroupMembersException {
+    when(session.getUser()).thenReturn(USER);
+    when(session.getConsultant()).thenReturn(CONSULTANT);
+    setField(newFeedbackEmailSupplier, "userId", CONSULTANT.getId());
+    when(consultantService.getConsultant(anyString())).thenReturn(Optional.of(CONSULTANT));
+    when(rocketChatService.getMembersOfGroup(anyString())).thenReturn(List.of(GROUP_MEMBER_USER_1));
+    var consultant = mock(Consultant.class);
+    when(consultant.getId()).thenReturn(UUID.randomUUID().toString());
+    when(consultant.getEmail()).thenReturn("a@b.com");
+    when(consultant.isAbsent()).thenReturn(false);
+    when(consultant.getRocketChatId()).thenReturn(RandomStringUtils.randomAlphanumeric(17));
+    when(consultant.getNotifyNewFeedbackMessageFromAdviceSeeker()).thenReturn(true);
+    when(consultantService.getConsultantByRcUserId(anyString()))
+        .thenReturn(Optional.of(consultant));
+    when(keycloakService.userHasRole(anyString(), anyString())).thenReturn(true);
+
+    var generatedMails = newFeedbackEmailSupplier.generateEmails();
+
+    assertThat(generatedMails, hasSize(1));
+  }
+
+  @Test
+  public void generateEmails_Should_ReturnNoMail_When_ConsultantsFeedbackToggleIsOff()
+      throws RocketChatGetGroupMembersException {
+    when(session.getConsultant()).thenReturn(CONSULTANT);
+    setField(newFeedbackEmailSupplier, "userId", CONSULTANT.getId());
+    when(consultantService.getConsultant(anyString())).thenReturn(Optional.of(CONSULTANT));
+    when(rocketChatService.getMembersOfGroup(anyString())).thenReturn(List.of(GROUP_MEMBER_USER_1));
+    var consultant = mock(Consultant.class);
+    when(consultant.getId()).thenReturn(UUID.randomUUID().toString());
+    when(consultant.getEmail()).thenReturn("a@b.com");
+    when(consultant.isAbsent()).thenReturn(false);
+    when(consultant.getRocketChatId()).thenReturn(RandomStringUtils.randomAlphanumeric(17));
+    when(consultant.getNotifyNewFeedbackMessageFromAdviceSeeker()).thenReturn(false);
+    when(consultantService.getConsultantByRcUserId(anyString()))
+        .thenReturn(Optional.of(consultant));
+    when(keycloakService.userHasRole(anyString(), anyString())).thenReturn(true);
+
+    var generatedMails = newFeedbackEmailSupplier.generateEmails();
+
+    assertThat(generatedMails, hasSize(0));
+  }
+
+  @Test
   public void generateEmails_Should_ReturnEmptyList_When_SessionConsultantIsAbsent()
       throws RocketChatGetGroupMembersException {
     when(session.getConsultant()).thenReturn(CONSULTANT);
@@ -194,6 +240,31 @@ public class NewFeedbackEmailSupplierTest {
     assertThat(templateData.get(3).getValue(), is("applicationBaseUrl"));
   }
 
+  @Test
+  public void generateEmails_Should_ReturnExpectedMail_When_AnotherConsultantWroteAndFeedbackToggleIsOn()
+      throws RocketChatGetGroupMembersException {
+    when(session.getUser()).thenReturn(USER);
+    when(session.getConsultant()).thenReturn(CONSULTANT_2);
+    setField(newFeedbackEmailSupplier, "userId", CONSULTANT.getId());
+    when(consultantService.getConsultant(anyString())).thenReturn(Optional.of(CONSULTANT_2));
+
+    var generatedMails = newFeedbackEmailSupplier.generateEmails();
+
+    assertThat(generatedMails, hasSize(1));
+  }
+
+  @Test
+  public void generateEmails_Should_ReturnNoMail_When_AnotherConsultantWroteAndFeedbackToggleIsOff()
+      throws RocketChatGetGroupMembersException {
+    var consultant = mock(Consultant.class);
+    when(session.getConsultant()).thenReturn(consultant);
+    setField(newFeedbackEmailSupplier, "userId", CONSULTANT.getId());
+    when(consultantService.getConsultant(anyString())).thenReturn(Optional.of(consultant));
+
+    var generatedMails = newFeedbackEmailSupplier.generateEmails();
+
+    assertThat(generatedMails, hasSize(0));
+  }
 
   @Test
   public void generateEmails_Should_FilterNonMainConsultantsNorSessionAssignees() throws Exception {

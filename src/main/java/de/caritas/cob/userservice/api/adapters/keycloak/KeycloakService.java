@@ -679,6 +679,15 @@ public class KeycloakService implements IdentityClient {
     return keycloakClient.getUsersResource().search(username);
   }
 
+  public UserRepresentation getById(String userId) {
+    UserResource userResource = keycloakClient.getUsersResource().get(userId);
+    if (userResource == null) {
+      log.error("Could not get user with id {} from keycloak", userId);
+      throw new KeycloakException("User with id not found in keycloak: " + userId);
+    }
+    return userResource.toRepresentation();
+  }
+
   /**
    * Closes the provided session.
    *

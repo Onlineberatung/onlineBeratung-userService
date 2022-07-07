@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
+import static java.util.Collections.singletonList;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
@@ -64,6 +65,7 @@ import de.caritas.cob.userservice.api.facade.sessionlist.SessionListFacade;
 import de.caritas.cob.userservice.api.facade.userdata.AskerDataProvider;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataProvider;
+import de.caritas.cob.userservice.api.facade.userdata.KeycloakUserDataProvider;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.EnquiryData;
@@ -104,6 +106,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.MapUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -163,6 +166,9 @@ public class UserController implements UsersApi {
   private final @NonNull ConsultantDataProvider consultantDataProvider;
   private final @NonNull AskerDataProvider askerDataProvider;
   private final @NonNull VideoChatConfig videoChatConfig;
+  private final @NonNull KeycloakUserDataProvider keycloakUserDataProvider;
+  @Value("${multitenancy.enabled}")
+  private boolean multiTenancyEnabled;
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
@@ -343,6 +349,62 @@ public class UserController implements UsersApi {
         : new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
+  @Override
+  public ResponseEntity<GroupSessionListResponseDTO> getSessionForId(String rcToken,
+      Long sessionId) {
+    GroupSessionListResponseDTO groupSessionList;
+    if (authenticatedUser.isConsultant()) {
+      var consultant = userAccountProvider.retrieveValidatedConsultant();
+      var rocketChatCredentials = RocketChatCredentials.builder()
+          .rocketChatUserId(consultant.getRocketChatId())
+          .rocketChatToken(rcToken)
+          .build();
+      groupSessionList = sessionListFacade.retrieveSessionsForAuthenticatedConsultantBySessionIds(
+          consultant, singletonList(sessionId), rocketChatCredentials,
+          authenticatedUser.getRoles());
+    } else {
+      var user = userAccountProvider.retrieveValidatedUser();
+      var rocketChatCredentials = RocketChatCredentials.builder()
+          .rocketChatUserId(user.getRcUserId())
+          .rocketChatToken(rcToken)
+          .build();
+      groupSessionList = sessionListFacade.retrieveSessionsForAuthenticatedUserBySessionIds(
+          user.getUserId(), singletonList(sessionId), rocketChatCredentials,
+          authenticatedUser.getRoles());
+    }
+
+    return isNotEmpty(groupSessionList.getSessions())
+        ? new ResponseEntity<>(groupSessionList, HttpStatus.OK)
+        : new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
+
+  @Override
+  public ResponseEntity<GroupSessionListResponseDTO> getChatById(String rcToken, Long chatId) {
+    GroupSessionListResponseDTO groupSessionList;
+    if (authenticatedUser.isConsultant()) {
+      var consultant = userAccountProvider.retrieveValidatedConsultant();
+      var rocketChatCredentials = RocketChatCredentials.builder()
+          .rocketChatUserId(consultant.getRocketChatId())
+          .rocketChatToken(rcToken)
+          .build();
+      groupSessionList = sessionListFacade.retrieveChatsForConsultantByChatIds(consultant,
+          singletonList(chatId), rocketChatCredentials
+      );
+    } else {
+      var user = userAccountProvider.retrieveValidatedUser();
+      var rocketChatCredentials = RocketChatCredentials.builder()
+          .rocketChatUserId(user.getRcUserId())
+          .rocketChatToken(rcToken)
+          .build();
+      groupSessionList = sessionListFacade.retrieveChatsForUserByChatIds(singletonList(chatId),
+          rocketChatCredentials);
+    }
+
+    return isNotEmpty(groupSessionList.getSessions())
+        ? new ResponseEntity<>(groupSessionList, HttpStatus.OK)
+        : new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
+
   /**
    * Updates the absence (and its message) for the calling consultant.
    *
@@ -371,11 +433,12 @@ public class UserController implements UsersApi {
       accountManager.findConsultant(authenticatedUser.getUserId()).ifPresent(consultantMap ->
           partialUserData.setDisplayName(userDtoMapper.displayNameOf(consultantMap))
       );
+    } else if (multiTenancyEnabled && isTenantAdmin()) {
+      partialUserData = keycloakUserDataProvider.retrieveAuthenticatedUserData();
     } else {
       var user = userAccountProvider.retrieveValidatedUser();
       partialUserData = askerDataProvider.retrieveData(user);
     }
-
     var otpInfoDTO = identityClientConfig.isOtpAllowed(authenticatedUser.getRoles())
         ? identityManager.getOtpCredential(authenticatedUser.getUsername())
         : null;
@@ -388,11 +451,16 @@ public class UserController implements UsersApi {
     return new ResponseEntity<>(fullUserData, HttpStatus.OK);
   }
 
+  private boolean isTenantAdmin() {
+    return authenticatedUser.isSingleTenantAdmin() || authenticatedUser.isTenantSuperAdmin();
+  }
+
   @Override
   public ResponseEntity<Void> patchUser(PatchUserDTO patchUserDTO) {
     var patchMap = userDtoMapper.mapOf(patchUserDTO, authenticatedUser).orElseThrow(() ->
         new BadRequestException("Invalid payload: at least one property must be set")
     );
+
     accountManager.patchUser(patchMap).orElseThrow();
 
     return ResponseEntity.noContent().build();
@@ -786,6 +854,9 @@ public class UserController implements UsersApi {
     var chatUserId = userDtoMapper.chatUserIdOf(user);
     var username = authenticatedUser.getUsername();
     if (isNull(chatUserId)) {
+      if (isAdviceSeekerWithoutEnquiryMessageWritten()) {
+        return ResponseEntity.accepted().build();
+      }
       var message = String.format("Chat-user ID of user %s unknown", username);
       throw new InternalServerErrorException(message);
     }
@@ -796,6 +867,14 @@ public class UserController implements UsersApi {
     }
 
     return ResponseEntity.noContent().build();
+  }
+
+  private boolean isAdviceSeekerWithoutEnquiryMessageWritten() {
+    if (authenticatedUser.isAdviceSeeker()) {
+      var adviceSeeker = userAccountProvider.retrieveValidatedUser();
+      return adviceSeeker.getCreateDate().isEqual(adviceSeeker.getUpdateDate());
+    }
+    return false;
   }
 
   /**
@@ -1097,7 +1176,7 @@ public class UserController implements UsersApi {
 
     if (Boolean.parseBoolean(validationResult.get("created"))) {
       var patchMap = userDtoMapper.mapOf(validationResult.get("email"), authenticatedUser);
-      accountManager.patchUser(patchMap).orElseThrow();
+      accountManager.patchUser(patchMap);
       return ResponseEntity.noContent().build();
     }
     if (Boolean.parseBoolean(validationResult.get("attemptsLeft"))) {
@@ -1123,6 +1202,12 @@ public class UserController implements UsersApi {
     }
     if (authenticatedUser.isConsultant() && !identityClientConfig.getOtpAllowedForConsultants()) {
       throw new ConflictException("2FA is disabled for consultant role");
+    }
+    if (authenticatedUser.isSingleTenantAdmin() && !identityClientConfig.getOtpAllowedForSingleTenantAdmins()) {
+      throw new ConflictException("2FA is disabled for single tenant admin role");
+    }
+    if (authenticatedUser.isTenantSuperAdmin() && !identityClientConfig.getOtpAllowedForTenantSuperAdmins()) {
+      throw new ConflictException("2FA is disabled for tenant admin role");
     }
 
     var isValid = identityManager.setUpOneTimePassword(

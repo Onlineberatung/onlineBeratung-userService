@@ -29,4 +29,8 @@
   <include file="db/changelog/changeset/0023_consultant_status/0023_changeSet.xml"/>
   <include file="db/changelog/changeset/0024_consultant_walk_through/0024_changeSet.xml"/>
   <include file="db/changelog/changeset/0025_add_notify_enquiries_repeating/0025_changeSet.xml"/>
+  <include
+    file="db/changelog/changeset/0026_add_notify_new_messages_from_advice_seeker/0026_changeSet.xml"/>
+  <include file="db/changelog/changeset/0027_consultant_agency_status/0027_changeSet.xml"/>
+  <include file="db/changelog/changeset/0028_session_main_topic/0028_changeSet.xml"/>
 </databaseChangeLog>

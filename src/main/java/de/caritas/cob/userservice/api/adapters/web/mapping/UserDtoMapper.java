@@ -103,8 +103,15 @@ public class UserDtoMapper {
   }
 
   private String mapEmailType(EmailToggle emailToggle) {
-    if (emailToggle.getName().equals(EmailType.DAILY_ENQUIRY)) {
+    var name = emailToggle.getName();
+    if (name.equals(EmailType.DAILY_ENQUIRY)) {
       return "notifyEnquiriesRepeating";
+    }
+    if (name.equals(EmailType.NEW_CHAT_MESSAGE_FROM_ADVICE_SEEKER)) {
+      return "notifyNewChatMessageFromAdviceSeeker";
+    }
+    if (name.equals(EmailType.NEW_FEEDBACK_MESSAGE_FROM_ADVICE_SEEKER)) {
+      return "notifyNewFeedbackMessageFromAdviceSeeker";
     }
 
     return null;

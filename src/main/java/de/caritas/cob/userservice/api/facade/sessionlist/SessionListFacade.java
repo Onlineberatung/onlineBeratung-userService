@@ -8,6 +8,8 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.GroupSessionListResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.GroupSessionResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
@@ -16,6 +18,7 @@ import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.service.session.SessionFilter;
 import de.caritas.cob.userservice.api.service.session.SessionMapper;
+import de.caritas.cob.userservice.api.service.session.SessionTopicEnrichmentService;
 import de.caritas.cob.userservice.api.service.sessionlist.ConsultantSessionListService;
 import de.caritas.cob.userservice.api.service.sessionlist.UserSessionListService;
 import java.util.ArrayList;
@@ -26,6 +29,7 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -38,6 +42,12 @@ public class SessionListFacade {
 
   private final UserSessionListService userSessionListService;
   private final ConsultantSessionListService consultantSessionListService;
+
+  @Value("${feature.topics.enabled}")
+  private boolean topicsFeatureEnabled;
+
+  @Autowired(required = false)
+  SessionTopicEnrichmentService sessionTopicEnrichmentService;
 
   @Autowired
   public SessionListFacade(UserSessionListService userSessionListService,
@@ -62,7 +72,6 @@ public class SessionListFacade {
     userSessions.sort(comparing(UserSessionResponseDTO::getLatestMessage).reversed());
 
     return new UserSessionListResponseDTO().sessions(userSessions);
-
   }
 
   /**
@@ -90,6 +99,42 @@ public class SessionListFacade {
   }
 
   /**
+   * Returns a list of {@link UserSessionListResponseDTO} for the specified user ID and session Ids,
+   * with the session list sorted by last message date descending.
+   *
+   * @param userId                the user ID
+   * @param sessionIds            the session IDs
+   * @param rocketChatCredentials the rocket chat credentials
+   * @param roles                 the roles of given user
+   * @return {@link UserSessionListResponseDTO}
+   */
+  public GroupSessionListResponseDTO retrieveSessionsForAuthenticatedUserBySessionIds(String userId,
+      List<Long> sessionIds, RocketChatCredentials rocketChatCredentials, Set<String> roles) {
+    List<UserSessionResponseDTO> userSessions = userSessionListService.retrieveSessionsForAuthenticatedUserAndSessionIds(
+        userId, sessionIds, rocketChatCredentials, roles);
+    userSessions.sort(comparing(UserSessionResponseDTO::getLatestMessage).reversed());
+
+    SessionMapper sessionMapper = new SessionMapper();
+    var sessions = userSessions.stream()
+        .map(sessionMapper::toGroupSessionResponse)
+        .collect(Collectors.toList());
+
+    return new GroupSessionListResponseDTO().sessions(sessions);
+  }
+
+  public GroupSessionListResponseDTO retrieveChatsForUserByChatIds(List<Long> chatIds, RocketChatCredentials rocketChatCredentials) {
+    var userChatSessions = userSessionListService.retrieveChatsForUserAndChatIds(chatIds, rocketChatCredentials);
+    userChatSessions.sort(comparing(UserSessionResponseDTO::getLatestMessage).reversed());
+
+    SessionMapper sessionMapper = new SessionMapper();
+    var sessions = userChatSessions.stream()
+        .map(sessionMapper::toGroupSessionResponse)
+        .collect(Collectors.toList());
+
+    return new GroupSessionListResponseDTO().sessions(sessions);
+  }
+
+  /**
    * @param consultant            the authenticated consultant
    * @param rcGroupIds            the group or feedback group IDs
    * @param rocketChatCredentials the rocket chat credentials
@@ -110,6 +155,55 @@ public class SessionListFacade {
 
     return new GroupSessionListResponseDTO().sessions(sessions);
   }
+
+  /**
+   * @param consultant            the authenticated consultant
+   * @param sessionIds            the session IDs
+   * @param rocketChatCredentials the rocket chat credentials
+   * @param roles                 the roles of given consultant
+   * @return {@link GroupSessionListResponseDTO}
+   */
+  public GroupSessionListResponseDTO retrieveSessionsForAuthenticatedConsultantBySessionIds(
+      Consultant consultant, List<Long> sessionIds, RocketChatCredentials rocketChatCredentials,
+      Set<String> roles) {
+    List<ConsultantSessionResponseDTO> consultantSessions = consultantSessionListService.retrieveSessionsForConsultantAndSessionIds(
+        consultant, sessionIds, roles, rocketChatCredentials.getRocketChatToken());
+    consultantSessions.sort(comparing(ConsultantSessionResponseDTO::getLatestMessage).reversed());
+
+    SessionMapper sessionMapper = new SessionMapper();
+    var sessions = consultantSessions.stream()
+        .map(sessionMapper::toGroupSessionResponse)
+        .collect(Collectors.toList());
+
+    return new GroupSessionListResponseDTO().sessions(sessions);
+  }
+
+  public GroupSessionListResponseDTO retrieveChatsForConsultantByChatIds(Consultant consultant,
+      List<Long> chatIds, RocketChatCredentials rocketChatCredentials) {
+    List<ConsultantSessionResponseDTO> consultantSessions = consultantSessionListService.retrieveChatsForConsultantAndChatIds(
+        consultant, chatIds,  rocketChatCredentials.getRocketChatToken());
+    consultantSessions.sort(comparing(ConsultantSessionResponseDTO::getLatestMessage).reversed());
+
+    SessionMapper sessionMapper = new SessionMapper();
+    var sessions = consultantSessions.stream()
+        .map(sessionMapper::toGroupSessionResponse)
+        .collect(Collectors.toList());
+
+    if (topicsFeatureEnabled) {
+      enrichWithTopicDataForGroupSessionResponse(sessions);
+    }
+
+    return new GroupSessionListResponseDTO().sessions(sessions);
+  }
+
+  private void enrichWithTopicDataForGroupSessionResponse(List<GroupSessionResponseDTO> sessions) {
+    if (sessions != null) {
+      sessions.stream()
+          .map(GroupSessionResponseDTO::getSession)
+          .forEach(sessionTopicEnrichmentService::enrichSessionWithTopicData);
+    }
+  }
+
 
   /**
    * Returns a {@link ConsultantSessionResponseDTO} with the session list for the specified
@@ -155,6 +249,14 @@ public class SessionListFacade {
         .offset(sessionListQueryParameter.getOffset())
         .count(consultantSessionsSublist.size())
         .total(consultantSessions.size());
+  }
+
+  private void enrichWithTopicData(List<ConsultantSessionResponseDTO> consultantSessionsSublist) {
+    if (consultantSessionsSublist != null) {
+      consultantSessionsSublist.stream()
+          .map(ConsultantSessionResponseDTO::getSession)
+          .forEach(sessionTopicEnrichmentService::enrichSessionWithTopicData);
+    }
   }
 
   private boolean isFeedbackFilter(SessionListQueryParameter sessionListQueryParameter) {
@@ -207,6 +309,10 @@ public class SessionListFacade {
     if (areMoreConsultantSessionsAvailable(sessionListQueryParameter.getOffset(), teamSessions)) {
       teamSessionsSublist =
           retrieveConsultantSessionsSublist(sessionListQueryParameter, teamSessions);
+    }
+
+    if (topicsFeatureEnabled) {
+      enrichWithTopicData(teamSessionsSublist);
     }
 
     return new ConsultantSessionListResponseDTO()

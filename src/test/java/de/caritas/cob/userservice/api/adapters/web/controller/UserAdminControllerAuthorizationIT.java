@@ -356,10 +356,10 @@ public class UserAdminControllerAuthorizationIT {
         easyRandom.nextObject(CreateConsultantDTO.class);
 
     mvc.perform(post(GET_CONSULTANT_PATH)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(createConsultantDTO)))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(createConsultantDTO)))
         .andExpect(status().isOk());
 
     verify(consultantAdminFacade, times(1)).createNewConsultant(any());
@@ -403,10 +403,10 @@ public class UserAdminControllerAuthorizationIT {
         easyRandom.nextObject(UpdateAdminConsultantDTO.class);
 
     mvc.perform(put(GET_CONSULTANT_PATH + "consultantId")
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(updateConsultantDTO)))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(updateConsultantDTO)))
         .andExpect(status().isOk());
 
     verify(consultantAdminFacade, times(1)).updateConsultant(anyString(), any());
@@ -450,10 +450,10 @@ public class UserAdminControllerAuthorizationIT {
         easyRandom.nextObject(CreateConsultantAgencyDTO.class);
 
     mvc.perform(post(String.format(CONSULTANT_AGENCY_PATH, "consultantId"))
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(createConsultantAgencyDTO)))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(createConsultantAgencyDTO)))
         .andExpect(status().isCreated());
 
     verify(consultantAdminFacade, times(1)).createNewConsultantAgency(anyString(), any());
@@ -463,9 +463,9 @@ public class UserAdminControllerAuthorizationIT {
   public void setConsultantAgenciesShouldReturnUnauthorizedAndCallNoMethodsWhenNoKeycloakAuthPresent()
       throws Exception {
     mvc.perform(
-            put("/useradmin/consultants/{consultantId}/agencies", UUID.randomUUID().toString())
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE))
+        put("/useradmin/consultants/{consultantId}/agencies", UUID.randomUUID().toString())
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -509,24 +509,26 @@ public class UserAdminControllerAuthorizationIT {
     );
 
     mvc.perform(
-            put("/useradmin/consultants/{consultantId}/agencies", UUID.randomUUID().toString())
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(agencies)))
+        put("/useradmin/consultants/{consultantId}/agencies", UUID.randomUUID().toString())
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(agencies)))
         .andExpect(status().isOk());
 
-    verify(consultantAdminFacade).createNewConsultantAgency(anyString(), any());
-    verify(consultantAdminFacade).markConsultantAgenciesForDeletion(anyString());
+    verify(consultantAdminFacade).markConsultantAgenciesForDeletion(anyString(), any());
+    verify(consultantAdminFacade).filterAgencyListForCreation(anyString(), any());
+    verify(consultantAdminFacade).prepareConsultantAgencyRelation(anyString(), any());
+    verify(consultantAdminFacade).completeConsultantAgencyAssigment(anyString(), any());
   }
 
   @Test
   public void changeAgencyType_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
       throws Exception {
     mvc.perform(post(AGENCY_CHANGE_TYPE_PATH)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(consultantAdminFacade);

@@ -7,7 +7,6 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_USER_ID
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -313,27 +312,17 @@ public class JoinAndLeaveChatFacadeTest {
 
   @Test
   public void leaveChat_Should_RemoveConsultantFromRocketChatGroup()
-      throws RocketChatRemoveUserFromGroupException {
+      throws RocketChatRemoveUserFromGroupException, RocketChatUserNotInitializedException, RocketChatGetGroupMembersException {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
     when(consultantService.getConsultantViaAuthenticatedUser(authenticatedUser))
         .thenReturn(Optional.of(CONSULTANT));
+    when(rocketChatService.getStandardMembersOfGroup(eq(ACTIVE_CHAT.getGroupId())))
+        .thenReturn(List.of(easyRandom.nextObject(GroupMemberDTO.class)));
 
     joinAndLeaveChatFacade.leaveChat(ACTIVE_CHAT.getId(), authenticatedUser);
 
     verify(rocketChatService, times(1)).removeUserFromGroup(CONSULTANT.getRocketChatId(),
         ACTIVE_CHAT.getGroupId());
-  }
-
-  @Test
-  public void leaveChat_Should_RemoveUserFromRocketChatGroup()
-      throws RocketChatRemoveUserFromGroupException {
-    when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
-    when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(Optional.of(user));
-    when(user.getRcUserId()).thenReturn(RC_USER_ID);
-
-    joinAndLeaveChatFacade.leaveChat(ACTIVE_CHAT.getId(), authenticatedUser);
-
-    verify(rocketChatService, times(1)).removeUserFromGroup(RC_USER_ID, ACTIVE_CHAT.getGroupId());
   }
 
   @Test(expected = InternalServerErrorException.class)
@@ -349,18 +338,7 @@ public class JoinAndLeaveChatFacadeTest {
   }
 
   @Test
-  public void leaveChat_Should_SetEncryptedRoomSettingsToFalse_When_lastStandardUserLeftChat() {
-    when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
-    when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(Optional.of(user));
-    when(user.getRcUserId()).thenReturn(RC_USER_ID);
-
-    joinAndLeaveChatFacade.leaveChat(ACTIVE_CHAT.getId(), authenticatedUser);
-
-    verify(rocketChatService).saveRoomSettings(ACTIVE_CHAT.getGroupId(), false);
-  }
-
-  @Test
-  public void leaveChat_Should_NotSetEncryptedRoomSettings_When_StandardMemberInChat()
+  public void leaveChatShouldNotDeleteChatsWhenStandardMemberInChat()
       throws RocketChatUserNotInitializedException, RocketChatGetGroupMembersException {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
     when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(Optional.of(user));
@@ -370,6 +348,7 @@ public class JoinAndLeaveChatFacadeTest {
 
     joinAndLeaveChatFacade.leaveChat(ACTIVE_CHAT.getId(), authenticatedUser);
 
-    verify(rocketChatService, never()).saveRoomSettings(anyString(), anyBoolean());
+    verify(rocketChatService, never()).deleteGroupAsSystemUser(anyString());
+    verify(chatService, never()).deleteChat(any());
   }
 }

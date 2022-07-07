@@ -11,6 +11,7 @@ public class PathConstants {
   public static final String PATH_CREATE_ENQUIRY_MESSAGE =
       "/users/sessions/" + SESSION_ID + "/enquiry/new";
   public static final String PATH_REGISTER_USER = "/users/askers/new";
+  public static final String PATH_ACTIVATE_2FA = "/users/2fa/app";
   public static final String PATH_ACCEPT_ENQUIRY = "/users/sessions/new/";
   public static final String PATH_PUT_CONSULTANT_ABSENT = "/users/consultants/absences";
   public static final String PATH_GET_SESSIONS_FOR_AUTHENTICATED_CONSULTANT =
