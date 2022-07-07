@@ -430,7 +430,7 @@ public class SessionService {
     return session;
   }
 
-  private Session getSessionByGroupId(String rcGroupId) {
+  public Session getSessionByGroupId(String rcGroupId) {
     return sessionRepository.findByGroupId(rcGroupId).orElseThrow(
         () -> new NotFoundException(String.format("Session with groupId %s not found.", rcGroupId),
             LogService::logWarn));
