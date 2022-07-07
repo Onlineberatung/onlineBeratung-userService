@@ -882,6 +882,9 @@ public class UserController implements UsersApi {
     var chatUserId = userDtoMapper.chatUserIdOf(user);
     var username = authenticatedUser.getUsername();
     if (isNull(chatUserId)) {
+      if (isAdviceSeekerWithoutEnquiryMessageWritten()) {
+        return ResponseEntity.accepted().build();
+      }
       var message = String.format("Chat-user ID of user %s unknown", username);
       throw new InternalServerErrorException(message);
     }
@@ -892,6 +895,14 @@ public class UserController implements UsersApi {
     }
 
     return ResponseEntity.noContent().build();
+  }
+
+  private boolean isAdviceSeekerWithoutEnquiryMessageWritten() {
+    if (authenticatedUser.isAdviceSeeker()) {
+      var adviceSeeker = userAccountProvider.retrieveValidatedUser();
+      return adviceSeeker.getCreateDate().isEqual(adviceSeeker.getUpdateDate());
+    }
+    return false;
   }
 
   /**
