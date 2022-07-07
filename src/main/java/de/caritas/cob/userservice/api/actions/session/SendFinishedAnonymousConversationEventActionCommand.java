@@ -7,6 +7,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace;
 
 import de.caritas.cob.userservice.api.actions.ActionCommand;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
@@ -18,11 +19,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
  * Action to send a live finished anonymous conversation event.
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class SendFinishedAnonymousConversationEventActionCommand implements
@@ -41,9 +44,14 @@ public class SendFinishedAnonymousConversationEventActionCommand implements
     List<String> userIdsToSendLiveEvent = collectNotInitiatingUser(session);
 
     if (isNotEmpty(userIdsToSendLiveEvent)) {
-      this.liveEventNotificationService
-          .sendLiveFinishedAnonymousConversationToUsers(userIdsToSendLiveEvent,
-              forSession(session));
+      try {
+        this.liveEventNotificationService
+            .sendLiveFinishedAnonymousConversationToUsers(userIdsToSendLiveEvent,
+                forSession(session));
+      } catch (Exception e) {
+        log.error("Unable to send anonymous conversation finished live event");
+        log.error(getStackTrace(e));
+      }
     }
   }
 

@@ -10,14 +10,14 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
 
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.HalLink.MethodEnum;
-import de.caritas.cob.userservice.api.admin.model.ConsultantAdminResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.Organizer;
-import de.caritas.cob.userservice.api.admin.model.ConsultantDTO;
-import de.caritas.cob.userservice.api.admin.model.ConsultantFilter;
-import de.caritas.cob.userservice.api.admin.model.ConsultantSearchResultDTO;
-import de.caritas.cob.userservice.api.admin.model.Sort;
-import de.caritas.cob.userservice.api.admin.model.Sort.FieldEnum;
-import de.caritas.cob.userservice.api.admin.model.Sort.OrderEnum;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantFilter;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSearchResultDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.Sort;
+import de.caritas.cob.userservice.api.adapters.web.dto.Sort.FieldEnum;
+import de.caritas.cob.userservice.api.adapters.web.dto.Sort.OrderEnum;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -35,14 +35,14 @@ public class ConsultantAdminFilterServiceBase {
     ConsultantSearchResultDTO consultants = this.consultantAdminFilterService
         .findFilteredConsultants(1, 100, new ConsultantFilter(), new Sort());
 
-    assertThat(consultants.getEmbedded(), hasSize(38));
+    assertThat(consultants.getEmbedded(), hasSize(39));
   }
 
   public void findFilteredConsultants_Should_returnAllConsultants_When_noFilterIsNull() {
     ConsultantSearchResultDTO consultants = this.consultantAdminFilterService
         .findFilteredConsultants(1, 100, null, new Sort());
 
-    assertThat(consultants.getEmbedded(), hasSize(38));
+    assertThat(consultants.getEmbedded(), hasSize(39));
   }
 
   public void findFilteredConsultants_Should_returnOneConsultant_When_perPageIsNegativeValue() {
@@ -76,7 +76,7 @@ public class ConsultantAdminFilterServiceBase {
         .findFilteredConsultants(2, 30, new ConsultantFilter(), null);
 
     assertThat(firstPage.getEmbedded(), hasSize(30));
-    assertThat(secondPage.getEmbedded(), hasSize(8));
+    assertThat(secondPage.getEmbedded(), hasSize(9));
   }
 
   public void findFilteredConsultants_Should_returnExpectedConsultant_When_allFiltersAreSet() {

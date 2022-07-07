@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -157,6 +158,15 @@ public class Consultant implements TenantAware {
   @Column(name = "encourage_2fa", nullable = false, columnDefinition = "bit default true")
   private Boolean encourage2fa;
 
+  @Column(name = "notify_enquiries_repeating", nullable = false, columnDefinition = "bit default true")
+  private Boolean notifyEnquiriesRepeating;
+
+  @Column(name = "notify_new_chat_message_from_advice_seeker", nullable = false, columnDefinition = "bit default true")
+  private Boolean notifyNewChatMessageFromAdviceSeeker;
+
+  @Column(name = "notify_new_feedback_message_from_advice_seeker", nullable = false, columnDefinition = "bit default true")
+  private Boolean notifyNewFeedbackMessageFromAdviceSeeker;
+
   @Column(name = "tenant_id")
   @Field
   private Long tenantId;
@@ -166,6 +176,7 @@ public class Consultant implements TenantAware {
 
   @Column(name = "status", length = 11)
   @Enumerated(EnumType.STRING)
+  @Field
   private ConsultantStatus status = ConsultantStatus.IN_PROGRESS;
 
   @Column(name = "walk_through_enabled", columnDefinition = "tinyint", nullable = false)
@@ -203,6 +214,18 @@ public class Consultant implements TenantAware {
 
       return languages;
     }
+  }
+
+  @JsonIgnore
+  public boolean isInAgency(long agencyId) {
+    if (isNull(consultantAgencies)) {
+      return false;
+    }
+
+    return consultantAgencies.stream()
+        .map(ConsultantAgency::getAgencyId)
+        .collect(Collectors.toSet())
+        .contains(agencyId);
   }
 
   @Override

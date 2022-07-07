@@ -10,8 +10,12 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface AppointmentRepository extends CrudRepository<Appointment, UUID> {
 
-  @Query(value = "SELECT * FROM appointment a WHERE a.datetime >= :datetime ORDER BY a.datetime ASC", nativeQuery = true)
-  List<Appointment> findAllOrderByDatetimeAfter(Instant datetime);
+  @Query(value =
+      "SELECT * "
+          + "FROM appointment a "
+          + "WHERE a.consultant_id = :userId AND a.datetime >= :datetime "
+          + "ORDER BY a.datetime", nativeQuery = true)
+  List<Appointment> findAllOrderByDatetimeAfter(Instant datetime, String userId);
 
   @Modifying
   @Query(value = "DELETE FROM appointment a WHERE a.datetime <= :datetime", nativeQuery = true)

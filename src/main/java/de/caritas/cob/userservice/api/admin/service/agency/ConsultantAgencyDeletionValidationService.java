@@ -62,7 +62,7 @@ public class ConsultantAgencyDeletionValidationService {
   }
 
   private boolean isAgencyStillActive(ConsultantAgency consultantAgency) {
-    AgencyDTO agency = this.agencyService.getAgency(consultantAgency.getAgencyId());
+    AgencyDTO agency = this.agencyService.getAgencyWithoutCaching(consultantAgency.getAgencyId());
     return isFalse(agency.getOffline());
   }
 

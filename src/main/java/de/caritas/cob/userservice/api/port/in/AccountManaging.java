@@ -10,11 +10,17 @@ public interface AccountManaging {
 
   boolean existsAdviceSeeker(String id);
 
-  Optional<User> findAdviceSeeker(String id);
+  Optional<Map<String, Object>> findAdviceSeeker(String id);
 
   Optional<User> findAdviceSeekerByChatUserId(String chatId);
 
   Optional<Map<String, Object>> findConsultant(String id);
 
   Optional<Map<String, Object>> findConsultantByUsername(String username);
+
+  Map<String, Object> findConsultantsByInfix(
+      String infix, int pageNumber, int pageSize, String fieldName, boolean isAscending
+  );
+
+  boolean isTeamAdvisedBy(Long sessionId, String consultantId);
 }

@@ -1,0 +1,147 @@
+openapi: 3.0.1
+
+info:
+  title: Definition for Topic API
+  description: This information will be replaced by the SpringFox config information
+  version: 0.0.1
+
+paths:
+  /topic:
+    post:
+      tags:
+        - topic-controller
+      summary: 'Creates a new topic [Authorization: Role: topic-admin]'
+      operationId: createTopic
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/TopicDTO'
+      responses:
+        200:
+          description: OK - successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopicDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+    get:
+      tags:
+        - topic-controller
+      summary: 'Get all topics'
+      operationId: getAllTopics
+      responses:
+        200:
+          description: OK - successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TopicDTO'
+        204:
+          description: NO CONTENT - no content found
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+  /topic/{id}:
+    summary: Represents a topic
+    description: This resource represents an individual topic in a system.
+    get:
+      tags:
+        - topic-controller
+      summary: 'Gets a topic by its id [Not yet implemented]'
+      operationId: getTopicById
+      parameters:
+        - name: id
+          in: path
+          description: Topic ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopicDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        404:
+          description: Not found
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+    put:
+      tags:
+        - topic-controller
+      summary: 'Updates a topic [Authorization: Role: topic-admin] [Not yet implemented]'
+      operationId: updateTopic
+      parameters:
+        - name: id
+          in: path
+          description: Topic ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/TopicDTO'
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopicDTO'
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        409:
+          description: CONFLICT - unique constraint validation fails
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+components:
+  schemas:
+    TopicDTO:
+      type: object
+      required:
+        - name
+        - description
+      properties:
+        id:
+          type: long
+          example: 12132
+        name:
+          type: string
+          example: "Topic name"
+          maxLength: 100
+        description:
+          type: string
+          example: "Description"
+          maxLength: 200
+        internalIdentifier:
+          type: string
+          example: "identifier for data exports for example: alcohol"
+          maxLength: 50
+        status:
+          type: string
+          example: "Active"
+          maxLength: 10
+        createDate:
+          type: string
+        updateDate:
+          type: string

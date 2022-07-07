@@ -15,8 +15,8 @@ import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.List;
@@ -87,14 +87,16 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
 
   private List<MailDTO> buildMailsDependingOnAuthor(Consultant sendingConsultant)
       throws RocketChatGetGroupMembersException {
-    if (areUsersEqual(userId, session.getConsultant())) {
+    var receivingConsultant = session.getConsultant();
+    if (areUsersEqual(userId, receivingConsultant)) {
       return buildNotificationMailsForAllOtherConsultants(sendingConsultant);
     }
 
-    if (didAnotherConsultantWrite()) {
-      return singletonList(buildMailForAssignedConsultant(sendingConsultant,
-          session.getConsultant()));
+    if (receivingConsultant.getNotifyNewFeedbackMessageFromAdviceSeeker()
+        && didAnotherConsultantWrite()) {
+      return singletonList(buildMailForAssignedConsultant(sendingConsultant, receivingConsultant));
     }
+
     return emptyList();
   }
 
@@ -125,6 +127,7 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
         .filter(Objects::nonNull)
         .filter(this::notHimselfAndNotAbsent)
         .filter(this::isMainConsultantOrAssignedToSession)
+        .filter(Consultant::getNotifyNewFeedbackMessageFromAdviceSeeker)
         .map(consultant -> buildMailForAssignedConsultant(sendingConsultant, consultant))
         .collect(Collectors.toList());
   }

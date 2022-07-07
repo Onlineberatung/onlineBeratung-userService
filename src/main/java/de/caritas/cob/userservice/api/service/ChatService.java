@@ -2,23 +2,24 @@ package de.caritas.cob.userservice.api.service;
 
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.ChatDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionConsultantForConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateChatResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserChatDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.adapters.web.dto.ChatDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UserChatDTO;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.Chat.ChatInterval;
-import de.caritas.cob.userservice.api.port.out.ChatRepository;
 import de.caritas.cob.userservice.api.model.ChatAgency;
-import de.caritas.cob.userservice.api.port.out.ChatAgencyRepository;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.port.out.ChatAgencyRepository;
+import de.caritas.cob.userservice.api.port.out.ChatRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -26,7 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
+import java.util.stream.StreamSupport;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -60,14 +61,7 @@ public class ChatService {
 
   private ConsultantSessionResponseDTO convertChatToConsultantSessionResponseDTO(Chat chat) {
     return new ConsultantSessionResponseDTO()
-        .chat(new UserChatDTO(chat.getId(), chat.getTopic(),
-            LocalDate.of(chat.getStartDate().getYear(), chat.getStartDate().getMonth(),
-                chat.getStartDate().getDayOfMonth()),
-            LocalTime.of(chat.getStartDate().getHour(), chat.getStartDate().getMinute(),
-                chat.getStartDate().getSecond()),
-            chat.getDuration(), isTrue(chat.isRepetitive()), isTrue(chat.isActive()),
-            chat.getConsultingTypeId(), null, null, false, chat.getGroupId(), null, false,
-            getChatModerators(chat.getChatAgencies()), chat.getStartDate()))
+        .chat(createUserChat(chat))
         .consultant(new SessionConsultantForConsultantDTO()
             .id(chat.getChatOwner().getId())
             .firstName(chat.getChatOwner().getFirstName())
@@ -113,15 +107,25 @@ public class ChatService {
         .collect(Collectors.toList());
   }
 
+  public List<UserSessionResponseDTO> getChatSessionsByIds(Set<Long> chatIds) {
+    return StreamSupport.stream(chatRepository.findAllById(chatIds).spliterator(), false)
+        .map(this::convertChatToUserSessionResponseDTO)
+        .collect(Collectors.toList());
+  }
+
   private UserSessionResponseDTO convertChatToUserSessionResponseDTO(Chat chat) {
-    return new UserSessionResponseDTO().chat(new UserChatDTO(chat.getId(), chat.getTopic(),
+    return new UserSessionResponseDTO().chat(createUserChat(chat));
+  }
+
+  private UserChatDTO createUserChat(Chat chat) {
+    return new UserChatDTO(chat.getId(), chat.getTopic(),
         LocalDate.of(chat.getStartDate().getYear(), chat.getStartDate().getMonth(),
             chat.getStartDate().getDayOfMonth()),
         LocalTime.of(chat.getStartDate().getHour(), chat.getStartDate().getMinute(),
             chat.getStartDate().getSecond()),
         chat.getDuration(), isTrue(chat.isRepetitive()), isTrue(chat.isActive()),
         chat.getConsultingTypeId(), null, null, false, chat.getGroupId(), null, false,
-        getChatModerators(chat.getChatAgencies()), chat.getStartDate()));
+        getChatModerators(chat.getChatAgencies()), chat.getStartDate(), null);
   }
 
   /**
@@ -132,6 +136,31 @@ public class ChatService {
    */
   public Optional<Chat> getChat(Long chatId) {
     return chatRepository.findById(chatId);
+  }
+
+  public List<ConsultantSessionResponseDTO> getChatSessionsForConsultantByIds(Set<Long> chatIds) {
+    return StreamSupport.stream(chatRepository.findAllById(chatIds).spliterator(), false)
+        .map(this::convertChatToConsultantSessionResponseDTO)
+        .collect(Collectors.toList());
+  }
+
+  /**
+   * Returns an {@link List} of {@link UserSessionResponseDTO} for the provided group IDs.
+   *
+   * @param groupIds a list of rocket chat group or feedback group IDs
+   * @return {@link List<UserSessionResponseDTO>}
+   */
+  public List<UserSessionResponseDTO> getChatSessionsByGroupIds(Set<String> groupIds) {
+    return chatRepository.findByGroupIds(groupIds).stream()
+        .map(this::convertChatToUserSessionResponseDTO)
+        .collect(Collectors.toList());
+  }
+
+  public List<ConsultantSessionResponseDTO> getChatSessionsForConsultantByGroupIds(
+      Set<String> groupIds) {
+    return chatRepository.findByGroupIds(groupIds).stream()
+        .map(this::convertChatToConsultantSessionResponseDTO)
+        .collect(Collectors.toList());
   }
 
   /**

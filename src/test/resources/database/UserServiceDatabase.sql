@@ -579,7 +579,12 @@ VALUES ('0b3b1cc6-be98-4787-aa56-212259d811b9', 'enc.MVWWSZ3SMF2GS33OFV2GKYLN', 
         '2020-10-08 08:54:09', '2020-10-08 08:54:09', 1),
        ('34c3x5b1-0677-4fd2-a7ea-56a71aefd099', 'enc.AAAW42LPOJUXI6JNMRTFMYLVNR2A....', 'Default',
         'Consultant', 'new@consultant.de', 0, 0, NULL, 'aaa8Fw2juns6FFTks', 1, 0, NULL,
-        '2020-10-08 08:54:09', '2020-10-08 08:54:09', 1);
+        '2020-10-08 08:54:09', '2020-10-08 08:54:09', 1),
+       ('42c3x532-0677-4fd2-a7ea-56a71aefd088', 'enc.AAAW42LPOJUXI6JNMRTFMYLVDSSA....', 'Default',
+               'Consultant', 'nosessions@consultant.de', 0, 0, NULL, 'xyz8Fw2juns6FFTks', 1, 0, NULL,
+               '2020-10-08 08:54:09', '2020-10-08 08:54:09', 1);
+
+        ;
 INSERT INTO consultant_agency (`id`, `consultant_id`, `agency_id`, `create_date`, `update_date`)
 VALUES (0, '473f7c4b-f011-4fc2-847c-ceb636a5b399', 1, '2020-10-08 08:53:55', '2020-10-08 08:53:55'),
        (1, '88613f5d-0d40-47e0-b323-e792e7fba3ed', 1, '2020-10-08 08:53:56', '2020-10-08 08:53:56'),
@@ -702,12 +707,14 @@ VALUES (0, '473f7c4b-f011-4fc2-847c-ceb636a5b399', 1, '2020-10-08 08:53:55', '20
        (61, 'e1fc5245-8497-4315-b610-667917cf3442', 1732, '2020-10-08 08:57:45',
         '2020-10-08 08:57:45'),
        (62, '66794732-8751-4a06-a786-4849375e8999', 1733, '2020-10-08 08:57:45',
-        '2020-10-08 08:57:45');
+        '2020-10-08 08:57:45'),
+       (63, '0b3b1cc6-be98-4787-aa56-212259d811b9', 1, '2020-10-08 08:57:44',
+        '2020-10-08 08:57:44');
 INSERT INTO session (`id`, `user_id`, `consultant_id`, `consulting_type`, `message_date`,
                      `postcode`, `agency_id`, `rc_group_id`, `rc_feedback_group_id`, `status`,
                      `is_team_session`, `is_monitoring`, `create_date`, `update_date`)
 VALUES (1, '1da238c6-cd46-4162-80f1-bff74eafe77f', '473f7c4b-f011-4fc2-847c-ceb636a5b399', 0,
-        '2020-10-08 09:03:45', '12345', 1, '4WKq3kj9C7WESSQuK', NULL, 2, 0, 1,
+        '2020-10-08 09:03:45', '12345', 1, '4WKq3kj9C7WESSQuK', 'E6FohkNfEDPY9bRXc', 2, 0, 1,
         '2020-10-08 09:03:45', '2020-10-08 09:03:45'),
        (2, '236b97bf-6cd7-434a-83f3-0a0b129dd45a', '75abe824-fb42-476d-a52a-66660113bdcc', 0,
         '2020-10-08 09:03:48', '12345', 0, 'DJrRTzFg8Ac2BqE8j', NULL, 2, 1, 1,
@@ -1115,9 +1122,6 @@ VALUES (1, '1da238c6-cd46-4162-80f1-bff74eafe77f', '473f7c4b-f011-4fc2-847c-ceb6
        (1101, '9c4057d0-05ad-4e86-a47c-dc5bdeec03b9', '94c3e0b1-0677-4fd2-a7ea-56a71aefd0e8', 9,
         '2020-11-04 14:56:17', '00000', 639, 'Jn2fnQgSBACCv5pr7', NULL, 2, 1, 0,
         '2020-11-04 14:56:08', '2020-11-04 14:57:28'),
-       (1200, '06c6601f-a5b4-4812-9260-20065390b1f5', NULL, 1, '2020-11-05 14:18:16', '12345', 121,
-        'ix7E7HzXKTgGeQMyb', 'EQBcSwxn4eCAPYQ2J', 1, 1, 1, '2020-11-05 14:17:34',
-        '2020-11-05 14:18:16'),
        (1201, 'def9a0a1-c936-45ee-9141-d73dfc0a3888', NULL, 1, NULL, '12345', 121,
         NULL, NULL, 0, 1, 1, '2018-04-20 11:09:32',
         '2018-04-20 11:09:32'),
@@ -1150,4 +1154,21 @@ VALUES (1, '1da238c6-cd46-4162-80f1-bff74eafe77f', '473f7c4b-f011-4fc2-847c-ceb6
         '2020-10-08 09:03:47', '2020-10-08 09:03:48'),
        (1212, '236b97bf-6cd7-434a-83f3-0a0b129dd45a', '34c3x5b1-0677-4fd2-a7ea-56a71aefd099', 0,
         '2020-10-08 09:03:48', '12345', 0, 'DJrRTzFg8Ac2BqE8j', NULL, 3, 0, 1,
+        '2020-10-08 09:03:47', '2020-10-08 09:03:48'),
+       (1213, 'jurea0a1-c936-45ee-9141-d73dfc0a3000', '94c3e0b1-0677-4fd2-a7ea-56a71aefd0e8', 9,
+        '2020-02-05 11:09:32', '00000', 639, 'XJrRTzFg8Ac5BwE86', NULL, 1, 0, 0,
+        '2020-02-05 11:09:32', '2020-02-05 11:09:32'),
+       (1214, '679b6688-2b2b-43ff-af7a-873d9be81523', '75abe824-fb42-476d-a52a-66660113bdcc', 0,
+        '2020-10-08 09:03:48', '12345', 0, 'DJrRTzFg8Ac2BqE8j', NULL, 4, 0, 1,
         '2020-10-08 09:03:47', '2020-10-08 09:03:48');
+
+INSERT INTO session (`id`, `user_id`, `consultant_id`, `consulting_type`, `message_date`,
+                     `postcode`, `agency_id`, `rc_group_id`, `rc_feedback_group_id`, `status`,
+                     `is_team_session`, `is_monitoring`, `create_date`, `update_date`,`main_topic_id`)
+VALUES
+        (1200, '06c6601f-a5b4-4812-9260-20065390b1f5', NULL, 1, '2020-11-05 14:18:16', '12345', 121,
+        'ix7E7HzXKTgGeQMyb', 'EQBcSwxn4eCAPYQ2J', 1, 1, 1, '2020-11-05 14:17:34',
+        '2020-11-05 14:18:16', 1),
+        (1215, '1da238c6-cd46-4162-80f1-bff74eafe77f', '34c3x5b1-0677-4fd2-a7ea-56a71aefd099', 0,
+        '2020-10-08 09:03:45', '12345', 1, 'DJrRTzFg8Ac2BqE8j', 'E6FohkNfEDPY9bRXc', 2, 0, 1,
+        '2020-10-08 09:03:45', '2020-10-08 09:03:45', 1);

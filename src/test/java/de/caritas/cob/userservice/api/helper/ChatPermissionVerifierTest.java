@@ -68,9 +68,9 @@ public class ChatPermissionVerifierTest {
     ConsultantAgency[] consultantAgencyArray =
         new ConsultantAgency[]{
             new ConsultantAgency(AGENCY_ID, consultant, AGENCY_ID, nowInUtc(),
-                nowInUtc(), nowInUtc(), null),
+                nowInUtc(), nowInUtc(), null, null),
             new ConsultantAgency(AGENCY_ID_2, consultant, AGENCY_ID_2, nowInUtc(),
-                nowInUtc(), nowInUtc(), null)};
+                nowInUtc(), nowInUtc(), null, null)};
     Set<ConsultantAgency> consultantAgencySet =
         new HashSet<>(Arrays.asList(consultantAgencyArray));
 
@@ -84,9 +84,9 @@ public class ChatPermissionVerifierTest {
     ConsultantAgency[] consultantAgencyArray =
         new ConsultantAgency[]{
             new ConsultantAgency(AGENCY_ID, consultant, AGENCY_ID, nowInUtc(),
-                nowInUtc(), nowInUtc(), null),
+                nowInUtc(), nowInUtc(), null, null),
             new ConsultantAgency(AGENCY_ID_3, consultant, AGENCY_ID_3, nowInUtc(),
-                nowInUtc(), nowInUtc(), null)};
+                nowInUtc(), nowInUtc(), null, null)};
     Set<ConsultantAgency> consultantAgencySet =
         new HashSet<>(Arrays.asList(consultantAgencyArray));
 

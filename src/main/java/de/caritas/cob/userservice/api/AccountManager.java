@@ -5,17 +5,24 @@ import static java.util.Objects.isNull;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.Consultant.ConsultantBase;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.in.AccountManaging;
+import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.MessageClient;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -32,6 +39,12 @@ public class AccountManager implements AccountManaging {
   private final MessageClient messageClient;
 
   private final UsernameTranscoder usernameTranscoder;
+
+  private final AgencyService agencyService;
+
+  private final ConsultantAgencyRepository consultantAgencyRepository;
+
+  private final SessionRepository sessionRepository;
 
   @Override
   public Optional<Map<String, Object>> findConsultant(String id) {
@@ -61,6 +74,33 @@ public class AccountManager implements AccountManaging {
         : Optional.of(findByDbConsultant(dbConsultant));
   }
 
+  public Map<String, Object> findConsultantsByInfix(
+      String infix, int pageNumber, int pageSize, String fieldName, boolean isAscending) {
+
+    var direction = isAscending ? Direction.ASC : Direction.DESC;
+    var pageRequest = PageRequest.of(pageNumber, pageSize, direction, fieldName);
+    var consultantPage = consultantRepository.findAllByInfix(infix, pageRequest);
+
+    var consultantIds = consultantPage.stream()
+        .map(ConsultantBase::getId)
+        .collect(Collectors.toList());
+    var fullConsultants = consultantRepository.findAllByIdIn(consultantIds);
+
+    var consultingAgencies = consultantAgencyRepository.findByConsultantIdIn(consultantIds);
+    var agencyIds = userServiceMapper.agencyIdsOf(consultingAgencies);
+    var agencies = agencyService.getAgenciesWithoutCaching(agencyIds);
+
+    return userServiceMapper.mapOf(consultantPage, fullConsultants, agencies, consultingAgencies);
+  }
+
+  @Override
+  public boolean isTeamAdvisedBy(Long sessionId, String consultantId) {
+    var session = sessionRepository.findById(sessionId).orElseThrow();
+
+    return session.isTeamSession() && consultantAgencyRepository
+        .existsByConsultantIdAndAgencyIdAndDeleteDateIsNull(consultantId, session.getAgencyId());
+  }
+
   @Override
   public Optional<Map<String, Object>> patchUser(Map<String, Object> patchMap) {
     var id = (String) patchMap.get("id");
@@ -78,12 +118,17 @@ public class AccountManager implements AccountManaging {
 
   @Override
   public boolean existsAdviceSeeker(String id) {
-    return findAdviceSeeker(id).isPresent();
+    return userRepository.findByUserIdAndDeleteDateIsNull(id).isPresent();
   }
 
   @Override
-  public Optional<User> findAdviceSeeker(String id) {
-    return userRepository.findByUserIdAndDeleteDateIsNull(id);
+  public Optional<Map<String, Object>> findAdviceSeeker(String id) {
+    var userMap = new HashMap<String, Object>();
+    userRepository.findByUserIdAndDeleteDateIsNull(id).ifPresent(user ->
+        userMap.putAll(userServiceMapper.mapOf(user))
+    );
+
+    return userMap.isEmpty() ? Optional.empty() : Optional.of(userMap);
   }
 
   @Override

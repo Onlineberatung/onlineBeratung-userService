@@ -17,7 +17,7 @@ import org.springframework.test.context.TestPropertySource;
 @DataJpaTest
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class ConsultantMobileTokenRepositoryIT {
+class ConsultantMobileTokenRepositoryIT {
 
   @Autowired
   private ConsultantMobileTokenRepository underTest;
@@ -37,7 +37,7 @@ public class ConsultantMobileTokenRepositoryIT {
   }
 
   @Test
-  public void saveShouldSaveToken() {
+  void saveShouldSaveToken() {
     givenAConsultant();
     givenAValidToken();
 

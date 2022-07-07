@@ -1,8 +1,11 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
+import static java.util.Collections.singletonList;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
@@ -18,8 +21,10 @@ import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResp
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateChatResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateEnquiryMessageResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.DeleteUserAccountDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.E2eKeyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.EmailDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.EnquiryMessageDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.GroupSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.LanguageResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.MasterKeyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.MobileTokenDTO;
@@ -30,6 +35,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.NewRegistrationResponseDt
 import de.caritas.cob.userservice.api.adapters.web.dto.OneTimePasswordDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PasswordDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PatchUserDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ReassignmentNotificationDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDataDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateChatResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
@@ -64,8 +70,8 @@ import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataProvider;
 import de.caritas.cob.userservice.api.facade.userdata.KeycloakUserDataProvider;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.helper.AuthenticatedUserHelper;
 import de.caritas.cob.userservice.api.model.Chat;
+import de.caritas.cob.userservice.api.model.EnquiryData;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
@@ -91,6 +97,8 @@ import de.caritas.cob.userservice.api.workflow.delete.action.asker.DeleteSingleR
 import de.caritas.cob.userservice.api.workflow.delete.model.SessionDeletionWorkflowDTO;
 import de.caritas.cob.userservice.generated.api.adapters.web.controller.UsersApi;
 import io.swagger.annotations.Api;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -137,7 +145,6 @@ public class UserController implements UsersApi {
   private final @NotNull AssignSessionFacade assignSessionFacade;
   private final @NotNull AssignEnquiryFacade assignEnquiryFacade;
   private final @NotNull DecryptionService decryptionService;
-  private final @NotNull AuthenticatedUserHelper authenticatedUserHelper;
   private final @NotNull ChatService chatService;
   private final @NotNull StartChatFacade startChatFacade;
   private final @NotNull GetChatFacade getChatFacade;
@@ -249,10 +256,10 @@ public class UserController implements UsersApi {
         .rocketChatUserId(rcUserId)
         .build();
     var language = consultantDtoMapper.languageOf(enquiryMessage.getLanguage());
+    var enquiryData = new EnquiryData(user, sessionId, enquiryMessage.getMessage(), language,
+        rocketChatCredentials, enquiryMessage.getT(), enquiryMessage.getOrg());
 
-    var response = createEnquiryMessageFacade.createEnquiryMessage(
-        user, sessionId, enquiryMessage.getMessage(), language, rocketChatCredentials
-    );
+    var response = createEnquiryMessageFacade.createEnquiryMessage(enquiryData);
 
     return new ResponseEntity<>(response, HttpStatus.CREATED);
   }
@@ -308,6 +315,96 @@ public class UserController implements UsersApi {
 
     return isNotEmpty(userSessionsDTO.getSessions())
         ? new ResponseEntity<>(userSessionsDTO, HttpStatus.OK)
+        : new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
+
+  /**
+   * Returns a list of sessions for the currently authenticated/logged in user and given RocketChat
+   * group, or feedback group IDs.
+   *
+   * @param rcToken Rocket.Chat token (required)
+   * @return {@link ResponseEntity} of {@link UserSessionListResponseDTO}
+   */
+  @Override
+  public ResponseEntity<GroupSessionListResponseDTO> getSessionsForGroupOrFeedbackGroupIds(
+      @RequestHeader String rcToken, @RequestParam(value = "rcGroupIds") List<String> rcGroupIds) {
+    GroupSessionListResponseDTO groupSessionList;
+    if (authenticatedUser.isConsultant()) {
+      var consultant = userAccountProvider.retrieveValidatedConsultant();
+      var rocketChatCredentials = RocketChatCredentials.builder()
+          .rocketChatUserId(consultant.getRocketChatId())
+          .rocketChatToken(rcToken)
+          .build();
+      groupSessionList = sessionListFacade.retrieveSessionsForAuthenticatedConsultantByGroupIds(
+          consultant, rcGroupIds, rocketChatCredentials, authenticatedUser.getRoles());
+    } else {
+      var user = userAccountProvider.retrieveValidatedUser();
+      var rocketChatCredentials = RocketChatCredentials.builder()
+          .rocketChatUserId(user.getRcUserId())
+          .rocketChatToken(rcToken)
+          .build();
+      groupSessionList = sessionListFacade.retrieveSessionsForAuthenticatedUserByGroupIds(
+          user.getUserId(), rcGroupIds, rocketChatCredentials, authenticatedUser.getRoles());
+    }
+
+    return isNotEmpty(groupSessionList.getSessions())
+        ? new ResponseEntity<>(groupSessionList, HttpStatus.OK)
+        : new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
+
+  @Override
+  public ResponseEntity<GroupSessionListResponseDTO> getSessionForId(String rcToken,
+      Long sessionId) {
+    GroupSessionListResponseDTO groupSessionList;
+    if (authenticatedUser.isConsultant()) {
+      var consultant = userAccountProvider.retrieveValidatedConsultant();
+      var rocketChatCredentials = RocketChatCredentials.builder()
+          .rocketChatUserId(consultant.getRocketChatId())
+          .rocketChatToken(rcToken)
+          .build();
+      groupSessionList = sessionListFacade.retrieveSessionsForAuthenticatedConsultantBySessionIds(
+          consultant, singletonList(sessionId), rocketChatCredentials,
+          authenticatedUser.getRoles());
+    } else {
+      var user = userAccountProvider.retrieveValidatedUser();
+      var rocketChatCredentials = RocketChatCredentials.builder()
+          .rocketChatUserId(user.getRcUserId())
+          .rocketChatToken(rcToken)
+          .build();
+      groupSessionList = sessionListFacade.retrieveSessionsForAuthenticatedUserBySessionIds(
+          user.getUserId(), singletonList(sessionId), rocketChatCredentials,
+          authenticatedUser.getRoles());
+    }
+
+    return isNotEmpty(groupSessionList.getSessions())
+        ? new ResponseEntity<>(groupSessionList, HttpStatus.OK)
+        : new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
+
+  @Override
+  public ResponseEntity<GroupSessionListResponseDTO> getChatById(String rcToken, Long chatId) {
+    GroupSessionListResponseDTO groupSessionList;
+    if (authenticatedUser.isConsultant()) {
+      var consultant = userAccountProvider.retrieveValidatedConsultant();
+      var rocketChatCredentials = RocketChatCredentials.builder()
+          .rocketChatUserId(consultant.getRocketChatId())
+          .rocketChatToken(rcToken)
+          .build();
+      groupSessionList = sessionListFacade.retrieveChatsForConsultantByChatIds(consultant,
+          singletonList(chatId), rocketChatCredentials
+      );
+    } else {
+      var user = userAccountProvider.retrieveValidatedUser();
+      var rocketChatCredentials = RocketChatCredentials.builder()
+          .rocketChatUserId(user.getRcUserId())
+          .rocketChatToken(rcToken)
+          .build();
+      groupSessionList = sessionListFacade.retrieveChatsForUserByChatIds(singletonList(chatId),
+          rocketChatCredentials);
+    }
+
+    return isNotEmpty(groupSessionList.getSessions())
+        ? new ResponseEntity<>(groupSessionList, HttpStatus.OK)
         : new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
@@ -557,6 +654,31 @@ public class UserController implements UsersApi {
   }
 
   /**
+   * Sends email notification for reassign request to advice seeker if the property isConfirmed of
+   * {@link ReassignmentNotificationDTO} is null or false. Send email confirmation notification to
+   * consultant if property isConfirmed of {@link * ReassignmentNotificationDTO} is true.
+   *
+   * @param reassignmentNotificationDTO (required)
+   * @return {@link ResponseEntity} containing {@link HttpStatus}
+   */
+  @Override
+  public ResponseEntity<Void> sendReassignmentNotification(
+      @RequestBody ReassignmentNotificationDTO reassignmentNotificationDTO) {
+
+    if (isTrue(reassignmentNotificationDTO.getIsConfirmed())) {
+      emailNotificationFacade.sendReassignConfirmationNotification(
+          reassignmentNotificationDTO.getToConsultantId().toString(),
+          TenantContext.getCurrentTenantData());
+    } else {
+      emailNotificationFacade
+          .sendReassignRequestNotification(reassignmentNotificationDTO.getRcGroupId(),
+              TenantContext.getCurrentTenantData());
+    }
+
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  /**
    * Returns the monitoring for the given session.
    *
    * @param sessionId Session Id (required)
@@ -564,24 +686,23 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<MonitoringDTO> getMonitoring(@PathVariable Long sessionId) {
-
-    // Check if session exists
-    var session = sessionService.getSession(sessionId);
-    if (session.isEmpty()) {
+    var sessionOptional = sessionService.getSession(sessionId);
+    if (sessionOptional.isEmpty()) {
       log.warn("Bad request: Session with id {} not found", sessionId);
 
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    // Check if consultant has the right to access the session
-    if (!authenticatedUserHelper.hasPermissionForSession(session.get())) {
+    var session = sessionOptional.get();
+    var userId = authenticatedUser.getUserId();
+    if (!session.isAdvisedBy(userId) && !accountManager.isTeamAdvisedBy(sessionId, userId)) {
       log.warn("Bad request: Consultant with id {} has no permission to access session with id {}",
-          authenticatedUser.getUserId(), sessionId);
+          userId, sessionId);
 
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    var responseDTO = monitoringService.getMonitoring(session.get());
+    var responseDTO = monitoringService.getMonitoring(session);
 
     if (nonNull(responseDTO) && MapUtils.isNotEmpty(responseDTO.getProperties())) {
       return new ResponseEntity<>(responseDTO, HttpStatus.OK);
@@ -602,29 +723,22 @@ public class UserController implements UsersApi {
   @Override
   public ResponseEntity<Void> updateMonitoring(@PathVariable Long sessionId,
       @RequestBody MonitoringDTO monitoring) {
-
-    var session = sessionService.getSession(sessionId);
-
-    if (session.isPresent()) {
-
-      // Check if calling consultant has the permission to update the monitoring values
-      if (authenticatedUserHelper.hasPermissionForSession(session.get())) {
-        monitoringService.updateMonitoring(session.get().getId(), monitoring);
-        return new ResponseEntity<>(HttpStatus.OK);
-
-      } else {
-        log.warn(
-            "Unauthorized: Consultant with id {} is not authorized to update monitoring of session {}",
-            authenticatedUser.getUserId(), sessionId
-        );
-        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-      }
-
-    } else {
+    var sessionOptional = sessionService.getSession(sessionId);
+    if (sessionOptional.isEmpty()) {
       log.warn("Bad request: Session with id {} not found", sessionId);
-
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
+
+    var userId = authenticatedUser.getUserId();
+    var session = sessionOptional.get();
+    if (session.isAdvisedBy(userId) || accountManager.isTeamAdvisedBy(sessionId, userId)) {
+      monitoringService.updateMonitoring(session.getId(), monitoring);
+      return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    var message = "Unauthorized: Consultant with id {} is not authorized to update monitoring of session {}";
+    log.warn(message, userId, sessionId);
+    return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
   }
 
   /**
@@ -647,8 +761,18 @@ public class UserController implements UsersApi {
   @Override
   public ResponseEntity<ConsultantSearchResultDTO> searchConsultants(
       String query, Integer page, Integer perPage, String field, String order) {
+    var decodedInfix = URLDecoder.decode(query, StandardCharsets.UTF_8).trim();
+    var isAscending = order.equalsIgnoreCase("asc");
+    var mappedField = consultantDtoMapper.mappedFieldOf(field);
 
-    return ResponseEntity.ok(new ConsultantSearchResultDTO());
+    var resultMap = accountManager.findConsultantsByInfix(
+        decodedInfix, page - 1, perPage, mappedField, isAscending
+    );
+    var result = consultantDtoMapper.consultantSearchResultOf(
+        resultMap, query, page, perPage, field, order
+    );
+
+    return ResponseEntity.ok(result);
   }
 
   /**
@@ -679,10 +803,33 @@ public class UserController implements UsersApi {
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
-    var consultant = this.userAccountProvider.retrieveValidatedConsultantById(consultantId);
-    assignSessionFacade.assignSession(session.get(), consultant);
+    var consultantToAssign = userAccountProvider.retrieveValidatedConsultantById(consultantId);
+    var authConsultant = consultantService.getConsultant(authenticatedUser.getUserId())
+        .orElseThrow();
+    assignSessionFacade.assignSession(session.get(), consultantToAssign, authConsultant);
 
     return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<Void> removeFromSession(Long sessionId, UUID consultantId) {
+    var consultantMap = accountManager.findConsultant(consultantId.toString()).orElseThrow(() ->
+        new NotFoundException(String.format("Consultant (%s) not found", consultantId))
+    );
+
+    var sessionMap = messenger.findSession(sessionId).orElseThrow(() ->
+        new NotFoundException(String.format("Session (%s) not found", sessionId))
+    );
+
+    var chatId = consultantDtoMapper.chatIdOf(sessionMap);
+    var chatUserId = userDtoMapper.chatUserIdOf(consultantMap);
+    if (!messenger.removeUserFromSession(chatUserId, chatId)) {
+      var message = String.format(
+          "Could not remove consultant (%s) from session (%s)", consultantId, sessionId);
+      throw new InternalServerErrorException(message);
+    }
+
+    return ResponseEntity.noContent().build();
   }
 
   /**
@@ -723,6 +870,39 @@ public class UserController implements UsersApi {
     }
 
     return new ResponseEntity<>(HttpStatus.CONFLICT);
+  }
+
+  @Override
+  public ResponseEntity<Void> updateE2eInChats(E2eKeyDTO e2eKeyDTO) {
+    var userId = authenticatedUser.getUserId();
+    var user = authenticatedUser.isConsultant()
+        ? accountManager.findConsultant(userId).orElseThrow()
+        : accountManager.findAdviceSeeker(userId).orElseThrow();
+
+    var chatUserId = userDtoMapper.chatUserIdOf(user);
+    var username = authenticatedUser.getUsername();
+    if (isNull(chatUserId)) {
+      if (isAdviceSeekerWithoutEnquiryMessageWritten()) {
+        return ResponseEntity.accepted().build();
+      }
+      var message = String.format("Chat-user ID of user %s unknown", username);
+      throw new InternalServerErrorException(message);
+    }
+
+    if (isFalse(messenger.updateE2eKeys(chatUserId, e2eKeyDTO.getPublicKey()))) {
+      var message = String.format("Setting E2E keys in user %s's chats failed", username);
+      throw new InternalServerErrorException(message);
+    }
+
+    return ResponseEntity.noContent().build();
+  }
+
+  private boolean isAdviceSeekerWithoutEnquiryMessageWritten() {
+    if (authenticatedUser.isAdviceSeeker()) {
+      var adviceSeeker = userAccountProvider.retrieveValidatedUser();
+      return adviceSeeker.getCreateDate().isEqual(adviceSeeker.getUpdateDate());
+    }
+    return false;
   }
 
   /**
@@ -1024,7 +1204,7 @@ public class UserController implements UsersApi {
 
     if (Boolean.parseBoolean(validationResult.get("created"))) {
       var patchMap = userDtoMapper.mapOf(validationResult.get("email"), authenticatedUser);
-      accountManager.patchUser(patchMap).orElseThrow();
+      accountManager.patchUser(patchMap);
       return ResponseEntity.noContent().build();
     }
     if (Boolean.parseBoolean(validationResult.get("attemptsLeft"))) {
@@ -1045,16 +1225,20 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<Void> activateTwoFactorAuthByApp(OneTimePasswordDTO oneTimePasswordDTO) {
-    if (authenticatedUser.isUser() && !identityClientConfig.getOtpAllowedForUsers()) {
+    if (authenticatedUser.isAdviceSeeker() && isFalse(
+        identityClientConfig.getOtpAllowedForUsers())) {
       throw new ConflictException("2FA is disabled for user role");
     }
-    if (authenticatedUser.isConsultant() && !identityClientConfig.getOtpAllowedForConsultants()) {
+    if (authenticatedUser.isConsultant() && isFalse(
+        identityClientConfig.getOtpAllowedForConsultants())) {
       throw new ConflictException("2FA is disabled for consultant role");
     }
-    if (authenticatedUser.isSingleTenantAdmin() && !identityClientConfig.getOtpAllowedForSingleTenantAdmins()) {
+    if (authenticatedUser.isSingleTenantAdmin() && isFalse(identityClientConfig
+        .getOtpAllowedForSingleTenantAdmins())) {
       throw new ConflictException("2FA is disabled for single tenant admin role");
     }
-    if (authenticatedUser.isTenantSuperAdmin() && !identityClientConfig.getOtpAllowedForTenantSuperAdmins()) {
+    if (authenticatedUser.isTenantSuperAdmin() && isFalse(identityClientConfig
+        .getOtpAllowedForTenantSuperAdmins())) {
       throw new ConflictException("2FA is disabled for tenant admin role");
     }
 

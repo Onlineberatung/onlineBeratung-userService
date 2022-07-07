@@ -34,7 +34,7 @@ import org.springframework.test.context.ActiveProfiles;
 @DataJpaTest
 @ActiveProfiles("testing")
 @AutoConfigureTestDatabase
-public class ConsultantRepositoryIT {
+class ConsultantRepositoryIT {
 
   private static final EasyRandom easyRandom = new EasyRandom();
 
@@ -68,7 +68,7 @@ public class ConsultantRepositoryIT {
   }
 
   @Test
-  public void deleteShouldDeleteConsultantAndAppointment() {
+  void deleteShouldDeleteConsultantAndAppointment() {
     givenACreatedConsultantWithAnAppointment();
 
     assertTrue(underTest.existsById(consultant.getId()));
@@ -84,7 +84,7 @@ public class ConsultantRepositoryIT {
   }
 
   @Test
-  public void saveShouldSaveConsultantWithDefaultLanguage() {
+  void saveShouldSaveConsultantWithDefaultLanguage() {
     givenAnExistingConsultantSpeaking();
 
     var languages = consultant.getLanguages();
@@ -94,7 +94,7 @@ public class ConsultantRepositoryIT {
   }
 
   @Test
-  public void saveShouldSaveConsultantWithOneLanguage() {
+  void saveShouldSaveConsultantWithOneLanguage() {
     givenAnExistingConsultantSpeaking(LanguageCode.en);
 
     var optionalConsultant = underTest.findById(consultant.getId());
@@ -107,7 +107,7 @@ public class ConsultantRepositoryIT {
   }
 
   @Test
-  public void saveShouldSaveConsultantWithMultipleLanguages() {
+  void saveShouldSaveConsultantWithMultipleLanguages() {
     givenAnExistingConsultantSpeaking(LanguageCode.en, LanguageCode.tr);
 
     var optionalConsultant = underTest.findById(consultant.getId());
@@ -125,7 +125,7 @@ public class ConsultantRepositoryIT {
   }
 
   @Test
-  public void saveShouldSaveLessLanguages() {
+  void saveShouldSaveLessLanguages() {
     givenAnExistingConsultantSpeaking(LanguageCode.en, LanguageCode.tr);
 
     var optionalConsultant = underTest.findById(consultant.getId());
@@ -142,7 +142,7 @@ public class ConsultantRepositoryIT {
   }
 
   @Test
-  public void saveShouldEmptyLanguagesToDefault() {
+  void saveShouldEmptyLanguagesToDefault() {
     givenAnExistingConsultantSpeaking(LanguageCode.en, LanguageCode.tr);
 
     var optionalConsultant = underTest.findById(consultant.getId());
@@ -161,7 +161,7 @@ public class ConsultantRepositoryIT {
   }
 
   @Test
-  public void saveShouldNotChangeTheDefaultBehaviourOnManualSettingDefault() {
+  void saveShouldNotChangeTheDefaultBehaviourOnManualSettingDefault() {
     givenAnExistingConsultantSpeaking();
 
     var optionalConsultant = underTest.findById(consultant.getId());
@@ -205,12 +205,12 @@ public class ConsultantRepositoryIT {
     var notMatching = easyRandom.nextInt(20) + 5;
     givenConsultantsNotMatching(notMatching, infix);
 
-    var foundConsultants = underTest.findAllByInfix(infix, Pageable.unpaged());
+    var consultantPage = underTest.findAllByInfix(infix, Pageable.unpaged());
 
     int allMatching = firstNameMatching + lastNameMatching + emailMatching;
-    assertEquals(allMatching, foundConsultants.size());
+    assertEquals(allMatching, consultantPage.getTotalElements());
     assertEquals(allMatching, matchingIds.size());
-    foundConsultants.forEach(consultant ->
+    consultantPage.forEach(consultant ->
         assertTrue(matchingIds.contains(consultant.getId()))
     );
   }
@@ -221,24 +221,26 @@ public class ConsultantRepositoryIT {
     var notMatching = easyRandom.nextInt(20) + 5;
     givenConsultantsNotMatching(notMatching, infix);
 
-    var foundConsultants = underTest.findAllByInfix(infix, Pageable.unpaged());
+    var consultantPage = underTest.findAllByInfix(infix, Pageable.unpaged());
 
-    assertEquals(0, foundConsultants.size());
+    assertEquals(0, consultantPage.getTotalElements());
     assertEquals(0, matchingIds.size());
   }
 
   @Test
-  void findAllByInfixShouldBeLimitedIfLimitGiven() {
+  void findAllByInfixShouldBePagedIfPageSizeGiven() {
     var infix = RandomStringUtils.randomAlphanumeric(16);
-    var limit = easyRandom.nextInt(100);
-    givenConsultantsMatchingEmail(limit + 1, infix);
+    var pageSize = easyRandom.nextInt(100) + 1;
+    givenConsultantsMatchingEmail(pageSize + 1, infix);
 
-    var pageRequest = PageRequest.of(0, limit);
-    var foundConsultants = underTest.findAllByInfix(infix, pageRequest);
+    var pageRequest = PageRequest.of(0, pageSize);
+    var consultantPage = underTest.findAllByInfix(infix, pageRequest);
 
-    assertEquals(limit, foundConsultants.size());
-    assertEquals(limit + 1, matchingIds.size());
-    foundConsultants.forEach(consultant ->
+    assertEquals(pageSize, consultantPage.getNumberOfElements());
+    assertEquals(2, consultantPage.getTotalPages());
+    assertEquals(pageSize + 1, consultantPage.getTotalElements());
+    assertEquals(pageSize + 1, matchingIds.size());
+    consultantPage.forEach(consultant ->
         assertTrue(matchingIds.contains(consultant.getId()))
     );
   }
@@ -246,15 +248,16 @@ public class ConsultantRepositoryIT {
   @Test
   void findAllByInfixShouldBeSortedByLastNameDescIfSortGiven() {
     var infix = RandomStringUtils.randomAlphanumeric(16);
-    var limit = easyRandom.nextInt(100) + 1;
-    givenConsultantsMatchingEmail(limit, infix);
+    var pageSize = easyRandom.nextInt(100) + 1;
+    givenConsultantsMatchingEmail(pageSize, infix);
 
     var sort = Sort.by("lastName").descending();
-    var pageRequest = PageRequest.of(0, limit, sort);
-    var foundConsultants = underTest.findAllByInfix(infix, pageRequest);
+    var pageRequest = PageRequest.of(0, pageSize, sort);
+    var consultantPage = underTest.findAllByInfix(infix, pageRequest);
 
-    assertEquals(limit, foundConsultants.size());
-    assertEquals(limit, matchingIds.size());
+    assertEquals(pageSize, consultantPage.getTotalElements());
+    assertEquals(pageSize, matchingIds.size());
+    var foundConsultants = consultantPage.getContent();
     var previousLastName = foundConsultants.get(0).getLastName();
     for (var foundConsultant : foundConsultants) {
       assertTrue(matchingIds.contains(foundConsultant.getId()));
@@ -266,15 +269,16 @@ public class ConsultantRepositoryIT {
   @Test
   void findAllByInfixShouldBeSortedByFirstNameAscIfSortGiven() {
     var infix = RandomStringUtils.randomAlphanumeric(16);
-    var limit = easyRandom.nextInt(100);
-    givenConsultantsMatchingEmail(limit, infix);
+    var pageSize = easyRandom.nextInt(100) + 1;
+    givenConsultantsMatchingEmail(pageSize, infix);
 
     var sort = Sort.by("firstName").ascending();
-    var pageRequest = PageRequest.of(0, limit, sort);
-    var foundConsultants = underTest.findAllByInfix(infix, pageRequest);
+    var pageRequest = PageRequest.of(0, pageSize, sort);
+    var consultantPage = underTest.findAllByInfix(infix, pageRequest);
 
-    assertEquals(limit, foundConsultants.size());
-    assertEquals(limit, matchingIds.size());
+    assertEquals(pageSize, consultantPage.getTotalElements());
+    assertEquals(pageSize, matchingIds.size());
+    var foundConsultants = consultantPage.getContent();
     var previousFirstName = foundConsultants.get(0).getFirstName();
     for (var foundConsultant : foundConsultants) {
       assertTrue(matchingIds.contains(foundConsultant.getId()));
@@ -296,14 +300,34 @@ public class ConsultantRepositoryIT {
     var notMatching = easyRandom.nextInt(20) + 5;
     givenConsultantsNotMatching(notMatching, transformedInfix);
 
-    var foundConsultants = underTest.findAllByInfix(infix, Pageable.unpaged());
+    var consultantPage = underTest.findAllByInfix(infix, Pageable.unpaged());
 
     int allMatching = firstNameMatching + lastNameMatching + emailMatching;
-    assertEquals(allMatching, foundConsultants.size());
+    assertEquals(allMatching, consultantPage.getTotalElements());
     assertEquals(allMatching, matchingIds.size());
-    foundConsultants.forEach(consultant ->
+    consultantPage.forEach(consultant ->
         assertTrue(matchingIds.contains(consultant.getId()))
     );
+  }
+
+  @Test
+  void findAllByInfixShouldSearchAllOnStarQuery() {
+    var infix = RandomStringUtils.randomAlphanumeric(4);
+    var transformedInfix = easyRandom.nextBoolean() ? infix.toLowerCase() : infix.toUpperCase();
+    final var before = (int) underTest.countByDeleteDateIsNull();
+    var firstNameMatching = easyRandom.nextInt(20) + 5;
+    givenConsultantsMatchingFirstName(firstNameMatching, transformedInfix);
+    var lastNameMatching = easyRandom.nextInt(20) + 5;
+    givenConsultantsMatchingLastName(lastNameMatching, transformedInfix);
+    var emailMatching = easyRandom.nextInt(20) + 5;
+    givenConsultantsMatchingEmail(emailMatching, transformedInfix);
+    var notMatching = easyRandom.nextInt(20) + 5;
+    givenConsultantsNotMatching(notMatching, transformedInfix);
+
+    var consultantPage = underTest.findAllByInfix("*", Pageable.unpaged());
+
+    int allMatching = firstNameMatching + lastNameMatching + emailMatching + notMatching + before;
+    assertEquals(allMatching, consultantPage.getTotalElements());
   }
 
   private void givenConsultantsMatchingFirstName(@PositiveOrZero int count,

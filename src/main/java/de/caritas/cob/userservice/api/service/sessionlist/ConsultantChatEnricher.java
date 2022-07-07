@@ -10,7 +10,7 @@ import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserChatDTO;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.room.RoomsLastMessageDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsLastMessageDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
 import java.sql.Timestamp;
 import java.util.List;
@@ -59,40 +59,19 @@ public class ConsultantChatEnricher {
       RocketChatRoomInformation rocketChatRoomInformation, String rcUserId,
       ConsultantSessionResponseDTO consultantSessionResponseDTO) {
     UserChatDTO chat = consultantSessionResponseDTO.getChat();
-    String groupId = consultantSessionResponseDTO.getChat().getGroupId();
 
     chat.setSubscribed(isRoomSubscribedByConsultant(rocketChatRoomInformation.getUserRooms(),
         consultantSessionResponseDTO));
     chat.setMessagesRead(rocketChatRoomInformation
         .getReadMessages().getOrDefault(chat.getGroupId(), true));
 
-    if (sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
-        rocketChatRoomInformation.getLastMessagesRoom(), groupId)) {
-      updateChatWithAvailableLastMessage(rocketChatRoomInformation, rcUserId,
-          consultantSessionResponseDTO, chat, groupId);
-    } else {
-      consultantSessionResponseDTO.setLatestMessage(Timestamp.valueOf(chat.getStartDateWithTime()));
-    }
+    new AvailableLastMessageUpdater(sessionListAnalyser).updateChatWithAvailableLastMessage(chat,
+        consultantSessionResponseDTO::setLatestMessage, rocketChatRoomInformation, rcUserId);
   }
 
   private boolean isRoomSubscribedByConsultant(List<String> userRoomsList,
       ConsultantSessionResponseDTO chat) {
     return nonNull(userRoomsList) && userRoomsList.contains(chat.getChat().getGroupId());
-  }
-
-  private void updateChatWithAvailableLastMessage(
-      RocketChatRoomInformation rocketChatRoomInformation, String rcUserId,
-      ConsultantSessionResponseDTO dto, UserChatDTO chat, String groupId) {
-    RoomsLastMessageDTO roomsLastMessage = rocketChatRoomInformation
-        .getLastMessagesRoom().get(groupId);
-    chat.setLastMessage(isNotBlank(roomsLastMessage.getMessage()) ? sessionListAnalyser
-        .prepareMessageForSessionList(roomsLastMessage.getMessage(), groupId) : null);
-    chat.setMessageDate(Helper
-        .getUnixTimestampFromDate(rocketChatRoomInformation.getLastMessagesRoom().get(groupId)
-            .getTimestamp()));
-    dto.setLatestMessage(roomsLastMessage.getTimestamp());
-    chat.setAttachment(sessionListAnalyser
-        .getAttachmentFromRocketChatMessageIfAvailable(rcUserId, roomsLastMessage));
   }
 
 }

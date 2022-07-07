@@ -55,9 +55,9 @@ public class Organizer implements Organizing {
   }
 
   @Override
-  public List<Map<String, Object>> findAllTodaysAndFutureAppointments() {
+  public List<Map<String, Object>> findAllTodaysAndFutureAppointments(String userId) {
     var startOfDay = clock.instant().truncatedTo(ChronoUnit.DAYS);
-    var futureAppointments = appointmentRepository.findAllOrderByDatetimeAfter(startOfDay);
+    var futureAppointments = appointmentRepository.findAllOrderByDatetimeAfter(startOfDay, userId);
 
     return futureAppointments.stream()
         .map(mapper::mapOf)

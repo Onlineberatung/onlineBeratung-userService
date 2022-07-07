@@ -3,21 +3,23 @@ package de.caritas.cob.userservice.api.facade;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+import de.caritas.cob.userservice.api.actions.chat.ChatReCreator;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.concurrent.atomic.AtomicReference;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -28,11 +30,12 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class JoinAndLeaveChatFacade {
 
-  private final @NonNull ChatService chatService;
-  private final @NonNull ChatPermissionVerifier chatPermissionVerifier;
-  private final @NonNull ConsultantService consultantService;
-  private final @NonNull UserService userService;
-  private final @NonNull RocketChatService rocketChatService;
+  private final ChatService chatService;
+  private final ChatPermissionVerifier chatPermissionVerifier;
+  private final ConsultantService consultantService;
+  private final UserService userService;
+  private final RocketChatService rocketChatService;
+  private final ChatReCreator chatReCreator;
 
   /**
    * Join a chat.
@@ -63,8 +66,26 @@ public class JoinAndLeaveChatFacade {
 
     try {
       rocketChatService.removeUserFromGroup(rcUserId, chat.getGroupId());
-    } catch (RocketChatRemoveUserFromGroupException e) {
+      if (rocketChatService.getStandardMembersOfGroup(chat.getGroupId()).isEmpty()) {
+        deleteMessengerChat(chat.getGroupId());
+        if (chat.isRepetitive()) {
+          var rcGroupId = chatReCreator.recreateMessengerChat(chat);
+          chatReCreator.updateAsNextChat(chat, rcGroupId);
+        } else {
+          chatService.deleteChat(chat);
+        }
+      }
+    } catch (RocketChatRemoveUserFromGroupException
+             | RocketChatUserNotInitializedException
+             | RocketChatGetGroupMembersException e) {
       throw new InternalServerErrorException(e.getMessage(), LogService::logInternalServerError);
+    }
+  }
+
+  private void deleteMessengerChat(String groupId) {
+    if (!rocketChatService.deleteGroupAsSystemUser(groupId)) {
+      var message = String.format("Could not delete Rocket.Chat group with id %s", groupId);
+      throw new InternalServerErrorException(message);
     }
   }
 

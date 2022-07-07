@@ -34,7 +34,7 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostWelcome
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.messageservice.generated.web.MessageControllerApi;
 import de.caritas.cob.userservice.messageservice.generated.web.model.AliasOnlyMessageDTO;
@@ -68,6 +68,7 @@ public class MessageServiceProviderTest {
   @Mock
   private SecurityHeaderSupplier securityHeaderSupplier;
 
+  @SuppressWarnings("unused")
   @Mock
   private TenantHeaderSupplier tenantHeaderSupplier;
 
@@ -81,10 +82,10 @@ public class MessageServiceProviderTest {
     when(securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders()).thenReturn(headers);
     doThrow(restClientException).when(this.messageControllerApi)
         .createMessage(anyString(), anyString(), anyString(), any());
+    var rocketChatData = new RocketChatData(MESSAGE, RC_CREDENTIALS, RC_GROUP_ID);
 
     try {
-      this.messageServiceProvider
-          .postEnquiryMessage(MESSAGE, RC_CREDENTIALS, RC_GROUP_ID, exceptionInformation);
+      this.messageServiceProvider.postEnquiryMessage(rocketChatData, exceptionInformation);
       fail("Expected exception: RocketChatPostMessageException");
     } catch (RocketChatPostMessageException exception) {
       assertTrue("Excepted RocketChatPostMessageException thrown", true);
@@ -100,9 +101,9 @@ public class MessageServiceProviderTest {
     HttpHeaders headers = mock(HttpHeaders.class);
     when(securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders()).thenReturn(headers);
     ArgumentCaptor<MessageDTO> captor = ArgumentCaptor.forClass(MessageDTO.class);
+    var rocketChatData = new RocketChatData(MESSAGE, RC_CREDENTIALS, RC_GROUP_ID);
 
-    this.messageServiceProvider
-        .postEnquiryMessage(MESSAGE, RC_CREDENTIALS, RC_GROUP_ID, exceptionInformation);
+    this.messageServiceProvider.postEnquiryMessage(rocketChatData, exceptionInformation);
 
     verify(messageControllerApi, times(1))
         .createMessage(eq(RC_CREDENTIALS.getRocketChatToken()),

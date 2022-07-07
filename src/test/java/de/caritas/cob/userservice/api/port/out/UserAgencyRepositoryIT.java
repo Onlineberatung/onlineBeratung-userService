@@ -20,7 +20,7 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 @Import(JpaAuditingConfiguration.class)
-public class UserAgencyRepositoryIT {
+class UserAgencyRepositoryIT {
 
   private static final EasyRandom easyRandom = new EasyRandom();
 
@@ -40,7 +40,7 @@ public class UserAgencyRepositoryIT {
   }
 
   @Test
-  public void saveShouldWriteAuditingData() {
+  void saveShouldWriteAuditingData() {
     givenPersistedUserAgency();
 
     assertNotNull(userAgency.getCreateDate());

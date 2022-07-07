@@ -404,6 +404,9 @@
 								<importMapping>
 									SessionConsultantForUserDTO=${adapters.web.dto.path}.SessionConsultantForUserDTO
 								</importMapping>
+								<importMapping>
+									GroupSessionConsultantDTO=${adapters.web.dto.path}.GroupSessionConsultantDTO
+								</importMapping>
 								<importMapping>UserChatDTO=${adapters.web.dto.path}.UserChatDTO</importMapping>
 								<importMapping>UserDataResponseDTO=${adapters.web.dto.path}.UserDataResponseDTO
 								</importMapping>
@@ -419,6 +422,9 @@
 								<typeMapping>SessionUserDTO=${adapters.web.dto.path}.SessionUserDTO</typeMapping>
 								<typeMapping>
 									SessionConsultantForUserDTO=${adapters.web.dto.path}.SessionConsultantForUserDTO
+								</typeMapping>
+								<typeMapping>
+									GroupSessionConsultantDTO=${adapters.web.dto.path}.GroupSessionConsultantDTO
 								</typeMapping>
 								<typeMapping>UserChatDTO=${adapters.web.dto.path}.UserChatDTO</typeMapping>
 								<typeMapping>UserDataResponseDTO=${adapters.web.dto.path}.UserDataResponseDTO
@@ -467,8 +473,8 @@
 							</configOptions>
 							<inputSpec>${project.basedir}/api/useradminservice.yaml</inputSpec>
 							<generatorName>spring</generatorName>
-							<apiPackage>${project.groupId}.${project.artifactId}.generated.api.admin.controller</apiPackage>
-							<modelPackage>${project.groupId}.${project.artifactId}.api.admin.model</modelPackage>
+							<apiPackage>${adapters.web.generated.path}.controller</apiPackage>
+							<modelPackage>${adapters.web.dto.path}</modelPackage>
 							<generateSupportingFiles>true</generateSupportingFiles>
 							<output>target/generated-sources</output>
 							<typeMappings>
@@ -767,6 +773,31 @@
 							</apiPackage>
 							<modelPackage>
 								${project.groupId}.${project.artifactId}.tenantadminservice.generated.web.model
+							</modelPackage>
+						</configuration>
+					</execution>
+					<execution>
+						<id>topic-service-client-model</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<configOptions>
+								<sourceFolder>/</sourceFolder>
+								<library>resttemplate</library>
+								<dateLibrary>java8</dateLibrary>
+							</configOptions>
+							<inputSpec>${project.basedir}/services/topicservice.yaml</inputSpec>
+							<generatorName>java</generatorName>
+							<generateApis>true</generateApis>
+							<generateApiTests>false</generateApiTests>
+							<generateModelTests>false</generateModelTests>
+							<apiPackage>
+								${project.groupId}.${project.artifactId}.topicservice.generated.web
+							</apiPackage>
+							<modelPackage>
+								${project.groupId}.${project.artifactId}.topicservice.generated.web.model
 							</modelPackage>
 						</configuration>
 					</execution>

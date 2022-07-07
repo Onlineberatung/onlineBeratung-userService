@@ -1,20 +1,25 @@
 package de.caritas.cob.userservice.api.testConfig;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatClient;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatMapper;
+import de.caritas.cob.userservice.api.adapters.rocketchat.config.RocketChatConfig;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupDTO;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupResponseDTO;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.login.DataDTO;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.login.LoginResponseDTO;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.login.MeDTO;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupResponseDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.DataDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.LoginResponseDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.MeDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+@Slf4j
 @TestConfiguration
 public class RocketChatTestConfig {
 
@@ -23,8 +28,11 @@ public class RocketChatTestConfig {
 
   @Bean
   public RocketChatService rocketChatService(RestTemplate restTemplate,
-      RocketChatCredentialsProvider rocketChatCredentialsProvider) {
-    return new RocketChatService(restTemplate, rocketChatCredentialsProvider) {
+      RocketChatCredentialsProvider rocketChatCredentialsProvider,
+      RocketChatConfig rocketChatConfig, RocketChatClient rocketChatClient,
+      RocketChatMapper rocketChatMapper) {
+    return new RocketChatService(restTemplate, rocketChatCredentialsProvider, rocketChatClient,
+        rocketChatConfig, rocketChatMapper) {
       @Override
       public ResponseEntity<LoginResponseDTO> loginUserFirstTime(String username, String password) {
         var loginResponseDTO = new LoginResponseDTO();
@@ -62,14 +70,17 @@ public class RocketChatTestConfig {
 
       @Override
       public void addTechnicalUserToGroup(String rcGroupId) {
+        log.info("RocketChatTestConfig.addTechnicalUserToGroup({}) called", rcGroupId);
       }
 
       @Override
       public void removeUserFromGroup(String rcUserId, String rcGroupId) {
+        log.info("RocketChatTestConfig.removeUserFromGroup({},{}) called", rcUserId, rcGroupId);
       }
 
       @Override
       public void removeTechnicalUserFromGroup(String rcGroupId) {
+        log.info("RocketChatTestConfig.removeTechnicalUserFromGroup({}) called", rcGroupId);
       }
 
       @Override

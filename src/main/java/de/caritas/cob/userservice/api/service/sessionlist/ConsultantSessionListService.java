@@ -16,7 +16,10 @@ import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,6 +32,48 @@ public class ConsultantSessionListService {
   private final @NonNull ChatService chatService;
   private final @NonNull ConsultantSessionEnricher consultantSessionEnricher;
   private final @NonNull ConsultantChatEnricher consultantChatEnricher;
+
+  /**
+   * @param consultant  {@link Consultant}
+   * @param rcGroupIds  rocket chat group or feedback group IDs
+   * @param roles       roles of the consultant
+   * @param rcAuthToken rocket chat authentication token
+   * @return List of {@link ConsultantSessionResponseDTO}
+   */
+  public List<ConsultantSessionResponseDTO> retrieveSessionsForConsultantAndGroupIds(
+      Consultant consultant, List<String> rcGroupIds,
+      Set<String> roles, String rcAuthToken) {
+    var groupIds = new HashSet<>(rcGroupIds);
+    var sessions = sessionService.getSessionsByConsultantAndGroupOrFeedbackGroupIds(consultant,
+        groupIds, roles);
+    var chats = chatService.getChatSessionsForConsultantByGroupIds(groupIds);
+    return mergeConsultantSessionsAndChats(consultant, sessions, chats, rcAuthToken);
+  }
+
+  /**
+   * @param consultant  {@link Consultant}
+   * @param sessionIds  session IDs
+   * @param roles       roles of the consultant
+   * @param rcAuthToken rocket chat authentication token
+   * @return List of {@link ConsultantSessionResponseDTO}
+   */
+  public List<ConsultantSessionResponseDTO> retrieveSessionsForConsultantAndSessionIds(
+      Consultant consultant, List<Long> sessionIds, Set<String> roles, String rcAuthToken) {
+    var uniqueSessionIds = new HashSet<>(sessionIds);
+    var sessions = sessionService.getSessionsByIds(consultant, uniqueSessionIds, roles);
+    var groupIds = sessions.stream()
+        .map(sessionResponse -> sessionResponse.getSession().getGroupId())
+        .collect(Collectors.toSet());
+    var chats = chatService.getChatSessionsForConsultantByGroupIds(groupIds);
+    return mergeConsultantSessionsAndChats(consultant, sessions, chats, rcAuthToken);
+  }
+
+  public List<ConsultantSessionResponseDTO> retrieveChatsForConsultantAndChatIds(
+      Consultant consultant, List<Long> chatIds, String rcAuthToken) {
+    var uniqueChatIds = new HashSet<>(chatIds);
+    var chats = chatService.getChatSessionsForConsultantByIds(uniqueChatIds);
+    return updateConsultantChatValues(chats, rcAuthToken, consultant);
+  }
 
   /**
    * Returns a list of {@link ConsultantSessionResponseDTO} for the specified consultant id and

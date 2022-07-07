@@ -68,7 +68,8 @@ public class ConsultantDataProviderIT {
   @Test
   public void retrieveData_Should_returnDataWithHasArchiveFalse_When_ConsultantHasNoRegisteredSessions() {
     var consultant = easyRandom.nextObject(Consultant.class);
-    consultant.setId("34c3x5b1-0677-4fd2-a7ea-56a71aefd099");
+
+    consultant.setId("42c3x532-0677-4fd2-a7ea-56a71aefd088");
     when(agencyService.getAgencies(any()))
         .thenReturn(List.of(new AgencyDTO().consultingType(1)));
     when(consultingTypeManager.getConsultingTypeSettings(anyInt()))

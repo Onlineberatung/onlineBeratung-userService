@@ -1,20 +1,22 @@
 package de.caritas.cob.userservice.api.service.archive;
 
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.SESSION_ID;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.AccountManager;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
+import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,15 +33,19 @@ public class SessionArchiveServiceTest {
   @Mock
   SessionRepository sessionRepository;
   @Mock
-  ConsultantAgencyRepository consultantAgencyRepository;
-  @Mock
+  @SuppressWarnings("unused")
   AuthenticatedUser authenticatedUser;
-  @Mock
-  SessionArchivePermissionChecker sessionArchivePermissionChecker;
   @Mock
   SessionArchiveValidator sessionArchiveValidator;
   @Mock
+  @SuppressWarnings("unused")
   RocketChatService rocketChatService;
+  @Mock
+  @SuppressWarnings("unused")
+  ConsultantAgencyService consultantAgencyService;
+  @Mock
+  @SuppressWarnings("unused")
+  AccountManager accountManager;
 
   @Test(expected = NotFoundException.class)
   public void archiveSession_Should_ThrowNotFoundException_WhenSessionIsNotFound() {
@@ -53,6 +59,7 @@ public class SessionArchiveServiceTest {
   public void archiveSession_Should_ThrowConflictException_WhenSessionShouldBeArchivedAndIsNotInProgress() {
 
     Session session = Mockito.mock(Session.class);
+    when(session.isAdvised(any())).thenReturn(true);
     when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
     doThrow(new ConflictException("Conflict"))
         .when(sessionArchiveValidator)
@@ -67,9 +74,6 @@ public class SessionArchiveServiceTest {
 
     Session session = Mockito.mock(Session.class);
     when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
-    doThrow(new ForbiddenException("Forbidden"))
-        .when(sessionArchivePermissionChecker)
-        .checkPermission(session);
 
     sessionArchiveService.archiveSession(SESSION_ID);
 
@@ -80,6 +84,7 @@ public class SessionArchiveServiceTest {
   public void archiveSession_Should_ChangeStatusOfSession_WhenConsultantHasPermission() {
 
     Session session = Mockito.mock(Session.class);
+    when(session.isAdvised(any())).thenReturn(true);
     when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
 
     sessionArchiveService.archiveSession(SESSION_ID);
@@ -92,9 +97,6 @@ public class SessionArchiveServiceTest {
 
     Session session = Mockito.mock(Session.class);
     when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
-    doThrow(new ForbiddenException("Forbidden"))
-        .when(sessionArchivePermissionChecker)
-        .checkPermission(session);
 
     sessionArchiveService.archiveSession(SESSION_ID);
 
@@ -105,6 +107,7 @@ public class SessionArchiveServiceTest {
   public void archiveSession_Should_ChangeStatusOfSession_WhenUserHasPermission() {
 
     Session session = Mockito.mock(Session.class);
+    when(session.isAdvised(any())).thenReturn(true);
     when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
 
     sessionArchiveService.archiveSession(SESSION_ID);
@@ -122,6 +125,7 @@ public class SessionArchiveServiceTest {
   public void dearchiveSession_Should_ThrowConflictException_WhenSessionShouldBeReactivatedAndIsAlreadyInProgress() {
 
     Session session = Mockito.mock(Session.class);
+    when(session.isAdvised(any())).thenReturn(true);
     when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
     doThrow(new ConflictException("Conflict"))
         .when(sessionArchiveValidator)
@@ -137,9 +141,6 @@ public class SessionArchiveServiceTest {
 
     Session session = Mockito.mock(Session.class);
     when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
-    doThrow(new ForbiddenException("Forbidden"))
-        .when(sessionArchivePermissionChecker)
-        .checkPermission(session);
 
     sessionArchiveService.dearchiveSession(SESSION_ID);
 
@@ -151,9 +152,6 @@ public class SessionArchiveServiceTest {
 
     Session session = Mockito.mock(Session.class);
     when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
-    doThrow(new ForbiddenException("Forbidden"))
-        .when(sessionArchivePermissionChecker)
-        .checkPermission(session);
 
     sessionArchiveService.dearchiveSession(SESSION_ID);
 
@@ -165,9 +163,6 @@ public class SessionArchiveServiceTest {
 
     Session session = Mockito.mock(Session.class);
     when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
-    doThrow(new ForbiddenException("Forbidden"))
-        .when(sessionArchiveValidator)
-        .isValidForDearchiving(session);
 
     sessionArchiveService.dearchiveSession(SESSION_ID);
 
@@ -176,8 +171,8 @@ public class SessionArchiveServiceTest {
 
   @Test
   public void dearchiveSession_Should_ChangeStatusOfSession_WhenConsultantHasPermission() {
-
     Session session = Mockito.mock(Session.class);
+    when(session.isAdvised(any())).thenReturn(true);
     when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
 
     sessionArchiveService.dearchiveSession(SESSION_ID);
@@ -190,9 +185,6 @@ public class SessionArchiveServiceTest {
 
     Session session = Mockito.mock(Session.class);
     when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
-    doThrow(new ForbiddenException("Forbidden"))
-        .when(sessionArchiveValidator)
-        .isValidForDearchiving(session);
 
     sessionArchiveService.dearchiveSession(SESSION_ID);
 
@@ -203,6 +195,7 @@ public class SessionArchiveServiceTest {
   public void dearchiveSession_Should_ChangeStatusOfSession_WhenUserHasPermission() {
 
     Session session = Mockito.mock(Session.class);
+    when(session.isAdvised(any())).thenReturn(true);
     when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
 
     sessionArchiveService.dearchiveSession(SESSION_ID);

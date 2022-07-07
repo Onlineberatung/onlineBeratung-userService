@@ -4,9 +4,11 @@ import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc
 import static de.caritas.cob.userservice.api.model.Session.RegistrationType.ANONYMOUS;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
-import static org.springframework.web.context.request.RequestContextHolder.currentRequestAttributes;
 
 import com.neovisionaries.i18n.LanguageCode;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupResponseDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateEnquiryMessageResponseDTO;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.container.RocketChatCredentials;
@@ -23,16 +25,15 @@ import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.RocketChatRoomNameGenerator;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupResponseDTO;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.EnquiryData;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.service.message.RocketChatData;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
@@ -40,13 +41,11 @@ import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.Exte
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import javax.servlet.http.HttpServletRequest;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 /*
  * Facade for capsuling the steps for saving the enquiry message.
@@ -74,19 +73,15 @@ public class CreateEnquiryMessageFacade {
    * Creates the private Rocket.Chat group, initializes the session monitoring and saves the enquiry
    * message in Rocket.Chat.
    *
-   * @param user                  {@link User}
-   * @param sessionId             {@link Session#getId()}
-   * @param message               enquiry message
-   * @param rocketChatCredentials {@link RocketChatCredentials}
+   * @param enquiryData data necessary for creating the enquiry message
    */
-  public CreateEnquiryMessageResponseDTO createEnquiryMessage(User user, Long sessionId,
-      String message, String language, RocketChatCredentials rocketChatCredentials) {
-
+  public CreateEnquiryMessageResponseDTO createEnquiryMessage(EnquiryData enquiryData) {
     try {
+      checkIfKeycloakAndRocketChatUsernamesMatch(
+          enquiryData.getRocketChatCredentials().getRocketChatUserId(), enquiryData.getUser());
 
-      checkIfKeycloakAndRocketChatUsernamesMatch(rocketChatCredentials.getRocketChatUserId(), user);
-
-      var session = fetchSessionForEnquiryMessage(sessionId, user);
+      var session = fetchSessionForEnquiryMessage(enquiryData.getSessionId(),
+          enquiryData.getUser());
       checkIfNotAnonymousEnquiry(session);
       checkIfEnquiryMessageIsAlreadyWrittenForSession(session);
 
@@ -97,7 +92,7 @@ public class CreateEnquiryMessageFacade {
           consultantAgencyService.findConsultantsByAgencyId(session.getAgencyId());
 
       String rcGroupId = createRocketChatRoomAndAddUsers(session, agencyList,
-          rocketChatCredentials);
+          enquiryData.getRocketChatCredentials());
       String rcFeedbackGroupId = retrieveRcFeedbackGroupIdIfConsultingTypeHasFeedbackChat(session,
           rcGroupId, agencyList, extendedConsultingTypeResponseDTO);
 
@@ -107,36 +102,37 @@ public class CreateEnquiryMessageFacade {
           .rcFeedbackGroupId(rcFeedbackGroupId)
           .build();
 
-      saveRocketChatIdForUser(user, rocketChatCredentials, createEnquiryExceptionInformation);
-
-      messageServiceProvider.postEnquiryMessage(message, rocketChatCredentials, rcGroupId,
+      saveRocketChatIdForUser(enquiryData.getUser(), enquiryData.getRocketChatCredentials(),
           createEnquiryExceptionInformation);
-      messageServiceProvider.postWelcomeMessageIfConfigured(rcGroupId, user,
+
+      var rocketChatData = new RocketChatData(enquiryData.getMessage(),
+          enquiryData.getRocketChatCredentials(), rcGroupId, enquiryData.getType(),
+          enquiryData.getOrg());
+      final var messageResponse = messageServiceProvider.postEnquiryMessage(
+          rocketChatData,
+          createEnquiryExceptionInformation);
+      messageServiceProvider.postWelcomeMessageIfConfigured(rcGroupId, enquiryData.getUser(),
           extendedConsultingTypeResponseDTO, createEnquiryExceptionInformation);
       messageServiceProvider.postFurtherStepsOrSaveSessionDataMessageIfConfigured(rcGroupId,
           extendedConsultingTypeResponseDTO, createEnquiryExceptionInformation);
 
-      updateSession(session, language, rcGroupId, rcFeedbackGroupId,
+      updateSession(session, enquiryData.getLanguage(), rcGroupId, rcFeedbackGroupId,
           createEnquiryExceptionInformation);
 
-      emailNotificationFacade
-          .sendNewEnquiryEmailNotification(session, TenantContext.getCurrentTenantData());
+      emailNotificationFacade.sendNewEnquiryEmailNotification(session,
+          TenantContext.getCurrentTenantData());
 
       return new CreateEnquiryMessageResponseDTO()
           .rcGroupId(rcGroupId)
-          .sessionId(sessionId);
+          .sessionId(enquiryData.getSessionId())
+          .t(messageResponse.getT());
 
     } catch (CreateEnquiryException exception) {
-      doRollback(exception.getExceptionInformation(), rocketChatCredentials);
+      doRollback(exception.getExceptionInformation(), enquiryData.getRocketChatCredentials());
       log.error("CreateEnquiryMessageFacade error: ", exception);
       throw new InternalServerErrorException(exception.getMessage(), exception);
     }
 
-  }
-
-
-  private HttpServletRequest getHttpServletRequest() {
-    return ((ServletRequestAttributes) currentRequestAttributes()).getRequest();
   }
 
   private void checkIfKeycloakAndRocketChatUsernamesMatch(String rcUserId, User user) {

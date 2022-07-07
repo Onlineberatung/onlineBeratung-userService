@@ -227,6 +227,86 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /users/sessions/room:
+    get:
+      tags:
+        - user-controller
+      summary: 'Returns sessions for given RocketChat group or feedback group IDs.
+      [Authorization: Role: user, consultant]'
+      operationId: getSessionsForGroupOrFeedbackGroupIds
+      parameters:
+        - name: RCToken
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: rcGroupIds[]
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+      responses:
+        200:
+          description: OK - successful operation
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/GroupSessionListResponseDTO'
+        204:
+          description: NO CONTENT - no sessions for given group ids
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+  /users/sessions/room/{sessionId}:
+    get:
+      tags:
+        - user-controller
+      summary: 'Returns the session for given ID.
+      [Authorization: Role: user, consultant]'
+      operationId: getSessionForId
+      parameters:
+        - name: RCToken
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: sessionId
+          in: path
+          description: Session Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK - successful operation
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/GroupSessionListResponseDTO'
+        204:
+          description: NO CONTENT - no sessions for given session ID
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /users/sessions/{sessionId}/archive:
     put:
       tags:
@@ -739,6 +819,30 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /users/mails/reassignment:
+    post:
+      tags:
+        - user-controller
+      summary: 'Sends a notification e-mail that a reassignment has been requested/confirmed
+          [Authorization: Role: user, consultant]'
+      operationId: sendReassignmentNotification
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/ReassignmentNotificationDTO'
+        required: true
+      responses:
+        200:
+          description: successful operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - invalid token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /users/sessions/monitoring/{sessionId}:
     put:
       tags:
@@ -847,6 +951,7 @@ paths:
         - name: query
           in: query
           description: URL-encoded infix to search for in first name, last name, or email.
+            A non-encoded star symbol searches for all.
           required: true
           schema:
             type: string
@@ -870,9 +975,9 @@ paths:
           description: field to sort by
           schema:
             type: string
-            enum: [ firstName, lastName, email ]
-            default: firstName
-            pattern: '^(firstName|lastName|email)$'
+            enum: [ FIRSTNAME, LASTNAME, EMAIL ]
+            default: FIRSTNAME
+            pattern: '^(FIRSTNAME|LASTNAME|EMAIL)$'
         - name: order
           in: query
           description: sort order
@@ -929,6 +1034,44 @@ paths:
             agency of session is not assigned to consultant
         409:
           description: CONFLICT - session is already assigned to this consultant
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+    delete:
+      tags:
+        - user-controller
+      summary: 'Remove a consultant from a session 
+        [Auth: ASSIGN_CONSULTANT_TO_ENQUIRY or ASSIGN_CONSULTANT_TO_SESSION]'
+      operationId: removeFromSession
+      parameters:
+        - name: sessionId
+          in: path
+          description: Session Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: consultantId
+          in: path
+          description: Consultant Id
+          required: true
+          schema:
+            type: string
+            format: UUID
+      responses:
+        204:
+          description: NO CONTENT - successful operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        404:
+          description: NOT FOUND - the consultant or the session does not exist
+        409:
+          description: CONFLICT - the session is not assigned to this consultant
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
@@ -1049,6 +1192,36 @@ paths:
           description: FORBIDDEN - no/invalid role/authorization, CSRF token or consultant without permission for given session
         404:
           description: NOT FOUND - Session not found
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+  /users/chat/e2e:
+    put:
+      tags:
+        - user-controller
+      summary: 'Updates E2E keys in all user''s chats [authorities: consultant or user]'
+      operationId: updateE2eInChats
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/E2eKeyDTO'
+        required: true
+      responses:
+        202:
+          description: 'ACCEPTED - request processed but update not executed. This status is being
+          returned if a new registered advice seeker wants to update e2e in chats. The therfore
+          required user chat id for rocket chat is being initialized as soon as the enquiry
+          message has been written!'
+        204:
+          description: NO CONTENT - successful operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request resp. provided password is wrong
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
@@ -1359,6 +1532,45 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /users/chat/room/{chatId}:
+    get:
+      tags:
+        - user-controller
+      summary: 'Returns the chat for given ID.
+      [Authorization: Role: user, consultant]'
+      operationId: getChatById
+      parameters:
+        - name: RCToken
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: chatId
+          in: path
+          description: Chat Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK - successful operation
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/GroupSessionListResponseDTO'
+        204:
+          description: NO CONTENT - no chat for given chat ID
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /users/account:
     delete:
       tags:
@@ -1584,6 +1796,9 @@ components:
         consultantId:
           type: string
           description: UUID
+        mainTopicId:
+          type: integer
+          example: 15
 
     SessionDataDTO:
       allOf:
@@ -1652,6 +1867,57 @@ components:
         latestMessage:
           $ref: '#/components/schemas/Date'
 
+    GroupSessionListResponseDTO:
+      type: object
+      properties:
+        sessions:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupSessionResponseDTO'
+
+    GroupSessionResponseDTO:
+      type: object
+      required:
+        - SessionDTO
+        - UserChatDTO
+      properties:
+        session:
+          $ref: '#/components/schemas/SessionDTO'
+        chat:
+          $ref: '#/components/schemas/UserChatDTO'
+        user:
+          $ref: '#/components/schemas/SessionUserDTO'
+        consultant:
+          $ref: '#/components/schemas/GroupSessionConsultantDTO'
+        agency:
+          $ref: '#/components/schemas/AgencyDTO'
+        latestMessage:
+          $ref: '#/components/schemas/Date'
+
+    GroupSessionConsultantDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 153918
+        username:
+          type: string
+          example: beraterXYZ
+        displayName:
+          type: string
+        isAbsent:
+          type: boolean
+          example: true
+        absenceMessage:
+          type: string
+          example: Bin nicht da
+        firstName:
+          type: string
+          example: Max
+        lastName:
+          type: string
+          example: Mustermann
+
     Date:
       type: object
       writeOnly: true
@@ -1702,9 +1968,12 @@ components:
           type: string
           example: 8ertjlasdKJA
           description: asker Rocket.Chat ID
+        e2eLastMessage:
+          $ref: '#/components/schemas/LastMessageDTO'
         lastMessage:
           type: string
-          example: Thanks for the answer
+        lastMessageType:
+          $ref: '#/components/schemas/MessageType'
         messageDate:
           type: integer
           format: int64
@@ -1731,6 +2000,8 @@ components:
           $ref: '#/components/schemas/SessionAttachmentDTO'
         videoCallMessageDTO:
           $ref: '#/components/schemas/VideoCallMessageDTO'
+        topic:
+          $ref: '#/components/schemas/SessionTopicDTO'
 
     SessionAttachmentDTO:
       type: object
@@ -1744,6 +2015,25 @@ components:
         fileReceived:
           type: boolean
           example: true
+
+    SessionTopicDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 12132
+        name:
+          type: string
+          example: "Topic name"
+          maxLength: 100
+        description:
+          type: string
+          example: "Description"
+          maxLength: 200
+        status:
+          type: string
+          example: "Active"
+          maxLength: 10
 
     AliasMessageDTO:
       type: object
@@ -1778,6 +2068,11 @@ components:
         rcUserId:
           type: string
           example: "ag89h3tjkerg94t"
+        t:
+          type: string
+        org:
+          type: string
+          example: "Lorem ipsum dolor sit amet, consetetur..."
 
     VideoCallMessageDTO:
       type: object
@@ -1809,6 +2104,16 @@ components:
         - "FINISHED_CONVERSATION"
         - "USER_MUTED"
         - "USER_UNMUTED"
+        - "E2EE_ACTIVATED"
+        - "MASTER_KEY_LOST"
+
+    LastMessageDTO:
+      type: object
+      properties:
+        msg:
+          type: string
+        t:
+          type: string
 
     ConsultantSessionDTO:
       type: object
@@ -1907,6 +2212,8 @@ components:
         consultingType:
           type: integer
           example: 0
+        e2eLastMessage:
+          $ref: '#/components/schemas/LastMessageDTO'
         lastMessage:
           type: string
           example: Thanks for the answer
@@ -2006,6 +2313,11 @@ components:
           example: Lorem ipsum dolor sit amet, consetetur...
         language:
           $ref: '#/components/schemas/LanguageCode'
+        t:
+          type: string
+        org:
+          type: string
+          example: "Lorem ipsum dolor sit amet, consetetur..."
 
     CreateEnquiryMessageResponseDTO:
       type: object
@@ -2016,6 +2328,8 @@ components:
         rcGroupId:
           type: string
           example: fR2Rz7dmWmHdXE8uz
+        t:
+          type: string
 
     AbsenceDTO:
       type: object
@@ -2103,6 +2417,12 @@ components:
           type: boolean
           example: true
           description: "Is true if the walk through is enabled for the user"
+        emailToggles:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/EmailToggle'
 
     PatchUserDTO:
       type: object
@@ -2119,6 +2439,13 @@ components:
           type: boolean
           example: true
           description: indicates should the walkt hrough be enabled
+        emailToggles:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/EmailToggle'
+
     UpdateConsultantDTO:
       type: object
       required:
@@ -2150,15 +2477,15 @@ components:
       type: string
       description: ISO 639-1 code
       enum: [
-        aa, ab, ae, af, ak, am, an, ar, as, av, ay, az, ba, be, bg, bh, bi, bm, bn, bo, br,
-        bs, ca, ce, ch, co, cr, cs, cu, cv, cy, da, de, dv, dz, ee, el, en, eo, es, et, eu,
-        fa, ff, fi, fj, fo, fr, fy, ga, gd, gl, gn, gu, gv, ha, he, hi, ho, hr, ht, hu, hy,
-        hz, ia, id, ie, ig, ii, ik, io, is, it, iu, ja, jv, ka, kg, ki, kj, kk, kl, km, kn,
-        ko, kr, ks, ku, kv, kw, ky, la, lb, lg, li, ln, lo, lt, lu, lv, mg, mh, mi, mk, ml,
-        mn, mr, ms, mt, my, na, nb, nd, ne, ng, nl, nn, no, nr, nv, ny, oc, oj, om, or, os,
-        pa, pi, pl, ps, pt, qu, rm, rn, ro, ru, rw, sa, sc, sd, se, sg, si, sk, sl, sm, sn,
-        so, sq, sr, ss, st, su, sv, sw, ta, te, tg, th, ti, tk, tl, tn, to, tr, ts, tt, tw,
-        ty, ug, uk, ur, uz, ve, vi, vo, wa, wo, xh, yi, yo, za, zh, zu
+          aa, ab, ae, af, ak, am, an, ar, as, av, ay, az, ba, be, bg, bh, bi, bm, bn, bo, br,
+          bs, ca, ce, ch, co, cr, cs, cu, cv, cy, da, de, dv, dz, ee, el, en, eo, es, et, eu,
+          fa, ff, fi, fj, fo, fr, fy, ga, gd, gl, gn, gu, gv, ha, he, hi, ho, hr, ht, hu, hy,
+          hz, ia, id, ie, ig, ii, ik, io, is, it, iu, ja, jv, ka, kg, ki, kj, kk, kl, km, kn,
+          ko, kr, ks, ku, kv, kw, ky, la, lb, lg, li, ln, lo, lt, lu, lv, mg, mh, mi, mk, ml,
+          mn, mr, ms, mt, my, na, nb, nd, ne, ng, nl, nn, no, nr, nv, ny, oc, oj, om, or, os,
+          pa, pi, pl, ps, pt, qu, rm, rn, ro, ru, rw, sa, sc, sd, se, sg, si, sk, sl, sm, sn,
+          so, sq, sr, ss, st, su, sv, sw, ta, te, tg, th, ti, tk, tl, tn, to, tr, ts, tt, tw,
+          ty, ug, uk, ur, uz, ve, vi, vo, wa, wo, xh, yi, yo, za, zh, zu
       ]
 
     LanguageResponseDTO:
@@ -2338,6 +2665,16 @@ components:
         utcOffset:
           type: string
 
+    E2eKeyDTO:
+      type: object
+      required:
+        - publicKey
+      properties:
+        publicKey:
+          type: string
+          minLength: 342
+          maxLength: 342
+
     UpdateChatResponseDTO:
       type: object
       required:
@@ -2407,6 +2744,22 @@ components:
           type: string
           example: fR2Rz7dmWmHdXE8uz
 
+    ReassignmentNotificationDTO:
+      type: object
+      required:
+        - rcGroupId
+        - toConsultantId
+      properties:
+        rcGroupId:
+          type: string
+          example: fR2Rz7dmWmHdXE8uz
+        toConsultantId:
+          type: string
+          format: UUID
+        isConfirmed:
+          type: boolean
+          description: null defines the reassign request
+
     DeleteUserAccountDTO:
       type: object
       required:
@@ -2473,6 +2826,25 @@ components:
       enum:
         - EMAIL
         - APP
+
+    EmailToggle:
+      type: object
+      required:
+        - name
+        - state
+      properties:
+        name:
+          $ref: '#/components/schemas/EmailType'
+        state:
+          type: boolean
+          nullable: false
+
+    EmailType:
+      type: string
+      enum:
+        - DAILY_ENQUIRY
+        - NEW_CHAT_MESSAGE_FROM_ADVICE_SEEKER
+        - NEW_FEEDBACK_MESSAGE_FROM_ADVICE_SEEKER
 
   securitySchemes:
     Bearer:

@@ -4,7 +4,6 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatCredentialsProvider;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -52,6 +51,12 @@ public class RocketChatClient {
 
   public <T> ResponseEntity<T> getForEntity(String url, Class<T> responseType) {
     var entity = new HttpEntity<>(httpHeaders());
+
+    return restTemplate.exchange(url, HttpMethod.GET, entity, responseType);
+  }
+
+  public <T> ResponseEntity<T> getForEntity(String url, String userId, Class<T> responseType) {
+    var entity = new HttpEntity<>(httpHeaders(userId));
 
     return restTemplate.exchange(url, HttpMethod.GET, entity, responseType);
   }

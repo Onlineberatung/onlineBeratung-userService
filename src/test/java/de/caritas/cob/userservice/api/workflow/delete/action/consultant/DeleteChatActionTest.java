@@ -24,7 +24,7 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteGroup
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.port.out.ChatRepository;
 import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;

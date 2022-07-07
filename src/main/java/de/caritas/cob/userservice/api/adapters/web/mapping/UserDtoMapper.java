@@ -3,6 +3,8 @@ package de.caritas.cob.userservice.api.adapters.web.mapping;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.EmailToggle;
+import de.caritas.cob.userservice.api.adapters.web.dto.EmailType;
 import de.caritas.cob.userservice.api.adapters.web.dto.OtpType;
 import de.caritas.cob.userservice.api.adapters.web.dto.PatchUserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.TwoFactorAuthDTO;
@@ -14,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -56,9 +59,17 @@ public class UserDtoMapper {
     return null;
   }
 
+  public String chatUserIdOf(Map<String, Object> userMap) {
+    if (userMap.containsKey("chatUserId")) {
+      return (String) userMap.get("chatUserId");
+    }
+
+    return null;
+  }
+
   public Optional<Map<String, Object>> mapOf(PatchUserDTO patchUserDTO, AuthenticatedUser user) {
     if (isNull(patchUserDTO.getEncourage2fa()) && isNull(patchUserDTO.getDisplayName()) && isNull(
-        patchUserDTO.getWalkThroughEnabled())) {
+        patchUserDTO.getWalkThroughEnabled()) && isNull(patchUserDTO.getEmailToggles())) {
       return Optional.empty();
     }
 
@@ -73,6 +84,13 @@ public class UserDtoMapper {
     if (nonNull(patchUserDTO.getWalkThroughEnabled())) {
       map.put("walkThroughEnabled", patchUserDTO.getWalkThroughEnabled());
     }
+    var emailToggles = patchUserDTO.getEmailToggles();
+    if (nonNull(emailToggles)) {
+      var emailToggleMap = emailToggles.stream().collect(Collectors.toMap(
+          this::mapEmailType, EmailToggle::getState
+      ));
+      map.putAll(emailToggleMap);
+    }
 
     return Optional.of(map);
   }
@@ -82,6 +100,21 @@ public class UserDtoMapper {
         "id", user.getUserId(),
         "email", email
     );
+  }
+
+  private String mapEmailType(EmailToggle emailToggle) {
+    var name = emailToggle.getName();
+    if (name.equals(EmailType.DAILY_ENQUIRY)) {
+      return "notifyEnquiriesRepeating";
+    }
+    if (name.equals(EmailType.NEW_CHAT_MESSAGE_FROM_ADVICE_SEEKER)) {
+      return "notifyNewChatMessageFromAdviceSeeker";
+    }
+    if (name.equals(EmailType.NEW_FEEDBACK_MESSAGE_FROM_ADVICE_SEEKER)) {
+      return "notifyNewFeedbackMessageFromAdviceSeeker";
+    }
+
+    return null;
   }
 
   @SuppressWarnings("unchecked")

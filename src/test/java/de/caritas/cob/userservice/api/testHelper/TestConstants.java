@@ -5,14 +5,21 @@ import static de.caritas.cob.userservice.api.model.Session.RegistrationType.ANON
 import static de.caritas.cob.userservice.api.model.Session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.api.model.Session.SessionStatus.IN_PROGRESS;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.DataDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.LoginResponseDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.attachment.AttachmentDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.attachment.FileDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsLastMessageDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsUpdateDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.subscriptions.SubscriptionsUpdateDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.RocketChatUserDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AbsenceDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ChatDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateChatResponseDTO;
-import de.caritas.cob.userservice.api.model.ConsultantStatus;
-import de.caritas.cob.userservice.api.model.OtpInfoDTO;
-import de.caritas.cob.userservice.api.model.OtpSetupDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionAttachmentDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionConsultantForUserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
@@ -27,21 +34,12 @@ import de.caritas.cob.userservice.api.model.Chat.ChatInterval;
 import de.caritas.cob.userservice.api.model.ChatAgency;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.model.UserAgency;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.RocketChatUserDTO;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupMemberDTO;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.login.DataDTO;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.login.LoginResponseDTO;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.message.attachment.AttachmentDTO;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.message.attachment.FileDTO;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.room.RoomsLastMessageDTO;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.room.RoomsUpdateDTO;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.subscriptions.SubscriptionsUpdateDTO;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.GroupChatDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.MonitoringDTO;
@@ -167,17 +165,17 @@ public class TestConstants {
   public static final List<SubscriptionsUpdateDTO> SUBSCRIPTIONS_UPDATE_LIST_DTO_WITH_ONE_FEEDBACK_UNREAD =
       Arrays.asList(
           new SubscriptionsUpdateDTO("A", true, false, 0, 0, 0, NOW, RC_GROUP_ID, "A", "A", "P",
-              null, null, null, null),
+              null, null, null, null, null),
           new SubscriptionsUpdateDTO("A", true, false, 0, 0, 0, NOW, RC_GROUP_ID_2, "A", "A", "P",
-              null, null, null, null),
+              null, null, null, null, null),
           new SubscriptionsUpdateDTO("A", true, false, 0, 0, 0, NOW, RC_GROUP_ID_3, "A", "A", "P",
-              null, null, null, null),
+              null, null, null, null, null),
           new SubscriptionsUpdateDTO("A", true, false, 1, 0, 0, NOW, RC_FEEDBACK_GROUP_ID, "A", "A",
-              "P", null, null, null, null),
+              "P", null, null, null, null, null),
           new SubscriptionsUpdateDTO("A", true, false, 0, 0, 0, NOW, RC_FEEDBACK_GROUP_ID_2, "A",
-              "A", "P", null, null, null, null),
+              "A", "P", null, null, null, null, null),
           new SubscriptionsUpdateDTO("A", true, false, 0, 0, 0, NOW, RC_FEEDBACK_GROUP_ID_3, "A",
-              "A", "P", null, null, null, null));
+              "A", "P", null, null, null, null, null));
 
 
   /**
@@ -296,7 +294,6 @@ public class TestConstants {
   public static final String CONSULTANT_ID_3 = "ksf93j-3344-32gg-2344-93kd93jaf";
   public static final String MAIN_CONSULTANT_ID = "asdj78wfjsdf";
   public static final String RC_USER_ID_MAIN_CONSULTANT = "xxxyyy";
-  public static final String TEAM_CONSULTANT_ID = "34t789hqeg-q34g8weq9rhg-q34g09";
   public static final String ENCODING_PREFIX = "enc.";
   public static final String USERNAME_CONSULTANT_DECODED = "Consultantname!#123";
   public static final String USERNAME_CONSULTANT_ENCODED =
@@ -320,15 +317,17 @@ public class TestConstants {
   public static final String INVALID_STATE = "xxx";
   public static final Consultant CONSULTANT =
       new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, USERNAME, FIRST_NAME, LAST_NAME, EMAIL,
-          IS_ABSENT, IS_TEAM_CONSULTANT, ABSENCE_MESSAGE, IS_LANGUAGE_FORMAL, null, null,
-          null, null, null, null, null, null, true, null, null, ConsultantStatus.CREATED, false);
+          IS_ABSENT, IS_TEAM_CONSULTANT, ABSENCE_MESSAGE, IS_LANGUAGE_FORMAL, null, null, null,
+          null, null, null, null, null, true, true, true, true, null, null,
+          ConsultantStatus.CREATED, false);
   public static final Consultant CONSULTANT_2 = new Consultant(CONSULTANT_ID_2, ROCKETCHAT_ID,
       USERNAME, "first name", "last name", EMAIL, false, false, null, false, null, null,
-      null, null, null, null, null, null, true, null, null, ConsultantStatus.CREATED, false);
+      null, null, null, null, null, null, true, true, true, true, null, null,
+      ConsultantStatus.CREATED, false);
   public static final Consultant MAIN_CONSULTANT =
       new Consultant(MAIN_CONSULTANT_ID, RC_USER_ID_MAIN_CONSULTANT, USERNAME, "first name",
           "last name", EMAIL, false, false, null, false, null, null, null, null, null,
-          null, null, null, true, null, null, ConsultantStatus.CREATED, false);
+          null, null, null, true, true, true, true, null, null, ConsultantStatus.CREATED, false);
   public static final SessionConsultantForUserDTO CONSULTANT_DTO = new SessionConsultantForUserDTO();
   public static final AbsenceDTO ABSENCE_DTO_WITH_NULL_MESSAGE = new AbsenceDTO().absent(true);
   public static final GroupMemberDTO GROUP_MEMBER_USER_1 =
@@ -356,10 +355,10 @@ public class TestConstants {
       new AuthenticatedUser(CONSULTANT_ID, USERNAME, null, ACCESS_TOKEN, null);
   public static final UserDTO USER_DTO_SUCHT =
       new UserDTO(USERNAME, POSTCODE, AGENCY_ID, PASSWORD, EMAIL, null, null,
-          "true", Integer.toString(CONSULTING_TYPE_ID_SUCHT), "", true, null);
+          "true", Integer.toString(CONSULTING_TYPE_ID_SUCHT), "", true, null, null);
   public static final UserDTO USER_DTO_KREUZBUND =
       new UserDTO(USERNAME, POSTCODE, AGENCY_ID, PASSWORD, EMAIL, null, null,
-          "true", Integer.toString(CONSULTING_TYPE_ID_KREUZBUND), "", true, null);
+          "true", Integer.toString(CONSULTING_TYPE_ID_KREUZBUND), "", true, null, null);
   public static final UserDTO USER_DTO_WITH_AGE =
       new UserDTO(VALID_AGE, null, Integer.toString(CONSULTING_TYPE_ID_U25));
   public static final UserDTO USER_DTO_WITH_INVALID_AGE =
@@ -418,19 +417,21 @@ public class TestConstants {
    * ConsultantAgency
    */
   public static final ConsultantAgency[] CONSULTANT_AGENCY = new ConsultantAgency[]{
-      new ConsultantAgency(1L, CONSULTANT, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc(), null)};
+      new ConsultantAgency(1L, CONSULTANT, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc(), null,
+          null)};
   public static final ConsultantAgency CONSULTANT_AGENCY_2 =
-      new ConsultantAgency(2L, CONSULTANT, AGENCY_ID_2, nowInUtc(), nowInUtc(), nowInUtc(), null);
+      new ConsultantAgency(2L, CONSULTANT, AGENCY_ID_2, nowInUtc(), nowInUtc(), nowInUtc(), null,
+          null);
   public static final Set<ConsultantAgency> CONSULTANT_AGENCY_SET =
       new HashSet<>(Arrays.asList(CONSULTANT_AGENCY));
   public static final Consultant CONSULTANT_WITH_AGENCY = new Consultant(CONSULTANT_ID,
       ROCKETCHAT_ID, USERNAME, "first name", "last name", EMAIL, false, false, "absent", false,
       null, null, null, new HashSet<>(Arrays.asList(CONSULTANT_AGENCY)), null, null,
-      null, null, true, null, null, ConsultantStatus.CREATED, false);
+      null, null, true, true, true, true, null, null, ConsultantStatus.CREATED, false);
   public static final Consultant CONSULTANT_WITH_AGENCY_2 = new Consultant(CONSULTANT_ID_2,
       ROCKETCHAT_ID, USERNAME, "first name", "last name", EMAIL, false, false, null, false,
       null, null, null, new HashSet<>(Collections.singletonList(CONSULTANT_AGENCY_2)),
-      null, null, null, null, true, null, null, ConsultantStatus.CREATED, false);
+      null, null, null, null, true, true, true, true, null, null, ConsultantStatus.CREATED, false);
   /**
    * UserAgency
    */
@@ -452,52 +453,53 @@ public class TestConstants {
   public static final Long ENQUIRY_ID_2 = 2L;
   public static final Session SESSION =
       new Session(SESSION_ID, null, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, null,
-          null, IN_PROGRESS, null, null, null, null, false, false, false, nowInUtc(), null, null);
+          null, IN_PROGRESS, null, null, null, null, false, false, false, nowInUtc(), null, null, null);
   public static final Session SESSION_WITH_CONSULTANT =
       new Session(SESSION_ID, null, CONSULTANT_2, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE,
           AGENCY_ID, null, IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, false, false, false,
-          nowInUtc(), null, null);
+          nowInUtc(), null, null, null);
   public static final Session SESSION_WITH_ASKER_AND_CONSULTANT =
       new Session(SESSION_ID, USER_WITH_RC_ID, CONSULTANT_2, CONSULTING_TYPE_ID_SUCHT, REGISTERED,
           POSTCODE, AGENCY_ID, null, IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, false, false,
-          false, nowInUtc(), null, null);
+          false, nowInUtc(), null, null, null);
   public static final Session TEAM_SESSION_WITH_ASKER_AND_CONSULTANT =
       new Session(SESSION_ID, USER_WITH_RC_ID, CONSULTANT_2, CONSULTING_TYPE_ID_SUCHT, REGISTERED,
           POSTCODE, AGENCY_ID, null, IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, true, false,
-          false, nowInUtc(), null, null);
+          false, nowInUtc(), null, null, null);
   public static final Session FEEDBACK_SESSION_WITH_ASKER_AND_CONSULTANT =
       new Session(SESSION_ID, USER_WITH_RC_ID, CONSULTANT_2, CONSULTING_TYPE_ID_SUCHT, REGISTERED,
           POSTCODE, AGENCY_ID, null, IN_PROGRESS, nowInUtc(), RC_GROUP_ID, RC_FEEDBACK_GROUP_ID_2,
-          null, true, false, false, nowInUtc(), null, null);
+          null, true, false, false, nowInUtc(), null, null, null);
   public static final Session ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT =
       new Session(SESSION_ID, null, null, CONSULTING_TYPE_ID_SUCHT, ANONYMOUS, POSTCODE, AGENCY_ID,
           null, SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null, false, false, false,
-          nowInUtc(), null, null);
+          nowInUtc(), null, null, null);
   public static final Session SESSION_WITHOUT_CONSULTANT = new Session(SESSION_ID, USER_WITH_RC_ID,
       null, CONSULTING_TYPE_ID_U25, REGISTERED, POSTCODE, AGENCY_ID, null, SessionStatus.NEW, null,
-      RC_GROUP_ID, null, null, IS_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null, null);
+      RC_GROUP_ID, null, null, IS_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null, null, null);
   public static final Session FEEDBACKSESSION_WITHOUT_CONSULTANT = new Session(SESSION_ID,
       USER_WITH_RC_ID, null, CONSULTING_TYPE_ID_U25, REGISTERED, POSTCODE, AGENCY_ID, null,
       SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null, IS_TEAM_SESSION,
-      IS_MONITORING, false, nowInUtc(), null, null);
+      IS_MONITORING, false, nowInUtc(), null, null, null);
   public static final Session FEEDBACKSESSION_WITH_CONSULTANT =
       new Session(SESSION_ID, USER_WITH_RC_ID, CONSULTANT_2, CONSULTING_TYPE_ID_U25, REGISTERED,
           POSTCODE, AGENCY_ID, null, IN_PROGRESS, nowInUtc(), RC_GROUP_ID, RC_FEEDBACK_GROUP_ID,
-          null, IS_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null, null);
+          null, IS_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null, null, null);
   public static final Session SESSION_WITHOUT_CONSULTANT_NO_RC_USER_ID =
       new Session(TEAM_SESSION_ID, USER_NO_RC_USER_ID_2, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED,
           POSTCODE, AGENCY_ID, null, SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null,
-          IS_NO_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null, null);
+          IS_NO_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null, null, null);
   public static final Session U25_SESSION_WITHOUT_CONSULTANT = new Session(SESSION_ID,
       USER_WITH_RC_ID, null, CONSULTING_TYPE_ID_U25, REGISTERED, POSTCODE, AGENCY_ID, null,
       SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null, IS_TEAM_SESSION,
-      IS_MONITORING, false, nowInUtc(), null, null);
+      IS_MONITORING, false, nowInUtc(), null, null, null);
   public static final List<Session> SESSION_LIST = Collections.singletonList(SESSION);
   public static final Set<Session> SESSION_SET = new HashSet<>(
       Arrays.asList(U25_SESSION_WITHOUT_CONSULTANT, SESSION_WITHOUT_CONSULTANT_NO_RC_USER_ID));
   public static final User USER_WITH_SESSIONS =
       new User(USER_ID, null, USERNAME, EMAIL, RC_USER_ID, IS_LANGUAGE_FORMAL, SESSION_SET, null,
           null, null, null, null, null, nowInUtc(), null);
+
   public static final SessionDTO SESSION_DTO_SUCHT = new SessionDTO()
       .id(SESSION_ID)
       .agencyId(AGENCY_ID)
@@ -643,15 +645,15 @@ public class TestConstants {
   public static final UserChatDTO USER_CHAT_DTO_1 = new UserChatDTO(CHAT_ID, CHAT_TOPIC, null, null,
       CHAT_DURATION_30, IS_REPETITIVE, IS_ACTIVE, CONSULTING_TYPE_ID_PREGNANCY, null,
       Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 86300000)), MESSAGES_NOT_READ,
-      RC_GROUP_ID_4, null, false, null, nowInUtc());
+      RC_GROUP_ID_4, null, false, null, nowInUtc(), null);
   public static final UserChatDTO USER_CHAT_DTO_2 = new UserChatDTO(CHAT_ID_2, CHAT_TOPIC_2, null,
       null, CHAT_DURATION_60, IS_REPETITIVE, IS_NOT_ACTIVE, CONSULTING_TYPE_ID_DEBT, null,
       Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 86200000)), MESSAGES_NOT_READ,
-      RC_GROUP_ID_5, null, false, null, nowInUtc());
+      RC_GROUP_ID_5, null, false, null, nowInUtc(), null);
   public static final UserChatDTO USER_CHAT_DTO_3 = new UserChatDTO(CHAT_ID_3, CHAT_TOPIC_3, null,
       null, CHAT_DURATION_90, IS_NOT_REPETITIVE, IS_NOT_ACTIVE, CONSULTING_TYPE_ID_CHILDREN,
       null, Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 86410000)), MESSAGES_NOT_READ,
-      RC_GROUP_ID_6, null, false, null, nowInUtc());
+      RC_GROUP_ID_6, null, false, null, nowInUtc(), null);
   public static final UserSessionResponseDTO USER_CHAT_RESPONSE_DTO = new UserSessionResponseDTO()
       .chat(USER_CHAT_DTO_1)
       .agency(EMPTY_AGENCY_DTO)
@@ -735,47 +737,48 @@ public class TestConstants {
 
   public static final RoomsLastMessageDTO ROOMS_LAST_MESSAGE_DTO_WITHOUT_ATTACHMENT =
       new RoomsLastMessageDTO("id", RC_GROUP_ID, NOW_MINUS_1_DAY, USER_DTO_1, true, NOW_MINUS_1_DAY,
-          MESSAGE, null, null, null);
+          MESSAGE, "p", null, null, null);
   public static final RoomsLastMessageDTO ROOMS_LAST_MESSAGE_DTO_1 =
       new RoomsLastMessageDTO("id", RC_GROUP_ID, NOW_MINUS_1_DAY, USER_DTO_1, true, NOW_MINUS_1_DAY,
-          MESSAGE, FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO), null);
+          MESSAGE, "p", FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO), null);
   public static final RoomsLastMessageDTO ROOMS_LAST_MESSAGE_DTO_2 =
       new RoomsLastMessageDTO("id", RC_GROUP_ID_2, NOW_MINUS_3_DAYS, USER_DTO_2, true,
-          NOW_MINUS_3_DAYS, MESSAGE, FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO),
-          null);
+          NOW_MINUS_3_DAYS, MESSAGE, "p", FILE_DTO,
+          org.assertj.core.util.Arrays.array(ATTACHMENT_DTO), null);
   public static final RoomsLastMessageDTO ROOMS_LAST_MESSAGE_DTO_3 = new RoomsLastMessageDTO("id",
-      RC_GROUP_ID, NOW_MINUS_2_DAYS, USER_DTO_3, true, NOW_MINUS_2_DAYS, MESSAGE, null, null, null);
+      RC_GROUP_ID, NOW_MINUS_2_DAYS, USER_DTO_3, true, NOW_MINUS_2_DAYS, MESSAGE, "p", null, null,
+      null);
   public static final RoomsLastMessageDTO ROOMS_LAST_MESSAGE_DTO_4 =
       new RoomsLastMessageDTO("id", RC_GROUP_ID_4, NOW_MINUS_1_DAY, USER_DTO_1, true,
-          NOW_MINUS_1_DAY, MESSAGE, FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO),
-          null);
+          NOW_MINUS_1_DAY, MESSAGE, "p", FILE_DTO,
+          org.assertj.core.util.Arrays.array(ATTACHMENT_DTO), null);
   public static final RoomsLastMessageDTO ROOMS_LAST_MESSAGE_DTO_5 =
       new RoomsLastMessageDTO("id", RC_GROUP_ID_5, NOW_MINUS_1_DAY, USER_DTO_1, true,
-          NOW_MINUS_1_DAY, MESSAGE, FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO),
-          null);
+          NOW_MINUS_1_DAY, MESSAGE, "p", FILE_DTO,
+          org.assertj.core.util.Arrays.array(ATTACHMENT_DTO), null);
   public static final RoomsLastMessageDTO ROOMS_LAST_MESSAGE_DTO_6 =
       new RoomsLastMessageDTO("id", RC_GROUP_ID_6, NOW_MINUS_1_DAY, USER_DTO_1, true,
-          NOW_MINUS_1_DAY, MESSAGE, FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO),
-          null);
+          NOW_MINUS_1_DAY, MESSAGE, "p", FILE_DTO,
+          org.assertj.core.util.Arrays.array(ATTACHMENT_DTO), null);
   public static final List<RoomsUpdateDTO> ROOMS_UPDATE_DTO_LIST = Arrays.asList(
       new RoomsUpdateDTO(RC_GROUP_ID, "name1", "fname1", "P", USER_DTO_1, true, false, new Date(),
-          ROOMS_LAST_MESSAGE_DTO_1),
+          ROOMS_LAST_MESSAGE_DTO_1, new Date()),
       new RoomsUpdateDTO(RC_GROUP_ID_2, "name2", "fname2", "P", USER_DTO_2, true, false, new Date(),
-          ROOMS_LAST_MESSAGE_DTO_2),
+          ROOMS_LAST_MESSAGE_DTO_2, new Date()),
       new RoomsUpdateDTO(RC_GROUP_ID_3, "name3", "fname3", "P", USER_DTO_3, true, false, new Date(),
-          ROOMS_LAST_MESSAGE_DTO_3),
+          ROOMS_LAST_MESSAGE_DTO_3, new Date()),
       new RoomsUpdateDTO(RC_FEEDBACK_GROUP_ID, "name1", "fname1", "P", USER_DTO_1, true, false,
-          new Date(), ROOMS_LAST_MESSAGE_DTO_1),
+          new Date(), ROOMS_LAST_MESSAGE_DTO_1, new Date()),
       new RoomsUpdateDTO(RC_FEEDBACK_GROUP_ID_2, "name2", "fname2", "P", USER_DTO_2, true, false,
-          new Date(), ROOMS_LAST_MESSAGE_DTO_2),
+          new Date(), ROOMS_LAST_MESSAGE_DTO_2, new Date()),
       new RoomsUpdateDTO(RC_FEEDBACK_GROUP_ID_3, "name3", "fname3", "P", USER_DTO_3, true, false,
-          new Date(), ROOMS_LAST_MESSAGE_DTO_3),
+          new Date(), ROOMS_LAST_MESSAGE_DTO_3, new Date()),
       new RoomsUpdateDTO(RC_GROUP_ID_4, "name4", "fname4", "P", USER_DTO_1, true, false, new Date(),
-          ROOMS_LAST_MESSAGE_DTO_4),
+          ROOMS_LAST_MESSAGE_DTO_4, new Date()),
       new RoomsUpdateDTO(RC_GROUP_ID_5, "name5", "fname5", "P", USER_DTO_2, true, false, new Date(),
-          ROOMS_LAST_MESSAGE_DTO_5),
+          ROOMS_LAST_MESSAGE_DTO_5, new Date()),
       new RoomsUpdateDTO(RC_GROUP_ID_6, "name6", "fname6", "P", USER_DTO_3, true, false, new Date(),
-          ROOMS_LAST_MESSAGE_DTO_6));
+          ROOMS_LAST_MESSAGE_DTO_6, new Date()));
   public static final Map<String, RoomsLastMessageDTO> ROOMS_LAST_MESSAGE_DTO_MAP = new HashMap<>() {
     {
       put(RC_GROUP_ID, ROOMS_LAST_MESSAGE_DTO_1);
@@ -791,21 +794,20 @@ public class TestConstants {
   };
   public static final RoomsLastMessageDTO ROOMS_LAST_MESSAGE_DTO_WITH_ATTACHMENT =
       new RoomsLastMessageDTO("id", RC_GROUP_ID, NOW_MINUS_1_DAY, USER_DTO_1, true, NOW_MINUS_1_DAY,
-          MESSAGE, FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO), null);
-  public static final RoomsLastMessageDTO ROOMS_LAST_MESSAGE_DTO_WITH_ATTACHMENT_FOR_CHAT =
-      new RoomsLastMessageDTO("id", RC_GROUP_ID_6, NOW_MINUS_1_DAY, USER_DTO_1, true,
-          NOW_MINUS_1_DAY, MESSAGE, FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO),
-          null);
+          MESSAGE, "p", FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO), null);
+  public static final RoomsLastMessageDTO ROOMS_LAST_MESSAGE_DTO_WITH_ATTACHMENT_FOR_CHAT = new RoomsLastMessageDTO(
+      "id", RC_GROUP_ID_6, NOW_MINUS_1_DAY, USER_DTO_1, true, NOW_MINUS_1_DAY, MESSAGE, "p",
+      FILE_DTO, org.assertj.core.util.Arrays.array(ATTACHMENT_DTO), null);
   public static final List<RoomsUpdateDTO> ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT =
       Collections.singletonList(
           new RoomsUpdateDTO(RC_GROUP_ID, "name1", "fname1", "P", USER_DTO_1, true, false,
-              new Date(), ROOMS_LAST_MESSAGE_DTO_WITH_ATTACHMENT));
+              new Date(), ROOMS_LAST_MESSAGE_DTO_WITH_ATTACHMENT, new Date()));
   public static final List<RoomsUpdateDTO> ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT_FOR_CHAT =
       Arrays.asList(
           new RoomsUpdateDTO(RC_GROUP_ID_4, "name1", "fname1", "P", USER_DTO_1, true, false,
-              new Date(), ROOMS_LAST_MESSAGE_DTO_WITH_ATTACHMENT_FOR_CHAT),
+              new Date(), ROOMS_LAST_MESSAGE_DTO_WITH_ATTACHMENT_FOR_CHAT, new Date()),
           new RoomsUpdateDTO(RC_GROUP_ID_6, "name1", "fname1", "P", USER_DTO_1, true, false,
-              new Date(), ROOMS_LAST_MESSAGE_DTO_WITH_ATTACHMENT_FOR_CHAT));
+              new Date(), ROOMS_LAST_MESSAGE_DTO_WITH_ATTACHMENT_FOR_CHAT, new Date()));
   public static final SessionAttachmentDTO SESSION_ATTACHMENT_DTO_RECEIVED =
       new SessionAttachmentDTO()
           .fileType(ROOMS_LAST_MESSAGE_DTO_1.getFile().getType())
@@ -1201,7 +1203,7 @@ public class TestConstants {
       CHAT_TOPIC_3, null, null, CHAT_DURATION_90, IS_NOT_REPETITIVE,
       IS_NOT_ACTIVE, CONSULTING_TYPE_ID_CHILDREN, ENCRYPTED_MESSAGE,
       Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 86410000)), MESSAGES_NOT_READ,
-      RC_GROUP_ID_6, null, false, null, nowInUtc());
+      RC_GROUP_ID_6, null, false, null, nowInUtc(), null);
   public static final ConsultantSessionResponseDTO CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE =
       new ConsultantSessionResponseDTO()
           .chat(USER_CHAT_DTO_WITH_ENCRYPTED_MESSAGE)

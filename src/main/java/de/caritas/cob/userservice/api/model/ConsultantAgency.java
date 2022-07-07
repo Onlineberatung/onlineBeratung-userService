@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -67,6 +69,10 @@ public class ConsultantAgency implements TenantAware {
   @Column(name = "tenant_id")
   private Long tenantId;
 
+  @Column(name = "status", length = 11)
+  @Enumerated(EnumType.STRING)
+  @Field
+  private ConsultantAgencyStatus status = ConsultantAgencyStatus.IN_PROGRESS;
 
   @Override
   public boolean equals(Object o) {
@@ -83,5 +89,16 @@ public class ConsultantAgency implements TenantAware {
   @Override
   public int hashCode() {
     return Objects.hash(id);
+  }
+
+  public interface ConsultantAgencyBase {
+
+    Long getId();
+
+    Long getAgencyId();
+
+    String getConsultantId();
+
+    LocalDateTime getDeleteDate();
   }
 }

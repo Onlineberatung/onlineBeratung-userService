@@ -7,18 +7,25 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_USER_ID
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
 import de.caritas.cob.userservice.api.model.Chat;
@@ -26,9 +33,10 @@ import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.user.UserService;
+import java.util.List;
 import java.util.Optional;
+import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -37,6 +45,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JoinAndLeaveChatFacadeTest {
+
+  private static final EasyRandom easyRandom = new EasyRandom();
 
   @InjectMocks
   private JoinAndLeaveChatFacade joinAndLeaveChatFacade;
@@ -302,27 +312,17 @@ public class JoinAndLeaveChatFacadeTest {
 
   @Test
   public void leaveChat_Should_RemoveConsultantFromRocketChatGroup()
-      throws RocketChatRemoveUserFromGroupException {
+      throws RocketChatRemoveUserFromGroupException, RocketChatUserNotInitializedException, RocketChatGetGroupMembersException {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
     when(consultantService.getConsultantViaAuthenticatedUser(authenticatedUser))
         .thenReturn(Optional.of(CONSULTANT));
+    when(rocketChatService.getStandardMembersOfGroup(eq(ACTIVE_CHAT.getGroupId())))
+        .thenReturn(List.of(easyRandom.nextObject(GroupMemberDTO.class)));
 
     joinAndLeaveChatFacade.leaveChat(ACTIVE_CHAT.getId(), authenticatedUser);
 
     verify(rocketChatService, times(1)).removeUserFromGroup(CONSULTANT.getRocketChatId(),
         ACTIVE_CHAT.getGroupId());
-  }
-
-  @Test
-  public void leaveChat_Should_RemoveUserFromRocketChatGroup()
-      throws RocketChatRemoveUserFromGroupException {
-    when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
-    when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(Optional.of(user));
-    when(user.getRcUserId()).thenReturn(RC_USER_ID);
-
-    joinAndLeaveChatFacade.leaveChat(ACTIVE_CHAT.getId(), authenticatedUser);
-
-    verify(rocketChatService, times(1)).removeUserFromGroup(RC_USER_ID, ACTIVE_CHAT.getGroupId());
   }
 
   @Test(expected = InternalServerErrorException.class)
@@ -337,4 +337,18 @@ public class JoinAndLeaveChatFacadeTest {
     joinAndLeaveChatFacade.leaveChat(ACTIVE_CHAT.getId(), authenticatedUser);
   }
 
+  @Test
+  public void leaveChatShouldNotDeleteChatsWhenStandardMemberInChat()
+      throws RocketChatUserNotInitializedException, RocketChatGetGroupMembersException {
+    when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
+    when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(Optional.of(user));
+    when(user.getRcUserId()).thenReturn(RC_USER_ID);
+    when(rocketChatService.getStandardMembersOfGroup(eq(ACTIVE_CHAT.getGroupId())))
+        .thenReturn(List.of(easyRandom.nextObject(GroupMemberDTO.class)));
+
+    joinAndLeaveChatFacade.leaveChat(ACTIVE_CHAT.getId(), authenticatedUser);
+
+    verify(rocketChatService, never()).deleteGroupAsSystemUser(anyString());
+    verify(chatService, never()).deleteChat(any());
+  }
 }

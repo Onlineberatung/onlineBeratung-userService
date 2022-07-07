@@ -6,7 +6,7 @@ import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
-import de.caritas.cob.userservice.api.admin.model.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.CreateConsultantDTOAbsenceInputAdapter;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.admin.service.tenant.TenantAdminService;
@@ -21,7 +21,7 @@ import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.ConsultantImportService.ImportRecord;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.tenantadminservice.generated.web.model.TenantDTO;
 import java.util.Set;
@@ -141,6 +141,9 @@ public class ConsultantCreatorService {
         .teamConsultant(consultantCreationInput.isTeamConsultant())
         .rocketChatId(rocketChatUserId)
         .encourage2fa(true)
+        .notifyEnquiriesRepeating(true)
+        .notifyNewChatMessageFromAdviceSeeker(true)
+        .notifyNewFeedbackMessageFromAdviceSeeker(true)
         .languageFormal(consultantCreationInput.isLanguageFormal())
         .languages(Set.of())
         .createDate(consultantCreationInput.getCreateDate())

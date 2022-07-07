@@ -3,14 +3,13 @@ package de.caritas.cob.userservice.api.helper;
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsLastMessageDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionAttachmentDTO;
 import de.caritas.cob.userservice.api.exception.CustomCryptoException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.adapters.web.dto.SessionAttachmentDTO;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.room.RoomsLastMessageDTO;
 import de.caritas.cob.userservice.api.service.DecryptionService;
 import de.caritas.cob.userservice.api.service.LogService;
 import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,8 +18,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class SessionListAnalyser {
-
-  public static final int MAX_MESSAGE_LENGTH_FOR_FRONTEND = 100;
 
   private final DecryptionService decryptionService;
 
@@ -39,22 +36,13 @@ public class SessionListAnalyser {
    * @return Decrypted message
    */
   public String prepareMessageForSessionList(String message, String groupId) {
-
     try {
-      return truncateMessageToMaximalLengthForFrontend(decryptionService.decrypt(message, groupId));
+      return decryptionService.decrypt(message, groupId);
     } catch (CustomCryptoException cryptoEx) {
       throw new InternalServerErrorException(
           String.format("Could not decrypt message for group id %s", groupId),
           LogService::logInternalServerError);
     }
-  }
-
-  private String truncateMessageToMaximalLengthForFrontend(String decryptedMessage) {
-    if (StringUtils.isEmpty(decryptedMessage.trim())) {
-      return null;
-    }
-    return StringUtils.left(decryptedMessage,
-        Math.min(decryptedMessage.length(), MAX_MESSAGE_LENGTH_FOR_FRONTEND));
   }
 
   /**

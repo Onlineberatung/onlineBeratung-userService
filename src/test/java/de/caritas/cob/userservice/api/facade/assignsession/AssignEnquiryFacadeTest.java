@@ -17,11 +17,13 @@ import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -29,12 +31,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
+import com.google.firebase.auth.multitenancy.Tenant;
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.model.Session.RegistrationType;
@@ -45,26 +48,36 @@ import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
 import de.caritas.cob.userservice.api.service.statistics.event.AssignSessionStatisticsEvent;
+import de.caritas.cob.userservice.api.tenant.TenantContext;
+import de.caritas.cob.userservice.api.tenant.TenantContextProvider;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.UserRole;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+
+
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.springframework.test.util.ReflectionTestUtils;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AssignEnquiryFacadeTest {
+@ExtendWith(MockitoExtension.class)
+class AssignEnquiryFacadeTest {
 
   static final RocketChatAddUserToGroupException RC_ADD_USER_TO_GROUP_EXC =
       new RocketChatAddUserToGroupException(new Exception());
+  public static final long CURRENT_TENANT_ID = 1L;
 
   @InjectMocks
   AssignEnquiryFacade assignEnquiryFacade;
@@ -87,14 +100,21 @@ public class AssignEnquiryFacadeTest {
   UnauthorizedMembersProvider unauthorizedMembersProvider;
   @Mock
   StatisticsService statisticsService;
+  @Mock
+  TenantContextProvider tenantContextProvider;
 
-  @Before
+  @BeforeEach
   public void setup() {
     setInternalState(LogService.class, "LOGGER", logger);
   }
 
+  @AfterEach
+  public void tearDown() {
+    TenantContext.clear();
+  }
+
   @Test
-  public void assignEnquiry_Should_ReturnOKAndNotRemoveSystemUser() {
+  void assignEnquiry_Should_ReturnOKAndNotRemoveSystemUser() {
     assignEnquiryFacade
         .assignRegisteredEnquiry(FEEDBACKSESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
 
@@ -105,7 +125,7 @@ public class AssignEnquiryFacadeTest {
   }
 
   @Test
-  public void assignEnquiry_Should_FireAssignSessionStatisticsEvent() {
+  void assignEnquiry_Should_FireAssignSessionStatisticsEvent() {
 
     assignEnquiryFacade
         .assignRegisteredEnquiry(FEEDBACKSESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
@@ -137,46 +157,59 @@ public class AssignEnquiryFacadeTest {
                 && consultantSessionDTO.getSession().equals(session)));
   }
 
+
   @Test
-  public void assignEnquiry_Should_ReturnOKAndRemoveSystemMessagesFromGroup() {
+  void assignEnquiry_Should_ReturnOKAndRemoveSystemMessagesFromGroup() {
+    // given
+    TenantContext.setCurrentTenant(CURRENT_TENANT_ID);
     when(rocketChatFacade.retrieveRocketChatMembers(anyString())).thenReturn(LIST_GROUP_MEMBER_DTO);
 
+    // when
     assignEnquiryFacade.assignRegisteredEnquiry(SESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
 
+    // then
     verifyConsultantAndSessionHaveBeenChecked(SESSION_WITHOUT_CONSULTANT,
         CONSULTANT_WITH_AGENCY);
     verify(rocketChatFacade, times(0)).removeUserFromGroup(ROCKET_CHAT_SYSTEM_USER_ID,
         RC_GROUP_ID);
     verifyAsync((a) -> verify(rocketChatFacade, times(1))
         .removeSystemMessagesFromRocketChatGroup(anyString()));
+    verifyAsync((a) -> verify(tenantContextProvider).setCurrentTenantContextIfMissing(
+        CURRENT_TENANT_ID));
   }
 
   @Test
-  public void assignEnquiry_Should_ReturnOKAndRemoveSystemMessagesFromFeedbackGroup_WhenSessionIsFeedbackSession() {
+  void assignEnquiry_Should_ReturnOKAndRemoveSystemMessagesFromFeedbackGroup_WhenSessionIsFeedbackSession() {
+    // given
+    TenantContext.setCurrentTenant(CURRENT_TENANT_ID);
+    // when
     assignEnquiryFacade
         .assignRegisteredEnquiry(FEEDBACKSESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
 
+    // then
     verifyAsync((a) -> verify(rocketChatFacade, times(0))
         .removeUserFromGroup(ROCKET_CHAT_SYSTEM_USER_ID, RC_GROUP_ID));
     verifyAsync(
         (a) -> verify(rocketChatFacade, atLeastOnce()).retrieveRocketChatMembers(Mockito.any()));
-  }
-
-  @Test(expected = InternalServerErrorException.class)
-  public void assignEnquiry_Should_ReturnInternalServerErrorAndLogError_WhenUpdateSessionFails() {
-    doThrow(new InternalServerErrorException("")).when(sessionService)
-        .updateConsultantAndStatusForSession(Mockito.any(), Mockito.any(), Mockito.any());
-
-    assignEnquiryFacade
-        .assignRegisteredEnquiry(FEEDBACKSESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
-
-    verifyConsultantAndSessionHaveBeenChecked(FEEDBACKSESSION_WITHOUT_CONSULTANT,
-        CONSULTANT_WITH_AGENCY);
-    verify(logger, times(1)).error(anyString(), anyString());
+    verifyAsync((a) -> verify(tenantContextProvider).setCurrentTenantContextIfMissing(CURRENT_TENANT_ID));
   }
 
   @Test
-  public void assignEnquiry_Should_LogError_When_RCRemoveGroupMembersFails() {
+  void assignEnquiry_Should_ReturnInternalServerError_WhenUpdateSessionFails() {
+    doThrow(new InternalServerErrorException("")).when(sessionService)
+        .updateConsultantAndStatusForSession(Mockito.any(), Mockito.any(), Mockito.any());
+
+    assertThrows(InternalServerErrorException.class, () -> {
+      assignEnquiryFacade
+          .assignRegisteredEnquiry(FEEDBACKSESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
+    });
+
+    verifyConsultantAndSessionHaveBeenChecked(FEEDBACKSESSION_WITHOUT_CONSULTANT,
+        CONSULTANT_WITH_AGENCY);
+  }
+
+  @Test
+  void assignEnquiry_Should_LogError_When_RCRemoveGroupMembersFails() {
     doThrow(new InternalServerErrorException("")).when(rocketChatFacade)
         .removeSystemMessagesFromRocketChatGroup(anyString());
 
@@ -191,24 +224,19 @@ public class AssignEnquiryFacadeTest {
     verifyAsync((a) -> verify(logger, times(1)).error(anyString(), anyString(), anyString()));
   }
 
-  @Test(expected = InternalServerErrorException.class)
-  public void assignEnquiry_Should_ReturnInternalServerErrorAndLogError_WhenSessionRollbackFails() {
+  @Test
+  void assignEnquiry_Should_ReturnInternalServerError_WhenSessionRollbackFails() {
     doThrow(new InternalServerErrorException("")).when(sessionService)
         .updateConsultantAndStatusForSession(any(), any(), any());
 
-    assignEnquiryFacade
-        .assignRegisteredEnquiry(FEEDBACKSESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
-
-    verifyConsultantAndSessionHaveBeenChecked(FEEDBACKSESSION_WITHOUT_CONSULTANT,
-        CONSULTANT_WITH_AGENCY);
-    verify(logger, atLeast(2)).error(anyString(), anyString());
-    verify(sessionService, times(1)).updateConsultantAndStatusForSession(
-        FEEDBACKSESSION_WITHOUT_CONSULTANT, FEEDBACKSESSION_WITHOUT_CONSULTANT.getConsultant(),
-        FEEDBACKSESSION_WITHOUT_CONSULTANT.getStatus());
+    assertThrows(InternalServerErrorException.class, () -> {
+      assignEnquiryFacade
+          .assignRegisteredEnquiry(FEEDBACKSESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
+    });
   }
 
   @Test
-  public void assignEnquiry_Should_LogError_WhenAddPeerConsultantToFeedbackGroupFails() {
+  void assignEnquiry_Should_LogError_WhenAddPeerConsultantToFeedbackGroupFails() {
     doThrow(new InternalServerErrorException("")).when(rocketChatFacade)
         .addUserToRocketChatGroup(ROCKETCHAT_ID, RC_FEEDBACK_GROUP_ID);
 
@@ -223,7 +251,7 @@ public class AssignEnquiryFacadeTest {
   }
 
   @Test
-  public void assignEnquiry_Should_LogError_WhenRemoveSystemMessagesFromGroupFails() {
+  void assignEnquiry_Should_LogError_WhenRemoveSystemMessagesFromGroupFails() {
     doThrow(new InternalServerErrorException("error")).when(rocketChatFacade)
         .removeSystemMessagesFromRocketChatGroup(Mockito.any());
 
@@ -238,7 +266,7 @@ public class AssignEnquiryFacadeTest {
   }
 
   @Test
-  public void assignEnquiry_Should_LogError_When_RemoveSystemMessagesFromFeedbackChatFails() {
+  void assignEnquiry_Should_LogError_When_RemoveSystemMessagesFromFeedbackChatFails() {
     doThrow(new InternalServerErrorException("error")).when(rocketChatFacade)
         .removeSystemMessagesFromRocketChatGroup(Mockito.any());
 
@@ -253,7 +281,7 @@ public class AssignEnquiryFacadeTest {
   }
 
   @Test
-  public void assignEnquiry_Should_AddPeerConsultantToFeedbackGroup_WhenSessionHasFeedbackIsTrue() {
+  void assignEnquiry_Should_AddPeerConsultantToFeedbackGroup_WhenSessionHasFeedbackIsTrue() {
     assignEnquiryFacade
         .assignRegisteredEnquiry(U25_SESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
 
@@ -264,16 +292,16 @@ public class AssignEnquiryFacadeTest {
   }
 
   @Test
-  public void assignEnquiry_Should_removeAllUnauthorizedMembers_When_sessionIsNotATeamSession() {
+  void assignEnquiry_Should_removeAllUnauthorizedMembers_When_sessionIsNotATeamSession() {
     Session session = new EasyRandom().nextObject(Session.class);
     session.setTeamSession(false);
     session.setStatus(SessionStatus.NEW);
     session.setConsultant(null);
     session.getUser().setRcUserId("userRcId");
     session.setRegistrationType(RegistrationType.REGISTERED);
-    session.setAgencyId(1L);
+    session.setAgencyId(CURRENT_TENANT_ID);
     ConsultantAgency consultantAgency = new EasyRandom().nextObject(ConsultantAgency.class);
-    consultantAgency.setAgencyId(1L);
+    consultantAgency.setAgencyId(CURRENT_TENANT_ID);
     Consultant consultant = new EasyRandom().nextObject(Consultant.class);
     consultant.setConsultantAgencies(asSet(consultantAgency));
     consultant.setRocketChatId("consultantRcId");
@@ -297,16 +325,16 @@ public class AssignEnquiryFacadeTest {
   }
 
   @Test
-  public void assignEnquiry_ShouldNot_removeTeamMembers_When_sessionIsTeamSession() {
+  void assignEnquiry_ShouldNot_removeTeamMembers_When_sessionIsTeamSession() {
     Session session = new EasyRandom().nextObject(Session.class);
     session.setTeamSession(false);
     session.setStatus(SessionStatus.NEW);
     session.setConsultant(null);
     session.getUser().setRcUserId("userRcId");
     session.setRegistrationType(RegistrationType.REGISTERED);
-    session.setAgencyId(1L);
+    session.setAgencyId(CURRENT_TENANT_ID);
     ConsultantAgency consultantAgency = new EasyRandom().nextObject(ConsultantAgency.class);
-    consultantAgency.setAgencyId(1L);
+    consultantAgency.setAgencyId(CURRENT_TENANT_ID);
     Consultant consultant = new EasyRandom().nextObject(Consultant.class);
     consultant.setConsultantAgencies(asSet(consultantAgency));
     consultant.setRocketChatId("newConsultantRcId");
@@ -340,7 +368,7 @@ public class AssignEnquiryFacadeTest {
   }
 
   @Test
-  public void assignAnonymousEnquiry_Should_AddConsultantToGroup_WhenSessionIsAnonymousConversation() {
+  void assignAnonymousEnquiry_Should_AddConsultantToGroup_WhenSessionIsAnonymousConversation() {
     assignEnquiryFacade
         .assignAnonymousEnquiry(ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
 
@@ -351,7 +379,7 @@ public class AssignEnquiryFacadeTest {
   }
 
   @Test
-  public void assignAnonymousEnquiry_Should_RemoveSystemMessagesFromGroup() {
+  void assignAnonymousEnquiry_Should_RemoveSystemMessagesFromGroup() {
     assignEnquiryFacade
         .assignAnonymousEnquiry(ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
 
@@ -360,13 +388,15 @@ public class AssignEnquiryFacadeTest {
     verify(rocketChatFacade, times(1)).removeSystemMessagesFromRocketChatGroup(anyString());
   }
 
-  @Test(expected = InternalServerErrorException.class)
-  public void assignAnonymousEnquiry_Should_ReturnInternalServerErrorAndDoARollback_WhenAddConsultantToGroupFails() {
+  @Test
+  void assignAnonymousEnquiry_Should_ReturnInternalServerErrorAndDoARollback_WhenAddConsultantToGroupFails() {
     doThrow(new InternalServerErrorException("")).when(rocketChatFacade)
         .addUserToRocketChatGroup(ROCKETCHAT_ID, RC_GROUP_ID);
 
-    assignEnquiryFacade
-        .assignAnonymousEnquiry(ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
+    assertThrows(InternalServerErrorException.class, () -> {
+      assignEnquiryFacade
+          .assignAnonymousEnquiry(ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
+    });
 
     verifyConsultantAndSessionHaveBeenChecked(ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT,
         CONSULTANT_WITH_AGENCY);

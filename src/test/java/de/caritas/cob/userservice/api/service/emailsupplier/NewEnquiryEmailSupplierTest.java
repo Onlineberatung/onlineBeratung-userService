@@ -62,9 +62,9 @@ public class NewEnquiryEmailSupplierTest {
     when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(anyLong())).thenReturn(asList(
         null,
         new ConsultantAgency(0L, new Consultant(), 0L, nowInUtc(), nowInUtc(),
-            nowInUtc(), null),
+            nowInUtc(), null, null),
         new ConsultantAgency(1L, absentConsultant, 1L, nowInUtc(), nowInUtc(),
-            nowInUtc(), null)));
+            nowInUtc(), null, null)));
 
     List<MailDTO> generatedMails = newEnquiryEmailSupplier.generateEmails();
 
@@ -75,9 +75,9 @@ public class NewEnquiryEmailSupplierTest {
   public void generateEmails_Should_ReturnExpectedMailDTO_When_PresentConsultantsWereFound() {
     when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(anyLong())).thenReturn(asList(
         new ConsultantAgency(0L, MAIN_CONSULTANT, 0L, nowInUtc(), nowInUtc(),
-            nowInUtc(), null),
+            nowInUtc(), null, null),
         new ConsultantAgency(1L, MAIN_CONSULTANT, 1L, nowInUtc(), nowInUtc(),
-            nowInUtc(), null)));
+            nowInUtc(), null, null)));
     when(agencyService.getAgency(any())).thenReturn(AGENCY_DTO_U25);
     when(session.getPostcode()).thenReturn("12345");
 

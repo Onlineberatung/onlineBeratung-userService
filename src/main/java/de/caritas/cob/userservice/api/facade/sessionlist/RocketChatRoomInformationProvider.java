@@ -5,17 +5,18 @@ import static java.util.Collections.emptyMap;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsLastMessageDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsUpdateDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.subscriptions.SubscriptionsUpdateDTO;
+import de.caritas.cob.userservice.api.container.RocketChatCredentials;
+import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import de.caritas.cob.userservice.api.container.RocketChatCredentials;
-import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.room.RoomsLastMessageDTO;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.room.RoomsUpdateDTO;
-import de.caritas.cob.userservice.api.service.rocketchat.dto.subscriptions.SubscriptionsUpdateDTO;
-import de.caritas.cob.userservice.api.service.rocketchat.RocketChatService;
 
 @Component
 public class RocketChatRoomInformationProvider {
@@ -44,15 +45,17 @@ public class RocketChatRoomInformationProvider {
       roomsForUpdate = rocketChatService.getRoomsOfUser(rocketChatCredentials);
     }
 
-    List<String> userRooms =
-        roomsForUpdate.stream().map(RoomsUpdateDTO::getId).collect(Collectors.toList());
-    Map<String, RoomsLastMessageDTO> lastMessagesRoom = getRcRoomLastMessages(roomsForUpdate);
+    var userRooms = roomsForUpdate.stream().map(RoomsUpdateDTO::getId).collect(Collectors.toList());
+    var lastMessagesRoom = getRcRoomLastMessages(roomsForUpdate);
+    var groupIdToLastMessageFallbackDate = collectFallbackDateOfRoomsWithoutLastMessage(
+        roomsForUpdate);
 
     return RocketChatRoomInformation.builder()
         .readMessages(readMessages)
         .roomsForUpdate(roomsForUpdate)
         .userRooms(userRooms)
         .lastMessagesRoom(lastMessagesRoom)
+        .groupIdToLastMessageFallbackDate(groupIdToLastMessageFallbackDate)
         .build();
   }
 
@@ -80,6 +83,14 @@ public class RocketChatRoomInformationProvider {
 
   private boolean isLastMessageAndTimestampForRocketChatRoomAvailable(RoomsUpdateDTO room) {
     return nonNull(room.getLastMessage()) && nonNull(room.getLastMessage().getTimestamp());
+  }
+
+  private Map<String, Date> collectFallbackDateOfRoomsWithoutLastMessage(
+      List<RoomsUpdateDTO> roomsForUpdate) {
+    return roomsForUpdate.stream()
+        .filter(room -> !isLastMessageAndTimestampForRocketChatRoomAvailable(room))
+        .filter(room -> nonNull(room.getLastMessageDate()))
+        .collect(Collectors.toMap(RoomsUpdateDTO::getId, RoomsUpdateDTO::getLastMessageDate));
   }
 
 }
