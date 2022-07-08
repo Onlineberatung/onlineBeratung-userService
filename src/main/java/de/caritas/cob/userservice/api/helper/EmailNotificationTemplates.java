@@ -17,5 +17,7 @@ public class EmailNotificationTemplates {
   public static final String TEMPLATE_ASSIGN_ENQUIRY_NOTIFICATION = "assign-enquiry-notification";
   public static final String TEMPLATE_FREE_TEXT = "free-text";
   public static final String TEMPLATE_DAILY_ENQUIRY_NOTIFICATION = "daily-enquiry-notification";
+  public static final String TEMPLATE_REASSIGN_REQUEST_NOTIFICATION = "reassign-request-notification";
+  public static final String TEMPLATE_REASSIGN_CONFIRMATION_NOTIFICATION = "reassign-confirmation-notification";
 
 }

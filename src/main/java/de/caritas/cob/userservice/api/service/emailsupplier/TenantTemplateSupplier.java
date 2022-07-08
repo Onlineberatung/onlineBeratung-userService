@@ -26,18 +26,28 @@ public class TenantTemplateSupplier {
 
   public List<TemplateDataDTO> getTemplateAttributes() {
     var subdomain = TenantContext.getCurrentTenantData().getSubdomain();
-    RestrictedTenantDTO tenantData = tenantService
-        .getRestrictedTenantData(subdomain);
+    RestrictedTenantDTO tenantData = getRestrictedTenantDTO(subdomain);
 
     List<TemplateDataDTO> templateAttributes = new ArrayList<>();
     templateAttributes.add(getTenantName(tenantData));
     templateAttributes.add(getTenantClaim(tenantData));
-    String tenantBaseUrl = getTenantBaseUrl(subdomain);
+    String tenantBaseUrl = getTenantBaseUrl(tenantData.getSubdomain());
     templateAttributes.add(new TemplateDataDTO().key("url").value(tenantBaseUrl));
     templateAttributes.add(getTenantImprintUrl(tenantBaseUrl));
     templateAttributes.add(getTanantPrivacyUrl(tenantBaseUrl));
 
     return templateAttributes;
+  }
+
+  private RestrictedTenantDTO getRestrictedTenantDTO(String subdomain) {
+    if (subdomain != null) {
+      return tenantService.getRestrictedTenantData(subdomain);
+    } else {
+      log.warn("Subdomain was null, fallback to tenant data resolution by tenant id");
+      var tenantId = TenantContext.getCurrentTenantData().getTenantId();
+      log.info("Resolving tenant data by tenantId {}", tenantId);
+      return tenantService.getRestrictedTenantData(tenantId);
+    }
   }
 
   private TemplateDataDTO getTenantImprintUrl(String tenantUrl) {
