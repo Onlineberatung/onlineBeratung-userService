@@ -2756,6 +2756,8 @@ components:
         toConsultantId:
           type: string
           format: UUID
+        fromConsultantName:
+          type: string
         isConfirmed:
           type: boolean
           description: null defines the reassign request

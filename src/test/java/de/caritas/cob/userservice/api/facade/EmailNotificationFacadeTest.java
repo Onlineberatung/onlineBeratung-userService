@@ -47,6 +47,7 @@ import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ReassignmentNotificationDTO;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.EmailNotificationException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -684,17 +685,19 @@ public class EmailNotificationFacadeTest {
   public void sendReassignConfirmationNotification_Should_sendEmail_When_consultantsExists() {
     var randomConsultant = new EasyRandom().nextObject(Consultant.class);
     when(consultantService.getConsultant(any())).thenReturn(Optional.of(randomConsultant));
+    var reassignmentNotification = new EasyRandom().nextObject(ReassignmentNotificationDTO.class);
 
-    emailNotificationFacade.sendReassignConfirmationNotification("receiver", null);
+    emailNotificationFacade.sendReassignConfirmationNotification(reassignmentNotification, null);
 
     verifyAsync(a -> mailService.sendEmailNotification(Mockito.any()));
   }
 
   @Test(expected = NotFoundException.class)
   public void sendReassignConfirmationNotification_ShouldThrow_NotFoundEception_When_consultantDoesNotExist() {
+    var reassignmentNotification = new EasyRandom().nextObject(ReassignmentNotificationDTO.class);
     when(consultantService.getConsultant(any())).thenReturn(Optional.empty());
 
-    emailNotificationFacade.sendReassignConfirmationNotification("receiver", null);
+    emailNotificationFacade.sendReassignConfirmationNotification(reassignmentNotification, null);
   }
 
 }

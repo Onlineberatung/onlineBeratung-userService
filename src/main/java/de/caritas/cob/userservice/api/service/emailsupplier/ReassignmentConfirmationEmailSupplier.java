@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.service.emailsupplier;
 
 import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.TEMPLATE_REASSIGN_CONFIRMATION_NOTIFICATION;
+import static java.util.Arrays.asList;
 
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Consultant;
@@ -16,6 +17,7 @@ import lombok.Builder;
 public class ReassignmentConfirmationEmailSupplier implements EmailSupplier {
 
   private final Consultant receiverConsultant;
+  private final String senderConsultantName;
   private final String applicationBaseUrl;
   private final TenantTemplateSupplier tenantTemplateSupplier;
   private final boolean multiTenancyEnabled;
@@ -29,9 +31,10 @@ public class ReassignmentConfirmationEmailSupplier implements EmailSupplier {
   }
 
   private MailDTO buildMailDtoForReassignRequestNotification() {
-    var templateAttributes = new ArrayList<TemplateDataDTO>();
-    templateAttributes.add(
-        new TemplateDataDTO().key("name_recipient").value(decodedUsernameOf(receiverConsultant)));
+    var templateAttributes = new ArrayList<>(asList(
+        new TemplateDataDTO().key("name_recipient").value(decodedUsernameOf(receiverConsultant)),
+        new TemplateDataDTO().key("name_from_consultant")
+            .value(decodedUsernameOf(senderConsultantName))));
 
     if (!multiTenancyEnabled) {
       templateAttributes.add(new TemplateDataDTO().key("url").value(applicationBaseUrl));
@@ -46,7 +49,11 @@ public class ReassignmentConfirmationEmailSupplier implements EmailSupplier {
   }
 
   private String decodedUsernameOf(Consultant consultant) {
-    return usernameTranscoder.decodeUsername(consultant.getUsername());
+    return decodedUsernameOf(consultant.getUsername());
+  }
+
+  private String decodedUsernameOf(String decoded) {
+    return usernameTranscoder.decodeUsername(decoded);
   }
 
 }
