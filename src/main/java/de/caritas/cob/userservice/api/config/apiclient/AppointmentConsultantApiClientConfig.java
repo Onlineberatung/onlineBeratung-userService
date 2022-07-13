@@ -18,17 +18,6 @@ public class AppointmentConsultantApiClientConfig {
   private String appointmentServiceApiUrl;
 
   /**
-   * AppointmentService controller bean.
-   *
-   * @param appointmentServiceApiUrl {@link ApiClient}
-   * @return the ConsultantApi controller {@link ConsultantApi}
-   */
-  //@Bean
-  public ConsultantApi consultantApi(ApiClient appointmentServiceApiUrl) {
-    return new ConsultantApi(appointmentServiceApiUrl);
-  }
-
-  /**
    * AppointmentService API client bean.
    *
    * @param restTemplate {@link RestTemplate}
