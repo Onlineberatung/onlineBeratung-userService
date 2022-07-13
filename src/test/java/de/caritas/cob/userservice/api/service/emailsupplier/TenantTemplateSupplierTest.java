@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.service.emailsupplier;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
@@ -15,11 +16,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TenantTemplateSupplierTest {
+
+  private static final String VALID_SUBDOMAIN = "subdomain";
 
   @InjectMocks
   TenantTemplateSupplier tenantTemplateSupplier;
@@ -30,11 +34,11 @@ public class TenantTemplateSupplierTest {
   private final EasyRandom easyRandom = new EasyRandom();
 
   @Test
-  public void test_Provide_Tenant_Specific_Data_For_Email_Templates() {
+  public void getTemplateAttributes_Provide_Tenant_Specific_Data_For_Email_Templates() {
     //given
     var tenantData = new TenantData();
     tenantData.setTenantId(1L);
-    tenantData.setSubdomain("subdomain");
+    tenantData.setSubdomain(VALID_SUBDOMAIN);
     TenantContext.setCurrentTenantData(tenantData);
     ReflectionTestUtils
         .setField(tenantTemplateSupplier, "applicationBaseUrl", "https://onlineberatung.net");
@@ -43,9 +47,47 @@ public class TenantTemplateSupplierTest {
     //when
     when(tenantService.getRestrictedTenantData(tenantData.getSubdomain()))
         .thenReturn(mockedTenantData);
+    mockedTenantData.setSubdomain(VALID_SUBDOMAIN);
     List<TemplateDataDTO> templateAttributes = tenantTemplateSupplier.getTemplateAttributes();
 
     //then
+    assertTemplateAttributesAreCorrect(mockedTenantData, templateAttributes);
+
+    verify(tenantService).getRestrictedTenantData(tenantData.getSubdomain());
+    verify(tenantService, Mockito.never()).getRestrictedTenantData(tenantData.getTenantId());
+
+    TenantContext.clear();
+  }
+
+
+  @Test
+  public void getTemplateAttributes_Provide_Tenant_Specific_Data_For_Email_Templates_IfSubdomainNotSet() {
+    //given
+    var tenantData = new TenantData();
+    tenantData.setTenantId(1L);
+    tenantData.setSubdomain(null);
+    TenantContext.setCurrentTenantData(tenantData);
+    ReflectionTestUtils
+        .setField(tenantTemplateSupplier, "applicationBaseUrl", "https://onlineberatung.net");
+    RestrictedTenantDTO mockedTenantData = easyRandom.nextObject(RestrictedTenantDTO.class);
+    mockedTenantData.setSubdomain(VALID_SUBDOMAIN);
+
+    //when
+    when(tenantService.getRestrictedTenantData(tenantData.getTenantId()))
+        .thenReturn(mockedTenantData);
+    List<TemplateDataDTO> templateAttributes = tenantTemplateSupplier.getTemplateAttributes();
+
+    //then
+    assertTemplateAttributesAreCorrect(mockedTenantData, templateAttributes);
+
+    verify(tenantService, Mockito.never()).getRestrictedTenantData(tenantData.getSubdomain());
+    verify(tenantService).getRestrictedTenantData(tenantData.getTenantId());
+
+    TenantContext.clear();
+  }
+
+  private void assertTemplateAttributesAreCorrect(RestrictedTenantDTO mockedTenantData,
+      List<TemplateDataDTO> templateAttributes) {
     assertThat(templateAttributes.get(0).getKey(), is("tenant_name"));
     assertThat(templateAttributes.get(0).getValue(), is(mockedTenantData.getName()));
 
@@ -62,8 +104,6 @@ public class TenantTemplateSupplierTest {
     assertThat(templateAttributes.get(4).getKey(), is("tenant_urldatenschutz"));
     assertThat(templateAttributes.get(4).getValue(),
         is("https://subdomain.onlineberatung.net/datenschutz"));
-
-    TenantContext.clear();
   }
 
 }

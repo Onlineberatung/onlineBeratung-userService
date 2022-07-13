@@ -17,4 +17,10 @@ public class TenantContextProvider {
     }
   }
 
+  public void setCurrentTenantContextIfMissing(Long currentTenantId) {
+    if (!TenantContext.contextIsSet()) {
+      TenantContext.setCurrentTenant(currentTenantId);
+    }
+  }
+
 }

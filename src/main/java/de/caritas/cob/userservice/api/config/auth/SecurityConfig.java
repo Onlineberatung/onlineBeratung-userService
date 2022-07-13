@@ -166,7 +166,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .hasAuthority(CONSULTANT_DEFAULT)
         .antMatchers(HttpMethod.DELETE, APPOINTMENTS_APPOINTMENT_ID + UUID_PATTERN + "}")
         .hasAuthority(CONSULTANT_DEFAULT)
-        .antMatchers("/users/sessions/{sessionId:[0-9]+}/dearchive")
+        .antMatchers("/users/sessions/{sessionId:[0-9]+}/dearchive",
+            "/users/mails/reassignment")
         .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT)
         .antMatchers("/userstatistics", "/userstatistics/**")
         .permitAll()

@@ -17,6 +17,8 @@ import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
 import de.caritas.cob.userservice.api.service.statistics.event.AssignSessionStatisticsEvent;
+import de.caritas.cob.userservice.api.tenant.TenantContext;
+import de.caritas.cob.userservice.api.tenant.TenantContextProvider;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.UserRole;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +42,7 @@ public class AssignEnquiryFacade {
   private final @NonNull ConsultingTypeManager consultingTypeManager;
   private final @NonNull UnauthorizedMembersProvider unauthorizedMembersProvider;
   private final @NonNull StatisticsService statisticsService;
+  private final @NonNull TenantContextProvider tenantContextProvider;
 
   /**
    * Assigns the given {@link Session} session to the given {@link Consultant}. Remove all other
@@ -54,7 +57,7 @@ public class AssignEnquiryFacade {
    */
   public void assignRegisteredEnquiry(Session session, Consultant consultant) {
     assignEnquiry(session, consultant);
-    supplyAsync(updateRocketChatRooms(session, consultant));
+    supplyAsync(updateRocketChatRooms(session, consultant, TenantContext.getCurrentTenant()));
     statisticsService.fireEvent(
         new AssignSessionStatisticsEvent(consultant.getId(), UserRole.CONSULTANT, session.getId()));
   }
@@ -90,8 +93,9 @@ public class AssignEnquiryFacade {
     sessionService.updateConsultantAndStatusForSession(session, consultant, IN_PROGRESS);
   }
 
-  private Supplier<Object> updateRocketChatRooms(Session session, Consultant consultant) {
+  private Supplier<Object> updateRocketChatRooms(Session session, Consultant consultant, Long currentTenantId) {
     return () -> {
+      tenantContextProvider.setCurrentTenantContextIfMissing(currentTenantId);
       updateRocketChatRooms(session.getGroupId(), session, consultant);
       if (session.hasFeedbackChat()) {
         updateRocketChatRooms(session.getFeedbackGroupId(), session, consultant);
@@ -114,6 +118,7 @@ public class AssignEnquiryFacade {
       throw e;
     }
   }
+
 
   private void removeUnauthorizedMembers(String rcGroupId, Session session, Consultant consultant,
       List<GroupMemberDTO> memberList) {
