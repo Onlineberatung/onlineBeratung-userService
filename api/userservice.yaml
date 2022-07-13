@@ -2291,6 +2291,9 @@ components:
     SessionConsultantForUserDTO:
       type: object
       properties:
+        id:
+          type: string
+          example: consultantId
         username:
           type: string
           example: beraterXYZ
