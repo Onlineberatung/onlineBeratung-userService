@@ -23,7 +23,7 @@ public class AppointmentConsultantApiClientConfig {
    * @param appointmentServiceApiUrl {@link ApiClient}
    * @return the ConsultantApi controller {@link ConsultantApi}
    */
-  @Bean
+  //@Bean
   public ConsultantApi consultantApi(ApiClient appointmentServiceApiUrl) {
     return new ConsultantApi(appointmentServiceApiUrl);
   }
