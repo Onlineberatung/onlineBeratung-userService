@@ -22,71 +22,71 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class AppointmentService {
 
-    private final @NonNull ConsultantApi appointmentConsultantApi;
-    private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
-    private final @NonNull TenantHeaderSupplier tenantHeaderSupplier;
-    private final @NonNull IdentityClient identityClient;
+  private final @NonNull ConsultantApi appointmentConsultantApi;
+  private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
+  private final @NonNull TenantHeaderSupplier tenantHeaderSupplier;
+  private final @NonNull IdentityClient identityClient;
 
 
-    @Value("${keycloakService.technical.username}")
-    private String keycloakTechnicalUsername;
+  @Value("${keycloakService.technical.username}")
+  private String keycloakTechnicalUsername;
 
-    @Value("${keycloakService.technical.password}")
-    private String keycloakTechnicalPassword;
+  @Value("${keycloakService.technical.password}")
+  private String keycloakTechnicalPassword;
 
 
-    public void createConsultant(ConsultantAdminResponseDTO consultantAdminResponseDTO) {
-        if (consultantAdminResponseDTO != null) {
-            ObjectMapper mapper = new ObjectMapper()
-                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            addTechnicalUserHeaders(this.appointmentConsultantApi.getApiClient());
-            try {
-                de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO consultant =
-                        mapper.readValue(mapper.writeValueAsString(consultantAdminResponseDTO.getEmbedded()),
-                                de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO.class);
-                this.appointmentConsultantApi.createConsultant(consultant);
-            } catch (Exception e) {
-                log.error(e.getMessage());
-            }
-        }
+  public void createConsultant(ConsultantAdminResponseDTO consultantAdminResponseDTO) {
+    if (consultantAdminResponseDTO != null) {
+      ObjectMapper mapper = new ObjectMapper()
+          .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      addTechnicalUserHeaders(this.appointmentConsultantApi.getApiClient());
+      try {
+        de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO consultant =
+            mapper.readValue(mapper.writeValueAsString(consultantAdminResponseDTO.getEmbedded()),
+                de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO.class);
+        this.appointmentConsultantApi.createConsultant(consultant);
+      } catch (Exception e) {
+        log.error(e.getMessage());
+      }
     }
+  }
 
-    public void updateConsultant(ConsultantAdminResponseDTO consultantAdminResponseDTO) {
-        if (consultantAdminResponseDTO != null) {
-            ObjectMapper mapper = new ObjectMapper()
-                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            addTechnicalUserHeaders(this.appointmentConsultantApi.getApiClient());
-            try {
-                de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO consultant =
-                        mapper.readValue(mapper.writeValueAsString(consultantAdminResponseDTO.getEmbedded()),
-                                de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO.class);
-                this.appointmentConsultantApi.updateConsultant(consultant.getId(), consultant);
-            } catch (Exception e) {
-                log.error(e.getMessage());
-            }
-        }
+  public void updateConsultant(ConsultantAdminResponseDTO consultantAdminResponseDTO) {
+    if (consultantAdminResponseDTO != null) {
+      ObjectMapper mapper = new ObjectMapper()
+          .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      addTechnicalUserHeaders(this.appointmentConsultantApi.getApiClient());
+      try {
+        de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO consultant =
+            mapper.readValue(mapper.writeValueAsString(consultantAdminResponseDTO.getEmbedded()),
+                de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO.class);
+        this.appointmentConsultantApi.updateConsultant(consultant.getId(), consultant);
+      } catch (Exception e) {
+        log.error(e.getMessage());
+      }
     }
+  }
 
-    public void deleteConsultant(String consultantId) {
-        if (consultantId != null && !consultantId.isEmpty()) {
-            addTechnicalUserHeaders(this.appointmentConsultantApi.getApiClient());
-            this.appointmentConsultantApi.deleteConsultant(consultantId);
-        }
+  public void deleteConsultant(String consultantId) {
+    if (consultantId != null && !consultantId.isEmpty()) {
+      addTechnicalUserHeaders(this.appointmentConsultantApi.getApiClient());
+      this.appointmentConsultantApi.deleteConsultant(consultantId);
     }
+  }
 
-    private void addDefaultHeaders(ApiClient apiClient) {
-        var headers = this.securityHeaderSupplier.getCsrfHttpHeaders();
-        tenantHeaderSupplier.addTenantHeader(headers);
-        headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
-    }
+  private void addDefaultHeaders(ApiClient apiClient) {
+    var headers = this.securityHeaderSupplier.getCsrfHttpHeaders();
+    tenantHeaderSupplier.addTenantHeader(headers);
+    headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
+  }
 
-    private void addTechnicalUserHeaders(ApiClient apiClient) {
-        var keycloakLoginResponseDTO = identityClient.loginUser(
-                keycloakTechnicalUsername, keycloakTechnicalPassword
-        );
-        var headers = this.securityHeaderSupplier
-                .getKeycloakAndCsrfHttpHeaders(keycloakLoginResponseDTO.getAccessToken());
-        tenantHeaderSupplier.addTenantHeader(headers);
-        headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
-    }
+  private void addTechnicalUserHeaders(ApiClient apiClient) {
+    var keycloakLoginResponseDTO = identityClient.loginUser(
+        keycloakTechnicalUsername, keycloakTechnicalPassword
+    );
+    var headers = this.securityHeaderSupplier
+        .getKeycloakAndCsrfHttpHeaders(keycloakLoginResponseDTO.getAccessToken());
+    tenantHeaderSupplier.addTenantHeader(headers);
+    headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
+  }
 }
