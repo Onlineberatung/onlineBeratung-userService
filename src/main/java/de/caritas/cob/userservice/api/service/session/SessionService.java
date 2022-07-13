@@ -325,7 +325,7 @@ public class SessionService {
   }
 
   private SessionConsultantForUserDTO convertToSessionConsultantForUserDTO(Consultant consultant) {
-    return new SessionConsultantForUserDTO(consultant.getUsername(), consultant.isAbsent(),
+    return new SessionConsultantForUserDTO(consultant.getId(), consultant.getUsername(), consultant.isAbsent(),
         consultant.getAbsenceMessage(), null);
   }
 
