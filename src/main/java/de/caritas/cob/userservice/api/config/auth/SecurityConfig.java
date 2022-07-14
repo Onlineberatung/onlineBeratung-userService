@@ -131,7 +131,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .hasAnyAuthority(ASSIGN_CONSULTANT_TO_ENQUIRY, ASSIGN_CONSULTANT_TO_SESSION)
         .antMatchers("/users/consultants").hasAuthority(VIEW_AGENCY_CONSULTANTS)
         .antMatchers("/users/consultants/import", "/users/askers/import",
-            "/users/askersWithoutSession/import")
+            "/users/askersWithoutSession/import", "/users/sessions/rocketChatGroupId")
         .hasAuthority(TECHNICAL_DEFAULT)
         .antMatchers("/liveproxy/send")
         .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT,
