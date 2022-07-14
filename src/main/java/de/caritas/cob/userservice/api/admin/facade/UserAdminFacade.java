@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.admin.facade;
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static java.util.Objects.nonNull;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.AskerResponseDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.model.User;
@@ -40,6 +41,16 @@ public class UserAdminFacade {
     this.identityClient.deactivateUser(userId);
     user.setDeleteDate(nowInUtc());
     this.userService.saveUser(user);
+  }
+
+  public AskerResponseDTO getAsker(String userId) {
+    User user = userService.getUser(userId)
+        .orElseThrow(() -> new NotFoundException(String.format("Asker with id %s does not exist", userId)));
+    AskerResponseDTO asker = new AskerResponseDTO();
+    asker.setId(user.getUserId());
+    asker.setUsername(user.getUsername());
+    asker.setEmail(user.getEmail());
+    return asker;
   }
 
 }

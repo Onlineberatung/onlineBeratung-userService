@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.AskerResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
 import de.caritas.cob.userservice.api.admin.facade.UserAdminFacade;
 import de.caritas.cob.userservice.api.admin.hallink.RootDTOBuilder;
@@ -235,5 +237,11 @@ public class UserAdminController implements UseradminApi {
   public ResponseEntity<Void> markAskerForDeletion(String askerId) {
     this.userAdminFacade.markAskerForDeletion(askerId);
     return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<AskerResponseDTO> getAsker(String askerId) {
+    AskerResponseDTO response = this.userAdminFacade.getAsker(askerId);
+    return new ResponseEntity<>(response, HttpStatus.OK);
   }
 }
