@@ -656,13 +656,15 @@ public class SessionService {
     return Optional.empty();
   }
 
-  public String findGroupIdByConsultantAndUserAndConsultingType(String consultantId, String askerId, Integer consultingTypeId) {
+  public String findGroupIdByConsultantAndUserAndConsultingType(String consultantId, String askerId,
+      Integer consultingTypeId) {
     Optional<Consultant> consultant = consultantService.getConsultant(consultantId);
-    if(!consultant.isPresent()){
-      throw new BadRequestException(String.format("Consultant for given id %s not found", consultantId));
+    if (!consultant.isPresent()) {
+      throw new BadRequestException(
+          String.format("Consultant for given id %s not found", consultantId));
     }
     Optional<User> user = userService.getUser(askerId);
-    if(!user.isPresent()){
+    if (!user.isPresent()) {
       throw new BadRequestException(String.format("Asker for given id %s not found", askerId));
     }
 
