@@ -417,9 +417,11 @@ public class TestConstants {
    * ConsultantAgency
    */
   public static final ConsultantAgency[] CONSULTANT_AGENCY = new ConsultantAgency[]{
-      new ConsultantAgency(1L, CONSULTANT, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc(), null, null)};
+      new ConsultantAgency(1L, CONSULTANT, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc(), null,
+          null)};
   public static final ConsultantAgency CONSULTANT_AGENCY_2 =
-      new ConsultantAgency(2L, CONSULTANT, AGENCY_ID_2, nowInUtc(), nowInUtc(), nowInUtc(), null, null);
+      new ConsultantAgency(2L, CONSULTANT, AGENCY_ID_2, nowInUtc(), nowInUtc(), nowInUtc(), null,
+          null);
   public static final Set<ConsultantAgency> CONSULTANT_AGENCY_SET =
       new HashSet<>(Arrays.asList(CONSULTANT_AGENCY));
   public static final Consultant CONSULTANT_WITH_AGENCY = new Consultant(CONSULTANT_ID,
@@ -643,15 +645,15 @@ public class TestConstants {
   public static final UserChatDTO USER_CHAT_DTO_1 = new UserChatDTO(CHAT_ID, CHAT_TOPIC, null, null,
       CHAT_DURATION_30, IS_REPETITIVE, IS_ACTIVE, CONSULTING_TYPE_ID_PREGNANCY, null,
       Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 86300000)), MESSAGES_NOT_READ,
-      RC_GROUP_ID_4, null, false, null, nowInUtc());
+      RC_GROUP_ID_4, null, false, null, nowInUtc(), null);
   public static final UserChatDTO USER_CHAT_DTO_2 = new UserChatDTO(CHAT_ID_2, CHAT_TOPIC_2, null,
       null, CHAT_DURATION_60, IS_REPETITIVE, IS_NOT_ACTIVE, CONSULTING_TYPE_ID_DEBT, null,
       Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 86200000)), MESSAGES_NOT_READ,
-      RC_GROUP_ID_5, null, false, null, nowInUtc());
+      RC_GROUP_ID_5, null, false, null, nowInUtc(), null);
   public static final UserChatDTO USER_CHAT_DTO_3 = new UserChatDTO(CHAT_ID_3, CHAT_TOPIC_3, null,
       null, CHAT_DURATION_90, IS_NOT_REPETITIVE, IS_NOT_ACTIVE, CONSULTING_TYPE_ID_CHILDREN,
       null, Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 86410000)), MESSAGES_NOT_READ,
-      RC_GROUP_ID_6, null, false, null, nowInUtc());
+      RC_GROUP_ID_6, null, false, null, nowInUtc(), null);
   public static final UserSessionResponseDTO USER_CHAT_RESPONSE_DTO = new UserSessionResponseDTO()
       .chat(USER_CHAT_DTO_1)
       .agency(EMPTY_AGENCY_DTO)
@@ -1201,7 +1203,7 @@ public class TestConstants {
       CHAT_TOPIC_3, null, null, CHAT_DURATION_90, IS_NOT_REPETITIVE,
       IS_NOT_ACTIVE, CONSULTING_TYPE_ID_CHILDREN, ENCRYPTED_MESSAGE,
       Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 86410000)), MESSAGES_NOT_READ,
-      RC_GROUP_ID_6, null, false, null, nowInUtc());
+      RC_GROUP_ID_6, null, false, null, nowInUtc(), null);
   public static final ConsultantSessionResponseDTO CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE =
       new ConsultantSessionResponseDTO()
           .chat(USER_CHAT_DTO_WITH_ENCRYPTED_MESSAGE)

@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.facade;
 
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.api.model.Session.RegistrationType.REGISTERED;
+import static de.caritas.cob.userservice.api.testHelper.AsyncVerification.verifyAsync;
 import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_EMAIL_DUMMY_SUFFIX;
 import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_SYSTEM_USER_ID;
 import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_VALUE_EMAIL_DUMMY_SUFFIX;
@@ -43,7 +44,10 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 
 import com.google.api.client.util.Lists;
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ReassignmentNotificationDTO;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.EmailNotificationException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -65,8 +69,6 @@ import de.caritas.cob.userservice.api.service.emailsupplier.NewFeedbackEmailSupp
 import de.caritas.cob.userservice.api.service.emailsupplier.NewMessageEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.TenantTemplateSupplier;
 import de.caritas.cob.userservice.api.service.helper.MailService;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
@@ -125,9 +127,11 @@ public class EmailNotificationFacadeTest {
   private final User USER = new User(USER_ID, null, USERNAME_ENCODED, "email@email.de", false);
   private final User USER_NO_EMAIL = new User(USER_ID, null, "username", "", false);
   private final ConsultantAgency CONSULTANT_AGENCY =
-      new ConsultantAgency(1L, CONSULTANT, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc(), null, null);
+      new ConsultantAgency(1L, CONSULTANT, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc(), null,
+          null);
   private final ConsultantAgency CONSULTANT_AGENCY_2 =
-      new ConsultantAgency(1L, CONSULTANT2, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc(), null, null);
+      new ConsultantAgency(1L, CONSULTANT2, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc(), null,
+          null);
   private final ConsultantAgency ABSENT_CONSULTANT_AGENCY =
       new ConsultantAgency(1L, ABSENT_CONSULTANT, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc(),
           null, null);
@@ -653,6 +657,47 @@ public class EmailNotificationFacadeTest {
         .sendNewEnquiryEmailNotification(new EasyRandom().nextObject(Session.class), null);
 
     verifyNoInteractions(newEnquiryEmailSupplier);
+  }
+
+  @Test
+  public void sendReassignRequestNotification_Should_SendEmail_When_askerHasValidMailAddress() {
+    var session = new EasyRandom().nextObject(Session.class);
+    when(sessionService.getSessionByGroupId(any())).thenReturn(session);
+    session.getUser().setEmail("mail@valid.de");
+
+    emailNotificationFacade.sendReassignRequestNotification("id", null);
+
+    verify(mailService).sendEmailNotification(Mockito.any());
+  }
+
+  @Test
+  public void sendReassignRequestNotification_ShouldNot_SendEmail_When_askerHasDummyMailAddress() {
+    var session = new EasyRandom().nextObject(Session.class);
+    when(sessionService.getSessionByGroupId(any())).thenReturn(session);
+    session.getUser().setEmail("mail@" + FIELD_VALUE_EMAIL_DUMMY_SUFFIX);
+
+    emailNotificationFacade.sendReassignRequestNotification("id", null);
+
+    verifyNoInteractions(mailService);
+  }
+
+  @Test
+  public void sendReassignConfirmationNotification_Should_sendEmail_When_consultantsExists() {
+    var randomConsultant = new EasyRandom().nextObject(Consultant.class);
+    when(consultantService.getConsultant(any())).thenReturn(Optional.of(randomConsultant));
+    var reassignmentNotification = new EasyRandom().nextObject(ReassignmentNotificationDTO.class);
+
+    emailNotificationFacade.sendReassignConfirmationNotification(reassignmentNotification, null);
+
+    verifyAsync(a -> mailService.sendEmailNotification(Mockito.any()));
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void sendReassignConfirmationNotification_ShouldThrow_NotFoundEception_When_consultantDoesNotExist() {
+    var reassignmentNotification = new EasyRandom().nextObject(ReassignmentNotificationDTO.class);
+    when(consultantService.getConsultant(any())).thenReturn(Optional.empty());
+
+    emailNotificationFacade.sendReassignConfirmationNotification(reassignmentNotification, null);
   }
 
 }

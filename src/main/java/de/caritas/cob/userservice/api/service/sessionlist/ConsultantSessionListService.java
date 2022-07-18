@@ -68,6 +68,13 @@ public class ConsultantSessionListService {
     return mergeConsultantSessionsAndChats(consultant, sessions, chats, rcAuthToken);
   }
 
+  public List<ConsultantSessionResponseDTO> retrieveChatsForConsultantAndChatIds(
+      Consultant consultant, List<Long> chatIds, String rcAuthToken) {
+    var uniqueChatIds = new HashSet<>(chatIds);
+    var chats = chatService.getChatSessionsForConsultantByIds(uniqueChatIds);
+    return updateConsultantChatValues(chats, rcAuthToken, consultant);
+  }
+
   /**
    * Returns a list of {@link ConsultantSessionResponseDTO} for the specified consultant id and
    * status.

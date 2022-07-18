@@ -4,6 +4,8 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
@@ -33,6 +35,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.NewRegistrationResponseDt
 import de.caritas.cob.userservice.api.adapters.web.dto.OneTimePasswordDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PasswordDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PatchUserDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ReassignmentNotificationDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDataDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateChatResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
@@ -378,6 +381,33 @@ public class UserController implements UsersApi {
         : new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
+  @Override
+  public ResponseEntity<GroupSessionListResponseDTO> getChatById(String rcToken, Long chatId) {
+    GroupSessionListResponseDTO groupSessionList;
+    if (authenticatedUser.isConsultant()) {
+      var consultant = userAccountProvider.retrieveValidatedConsultant();
+      var rocketChatCredentials = RocketChatCredentials.builder()
+          .rocketChatUserId(consultant.getRocketChatId())
+          .rocketChatToken(rcToken)
+          .build();
+      groupSessionList = sessionListFacade.retrieveChatsForConsultantByChatIds(consultant,
+          singletonList(chatId), rocketChatCredentials
+      );
+    } else {
+      var user = userAccountProvider.retrieveValidatedUser();
+      var rocketChatCredentials = RocketChatCredentials.builder()
+          .rocketChatUserId(user.getRcUserId())
+          .rocketChatToken(rcToken)
+          .build();
+      groupSessionList = sessionListFacade.retrieveChatsForUserByChatIds(singletonList(chatId),
+          rocketChatCredentials);
+    }
+
+    return isNotEmpty(groupSessionList.getSessions())
+        ? new ResponseEntity<>(groupSessionList, HttpStatus.OK)
+        : new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
+
   /**
    * Updates the absence (and its message) for the calling consultant.
    *
@@ -624,6 +654,30 @@ public class UserController implements UsersApi {
   }
 
   /**
+   * Sends email notification for reassign request to advice seeker if the property isConfirmed of
+   * {@link ReassignmentNotificationDTO} is null or false. Send email confirmation notification to
+   * consultant if property isConfirmed of {@link * ReassignmentNotificationDTO} is true.
+   *
+   * @param reassignmentNotificationDTO (required)
+   * @return {@link ResponseEntity} containing {@link HttpStatus}
+   */
+  @Override
+  public ResponseEntity<Void> sendReassignmentNotification(
+      @RequestBody ReassignmentNotificationDTO reassignmentNotificationDTO) {
+
+    if (isTrue(reassignmentNotificationDTO.getIsConfirmed())) {
+      emailNotificationFacade.sendReassignConfirmationNotification(reassignmentNotificationDTO,
+          TenantContext.getCurrentTenantData());
+    } else {
+      emailNotificationFacade
+          .sendReassignRequestNotification(reassignmentNotificationDTO.getRcGroupId(),
+              TenantContext.getCurrentTenantData());
+    }
+
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  /**
    * Returns the monitoring for the given session.
    *
    * @param sessionId Session Id (required)
@@ -827,16 +881,27 @@ public class UserController implements UsersApi {
     var chatUserId = userDtoMapper.chatUserIdOf(user);
     var username = authenticatedUser.getUsername();
     if (isNull(chatUserId)) {
+      if (isAdviceSeekerWithoutEnquiryMessageWritten()) {
+        return ResponseEntity.accepted().build();
+      }
       var message = String.format("Chat-user ID of user %s unknown", username);
       throw new InternalServerErrorException(message);
     }
 
-    if (Boolean.FALSE.equals(messenger.updateE2eKeys(chatUserId, e2eKeyDTO.getPublicKey()))) {
+    if (isFalse(messenger.updateE2eKeys(chatUserId, e2eKeyDTO.getPublicKey()))) {
       var message = String.format("Setting E2E keys in user %s's chats failed", username);
       throw new InternalServerErrorException(message);
     }
 
     return ResponseEntity.noContent().build();
+  }
+
+  private boolean isAdviceSeekerWithoutEnquiryMessageWritten() {
+    if (authenticatedUser.isAdviceSeeker()) {
+      var adviceSeeker = userAccountProvider.retrieveValidatedUser();
+      return adviceSeeker.getCreateDate().isEqual(adviceSeeker.getUpdateDate());
+    }
+    return false;
   }
 
   /**
@@ -1159,16 +1224,20 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<Void> activateTwoFactorAuthByApp(OneTimePasswordDTO oneTimePasswordDTO) {
-    if (authenticatedUser.isAdviceSeeker() && Boolean.FALSE.equals(identityClientConfig.getOtpAllowedForUsers())) {
+    if (authenticatedUser.isAdviceSeeker() && isFalse(
+        identityClientConfig.getOtpAllowedForUsers())) {
       throw new ConflictException("2FA is disabled for user role");
     }
-    if (authenticatedUser.isConsultant() && Boolean.FALSE.equals(identityClientConfig.getOtpAllowedForConsultants())) {
+    if (authenticatedUser.isConsultant() && isFalse(
+        identityClientConfig.getOtpAllowedForConsultants())) {
       throw new ConflictException("2FA is disabled for consultant role");
     }
-    if (authenticatedUser.isSingleTenantAdmin() && !identityClientConfig.getOtpAllowedForSingleTenantAdmins()) {
+    if (authenticatedUser.isSingleTenantAdmin() && isFalse(identityClientConfig
+        .getOtpAllowedForSingleTenantAdmins())) {
       throw new ConflictException("2FA is disabled for single tenant admin role");
     }
-    if (authenticatedUser.isTenantSuperAdmin() && !identityClientConfig.getOtpAllowedForTenantSuperAdmins()) {
+    if (authenticatedUser.isTenantSuperAdmin() && isFalse(identityClientConfig
+        .getOtpAllowedForTenantSuperAdmins())) {
       throw new ConflictException("2FA is disabled for tenant admin role");
     }
 

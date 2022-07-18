@@ -348,9 +348,9 @@ public class SessionService {
    */
   public List<UserSessionResponseDTO> getSessionsByUserAndGroupOrFeedbackGroupIds(String userId,
       Set<String> rcGroupIds, Set<String> roles) {
-    checkForUserOrConsultantRole(roles);
+    checkForAskerRoles(roles);
     var sessions = sessionRepository.findByGroupOrFeedbackGroupIds(rcGroupIds);
-    sessions.forEach(session -> checkIfUserAndNotOwnerOfSession(session, userId, roles));
+    sessions.forEach(session -> checkAskerPermissionForSession(session, userId, roles));
     List<AgencyDTO> agencies = fetchAgencies(sessions);
     return convertToUserSessionResponseDTO(sessions, agencies);
   }
@@ -365,10 +365,10 @@ public class SessionService {
    */
   public List<UserSessionResponseDTO> getSessionsByUserAndSessionIds(String userId,
       Set<Long> sessionIds, Set<String> roles) {
-    checkForUserOrConsultantRole(roles);
+    checkForAskerRoles(roles);
     var sessions = StreamSupport.stream(sessionRepository.findAllById(sessionIds).spliterator(),
         false).collect(Collectors.toList());
-    sessions.forEach(session -> checkIfUserAndNotOwnerOfSession(session, userId, roles));
+    sessions.forEach(session -> checkAskerPermissionForSession(session, userId, roles));
     List<AgencyDTO> agencies = fetchAgencies(sessions);
     return convertToUserSessionResponseDTO(sessions, agencies);
   }
@@ -430,7 +430,7 @@ public class SessionService {
     return session;
   }
 
-  private Session getSessionByGroupId(String rcGroupId) {
+  public Session getSessionByGroupId(String rcGroupId) {
     return sessionRepository.findByGroupId(rcGroupId).orElseThrow(
         () -> new NotFoundException(String.format("Session with groupId %s not found.", rcGroupId),
             LogService::logWarn));
@@ -450,6 +450,25 @@ public class SessionService {
     }
   }
 
+  private void checkForAskerRoles(Set<String> roles) {
+    if (!roles.contains(UserRole.USER.getValue()) && !roles.contains(UserRole.ANONYMOUS.getValue())
+        && !roles.contains(UserRole.CONSULTANT.getValue())) {
+      throw new ForbiddenException("No user or consultant role to retrieve sessions",
+          LogService::logForbidden);
+    }
+  }
+
+  private void checkAskerPermissionForSession(Session session, String userId, Set<String> roles) {
+    if ((roles.contains(UserRole.USER.getValue())
+        || session.getRegistrationType() == RegistrationType.ANONYMOUS && roles.contains(
+        UserRole.ANONYMOUS.getValue())) && session.getUser().getUserId().equals(userId)) {
+      return;
+    }
+    throw new ForbiddenException(
+        String.format("Asker %s not allowed to access session with ID %s", userId, session.getId()),
+        LogService::logForbidden);
+  }
+
   private void checkIfUserAndNotOwnerOfSession(Session session, String userId, Set<String> roles) {
     if (roles.contains(UserRole.USER.getValue()) && !session.getUser().getUserId().equals(userId)) {
       throw new ForbiddenException(
@@ -467,13 +486,33 @@ public class SessionService {
   }
 
   private void checkConsultantAssignment(Consultant consultant, Session session) {
-    if (session.isAdvisedBy(consultant) || (isTeamSessionOrNew(session) && consultant.isInAgency(
-        session.getAgencyId()))) {
+    if (session.isAdvisedBy(consultant) || isAllowedToAdvise(consultant, session)
+        || isAnonymousEnquiryAndAllowedToAdviseConsultingType(consultant, session)) {
       return;
     }
     throw new ForbiddenException(
         String.format("No permission for session %s by consultant %s", session.getId(),
             consultant.getId()));
+  }
+
+  private boolean isAllowedToAdvise(Consultant consultant, Session session) {
+    return isTeamSessionOrNew(session) && session.getAgencyId() != null && consultant.isInAgency(
+        session.getAgencyId());
+  }
+
+  private boolean isAnonymousEnquiryAndAllowedToAdviseConsultingType(Consultant consultant,
+      Session session) {
+    if (session.getStatus() != SessionStatus.NEW
+        || session.getRegistrationType() != RegistrationType.ANONYMOUS) {
+      return false;
+    }
+    var agencyIdsOfConsultant = consultant.getConsultantAgencies().stream()
+        .map(ConsultantAgency::getAgencyId)
+        .collect(Collectors.toList());
+    var consultingTypes = agencyService.getAgencies(agencyIdsOfConsultant).stream()
+        .map(AgencyDTO::getConsultingType)
+        .collect(Collectors.toSet());
+    return consultingTypes.contains(session.getConsultingTypeId());
   }
 
   /**

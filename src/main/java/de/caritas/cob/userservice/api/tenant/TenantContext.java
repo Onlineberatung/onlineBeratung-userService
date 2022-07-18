@@ -42,4 +42,8 @@ public class TenantContext {
   public static void clear() {
     CURRENT_TENANT_DATA.remove();
   }
+
+  public static boolean contextIsSet() {
+    return getCurrentTenant() != null;
+  }
 }

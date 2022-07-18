@@ -2,8 +2,10 @@ package de.caritas.cob.userservice.api.config.auth;
 
 import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION;
 import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.CONSULTANT_DEFAULT;
+import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.USER_DEFAULT;
 import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.VIEW_AGENCY_CONSULTANTS;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -36,8 +38,8 @@ public class AuthorityTest {
     List<String> result = Authority.getAuthoritiesByUserRole(UserRole.USER);
 
     assertNotNull(result);
-    assertTrue(result.contains(AuthorityValue.USER_DEFAULT));
-    assertEquals(1, result.size());
+    assertThat(result, contains(USER_DEFAULT, ASSIGN_CONSULTANT_TO_SESSION));
+    assertEquals(2, result.size());
 
   }
 

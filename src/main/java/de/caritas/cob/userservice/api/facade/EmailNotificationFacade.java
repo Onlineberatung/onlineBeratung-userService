@@ -2,7 +2,10 @@ package de.caritas.cob.userservice.api.facade;
 
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.web.dto.ReassignmentNotificationDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
@@ -10,7 +13,7 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMem
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
@@ -19,9 +22,10 @@ import de.caritas.cob.userservice.api.service.emailsupplier.EmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewEnquiryEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewFeedbackEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewMessageEmailSupplier;
+import de.caritas.cob.userservice.api.service.emailsupplier.ReassignmentConfirmationEmailSupplier;
+import de.caritas.cob.userservice.api.service.emailsupplier.ReassignmentRequestEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.TenantTemplateSupplier;
 import de.caritas.cob.userservice.api.service.helper.MailService;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.api.tenant.TenantData;
@@ -54,7 +58,6 @@ public class EmailNotificationFacade {
   @Value("${rocket.systemuser.id}")
   private String rocketChatSystemUserId;
 
-  private final @NonNull ConsultantAgencyRepository consultantAgencyRepository;
   private final @NonNull MailService mailService;
   private final @NonNull SessionService sessionService;
   private final @NonNull ConsultantAgencyService consultantAgencyService;
@@ -198,6 +201,58 @@ public class EmailNotificationFacade {
       log.error("EmailNotificationFacade error: ", exception);
     }
     TenantContext.clear();
+  }
+
+  @Async
+  public void sendReassignRequestNotification(String rcGroupId, TenantData tenantData) {
+    TenantContext.setCurrentTenantData(tenantData);
+    var session = sessionService.getSessionByGroupId(rcGroupId);
+    var user = session.getUser();
+    if (hasUserValidEmailAddress(user)) {
+      var reassignmentRequestEmailSupplier = ReassignmentRequestEmailSupplier.builder()
+          .receiverEmailAddress(user.getEmail())
+          .receiverUsername(user.getUsername())
+          .tenantTemplateSupplier(tenantTemplateSupplier)
+          .applicationBaseUrl(applicationBaseUrl)
+          .multiTenancyEnabled(multiTenancyEnabled).build();
+      try {
+        sendMailTasksToMailService(reassignmentRequestEmailSupplier);
+      } catch (Exception exception) {
+        log.error("EmailNotificationFacade error: Failed to send reassign request notification",
+            exception);
+      }
+    }
+    TenantContext.clear();
+  }
+
+  private boolean hasUserValidEmailAddress(User user) {
+    return nonNull(user) && isNotBlank(user.getEmail()) && !user.getEmail()
+        .endsWith(emailDummySuffix);
+  }
+
+  @Async
+  public void sendReassignConfirmationNotification(
+      ReassignmentNotificationDTO reassignmentNotification, TenantData tenantData) {
+    TenantContext.setCurrentTenantData(tenantData);
+    var reassignmentConfirmationEmailSupplier = ReassignmentConfirmationEmailSupplier.builder()
+        .receiverConsultant(
+            findExistingConsultantById(reassignmentNotification.getToConsultantId().toString()))
+        .senderConsultantName(reassignmentNotification.getFromConsultantName())
+        .tenantTemplateSupplier(tenantTemplateSupplier)
+        .applicationBaseUrl(applicationBaseUrl)
+        .multiTenancyEnabled(multiTenancyEnabled).build();
+    try {
+      sendMailTasksToMailService(reassignmentConfirmationEmailSupplier);
+    } catch (Exception exception) {
+      log.error("EmailNotificationFacade error: Failed to send reqssign confiration notification",
+          exception);
+    }
+    TenantContext.clear();
+  }
+
+  private Consultant findExistingConsultantById(String consultantId) {
+    return consultantService.getConsultant(consultantId)
+        .orElseThrow(() -> new NotFoundException("Consultant with id %s not found", consultantId));
   }
 
 }

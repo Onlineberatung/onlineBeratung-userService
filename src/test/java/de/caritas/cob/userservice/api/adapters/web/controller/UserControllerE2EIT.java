@@ -1,7 +1,9 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
+import static de.caritas.cob.userservice.api.testHelper.AsyncVerification.verifyAsync;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS_SYSTEM_A;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS_TECHNICAL_A;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_TOKEN;
 import static java.util.Objects.nonNull;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
@@ -33,6 +35,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsGetDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsUpdateDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.subscriptions.SubscriptionsGetDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.subscriptions.SubscriptionsUpdateDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.RocketChatUserDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UpdateUser;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserInfoResponseDTO;
@@ -41,6 +47,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.EmailToggle;
 import de.caritas.cob.userservice.api.adapters.web.dto.EmailType;
 import de.caritas.cob.userservice.api.adapters.web.dto.PasswordDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PatchUserDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ReassignmentNotificationDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
@@ -57,16 +64,22 @@ import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.model.Language;
 import de.caritas.cob.userservice.api.model.OtpInfoDTO;
 import de.caritas.cob.userservice.api.model.OtpType;
+import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.model.UserAgency;
 import de.caritas.cob.userservice.api.port.out.ChatAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.ChatRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.ConsultingTypeControllerApi;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.BasicConsultingTypeResponseDTO;
+import de.caritas.cob.userservice.mailservice.generated.web.MailsControllerApi;
+import de.caritas.cob.userservice.topicservice.generated.ApiClient;
+import de.caritas.cob.userservice.topicservice.generated.web.TopicControllerApi;
+import de.caritas.cob.userservice.topicservice.generated.web.model.TopicDTO;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -74,10 +87,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import javax.servlet.http.Cookie;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.assertj.core.util.Lists;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -87,6 +102,7 @@ import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.admin.client.token.TokenManager;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -102,6 +118,7 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -111,6 +128,8 @@ import org.springframework.web.util.UriTemplateHandler;
 @AutoConfigureMockMvc
 @ActiveProfiles("testing")
 @AutoConfigureTestDatabase
+@TestPropertySource(properties = "spring.profiles.active=testing")
+@TestPropertySource(properties = "feature.topics.enabled=true")
 class UserControllerE2EIT {
 
   private static final EasyRandom easyRandom = new EasyRandom();
@@ -157,6 +176,9 @@ class UserControllerE2EIT {
   @Autowired
   private IdentityConfig identityConfig;
 
+  @Autowired
+  private SessionRepository sessionRepository;
+
   @MockBean
   private AuthenticatedUser authenticatedUser;
 
@@ -174,6 +196,14 @@ class UserControllerE2EIT {
   @MockBean
   @Qualifier("rocketChatRestTemplate")
   private RestTemplate rocketChatRestTemplate;
+
+  @MockBean
+  @Qualifier("topicControllerApiPrimary")
+  private TopicControllerApi topicControllerApi;
+
+  @MockBean
+  @Qualifier("mailsControllerApi")
+  private MailsControllerApi mailsControllerApi;
 
   @MockBean
   private Keycloak keycloak;
@@ -250,10 +280,10 @@ class UserControllerE2EIT {
     var username = usernameTranscoder.decodeUsername(consultant.getUsername());
 
     mockMvc.perform(
-            get("/users/data")
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .accept(MediaType.APPLICATION_JSON))
+        get("/users/data")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("userId", is(consultant.getId())))
         .andExpect(jsonPath("userName", is(username)))
@@ -314,10 +344,10 @@ class UserControllerE2EIT {
     var username = usernameTranscoder.decodeUsername(user.getUsername());
 
     mockMvc.perform(
-            get("/users/data")
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .accept(MediaType.APPLICATION_JSON))
+        get("/users/data")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("userId", is(user.getUserId())))
         .andExpect(jsonPath("userName", is(username)))
@@ -365,10 +395,10 @@ class UserControllerE2EIT {
     var username = usernameTranscoder.decodeUsername(consultant.getUsername());
 
     mockMvc.perform(
-            get("/users/data")
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .accept(MediaType.APPLICATION_JSON))
+        get("/users/data")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("userId", is(consultant.getId())))
         .andExpect(jsonPath("userName", is(username)))
@@ -429,10 +459,10 @@ class UserControllerE2EIT {
     var username = usernameTranscoder.decodeUsername(user.getUsername());
 
     mockMvc.perform(
-            get("/users/data")
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .accept(MediaType.APPLICATION_JSON))
+        get("/users/data")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("userId", is(user.getUserId())))
         .andExpect(jsonPath("userName", is(username)))
@@ -467,6 +497,39 @@ class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  void getSessionsForAuthenticatedConsultant_ShouldGetSessionsWithTopics()
+      throws Exception {
+    givenABearerToken();
+    givenAValidConsultantWithId("34c3x5b1-0677-4fd2-a7ea-56a71aefd099");
+    givenConsultingTypeServiceResponse();
+    givenAValidRocketChatInfoUserResponse();
+    givenAValidRocketChatSubscriptionsResponse();
+    givenAValidRocketChatRoomsResponse();
+    givenAValidTopicServiceResponse();
+
+    mockMvc.perform(
+        get("/users/sessions/consultants?status=2&count=15&filter=all&offset=0")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .header("rcToken", RC_TOKEN)
+
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("offset", is(0)))
+        .andExpect(jsonPath("count", is(2)))
+        .andExpect(jsonPath("total", is(2)))
+        .andExpect(jsonPath("sessions", hasSize(2)))
+        .andExpect(jsonPath("sessions[0].session.id", is(1215)))
+        .andExpect(jsonPath("sessions[0].session.agencyId", is(1)))
+        .andExpect(jsonPath("sessions[0].session.topic.id", is(1)))
+        .andExpect(jsonPath("sessions[0].session.topic.name", is("topic name")))
+        .andExpect(jsonPath("sessions[0].session.topic.description", is("topic desc")))
+        .andExpect(jsonPath("sessions[0].session.topic.status", is("INACTIVE")));
+  }
+
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   void getUserDataShouldRespondWithConsultantDataAndStatusOkWhen2faIsNotActivated()
       throws Exception {
     givenABearerToken();
@@ -480,10 +543,10 @@ class UserControllerE2EIT {
     var username = usernameTranscoder.decodeUsername(consultant.getUsername());
 
     mockMvc.perform(
-            get("/users/data")
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .accept(MediaType.APPLICATION_JSON))
+        get("/users/data")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("userId", is(consultant.getId())))
         .andExpect(jsonPath("userName", is(username)))
@@ -544,10 +607,10 @@ class UserControllerE2EIT {
     var username = usernameTranscoder.decodeUsername(user.getUsername());
 
     mockMvc.perform(
-            get("/users/data")
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .accept(MediaType.APPLICATION_JSON))
+        get("/users/data")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("userId", is(user.getUserId())))
         .andExpect(jsonPath("userName", is(username)))
@@ -593,10 +656,10 @@ class UserControllerE2EIT {
     givenConsultantIsNotToNotifyAboutNewEnquiries();
 
     mockMvc.perform(
-            get("/users/data")
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .accept(MediaType.APPLICATION_JSON))
+        get("/users/data")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("emailToggles", hasSize(3)))
         .andExpect(jsonPath("emailToggles[?(@.name =~ /DAILY_ENQUIRY/)].state",
@@ -623,10 +686,10 @@ class UserControllerE2EIT {
     givenConsultantIsNotToNotifyAboutNewFollowUps();
 
     mockMvc.perform(
-            get("/users/data")
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .accept(MediaType.APPLICATION_JSON))
+        get("/users/data")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("emailToggles", hasSize(3)))
         .andExpect(jsonPath("emailToggles[?(@.name =~ /DAILY_ENQUIRY/)].state",
@@ -644,13 +707,13 @@ class UserControllerE2EIT {
     givenAFullPatchDto();
 
     mockMvc.perform(
-            patch("/users/data")
-                .cookie(CSRF_COOKIE)
-                .cookie(RC_TOKEN_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(patchUserDTO))
-                .accept(MediaType.APPLICATION_JSON))
+        patch("/users/data")
+            .cookie(CSRF_COOKIE)
+            .cookie(RC_TOKEN_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(patchUserDTO))
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
     var savedUser = userRepository.findById(user.getUserId());
@@ -666,13 +729,13 @@ class UserControllerE2EIT {
     givenAValidRocketChatUpdateUserResponse();
 
     mockMvc.perform(
-            patch("/users/data")
-                .cookie(CSRF_COOKIE)
-                .cookie(RC_TOKEN_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(patchUserDTO))
-                .accept(MediaType.APPLICATION_JSON))
+        patch("/users/data")
+            .cookie(CSRF_COOKIE)
+            .cookie(RC_TOKEN_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(patchUserDTO))
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
     var savedConsultant = consultantRepository.findById(consultant.getId());
@@ -699,13 +762,13 @@ class UserControllerE2EIT {
     givenAValidRocketChatUpdateUserResponse();
 
     mockMvc.perform(
-            patch("/users/data")
-                .cookie(CSRF_COOKIE)
-                .cookie(RC_TOKEN_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(patchUserDTO))
-                .accept(MediaType.APPLICATION_JSON))
+        patch("/users/data")
+            .cookie(CSRF_COOKIE)
+            .cookie(RC_TOKEN_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(patchUserDTO))
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
     var savedConsultant = consultantRepository.findById(consultant.getId());
@@ -726,13 +789,13 @@ class UserControllerE2EIT {
     givenAFullPatchDto(false);
     givenAValidRocketChatUpdateUserResponse();
     mockMvc.perform(
-            patch("/users/data")
-                .cookie(CSRF_COOKIE)
-                .cookie(RC_TOKEN_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(patchUserDTO))
-                .accept(MediaType.APPLICATION_JSON))
+        patch("/users/data")
+            .cookie(CSRF_COOKIE)
+            .cookie(RC_TOKEN_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(patchUserDTO))
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
     savedConsultant = consultantRepository.findById(consultant.getId());
@@ -741,13 +804,13 @@ class UserControllerE2EIT {
 
     givenAFullPatchDto(true);
     mockMvc.perform(
-            patch("/users/data")
-                .cookie(CSRF_COOKIE)
-                .cookie(RC_TOKEN_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(patchUserDTO))
-                .accept(MediaType.APPLICATION_JSON))
+        patch("/users/data")
+            .cookie(CSRF_COOKIE)
+            .cookie(RC_TOKEN_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(patchUserDTO))
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
     savedConsultant = consultantRepository.findById(consultant.getId());
@@ -763,12 +826,12 @@ class UserControllerE2EIT {
     var patchDto = givenAnInvalidPatchDto();
 
     mockMvc.perform(
-            patch("/users/data")
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(patchDto))
-                .accept(MediaType.APPLICATION_JSON))
+        patch("/users/data")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(patchDto))
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
 
@@ -847,7 +910,7 @@ class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
-  public void deactivateAndFlagUserAccountForDeletionShouldDeactivateAndRespondWithOkIf2faIsOff()
+  void deactivateAndFlagUserAccountForDeletionShouldDeactivateAndRespondWithOkIf2faIsOff()
       throws Exception {
     givenAValidUser();
     givenADeleteUserAccountDto();
@@ -970,11 +1033,11 @@ class UserControllerE2EIT {
     givenValidRocketChatTechUserResponse();
 
     mockMvc.perform(put("/users/data")
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(updateConsultantDTO))
-            .accept(MediaType.APPLICATION_JSON))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(updateConsultantDTO))
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     var savedConsultant = consultantRepository.findById(consultant.getId());
@@ -992,11 +1055,11 @@ class UserControllerE2EIT {
     givenValidRocketChatTechUserResponse();
 
     mockMvc.perform(put("/users/data")
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(updateConsultantDTO))
-            .accept(MediaType.APPLICATION_JSON))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(updateConsultantDTO))
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     var savedConsultant = consultantRepository.findById(consultant.getId());
@@ -1018,11 +1081,11 @@ class UserControllerE2EIT {
     givenValidRocketChatTechUserResponse();
 
     mockMvc.perform(put("/users/data")
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(updateConsultantDTO))
-            .accept(MediaType.APPLICATION_JSON))
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(updateConsultantDTO))
+        .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     var savedConsultant = consultantRepository.findById(consultant.getId());
@@ -1042,12 +1105,48 @@ class UserControllerE2EIT {
     givenAUserDTO();
 
     mockMvc.perform(
-            post("/users/askers/new")
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userDTO)))
+        post("/users/askers/new")
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(userDTO)))
         .andExpect(status().isCreated());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT, AuthorityValue.USER_DEFAULT})
+  void sendReassignmentNotificationShouldSendEmailAndRespondWithOk() throws Exception {
+    var apiClientMock = mock(de.caritas.cob.userservice.mailservice.generated.ApiClient.class);
+    when(mailsControllerApi.getApiClient()).thenReturn(apiClientMock);
+    var session = givenAExistingSession();
+    var assignemtNotification = new ReassignmentNotificationDTO()
+        .toConsultantId(UUID.randomUUID())
+        .rcGroupId(session.getGroupId());
+
+    mockMvc.perform(post("/users/mails/reassignment")
+        .cookie(CSRF_COOKIE)
+        .header(CSRF_HEADER, CSRF_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(assignemtNotification))
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verifyAsync(a -> verify(mailsControllerApi).sendMails(any()));
+  }
+
+  private Session givenAExistingSession() {
+    var user = new EasyRandom().nextObject(User.class);
+    user.setSessions(null);
+    user.setUserAgencies(null);
+    user.setUserMobileTokens(null);
+    var session = new EasyRandom().nextObject(Session.class);
+    session.setConsultant(null);
+    session.setUser(userRepository.save(user));
+    session.setId(null);
+    session.setSessionData(null);
+    session.setPostcode("12345");
+    session.setConsultingTypeId(1);
+    return sessionRepository.save(session);
   }
 
   private void givenARealmResource() {
@@ -1162,6 +1261,39 @@ class UserControllerE2EIT {
     ).thenReturn(ResponseEntity.ok(userInfoResponse));
   }
 
+  private void givenAValidRocketChatRoomsResponse() {
+    var roomsGetDTO = new RoomsGetDTO();
+    roomsGetDTO.setUpdate(new RoomsUpdateDTO[]{});
+    when(restTemplate.exchange(
+        Mockito.anyString(), eq(HttpMethod.GET),
+        any(HttpEntity.class), eq(RoomsGetDTO.class))
+    ).thenReturn(ResponseEntity.ok(roomsGetDTO));
+  }
+
+  private void givenAValidTopicServiceResponse() {
+    var firstTopic = new TopicDTO().id(1L).name("topic name").description("topic desc")
+        .status("INACTIVE");
+    var secondTopic = new TopicDTO().id(2L).name("topic name 2").description("topic desc 2")
+        .status("ACTIVE");
+    when(topicControllerApi.getApiClient()).thenReturn(new ApiClient());
+    when(topicControllerApi.getAllTopics()).thenReturn(Lists.newArrayList(firstTopic, secondTopic));
+  }
+
+  private void givenAValidRocketChatSubscriptionsResponse() {
+    var subscriptionsGetDTO = new SubscriptionsGetDTO();
+    subscriptionsGetDTO.setUpdate(new SubscriptionsUpdateDTO[]{});
+    var urlSuffix = "/subscriptions.get";
+    when(rocketChatRestTemplate.exchange(
+        Mockito.anyString(), eq(HttpMethod.GET),
+        any(HttpEntity.class), eq(SubscriptionsGetDTO.class))
+    ).thenReturn(ResponseEntity.ok(subscriptionsGetDTO));
+
+    when(restTemplate.exchange(
+        Mockito.anyString(), eq(HttpMethod.GET),
+        any(HttpEntity.class), eq(SubscriptionsGetDTO.class))
+    ).thenReturn(ResponseEntity.ok(subscriptionsGetDTO));
+  }
+
   private void givenAValidRocketChatUpdateUserResponse() {
     var urlSuffix = "/api/v1/users.update";
     var updateUserResponse = easyRandom.nextObject(Void.class);
@@ -1187,6 +1319,16 @@ class UserControllerE2EIT {
 
   private void givenAValidConsultant() {
     consultant = consultantRepository.findAll().iterator().next();
+    when(authenticatedUser.getUserId()).thenReturn(consultant.getId());
+    when(authenticatedUser.isAdviceSeeker()).thenReturn(false);
+    when(authenticatedUser.isConsultant()).thenReturn(true);
+    when(authenticatedUser.getUsername()).thenReturn(consultant.getUsername());
+    when(authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.CONSULTANT.getValue()));
+    when(authenticatedUser.getGrantedAuthorities()).thenReturn(Set.of("anAuthority"));
+  }
+
+  private void givenAValidConsultantWithId(String id) {
+    consultant = consultantRepository.findById(id).get();
     when(authenticatedUser.getUserId()).thenReturn(consultant.getId());
     when(authenticatedUser.isAdviceSeeker()).thenReturn(false);
     when(authenticatedUser.isConsultant()).thenReturn(true);

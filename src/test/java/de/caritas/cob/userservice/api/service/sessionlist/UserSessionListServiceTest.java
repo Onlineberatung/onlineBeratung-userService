@@ -93,6 +93,7 @@ public class UserSessionListServiceTest {
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
             .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
+            .lastMessagesRoom(emptyMap())
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(RC_CREDENTIALS))
         .thenReturn(rocketChatRoomInformation);
@@ -142,6 +143,7 @@ public class UserSessionListServiceTest {
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
             .readMessages(MESSAGES_READ_MAP_WITH_UNREADS)
+            .lastMessagesRoom(emptyMap())
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(RC_CREDENTIALS))
         .thenReturn(rocketChatRoomInformation);
@@ -240,8 +242,6 @@ public class UserSessionListServiceTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(RC_CREDENTIALS))
         .thenReturn(rocketChatRoomInformation);
-    when(sessionListAnalyser.isLastMessageForRocketChatGroupIdAvailable(
-        Mockito.any(), Mockito.any())).thenReturn(true);
     when(sessionListAnalyser
         .getAttachmentFromRocketChatMessageIfAvailable(
             Mockito.eq(RC_CREDENTIALS.getRocketChatUserId()),
