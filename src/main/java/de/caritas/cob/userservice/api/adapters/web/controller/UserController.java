@@ -667,8 +667,7 @@ public class UserController implements UsersApi {
       @RequestBody ReassignmentNotificationDTO reassignmentNotificationDTO) {
 
     if (isTrue(reassignmentNotificationDTO.getIsConfirmed())) {
-      emailNotificationFacade.sendReassignConfirmationNotification(
-          reassignmentNotificationDTO.getToConsultantId().toString(),
+      emailNotificationFacade.sendReassignConfirmationNotification(reassignmentNotificationDTO,
           TenantContext.getCurrentTenantData());
     } else {
       emailNotificationFacade
