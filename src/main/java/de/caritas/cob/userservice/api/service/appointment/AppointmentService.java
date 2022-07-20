@@ -12,7 +12,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
 /**
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-@ConditionalOnExpression("${feature.appointment.enabled:true}")
 @Slf4j
 public class AppointmentService {
 
@@ -28,7 +26,8 @@ public class AppointmentService {
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
   private final @NonNull TenantHeaderSupplier tenantHeaderSupplier;
   private final @NonNull IdentityClient identityClient;
-
+  @Value("${feature.appointment.enabled}")
+  private boolean appointmentFeatureEnabled;
 
   @Value("${keycloakService.technical.username}")
   private String keycloakTechnicalUsername;
@@ -38,6 +37,10 @@ public class AppointmentService {
 
 
   public void createConsultant(ConsultantAdminResponseDTO consultantAdminResponseDTO) {
+    if(!appointmentFeatureEnabled){
+      return;
+    }
+
     if (consultantAdminResponseDTO != null) {
       ObjectMapper mapper = new ObjectMapper()
           .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -54,6 +57,10 @@ public class AppointmentService {
   }
 
   public void updateConsultant(ConsultantAdminResponseDTO consultantAdminResponseDTO) {
+    if(!appointmentFeatureEnabled){
+      return;
+    }
+
     if (consultantAdminResponseDTO != null) {
       ObjectMapper mapper = new ObjectMapper()
           .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -70,6 +77,10 @@ public class AppointmentService {
   }
 
   public void deleteConsultant(String consultantId) {
+    if(!appointmentFeatureEnabled){
+      return;
+    }
+
     if (consultantId != null && !consultantId.isEmpty()) {
       addTechnicalUserHeaders(this.appointmentConsultantApi.getApiClient());
       this.appointmentConsultantApi.deleteConsultant(consultantId);

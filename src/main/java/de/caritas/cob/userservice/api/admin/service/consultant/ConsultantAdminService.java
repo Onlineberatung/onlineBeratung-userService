@@ -19,7 +19,6 @@ import de.caritas.cob.userservice.api.service.appointment.AppointmentService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -35,8 +34,6 @@ public class ConsultantAdminService {
   private final @NonNull ConsultantPreDeletionService consultantPreDeletionService;
   @Autowired(required = false)
   AppointmentService appointmentService;
-  @Value("${feature.appointment.enabled}")
-  private boolean appointmentFeatureEnabled;
 
   /**
    * Finds a {@link Consultant} by the given consultant id and throws a {@link NoContentException}
@@ -57,20 +54,18 @@ public class ConsultantAdminService {
    * Creates a new {@link Consultant} based on the {@link CreateConsultantDTO} input.
    *
    * @param createConsultantDTO the input data used for {@link Consultant} creation
-   * @return the generated and persisted {@link Consultant} representation as
-   * {@link ConsultantAdminResponseDTO}
+   * @return the generated and persisted {@link Consultant} representation as {@link
+   * ConsultantAdminResponseDTO}
    */
   public ConsultantAdminResponseDTO createNewConsultant(CreateConsultantDTO createConsultantDTO) {
     Consultant newConsultant =
         this.consultantCreatorService.createNewConsultant(createConsultantDTO);
 
-    ConsultantAdminResponseDTO consultantAdminResponseDTO = ConsultantResponseDTOBuilder.getInstance(
-        newConsultant).buildResponseDTO();
+    ConsultantAdminResponseDTO consultantAdminResponseDTO = ConsultantResponseDTOBuilder
+        .getInstance(
+            newConsultant).buildResponseDTO();
 
-    if (appointmentFeatureEnabled) {
-      // Create calcom user
-      this.appointmentService.createConsultant(consultantAdminResponseDTO);
-    }
+    this.appointmentService.createConsultant(consultantAdminResponseDTO);
 
     return consultantAdminResponseDTO;
   }
@@ -80,22 +75,19 @@ public class ConsultantAdminService {
    *
    * @param consultantId        the id of consultant to be updated
    * @param updateConsultantDTO the input data used for {@link Consultant} update
-   * @return the generated and persisted {@link Consultant} representation as
-   * {@link ConsultantAdminResponseDTO}
+   * @return the generated and persisted {@link Consultant} representation as {@link
+   * ConsultantAdminResponseDTO}
    */
   public ConsultantAdminResponseDTO updateConsultant(String consultantId,
       UpdateAdminConsultantDTO updateConsultantDTO) {
     Consultant updatedConsultant = this.consultantUpdateService.updateConsultant(consultantId,
         updateConsultantDTO);
 
-    ConsultantAdminResponseDTO consultantAdminResponseDTO = ConsultantResponseDTOBuilder.getInstance(
-        updatedConsultant).buildResponseDTO();
+    ConsultantAdminResponseDTO consultantAdminResponseDTO = ConsultantResponseDTOBuilder
+        .getInstance(
+            updatedConsultant).buildResponseDTO();
 
-    if (appointmentFeatureEnabled) {
-      // Create calcom user
-      this.appointmentService.updateConsultant(consultantAdminResponseDTO);
-    }
-
+    this.appointmentService.updateConsultant(consultantAdminResponseDTO);
     return consultantAdminResponseDTO;
   }
 
@@ -111,10 +103,7 @@ public class ConsultantAdminService {
 
     this.consultantPreDeletionService.performPreDeletionSteps(consultant);
 
-    if (appointmentFeatureEnabled) {
-      // Delete appointment calcom user
-      this.appointmentService.deleteConsultant(consultant.getId());
-    }
+    this.appointmentService.deleteConsultant(consultant.getId());
 
     consultant.setDeleteDate(nowInUtc());
     consultant.setStatus(ConsultantStatus.IN_DELETION);
