@@ -2611,6 +2611,10 @@ components:
         lastName:
           type: string
           example: Mustermann
+        displayName:
+          type: string
+        username:
+          type: string
         agencies:
           type: array
           items:
