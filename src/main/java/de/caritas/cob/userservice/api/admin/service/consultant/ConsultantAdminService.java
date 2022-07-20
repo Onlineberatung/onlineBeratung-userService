@@ -2,22 +2,24 @@ package de.caritas.cob.userservice.api.admin.service.consultant;
 
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantCreatorService;
 import de.caritas.cob.userservice.api.admin.service.consultant.delete.ConsultantPreDeletionService;
 import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
 import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
-import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
+import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
-import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.service.appointment.AppointmentService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -31,7 +33,10 @@ public class ConsultantAdminService {
   private final @NonNull ConsultantCreatorService consultantCreatorService;
   private final @NonNull ConsultantUpdateService consultantUpdateService;
   private final @NonNull ConsultantPreDeletionService consultantPreDeletionService;
-  private final @NonNull AppointmentService appointmentService;
+  @Autowired(required = false)
+  AppointmentService appointmentService;
+  @Value("${feature.appointment.enabled}")
+  private boolean appointmentFeatureEnabled;
 
   /**
    * Finds a {@link Consultant} by the given consultant id and throws a {@link NoContentException}
@@ -52,17 +57,20 @@ public class ConsultantAdminService {
    * Creates a new {@link Consultant} based on the {@link CreateConsultantDTO} input.
    *
    * @param createConsultantDTO the input data used for {@link Consultant} creation
-   * @return the generated and persisted {@link Consultant} representation as {@link
-   * ConsultantAdminResponseDTO}
+   * @return the generated and persisted {@link Consultant} representation as
+   * {@link ConsultantAdminResponseDTO}
    */
   public ConsultantAdminResponseDTO createNewConsultant(CreateConsultantDTO createConsultantDTO) {
     Consultant newConsultant =
         this.consultantCreatorService.createNewConsultant(createConsultantDTO);
 
-    ConsultantAdminResponseDTO consultantAdminResponseDTO = ConsultantResponseDTOBuilder.getInstance(newConsultant).buildResponseDTO();
+    ConsultantAdminResponseDTO consultantAdminResponseDTO = ConsultantResponseDTOBuilder.getInstance(
+        newConsultant).buildResponseDTO();
 
-    // Create calcom user
-    appointmentService.createConsultant(consultantAdminResponseDTO);
+    if (appointmentFeatureEnabled) {
+      // Create calcom user
+      this.appointmentService.createConsultant(consultantAdminResponseDTO);
+    }
 
     return consultantAdminResponseDTO;
   }
@@ -72,18 +80,21 @@ public class ConsultantAdminService {
    *
    * @param consultantId        the id of consultant to be updated
    * @param updateConsultantDTO the input data used for {@link Consultant} update
-   * @return the generated and persisted {@link Consultant} representation as {@link
-   * ConsultantAdminResponseDTO}
+   * @return the generated and persisted {@link Consultant} representation as
+   * {@link ConsultantAdminResponseDTO}
    */
   public ConsultantAdminResponseDTO updateConsultant(String consultantId,
       UpdateAdminConsultantDTO updateConsultantDTO) {
     Consultant updatedConsultant = this.consultantUpdateService.updateConsultant(consultantId,
         updateConsultantDTO);
 
-    ConsultantAdminResponseDTO consultantAdminResponseDTO = ConsultantResponseDTOBuilder.getInstance(updatedConsultant).buildResponseDTO();
+    ConsultantAdminResponseDTO consultantAdminResponseDTO = ConsultantResponseDTOBuilder.getInstance(
+        updatedConsultant).buildResponseDTO();
 
-    // Create calcom user
-    appointmentService.updateConsultant(consultantAdminResponseDTO);
+    if (appointmentFeatureEnabled) {
+      // Create calcom user
+      this.appointmentService.updateConsultant(consultantAdminResponseDTO);
+    }
 
     return consultantAdminResponseDTO;
   }
@@ -100,8 +111,10 @@ public class ConsultantAdminService {
 
     this.consultantPreDeletionService.performPreDeletionSteps(consultant);
 
-    // Delete appointment calcom user
-    this.appointmentService.deleteConsultant(consultant.getId());
+    if (appointmentFeatureEnabled) {
+      // Delete appointment calcom user
+      this.appointmentService.deleteConsultant(consultant.getId());
+    }
 
     consultant.setDeleteDate(nowInUtc());
     consultant.setStatus(ConsultantStatus.IN_DELETION);
