@@ -2106,6 +2106,7 @@ components:
         - "USER_UNMUTED"
         - "E2EE_ACTIVATED"
         - "MASTER_KEY_LOST"
+        - "REASSIGN_CONSULTANT"
 
     LastMessageDTO:
       type: object
@@ -2562,6 +2563,10 @@ components:
         lastName:
           type: string
           example: Mustermann
+        displayName:
+          type: string
+        username:
+          type: string
         agencies:
           type: array
           items:
@@ -2756,6 +2761,8 @@ components:
         toConsultantId:
           type: string
           format: UUID
+        fromConsultantName:
+          type: string
         isConfirmed:
           type: boolean
           description: null defines the reassign request

@@ -7,7 +7,9 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.mapping.UserDtoMapper;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.port.in.AccountManaging;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Language;
@@ -27,6 +29,8 @@ public class ConsultantAgencyService {
 
   private final @NonNull ConsultantAgencyRepository consultantAgencyRepository;
   private final @NonNull AgencyService agencyService;
+  private final @NonNull AccountManaging accountManager;
+  private final @NonNull UserDtoMapper userDtoMapper;
 
   /**
    * Save a {@link ConsultantAgency} to the database.
@@ -121,10 +125,20 @@ public class ConsultantAgencyService {
   }
 
   private ConsultantResponseDTO convertToConsultantResponseDTO(ConsultantAgency agency) {
-    return new ConsultantResponseDTO()
-        .consultantId(agency.getConsultant().getId())
-        .firstName(agency.getConsultant().getFirstName())
-        .lastName(agency.getConsultant().getLastName());
+    var consultant = agency.getConsultant();
+    var id = consultant.getId();
+
+    var consultantDto = new ConsultantResponseDTO()
+        .consultantId(id)
+        .firstName(consultant.getFirstName())
+        .lastName(consultant.getLastName())
+        .username(consultant.getUsername());
+
+    accountManager.findConsultant(id).ifPresent(consultantMap ->
+        consultantDto.displayName(userDtoMapper.displayNameOf(consultantMap))
+    );
+
+    return consultantDto;
   }
 
   /**

@@ -5,6 +5,7 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.web.dto.ReassignmentNotificationDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
@@ -230,11 +231,13 @@ public class EmailNotificationFacade {
   }
 
   @Async
-  public void sendReassignConfirmationNotification(String receiverConsultantId,
-      TenantData tenantData) {
+  public void sendReassignConfirmationNotification(
+      ReassignmentNotificationDTO reassignmentNotification, TenantData tenantData) {
     TenantContext.setCurrentTenantData(tenantData);
     var reassignmentConfirmationEmailSupplier = ReassignmentConfirmationEmailSupplier.builder()
-        .receiverConsultant(findExistingConsultantById(receiverConsultantId))
+        .receiverConsultant(
+            findExistingConsultantById(reassignmentNotification.getToConsultantId().toString()))
+        .senderConsultantName(reassignmentNotification.getFromConsultantName())
         .tenantTemplateSupplier(tenantTemplateSupplier)
         .applicationBaseUrl(applicationBaseUrl)
         .multiTenancyEnabled(multiTenancyEnabled).build();
