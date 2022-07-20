@@ -793,20 +793,20 @@ public class UserController implements UsersApi {
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    var userId = authenticatedUser.getUserId();
     // Check if the calling consultant has the correct right to assign the enquiry to a consultant
     if (session.get().getStatus().equals(SessionStatus.NEW) && !authenticatedUser
         .getGrantedAuthorities().contains(AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY)) {
       LogService.logForbidden(String.format(
           "The calling consultant with id %s does not have the authority to assign the enquiry to a consultant.",
-          authenticatedUser.getUserId()));
+          userId));
 
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
     var consultantToAssign = userAccountProvider.retrieveValidatedConsultantById(consultantId);
-    var authConsultant = consultantService.getConsultant(authenticatedUser.getUserId())
-        .orElseThrow();
-    assignSessionFacade.assignSession(session.get(), consultantToAssign, authConsultant);
+    var consultantToKeep = consultantService.getConsultant(userId).orElse(null);
+    assignSessionFacade.assignSession(session.get(), consultantToAssign, consultantToKeep);
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
