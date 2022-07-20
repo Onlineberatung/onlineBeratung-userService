@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS_SYSTEM_A;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.hamcrest.Matchers.contains;
@@ -13,7 +14,10 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -21,12 +25,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.neovisionaries.i18n.LanguageCode;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.RocketChatUserDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.LanguageResponseDTO;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.ChatAgency;
 import de.caritas.cob.userservice.api.model.Consultant;
@@ -54,6 +63,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.Cookie;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.PositiveOrZero;
+import lombok.NonNull;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.Matchers;
 import org.jeasy.random.EasyRandom;
@@ -61,14 +71,20 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.client.RestTemplate;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -110,6 +126,16 @@ class UserControllerConsultantE2EIT {
 
   @Autowired
   private IdentityConfig identityConfig;
+
+  @Autowired
+  private UsernameTranscoder usernameTranscoder;
+
+  @MockBean
+  @Qualifier("rocketChatRestTemplate")
+  private RestTemplate rocketChatRestTemplate;
+
+  @MockBean
+  private RocketChatCredentialsProvider rocketChatCredentialsProvider;
 
   @SpyBean
   private AgencyService agencyService;
@@ -620,6 +646,30 @@ class UserControllerConsultantE2EIT {
   }
 
   @Test
+  @WithMockUser(authorities = AuthorityValue.VIEW_AGENCY_CONSULTANTS)
+  void getConsultantsShouldRespondWithDisplayNameAndUsername() throws Exception {
+    var agencyId = givenAnAgencyIdWithDefaultLanguageOnly();
+    givenAValidRocketChatSystemUser();
+    givenAValidRocketChatInfoUserResponse("user1", "user2", "user3");
+
+    mockMvc.perform(
+            get("/users/consultants")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .param("agencyId", String.valueOf(agencyId))
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", hasSize(3)))
+        .andExpect(jsonPath("[0].displayName", is("user1")))
+        .andExpect(jsonPath("[0].username", startsWith("enc.")))
+        .andExpect(jsonPath("[1].displayName", is("user2")))
+        .andExpect(jsonPath("[1].username", startsWith("enc.")))
+        .andExpect(jsonPath("[2].displayName", is("user3")))
+        .andExpect(jsonPath("[2].username", startsWith("enc.")));
+  }
+
+  @Test
   @WithMockUser
   void getConsultantPublicDataShouldRespondWithOk() throws Exception {
     givenAConsultantWithMultipleAgencies();
@@ -646,6 +696,38 @@ class UserControllerConsultantE2EIT {
         .andExpect(jsonPath("agencies[0].consultingType", is(notNullValue())));
 
     assertEquals(24, consultant.getConsultantAgencies().size());
+  }
+
+  @SuppressWarnings("unchecked,SameParameterValue")
+  private void givenAValidRocketChatInfoUserResponse(String username1, String username2,
+      String username3) {
+    var urlInfix = "/api/v1/users.info?userId=";
+    when(rocketChatRestTemplate.exchange(
+        contains(urlInfix), eq(HttpMethod.GET),
+        any(HttpEntity.class), eq(UserInfoResponseDTO.class))
+    ).thenReturn(
+        ResponseEntity.ok(userInfoResponseDTO(username1)),
+        ResponseEntity.ok(userInfoResponseDTO(username2)),
+        ResponseEntity.ok(userInfoResponseDTO(username3))
+    );
+  }
+
+  @NonNull
+  private UserInfoResponseDTO userInfoResponseDTO(String clearTextUsername) {
+    var userInfoResponse = new UserInfoResponseDTO();
+    userInfoResponse.setSuccess(true);
+
+    var chatUser = easyRandom.nextObject(RocketChatUserDTO.class);
+    chatUser.setId(RandomStringUtils.randomAlphanumeric(17));
+    chatUser.setUsername(RandomStringUtils.randomAlphabetic(16));
+    chatUser.setName(usernameTranscoder.encodeUsername(clearTextUsername));
+    userInfoResponse.setUser(chatUser);
+    return userInfoResponse;
+  }
+
+  private void givenAValidRocketChatSystemUser() throws RocketChatUserNotInitializedException {
+    when(rocketChatCredentialsProvider.getSystemUserSneaky()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
+    when(rocketChatCredentialsProvider.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
   }
 
   private long aPositiveLong() {
