@@ -1,5 +1,5 @@
 {
-  "name": "caritas-online-beratung-userservice",
+  "name": "online-beratung-userservice",
   "version": "2.18.1",
   "scripts": {
     "release": "standard-version"
