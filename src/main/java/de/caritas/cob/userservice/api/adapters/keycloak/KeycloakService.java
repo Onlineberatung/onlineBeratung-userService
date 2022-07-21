@@ -516,7 +516,7 @@ public class KeycloakService implements IdentityClient {
   }
 
   /**
-   * If user didn't provide an email, set to dummy address (userId@caritas-online-beratung.de). No *
+   * If user didn't provide an email, set to dummy address (userId@online-beratung.de). No *
    * success/error status possible, because the Keycloak Client doesn't provide one either. *
    *
    * @param userId Keycloak user ID

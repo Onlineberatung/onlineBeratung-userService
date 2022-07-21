@@ -24,7 +24,7 @@ getTokenBody = {
   'password': migrationUserPassword
 }
 
-tokenUrl = server + '/auth/realms/caritas-online-beratung/protocol/openid-connect/token'
+tokenUrl = server + '/auth/realms/online-beratung/protocol/openid-connect/token'
 tokenResponse = requests.post(tokenUrl, data=getTokenBody, headers=getTokenHeader)
 print('Fetch Bearer access token from keycloak')
 print(tokenResponse.status_code)
@@ -33,7 +33,7 @@ authenticationHeaders = {'Authorization': 'Bearer ' + accessToken,
                          'Content-Type': 'application/json'}
 
 def changeRoleName(fromRoleName, targetRoleName):
-  roleBaseUrl = server + '/auth/admin/realms/caritas-online-beratung/roles/'
+  roleBaseUrl = server + '/auth/admin/realms/online-beratung/roles/'
   identifiedRoleUrl = roleBaseUrl + fromRoleName
   getRoleResponse = requests.get(identifiedRoleUrl, headers=authenticationHeaders)
 
