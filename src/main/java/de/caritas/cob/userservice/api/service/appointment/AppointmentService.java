@@ -37,7 +37,7 @@ public class AppointmentService {
 
 
   public void createConsultant(ConsultantAdminResponseDTO consultantAdminResponseDTO) {
-    if(!appointmentFeatureEnabled){
+    if (!appointmentFeatureEnabled) {
       return;
     }
 
@@ -57,7 +57,7 @@ public class AppointmentService {
   }
 
   public void updateConsultant(ConsultantAdminResponseDTO consultantAdminResponseDTO) {
-    if(!appointmentFeatureEnabled){
+    if (!appointmentFeatureEnabled) {
       return;
     }
 
@@ -77,7 +77,7 @@ public class AppointmentService {
   }
 
   public void deleteConsultant(String consultantId) {
-    if(!appointmentFeatureEnabled){
+    if (!appointmentFeatureEnabled) {
       return;
     }
 
