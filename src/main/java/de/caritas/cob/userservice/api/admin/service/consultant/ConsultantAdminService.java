@@ -18,7 +18,6 @@ import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.service.appointment.AppointmentService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -32,8 +31,7 @@ public class ConsultantAdminService {
   private final @NonNull ConsultantCreatorService consultantCreatorService;
   private final @NonNull ConsultantUpdateService consultantUpdateService;
   private final @NonNull ConsultantPreDeletionService consultantPreDeletionService;
-  @Autowired(required = false)
-  AppointmentService appointmentService;
+  private final @NonNull AppointmentService appointmentService;
 
   /**
    * Finds a {@link Consultant} by the given consultant id and throws a {@link NoContentException}
