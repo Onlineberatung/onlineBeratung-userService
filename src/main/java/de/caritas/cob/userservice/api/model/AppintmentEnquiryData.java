@@ -14,7 +14,7 @@ import lombok.ToString;
 @Setter
 @EqualsAndHashCode
 @ToString
-public class EnquiryData {
+public class AppintmentEnquiryData {
 
   private final User user;
   private final Long sessionId;
@@ -23,6 +23,5 @@ public class EnquiryData {
   private final RocketChatCredentials rocketChatCredentials;
   private String type;
   private String org;
-  private AppointmentData appointmentData;
 
 }

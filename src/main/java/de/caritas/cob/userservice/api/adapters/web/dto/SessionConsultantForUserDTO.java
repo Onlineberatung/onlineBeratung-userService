@@ -20,6 +20,8 @@ import lombok.Setter;
 @ApiModel(value = "SessionConsultantForUser")
 public class SessionConsultantForUserDTO {
 
+  private String consultantId;
+
   @ApiModelProperty(example = "\"Username\"")
   @JsonSerialize(using = DecodeUsernameJsonSerializer.class)
   private String username;
@@ -31,4 +33,5 @@ public class SessionConsultantForUserDTO {
   private String absenceMessage;
 
   private String displayName;
+
 }

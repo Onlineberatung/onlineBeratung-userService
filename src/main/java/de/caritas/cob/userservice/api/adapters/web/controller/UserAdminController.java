@@ -1,5 +1,8 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.AskerResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
 import de.caritas.cob.userservice.api.admin.facade.UserAdminFacade;
 import de.caritas.cob.userservice.api.admin.hallink.RootDTOBuilder;
@@ -19,6 +22,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.SessionAdminResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionFilter;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ViolationDTO;
+import de.caritas.cob.userservice.api.facade.userdata.AskerDataProvider;
 import de.caritas.cob.userservice.generated.api.adapters.web.controller.UseradminApi;
 import io.swagger.annotations.Api;
 import java.util.List;
@@ -43,6 +47,7 @@ public class UserAdminController implements UseradminApi {
   private final @NonNull ViolationReportGenerator violationReportGenerator;
   private final @NonNull ConsultantAdminFacade consultantAdminFacade;
   private final @NonNull UserAdminFacade userAdminFacade;
+
 
   /**
    * Creates the root hal based navigation entity.
@@ -235,5 +240,11 @@ public class UserAdminController implements UseradminApi {
   public ResponseEntity<Void> markAskerForDeletion(String askerId) {
     this.userAdminFacade.markAskerForDeletion(askerId);
     return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<AskerResponseDTO> getAsker(String askerId) {
+    AskerResponseDTO response = this.userAdminFacade.getAsker(askerId);
+    return new ResponseEntity<>(response, HttpStatus.OK);
   }
 }

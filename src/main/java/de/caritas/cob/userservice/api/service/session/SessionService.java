@@ -30,6 +30,7 @@ import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.MonitoringDTO;
 import java.util.ArrayList;
@@ -57,6 +58,7 @@ public class SessionService {
   private final @NonNull SessionRepository sessionRepository;
   private final @NonNull AgencyService agencyService;
   private final @NonNull ConsultantService consultantService;
+  private final @NonNull UserService userService;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
 
   /**
@@ -295,7 +297,7 @@ public class SessionService {
   public List<ConsultantSessionResponseDTO> getActiveAndDoneSessionsForConsultant(
       Consultant consultant) {
     return Stream.of(getSessionsForConsultantByStatus(consultant, SessionStatus.IN_PROGRESS),
-            getSessionsForConsultantByStatus(consultant, SessionStatus.DONE))
+        getSessionsForConsultantByStatus(consultant, SessionStatus.DONE))
         .flatMap(Collection::stream)
         .map(session -> new SessionMapper().toConsultantSessionDto(session))
         .collect(Collectors.toList());
@@ -325,7 +327,8 @@ public class SessionService {
   }
 
   private SessionConsultantForUserDTO convertToSessionConsultantForUserDTO(Consultant consultant) {
-    return new SessionConsultantForUserDTO(consultant.getUsername(), consultant.isAbsent(),
+    return new SessionConsultantForUserDTO(consultant.getId(), consultant.getUsername(),
+        consultant.isAbsent(),
         consultant.getAbsenceMessage(), null);
   }
 
@@ -653,4 +656,20 @@ public class SessionService {
     return Optional.empty();
   }
 
+  public String findGroupIdByConsultantAndUserAndConsultingType(String consultantId, String askerId,
+      Integer consultingTypeId) {
+    Optional<Consultant> consultant = consultantService.getConsultant(consultantId);
+    if (!consultant.isPresent()) {
+      throw new BadRequestException(
+          String.format("Consultant for given id %s not found", consultantId));
+    }
+    Optional<User> user = userService.getUser(askerId);
+    if (!user.isPresent()) {
+      throw new BadRequestException(String.format("Asker for given id %s not found", askerId));
+    }
+
+    Optional<Session> session = findSessionByConsultantAndUserAndConsultingType(
+        consultant.get(), user.get(), consultingTypeId);
+    return session.get().getGroupId();
+  }
 }

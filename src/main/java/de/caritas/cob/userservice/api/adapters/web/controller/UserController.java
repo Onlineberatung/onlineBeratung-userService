@@ -36,6 +36,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.OneTimePasswordDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PasswordDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PatchUserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ReassignmentNotificationDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.RocketChatGroupIdDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDataDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateChatResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
@@ -257,7 +258,7 @@ public class UserController implements UsersApi {
         .build();
     var language = consultantDtoMapper.languageOf(enquiryMessage.getLanguage());
     var enquiryData = new EnquiryData(user, sessionId, enquiryMessage.getMessage(), language,
-        rocketChatCredentials, enquiryMessage.getT(), enquiryMessage.getOrg());
+        rocketChatCredentials, enquiryMessage.getT(), enquiryMessage.getOrg(), null);
 
     var response = createEnquiryMessageFacade.createEnquiryMessage(enquiryData);
 
@@ -1278,5 +1279,13 @@ public class UserController implements UsersApi {
     var consultantDto = consultantDtoMapper.consultantResponseDtoOf(consultant, agencies, false);
 
     return new ResponseEntity<>(consultantDto, HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<RocketChatGroupIdDTO> getRocketChatGroupId(
+      @NotNull @Valid String consultantId, @NotNull @Valid String askerId, @NotNull @Valid Integer consultingTypeId) {
+    String groupId = sessionService
+        .findGroupIdByConsultantAndUserAndConsultingType(consultantId, askerId, consultingTypeId);
+    return new ResponseEntity<>(new RocketChatGroupIdDTO().groupId(groupId), HttpStatus.OK);
   }
 }

@@ -2,19 +2,20 @@ package de.caritas.cob.userservice.api.admin.service.consultant;
 
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantCreatorService;
 import de.caritas.cob.userservice.api.admin.service.consultant.delete.ConsultantPreDeletionService;
 import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
 import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
-import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
+import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
-import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.service.appointment.AppointmentService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ public class ConsultantAdminService {
   private final @NonNull ConsultantCreatorService consultantCreatorService;
   private final @NonNull ConsultantUpdateService consultantUpdateService;
   private final @NonNull ConsultantPreDeletionService consultantPreDeletionService;
+  private final @NonNull AppointmentService appointmentService;
 
   /**
    * Finds a {@link Consultant} by the given consultant id and throws a {@link NoContentException}
@@ -57,8 +59,13 @@ public class ConsultantAdminService {
     Consultant newConsultant =
         this.consultantCreatorService.createNewConsultant(createConsultantDTO);
 
-    return ConsultantResponseDTOBuilder.getInstance(newConsultant)
-        .buildResponseDTO();
+    ConsultantAdminResponseDTO consultantAdminResponseDTO = ConsultantResponseDTOBuilder
+        .getInstance(
+            newConsultant).buildResponseDTO();
+
+    this.appointmentService.createConsultant(consultantAdminResponseDTO);
+
+    return consultantAdminResponseDTO;
   }
 
   /**
@@ -74,8 +81,12 @@ public class ConsultantAdminService {
     Consultant updatedConsultant = this.consultantUpdateService.updateConsultant(consultantId,
         updateConsultantDTO);
 
-    return ConsultantResponseDTOBuilder.getInstance(updatedConsultant)
-        .buildResponseDTO();
+    ConsultantAdminResponseDTO consultantAdminResponseDTO = ConsultantResponseDTOBuilder
+        .getInstance(
+            updatedConsultant).buildResponseDTO();
+
+    this.appointmentService.updateConsultant(consultantAdminResponseDTO);
+    return consultantAdminResponseDTO;
   }
 
   /**
@@ -89,6 +100,8 @@ public class ConsultantAdminService {
             String.format("Consultant with id %s does not exist", consultantId)));
 
     this.consultantPreDeletionService.performPreDeletionSteps(consultant);
+
+    this.appointmentService.deleteConsultant(consultant.getId());
 
     consultant.setDeleteDate(nowInUtc());
     consultant.setStatus(ConsultantStatus.IN_DELETION);

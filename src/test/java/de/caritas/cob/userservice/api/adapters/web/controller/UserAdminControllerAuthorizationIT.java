@@ -98,7 +98,7 @@ public class UserAdminControllerAuthorizationIT {
   @WithMockUser(
       authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
           AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+          AuthorityValue.USE_FEEDBACK,
           AuthorityValue.CONSULTANT_DEFAULT,
           AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
           AuthorityValue.START_CHAT,
@@ -145,7 +145,7 @@ public class UserAdminControllerAuthorizationIT {
   @WithMockUser(
       authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
           AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+          AuthorityValue.USE_FEEDBACK,
           AuthorityValue.CONSULTANT_DEFAULT,
           AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
           AuthorityValue.START_CHAT,
@@ -190,7 +190,7 @@ public class UserAdminControllerAuthorizationIT {
   @WithMockUser(
       authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
           AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+          AuthorityValue.USE_FEEDBACK,
           AuthorityValue.CONSULTANT_DEFAULT,
           AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
           AuthorityValue.START_CHAT,
@@ -237,7 +237,7 @@ public class UserAdminControllerAuthorizationIT {
   @WithMockUser(
       authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
           AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+          AuthorityValue.USE_FEEDBACK,
           AuthorityValue.CONSULTANT_DEFAULT,
           AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
           AuthorityValue.START_CHAT,
@@ -284,7 +284,7 @@ public class UserAdminControllerAuthorizationIT {
   @WithMockUser(
       authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
           AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+          AuthorityValue.USE_FEEDBACK,
           AuthorityValue.CONSULTANT_DEFAULT,
           AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
           AuthorityValue.START_CHAT,
@@ -333,7 +333,7 @@ public class UserAdminControllerAuthorizationIT {
   @WithMockUser(
       authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
           AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+          AuthorityValue.USE_FEEDBACK,
           AuthorityValue.CONSULTANT_DEFAULT,
           AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
           AuthorityValue.START_CHAT,
@@ -380,7 +380,7 @@ public class UserAdminControllerAuthorizationIT {
   @WithMockUser(
       authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
           AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+          AuthorityValue.USE_FEEDBACK,
           AuthorityValue.CONSULTANT_DEFAULT,
           AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
           AuthorityValue.START_CHAT,
@@ -427,7 +427,7 @@ public class UserAdminControllerAuthorizationIT {
   @WithMockUser(
       authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
           AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+          AuthorityValue.USE_FEEDBACK,
           AuthorityValue.CONSULTANT_DEFAULT,
           AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
           AuthorityValue.START_CHAT,
@@ -480,7 +480,6 @@ public class UserAdminControllerAuthorizationIT {
       AuthorityValue.CREATE_NEW_CHAT,
       AuthorityValue.START_CHAT,
       AuthorityValue.STOP_CHAT,
-      AuthorityValue.TECHNICAL_DEFAULT,
       AuthorityValue.UPDATE_CHAT,
       AuthorityValue.USE_FEEDBACK,
       AuthorityValue.USER_DEFAULT,
@@ -538,7 +537,7 @@ public class UserAdminControllerAuthorizationIT {
   @WithMockUser(
       authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
           AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+          AuthorityValue.USE_FEEDBACK,
           AuthorityValue.CONSULTANT_DEFAULT,
           AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
           AuthorityValue.START_CHAT,
@@ -583,7 +582,7 @@ public class UserAdminControllerAuthorizationIT {
   @WithMockUser(
       authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
           AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+          AuthorityValue.USE_FEEDBACK,
           AuthorityValue.CONSULTANT_DEFAULT,
           AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
           AuthorityValue.START_CHAT,
@@ -628,7 +627,7 @@ public class UserAdminControllerAuthorizationIT {
   @WithMockUser(
       authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
           AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+          AuthorityValue.USE_FEEDBACK,
           AuthorityValue.CONSULTANT_DEFAULT,
           AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
           AuthorityValue.START_CHAT,
@@ -671,7 +670,7 @@ public class UserAdminControllerAuthorizationIT {
   @WithMockUser(
       authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
           AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+          AuthorityValue.USE_FEEDBACK,
           AuthorityValue.CONSULTANT_DEFAULT,
           AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
           AuthorityValue.START_CHAT,
@@ -710,7 +709,7 @@ public class UserAdminControllerAuthorizationIT {
   @WithMockUser(
       authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
           AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK, AuthorityValue.TECHNICAL_DEFAULT,
+          AuthorityValue.USE_FEEDBACK,
           AuthorityValue.CONSULTANT_DEFAULT,
           AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
           AuthorityValue.START_CHAT,
