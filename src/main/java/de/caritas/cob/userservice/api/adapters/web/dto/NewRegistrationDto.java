@@ -56,7 +56,16 @@ public class NewRegistrationDto implements UserRegistrationDTO {
 
   private String consultantId;
 
-  @ApiModelProperty(required = false, example = "\"2\"", position = 13)
+  @ApiModelProperty(required = false, example = "\"2\"")
   @JsonProperty("mainTopicId")
   private Integer mainTopicId;
+
+  @ApiModelProperty(required = false, example = "\"MALE\"")
+  @JsonProperty("userGender")
+  private String userGender;
+
+
+  @ApiModelProperty(required = false, example = "\"21\"")
+  @JsonProperty("userAge")
+  private Integer userAge;
 }

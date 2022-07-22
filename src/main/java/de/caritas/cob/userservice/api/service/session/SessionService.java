@@ -198,6 +198,8 @@ public class SessionService {
         .createDate(nowInUtc())
         .updateDate(nowInUtc())
         .mainTopicId(userDto.getMainTopicId())
+        .userGender(userDto.getUserGender())
+        .userAge(userDto.getUserAge())
         .build();
     return saveSession(session);
   }

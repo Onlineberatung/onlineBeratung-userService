@@ -135,8 +135,8 @@ public class SessionDataProvider {
    * @return {@link SessionDataDTO}
    */
   public static SessionDataDTO fromUserDTO(UserDTO userDTO) {
-    return (SessionDataDTO) new SessionDataDTO()
-        .age(userDTO.getAge())
+    return new SessionDataDTO()
+        .age(String.valueOf(userDTO.getUserAge()))
         .state(userDTO.getState());
   }
 }

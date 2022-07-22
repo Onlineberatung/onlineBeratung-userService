@@ -13,4 +13,8 @@ public interface UserRegistrationDTO {
   String getConsultantId();
 
   Integer getMainTopicId();
+
+  String getUserGender();
+
+  Integer getUserAge();
 }

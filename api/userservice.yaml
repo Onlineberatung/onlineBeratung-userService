@@ -1799,6 +1799,12 @@ components:
         mainTopicId:
           type: integer
           example: 15
+        gender:
+          type: string
+          example: 'DIVERSE'
+        age:
+          type: integer
+          example: 21
 
     SessionDataDTO:
       allOf:
