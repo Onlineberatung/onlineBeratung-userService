@@ -117,6 +117,7 @@ public class SessionMapper {
       return response;
     }
     var consultant = GroupSessionConsultantDTO.builder()
+        .id(sessionConsultant.getConsultantId())
         .username(sessionConsultant.getUsername())
         .displayName(sessionConsultant.getDisplayName())
         .isAbsent(sessionConsultant.isAbsent())
