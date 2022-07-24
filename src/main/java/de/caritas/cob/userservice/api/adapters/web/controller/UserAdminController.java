@@ -23,6 +23,7 @@ import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.service.appointment.AppointmentService;
 import de.caritas.cob.userservice.generated.api.adapters.web.controller.UseradminApi;
 import io.swagger.annotations.Api;
+import java.util.ArrayList;
 import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -114,12 +115,13 @@ public class UserAdminController implements UseradminApi {
   @Override
   public ResponseEntity<Void> setConsultantAgencies(String consultantId,
       List<CreateConsultantAgencyDTO> agencyList) {
+    var notFilteredAgencyList = new ArrayList<>(agencyList);
     var agencyIdsForDeletions = consultantAdminFacade.filterAgencyListForDeletion(consultantId, agencyList);
     consultantAdminFacade.markConsultantAgenciesForDeletion(consultantId, agencyIdsForDeletions);
     consultantAdminFacade.filterAgencyListForCreation(consultantId, agencyList);
     consultantAdminFacade.prepareConsultantAgencyRelation(consultantId, agencyList);
     consultantAdminFacade.completeConsultantAgencyAssigment(consultantId, agencyList);
-    appointmentService.syncAgencies(consultantId, agencyList);
+    appointmentService.syncAgencies(consultantId, notFilteredAgencyList);
     return ResponseEntity.ok().build();
   }
 
