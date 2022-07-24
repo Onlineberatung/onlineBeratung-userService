@@ -116,12 +116,12 @@ public class UserAdminController implements UseradminApi {
   public ResponseEntity<Void> setConsultantAgencies(String consultantId,
       List<CreateConsultantAgencyDTO> agencyList) {
     var notFilteredAgencyList = new ArrayList<>(agencyList);
+    appointmentService.syncAgencies(consultantId, notFilteredAgencyList);
     var agencyIdsForDeletions = consultantAdminFacade.filterAgencyListForDeletion(consultantId, agencyList);
     consultantAdminFacade.markConsultantAgenciesForDeletion(consultantId, agencyIdsForDeletions);
     consultantAdminFacade.filterAgencyListForCreation(consultantId, agencyList);
     consultantAdminFacade.prepareConsultantAgencyRelation(consultantId, agencyList);
     consultantAdminFacade.completeConsultantAgencyAssigment(consultantId, agencyList);
-    appointmentService.syncAgencies(consultantId, notFilteredAgencyList);
     return ResponseEntity.ok().build();
   }
 
