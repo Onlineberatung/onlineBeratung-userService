@@ -3,11 +3,16 @@ package de.caritas.cob.userservice.api.service.appointment;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import de.caritas.cob.userservice.appointmentservice.generated.ApiClient;
+import de.caritas.cob.userservice.appointmentservice.generated.web.AgencyApi;
 import de.caritas.cob.userservice.appointmentservice.generated.web.ConsultantApi;
+import de.caritas.cob.userservice.appointmentservice.generated.web.model.AgencyConsultantSyncRequestDTO;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +28,7 @@ import org.springframework.stereotype.Component;
 public class AppointmentService {
 
   private final @NonNull ConsultantApi appointmentConsultantApi;
+  private final @NonNull AgencyApi appointmentAgencyApi;
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
   private final @NonNull TenantHeaderSupplier tenantHeaderSupplier;
   private final @NonNull IdentityClient identityClient;
@@ -101,5 +107,17 @@ public class AppointmentService {
         .getKeycloakAndCsrfHttpHeaders(keycloakLoginResponseDTO.getAccessToken());
     tenantHeaderSupplier.addTenantHeader(headers);
     headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
+  }
+
+  public void syncAgencies(String consultantId, List<CreateConsultantAgencyDTO> agencyList) {
+    if (!appointmentFeatureEnabled) {
+      return;
+    }
+    addTechnicalUserHeaders(this.appointmentConsultantApi.getApiClient());
+    var agencies = agencyList.stream().map(el -> el.getAgencyId()).collect(Collectors.toList());
+    AgencyConsultantSyncRequestDTO request = new AgencyConsultantSyncRequestDTO();
+    request.setAgencies(agencies);
+    request.setConsultantId(consultantId);
+    this.appointmentAgencyApi.agencyConsultantsSync(request);
   }
 }
