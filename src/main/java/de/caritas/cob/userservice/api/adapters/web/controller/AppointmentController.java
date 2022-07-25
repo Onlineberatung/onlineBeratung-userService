@@ -5,20 +5,34 @@ import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.Appointment;
 import de.caritas.cob.userservice.api.adapters.web.dto.AppointmentStatus;
+import de.caritas.cob.userservice.api.adapters.web.dto.CreateEnquiryMessageResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.EnquiryAppointmentDTO;
 import de.caritas.cob.userservice.api.adapters.web.mapping.AppointmentDtoMapper;
+import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
+import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
+import de.caritas.cob.userservice.api.facade.assignsession.AssignEnquiryFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
+import de.caritas.cob.userservice.api.model.AppointmentData;
+import de.caritas.cob.userservice.api.model.EnquiryData;
 import de.caritas.cob.userservice.api.port.in.Organizing;
+import de.caritas.cob.userservice.api.service.ConsultantService;
+import de.caritas.cob.userservice.api.service.session.SessionService;
+import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import de.caritas.cob.userservice.generated.api.adapters.web.controller.AppointmentsApi;
 import io.swagger.annotations.Api;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
@@ -32,6 +46,16 @@ public class AppointmentController implements AppointmentsApi {
   private final AppointmentDtoMapper mapper;
 
   private final AuthenticatedUser currentUser;
+
+  private final @NotNull ValidatedUserAccountProvider userAccountProvider;
+
+  private final @NotNull CreateEnquiryMessageFacade createEnquiryMessageFacade;
+
+  private final @NotNull AssignEnquiryFacade assignEnquiryFacade;
+
+  private final @NotNull SessionService sessionService;
+
+  private final @NotNull ConsultantService consultantService;
 
   @Override
   public ResponseEntity<Appointment> getAppointment(UUID id) {
@@ -92,5 +116,29 @@ public class AppointmentController implements AppointmentsApi {
     var savedAppointment = mapper.appointmentOf(savedMap, true);
 
     return new ResponseEntity<>(savedAppointment, HttpStatus.CREATED);
+  }
+
+  @Override
+  public ResponseEntity<CreateEnquiryMessageResponseDTO> createEnquiryAppointment(
+      @PathVariable Long sessionId, @RequestHeader String rcToken, @RequestHeader String rcUserId,
+      @RequestBody EnquiryAppointmentDTO enquiryAppointmentDTO) {
+
+    var user = this.userAccountProvider.retrieveValidatedUser();
+    var rocketChatCredentials = RocketChatCredentials.builder()
+        .rocketChatToken(rcToken)
+        .rocketChatUserId(rcUserId)
+        .build();
+
+    AppointmentData appointmentData = new AppointmentData(enquiryAppointmentDTO.getTitle(), enquiryAppointmentDTO.getUserName(), enquiryAppointmentDTO.getCounselorEmail(), enquiryAppointmentDTO.getDate(), enquiryAppointmentDTO.getDuration());
+    var enquiryData = new EnquiryData(user, sessionId, null, null,
+        rocketChatCredentials, enquiryAppointmentDTO.getT(), enquiryAppointmentDTO.getOrg(), appointmentData);
+
+    var response = createEnquiryMessageFacade.createEnquiryMessage(enquiryData);
+
+    var consultant = consultantService.getConsultantByEmail(enquiryAppointmentDTO.getCounselorEmail());
+    var session = sessionService.getSession(sessionId);
+    this.assignEnquiryFacade.assignRegisteredEnquiry(session.get(), consultant.get());
+
+    return new ResponseEntity<>(response, HttpStatus.CREATED);
   }
 }

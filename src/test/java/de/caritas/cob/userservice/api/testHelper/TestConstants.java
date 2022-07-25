@@ -384,7 +384,7 @@ public class TestConstants {
   public static final UserInfoResponseDTO USER_INFO_RESPONSE_DTO_FAILED =
       new UserInfoResponseDTO(ROCKET_CHAT_USER_DTO, FAILED, ERROR, ERROR);
   public static final SessionConsultantForUserDTO SESSION_CONSULTANT_FOR_USER_DTO =
-      new SessionConsultantForUserDTO(USERNAME, IS_ABSENT, ABSENCE_MESSAGE, null);
+      new SessionConsultantForUserDTO(null, USERNAME, IS_ABSENT, ABSENCE_MESSAGE, null);
   public static final RocketChatUserDTO USER_DTO_1 = new RocketChatUserDTO("xyz", "123", null,
       null);
   public static final RocketChatUserDTO USER_DTO_2 = new RocketChatUserDTO(ROCKETCHAT_ID_2, "456",

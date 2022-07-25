@@ -307,6 +307,49 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+
+  /users/sessions/rocketChatGroupId:
+    get:
+      tags:
+        - user-controller
+      summary: 'Returns the session for given consultant id and user id.'
+      operationId: getRocketChatGroupId
+      parameters:
+        - name: consultantId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: askerId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: consultingTypeId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: OK - successful operation
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/RocketChatGroupIdDTO'
+        204:
+          description: NO CONTENT - no sessions for given session ID
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+
   /users/sessions/{sessionId}/archive:
     put:
       tags:
@@ -2109,6 +2152,7 @@ components:
         - "USER_UNMUTED"
         - "E2EE_ACTIVATED"
         - "MASTER_KEY_LOST"
+        - "REASSIGN_CONSULTANT"
 
     LastMessageDTO:
       type: object
@@ -2294,6 +2338,9 @@ components:
     SessionConsultantForUserDTO:
       type: object
       properties:
+        id:
+          type: string
+          example: consultantId
         username:
           type: string
           example: beraterXYZ
@@ -2426,6 +2473,9 @@ components:
           uniqueItems: true
           items:
             $ref: '#/components/schemas/EmailToggle'
+        appointmentFeatureEnabled:
+          type: boolean
+          example: true
 
     PatchUserDTO:
       type: object
@@ -2565,6 +2615,10 @@ components:
         lastName:
           type: string
           example: Mustermann
+        displayName:
+          type: string
+        username:
+          type: string
         agencies:
           type: array
           items:
@@ -2765,6 +2819,8 @@ components:
         toConsultantId:
           type: string
           format: UUID
+        fromConsultantName:
+          type: string
         isConfirmed:
           type: boolean
           description: null defines the reassign request
@@ -2777,6 +2833,13 @@ components:
         password:
           type: string
           example: p@ssw0rd
+
+    RocketChatGroupIdDTO:
+      type: object
+      properties:
+        groupId:
+          type: string
+          example: rc123456
 
     EmailDTO:
       type: object

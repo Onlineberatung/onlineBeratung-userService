@@ -36,6 +36,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.OneTimePasswordDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PasswordDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PatchUserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ReassignmentNotificationDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.RocketChatGroupIdDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDataDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateChatResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
@@ -257,7 +258,7 @@ public class UserController implements UsersApi {
         .build();
     var language = consultantDtoMapper.languageOf(enquiryMessage.getLanguage());
     var enquiryData = new EnquiryData(user, sessionId, enquiryMessage.getMessage(), language,
-        rocketChatCredentials, enquiryMessage.getT(), enquiryMessage.getOrg());
+        rocketChatCredentials, enquiryMessage.getT(), enquiryMessage.getOrg(), null);
 
     var response = createEnquiryMessageFacade.createEnquiryMessage(enquiryData);
 
@@ -666,8 +667,7 @@ public class UserController implements UsersApi {
       @RequestBody ReassignmentNotificationDTO reassignmentNotificationDTO) {
 
     if (isTrue(reassignmentNotificationDTO.getIsConfirmed())) {
-      emailNotificationFacade.sendReassignConfirmationNotification(
-          reassignmentNotificationDTO.getToConsultantId().toString(),
+      emailNotificationFacade.sendReassignConfirmationNotification(reassignmentNotificationDTO,
           TenantContext.getCurrentTenantData());
     } else {
       emailNotificationFacade
@@ -793,20 +793,20 @@ public class UserController implements UsersApi {
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    var userId = authenticatedUser.getUserId();
     // Check if the calling consultant has the correct right to assign the enquiry to a consultant
     if (session.get().getStatus().equals(SessionStatus.NEW) && !authenticatedUser
         .getGrantedAuthorities().contains(AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY)) {
       LogService.logForbidden(String.format(
           "The calling consultant with id %s does not have the authority to assign the enquiry to a consultant.",
-          authenticatedUser.getUserId()));
+          userId));
 
       return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
     var consultantToAssign = userAccountProvider.retrieveValidatedConsultantById(consultantId);
-    var authConsultant = consultantService.getConsultant(authenticatedUser.getUserId())
-        .orElseThrow();
-    assignSessionFacade.assignSession(session.get(), consultantToAssign, authConsultant);
+    var consultantToKeep = consultantService.getConsultant(userId).orElse(null);
+    assignSessionFacade.assignSession(session.get(), consultantToAssign, consultantToKeep);
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
@@ -1279,5 +1279,13 @@ public class UserController implements UsersApi {
     var consultantDto = consultantDtoMapper.consultantResponseDtoOf(consultant, agencies, false);
 
     return new ResponseEntity<>(consultantDto, HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<RocketChatGroupIdDTO> getRocketChatGroupId(
+      @NotNull @Valid String consultantId, @NotNull @Valid String askerId, @NotNull @Valid Integer consultingTypeId) {
+    String groupId = sessionService
+        .findGroupIdByConsultantAndUserAndConsultingType(consultantId, askerId, consultingTypeId);
+    return new ResponseEntity<>(new RocketChatGroupIdDTO().groupId(groupId), HttpStatus.OK);
   }
 }

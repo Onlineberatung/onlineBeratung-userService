@@ -1,6 +1,6 @@
 {
-  "id": "caritas-online-beratung",
-  "realm": "caritas-online-beratung",
+  "id": "online-beratung",
+  "realm": "online-beratung",
   "notBefore": 0,
   "revokeRefreshToken": false,
   "refreshTokenMaxReuse": 0,

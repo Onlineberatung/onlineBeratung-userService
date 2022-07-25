@@ -17,10 +17,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserDtoMapper {
+
+  @Value("${feature.appointment.enabled}")
+  private boolean appointmentFeatureEnabled;
 
   public UserDataResponseDTO userDataOf(UserDataResponseDTO userData, OtpInfoDTO otpInfoDTO,
       boolean isE2eEncEnabled, boolean isDisplayNameAllowed) {
@@ -47,6 +51,8 @@ public class UserDtoMapper {
     userData.setIsDisplayNameEditable(
         isDisplayNameAllowed && userData.getUserRoles().contains(UserRole.CONSULTANT.getValue())
     );
+
+    userData.setAppointmentFeatureEnabled(appointmentFeatureEnabled);
 
     return userData;
   }

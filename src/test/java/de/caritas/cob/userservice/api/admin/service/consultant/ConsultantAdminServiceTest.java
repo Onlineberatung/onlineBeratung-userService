@@ -13,6 +13,7 @@ import de.caritas.cob.userservice.api.admin.service.consultant.update.Consultant
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
+import de.caritas.cob.userservice.api.service.appointment.AppointmentService;
 import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,6 +38,9 @@ public class ConsultantAdminServiceTest {
 
   @Mock
   private ConsultantPreDeletionService consultantPreDeletionService;
+
+  @Mock
+  private AppointmentService appointmentService;
 
   @Test(expected = NotFoundException.class)
   public void markConsultantForDeletion_Should_throwNotFoundException_When_consultantdoesNotExist() {

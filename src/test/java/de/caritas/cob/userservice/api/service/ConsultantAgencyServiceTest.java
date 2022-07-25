@@ -18,10 +18,12 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.mapping.UserDtoMapper;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.model.ConsultantStatus;
+import de.caritas.cob.userservice.api.port.in.AccountManaging;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.Arrays;
@@ -68,6 +70,12 @@ public class ConsultantAgencyServiceTest {
   private Logger logger;
   @Mock
   private AgencyService agencyService;
+  @Mock
+  @SuppressWarnings("unused")
+  private AccountManaging accountManager;
+  @Mock
+  @SuppressWarnings("unused")
+  private UserDtoMapper userDtoMapper;
 
   @Before
   public void setup() {

@@ -15,10 +15,12 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.endsWith;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -204,11 +206,15 @@ class UserControllerSessionE2EIT {
       userRepository.save(user);
       user = null;
     }
-    if (deleteSession) {
-      sessionRepository.delete(session);
-      deleteSession = false;
+    if (nonNull(session)) {
+      if (deleteSession) {
+        sessionRepository.delete(session);
+        deleteSession = false;
+      } else {
+        sessionRepository.save(session);
+      }
+      session = null;
     }
-    session = null;
     consultant = null;
     enquiryMessageDTO = null;
     consultantAgencyRepository.deleteAll(consultantAgencies);
@@ -593,7 +599,7 @@ class UserControllerSessionE2EIT {
         .andExpect(status().isOk())
         .andExpect(jsonPath("sessions[0].session.groupId", is("YWKxhFX5K2HPpsFbs")))
         .andExpect(jsonPath("sessions[0].consultant.username", is("u25main")))
-        .andExpect(jsonPath("sessions[0].consultant.id").doesNotExist())
+        .andExpect(jsonPath("sessions[0].consultant.id", is("bad14912-cf9f-4c16-9d0e-fe8ede9b60dc")))
         .andExpect(jsonPath("sessions[0].consultant.firstName").doesNotExist())
         .andExpect(jsonPath("sessions[0].consultant.lastName").doesNotExist())
         .andExpect(jsonPath("sessions[0].agency", is(notNullValue())))
@@ -711,7 +717,7 @@ class UserControllerSessionE2EIT {
         .andExpect(jsonPath("sessions[0].session.id", is(900)))
         .andExpect(jsonPath("sessions[0].session.groupId", is("YWKxhFX5K2HPpsFbs")))
         .andExpect(jsonPath("sessions[0].consultant.username", is("u25main")))
-        .andExpect(jsonPath("sessions[0].consultant.id").doesNotExist())
+        .andExpect(jsonPath("sessions[0].consultant.id", is("bad14912-cf9f-4c16-9d0e-fe8ede9b60dc")))
         .andExpect(jsonPath("sessions[0].consultant.firstName").doesNotExist())
         .andExpect(jsonPath("sessions[0].consultant.lastName").doesNotExist())
         .andExpect(jsonPath("sessions[0].agency", is(notNullValue())))
@@ -737,7 +743,8 @@ class UserControllerSessionE2EIT {
         .andExpect(jsonPath("sessions[0].session.groupId", is("YWKxhFX5K2HPpsFbs")))
         .andExpect(jsonPath("sessions[0].session.feedbackRead", is(true)))
         .andExpect(jsonPath("sessions[0].user.username", is("u25suchtler")))
-        .andExpect(jsonPath("sessions[0].consultant.id", is("bad14912-cf9f-4c16-9d0e-fe8ede9b60dc")))
+        .andExpect(
+            jsonPath("sessions[0].consultant.id", is("bad14912-cf9f-4c16-9d0e-fe8ede9b60dc")))
         .andExpect(jsonPath("sessions[0].consultant.firstName", is("Manfred")))
         .andExpect(jsonPath("sessions[0].consultant.lastName", is("Main")))
         .andExpect(jsonPath("sessions[0].consultant.username").doesNotExist())
@@ -977,6 +984,55 @@ class UserControllerSessionE2EIT {
   }
 
   @Test
+  @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
+  void assignSessionShouldReturnOkAndAssignWhenRequestedByConsultant() throws Exception {
+    givenAValidConsultant(true);
+    givenAValidRocketChatSystemUser();
+    givenValidRocketChatTechUserResponse();
+    givenAValidSession();
+    givenOnlyEmptyRocketChatGroupMemberResponses();
+
+    assertNotEquals(consultant, session.getConsultant());
+
+    mockMvc.perform(
+            put("/users/sessions/{sessionId}/consultant/{consultantId}", session.getId(),
+                consultant.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk());
+
+    var updatedSession = sessionRepository.findById(session.getId()).orElseThrow();
+    assertEquals(consultant, updatedSession.getConsultant());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
+  void assignSessionShouldReturnOkAndAssignWhenRequestedByAdviceSeeker() throws Exception {
+    givenAValidUser(true);
+    givenAValidConsultant();
+    givenAValidRocketChatSystemUser();
+    givenValidRocketChatTechUserResponse();
+    givenAValidSession();
+    givenOnlyEmptyRocketChatGroupMemberResponses();
+
+    assertNotEquals(consultant, session.getConsultant());
+
+    mockMvc.perform(
+            put("/users/sessions/{sessionId}/consultant/{consultantId}", session.getId(),
+                consultant.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk());
+
+    var updatedSession = sessionRepository.findById(session.getId()).orElseThrow();
+    assertEquals(consultant, updatedSession.getConsultant());
+  }
+
+  @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   void updateMonitoringShouldRespondWithUnauthorizedIfNotAdvisedByConsultant()
       throws Exception {
@@ -1059,6 +1115,19 @@ class UserControllerSessionE2EIT {
     var urlSuffix = "/api/v1/groups.members?roomId=" + chatId + "&count=0";
     when(restTemplate.exchange(
         endsWith(urlSuffix), eq(HttpMethod.GET),
+        any(HttpEntity.class), eq(GroupMemberResponseDTO.class))
+    ).thenReturn(ResponseEntity.ok(groupMemberResponseDTO));
+  }
+
+  private void givenOnlyEmptyRocketChatGroupMemberResponses() {
+    groupMemberResponseDTO = new GroupMemberResponseDTO();
+    groupMemberResponseDTO.setSuccess(true);
+    GroupMemberDTO[] groupMembers = {};
+    groupMemberResponseDTO.setMembers(groupMembers);
+
+    var urlInfix = "/api/v1/groups.members?roomId=";
+    when(restTemplate.exchange(
+        contains(urlInfix), eq(HttpMethod.GET),
         any(HttpEntity.class), eq(GroupMemberResponseDTO.class))
     ).thenReturn(ResponseEntity.ok(groupMemberResponseDTO));
   }

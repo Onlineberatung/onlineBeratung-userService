@@ -11,9 +11,12 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
+import de.caritas.cob.userservice.api.facade.userdata.AskerDataProvider;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.Optional;
+import lombok.NonNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -32,6 +35,9 @@ public class UserAdminFacadeTest {
 
   @Mock
   private UserService userService;
+
+  @Mock
+  private UsernameTranscoder usernameTranscoder;
 
   @Test(expected = NotFoundException.class)
   public void markAskerForDeletion_Should_throwNotFoundException_When_askerDoesNotExist() {
