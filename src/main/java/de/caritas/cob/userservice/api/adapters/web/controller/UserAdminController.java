@@ -1,16 +1,8 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
-import de.caritas.cob.userservice.api.adapters.web.dto.AskerResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO;
-import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
-import de.caritas.cob.userservice.api.admin.facade.UserAdminFacade;
-import de.caritas.cob.userservice.api.admin.hallink.RootDTOBuilder;
-import de.caritas.cob.userservice.api.adapters.web.dto.Sort;
-import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
-import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyConsultantResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyTypeDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.AskerResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAgencyResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantFilter;
@@ -20,11 +12,18 @@ import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.RootDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionAdminResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionFilter;
+import de.caritas.cob.userservice.api.adapters.web.dto.Sort;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ViolationDTO;
-import de.caritas.cob.userservice.api.facade.userdata.AskerDataProvider;
+import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
+import de.caritas.cob.userservice.api.admin.facade.UserAdminFacade;
+import de.caritas.cob.userservice.api.admin.hallink.RootDTOBuilder;
+import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
+import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
+import de.caritas.cob.userservice.api.service.appointment.AppointmentService;
 import de.caritas.cob.userservice.generated.api.adapters.web.controller.UseradminApi;
 import io.swagger.annotations.Api;
+import java.util.ArrayList;
 import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -47,6 +46,7 @@ public class UserAdminController implements UseradminApi {
   private final @NonNull ViolationReportGenerator violationReportGenerator;
   private final @NonNull ConsultantAdminFacade consultantAdminFacade;
   private final @NonNull UserAdminFacade userAdminFacade;
+  private final @NonNull AppointmentService appointmentService;
 
 
   /**
@@ -115,6 +115,8 @@ public class UserAdminController implements UseradminApi {
   @Override
   public ResponseEntity<Void> setConsultantAgencies(String consultantId,
       List<CreateConsultantAgencyDTO> agencyList) {
+    var notFilteredAgencyList = new ArrayList<>(agencyList);
+    appointmentService.syncAgencies(consultantId, notFilteredAgencyList);
     var agencyIdsForDeletions = consultantAdminFacade.filterAgencyListForDeletion(consultantId, agencyList);
     consultantAdminFacade.markConsultantAgenciesForDeletion(consultantId, agencyIdsForDeletions);
     consultantAdminFacade.filterAgencyListForCreation(consultantId, agencyList);

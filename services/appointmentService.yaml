@@ -162,6 +162,38 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MeetingSlug'
+  /agencies/agencyConsultantsSync:
+    post:
+      tags:
+        - agency
+      summary: Sycronise consultant and agency data with calcom
+      operationId: agencyConsultantsSync
+      requestBody:
+        description: Agency object for which a team needs to be added to cal.com with consultants
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgencyConsultantSyncRequestDTO'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+  /agencies/agencyMasterDataSync:
+    post:
+      tags:
+        - agency
+      summary: Sycronise agency master data with team data. For example name of agency ...
+      operationId: agencyMasterDataSync
+      requestBody:
+        description: Agency object for which a team needs to be added to cal.com
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgencyMasterDataSyncRequestDTO'
+        required: true
+      responses:
+        '200':
+          description: successful operation
   /agencies:
     post:
       tags:
@@ -295,26 +327,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MeetingSlug'
-  /askers/{askerId}/meetingSlug:
-    get:
-      tags:
-        - asker
-      summary: Get meeting booking link for an askers assigned consultant
-      operationId: getAskerMeetingSlug
-      parameters:
-        - name: askerId
-          in: path
-          description: ID of onber asker
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MeetingSlug'
   /askers/{askerId}/bookings:
     get:
       tags:
@@ -335,26 +347,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ArrayOfCalcomBookings'
-  /askers/bookings/{bookingId}:
-    get:
-      tags:
-        - asker
-      summary: Get booking details
-      operationId: getBookingDetails
-      parameters:
-        - name: bookingId
-          in: path
-          description: ID of calcom booking id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CalcomBooking'
   /eventTypes/{eventTypeId}:
     get:
       tags:
@@ -430,7 +422,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CalcomWebhook'
+              $ref: '#/components/schemas/CalcomWebhookInput'
         required: true
       responses:
         '200':
@@ -445,8 +437,7 @@ components:
       type: object
       properties:
         id:
-          type: integer
-          format: int32
+          type: long
           example: 1
         userId:
           type: integer
@@ -468,6 +459,17 @@ components:
         endTime:
           type: string
           example: 2022-06-16T00:00:00.000
+        rescheduleLink:
+          type: string
+          example: /consultant-slug/event-typ-slug?rescheduleUid=myUId
+        consultantName:
+          type: string
+        askerName:
+          type: string
+        askerId:
+          type: string
+        description:
+          type: string
     ArrayOfCalcomBookings:
       type: array
       items:
@@ -682,7 +684,7 @@ components:
           type: boolean
         role:
           type: string
-    CalcomWebhook:
+    CalcomWebhookInput:
       type: object
       properties:
         triggerEvent:
@@ -771,4 +773,58 @@ components:
               properties:
                 user:
                   type: string
+                bookingId:
+                  type: long
+                isInitialAppointment:
+                  type: boolean
 
+    CalcomSchedule:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        userId:
+          type: integer
+          format: int32
+        name:
+          type: string
+        timeZone:
+          type: string
+    CalcomAvailability:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        days:
+          type: array
+          items:
+            type: integer
+            format: int32
+          example: [1,2,3,4,5]
+        startTime:
+          type: string
+          example: 1970-01-01T09:00:00.000Z
+        endTime:
+          type: string
+          example: 1970-01-01T17:00:00.000Z
+        scheduleId:
+          type: integer
+          format: int32
+    AgencyConsultantSyncRequestDTO:
+      type: object
+      properties:
+        consultantId:
+          type: string
+        agencies:
+          type: array
+          items:
+            type: long
+    AgencyMasterDataSyncRequestDTO:
+      type: object
+      properties:
+        id:
+          type: long
+        name:
+          type: string
