@@ -112,7 +112,7 @@ public class UserDTO implements UserRegistrationDTO {
   private Integer mainTopicId;
 
   @ApiModelProperty(required = false, example = "\"MALE\"", position = 14)
-  @JsonProperty("userGender")
+  @JsonProperty("gender")
   private String userGender;
 
   public Integer getUserAge() {
