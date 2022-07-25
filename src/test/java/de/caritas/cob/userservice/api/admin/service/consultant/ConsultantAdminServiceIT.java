@@ -22,6 +22,7 @@ import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
+import de.caritas.cob.userservice.api.service.appointment.AppointmentService;
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
@@ -58,6 +59,9 @@ public class ConsultantAdminServiceIT {
 
   @MockBean
   private ConsultantUpdateService consultantUpdateService;
+
+  @MockBean
+  private AppointmentService appointmentService;
 
   @Test
   public void findConsultantById_Should_returnExpectedConsultant_When_consultantIdExists() {

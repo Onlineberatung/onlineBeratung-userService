@@ -55,7 +55,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   private final CsrfSecurityProperties csrfSecurityProperties;
   @Value("${multitenancy.enabled}")
   private boolean multitenancy;
-  private final HttpTenantFilter tenantFilter;
+  private HttpTenantFilter tenantFilter;
 
   /**
    * Processes HTTP requests and checks for a valid spring security authentication for the
@@ -107,6 +107,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .antMatchers("/users/twoFactorAuth", "/users/2fa/**", "/users/mobile/app/token")
         .hasAnyAuthority(SINGLE_TENANT_ADMIN, TENANT_ADMIN, USER_DEFAULT, CONSULTANT_DEFAULT)
         .antMatchers("/users/sessions/{sessionId:[0-9]+}/enquiry/new",
+            "/appointments/sessions/{sessionId:[0-9]+}/enquiry/new",
             "/users/askers/consultingType/new", "/users/account", "/users/mobiletoken",
             "/users/sessions/{sessionId:[0-9]+}/data")
         .hasAuthority(USER_DEFAULT)
@@ -130,7 +131,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .hasAnyAuthority(ASSIGN_CONSULTANT_TO_ENQUIRY, ASSIGN_CONSULTANT_TO_SESSION)
         .antMatchers("/users/consultants").hasAuthority(VIEW_AGENCY_CONSULTANTS)
         .antMatchers("/users/consultants/import", "/users/askers/import",
-            "/users/askersWithoutSession/import")
+            "/users/askersWithoutSession/import", "/users/sessions/rocketChatGroupId")
         .hasAuthority(TECHNICAL_DEFAULT)
         .antMatchers("/liveproxy/send")
         .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT,
@@ -150,8 +151,10 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
             "/users/{chatUserId:[0-9A-Za-z]+}/chat/{chatId:[0-9]+}/ban"
         )
         .hasAuthority(UPDATE_CHAT)
-        .antMatchers("/useradmin", "/useradmin/**", "/users/consultants/search")
-        .hasAuthority(USER_ADMIN)
+        .antMatchers("/useradmin", "/useradmin/**")
+        .hasAnyAuthority(USER_ADMIN, TECHNICAL_DEFAULT)
+        .antMatchers("/users/consultants/search")
+        .hasAnyAuthority(USER_ADMIN, TECHNICAL_DEFAULT)
         .antMatchers(
             "/users/consultants/sessions/{sessionId:[0-9]+}",
             "/users/sessions/{sessionId:[0-9]+}/archive",

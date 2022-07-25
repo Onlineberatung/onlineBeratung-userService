@@ -1,0 +1,830 @@
+openapi: 3.0.1
+info:
+  title: Appointment Service
+  description: '!UNFINISHED! Spec for Appointment Service'
+  version: 0.2.0
+
+tags:
+  - name: agency
+    description: All cal.com objects with a connection a unique agency
+  - name: consultant
+    description: Everything related to a onBer consultant
+  - name: asker
+    description: Everything related to a onBer asker
+  - name: eventType
+    description: Everything related to a calcom event-type
+paths:
+  /consultants:
+    post:
+      tags:
+        - consultant
+      summary: Add a new consultant to cal.com with consultant object
+      operationId: createConsultant
+      requestBody:
+        description: consultant object that needs to be added to cal.com
+        content:
+          application/json:
+            schema:
+              $ref: './../api/useradminservice.yaml#/components/schemas/ConsultantDTO'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalcomUser'
+  /consultants/{consultantId}:
+    put:
+      tags:
+        - consultant
+      summary: Update a new consultant to cal.com with consultant object
+      operationId: updateConsultant
+      parameters:
+        - name: consultantId
+          in: path
+          description: ID of onber consultant
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Consultant object that needs to be updated
+        content:
+          application/json:
+            schema:
+              $ref: './../api/useradminservice.yaml#/components/schemas/ConsultantDTO'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalcomUser'
+    delete:
+      tags:
+        - consultant
+      summary: Delete a consultant
+      operationId: deleteConsultant
+      parameters:
+        - name: consultantId
+          in: path
+          description: ID of onber consultant
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+  /consultants/{consultantId}/eventTypes:
+    get:
+      tags:
+        - consultant
+      summary: Get all eventTypes of consultant
+      operationId: getAllEventTypesOfConsultant
+      parameters:
+        - name: consultantId
+          in: path
+          description: ID of onber consultant
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfCalcomEventTypes'
+    post:
+      tags:
+        - consultant
+      summary: Add a new eventType to a consultant
+      operationId: addEventTypeToConsultant
+      parameters:
+        - name: consultantId
+          in: path
+          description: ID of onber consultant
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: EventType object that needs to be added to cal.com
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CalcomEventType'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalcomEventType'
+  /consultants/{consultantId}/bookings:
+    get:
+      tags:
+        - consultant
+      summary: Get all bookings of a consultant
+      operationId: getAllBookingsOfConsultant
+      parameters:
+        - name: consultantId
+          in: path
+          description: ID of onber consultant
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfCalcomBookings'
+  /consultants/{consultantId}/meetingSlug:
+    get:
+      tags:
+        - consultant
+      summary: Get meeting booking link for consultant
+      operationId: getConsultantMeetingSlug
+      parameters:
+        - name: consultantId
+          in: path
+          description: ID of onber consultant
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingSlug'
+  /agencies/agencyConsultantsSync:
+    post:
+      tags:
+        - agency
+      summary: Sycronise consultant and agency data with calcom
+      operationId: agencyConsultantsSync
+      requestBody:
+        description: Agency object for which a team needs to be added to cal.com with consultants
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgencyConsultantSyncRequestDTO'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+  /agencies/agencyMasterDataSync:
+    post:
+      tags:
+        - agency
+      summary: Sycronise agency master data with team data. For example name of agency ...
+      operationId: agencyMasterDataSync
+      requestBody:
+        description: Agency object for which a team needs to be added to cal.com
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgencyMasterDataSyncRequestDTO'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+  /agencies:
+    post:
+      tags:
+        - agency
+      summary: Add an new team to cal.com based on an agency
+      operationId: createAgency
+      requestBody:
+        description: Agency object for which a team needs to be added to cal.com
+        content:
+          application/json:
+            schema:
+              $ref: './../services/agencyservice.yaml#/components/schemas/AgencyResponseDTO'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalcomTeam'
+  /agencies/{agencyId}:
+    put:
+      tags:
+        - agency
+      summary: Update agency team with an agency object
+      operationId: updateAgency
+      parameters:
+        - name: agencyId
+          in: path
+          description: ID of onber agency
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Agency object for which a team needs to be updated in cal.com
+        content:
+          application/json:
+            schema:
+              $ref: './../services/agencyservice.yaml#/components/schemas/AgencyResponseDTO'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalcomTeam'
+    delete:
+      tags:
+        - agency
+      summary: Delete teams of an agency
+      operationId: deleteAgency
+      parameters:
+        - name: agencyId
+          in: path
+          description: ID of onber agency
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+  /agencies/{agencyId}/eventTypes:
+    get:
+      tags:
+        - agency
+      summary: Get all eventTypes of agencys initial meeting team
+      operationId: getAllEventTypesOfAgency
+      parameters:
+        - name: agencyId
+          in: path
+          description: ID of onber agency
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfCalcomEventTypes'
+    post:
+      tags:
+        - agency
+      summary: Add a new eventType to a agencys initial meeting team
+      operationId: addEventTypeToAgency
+      parameters:
+        - name: agencyId
+          in: path
+          description: ID of onber agency
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: EventType object that needs to be added to cal.com
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CalcomEventType'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalcomEventType'
+  /agencies/{agencyId}/initialMeetingSlug:
+    get:
+      tags:
+        - agency
+      summary: Get initial meeting booking link for agency
+      operationId: getInitialMeetingSlug
+      parameters:
+        - name: agencyId
+          in: path
+          description: ID of agency
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingSlug'
+  /askers/{askerId}/bookings:
+    get:
+      tags:
+        - asker
+      summary: Get all bookings of a asker
+      operationId: getAllBookingsOfAsker
+      parameters:
+        - name: askerId
+          in: path
+          description: ID of onber asker
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfCalcomBookings'
+  /eventTypes/{eventTypeId}:
+    get:
+      tags:
+        - eventType
+      summary: Get specific event-type by id
+      operationId: getEventTypeById
+      parameters:
+        - name: eventTypeId
+          in: path
+          description: ID of calcom eventType
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalcomEventType'
+    put:
+      tags:
+        - eventType
+      summary: Update an event-type with event-type object
+      operationId: updateEventType
+      parameters:
+        - name: eventTypeId
+          in: path
+          description: ID of calcom eventType
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: event-type object that needs to be updated
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CalcomEventType'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalcomEventType'
+    delete:
+      tags:
+        - eventType
+      summary: Delete an event-type
+      operationId: deleteEventType
+      parameters:
+        - name: eventTypeId
+          in: path
+          description: ID of calcom eventType
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+  /askers/processBooking:
+    post:
+      tags:
+        - asker
+      summary: Webhook subscriber
+      operationId: processBooking
+      requestBody:
+        description: The json string provided by calcom
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CalcomWebhookInput'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: string
+components:
+  schemas:
+    CalcomBooking:
+      type: object
+      properties:
+        id:
+          type: long
+          example: 1
+        userId:
+          type: integer
+          format: int32
+          example: 4
+        eventTypeId:
+          type: integer
+          format: int32
+          example: 9
+        uid:
+          type: string
+          example: xiuzqXxXqQTaZSfiHBAtUQ
+        title:
+          type: string
+          example: Meeting Type 2 between Foo and Bar
+        startTime:
+          type: string
+          example: 2022-06-15T23:30:00.000Z
+        endTime:
+          type: string
+          example: 2022-06-16T00:00:00.000
+        rescheduleLink:
+          type: string
+          example: /consultant-slug/event-typ-slug?rescheduleUid=myUId
+        consultantName:
+          type: string
+        askerName:
+          type: string
+        askerId:
+          type: string
+        description:
+          type: string
+    ArrayOfCalcomBookings:
+      type: array
+      items:
+        $ref: '#/components/schemas/CalcomBooking'
+    CalcomUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        emailVerified:
+          type: string
+        bio:
+          type: string
+        avatar:
+          type: string
+        timeZone:
+          type: string
+        weekStart:
+          type: string
+        endTime:
+          type: integer
+          format: int32
+        bufferTime:
+          type: integer
+          format: int32
+        theme:
+          type: string
+        defaultScheduleId:
+          type: integer
+          format: int32
+        locale:
+          type: string
+        timeFormat:
+          type: integer
+          format: int32
+        brandColor:
+          type: string
+        darkBrandColor:
+          type: string
+        allowDynamicBooking:
+          type: boolean
+        away:
+          type: boolean
+        createdDate:
+          type: string
+        verified:
+          type: boolean
+        invitedTo:
+          type: string
+        role:
+          type: string
+        metadata:
+          type: object
+        disableImpersonation:
+          type: boolean
+        password:
+          type: string
+          format: nullable
+        startTime:
+          type: integer
+          format: int32
+        hideBranding:
+          type: boolean
+        trialEndsAt:
+          type: string
+          format: nullable
+        completedOnboarding:
+          type: boolean
+        twoFactorSecret:
+          type: string
+          format: nullable
+        twoFactorEnabled:
+          type: boolean
+        identityProvider:
+          type: string
+        identityProviderId:
+          type: string
+          format: nullable
+        plan:
+          type: string
+    CalcomEventType:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        title:
+          type: string
+        slug:
+          type: string
+        length:
+          type: integer
+          format: int32
+        hidden:
+          type: boolean
+        position:
+          type: integer
+          format: int32
+        userId:
+          type: integer
+          format: int32
+        teamId:
+          type: integer
+          format: int32
+        eventName:
+          type: string
+        timeZone:
+          type: string
+        periodType:
+          type: string
+        periodStartDate:
+          type: string
+        periodEndDate:
+          type: string
+        periodDays:
+          type: integer
+          format: int32
+        periodCountCalendarDays:
+          type: boolean
+        requiresConfirmation:
+          type: boolean
+        recurringEvent:
+          type: string
+        disableGuests:
+          type: boolean
+        hideCalendarNotes:
+          type: boolean
+        minimumBookingNotice:
+          type: integer
+          format: int32
+        beforeEventBuffer:
+          type: integer
+          format: int32
+        afterEventBuffer:
+          type: integer
+          format: int32
+        schedulingType:
+          type: string
+        price:
+          type: integer
+          format: int32
+        currency:
+          type: string
+        slotInterval:
+          type: string
+        successRedirectUrl:
+          type: string
+        description:
+          type: string
+        locations:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+        metadata:
+          type: object
+        type:
+          type: string
+        consultantIds:
+          type: array
+          items:
+            type: string
+    ArrayOfCalcomEventTypes:
+      type: array
+      items:
+        $ref: '#/components/schemas/CalcomEventType'
+    MeetingSlug:
+      type: object
+      properties:
+        slug:
+          type: string
+    CalcomTeam:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+          format: nullable
+        slug:
+          type: string
+          format: nullable
+        logo:
+          type: string
+          format: nullable
+        bio:
+          type: string
+          format: nullable
+        hideBranding:
+          type: boolean
+          format: nullable
+    CalcomMembership:
+      type: object
+      properties:
+        teamId:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+        accepted:
+          type: boolean
+        role:
+          type: string
+    CalcomWebhookInput:
+      type: object
+      properties:
+        triggerEvent:
+          type: string
+        createdAt:
+          type: string
+        payload:
+          type: object
+          properties:
+            type:
+              type: string
+            title:
+              type: string
+            description:
+              type: string
+            additionalNotes:
+              type: string
+            startTime:
+              type: string
+              format: date-time
+            endTime:
+              type: string
+              format: date-time
+            organizer:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                timeZone:
+                  type: string
+                language:
+                  type: object
+                  properties:
+                    locale:
+                      type: string
+            attendees:
+              type: array
+              items:
+                type: object
+                properties:
+                  email:
+                    type: string
+                  name:
+                    type: string
+                  timeZone:
+                    type: string
+                  language:
+                    type: object
+                    properties:
+                      locale:
+                        type: string
+            location:
+              type: string
+            destinationCalendar:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  format: int32
+                integration:
+                  type: string
+                externalId:
+                  type: string
+                userId:
+                  type: integer
+                  format: int32
+                bookingId:
+                  type: integer
+                  format: int32
+                eventTypeId:
+                  type: string
+                  format: nullable
+            hideCalendarNotes:
+              type: boolean
+            requiresConfirmation:
+              type: boolean
+            uid:
+              type: string
+            bookingId:
+              type: integer
+              format: int32
+            metadata:
+              type: object
+              properties:
+                user:
+                  type: string
+                bookingId:
+                  type: long
+                isInitialAppointment:
+                  type: boolean
+
+    CalcomSchedule:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        userId:
+          type: integer
+          format: int32
+        name:
+          type: string
+        timeZone:
+          type: string
+    CalcomAvailability:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        days:
+          type: array
+          items:
+            type: integer
+            format: int32
+          example: [1,2,3,4,5]
+        startTime:
+          type: string
+          example: 1970-01-01T09:00:00.000Z
+        endTime:
+          type: string
+          example: 1970-01-01T17:00:00.000Z
+        scheduleId:
+          type: integer
+          format: int32
+    AgencyConsultantSyncRequestDTO:
+      type: object
+      properties:
+        consultantId:
+          type: string
+        agencies:
+          type: array
+          items:
+            type: long
+    AgencyMasterDataSyncRequestDTO:
+      type: object
+      properties:
+        id:
+          type: long
+        name:
+          type: string
