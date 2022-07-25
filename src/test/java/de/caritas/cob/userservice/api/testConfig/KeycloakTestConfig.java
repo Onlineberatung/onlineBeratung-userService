@@ -11,7 +11,9 @@ import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
+import java.util.Random;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
@@ -51,12 +53,20 @@ public class KeycloakTestConfig {
 
       @Override
       public KeycloakCreateUserResponseDTO createKeycloakUser(UserDTO user) {
-        KeycloakCreateUserResponseDTO keycloakUserDTO = new KeycloakCreateUserResponseDTO();
-        keycloakUserDTO.setUserId("keycloak-user-id");
-        keycloakUserDTO.setStatus(HttpStatus.OK);
 
+        KeycloakCreateUserResponseDTO keycloakUserDTO = new KeycloakCreateUserResponseDTO();
+        keycloakUserDTO.setUserId("keycloak-user-id " + RandomStringUtils.randomNumeric(5));
+        keycloakUserDTO.setStatus(HttpStatus.OK);
+        /*if (shouldGenerateNewUsername(user)) {
+          keycloakUserDTO.setUserId("keycloak-user-id" + RandomStringUtils.randomNumeric(5));
+        }*/
         return keycloakUserDTO;
       }
+
+      private boolean shouldGenerateNewUsername(UserDTO user) {
+        return user.getUserGender() != null;
+      }
+
 
       @Override
       public String updateDummyEmail(String userId, UserDTO user) {

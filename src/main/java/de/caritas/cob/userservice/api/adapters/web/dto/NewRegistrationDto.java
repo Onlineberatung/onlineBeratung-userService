@@ -2,9 +2,12 @@ package de.caritas.cob.userservice.api.adapters.web.dto;
 
 import static de.caritas.cob.userservice.api.helper.UserHelper.AGENCY_ID_MAX;
 import static de.caritas.cob.userservice.api.helper.UserHelper.AGENCY_ID_MIN;
+import static de.caritas.cob.userservice.api.helper.UserHelper.AGE_REGEXP;
 import static de.caritas.cob.userservice.api.helper.UserHelper.CONSULTING_TYPE_REGEXP;
 import static de.caritas.cob.userservice.api.helper.UserHelper.VALID_POSTCODE_REGEX;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -56,7 +59,20 @@ public class NewRegistrationDto implements UserRegistrationDTO {
 
   private String consultantId;
 
-  @ApiModelProperty(required = false, example = "\"2\"", position = 13)
+  @ApiModelProperty(required = false, example = "\"2\"")
   @JsonProperty("mainTopicId")
   private Integer mainTopicId;
+
+  @ApiModelProperty(required = false, example = "\"MALE\"")
+  @JsonProperty("gender")
+  private String userGender;
+
+  @Pattern(regexp = AGE_REGEXP, message = "{user.custom.age.invalid}")
+  @ApiModelProperty(example = "1")
+  @JsonProperty("age")
+  private String age;
+
+  public Integer getUserAge() {
+    return age == null ? null : Integer.valueOf(age);
+  }
 }

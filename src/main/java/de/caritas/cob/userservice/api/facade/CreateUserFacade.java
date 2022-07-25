@@ -44,6 +44,7 @@ public class CreateUserFacade {
    */
   public void createUserAccountWithInitializedConsultingType(final UserDTO userDTO) {
 
+    userVerifier.checkIfAllRequiredAttributesAreCorrectlyFilled(userDTO);
     userVerifier.checkIfUsernameIsAvailable(userDTO);
     agencyVerifier.checkIfConsultingTypeMatchesToAgency(userDTO);
 

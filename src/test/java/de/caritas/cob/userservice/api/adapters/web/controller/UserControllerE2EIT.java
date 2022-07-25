@@ -56,6 +56,7 @@ import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
+import de.caritas.cob.userservice.api.helper.UserVerifier;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.ChatAgency;
@@ -119,6 +120,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -178,6 +180,9 @@ class UserControllerE2EIT {
 
   @Autowired
   private SessionRepository sessionRepository;
+
+  @Autowired
+  private UserVerifier userVerifier;
 
   @MockBean
   private AuthenticatedUser authenticatedUser;
@@ -1114,6 +1119,26 @@ class UserControllerE2EIT {
   }
 
   @Test
+  void registerUserWithoutConsultingIdShouldSaveCreateUserWithDemographicsData() throws Exception {
+    ReflectionTestUtils
+        .setField(userVerifier, "demographicsFeatureEnabled", true);
+    givenConsultingTypeServiceResponse(2);
+    givenARealmResource();
+    givenAUserDTOWithDemographics();
+
+    mockMvc.perform(
+            post("/users/askers/new")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userDTO)))
+        .andExpect(status().isCreated());
+
+    ReflectionTestUtils
+        .setField(userVerifier, "demographicsFeatureEnabled", false);
+  }
+
+  @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT, AuthorityValue.USER_DEFAULT})
   void sendReassignmentNotificationShouldSendEmailAndRespondWithOk() throws Exception {
     var apiClientMock = mock(de.caritas.cob.userservice.mailservice.generated.ApiClient.class);
@@ -1166,6 +1191,11 @@ class UserControllerE2EIT {
     userDTO.setConsultantId(null);
     userDTO.setAgencyId(aPositiveLong());
     userDTO.setEmail(givenAValidEmail());
+  }
+
+  private void givenAUserDTOWithDemographics() {
+    givenAUserDTO();
+    userDTO.setUserGender("MALE");
   }
 
   private long aPositiveLong() {
@@ -1347,7 +1377,7 @@ class UserControllerE2EIT {
     when(authenticatedUser.getGrantedAuthorities()).thenReturn(Set.of("anotherAuthority"));
   }
 
-  private void givenConsultingTypeServiceResponse() {
+  private void givenConsultingTypeServiceResponse(Integer consultingTypeId) {
     consultingTypeControllerApi.getApiClient().setBasePath("https://www.google.de/");
     when(restTemplate.getUriTemplateHandler()).thenReturn(new UriTemplateHandler() {
       @SneakyThrows
@@ -1365,11 +1395,15 @@ class UserControllerE2EIT {
     });
 
     var body = new BasicConsultingTypeResponseDTO();
-    body.setId(1);
+    body.setId(consultingTypeId);
     ParameterizedTypeReference<List<BasicConsultingTypeResponseDTO>> value = new ParameterizedTypeReference<>() {
     };
     when(restTemplate.exchange(any(RequestEntity.class), eq(value)))
         .thenReturn(ResponseEntity.ok(List.of(body)));
+  }
+
+  private void givenConsultingTypeServiceResponse() {
+    this.givenConsultingTypeServiceResponse(1);
   }
 
   private void givenAValidConsultantSpeaking(LanguageCode languageCode) {
