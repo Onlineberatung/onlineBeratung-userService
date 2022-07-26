@@ -173,6 +173,12 @@ public class Session implements TenantAware {
   @Column(name = "main_topic_id")
   private Integer mainTopicId;
 
+  @Column(name = "user_gender")
+  private String userGender;
+
+  @Column(name = "user_age")
+  private Integer userAge;
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {

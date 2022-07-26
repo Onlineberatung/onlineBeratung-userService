@@ -1842,6 +1842,9 @@ components:
         mainTopicId:
           type: integer
           example: 15
+        gender:
+          type: string
+          example: 'DIVERSE'
 
     SessionDataDTO:
       allOf:
@@ -2764,6 +2767,12 @@ components:
         consultantId:
           type: string
           description: used for direct consultant registration
+        age:
+          type: string
+          example: 12
+        gender:
+          type: string
+          example: 'DIVERSE'
 
     NewRegistrationResponseDto:
       type: object

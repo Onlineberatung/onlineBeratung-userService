@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.service.session;
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.api.model.Session.RegistrationType.ANONYMOUS;
 import static de.caritas.cob.userservice.api.model.Session.RegistrationType.REGISTERED;
+import static de.caritas.cob.userservice.api.model.Session.SessionStatus.IN_PROGRESS;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_DTO_LIST;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_DTO_SUCHT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_ID;
@@ -70,6 +71,7 @@ import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import de.caritas.cob.userservice.api.testHelper.TestConstants;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.util.ArrayList;
@@ -98,25 +100,58 @@ class SessionServiceTest {
       null, null, null, null, nowInUtc(), null, null, true, true, true, true, null, null,
       ConsultantStatus.CREATED, false);
   private final User USER = new User(USER_ID, null, "username", "name@domain.de", false);
-  private final Session SESSION = new Session(ENQUIRY_ID, null, null, CONSULTING_TYPE_ID_SUCHT,
-      REGISTERED, "99999", 1L, null, SessionStatus.NEW, nowInUtc(), null, null, null, false, false,
-      false, nowInUtc(), null, null, null);
-  private final Session SESSION_2 = new Session(ENQUIRY_ID_2, null, null, CONSULTING_TYPE_ID_SUCHT,
-      REGISTERED, "99999", 1L, null, SessionStatus.NEW, nowInUtc(), null, null, null, false, false,
-      false, nowInUtc(), null, null, null);
-  private final Session SESSION_WITH_CONSULTANT = new Session(ENQUIRY_ID, null, CONSULTANT,
-      CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", 1L, LanguageCode.de, SessionStatus.NEW,
-      nowInUtc(), null, null, null, false, false, false, nowInUtc(), null, null, null);
-  private final Session ACCEPTED_SESSION = new Session(ENQUIRY_ID, null, CONSULTANT,
-      CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", 1L, LanguageCode.de, SessionStatus.NEW,
-      nowInUtc(), null, null, null, false, false, false, nowInUtc(), null, null, null);
+  private final Session SESSION = TestConstants.SESSION;
+
+  private final Session SESSION_2 =
+      Session.builder().id(ENQUIRY_ID_2)
+          .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
+          .registrationType(REGISTERED)
+          .postcode("99999")
+          .status(SessionStatus.NEW)
+          .createDate(nowInUtc())
+          .updateDate(nowInUtc())
+          .teamSession(false)
+          .isPeerChat(false)
+          .monitoring(false)
+          .build();
+
+  private final Session SESSION_WITH_CONSULTANT =  Session.builder().id(ENQUIRY_ID)
+      .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
+      .consultant(CONSULTANT)
+      .registrationType(REGISTERED)
+      .postcode("99999")
+      .status(SessionStatus.NEW)
+      .languageCode(LanguageCode.de)
+      .createDate(nowInUtc())
+      .updateDate(nowInUtc())
+      .teamSession(false)
+      .isPeerChat(false)
+      .monitoring(false)
+      .build();
+
+  private final Session ACCEPTED_SESSION =
+      Session.builder().id(ENQUIRY_ID)
+          .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
+          .consultant(CONSULTANT)
+          .registrationType(REGISTERED)
+          .agencyId(1L)
+          .postcode("99999")
+          .status(SessionStatus.NEW)
+          .languageCode(LanguageCode.de)
+          .createDate(nowInUtc())
+          .updateDate(nowInUtc())
+          .teamSession(false)
+          .isPeerChat(false)
+          .monitoring(false)
+          .build();
+
   private final ConsultantAgency CONSULTANT_AGENCY_1 = new ConsultantAgency(1L, CONSULTANT, 1L,
       nowInUtc(), nowInUtc(), nowInUtc(), null, null);
   private final Set<ConsultantAgency> CONSULTANT_AGENCY_SET = new HashSet<>();
   private final List<Session> SESSION_LIST_WITH_CONSULTANT = singletonList(SESSION_WITH_CONSULTANT);
   private final String ERROR_MSG = "error";
   private final UserDTO USER_DTO = new UserDTO(USERNAME, POSTCODE, AGENCY_ID, "XXX", "x@y.de", null,
-      null, null, CONSULTING_TYPE_ID_SUCHT + "", "", true, null, null);
+      null, null, CONSULTING_TYPE_ID_SUCHT + "", "", true, null, null, null);
 
   @InjectMocks
   private SessionService sessionService;
@@ -694,8 +729,7 @@ class SessionServiceTest {
     when(sessionRepository.findByGroupOrFeedbackGroupIds(singleton("rcGroupId"))).thenReturn(
         singletonList(anonymousEnquiry));
 
-    var sessionResponse = sessionService.getSessionsByUserAndGroupOrFeedbackGroupIds(
-        USER_ID, singleton("rcGroupId"), singleton(UserRole.ANONYMOUS.getValue()));
+    var sessionResponse = getSessionsByUserAndGroupOrFeedbackGroupIds(USER_ID);
 
     assertEquals(1, sessionResponse.size());
   }
@@ -709,8 +743,13 @@ class SessionServiceTest {
         singletonList(anonymousEnquiry));
 
     assertThrows(ForbiddenException.class,
-        () -> sessionService.getSessionsByUserAndGroupOrFeedbackGroupIds(
-            "someOtherId", singleton("rcGroupId"), singleton(UserRole.ANONYMOUS.getValue())));
+        () -> getSessionsByUserAndGroupOrFeedbackGroupIds("someOtherId"));
+  }
+
+  private List<UserSessionResponseDTO> getSessionsByUserAndGroupOrFeedbackGroupIds(
+      String someOtherId) {
+    return sessionService.getSessionsByUserAndGroupOrFeedbackGroupIds(
+        someOtherId, singleton("rcGroupId"), singleton(UserRole.ANONYMOUS.getValue()));
   }
 
   @Test
@@ -721,8 +760,7 @@ class SessionServiceTest {
     when(sessionRepository.findAllById(singleton(anonymousEnquiry.getId()))).thenReturn(
         singletonList(anonymousEnquiry));
 
-    var sessionResponse = sessionService.getSessionsByUserAndSessionIds(USER_ID,
-        singleton(anonymousEnquiry.getId()), singleton(UserRole.ANONYMOUS.getValue()));
+    var sessionResponse = getSomeUserId(USER_ID, anonymousEnquiry);
 
     assertEquals(1, sessionResponse.size());
   }
@@ -736,8 +774,12 @@ class SessionServiceTest {
         singletonList(anonymousEnquiry));
 
     assertThrows(ForbiddenException.class,
-        () -> sessionService.getSessionsByUserAndSessionIds("someUserId",
-            singleton(anonymousEnquiry.getId()), singleton(UserRole.ANONYMOUS.getValue())));
+        () -> getSomeUserId("someUserId", anonymousEnquiry));
+  }
+
+  private List<UserSessionResponseDTO> getSomeUserId(String someUserId, Session anonymousEnquiry) {
+    return sessionService.getSessionsByUserAndSessionIds(someUserId,
+        singleton(anonymousEnquiry.getId()), singleton(UserRole.ANONYMOUS.getValue()));
   }
 
   private Session createAnonymousNewEnquiryWithConsultingType(int consultingTypeId) {
