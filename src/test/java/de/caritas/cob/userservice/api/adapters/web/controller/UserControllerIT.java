@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.adapters.web.controller;
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.USERNAME_NOT_AVAILABLE;
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.api.model.Session.RegistrationType.REGISTERED;
+import static de.caritas.cob.userservice.api.model.Session.SessionStatus.NEW;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_ACCEPT_ENQUIRY;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_ACTIVATE_2FA;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_ARCHIVE_SESSION;
@@ -254,6 +255,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(UserController.class)
@@ -294,7 +296,7 @@ public class UserControllerIT {
       .offline(false)
       .consultingType(CONSULTING_TYPE_ID_SUCHT);
   private final SessionConsultantForUserDTO SESSION_CONSULTANT_DTO =
-      new SessionConsultantForUserDTO(NAME, IS_ABSENT, ABSENCE_MESSAGE, null);
+      new SessionConsultantForUserDTO(null, NAME, IS_ABSENT, ABSENCE_MESSAGE, null);
   private final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO = new UserSessionResponseDTO()
       .session(SESSION_DTO)
       .agency(AGENCY_DTO)
@@ -305,22 +307,76 @@ public class UserControllerIT {
   private final String VALID_SESSION_MONITORING_REQUEST_BODY = "{\"addictiveDrugs\": { \"drugs\":"
       + "{\"others\": false} }, \"intervention\": { \"information\": false } }";
   private final String ERROR = "error";
-  private final Session SESSION = new Session(SESSION_ID, USER, TEAM_CONSULTANT,
-      CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, AGENCY_ID, null, SessionStatus.IN_PROGRESS,
-      nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, false, nowInUtc(),
-      null, null, null);
+  private final Session SESSION =
+      Session.builder().id(SESSION_ID)
+          .user(USER)
+          .consultant(TEAM_CONSULTANT)
+          .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
+          .registrationType(REGISTERED)
+          .agencyId(AGENCY_ID)
+          .enquiryMessageDate(nowInUtc())
+          .groupId(RC_GROUP_ID)
+          .postcode(POSTCODE)
+          .status(SessionStatus.IN_PROGRESS)
+          .createDate(nowInUtc())
+          .updateDate(nowInUtc())
+          .teamSession(false)
+          .isPeerChat(false)
+          .monitoring(true)
+          .build();
+
   private final Session SESSION_WITHOUT_CONSULTANT =
-      new Session(SESSION_ID, USER, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, AGENCY_ID,
-          null, SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION,
-          IS_MONITORING, false, nowInUtc(), null, null, null);
+      Session.builder().id(SESSION_ID)
+          .user(USER)
+          .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
+          .registrationType(REGISTERED)
+          .agencyId(AGENCY_ID)
+          .enquiryMessageDate(nowInUtc())
+          .groupId(RC_GROUP_ID)
+          .postcode(POSTCODE)
+          .status(SessionStatus.NEW)
+          .createDate(nowInUtc())
+          .updateDate(nowInUtc())
+          .teamSession(false)
+          .isPeerChat(false)
+          .monitoring(true)
+          .build();
+
   private final Session TEAM_SESSION =
-      new Session(SESSION_ID, USER, TEAM_CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE,
-          AGENCY_ID, null, SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null,
-          IS_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null, null, null);
+      Session.builder().id(SESSION_ID)
+          .user(USER)
+          .consultant(TEAM_CONSULTANT)
+          .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
+          .registrationType(REGISTERED)
+          .agencyId(AGENCY_ID)
+          .enquiryMessageDate(nowInUtc())
+          .groupId(RC_GROUP_ID)
+          .postcode(POSTCODE)
+          .status(SessionStatus.IN_PROGRESS)
+          .createDate(nowInUtc())
+          .updateDate(nowInUtc())
+          .teamSession(true)
+          .isPeerChat(false)
+          .monitoring(true)
+          .build();
+
   private final Session TEAM_SESSION_WITHOUT_GROUP_ID =
-      new Session(SESSION_ID, USER, TEAM_CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE,
-          AGENCY_ID, null, SessionStatus.IN_PROGRESS, nowInUtc(), null, null, null, IS_TEAM_SESSION,
-          IS_MONITORING, false, nowInUtc(), null, null, null);
+      Session.builder().id(SESSION_ID)
+          .user(USER)
+          .consultant(TEAM_CONSULTANT)
+          .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
+          .registrationType(REGISTERED)
+          .agencyId(AGENCY_ID)
+          .enquiryMessageDate(nowInUtc())
+          .postcode(POSTCODE)
+          .status(SessionStatus.IN_PROGRESS)
+          .createDate(nowInUtc())
+          .updateDate(nowInUtc())
+          .teamSession(true)
+          .isPeerChat(false)
+          .monitoring(true)
+          .build();
+
   private final ConsultantResponseDTO CONSULTANT_RESPONSE_DTO = new ConsultantResponseDTO()
       .consultantId(CONSULTANT_ID)
       .firstName(FIRST_NAME)

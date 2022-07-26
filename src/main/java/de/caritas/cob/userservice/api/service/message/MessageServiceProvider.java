@@ -4,6 +4,8 @@ import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostFurtherStepsMessageException;
@@ -12,12 +14,14 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostWelcome
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.MessageHelper;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
+import de.caritas.cob.userservice.api.model.AppointmentData;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.messageservice.generated.ApiClient;
 import de.caritas.cob.userservice.messageservice.generated.web.MessageControllerApi;
+import de.caritas.cob.userservice.messageservice.generated.web.model.AliasMessageDTO;
 import de.caritas.cob.userservice.messageservice.generated.web.model.AliasOnlyMessageDTO;
 import de.caritas.cob.userservice.messageservice.generated.web.model.MessageDTO;
 import de.caritas.cob.userservice.messageservice.generated.web.model.MessageResponseDTO;
@@ -133,6 +137,24 @@ public class MessageServiceProvider {
 
     if (isTrue(extendedConsultingTypeResponseDTO.getSendSaveSessionDataMessage())) {
       this.postAliasOnlyMessage(rcGroupId, MessageType.UPDATE_SESSION_DATA, exceptionInformation);
+    }
+  }
+
+  public MessageResponseDTO postSendAppointmentBookedMessage(String rcGroupId,
+      CreateEnquiryExceptionInformation exceptionInformation,
+      AppointmentData appointmentData)
+      throws RocketChatPostFurtherStepsMessageException {
+
+    addDefaultHeaders(this.messageControllerApi.getApiClient());
+    try {
+      ObjectMapper mapper = new ObjectMapper();
+      return this.messageControllerApi.saveAliasMessageWithContent(rcGroupId, new AliasMessageDTO()
+          .messageType(MessageType.APPOINTMENT_SET).content(mapper.writeValueAsString(appointmentData)));
+
+    } catch (RestClientException | JsonProcessingException exception) {
+      throw new RocketChatPostFurtherStepsMessageException(String
+          .format("Could not post further steps message in Rocket.Chat group with id %s",
+              rcGroupId), exception, exceptionInformation);
     }
   }
 

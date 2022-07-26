@@ -802,6 +802,31 @@
 						</configuration>
 					</execution>
 					<execution>
+						<id>appointment-service-client-model</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<configOptions>
+								<sourceFolder>/</sourceFolder>
+								<library>resttemplate</library>
+								<dateLibrary>java8</dateLibrary>
+							</configOptions>
+							<inputSpec>${project.basedir}/services/appointmentService.yaml</inputSpec>
+							<generatorName>java</generatorName>
+							<generateApis>true</generateApis>
+							<generateApiTests>false</generateApiTests>
+							<generateModelTests>false</generateModelTests>
+							<apiPackage>
+								${project.groupId}.${project.artifactId}.appointmentservice.generated.web
+							</apiPackage>
+							<modelPackage>
+								${project.groupId}.${project.artifactId}.appointmentservice.generated.web.model
+							</modelPackage>
+						</configuration>
+					</execution>
+					<execution>
 						<id>keycloak-extension</id>
 						<goals>
 							<goal>generate</goal>

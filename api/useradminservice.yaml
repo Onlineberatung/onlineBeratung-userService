@@ -222,6 +222,35 @@ paths:
       security:
         - Bearer: [ ]
   /useradmin/askers/{askerId}:
+    get:
+      tags:
+        - admin-user-controller
+      summary: 'Get an asker by given id [Authorization: Role: consultant-admin]'
+      operationId: getAsker
+      parameters:
+        - name: askerId
+          in: path
+          description: asker id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - asker found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/AskerResponseDTO'
+        204:
+          description: NO CONTENT - asker with the specific id was not found
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
     delete:
       tags:
         - admin-user-controller
@@ -687,6 +716,19 @@ components:
           type: array
           items:
             $ref: './../services/agencyadminservice.yaml#/components/schemas/AgencyAdminResponseDTO'
+
+    AskerResponseDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "0f2cca9c-9303-4791-a0a5-a1ce16f1524f"
+        username:
+          type: string
+          example: max94
+        email:
+          type: string
+          example: "max@mustermann.de"
 
     ConsultantAdminResponseDTO:
       type: object

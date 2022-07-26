@@ -4,6 +4,7 @@ import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc
 import static de.caritas.cob.userservice.api.model.Session.RegistrationType.ANONYMOUS;
 import static de.caritas.cob.userservice.api.model.Session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.api.model.Session.SessionStatus.IN_PROGRESS;
+import static de.caritas.cob.userservice.api.model.Session.SessionStatus.NEW;
 
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.DataDTO;
@@ -355,10 +356,10 @@ public class TestConstants {
       new AuthenticatedUser(CONSULTANT_ID, USERNAME, null, ACCESS_TOKEN, null);
   public static final UserDTO USER_DTO_SUCHT =
       new UserDTO(USERNAME, POSTCODE, AGENCY_ID, PASSWORD, EMAIL, null, null,
-          "true", Integer.toString(CONSULTING_TYPE_ID_SUCHT), "", true, null, null);
+          "true", Integer.toString(CONSULTING_TYPE_ID_SUCHT), "", true, null, null, null);
   public static final UserDTO USER_DTO_KREUZBUND =
       new UserDTO(USERNAME, POSTCODE, AGENCY_ID, PASSWORD, EMAIL, null, null,
-          "true", Integer.toString(CONSULTING_TYPE_ID_KREUZBUND), "", true, null, null);
+          "true", Integer.toString(CONSULTING_TYPE_ID_KREUZBUND), "", true, null, null, null);
   public static final UserDTO USER_DTO_WITH_AGE =
       new UserDTO(VALID_AGE, null, Integer.toString(CONSULTING_TYPE_ID_U25));
   public static final UserDTO USER_DTO_WITH_INVALID_AGE =
@@ -383,7 +384,7 @@ public class TestConstants {
   public static final UserInfoResponseDTO USER_INFO_RESPONSE_DTO_FAILED =
       new UserInfoResponseDTO(ROCKET_CHAT_USER_DTO, FAILED, ERROR, ERROR);
   public static final SessionConsultantForUserDTO SESSION_CONSULTANT_FOR_USER_DTO =
-      new SessionConsultantForUserDTO(USERNAME, IS_ABSENT, ABSENCE_MESSAGE, null);
+      new SessionConsultantForUserDTO(null, USERNAME, IS_ABSENT, ABSENCE_MESSAGE, null);
   public static final RocketChatUserDTO USER_DTO_1 = new RocketChatUserDTO("xyz", "123", null,
       null);
   public static final RocketChatUserDTO USER_DTO_2 = new RocketChatUserDTO(ROCKETCHAT_ID_2, "456",
@@ -451,48 +452,197 @@ public class TestConstants {
   public static final boolean IS_NOT_MONITORING = false;
   public static final Long ENQUIRY_ID = 1L;
   public static final Long ENQUIRY_ID_2 = 2L;
-  public static final Session SESSION =
-      new Session(SESSION_ID, null, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, null,
-          null, IN_PROGRESS, null, null, null, null, false, false, false, nowInUtc(), null, null, null);
+  public static final Session SESSION = Session.builder().id(SESSION_ID)
+      .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
+      .registrationType(REGISTERED)
+      .postcode(POSTCODE)
+      .status(IN_PROGRESS)
+      .createDate(nowInUtc())
+      .updateDate(nowInUtc())
+      .teamSession(false)
+      .isPeerChat(false)
+      .monitoring(false)
+      .build();
+
   public static final Session SESSION_WITH_CONSULTANT =
-      new Session(SESSION_ID, null, CONSULTANT_2, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE,
-          AGENCY_ID, null, IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, false, false, false,
-          nowInUtc(), null, null, null);
+      Session.builder().id(SESSION_ID)
+          .consultant(CONSULTANT_2)
+          .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
+          .registrationType(REGISTERED)
+          .agencyId(AGENCY_ID)
+          .enquiryMessageDate(nowInUtc())
+          .groupId(RC_GROUP_ID)
+          .postcode(POSTCODE)
+          .status(IN_PROGRESS)
+          .createDate(nowInUtc())
+          .updateDate(nowInUtc())
+          .teamSession(false)
+          .isPeerChat(false)
+          .monitoring(false)
+          .build();
+
+
   public static final Session SESSION_WITH_ASKER_AND_CONSULTANT =
-      new Session(SESSION_ID, USER_WITH_RC_ID, CONSULTANT_2, CONSULTING_TYPE_ID_SUCHT, REGISTERED,
-          POSTCODE, AGENCY_ID, null, IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, false, false,
-          false, nowInUtc(), null, null, null);
+
+      Session.builder().id(SESSION_ID)
+          .user(USER_WITH_RC_ID)
+          .consultant(CONSULTANT_2)
+          .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
+          .registrationType(REGISTERED)
+          .agencyId(AGENCY_ID)
+          .enquiryMessageDate(nowInUtc())
+          .groupId(RC_GROUP_ID)
+          .postcode(POSTCODE)
+          .status(IN_PROGRESS)
+          .createDate(nowInUtc())
+          .updateDate(nowInUtc())
+          .teamSession(false)
+          .isPeerChat(false)
+          .monitoring(false)
+          .build();
+
   public static final Session TEAM_SESSION_WITH_ASKER_AND_CONSULTANT =
-      new Session(SESSION_ID, USER_WITH_RC_ID, CONSULTANT_2, CONSULTING_TYPE_ID_SUCHT, REGISTERED,
-          POSTCODE, AGENCY_ID, null, IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, true, false,
-          false, nowInUtc(), null, null, null);
+      Session.builder().id(SESSION_ID)
+          .user(USER_WITH_RC_ID)
+          .consultant(CONSULTANT_2)
+          .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
+          .registrationType(REGISTERED)
+          .agencyId(AGENCY_ID)
+          .enquiryMessageDate(nowInUtc())
+          .groupId(RC_GROUP_ID)
+          .postcode(POSTCODE)
+          .status(IN_PROGRESS)
+          .createDate(nowInUtc())
+          .updateDate(nowInUtc())
+          .teamSession(true)
+          .isPeerChat(false)
+          .monitoring(false)
+          .build();
+
   public static final Session FEEDBACK_SESSION_WITH_ASKER_AND_CONSULTANT =
-      new Session(SESSION_ID, USER_WITH_RC_ID, CONSULTANT_2, CONSULTING_TYPE_ID_SUCHT, REGISTERED,
-          POSTCODE, AGENCY_ID, null, IN_PROGRESS, nowInUtc(), RC_GROUP_ID, RC_FEEDBACK_GROUP_ID_2,
-          null, true, false, false, nowInUtc(), null, null, null);
+      Session.builder().id(SESSION_ID)
+          .user(USER_WITH_RC_ID)
+          .consultant(CONSULTANT_2)
+          .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
+          .registrationType(REGISTERED)
+          .agencyId(AGENCY_ID)
+          .enquiryMessageDate(nowInUtc())
+          .groupId(RC_GROUP_ID)
+          .feedbackGroupId(RC_FEEDBACK_GROUP_ID_2)
+          .postcode(POSTCODE)
+          .status(IN_PROGRESS)
+          .createDate(nowInUtc())
+          .updateDate(nowInUtc())
+          .teamSession(true)
+          .isPeerChat(false)
+          .monitoring(false)
+          .build();
+
   public static final Session ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT =
-      new Session(SESSION_ID, null, null, CONSULTING_TYPE_ID_SUCHT, ANONYMOUS, POSTCODE, AGENCY_ID,
-          null, SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null, false, false, false,
-          nowInUtc(), null, null, null);
-  public static final Session SESSION_WITHOUT_CONSULTANT = new Session(SESSION_ID, USER_WITH_RC_ID,
-      null, CONSULTING_TYPE_ID_U25, REGISTERED, POSTCODE, AGENCY_ID, null, SessionStatus.NEW, null,
-      RC_GROUP_ID, null, null, IS_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null, null, null);
-  public static final Session FEEDBACKSESSION_WITHOUT_CONSULTANT = new Session(SESSION_ID,
-      USER_WITH_RC_ID, null, CONSULTING_TYPE_ID_U25, REGISTERED, POSTCODE, AGENCY_ID, null,
-      SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null, IS_TEAM_SESSION,
-      IS_MONITORING, false, nowInUtc(), null, null, null);
+      Session.builder().id(SESSION_ID)
+          .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
+          .registrationType(ANONYMOUS)
+          .agencyId(AGENCY_ID)
+          .enquiryMessageDate(nowInUtc())
+          .groupId(RC_GROUP_ID)
+          .feedbackGroupId(RC_FEEDBACK_GROUP_ID_2)
+          .postcode(POSTCODE)
+          .status(NEW)
+          .createDate(nowInUtc())
+          .updateDate(nowInUtc())
+          .teamSession(false)
+          .isPeerChat(false)
+          .monitoring(false)
+          .build();
+
+  public static final Session SESSION_WITHOUT_CONSULTANT =
+      Session.builder().id(SESSION_ID)
+          .user(USER_WITH_RC_ID)
+          .consultingTypeId(CONSULTING_TYPE_ID_U25)
+          .registrationType(REGISTERED)
+          .agencyId(AGENCY_ID)
+          .enquiryMessageDate(null)
+          .groupId(RC_GROUP_ID)
+          .postcode(POSTCODE)
+          .status(SessionStatus.NEW)
+          .createDate(nowInUtc())
+          .updateDate(nowInUtc())
+          .teamSession(true)
+          .isPeerChat(false)
+          .monitoring(true)
+          .build();
+
+  public static final Session FEEDBACKSESSION_WITHOUT_CONSULTANT =
+      Session.builder().id(SESSION_ID)
+          .user(USER_WITH_RC_ID)
+          .consultingTypeId(CONSULTING_TYPE_ID_U25)
+          .registrationType(REGISTERED)
+          .agencyId(AGENCY_ID)
+          .enquiryMessageDate(nowInUtc())
+          .groupId(RC_GROUP_ID)
+          .feedbackGroupId(RC_FEEDBACK_GROUP_ID)
+          .postcode(POSTCODE)
+          .status(NEW)
+          .createDate(nowInUtc())
+          .updateDate(nowInUtc())
+          .teamSession(true)
+          .isPeerChat(false)
+          .monitoring(true)
+          .build();
   public static final Session FEEDBACKSESSION_WITH_CONSULTANT =
-      new Session(SESSION_ID, USER_WITH_RC_ID, CONSULTANT_2, CONSULTING_TYPE_ID_U25, REGISTERED,
-          POSTCODE, AGENCY_ID, null, IN_PROGRESS, nowInUtc(), RC_GROUP_ID, RC_FEEDBACK_GROUP_ID,
-          null, IS_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null, null, null);
+      Session.builder().id(SESSION_ID)
+          .user(USER_WITH_RC_ID)
+          .consultant(CONSULTANT_2)
+          .consultingTypeId(CONSULTING_TYPE_ID_U25)
+          .registrationType(REGISTERED)
+          .agencyId(AGENCY_ID)
+          .enquiryMessageDate(nowInUtc())
+          .groupId(RC_GROUP_ID)
+          .feedbackGroupId(RC_FEEDBACK_GROUP_ID)
+          .postcode(POSTCODE)
+          .status(NEW)
+          .createDate(nowInUtc())
+          .updateDate(nowInUtc())
+          .teamSession(true)
+          .isPeerChat(false)
+          .monitoring(true)
+          .build();
+
   public static final Session SESSION_WITHOUT_CONSULTANT_NO_RC_USER_ID =
-      new Session(TEAM_SESSION_ID, USER_NO_RC_USER_ID_2, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED,
-          POSTCODE, AGENCY_ID, null, SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null,
-          IS_NO_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null, null, null);
-  public static final Session U25_SESSION_WITHOUT_CONSULTANT = new Session(SESSION_ID,
-      USER_WITH_RC_ID, null, CONSULTING_TYPE_ID_U25, REGISTERED, POSTCODE, AGENCY_ID, null,
-      SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, RC_FEEDBACK_GROUP_ID, null, IS_TEAM_SESSION,
-      IS_MONITORING, false, nowInUtc(), null, null, null);
+      Session.builder().id(TEAM_SESSION_ID)
+          .user(USER_NO_RC_USER_ID_2)
+          .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
+          .registrationType(REGISTERED)
+          .agencyId(AGENCY_ID)
+          .enquiryMessageDate(nowInUtc())
+          .groupId(RC_GROUP_ID)
+          .feedbackGroupId(RC_FEEDBACK_GROUP_ID)
+          .postcode(POSTCODE)
+          .status(NEW)
+          .createDate(nowInUtc())
+          .updateDate(nowInUtc())
+          .teamSession(false)
+          .isPeerChat(false)
+          .monitoring(true)
+          .build();
+
+  public static final Session U25_SESSION_WITHOUT_CONSULTANT =
+      Session.builder().id(SESSION_ID)
+          .user(USER_WITH_RC_ID)
+          .consultingTypeId(CONSULTING_TYPE_ID_U25)
+          .registrationType(REGISTERED)
+          .agencyId(AGENCY_ID)
+          .enquiryMessageDate(nowInUtc())
+          .groupId(RC_GROUP_ID)
+          .feedbackGroupId(RC_FEEDBACK_GROUP_ID)
+          .postcode(POSTCODE)
+          .status(NEW)
+          .createDate(nowInUtc())
+          .updateDate(nowInUtc())
+          .teamSession(true)
+          .isPeerChat(false)
+          .monitoring(true)
+          .build();
   public static final List<Session> SESSION_LIST = Collections.singletonList(SESSION);
   public static final Set<Session> SESSION_SET = new HashSet<>(
       Arrays.asList(U25_SESSION_WITHOUT_CONSULTANT, SESSION_WITHOUT_CONSULTANT_NO_RC_USER_ID));
