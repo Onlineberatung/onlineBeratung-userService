@@ -2153,6 +2153,7 @@ components:
         - "E2EE_ACTIVATED"
         - "MASTER_KEY_LOST"
         - "REASSIGN_CONSULTANT"
+        - "REASSIGN_CONSULTANT_RESET_LAST_MESSAGE"
 
     LastMessageDTO:
       type: object
