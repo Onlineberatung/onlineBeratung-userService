@@ -506,6 +506,66 @@ class UserControllerSessionE2EIT {
   }
 
   @Test
+  @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
+  void getSessionsForAuthenticatedUserShouldReturnSessionsLastMessageTypeResetLastMessage()
+      throws Exception {
+    givenAValidUser(true);
+    givenAValidConsultant();
+    givenASessionInProgress();
+    givenAValidRocketChatSystemUser();
+    givenAValidRocketChatGetRoomsResponse(session.getGroupId(),
+        MessageType.REASSIGN_CONSULTANT_RESET_LAST_MESSAGE, null);
+    givenAnEmptyRocketChatGetSubscriptionsResponse();
+    user.getSessions().forEach(session ->
+        givenAValidRocketChatInfoUserResponse(session.getConsultant())
+    );
+
+    mockMvc.perform(
+            get("/users/sessions/askers")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("sessions", hasSize(2)))
+        .andExpect(jsonPath("sessions[*].session.lastMessageType",
+            containsInAnyOrder("REASSIGN_CONSULTANT_RESET_LAST_MESSAGE", "FURTHER_STEPS")))
+        .andExpect(jsonPath("sessions[0].chat", is(nullValue())))
+        .andExpect(jsonPath("sessions[1].chat", is(nullValue())));
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
+  void getSessionsForAuthenticatedUserShouldReturnSessionsLastMessageTypeReassignConsultant()
+      throws Exception {
+    givenAValidUser(true);
+    givenAValidConsultant();
+    givenASessionInProgress();
+    givenAValidRocketChatSystemUser();
+    givenAValidRocketChatGetRoomsResponse(session.getGroupId(), MessageType.REASSIGN_CONSULTANT,
+        "a message");
+    givenAnEmptyRocketChatGetSubscriptionsResponse();
+    user.getSessions().forEach(session ->
+        givenAValidRocketChatInfoUserResponse(session.getConsultant())
+    );
+
+    mockMvc.perform(
+            get("/users/sessions/askers")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("sessions", hasSize(2)))
+        .andExpect(jsonPath("sessions[*].session.lastMessageType",
+            containsInAnyOrder("REASSIGN_CONSULTANT", "FURTHER_STEPS")))
+        .andExpect(jsonPath("sessions[0].chat", is(nullValue())))
+        .andExpect(jsonPath("sessions[1].chat", is(nullValue())));
+  }
+
+  @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
   void getSessionsForGroupOrFeedbackGroupIdsShouldFindSessionsByGroupOrFeedbackGroup()
       throws Exception {
@@ -599,7 +659,8 @@ class UserControllerSessionE2EIT {
         .andExpect(status().isOk())
         .andExpect(jsonPath("sessions[0].session.groupId", is("YWKxhFX5K2HPpsFbs")))
         .andExpect(jsonPath("sessions[0].consultant.username", is("u25main")))
-        .andExpect(jsonPath("sessions[0].consultant.id", is("bad14912-cf9f-4c16-9d0e-fe8ede9b60dc")))
+        .andExpect(
+            jsonPath("sessions[0].consultant.id", is("bad14912-cf9f-4c16-9d0e-fe8ede9b60dc")))
         .andExpect(jsonPath("sessions[0].consultant.firstName").doesNotExist())
         .andExpect(jsonPath("sessions[0].consultant.lastName").doesNotExist())
         .andExpect(jsonPath("sessions[0].agency", is(notNullValue())))
@@ -717,7 +778,8 @@ class UserControllerSessionE2EIT {
         .andExpect(jsonPath("sessions[0].session.id", is(900)))
         .andExpect(jsonPath("sessions[0].session.groupId", is("YWKxhFX5K2HPpsFbs")))
         .andExpect(jsonPath("sessions[0].consultant.username", is("u25main")))
-        .andExpect(jsonPath("sessions[0].consultant.id", is("bad14912-cf9f-4c16-9d0e-fe8ede9b60dc")))
+        .andExpect(
+            jsonPath("sessions[0].consultant.id", is("bad14912-cf9f-4c16-9d0e-fe8ede9b60dc")))
         .andExpect(jsonPath("sessions[0].consultant.firstName").doesNotExist())
         .andExpect(jsonPath("sessions[0].consultant.lastName").doesNotExist())
         .andExpect(jsonPath("sessions[0].agency", is(notNullValue())))
