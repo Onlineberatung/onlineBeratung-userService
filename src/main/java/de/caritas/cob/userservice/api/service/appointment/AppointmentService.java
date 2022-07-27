@@ -48,8 +48,7 @@ public class AppointmentService {
     }
 
     if (consultantAdminResponseDTO != null) {
-      ObjectMapper mapper = new ObjectMapper()
-          .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      ObjectMapper mapper = getObjectMapper(false);
       addTechnicalUserHeaders(this.appointmentConsultantApi.getApiClient());
       try {
         de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO consultant =
@@ -68,8 +67,7 @@ public class AppointmentService {
     }
 
     if (consultantAdminResponseDTO != null) {
-      ObjectMapper mapper = new ObjectMapper()
-          .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      ObjectMapper mapper = getObjectMapper(false);
       addTechnicalUserHeaders(this.appointmentConsultantApi.getApiClient());
       try {
         de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO consultant =
@@ -80,6 +78,18 @@ public class AppointmentService {
         log.error(e.getMessage());
       }
     }
+  }
+
+  /**
+   * ObjectMapper provider method for injecting Mocks while testing
+   *
+   * @param failOnUnknownProperties DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES
+   * @return ObjectMapper
+   */
+  protected ObjectMapper getObjectMapper(boolean failOnUnknownProperties) {
+    ObjectMapper mapper = new ObjectMapper()
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, failOnUnknownProperties);
+    return mapper;
   }
 
   public void deleteConsultant(String consultantId) {

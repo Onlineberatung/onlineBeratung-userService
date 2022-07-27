@@ -2090,6 +2090,8 @@ components:
           $ref: '#/components/schemas/VideoCallMessageDTO'
         messageType:
           $ref: '#/components/schemas/MessageType'
+        content:
+          type: string
 
     ForwardMessageDTO:
       type: object
@@ -2143,6 +2145,9 @@ components:
     MessageType:
       type: string
       enum:
+        - "APPOINTMENT_SET"
+        - "APPOINTMENT_CANCELLED"
+        - "APPOINTMENT_RESCHEDULED"
         - "FURTHER_STEPS"
         - "UPDATE_SESSION_DATA"
         - "FORWARD"
@@ -2153,6 +2158,7 @@ components:
         - "E2EE_ACTIVATED"
         - "MASTER_KEY_LOST"
         - "REASSIGN_CONSULTANT"
+        - "REASSIGN_CONSULTANT_RESET_LAST_MESSAGE"
 
     LastMessageDTO:
       type: object
