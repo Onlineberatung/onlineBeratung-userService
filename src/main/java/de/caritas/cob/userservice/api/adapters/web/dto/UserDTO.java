@@ -162,7 +162,7 @@ public class UserDTO implements UserRegistrationDTO {
         + ", tenantId='" + tenantId + '\''
         + ", mainTopicId='" + mainTopicId + '\''
         + ", gender='" + userGender + '\''
-        + ", topicsOfInterest='" + topicIds + '\''
+        + ", topicIds='" + topicIds + '\''
         + ", counsellingRelation='" + counsellingRelation + '\''
         + '}';
   }

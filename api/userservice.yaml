@@ -1842,7 +1842,7 @@ components:
         mainTopicId:
           type: integer
           example: 15
-        topicsOfInterest:
+        topicIds:
           type: array
           items:
             type: integer
