@@ -223,8 +223,11 @@ public class SessionService {
   }
 
   private SessionTopic createNewSessionTopic(Session session, Integer topicId) {
-    return SessionTopic.builder().topicId(topicId).session(session).createDate(
-        LocalDateTime.now()).build();
+    return SessionTopic.builder().topicId(topicId)
+        .session(session)
+        .createDate(LocalDateTime.now())
+        .updateDate(LocalDateTime.now())
+        .build();
   }
 
   private ExtendedConsultingTypeResponseDTO obtainConsultingTypeSettings(UserDTO userDTO) {
