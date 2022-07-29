@@ -14,6 +14,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.api.client.util.Lists;
 import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
 import de.caritas.cob.userservice.api.conversation.model.PageableListRequest;
@@ -161,11 +162,13 @@ public class AnonymousEnquiryConversationListProviderIT {
       session.setPostcode("12345");
       session.setConsultingTypeId(CONSULTING_TYPE_ID_OFFENDER);
       session.setStatus(SessionStatus.NEW);
+      session.setSessionTopics(Lists.newArrayList());
     });
     sessions.get(0).setStatus(SessionStatus.INITIAL);
     sessions.get(1).setStatus(SessionStatus.IN_PROGRESS);
     sessions.get(2).setStatus(SessionStatus.DONE);
     sessions.get(3).setStatus(SessionStatus.IN_ARCHIVE);
+
     this.sessionRepository.saveAll(sessions);
   }
 

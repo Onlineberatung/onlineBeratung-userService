@@ -10,6 +10,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 
+import com.google.api.client.util.Lists;
 import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
@@ -164,6 +165,7 @@ public class ArchivedTeamSessionConversationListProviderTestIT {
       session.setConsultingTypeId(CONSULTING_TYPE_ID_OFFENDER);
       session.setStatus(SessionStatus.IN_ARCHIVE);
       session.setAgencyId(1L);
+      session.setSessionTopics(Lists.newArrayList());
     });
     sessions.get(0).setStatus(SessionStatus.INITIAL);
     sessions.get(1).setStatus(SessionStatus.IN_PROGRESS);

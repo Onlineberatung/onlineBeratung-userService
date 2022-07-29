@@ -6,8 +6,7 @@ import static de.caritas.cob.userservice.api.helper.UserHelper.AGE_REGEXP;
 import static de.caritas.cob.userservice.api.helper.UserHelper.CONSULTING_TYPE_REGEXP;
 import static de.caritas.cob.userservice.api.helper.UserHelper.VALID_POSTCODE_REGEX;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import java.util.Collection;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -75,4 +74,12 @@ public class NewRegistrationDto implements UserRegistrationDTO {
   public Integer getUserAge() {
     return age == null ? null : Integer.valueOf(age);
   }
+
+  @ApiModelProperty(required = false, example = "\"[1,5]\"")
+  @JsonProperty("topicIds")
+  private Collection<Integer> topicIds;
+
+  @ApiModelProperty(required = false, example = "\"RELATIVE_COUNSELLING\"")
+  @JsonProperty("counsellingRelation")
+  private String counsellingRelation;
 }

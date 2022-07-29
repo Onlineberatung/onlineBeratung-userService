@@ -1171,6 +1171,7 @@ class UserControllerE2EIT {
     session.setSessionData(null);
     session.setPostcode("12345");
     session.setConsultingTypeId(1);
+    session.setSessionTopics(Lists.newArrayList());
     return sessionRepository.save(session);
   }
 
