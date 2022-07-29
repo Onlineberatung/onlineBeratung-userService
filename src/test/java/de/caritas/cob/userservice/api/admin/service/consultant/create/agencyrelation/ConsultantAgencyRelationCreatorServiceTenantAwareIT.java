@@ -11,6 +11,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.api.client.util.Lists;
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
@@ -22,6 +23,7 @@ import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.model.Language;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
+import de.caritas.cob.userservice.api.model.SessionTopic;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.model.UserAgency;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
@@ -142,11 +144,11 @@ public class ConsultantAgencyRelationCreatorServiceTenantAwareIT {
 
     assertThat(result, notNullValue());
     assertThat(result, hasSize(1));
-    assertEquals(enquirySessionWithoutConsultant.getTenantId(), 1);
+    assertEquals(1, enquirySessionWithoutConsultant.getTenantId());
 
     List<ConsultantAgency> agenciesForConsultant = this.consultantAgencyRepository
         .findByConsultantId(consultant.getId());
-    assertEquals(agenciesForConsultant.get(0).getTenantId(), 1);
+    assertEquals(1, agenciesForConsultant.get(0).getTenantId());
   }
 
   private Consultant createConsultantWithoutAgencyAndSession() {
@@ -187,6 +189,7 @@ public class ConsultantAgencyRelationCreatorServiceTenantAwareIT {
     session.setUser(user);
     session.setAgencyId(agencyId);
     session.setTeamSession(true);
+    session.setSessionTopics(Lists.newArrayList());
     session.setLanguageCode(LanguageCode.de);
     return this.sessionRepository.save(session);
   }

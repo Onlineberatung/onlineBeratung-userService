@@ -1,4 +1,5 @@
 ALTER SEQUENCE sequence_session RESTART WITH 100000;
+ALTER SEQUENCE sequence_session_topic RESTART WITH 100000;
 ALTER SEQUENCE sequence_consultant_agency RESTART WITH 100000;
 INSERT INTO user (`user_id`, `id_old`, `delete_date`, `username`, `email`, `rc_user_id`,
                   `language_formal`, `create_date`, `update_date`)
@@ -1172,3 +1173,8 @@ VALUES
         (1215, '1da238c6-cd46-4162-80f1-bff74eafe77f', '34c3x5b1-0677-4fd2-a7ea-56a71aefd099', 0,
         '2020-10-08 09:03:45', '12345', 1, 'DJrRTzFg8Ac2BqE8j', 'E6FohkNfEDPY9bRXc', 2, 0, 1,
         '2020-10-08 09:03:45', '2020-10-08 09:03:45', 1);
+
+INSERT INTO session_topic (`id`, `session_id`, `topic_id`, `create_date`, `update_date`)
+VALUES
+        (1, 1200, 1,  '2020-10-08 09:03:45',  '2020-10-08 09:03:45'),
+        (2, 1200, 2,  '2020-10-08 09:03:45',  '2020-10-08 09:03:45');

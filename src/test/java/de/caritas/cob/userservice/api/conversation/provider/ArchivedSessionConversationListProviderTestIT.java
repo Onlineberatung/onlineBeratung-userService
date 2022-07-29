@@ -10,6 +10,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 
+import com.google.api.client.util.Lists;
 import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
 import de.caritas.cob.userservice.api.conversation.model.PageableListRequest;
@@ -163,6 +164,7 @@ public class ArchivedSessionConversationListProviderTestIT {
       session.setPostcode("12345");
       session.setConsultingTypeId(CONSULTING_TYPE_ID_OFFENDER);
       session.setStatus(SessionStatus.IN_ARCHIVE);
+      session.setSessionTopics(Lists.newArrayList());
     });
     sessions.get(0).setStatus(SessionStatus.INITIAL);
     sessions.get(1).setStatus(SessionStatus.IN_PROGRESS);

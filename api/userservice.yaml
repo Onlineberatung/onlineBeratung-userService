@@ -1842,6 +1842,14 @@ components:
         mainTopicId:
           type: integer
           example: 15
+        topicsOfInterest:
+          type: array
+          items:
+            type: integer
+          example: [12,15]
+        cousellingRelation:
+          type: string
+          example: 'SELF_COUNSELLING'
         gender:
           type: string
           example: 'DIVERSE'
@@ -2779,6 +2787,15 @@ components:
         gender:
           type: string
           example: 'DIVERSE'
+        topicsOfInterest:
+          type: array
+          items:
+            type: integer
+          example: [ 12,15 ]
+        cousellingRelation:
+          type: string
+          example: 'SELF_COUNSELLING'
+
 
     NewRegistrationResponseDto:
       type: object

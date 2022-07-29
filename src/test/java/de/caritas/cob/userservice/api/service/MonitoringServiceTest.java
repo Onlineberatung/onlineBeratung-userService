@@ -1,10 +1,15 @@
 package de.caritas.cob.userservice.api.service;
 
+import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.api.model.Session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.api.model.Session.SessionStatus.IN_PROGRESS;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WIT_MONITORING;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.IS_MONITORING;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.IS_NO_TEAM_SESSION;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.POSTCODE;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
@@ -18,6 +23,7 @@ import de.caritas.cob.userservice.api.exception.CreateMonitoringException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.MonitoringStructureProvider;
 import de.caritas.cob.userservice.api.adapters.web.dto.MonitoringDTO;
+import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.port.out.MonitoringRepository;
 import de.caritas.cob.userservice.api.model.Session;
 import java.util.HashMap;
@@ -48,8 +54,14 @@ public class MonitoringServiceTest {
   private final String ERROR = "error";
   private final Long SESSION_ID = 123L;
   private final Session SESSION =
-      new Session(SESSION_ID, null, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED, POSTCODE, null,
-          null, IN_PROGRESS, null, null, null, null, false, false, false, null, null, null, null, null, null);
+      Session.builder()
+          .id(SESSION_ID)
+          .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
+          .registrationType(
+              REGISTERED)
+          .postcode(POSTCODE)
+          .status(IN_PROGRESS)
+          .build();
   private final MonitoringDTO MONITORING_DTO = new MonitoringDTO();
 
   @Before

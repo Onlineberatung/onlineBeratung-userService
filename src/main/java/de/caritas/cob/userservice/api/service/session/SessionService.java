@@ -7,6 +7,7 @@ import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
+import com.google.api.client.util.Lists;
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionDTO;
@@ -25,6 +26,7 @@ import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.RegistrationType;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
+import de.caritas.cob.userservice.api.model.SessionTopic;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.ConsultantService;
@@ -33,6 +35,7 @@ import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.MonitoringDTO;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -202,8 +205,26 @@ public class SessionService {
         .mainTopicId(userDto.getMainTopicId())
         .userGender(userDto.getUserGender())
         .userAge(userDto.getUserAge())
+        .counsellingRelation(userDto.getCounsellingRelation())
         .build();
+
+    session.setSessionTopics(createSessionTopics(userDto.getTopicsOfInterest(), session));
     return saveSession(session);
+  }
+
+  private List<SessionTopic> createSessionTopics(Collection<Integer> topicsOfInterest, Session session) {
+    if (topicsOfInterest != null) {
+      return topicsOfInterest.stream().map(topicId -> createNewSessionTopic(session, topicId))
+          .collect(
+              Collectors.toList());
+    } else {
+      return Lists.newArrayList();
+    }
+  }
+
+  private SessionTopic createNewSessionTopic(Session session, Integer topicId) {
+    return SessionTopic.builder().topicId(topicId).session(session).createDate(
+        LocalDateTime.now()).build();
   }
 
   private ExtendedConsultingTypeResponseDTO obtainConsultingTypeSettings(UserDTO userDTO) {
@@ -672,6 +693,6 @@ public class SessionService {
 
     Optional<Session> session = findSessionByConsultantAndUserAndConsultingType(
         consultant.get(), user.get(), consultingTypeId);
-    return session.get().getGroupId();
+    return session.orElseThrow().getGroupId();
   }
 }

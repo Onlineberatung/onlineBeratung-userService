@@ -12,6 +12,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_NAM
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.APPLICATION_BASE_URL;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.APPLICATION_BASE_URL_FIELD_NAME;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CITY;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_ID_2;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_ID_3;
@@ -26,6 +27,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.NAME;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.POSTCODE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_FEEDBACK_GROUP_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME_CONSULTANT_ENCODED;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME_ENCODED;
@@ -136,34 +138,89 @@ public class EmailNotificationFacadeTest {
       new ConsultantAgency(1L, ABSENT_CONSULTANT, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc(),
           null, null);
   private final Session SESSION =
-      new Session(1L, USER, CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, "88045",
-          AGENCY_ID, null, SessionStatus.INITIAL, nowInUtc(), RC_GROUP_ID, null, null,
-          IS_NO_TEAM_SESSION, IS_MONITORING, false, nowInUtc(), null, null, null, null, null);
+      Session.builder()
+          .id(1L)
+          .user(USER)
+          .consultant(CONSULTANT)
+          .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
+          .registrationType(
+              REGISTERED)
+          .postcode("88045")
+          .agencyId(AGENCY_ID)
+          .status(SessionStatus.INITIAL)
+          .enquiryMessageDate(nowInUtc())
+          .groupId(RC_GROUP_ID)
+          .teamSession(IS_NO_TEAM_SESSION)
+          .monitoring(IS_MONITORING)
+          .createDate(nowInUtc()).build();
+
   private final Session SESSION_WITHOUT_CONSULTANT =
-      new Session(1L, USER, null, CONSULTING_TYPE_ID_SUCHT, REGISTERED, "88045", AGENCY_ID, null,
-          SessionStatus.NEW, nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING,
-          false, nowInUtc(), null, null, null, null, null);
-  private final Session SESSION_IN_PROGRESS = new Session(1L, USER, CONSULTANT,
-      CONSULTING_TYPE_ID_SUCHT, REGISTERED, "88045", AGENCY_ID, null, SessionStatus.IN_PROGRESS,
-      nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION, IS_MONITORING, false, nowInUtc(),
-      null, null, null, null, null);
-  private final Session SESSION_IN_PROGRESS_NO_EMAIL = new Session(1L, USER_NO_EMAIL,
-      CONSULTANT_NO_EMAIL, CONSULTING_TYPE_ID_SUCHT, REGISTERED, "88045", AGENCY_ID, null,
-      SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, IS_NO_TEAM_SESSION,
-      IS_MONITORING, false, nowInUtc(), null, null, null, null, null);
+      Session.builder()
+          .id(1L)
+          .user(USER)
+          .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
+          .registrationType(
+              REGISTERED)
+          .postcode("88045")
+          .agencyId(AGENCY_ID)
+          .status(SessionStatus.INITIAL)
+          .enquiryMessageDate(nowInUtc())
+          .groupId(RC_GROUP_ID)
+          .teamSession(IS_NO_TEAM_SESSION)
+          .monitoring(IS_MONITORING)
+          .createDate(nowInUtc()).build();
+
+  private final Session SESSION_IN_PROGRESS =
+      Session.builder()
+          .id(1L)
+          .user(USER)
+          .consultant(CONSULTANT)
+          .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
+          .registrationType(
+              REGISTERED)
+          .postcode("88045")
+          .agencyId(AGENCY_ID)
+          .status(SessionStatus.IN_PROGRESS)
+          .enquiryMessageDate(nowInUtc())
+          .groupId(RC_GROUP_ID)
+          .teamSession(IS_NO_TEAM_SESSION)
+          .monitoring(IS_MONITORING)
+          .createDate(nowInUtc()).build();
+
+  private final Session SESSION_IN_PROGRESS_NO_EMAIL =
+      Session.builder()
+          .id(1L)
+          .user(USER_NO_EMAIL)
+          .consultant(CONSULTANT_NO_EMAIL)
+          .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
+          .registrationType(
+              REGISTERED)
+          .postcode("88045")
+          .agencyId(AGENCY_ID)
+          .status(SessionStatus.IN_PROGRESS)
+          .enquiryMessageDate(nowInUtc())
+          .groupId(RC_GROUP_ID)
+          .teamSession(IS_NO_TEAM_SESSION)
+          .monitoring(IS_MONITORING)
+          .createDate(nowInUtc()).build();
+
   private final Session TEAM_SESSION =
-      new Session(1L, USER, CONSULTANT, CONSULTING_TYPE_ID_SUCHT, REGISTERED, "12345", AGENCY_ID,
-          null, SessionStatus.IN_PROGRESS, nowInUtc(), RC_GROUP_ID, null, null, IS_TEAM_SESSION,
-          IS_MONITORING, false, nowInUtc(), null, null, null, null, null);
-  private final AgencyDTO AGENCY_DTO = new AgencyDTO()
-      .id(AGENCY_ID)
-      .name(AGENCY_NAME)
-      .postcode(POSTCODE)
-      .city(CITY)
-      .description(DESCRIPTION)
-      .teamAgency(IS_NO_TEAM_AGENCY)
-      .offline(IS_NOT_OFFLINE)
-      .consultingType(0);
+      Session.builder()
+          .id(1L)
+          .user(USER)
+          .consultant(CONSULTANT)
+          .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
+          .registrationType(
+              REGISTERED)
+          .postcode("88045")
+          .agencyId(AGENCY_ID)
+          .status(SessionStatus.IN_PROGRESS)
+          .enquiryMessageDate(nowInUtc())
+          .groupId(RC_GROUP_ID)
+          .teamSession(IS_TEAM_SESSION)
+          .monitoring(IS_MONITORING)
+          .createDate(nowInUtc()).build();
+
   private final String USER_ROLE = UserRole.USER.getValue();
   private final Set<String> USER_ROLES = new HashSet<>(Collections.singletonList(USER_ROLE));
   private final String CONSULTANT_ROLE = UserRole.CONSULTANT.getValue();
@@ -172,10 +229,7 @@ public class EmailNotificationFacadeTest {
   private final String ERROR_MSG = "error";
   private final List<ConsultantAgency> CONSULTANT_LIST =
       Arrays.asList(CONSULTANT_AGENCY, CONSULTANT_AGENCY_2);
-  private final List<ConsultantAgency> CONSULTANT_AGENCY_LIST = Collections
-      .singletonList(CONSULTANT_AGENCY);
-  private final List<ConsultantAgency> ABSENT_CONSULTANT_AGENCY_LIST =
-      Collections.singletonList(ABSENT_CONSULTANT_AGENCY);
+
   private final String GROUP_MEMBER_1_RC_ID = "yzx324sdg";
   private final GroupMemberDTO GROUP_MEMBER_1 =
       new GroupMemberDTO(GROUP_MEMBER_1_RC_ID, "status1", "username1", "name1", "");

@@ -70,6 +70,7 @@ import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.model.EnquiryData;
 import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.model.Session.RegistrationType;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
@@ -115,12 +116,34 @@ public class CreateEnquiryMessageFacadeTest {
       ROCKET_CHAT_USER_DTO, null, true, false, null);
   private final GroupResponseDTO FEEDBACK_GROUP_RESPONSE_DTO_2 =
       new GroupResponseDTO(FEEDBACK_GROUP_DTO_2, true, null, null);
-  private final Session SESSION_WITHOUT_ENQUIRY_MESSAGE = new Session(1L, USER, CONSULTANT,
-      CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", AGENCY_ID, null, SessionStatus.INITIAL, null,
-      null, null, null, false, false, false, nowInUtc(), null, null, null, null, null);
-  private final Session SESSION_WITH_ENQUIRY_MESSAGE = new Session(1L, USER, CONSULTANT,
-      CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", AGENCY_ID, null, SessionStatus.INITIAL,
-      nowInUtc(), null, null, null, false, false, false, nowInUtc(), null, null, null, null, null);
+  private final Session SESSION_WITHOUT_ENQUIRY_MESSAGE =
+      Session.builder()
+          .id(1L)
+          .user(USER)
+          .consultant(CONSULTANT)
+          .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
+          .registrationType(
+          REGISTERED)
+          .postcode("99999")
+          .agencyId(AGENCY_ID)
+          .status(SessionStatus.INITIAL)
+          .createDate(nowInUtc()).build();
+
+
+  private final Session SESSION_WITH_ENQUIRY_MESSAGE =
+      Session.builder()
+          .id(1L)
+          .user(USER)
+          .consultant(CONSULTANT)
+          .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
+          .registrationType(
+          REGISTERED)
+          .postcode("99999")
+          .agencyId(AGENCY_ID)
+          .status(SessionStatus.INITIAL)
+          .enquiryMessageDate(nowInUtc())
+          .createDate(nowInUtc()).build();
+
   private final ConsultantAgency CONSULTANT_AGENCY =
       new ConsultantAgency(1L, CONSULTANT, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc(), null,
           null);
