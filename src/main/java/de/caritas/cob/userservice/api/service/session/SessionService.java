@@ -208,7 +208,7 @@ public class SessionService {
         .counsellingRelation(userDto.getCounsellingRelation())
         .build();
 
-    session.setSessionTopics(createSessionTopics(userDto.getTopicsOfInterest(), session));
+    session.setSessionTopics(createSessionTopics(userDto.getTopicIds(), session));
     return saveSession(session);
   }
 

@@ -105,7 +105,7 @@ public class CreateNewConsultingTypeFacade {
       userDTO.setUserGender(userRegistrationDTO.getUserGender());
       userDTO.setAge(String.valueOf(userRegistrationDTO.getUserAge()));
       userDTO.setCounsellingRelation(userRegistrationDTO.getCounsellingRelation());
-      userDTO.setTopicsOfInterest(userRegistrationDTO.getTopicsOfInterest());
+      userDTO.setTopicIds(userRegistrationDTO.getTopicIds());
       return userDTO;
     }
 

@@ -20,7 +20,7 @@ public interface UserRegistrationDTO {
 
   Integer getUserAge();
 
-  Collection<Integer> getTopicsOfInterest();
+  Collection<Integer> getTopicIds();
 
   String getCounsellingRelation();
 }

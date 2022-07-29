@@ -76,8 +76,8 @@ public class NewRegistrationDto implements UserRegistrationDTO {
   }
 
   @ApiModelProperty(required = false, example = "\"[1,5]\"")
-  @JsonProperty("topicsOfInterest")
-  private Collection<Integer> topicsOfInterest;
+  @JsonProperty("topicIds")
+  private Collection<Integer> topicIds;
 
   @ApiModelProperty(required = false, example = "\"RELATIVE_COUNSELLING\"")
   @JsonProperty("counsellingRelation")

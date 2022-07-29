@@ -117,8 +117,8 @@ public class UserDTO implements UserRegistrationDTO {
   private String userGender;
 
   @ApiModelProperty(required = false, example = "\"[1,5]\"")
-  @JsonProperty("topicsOfInterest")
-  private Collection<Integer> topicsOfInterest;
+  @JsonProperty("topicIds")
+  private Collection<Integer> topicIds;
 
   @ApiModelProperty(required = false, example = "\"RELATIVE_COUNSELLING\"")
   @JsonProperty("counsellingRelation")
@@ -162,7 +162,7 @@ public class UserDTO implements UserRegistrationDTO {
         + ", tenantId='" + tenantId + '\''
         + ", mainTopicId='" + mainTopicId + '\''
         + ", gender='" + userGender + '\''
-        + ", topicsOfInterest='" + topicsOfInterest + '\''
+        + ", topicsOfInterest='" + topicIds + '\''
         + ", counsellingRelation='" + counsellingRelation + '\''
         + '}';
   }

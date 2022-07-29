@@ -1847,7 +1847,7 @@ components:
           items:
             type: integer
           example: [12,15]
-        cousellingRelation:
+        counsellingRelation:
           type: string
           example: 'SELF_COUNSELLING'
         gender:
@@ -2787,12 +2787,12 @@ components:
         gender:
           type: string
           example: 'DIVERSE'
-        topicsOfInterest:
+        topicIds:
           type: array
           items:
             type: integer
           example: [ 12,15 ]
-        cousellingRelation:
+        counsellingRelation:
           type: string
           example: 'SELF_COUNSELLING'
 
