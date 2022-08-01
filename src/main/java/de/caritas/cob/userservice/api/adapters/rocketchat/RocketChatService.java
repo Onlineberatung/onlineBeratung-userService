@@ -129,6 +129,8 @@ public class RocketChatService implements MessageClient {
 
   private final RocketChatMapper mapper;
 
+  private final RocketChatCredentials rocketChatCredentials;
+
   private boolean rotatingTokensInitialized = false;
 
   @PostConstruct

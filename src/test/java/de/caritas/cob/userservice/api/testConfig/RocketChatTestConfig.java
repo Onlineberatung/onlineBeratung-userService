@@ -30,9 +30,9 @@ public class RocketChatTestConfig {
   public RocketChatService rocketChatService(RestTemplate restTemplate,
       RocketChatCredentialsProvider rocketChatCredentialsProvider,
       RocketChatConfig rocketChatConfig, RocketChatClient rocketChatClient,
-      RocketChatMapper rocketChatMapper) {
+      RocketChatMapper rocketChatMapper, RocketChatCredentials rocketChatCredentials) {
     return new RocketChatService(restTemplate, rocketChatCredentialsProvider, rocketChatClient,
-        rocketChatConfig, rocketChatMapper) {
+        rocketChatConfig, rocketChatMapper, rocketChatCredentials) {
       @Override
       public ResponseEntity<LoginResponseDTO> loginUserFirstTime(String username, String password) {
         var loginResponseDTO = new LoginResponseDTO();
