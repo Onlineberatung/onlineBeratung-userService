@@ -3,7 +3,6 @@ package de.caritas.cob.userservice.api.adapters.web.controller;
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.USERNAME_NOT_AVAILABLE;
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.api.model.Session.RegistrationType.REGISTERED;
-import static de.caritas.cob.userservice.api.model.Session.SessionStatus.NEW;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_ACCEPT_ENQUIRY;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_ACTIVATE_2FA;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_ARCHIVE_SESSION;
@@ -94,7 +93,6 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.INACTIVE_C
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.IS_ABSENT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.IS_MONITORING;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.IS_NO_TEAM_SESSION;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.IS_TEAM_SESSION;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.LAST_NAME;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.MASTER_KEY_1;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.MASTER_KEY_DTO_KEY_1;
@@ -166,7 +164,7 @@ import de.caritas.cob.userservice.api.config.auth.Authority;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.config.auth.RoleAuthorizationAuthorityMapper;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
-import de.caritas.cob.userservice.api.container.RocketChatCredentials;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
@@ -255,7 +253,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(UserController.class)

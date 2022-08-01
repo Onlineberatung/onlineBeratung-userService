@@ -1,4 +1,4 @@
-package de.caritas.cob.userservice.api.container;
+package de.caritas.cob.userservice.api.adapters.rocketchat;
 
 import java.time.LocalDateTime;
 import lombok.Builder;

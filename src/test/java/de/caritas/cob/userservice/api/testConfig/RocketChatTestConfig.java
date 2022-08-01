@@ -3,7 +3,7 @@ package de.caritas.cob.userservice.api.testConfig;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatClient;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatMapper;
 import de.caritas.cob.userservice.api.adapters.rocketchat.config.RocketChatConfig;
-import de.caritas.cob.userservice.api.container.RocketChatCredentials;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.DataDTO;
