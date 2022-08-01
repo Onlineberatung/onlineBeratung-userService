@@ -332,12 +332,8 @@ public class UserController implements UsersApi {
     GroupSessionListResponseDTO groupSessionList;
     if (authenticatedUser.isConsultant()) {
       var consultant = userAccountProvider.retrieveValidatedConsultant();
-      var rocketChatCredentials = RocketChatCredentials.builder()
-          .rocketChatUserId(consultant.getRocketChatId())
-          .rocketChatToken(rcToken)
-          .build();
       groupSessionList = sessionListFacade.retrieveSessionsForAuthenticatedConsultantByGroupIds(
-          consultant, rcGroupIds, rocketChatCredentials, authenticatedUser.getRoles());
+          consultant, rcGroupIds, authenticatedUser.getRoles());
     } else {
       var user = userAccountProvider.retrieveValidatedUser();
       var rocketChatCredentials = RocketChatCredentials.builder()
@@ -359,13 +355,8 @@ public class UserController implements UsersApi {
     GroupSessionListResponseDTO groupSessionList;
     if (authenticatedUser.isConsultant()) {
       var consultant = userAccountProvider.retrieveValidatedConsultant();
-      var rocketChatCredentials = RocketChatCredentials.builder()
-          .rocketChatUserId(consultant.getRocketChatId())
-          .rocketChatToken(rcToken)
-          .build();
       groupSessionList = sessionListFacade.retrieveSessionsForAuthenticatedConsultantBySessionIds(
-          consultant, singletonList(sessionId), rocketChatCredentials,
-          authenticatedUser.getRoles());
+          consultant, singletonList(sessionId), authenticatedUser.getRoles());
     } else {
       var user = userAccountProvider.retrieveValidatedUser();
       var rocketChatCredentials = RocketChatCredentials.builder()
@@ -531,8 +522,7 @@ public class UserController implements UsersApi {
           .build();
 
       consultantSessionListResponseDTO = sessionListFacade
-          .retrieveSessionsDtoForAuthenticatedConsultant(consultant,
-              rcToken, sessionListQueryParameter);
+          .retrieveSessionsDtoForAuthenticatedConsultant(consultant, sessionListQueryParameter);
     }
 
     return nonNull(consultantSessionListResponseDTO) && isNotEmpty(
