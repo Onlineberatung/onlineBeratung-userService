@@ -48,7 +48,7 @@ import de.caritas.cob.userservice.api.adapters.web.mapping.UserDtoMapper;
 import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
-import de.caritas.cob.userservice.api.container.RocketChatCredentials;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
@@ -332,12 +332,8 @@ public class UserController implements UsersApi {
     GroupSessionListResponseDTO groupSessionList;
     if (authenticatedUser.isConsultant()) {
       var consultant = userAccountProvider.retrieveValidatedConsultant();
-      var rocketChatCredentials = RocketChatCredentials.builder()
-          .rocketChatUserId(consultant.getRocketChatId())
-          .rocketChatToken(rcToken)
-          .build();
       groupSessionList = sessionListFacade.retrieveSessionsForAuthenticatedConsultantByGroupIds(
-          consultant, rcGroupIds, rocketChatCredentials, authenticatedUser.getRoles());
+          consultant, rcGroupIds, authenticatedUser.getRoles());
     } else {
       var user = userAccountProvider.retrieveValidatedUser();
       var rocketChatCredentials = RocketChatCredentials.builder()
@@ -359,13 +355,8 @@ public class UserController implements UsersApi {
     GroupSessionListResponseDTO groupSessionList;
     if (authenticatedUser.isConsultant()) {
       var consultant = userAccountProvider.retrieveValidatedConsultant();
-      var rocketChatCredentials = RocketChatCredentials.builder()
-          .rocketChatUserId(consultant.getRocketChatId())
-          .rocketChatToken(rcToken)
-          .build();
       groupSessionList = sessionListFacade.retrieveSessionsForAuthenticatedConsultantBySessionIds(
-          consultant, singletonList(sessionId), rocketChatCredentials,
-          authenticatedUser.getRoles());
+          consultant, singletonList(sessionId), authenticatedUser.getRoles());
     } else {
       var user = userAccountProvider.retrieveValidatedUser();
       var rocketChatCredentials = RocketChatCredentials.builder()
@@ -531,8 +522,7 @@ public class UserController implements UsersApi {
           .build();
 
       consultantSessionListResponseDTO = sessionListFacade
-          .retrieveSessionsDtoForAuthenticatedConsultant(consultant,
-              rcToken, sessionListQueryParameter);
+          .retrieveSessionsDtoForAuthenticatedConsultant(consultant, sessionListQueryParameter);
     }
 
     return nonNull(consultantSessionListResponseDTO) && isNotEmpty(

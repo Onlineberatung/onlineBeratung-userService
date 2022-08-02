@@ -24,6 +24,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.service.session.SessionFilter;
@@ -52,6 +53,8 @@ public class ConsultantSessionListServiceTest {
   private ConsultantSessionEnricher consultantSessionEnricher;
   @Mock
   private ConsultantChatEnricher consultantChatEnricher;
+  @Mock
+  private RocketChatCredentials rocketChatCredentials;
 
   @Before
   public void setup() {
@@ -67,9 +70,12 @@ public class ConsultantSessionListServiceTest {
 
   @Test
   public void retrieveSessionsForAuthenticatedConsultant_Should_ReturnOnlySessions_WhenQueryParameterSessionStatusIsNew() {
+    when(rocketChatCredentials.getRocketChatToken())
+        .thenReturn(RC_TOKEN);
+
     List<ConsultantSessionResponseDTO> result = consultantSessionListService
         .retrieveSessionsForAuthenticatedConsultant(CONSULTANT,
-            RC_TOKEN, createStandardSessionListQueryParameterObject(SESSION_STATUS_NEW));
+            createStandardSessionListQueryParameterObject(SESSION_STATUS_NEW));
 
     assertFalse(result.isEmpty());
     assertEquals(CONSULTANT_SESSION_RESPONSE_DTO_LIST.size(), result.size());
@@ -82,9 +88,12 @@ public class ConsultantSessionListServiceTest {
 
   @Test
   public void retrieveSessionsForAuthenticatedConsultant_ShouldNot_SendChatsInEnquiryList() {
+    when(rocketChatCredentials.getRocketChatToken())
+        .thenReturn(RC_TOKEN);
+
     List<ConsultantSessionResponseDTO> result = consultantSessionListService
         .retrieveSessionsForAuthenticatedConsultant(CONSULTANT,
-            RC_TOKEN, createStandardSessionListQueryParameterObject(SESSION_STATUS_NEW));
+            createStandardSessionListQueryParameterObject(SESSION_STATUS_NEW));
 
     assertNull(result.get(0).getChat());
     verify(chatService, never()).getChatsForConsultant(Mockito.any());
@@ -96,11 +105,12 @@ public class ConsultantSessionListServiceTest {
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE);
     when(sessionService.getActiveAndDoneSessionsForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
+    when(rocketChatCredentials.getRocketChatToken())
+        .thenReturn(RC_TOKEN);
 
     List<ConsultantSessionResponseDTO> result =
         consultantSessionListService
             .retrieveSessionsForAuthenticatedConsultant(CONSULTANT,
-                RC_TOKEN,
                 createStandardSessionListQueryParameterObject(SESSION_STATUS_IN_PROGRESS));
 
     assertNotNull(result);
