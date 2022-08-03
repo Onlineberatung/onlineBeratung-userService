@@ -1050,6 +1050,7 @@ class UserControllerSessionE2EIT {
   }
 
   @Test
+  @SuppressWarnings("java:S2925") // "Thread.sleep" should not be used in tests
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
   void assignSessionShouldReturnOkAndAssignWhenRequestedByConsultant(CapturedOutput logOutput)
       throws Exception {
@@ -1087,6 +1088,7 @@ class UserControllerSessionE2EIT {
   }
 
   @Test
+  @SuppressWarnings("java:S2925") // "Thread.sleep" should not be used in tests
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
   void assignSessionShouldReturnOkAndAssignWhenRequestedByAdviceSeeker(CapturedOutput logOutput)
       throws Exception {
