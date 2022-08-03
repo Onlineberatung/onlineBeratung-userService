@@ -58,7 +58,9 @@ public class AssignSessionFacade {
     updateSessionInDatabase(session, consultantToAssign);
     addNewConsultantToRocketChatGroup(session, consultantToAssign);
     removeUnauthorizedMembersFromGroups(session, consultantToAssign, authConsultant);
-    sendEmailForConsultantChange(session, consultantToAssign);
+    if (!authenticatedUser.isAdviceSeeker()) {
+      sendEmailForConsultantChange(session, consultantToAssign);
+    }
 
     statisticsService.fireEvent(
         new AssignSessionStatisticsEvent(consultantToAssign.getId(), UserRole.CONSULTANT,
