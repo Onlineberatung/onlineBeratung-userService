@@ -4,7 +4,7 @@ import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import de.caritas.cob.userservice.api.container.RocketChatCredentials;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.MissingConsultingTypeException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
@@ -104,6 +104,8 @@ public class CreateNewConsultingTypeFacade {
       userDTO.setMainTopicId(userRegistrationDTO.getMainTopicId());
       userDTO.setUserGender(userRegistrationDTO.getUserGender());
       userDTO.setAge(String.valueOf(userRegistrationDTO.getUserAge()));
+      userDTO.setCounsellingRelation(userRegistrationDTO.getCounsellingRelation());
+      userDTO.setTopicIds(userRegistrationDTO.getTopicIds());
       return userDTO;
     }
 

@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.conversation.model;
 
-import de.caritas.cob.userservice.api.container.RocketChatCredentials;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
 import lombok.Builder;
 import lombok.Data;
 

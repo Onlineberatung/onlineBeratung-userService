@@ -11,6 +11,7 @@ import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.api.client.util.Lists;
 import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
 import de.caritas.cob.userservice.api.conversation.model.PageableListRequest;
@@ -152,6 +153,7 @@ public class RegisteredEnquiryConversationListProviderIT {
       session.setAgencyId(1L);
       session.setStatus(SessionStatus.NEW);
       session.setConsultingTypeId(random.nextInt(127));
+      session.setSessionTopics(Lists.newArrayList());
     });
     sessions.get(0).setStatus(SessionStatus.INITIAL);
     sessions.get(1).setStatus(SessionStatus.IN_PROGRESS);
