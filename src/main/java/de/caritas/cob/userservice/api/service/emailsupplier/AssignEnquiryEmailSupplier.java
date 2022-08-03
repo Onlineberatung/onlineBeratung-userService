@@ -19,6 +19,7 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -46,7 +47,9 @@ public class AssignEnquiryEmailSupplier implements EmailSupplier {
   @Value("${app.base.url}")
   private String applicationBaseUrl;
 
+  @Autowired
   private ConsultantService consultantService;
+  @Autowired
   private TenantTemplateSupplier tenantTemplateSupplier;
 
   @Value("${multitenancy.enabled}")
