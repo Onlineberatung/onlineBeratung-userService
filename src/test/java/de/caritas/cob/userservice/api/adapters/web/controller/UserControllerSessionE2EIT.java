@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -79,6 +80,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.servlet.http.Cookie;
@@ -198,6 +200,7 @@ class UserControllerSessionE2EIT {
   private GroupMemberResponseDTO groupMemberResponseDTO;
   private SubscriptionsGetDTO subscriptionsGetResponse;
   private MonitoringDTO monitoringDTO;
+  private Consultant consultantToAssign;
 
   @AfterEach
   void reset() {
@@ -236,6 +239,7 @@ class UserControllerSessionE2EIT {
     subscriptionsGetResponse = null;
     identityConfig.setDisplayNameAllowedForConsultants(false);
     monitoringDTO = null;
+    consultantToAssign = null;
   }
 
   @Test
@@ -1046,19 +1050,23 @@ class UserControllerSessionE2EIT {
   }
 
   @Test
+  @SuppressWarnings("java:S2925") // "Thread.sleep" should not be used in tests
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
-  void assignSessionShouldReturnOkAndAssignWhenRequestedByConsultant() throws Exception {
+  void assignSessionShouldReturnOkAndAssignWhenRequestedByConsultant(CapturedOutput logOutput)
+      throws Exception {
     givenAValidConsultant(true);
     givenAValidRocketChatSystemUser();
     givenValidRocketChatTechUserResponse();
     givenAValidSession();
     givenOnlyEmptyRocketChatGroupMemberResponses();
+    givenAConsultantOfSameAgencyToAssignTo();
 
-    assertNotEquals(consultant, session.getConsultant());
+    var previousConsultant = session.getConsultant();
+    assertNotEquals(consultantToAssign, previousConsultant);
 
     mockMvc.perform(
             put("/users/sessions/{sessionId}/consultant/{consultantId}", session.getId(),
-                consultant.getId())
+                consultantToAssign.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON)
@@ -1066,12 +1074,24 @@ class UserControllerSessionE2EIT {
         .andExpect(status().isOk());
 
     var updatedSession = sessionRepository.findById(session.getId()).orElseThrow();
-    assertEquals(consultant, updatedSession.getConsultant());
+    assertEquals(consultantToAssign, updatedSession.getConsultant());
+    session.setConsultant(previousConsultant);
+
+    TimeUnit.SECONDS.sleep(1); // wait for logging thread
+    var out = logOutput.getOut();
+    assertTrue(out.contains("Sending 1 emails"));
+
+    var firstEmailLog = "Sending assign-enquiry-notification email to "
+        + consultantToAssign.getEmail();
+    int numFirstEmail = StringUtils.countOccurrencesOf(out, firstEmailLog);
+    assertEquals(1, numFirstEmail);
   }
 
   @Test
+  @SuppressWarnings("java:S2925") // "Thread.sleep" should not be used in tests
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
-  void assignSessionShouldReturnOkAndAssignWhenRequestedByAdviceSeeker() throws Exception {
+  void assignSessionShouldReturnOkAndAssignWhenRequestedByAdviceSeeker(CapturedOutput logOutput)
+      throws Exception {
     givenAValidUser(true);
     givenAValidConsultant();
     givenAValidRocketChatSystemUser();
@@ -1079,7 +1099,8 @@ class UserControllerSessionE2EIT {
     givenAValidSession();
     givenOnlyEmptyRocketChatGroupMemberResponses();
 
-    assertNotEquals(consultant, session.getConsultant());
+    var previousConsultant = session.getConsultant();
+    assertNotEquals(consultant, previousConsultant);
 
     mockMvc.perform(
             put("/users/sessions/{sessionId}/consultant/{consultantId}", session.getId(),
@@ -1092,6 +1113,11 @@ class UserControllerSessionE2EIT {
 
     var updatedSession = sessionRepository.findById(session.getId()).orElseThrow();
     assertEquals(consultant, updatedSession.getConsultant());
+    session.setConsultant(previousConsultant);
+
+    TimeUnit.SECONDS.sleep(1); // wait for logging thread
+    var out = logOutput.getOut();
+    assertFalse(out.contains("Sending 1 emails"));
   }
 
   @Test
@@ -1404,6 +1430,17 @@ class UserControllerSessionE2EIT {
     user = userRepository.findById("9c4057d0-05ad-4e86-a47c-dc5bdeec03b9").orElseThrow();
     when(authenticatedUser.getUserId()).thenReturn(user.getUserId());
     when(authenticatedUser.getRoles()).thenReturn(Set.of("user"));
+  }
+
+  private void givenAConsultantOfSameAgencyToAssignTo() {
+    consultantToAssign = StreamSupport.stream(
+            consultantRepository.findAll().spliterator(), true
+        )
+        .filter(c -> !c.getId().equals(consultant.getId()))
+        .filter(c -> !c.getId().equals(session.getConsultant().getId()))
+        .filter(c -> c.isInAgency(session.getAgencyId()))
+        .findFirst()
+        .orElseThrow();
   }
 
   private void givenAConsultantWithSessions() {
