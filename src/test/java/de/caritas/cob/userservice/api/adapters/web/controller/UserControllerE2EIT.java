@@ -1103,6 +1103,7 @@ class UserControllerE2EIT {
     )));
   }
 
+  // FIXME: does not test the "saved monitoring", see next fixme
   @Test
   void registerUserWithoutConsultingIdShouldSaveMonitoring() throws Exception {
     givenConsultingTypeServiceResponse();
@@ -1110,14 +1111,15 @@ class UserControllerE2EIT {
     givenAUserDTO();
 
     mockMvc.perform(
-        post("/users/askers/new")
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(userDTO)))
+            post("/users/askers/new")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userDTO)))
         .andExpect(status().isCreated());
   }
 
+  // FIXME: (for all registerUser tests) Currently, we cannot easily get the generated data. The API does not return anything from the generated user, which would lead us to write code for tests. Which I don't like. Idea, API could return the user or at least the ID, then for the user we could fetch the sessions (de.caritas.cob.userservice.api.port.out.SessionRepository#findByUser), since there is only one at the time, I think this would be an acceptable solution.
   @Test
   void registerUserWithoutConsultingIdShouldSaveCreateUserWithDemographicsData() throws Exception {
     ReflectionTestUtils
@@ -1136,6 +1138,52 @@ class UserControllerE2EIT {
 
     ReflectionTestUtils
         .setField(userVerifier, "demographicsFeatureEnabled", false);
+  }
+
+  @Test
+  void registerUserWithoutConsultingIdShouldSaveCreateUserWithCounsellingRelationData()
+      throws Exception {
+    givenConsultingTypeServiceResponse(2);
+    givenARealmResource();
+    givenAUserDTOWithCounsellingRelation();
+
+    mockMvc.perform(
+            post("/users/askers/new")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userDTO)))
+        .andExpect(status().isCreated());
+  }
+
+  @Test
+  void registerUserWithoutConsultingIdShouldSaveCreateUserWithMainTopicData() throws Exception {
+    givenConsultingTypeServiceResponse(2);
+    givenARealmResource();
+    givenAUserDTOWithMainTopic();
+
+    mockMvc.perform(
+            post("/users/askers/new")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userDTO)))
+        .andExpect(status().isCreated());
+  }
+
+  @Test
+  void registerUserWithoutConsultingIdShouldSaveCreateUserWithTopicsData() throws Exception {
+    givenConsultingTypeServiceResponse(2);
+    givenARealmResource();
+    givenAUserDTOWithTopics();
+
+    mockMvc.perform(
+            post("/users/askers/new")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userDTO)))
+        .andExpect(status().isCreated());
   }
 
   @Test
@@ -1197,6 +1245,21 @@ class UserControllerE2EIT {
   private void givenAUserDTOWithDemographics() {
     givenAUserDTO();
     userDTO.setUserGender("MALE");
+  }
+
+  private void givenAUserDTOWithCounsellingRelation() {
+    givenAUserDTO();
+    userDTO.setCounsellingRelation("RELATIVE_COUNSELLING");
+  }
+
+  private void givenAUserDTOWithMainTopic() {
+    givenAUserDTO();
+    userDTO.setMainTopicId(0);
+  }
+
+  private void givenAUserDTOWithTopics() {
+    givenAUserDTO();
+    userDTO.setTopicIds(List.of(0, 1));
   }
 
   private long aPositiveLong() {
