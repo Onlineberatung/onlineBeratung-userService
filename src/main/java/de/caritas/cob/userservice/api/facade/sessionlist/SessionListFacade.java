@@ -9,10 +9,9 @@ import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResp
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.GroupSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.GroupSessionResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
-import de.caritas.cob.userservice.api.container.RocketChatCredentials;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
@@ -137,15 +136,13 @@ public class SessionListFacade {
   /**
    * @param consultant            the authenticated consultant
    * @param rcGroupIds            the group or feedback group IDs
-   * @param rocketChatCredentials the rocket chat credentials
    * @param roles                 the roles of given consultant
    * @return {@link GroupSessionListResponseDTO}
    */
   public GroupSessionListResponseDTO retrieveSessionsForAuthenticatedConsultantByGroupIds(
-      Consultant consultant, List<String> rcGroupIds, RocketChatCredentials rocketChatCredentials,
-      Set<String> roles) {
+      Consultant consultant, List<String> rcGroupIds, Set<String> roles) {
     List<ConsultantSessionResponseDTO> consultantSessions = consultantSessionListService.retrieveSessionsForConsultantAndGroupIds(
-        consultant, rcGroupIds, roles, rocketChatCredentials.getRocketChatToken());
+        consultant, rcGroupIds, roles);
     consultantSessions.sort(comparing(ConsultantSessionResponseDTO::getLatestMessage).reversed());
 
     SessionMapper sessionMapper = new SessionMapper();
@@ -159,15 +156,13 @@ public class SessionListFacade {
   /**
    * @param consultant            the authenticated consultant
    * @param sessionIds            the session IDs
-   * @param rocketChatCredentials the rocket chat credentials
    * @param roles                 the roles of given consultant
    * @return {@link GroupSessionListResponseDTO}
    */
   public GroupSessionListResponseDTO retrieveSessionsForAuthenticatedConsultantBySessionIds(
-      Consultant consultant, List<Long> sessionIds, RocketChatCredentials rocketChatCredentials,
-      Set<String> roles) {
+      Consultant consultant, List<Long> sessionIds, Set<String> roles) {
     List<ConsultantSessionResponseDTO> consultantSessions = consultantSessionListService.retrieveSessionsForConsultantAndSessionIds(
-        consultant, sessionIds, roles, rocketChatCredentials.getRocketChatToken());
+        consultant, sessionIds, roles);
     consultantSessions.sort(comparing(ConsultantSessionResponseDTO::getLatestMessage).reversed());
 
     SessionMapper sessionMapper = new SessionMapper();
@@ -210,18 +205,15 @@ public class SessionListFacade {
    * consultant with consideration of the query parameters.
    *
    * @param consultant                {@link Consultant}
-   * @param rcAuthToken               Rocket.Chat Token
    * @param sessionListQueryParameter session list query parameters as
    *                                  {@link SessionListQueryParameter}
    * @return the response dto
    */
   public ConsultantSessionListResponseDTO retrieveSessionsDtoForAuthenticatedConsultant(
-      Consultant consultant, String rcAuthToken,
-      SessionListQueryParameter sessionListQueryParameter) {
+      Consultant consultant, SessionListQueryParameter sessionListQueryParameter) {
 
     List<ConsultantSessionResponseDTO> consultantSessions = consultantSessionListService
-        .retrieveSessionsForAuthenticatedConsultant(consultant, rcAuthToken,
-            sessionListQueryParameter);
+        .retrieveSessionsForAuthenticatedConsultant(consultant, sessionListQueryParameter);
 
     /* Sort the session list by latest Rocket.Chat message if session is in progress (no enquiry).
      * The latest answer is on top.

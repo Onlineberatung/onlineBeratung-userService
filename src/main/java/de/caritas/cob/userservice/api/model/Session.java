@@ -179,6 +179,18 @@ public class Session implements TenantAware {
   @Column(name = "user_age")
   private Integer userAge;
 
+  @Column(name = "counselling_relation")
+  private String counsellingRelation;
+
+  @OneToMany(
+      targetEntity = SessionTopic.class,
+      mappedBy = "session",
+      fetch = FetchType.LAZY,
+      cascade = CascadeType.ALL,
+      orphanRemoval = true)
+  private List<SessionTopic> sessionTopics;
+
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {

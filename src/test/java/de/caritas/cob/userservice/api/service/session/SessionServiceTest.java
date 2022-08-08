@@ -151,7 +151,7 @@ class SessionServiceTest {
   private final List<Session> SESSION_LIST_WITH_CONSULTANT = singletonList(SESSION_WITH_CONSULTANT);
   private final String ERROR_MSG = "error";
   private final UserDTO USER_DTO = new UserDTO(USERNAME, POSTCODE, AGENCY_ID, "XXX", "x@y.de", null,
-      null, null, CONSULTING_TYPE_ID_SUCHT + "", "", true, null, null, null);
+      null, null, CONSULTING_TYPE_ID_SUCHT + "", "", true, null, null, null, null, null);
 
   @InjectMocks
   private SessionService sessionService;

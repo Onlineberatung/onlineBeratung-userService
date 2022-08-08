@@ -5,6 +5,7 @@ import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResponseDTO;
@@ -32,40 +33,41 @@ public class ConsultantSessionListService {
   private final @NonNull ChatService chatService;
   private final @NonNull ConsultantSessionEnricher consultantSessionEnricher;
   private final @NonNull ConsultantChatEnricher consultantChatEnricher;
+  private final RocketChatCredentials rocketChatCredentials;
 
   /**
    * @param consultant  {@link Consultant}
    * @param rcGroupIds  rocket chat group or feedback group IDs
    * @param roles       roles of the consultant
-   * @param rcAuthToken rocket chat authentication token
    * @return List of {@link ConsultantSessionResponseDTO}
    */
   public List<ConsultantSessionResponseDTO> retrieveSessionsForConsultantAndGroupIds(
       Consultant consultant, List<String> rcGroupIds,
-      Set<String> roles, String rcAuthToken) {
+      Set<String> roles) {
     var groupIds = new HashSet<>(rcGroupIds);
     var sessions = sessionService.getSessionsByConsultantAndGroupOrFeedbackGroupIds(consultant,
         groupIds, roles);
     var chats = chatService.getChatSessionsForConsultantByGroupIds(groupIds);
-    return mergeConsultantSessionsAndChats(consultant, sessions, chats, rcAuthToken);
+
+    return mergeConsultantSessionsAndChats(consultant, sessions, chats);
   }
 
   /**
    * @param consultant  {@link Consultant}
    * @param sessionIds  session IDs
    * @param roles       roles of the consultant
-   * @param rcAuthToken rocket chat authentication token
    * @return List of {@link ConsultantSessionResponseDTO}
    */
   public List<ConsultantSessionResponseDTO> retrieveSessionsForConsultantAndSessionIds(
-      Consultant consultant, List<Long> sessionIds, Set<String> roles, String rcAuthToken) {
+      Consultant consultant, List<Long> sessionIds, Set<String> roles) {
     var uniqueSessionIds = new HashSet<>(sessionIds);
     var sessions = sessionService.getSessionsByIds(consultant, uniqueSessionIds, roles);
     var groupIds = sessions.stream()
         .map(sessionResponse -> sessionResponse.getSession().getGroupId())
         .collect(Collectors.toSet());
     var chats = chatService.getChatSessionsForConsultantByGroupIds(groupIds);
-    return mergeConsultantSessionsAndChats(consultant, sessions, chats, rcAuthToken);
+
+    return mergeConsultantSessionsAndChats(consultant, sessions, chats);
   }
 
   public List<ConsultantSessionResponseDTO> retrieveChatsForConsultantAndChatIds(
@@ -80,13 +82,11 @@ public class ConsultantSessionListService {
    * status.
    *
    * @param consultant                {@link Consultant}
-   * @param rcAuthToken               Rocket.Chat Token
    * @param sessionListQueryParameter session list query parameters as {@link SessionListQueryParameter}
    * @return the response dto
    */
   public List<ConsultantSessionResponseDTO> retrieveSessionsForAuthenticatedConsultant(
-      Consultant consultant, String rcAuthToken,
-      SessionListQueryParameter sessionListQueryParameter) {
+      Consultant consultant, SessionListQueryParameter sessionListQueryParameter) {
 
     List<ConsultantSessionResponseDTO> sessions = retrieveSessionsForStatus(consultant,
         sessionListQueryParameter.getSessionStatus());
@@ -96,7 +96,7 @@ public class ConsultantSessionListService {
       chats = chatService.getChatsForConsultant(consultant);
     }
 
-    return mergeConsultantSessionsAndChats(consultant, sessions, chats, rcAuthToken);
+    return mergeConsultantSessionsAndChats(consultant, sessions, chats);
   }
 
   private List<ConsultantSessionResponseDTO> retrieveSessionsForStatus(Consultant consultant,
@@ -146,9 +146,10 @@ public class ConsultantSessionListService {
 
   private List<ConsultantSessionResponseDTO> mergeConsultantSessionsAndChats(
       Consultant consultant, List<ConsultantSessionResponseDTO> sessions,
-      List<ConsultantSessionResponseDTO> chats, String rcAuthToken) {
+      List<ConsultantSessionResponseDTO> chats) {
     List<ConsultantSessionResponseDTO> allSessions = new ArrayList<>();
 
+    var rcAuthToken = rocketChatCredentials.getRocketChatToken();
     if (isNotEmpty(sessions)) {
       allSessions.addAll(
           updateConsultantSessionValues(sessions, rcAuthToken, consultant));

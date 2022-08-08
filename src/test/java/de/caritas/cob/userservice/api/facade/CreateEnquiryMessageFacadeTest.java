@@ -53,7 +53,7 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupRespons
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.RocketChatUserDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
-import de.caritas.cob.userservice.api.container.RocketChatCredentials;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CreateEnquiryMessageException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -115,12 +115,34 @@ public class CreateEnquiryMessageFacadeTest {
       ROCKET_CHAT_USER_DTO, null, true, false, null);
   private final GroupResponseDTO FEEDBACK_GROUP_RESPONSE_DTO_2 =
       new GroupResponseDTO(FEEDBACK_GROUP_DTO_2, true, null, null);
-  private final Session SESSION_WITHOUT_ENQUIRY_MESSAGE = new Session(1L, USER, CONSULTANT,
-      CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", AGENCY_ID, null, SessionStatus.INITIAL, null,
-      null, null, null, false, false, false, nowInUtc(), null, null, null, null, null);
-  private final Session SESSION_WITH_ENQUIRY_MESSAGE = new Session(1L, USER, CONSULTANT,
-      CONSULTING_TYPE_ID_SUCHT, REGISTERED, "99999", AGENCY_ID, null, SessionStatus.INITIAL,
-      nowInUtc(), null, null, null, false, false, false, nowInUtc(), null, null, null, null, null);
+  private final Session SESSION_WITHOUT_ENQUIRY_MESSAGE =
+      Session.builder()
+          .id(1L)
+          .user(USER)
+          .consultant(CONSULTANT)
+          .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
+          .registrationType(
+          REGISTERED)
+          .postcode("99999")
+          .agencyId(AGENCY_ID)
+          .status(SessionStatus.INITIAL)
+          .createDate(nowInUtc()).build();
+
+
+  private final Session SESSION_WITH_ENQUIRY_MESSAGE =
+      Session.builder()
+          .id(1L)
+          .user(USER)
+          .consultant(CONSULTANT)
+          .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
+          .registrationType(
+          REGISTERED)
+          .postcode("99999")
+          .agencyId(AGENCY_ID)
+          .status(SessionStatus.INITIAL)
+          .enquiryMessageDate(nowInUtc())
+          .createDate(nowInUtc()).build();
+
   private final ConsultantAgency CONSULTANT_AGENCY =
       new ConsultantAgency(1L, CONSULTANT, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc(), null,
           null);

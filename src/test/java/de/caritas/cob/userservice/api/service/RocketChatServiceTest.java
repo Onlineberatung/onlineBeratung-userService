@@ -103,6 +103,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClientResponseException;
@@ -172,7 +173,9 @@ public class RocketChatServiceTest {
   private final LocalDateTime DATETIME_OLDEST = nowInUtc();
   private final LocalDateTime DATETIME_LATEST = nowInUtc();
   private final String PASSWORD = "password";
-  private final RocketChatConfig rocketChatConfig = new RocketChatConfig();
+  private final RocketChatConfig rocketChatConfig = new RocketChatConfig(
+      new MockHttpServletRequest()
+  );
   @Mock
   Logger logger;
   @Mock

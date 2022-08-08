@@ -14,6 +14,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.api.client.util.Lists;
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
@@ -202,7 +203,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
         .createNewConsultantAgency(consultant.getId(), createConsultantAgencyDTO);
 
     roles.forEach(role ->
-        verify(keycloakService).ensureRole(eq(consultant.getId()), eq(role))
+        verify(keycloakService).ensureRole(consultant.getId(), role)
     );
     var result = consultantAgencyRepository
         .findByConsultantIdAndDeleteDateIsNull(consultant.getId());
@@ -266,6 +267,7 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     session.setAgencyId(agencyId);
     session.setLanguageCode(LanguageCode.de);
     session.setTeamSession(true);
+    session.setSessionTopics(Lists.newArrayList());
     return this.sessionRepository.save(session);
   }
 

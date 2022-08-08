@@ -35,7 +35,6 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserDeleteBod
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserUpdateRequestDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UsersListReponseDTO;
-import de.caritas.cob.userservice.api.container.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.RocketChatUnauthorizedException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
@@ -129,6 +128,8 @@ public class RocketChatService implements MessageClient {
   private final RocketChatConfig rocketChatConfig;
 
   private final RocketChatMapper mapper;
+
+  private final RocketChatCredentials rocketChatCredentials;
 
   private boolean rotatingTokensInitialized = false;
 

@@ -8,6 +8,7 @@ import static de.caritas.cob.userservice.api.helper.UserHelper.STATE_REGEXP;
 import static de.caritas.cob.userservice.api.helper.UserHelper.TERMS_ACCEPTED_REGEXP;
 import static de.caritas.cob.userservice.api.helper.UserHelper.VALID_POSTCODE_REGEX;
 
+import java.util.Collection;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -115,6 +116,14 @@ public class UserDTO implements UserRegistrationDTO {
   @JsonProperty("gender")
   private String userGender;
 
+  @ApiModelProperty(required = false, example = "\"[1,5]\"")
+  @JsonProperty("topicIds")
+  private Collection<Integer> topicIds;
+
+  @ApiModelProperty(required = false, example = "\"RELATIVE_COUNSELLING\"")
+  @JsonProperty("counsellingRelation")
+  private String counsellingRelation;
+
   public Integer getUserAge() {
     return age == null ? null : Integer.valueOf(age);
   }
@@ -152,6 +161,9 @@ public class UserDTO implements UserRegistrationDTO {
         + ", consultingType='" + consultingType + '\''
         + ", tenantId='" + tenantId + '\''
         + ", mainTopicId='" + mainTopicId + '\''
+        + ", gender='" + userGender + '\''
+        + ", topicIds='" + topicIds + '\''
+        + ", counsellingRelation='" + counsellingRelation + '\''
         + '}';
   }
 }
