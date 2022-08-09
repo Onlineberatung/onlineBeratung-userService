@@ -3,17 +3,16 @@ name: Push Admin API documentation
 on:
   push:
     paths:
-      - 'api/useradminservice.yaml'
+      - "api/useradminservice.yaml"
     branches-ignore:
-      - 'master'
-      - 'develop'
+      - "master"
+      - "develop"
 
 jobs:
   documentation:
     name: Pushes changes to Admin API
     runs-on: ubuntu-latest
     steps:
-
       - name: Checkout
         uses: actions/checkout@v2
 
@@ -45,7 +44,7 @@ jobs:
           dst_repo_name: ${{ secrets.DOCUMENTATION_REPO }}
           dst_branch: adminapi
           clean: true
-          commit_message: 'docs: updated user service admin api description'
+          commit_message: "docs: updated user service admin api description"
 
       - name: Maven clean
         run: mvn -B -Pprod clean
