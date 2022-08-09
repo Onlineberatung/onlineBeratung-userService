@@ -138,6 +138,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.actions.registry.ActionContainer;
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.ApiResponseEntityExceptionHandler;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
@@ -164,7 +165,6 @@ import de.caritas.cob.userservice.api.config.auth.Authority;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.config.auth.RoleAuthorizationAuthorityMapper;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
@@ -1335,7 +1335,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void getUserData_ForSingleTenantAdmin_Should_ReturnUserDataFromKeycloak()
+  public void getUserData_ForSingleTenantAdmin_Should_ReturnUserDataFromKeycloak_When_multiTenancyIsEnabled()
       throws Exception {
     ReflectionTestUtils
         .setField(userController, "multiTenancyEnabled", true);
@@ -1344,9 +1344,53 @@ public class UserControllerIT {
         .thenReturn(new UserDataResponseDTO());
 
     mvc.perform(get(PATH_USER_DATA)
-        .contentType(MediaType.APPLICATION_JSON)
-        .cookie(RC_TOKEN_COOKIE)
-        .accept(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON)
+            .cookie(RC_TOKEN_COOKIE)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().is(HttpStatus.OK.value()));
+  }
+
+  @Test
+  public void getUserData_ForTenantSuperAdmin_Should_ReturnUserDataFromKeycloak_When_multiTenancyIsEnabled()
+      throws Exception {
+    ReflectionTestUtils
+        .setField(userController, "multiTenancyEnabled", true);
+    when(authenticatedUser.isTenantSuperAdmin()).thenReturn(true);
+    when(keycloakUserDataProvider.retrieveAuthenticatedUserData())
+        .thenReturn(new UserDataResponseDTO());
+
+    mvc.perform(get(PATH_USER_DATA)
+            .contentType(MediaType.APPLICATION_JSON)
+            .cookie(RC_TOKEN_COOKIE)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().is(HttpStatus.OK.value()));
+  }
+
+  @Test
+  public void getUserData_ForSingleTenantAdmin_Should_ReturnUserDataFromKeycloak_When_multiTenancyIsDisabled()
+      throws Exception {
+    when(authenticatedUser.isSingleTenantAdmin()).thenReturn(true);
+    when(keycloakUserDataProvider.retrieveAuthenticatedUserData())
+        .thenReturn(new UserDataResponseDTO());
+
+    mvc.perform(get(PATH_USER_DATA)
+            .contentType(MediaType.APPLICATION_JSON)
+            .cookie(RC_TOKEN_COOKIE)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().is(HttpStatus.OK.value()));
+  }
+
+  @Test
+  public void getUserData_ForTenantSuperAdmin_Should_ReturnUserDataFromKeycloak_When_multiTenancyIsDisabled()
+      throws Exception {
+    when(authenticatedUser.isTenantSuperAdmin()).thenReturn(true);
+    when(keycloakUserDataProvider.retrieveAuthenticatedUserData())
+        .thenReturn(new UserDataResponseDTO());
+
+    mvc.perform(get(PATH_USER_DATA)
+            .contentType(MediaType.APPLICATION_JSON)
+            .cookie(RC_TOKEN_COOKIE)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.OK.value()));
   }
 
