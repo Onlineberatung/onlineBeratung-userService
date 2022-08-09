@@ -8,8 +8,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
-import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
@@ -18,10 +18,8 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
-import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -109,6 +107,7 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
     return new MailDTO()
         .template(TEMPLATE_NEW_ENQUIRY_NOTIFICATION)
         .email(email)
+        //TODO: .language()
         .templateData(templateAttributes);
   }
 

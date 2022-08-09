@@ -185,6 +185,7 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
     return new MailDTO()
         .template(TEMPLATE_NEW_FEEDBACK_MESSAGE_NOTIFICATION)
         .email(email)
+        //TODO: .language()
         .templateData(asList(
             new TemplateDataDTO().key("name_sender").value(nameSender),
             new TemplateDataDTO().key("name_recipient").value(nameRecipient),

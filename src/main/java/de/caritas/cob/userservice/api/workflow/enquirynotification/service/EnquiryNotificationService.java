@@ -124,6 +124,7 @@ public class EnquiryNotificationService {
     return new MailDTO()
         .template(TEMPLATE_DAILY_ENQUIRY_NOTIFICATION)
         .email(consultant.getEmail())
+        //TODO: .language()
         .templateData(asList(
             new TemplateDataDTO().key("subject").value(MAIL_SUBJECT),
             new TemplateDataDTO().key("consultant_name").value(consultant.getFullName()),

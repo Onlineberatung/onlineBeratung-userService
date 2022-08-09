@@ -40,6 +40,7 @@ public class ReassignmentRequestEmailSupplier implements EmailSupplier {
     return new MailDTO()
         .template(TEMPLATE_REASSIGN_REQUEST_NOTIFICATION)
         .email(receiverEmailAddress)
+        //TODO: .language()
         .templateData(templateAttributes);
   }
 

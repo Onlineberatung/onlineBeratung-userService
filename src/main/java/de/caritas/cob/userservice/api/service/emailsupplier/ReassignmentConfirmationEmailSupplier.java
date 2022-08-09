@@ -45,6 +45,7 @@ public class ReassignmentConfirmationEmailSupplier implements EmailSupplier {
     return new MailDTO()
         .template(TEMPLATE_REASSIGN_CONFIRMATION_NOTIFICATION)
         .email(receiverConsultant.getEmail())
+        //TODO: .language()
         .templateData(templateAttributes);
   }
 

@@ -152,6 +152,7 @@ public class NewMessageEmailSupplier implements EmailSupplier {
     return new MailDTO()
         .template(TEMPLATE_NEW_MESSAGE_NOTIFICATION_CONSULTANT)
         .email(email)
+        //TODO: .language()
         .templateData(templateAttributes);
   }
 
@@ -224,6 +225,7 @@ public class NewMessageEmailSupplier implements EmailSupplier {
     return new MailDTO()
         .template(TEMPLATE_NEW_MESSAGE_NOTIFICATION_ASKER)
         .email(email)
+        //TODO: .language()
         .templateData(templateAttributes);
   }
 

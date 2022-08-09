@@ -113,6 +113,7 @@ public class AssignEnquiryEmailSupplier implements EmailSupplier {
     return new MailDTO()
         .template(TEMPLATE_ASSIGN_ENQUIRY_NOTIFICATION)
         .email(email)
+        //TODO: .language()
         .templateData(templateAttributes);
   }
 
