@@ -110,7 +110,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.MapUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -171,8 +170,6 @@ public class UserController implements UsersApi {
   private final @NonNull AskerDataProvider askerDataProvider;
   private final @NonNull VideoChatConfig videoChatConfig;
   private final @NonNull KeycloakUserDataProvider keycloakUserDataProvider;
-  @Value("${multitenancy.enabled}")
-  private boolean multiTenancyEnabled;
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
