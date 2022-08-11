@@ -182,6 +182,10 @@ public class Consultant implements TenantAware {
   @Column(name = "walk_through_enabled", columnDefinition = "tinyint", nullable = false)
   private Boolean walkThroughEnabled;
 
+  @Enumerated(EnumType.STRING)
+  @Column(length = 2, nullable = false, columnDefinition = "varchar(2) default 'de'")
+  private LanguageCode languageCode;
+
   @JsonIgnore
   public String getFullName() {
     return (this.firstName + " " + this.lastName).trim();

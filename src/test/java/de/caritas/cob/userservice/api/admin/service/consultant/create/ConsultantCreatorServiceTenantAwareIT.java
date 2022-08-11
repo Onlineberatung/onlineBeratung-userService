@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.admin.service.consultant.create;
 
 import static org.mockito.Mockito.when;
 
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.admin.service.tenant.TenantAdminService;
@@ -70,6 +71,8 @@ public class ConsultantCreatorServiceTenantAwareIT {
     consultant.setNotifyNewChatMessageFromAdviceSeeker(true);
     consultant.setNotifyNewFeedbackMessageFromAdviceSeeker(true);
     consultant.setWalkThroughEnabled(true);
+    consultant.setLanguageCode(LanguageCode.de);
+
     consultantRepository.save(consultant);
   }
 
