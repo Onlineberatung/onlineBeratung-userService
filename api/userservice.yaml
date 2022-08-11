@@ -2512,6 +2512,8 @@ components:
           uniqueItems: true
           items:
             $ref: '#/components/schemas/EmailToggle'
+        preferredLanguage:
+          $ref: '#/components/schemas/LanguageCode'
 
     UpdateConsultantDTO:
       type: object
