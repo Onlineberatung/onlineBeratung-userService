@@ -92,7 +92,7 @@ public class UserDtoMapper {
       map.put("walkThroughEnabled", patchUserDTO.getWalkThroughEnabled());
     }
     if (nonNull(patchUserDTO.getPreferredLanguage())) {
-      map.put("preferredLanguage", patchUserDTO.getPreferredLanguage());
+      map.put("preferredLanguage", patchUserDTO.getPreferredLanguage().toString());
     }
     var emailToggles = patchUserDTO.getEmailToggles();
     if (nonNull(emailToggles)) {

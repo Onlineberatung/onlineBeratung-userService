@@ -72,6 +72,7 @@ public class ConsultantDataProvider {
         .isAbsent(consultant.isAbsent())
         .isFormalLanguage(consultant.isLanguageFormal())
         .languages(languageStringsOf(consultant.getLanguages()))
+        .preferredLanguage(preferredLanguageOf(consultant.getLanguageCode()))
         .encourage2fa(consultant.getEncourage2fa())
         .absenceMessage(consultant.getAbsenceMessage())
         .isInTeamAgency(consultant.isTeamConsultant())
@@ -114,6 +115,13 @@ public class ConsultantDataProvider {
         .map(Language::getLanguageCode)
         .map(LanguageCode::name)
         .collect(Collectors.toSet());
+  }
+
+  private de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode preferredLanguageOf(
+      LanguageCode languageCode) {
+    return de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode.fromValue(
+       languageCode.toString()
+   );
   }
 
   private boolean hasAtLeastOneTypeWithAllowedAnonymousConversations(List<AgencyDTO> agencyDTOS) {
