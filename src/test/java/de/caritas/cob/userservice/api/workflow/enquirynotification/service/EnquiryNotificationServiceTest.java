@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
@@ -173,6 +174,7 @@ class EnquiryNotificationServiceTest {
     consultant.setFirstName(firstNameLastName[0]);
     consultant.setLastName(firstNameLastName[1]);
     consultant.setEmail(mail);
+    consultant.setLanguageCode(LanguageCode.de);
     consultant.setNotifyEnquiriesRepeating(notifyEnqRep);
     var consultantAgency = new ConsultantAgency();
     consultantAgency.setConsultant(consultant);
@@ -192,7 +194,7 @@ class EnquiryNotificationServiceTest {
     return new MailDTO()
         .template(TEMPLATE_DAILY_ENQUIRY_NOTIFICATION)
         .email(email)
-        //TODO: .language()
+        .language(de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.DE)
         .templateData(asList(
             new TemplateDataDTO().key("subject")
                 .value("Online-Beratung | Unbeantwortete Erstanfragen"),

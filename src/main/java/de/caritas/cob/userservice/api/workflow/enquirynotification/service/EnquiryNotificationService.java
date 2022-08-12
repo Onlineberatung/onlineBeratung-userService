@@ -6,6 +6,7 @@ import static java.util.Arrays.asList;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
@@ -124,7 +125,7 @@ public class EnquiryNotificationService {
     return new MailDTO()
         .template(TEMPLATE_DAILY_ENQUIRY_NOTIFICATION)
         .email(consultant.getEmail())
-        //TODO: .language()
+        .language(languageOf(consultant.getLanguageCode()))
         .templateData(asList(
             new TemplateDataDTO().key("subject").value(MAIL_SUBJECT),
             new TemplateDataDTO().key("consultant_name").value(consultant.getFullName()),
@@ -143,4 +144,10 @@ public class EnquiryNotificationService {
     }
   }
 
+  private static de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode languageOf(
+      LanguageCode languageCode) {
+    return de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.fromValue(
+        languageCode.toString()
+    );
+  }
 }
