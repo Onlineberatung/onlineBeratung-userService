@@ -11,10 +11,12 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
+import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
@@ -135,24 +137,25 @@ public class NewMessageEmailSupplier implements EmailSupplier {
 
   private MailDTO toNewConsultantMessageMailDTO(ConsultantAgency agency) {
     return buildMailDtoForNewMessageNotificationConsultant(
-        agency.getConsultant().getEmail(), agency.getConsultant().getFullName(),
-        session.getPostcode());
+        agency.getConsultant(), session.getPostcode()
+    );
   }
 
-  private MailDTO buildMailDtoForNewMessageNotificationConsultant(String email, String name,
+  private MailDTO buildMailDtoForNewMessageNotificationConsultant(Consultant recipient,
       String postCode) {
     var templateAttributes = new ArrayList<TemplateDataDTO>();
-    templateAttributes.add(new TemplateDataDTO().key("name").value(name));
+    templateAttributes.add(new TemplateDataDTO().key("name").value(recipient.getFullName()));
     templateAttributes.add(new TemplateDataDTO().key("plz").value(postCode));
     if (!multiTenancyEnabled) {
       templateAttributes.add(new TemplateDataDTO().key("url").value(applicationBaseUrl));
     } else {
       templateAttributes.addAll(tenantTemplateSupplier.getTemplateAttributes());
     }
+
     return new MailDTO()
         .template(TEMPLATE_NEW_MESSAGE_NOTIFICATION_CONSULTANT)
-        .email(email)
-        //TODO: .language()
+        .email(recipient.getEmail())
+        .language(languageOf(recipient.getLanguageCode()))
         .templateData(templateAttributes);
   }
 
@@ -179,10 +182,15 @@ public class NewMessageEmailSupplier implements EmailSupplier {
   private List<MailDTO> buildMailForAskerList() {
     var usernameTranscoder = new UsernameTranscoder();
     var consultantUsername = obtainConsultantUsername();
-    return singletonList(
-        buildMailDtoForNewMessageNotificationAsker(session.getUser().getEmail(),
-            usernameTranscoder.decodeUsername(consultantUsername),
-            usernameTranscoder.decodeUsername(session.getUser().getUsername())));
+    var asker = session.getUser();
+    var mailDTO = buildMailDtoForNewMessageNotificationAsker(
+        asker.getEmail(),
+        asker.getLanguageCode(),
+        usernameTranscoder.decodeUsername(consultantUsername),
+        usernameTranscoder.decodeUsername(asker.getUsername())
+    );
+
+    return singletonList(mailDTO);
   }
 
   private String obtainConsultantUsername() {
@@ -210,8 +218,8 @@ public class NewMessageEmailSupplier implements EmailSupplier {
     return !session.getUser().getEmail().contains(emailDummySuffix);
   }
 
-  private MailDTO buildMailDtoForNewMessageNotificationAsker(String email, String consultantName,
-      String askerName) {
+  private MailDTO buildMailDtoForNewMessageNotificationAsker(String email,
+      LanguageCode languageCode, String consultantName, String askerName) {
     var templateAttributes = new ArrayList<TemplateDataDTO>();
     templateAttributes.add(new TemplateDataDTO().key("consultantName").value(consultantName));
     templateAttributes.add(new TemplateDataDTO().key("askerName").value(askerName));
@@ -225,8 +233,15 @@ public class NewMessageEmailSupplier implements EmailSupplier {
     return new MailDTO()
         .template(TEMPLATE_NEW_MESSAGE_NOTIFICATION_ASKER)
         .email(email)
-        //TODO: .language()
+        .language(languageOf(languageCode))
         .templateData(templateAttributes);
+  }
+
+  private static de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode languageOf(
+      LanguageCode languageCode) {
+    return de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.fromValue(
+        languageCode.toString()
+    );
   }
 
 }
