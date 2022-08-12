@@ -34,6 +34,7 @@ import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_T
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_NEGATIVE_OFFSET;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_USER_DATA;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_CHAT_NEW;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_CHAT_NEW_V2;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_REGISTER_NEW_CONSULTING_TYPE;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_REGISTER_USER;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_ADD_MOBILE_TOKEN;
@@ -135,6 +136,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.actions.registry.ActionContainer;
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
@@ -233,7 +235,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.service.spi.ServiceException;
 import org.jeasy.random.EasyRandom;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -251,7 +252,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 
 @RunWith(SpringRunner.class)
@@ -269,7 +269,8 @@ public class UserControllerIT {
   private final Consultant TEAM_CONSULTANT =
       new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, "consultant", "first name", "last name",
           "consultant@cob.de", false, true, "", false, null, null, null, null, null,
-          null, null, null, true, true, true, true, null, null, ConsultantStatus.CREATED, false);
+          null, null, null, true, true, true, true, null, null, ConsultantStatus.CREATED, false,
+          LanguageCode.de);
   private final Set<String> ROLES_WITH_USER =
       new HashSet<>(Arrays.asList("dummyRoleA", UserRole.USER.getValue(), "dummyRoleB"));
   private final SessionDTO SESSION_DTO = new SessionDTO()
@@ -521,12 +522,6 @@ public class UserControllerIT {
     setInternalState(UserController.class, "log", logger);
     setInternalState(LogService.class, "LOGGER", logger);
     setInternalState(ApiResponseEntityExceptionHandler.class, "log", logger);
-  }
-
-  @After
-  public void tearDown() {
-    ReflectionTestUtils
-        .setField(userController, "multiTenancyEnabled", false);
   }
 
   /**
@@ -1335,39 +1330,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void getUserData_ForSingleTenantAdmin_Should_ReturnUserDataFromKeycloak_When_multiTenancyIsEnabled()
-      throws Exception {
-    ReflectionTestUtils
-        .setField(userController, "multiTenancyEnabled", true);
-    when(authenticatedUser.isSingleTenantAdmin()).thenReturn(true);
-    when(keycloakUserDataProvider.retrieveAuthenticatedUserData())
-        .thenReturn(new UserDataResponseDTO());
-
-    mvc.perform(get(PATH_USER_DATA)
-            .contentType(MediaType.APPLICATION_JSON)
-            .cookie(RC_TOKEN_COOKIE)
-            .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().is(HttpStatus.OK.value()));
-  }
-
-  @Test
-  public void getUserData_ForTenantSuperAdmin_Should_ReturnUserDataFromKeycloak_When_multiTenancyIsEnabled()
-      throws Exception {
-    ReflectionTestUtils
-        .setField(userController, "multiTenancyEnabled", true);
-    when(authenticatedUser.isTenantSuperAdmin()).thenReturn(true);
-    when(keycloakUserDataProvider.retrieveAuthenticatedUserData())
-        .thenReturn(new UserDataResponseDTO());
-
-    mvc.perform(get(PATH_USER_DATA)
-            .contentType(MediaType.APPLICATION_JSON)
-            .cookie(RC_TOKEN_COOKIE)
-            .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().is(HttpStatus.OK.value()));
-  }
-
-  @Test
-  public void getUserData_ForSingleTenantAdmin_Should_ReturnUserDataFromKeycloak_When_multiTenancyIsDisabled()
+  public void getUserData_ForSingleTenantAdmin_Should_ReturnUserDataFromKeycloak()
       throws Exception {
     when(authenticatedUser.isSingleTenantAdmin()).thenReturn(true);
     when(keycloakUserDataProvider.retrieveAuthenticatedUserData())
@@ -1381,7 +1344,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void getUserData_ForTenantSuperAdmin_Should_ReturnUserDataFromKeycloak_When_multiTenancyIsDisabled()
+  public void getUserData_ForTenantSuperAdmin_Should_ReturnUserDataFromKeycloak()
       throws Exception {
     when(authenticatedUser.isTenantSuperAdmin()).thenReturn(true);
     when(keycloakUserDataProvider.retrieveAuthenticatedUserData())
@@ -1988,7 +1951,7 @@ public class UserControllerIT {
         .thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant())
         .thenReturn(TEAM_CONSULTANT);
-    when(createChatFacade.createChat(Mockito.any(), Mockito.any()))
+    when(createChatFacade.createChatV1(Mockito.any(), Mockito.any()))
         .thenThrow(new InternalServerErrorException(""));
 
     mvc.perform(post(PATH_POST_CHAT_NEW)
@@ -2005,13 +1968,60 @@ public class UserControllerIT {
         .thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant())
         .thenReturn(TEAM_CONSULTANT);
-    when(createChatFacade.createChat(Mockito.any(), Mockito.any()))
+    when(createChatFacade.createChatV1(Mockito.any(), Mockito.any()))
         .thenReturn(CREATE_CHAT_RESPONSE_DTO);
 
     mvc.perform(post(PATH_POST_CHAT_NEW)
-        .content(VALID_CREATE_CHAT_BODY)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .content(VALID_CREATE_CHAT_BODY)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().is(HttpStatus.CREATED.value()));
+  }
+
+  @Test
+  public void createChatV2_Should_ReturnBadRequest_WhenQueryParamsAreInvalid() throws Exception {
+
+    mvc.perform(post(PATH_POST_CHAT_NEW_V2)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verifyNoMoreInteractions(chatService);
+    verifyNoMoreInteractions(accountProvider);
+  }
+
+  @Test
+  public void createChatV2_Should_ReturnInternalServerErrorAndLogError_When_ChatCouldNotBeCreated()
+      throws Exception {
+
+    when(authenticatedUser.getUserId())
+        .thenReturn(CONSULTANT_ID);
+    when(accountProvider.retrieveValidatedConsultant())
+        .thenReturn(TEAM_CONSULTANT);
+    when(createChatFacade.createChatV2(Mockito.any(), Mockito.any()))
+        .thenThrow(new InternalServerErrorException(""));
+
+    mvc.perform(post(PATH_POST_CHAT_NEW_V2)
+            .content(VALID_CREATE_CHAT_BODY)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
+  }
+
+  @Test
+  public void createChatV2_Should_ReturnCreated_When_ChatWasCreated() throws Exception {
+
+    when(authenticatedUser.getUserId())
+        .thenReturn(CONSULTANT_ID);
+    when(accountProvider.retrieveValidatedConsultant())
+        .thenReturn(TEAM_CONSULTANT);
+    when(createChatFacade.createChatV2(Mockito.any(), Mockito.any()))
+        .thenReturn(CREATE_CHAT_RESPONSE_DTO);
+
+    mvc.perform(post(PATH_POST_CHAT_NEW_V2)
+            .content(VALID_CREATE_CHAT_BODY)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.CREATED.value()));
   }
 
@@ -2022,8 +2032,8 @@ public class UserControllerIT {
   public void startChat_Should_ReturnBadRequest_WhenPathParamsAreInvalid() throws Exception {
 
     mvc.perform(put(PATH_PUT_CHAT_START_WITH_INVALID_PATH_PARAMS)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
 
     verifyNoMoreInteractions(chatService);

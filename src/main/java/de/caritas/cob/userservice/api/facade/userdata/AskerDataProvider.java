@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.facade.userdata;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.SessionDataProvider;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
@@ -53,6 +54,7 @@ public class AskerDataProvider {
         .isAbsent(false)
         .encourage2fa(user.getEncourage2fa())
         .isFormalLanguage(user.isLanguageFormal())
+        .preferredLanguage(LanguageCode.fromValue(user.getLanguageCode().toString()))
         .isInTeamAgency(false)
         .userRoles(authenticatedUser.getRoles())
         .grantedAuthorities(authenticatedUser.getGrantedAuthorities())

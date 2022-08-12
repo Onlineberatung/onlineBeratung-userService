@@ -173,21 +173,23 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
   private MailDTO buildMailForAssignedConsultant(Consultant sendingConsultant,
       Consultant consultant) {
     String nameSender = sendingConsultant.getFullName();
-    String nameRecipient = consultant.getFullName();
     String nameUser = new UsernameTranscoder().decodeUsername(session.getUser().getUsername());
-    String email = consultant.getEmail();
 
-    return buildMailDtoForFeedbackMessageNotification(email, nameSender, nameRecipient, nameUser);
+    return mailOf(consultant, nameSender, nameUser);
   }
 
-  private MailDTO buildMailDtoForFeedbackMessageNotification(String email, String nameSender,
-      String nameRecipient, String nameUser) {
+  private MailDTO mailOf(Consultant recipient, String nameSender, String nameUser) {
+    var language = de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.fromValue(
+        recipient.getLanguageCode().toString()
+    );
+
     return new MailDTO()
         .template(TEMPLATE_NEW_FEEDBACK_MESSAGE_NOTIFICATION)
-        .email(email)
+        .email(recipient.getEmail())
+        .language(language)
         .templateData(asList(
             new TemplateDataDTO().key("name_sender").value(nameSender),
-            new TemplateDataDTO().key("name_recipient").value(nameRecipient),
+            new TemplateDataDTO().key("name_recipient").value(recipient.getFullName()),
             new TemplateDataDTO().key("name_user").value(nameUser),
             new TemplateDataDTO().key("url").value(applicationBaseUrl)));
   }

@@ -5,6 +5,9 @@ import static de.caritas.cob.userservice.api.helper.UserHelper.CHAT_MIN_DURATION
 import static de.caritas.cob.userservice.api.helper.UserHelper.CHAT_TOPIC_MAX_LENGTH;
 import static de.caritas.cob.userservice.api.helper.UserHelper.CHAT_TOPIC_MIN_LENGTH;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import javax.validation.constraints.Max;
@@ -12,15 +15,13 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.format.annotation.DateTimeFormat.ISO;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 
 /**
  * Create new chat model
@@ -29,6 +30,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 @ApiModel(value = "Chat")
 public class ChatDTO {
 

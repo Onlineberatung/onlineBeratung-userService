@@ -110,7 +110,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.MapUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -171,8 +170,6 @@ public class UserController implements UsersApi {
   private final @NonNull AskerDataProvider askerDataProvider;
   private final @NonNull VideoChatConfig videoChatConfig;
   private final @NonNull KeycloakUserDataProvider keycloakUserDataProvider;
-  @Value("${multitenancy.enabled}")
-  private boolean multiTenancyEnabled;
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
@@ -896,16 +893,34 @@ public class UserController implements UsersApi {
   }
 
   /**
-   * Creates a new chat with the given details and returns the generated chat link.
+   * Creates a new chat and agency_chat assignment with the given details and returns the generated
+   * chat link.
    *
    * @param chatDTO {@link ChatDTO} (required)
    * @return {@link ResponseEntity} containing {@link CreateChatResponseDTO}
    */
   @Override
-  public ResponseEntity<CreateChatResponseDTO> createChat(@RequestBody ChatDTO chatDTO) {
+  public ResponseEntity<CreateChatResponseDTO> createChatV1(@RequestBody ChatDTO chatDTO) {
 
     var callingConsultant = this.userAccountProvider.retrieveValidatedConsultant();
-    var response = createChatFacade.createChat(chatDTO, callingConsultant);
+    var response = createChatFacade.createChatV1(chatDTO, callingConsultant);
+
+    return new ResponseEntity<>(response, HttpStatus.CREATED);
+  }
+
+  /**
+   * Creates a new chat with the given details and returns the generated chat link.
+   * <p>The new version (v2) creates only the chat and the advice seekers can be invited in a
+   * separate step.
+   *
+   * @param chatDTO {@link ChatDTO} (required)
+   * @return {@link ResponseEntity} containing {@link CreateChatResponseDTO}
+   */
+  @Override
+  public ResponseEntity<CreateChatResponseDTO> createChatV2(@RequestBody ChatDTO chatDTO) {
+
+    var callingConsultant = this.userAccountProvider.retrieveValidatedConsultant();
+    var response = createChatFacade.createChatV2(chatDTO, callingConsultant);
 
     return new ResponseEntity<>(response, HttpStatus.CREATED);
   }

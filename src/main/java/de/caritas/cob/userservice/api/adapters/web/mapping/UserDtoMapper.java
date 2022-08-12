@@ -75,7 +75,8 @@ public class UserDtoMapper {
 
   public Optional<Map<String, Object>> mapOf(PatchUserDTO patchUserDTO, AuthenticatedUser user) {
     if (isNull(patchUserDTO.getEncourage2fa()) && isNull(patchUserDTO.getDisplayName()) && isNull(
-        patchUserDTO.getWalkThroughEnabled()) && isNull(patchUserDTO.getEmailToggles())) {
+        patchUserDTO.getWalkThroughEnabled()) && isNull(patchUserDTO.getEmailToggles()) && isNull(
+        patchUserDTO.getPreferredLanguage())) {
       return Optional.empty();
     }
 
@@ -89,6 +90,9 @@ public class UserDtoMapper {
     }
     if (nonNull(patchUserDTO.getWalkThroughEnabled())) {
       map.put("walkThroughEnabled", patchUserDTO.getWalkThroughEnabled());
+    }
+    if (nonNull(patchUserDTO.getPreferredLanguage())) {
+      map.put("preferredLanguage", patchUserDTO.getPreferredLanguage().toString());
     }
     var emailToggles = patchUserDTO.getEmailToggles();
     if (nonNull(emailToggles)) {

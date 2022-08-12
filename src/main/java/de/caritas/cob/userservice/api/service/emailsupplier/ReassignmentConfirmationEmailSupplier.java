@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.service.emailsupplier;
 import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.TEMPLATE_REASSIGN_CONFIRMATION_NOTIFICATION;
 import static java.util.Arrays.asList;
 
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
@@ -45,6 +46,7 @@ public class ReassignmentConfirmationEmailSupplier implements EmailSupplier {
     return new MailDTO()
         .template(TEMPLATE_REASSIGN_CONFIRMATION_NOTIFICATION)
         .email(receiverConsultant.getEmail())
+        .language(languageOf(receiverConsultant.getLanguageCode()))
         .templateData(templateAttributes);
   }
 
@@ -54,6 +56,13 @@ public class ReassignmentConfirmationEmailSupplier implements EmailSupplier {
 
   private String decodedUsernameOf(String decoded) {
     return usernameTranscoder.decodeUsername(decoded);
+  }
+
+  private static de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode languageOf(
+      LanguageCode languageCode) {
+    return de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.fromValue(
+        languageCode.toString()
+    );
   }
 
 }
