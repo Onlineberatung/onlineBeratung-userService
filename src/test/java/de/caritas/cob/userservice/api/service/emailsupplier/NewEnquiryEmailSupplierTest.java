@@ -17,6 +17,7 @@ import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.List;
@@ -87,6 +88,7 @@ public class NewEnquiryEmailSupplierTest {
     MailDTO generatedMail = generatedMails.get(0);
     assertThat(generatedMail.getTemplate(), is(TEMPLATE_NEW_ENQUIRY_NOTIFICATION));
     assertThat(generatedMail.getEmail(), is("email@email.com"));
+    assertThat(generatedMail.getLanguage(), is(LanguageCode.DE));
     List<TemplateDataDTO> templateData = generatedMail.getTemplateData();
     assertThat(templateData, hasSize(4));
     assertThat(templateData.get(0).getKey(), is("name"));

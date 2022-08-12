@@ -34,6 +34,7 @@ import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.Exte
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.NewMessageDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.NotificationsDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.TeamSessionsDTO;
+import de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.ArrayList;
@@ -153,6 +154,7 @@ public class NewMessageEmailSupplierTest {
     MailDTO generatedMail = generatedMails.get(0);
     assertThat(generatedMail.getTemplate(), is(TEMPLATE_NEW_MESSAGE_NOTIFICATION_CONSULTANT));
     assertThat(generatedMail.getEmail(), is("email@email.com"));
+    assertThat(generatedMail.getLanguage(), is(LanguageCode.DE));
     List<TemplateDataDTO> templateData = generatedMail.getTemplateData();
     assertThat(templateData, hasSize(3));
     assertThat(templateData.get(0).getKey(), is("name"));
@@ -187,6 +189,7 @@ public class NewMessageEmailSupplierTest {
     MailDTO generatedMail = generatedMails.get(0);
     assertThat(generatedMail.getTemplate(), is(TEMPLATE_NEW_MESSAGE_NOTIFICATION_CONSULTANT));
     assertThat(generatedMail.getEmail(), is("email@email.com"));
+    assertThat(generatedMail.getLanguage(), is(LanguageCode.DE));
     List<TemplateDataDTO> templateData = generatedMail.getTemplateData();
     assertThat(templateData, hasSize(3));
     assertThat(templateData.get(0).getKey(), is("name"));
@@ -264,6 +267,7 @@ public class NewMessageEmailSupplierTest {
     MailDTO generatedMail = generatedMails.get(0);
     assertThat(generatedMail.getTemplate(), is(TEMPLATE_NEW_MESSAGE_NOTIFICATION_ASKER));
     assertThat(generatedMail.getEmail(), is("email@email.com"));
+    assertThat(generatedMail.getLanguage(), is(LanguageCode.DE));
     List<TemplateDataDTO> templateData = generatedMail.getTemplateData();
     assertThat(templateData, hasSize(3));
     assertThat(templateData.get(0).getKey(), is("consultantName"));
