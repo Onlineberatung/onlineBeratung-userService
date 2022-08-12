@@ -47,7 +47,7 @@ public class CreateChatFacade {
    * @return the generated chat link URL (String)
    */
   public CreateChatResponseDTO createChatV1(ChatDTO chatDTO, Consultant consultant) {
-    return createChat(chatDTO, consultant, this::createChatAgencyRelation);
+    return createChat(chatDTO, consultant, this::saveChatAndChatAgencyRelation);
   }
 
   /**
@@ -58,16 +58,16 @@ public class CreateChatFacade {
    * @return the generated chat link URL (String)
    */
   public CreateChatResponseDTO createChatV2(ChatDTO chatDTO, Consultant consultant) {
-    return createChat(chatDTO, consultant, this::createChat);
+    return createChat(chatDTO, consultant, this::saveChat);
   }
 
   private CreateChatResponseDTO createChat(ChatDTO chatDTO, Consultant consultant,
-      BiFunction<Consultant, ChatDTO, Chat> createChat) {
+      BiFunction<Consultant, ChatDTO, Chat> saveChat) {
     Chat chat = null;
     String rcGroupId = null;
 
     try {
-      chat = createChat.apply(consultant, chatDTO);
+      chat = saveChat.apply(consultant, chatDTO);
       rcGroupId = createRocketChatGroupWithTechnicalUser(chatDTO, chat);
       chat.setGroupId(rcGroupId);
       chatService.saveChat(chat);
@@ -85,11 +85,11 @@ public class CreateChatFacade {
         chat.getConsultingTypeId()) : StringUtils.EMPTY;
   }
 
-  private Chat createChat(Consultant consultant, ChatDTO chatDTO) {
+  private Chat saveChat(Consultant consultant, ChatDTO chatDTO) {
     return chatService.saveChat(chatConverter.convertToEntity(chatDTO, consultant));
   }
 
-  private Chat createChatAgencyRelation(Consultant consultant, ChatDTO chatDTO) {
+  private Chat saveChatAndChatAgencyRelation(Consultant consultant, ChatDTO chatDTO) {
     if (isEmpty(consultant.getConsultantAgencies())) {
       throw new InternalServerErrorException(String
           .format("Consultant with id %s is not assigned to any agency", consultant.getId()));
