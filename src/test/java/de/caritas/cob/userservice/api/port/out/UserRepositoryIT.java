@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.config.JpaAuditingConfiguration;
 import de.caritas.cob.userservice.api.model.User;
 import java.time.LocalDateTime;
@@ -76,6 +77,13 @@ class UserRepositoryIT {
     assertNotNull(user.getCreateDate());
     assertNotNull(user.getUpdateDate());
     assertEquals(user.getCreateDate(), user.getUpdateDate());
+  }
+
+  @Test
+  void saveShouldWriteDefaultLanguage() {
+    givenPersistedUser();
+
+    assertEquals(LanguageCode.de, user.getLanguageCode());
   }
 
   private void givenPersistedUser() {

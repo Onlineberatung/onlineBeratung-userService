@@ -114,6 +114,8 @@ public class ConsultantUpdateServiceTenantAwareIT extends ConsultantUpdateServic
     consultant.setWalkThroughEnabled(true);
     consultant.setTeamConsultant(isTeamConsultant);
     consultant.setConsultantMobileTokens(Sets.newHashSet());
+    consultant.setLanguageCode(LanguageCode.de);
+
     return consultant;
   }
 

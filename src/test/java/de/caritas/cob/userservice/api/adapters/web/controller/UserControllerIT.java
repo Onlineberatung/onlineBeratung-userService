@@ -136,6 +136,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.actions.registry.ActionContainer;
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
@@ -234,7 +235,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.service.spi.ServiceException;
 import org.jeasy.random.EasyRandom;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -252,7 +252,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 
 @RunWith(SpringRunner.class)
@@ -270,7 +269,8 @@ public class UserControllerIT {
   private final Consultant TEAM_CONSULTANT =
       new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, "consultant", "first name", "last name",
           "consultant@cob.de", false, true, "", false, null, null, null, null, null,
-          null, null, null, true, true, true, true, null, null, ConsultantStatus.CREATED, false);
+          null, null, null, true, true, true, true, null, null, ConsultantStatus.CREATED, false,
+          LanguageCode.de);
   private final Set<String> ROLES_WITH_USER =
       new HashSet<>(Arrays.asList("dummyRoleA", UserRole.USER.getValue(), "dummyRoleB"));
   private final SessionDTO SESSION_DTO = new SessionDTO()
@@ -522,12 +522,6 @@ public class UserControllerIT {
     setInternalState(UserController.class, "log", logger);
     setInternalState(LogService.class, "LOGGER", logger);
     setInternalState(ApiResponseEntityExceptionHandler.class, "log", logger);
-  }
-
-  @After
-  public void tearDown() {
-    ReflectionTestUtils
-        .setField(userController, "multiTenancyEnabled", false);
   }
 
   /**
@@ -1336,39 +1330,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void getUserData_ForSingleTenantAdmin_Should_ReturnUserDataFromKeycloak_When_multiTenancyIsEnabled()
-      throws Exception {
-    ReflectionTestUtils
-        .setField(userController, "multiTenancyEnabled", true);
-    when(authenticatedUser.isSingleTenantAdmin()).thenReturn(true);
-    when(keycloakUserDataProvider.retrieveAuthenticatedUserData())
-        .thenReturn(new UserDataResponseDTO());
-
-    mvc.perform(get(PATH_USER_DATA)
-            .contentType(MediaType.APPLICATION_JSON)
-            .cookie(RC_TOKEN_COOKIE)
-            .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().is(HttpStatus.OK.value()));
-  }
-
-  @Test
-  public void getUserData_ForTenantSuperAdmin_Should_ReturnUserDataFromKeycloak_When_multiTenancyIsEnabled()
-      throws Exception {
-    ReflectionTestUtils
-        .setField(userController, "multiTenancyEnabled", true);
-    when(authenticatedUser.isTenantSuperAdmin()).thenReturn(true);
-    when(keycloakUserDataProvider.retrieveAuthenticatedUserData())
-        .thenReturn(new UserDataResponseDTO());
-
-    mvc.perform(get(PATH_USER_DATA)
-            .contentType(MediaType.APPLICATION_JSON)
-            .cookie(RC_TOKEN_COOKIE)
-            .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().is(HttpStatus.OK.value()));
-  }
-
-  @Test
-  public void getUserData_ForSingleTenantAdmin_Should_ReturnUserDataFromKeycloak_When_multiTenancyIsDisabled()
+  public void getUserData_ForSingleTenantAdmin_Should_ReturnUserDataFromKeycloak()
       throws Exception {
     when(authenticatedUser.isSingleTenantAdmin()).thenReturn(true);
     when(keycloakUserDataProvider.retrieveAuthenticatedUserData())
@@ -1382,7 +1344,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void getUserData_ForTenantSuperAdmin_Should_ReturnUserDataFromKeycloak_When_multiTenancyIsDisabled()
+  public void getUserData_ForTenantSuperAdmin_Should_ReturnUserDataFromKeycloak()
       throws Exception {
     when(authenticatedUser.isTenantSuperAdmin()).thenReturn(true);
     when(keycloakUserDataProvider.retrieveAuthenticatedUserData())

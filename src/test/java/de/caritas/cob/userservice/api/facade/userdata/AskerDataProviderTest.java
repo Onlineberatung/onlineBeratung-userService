@@ -19,6 +19,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
@@ -132,6 +133,7 @@ public class AskerDataProviderTest {
     when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.USER.getValue()));
     User user = mock(User.class);
     when(user.getEmail()).thenReturn("user@dummysuffix.de");
+    when(user.getLanguageCode()).thenReturn(LanguageCode.de);
     when(consultingTypeManager.getAllConsultingTypeIds())
         .thenReturn(IntStream.range(0, 22).boxed().collect(
             Collectors.toList()));
