@@ -3,7 +3,6 @@ package de.caritas.cob.userservice.api.service.session;
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.api.model.Session.RegistrationType.ANONYMOUS;
 import static de.caritas.cob.userservice.api.model.Session.RegistrationType.REGISTERED;
-import static de.caritas.cob.userservice.api.model.Session.SessionStatus.IN_PROGRESS;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_DTO_LIST;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_DTO_SUCHT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_ID;
@@ -71,8 +70,8 @@ import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
-import de.caritas.cob.userservice.api.testHelper.TestConstants;
 import de.caritas.cob.userservice.api.service.user.UserService;
+import de.caritas.cob.userservice.api.testHelper.TestConstants;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -98,7 +97,7 @@ class SessionServiceTest {
   private final Consultant CONSULTANT = new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, "consultant",
       "first name", "last name", "consultant@cob.de", false, false, null, false, null,
       null, null, null, null, nowInUtc(), null, null, true, true, true, true, null, null,
-      ConsultantStatus.CREATED, false);
+      ConsultantStatus.CREATED, false, LanguageCode.de);
   private final User USER = new User(USER_ID, null, "username", "name@domain.de", false);
   private final Session SESSION = TestConstants.SESSION;
 
@@ -797,7 +796,6 @@ class SessionServiceTest {
     return new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, "consultant",
         "first name", "last name", "consultant@cob.de", false, false, null, false, null,
         null, null, Set.of(agencies), null, nowInUtc(), null, null, true, true, true, true, null,
-        null,
-        ConsultantStatus.CREATED, false);
+        null, ConsultantStatus.CREATED, false, LanguageCode.de);
   }
 }

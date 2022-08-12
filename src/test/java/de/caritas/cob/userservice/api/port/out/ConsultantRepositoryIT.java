@@ -84,6 +84,13 @@ class ConsultantRepositoryIT {
   }
 
   @Test
+  void saveShouldWriteDefaultPreferredLanguageIndependentlyFromDefaultLanguageCapability() {
+    givenAnExistingConsultantSpeaking(LanguageCode.en);
+
+    assertEquals(LanguageCode.de, consultant.getLanguageCode());
+  }
+
+  @Test
   void saveShouldSaveConsultantWithDefaultLanguage() {
     givenAnExistingConsultantSpeaking();
 

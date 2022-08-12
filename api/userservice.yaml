@@ -2442,6 +2442,8 @@ components:
             description: each an ISO 639-1 code
             default: de
             example: de, en
+        preferredLanguage:
+          $ref: "#/components/schemas/LanguageCode"
         absenceMessage:
           type: string
           example: Bin mal weg...
@@ -2512,6 +2514,8 @@ components:
           uniqueItems: true
           items:
             $ref: '#/components/schemas/EmailToggle'
+        preferredLanguage:
+          $ref: '#/components/schemas/LanguageCode'
 
     UpdateConsultantDTO:
       type: object

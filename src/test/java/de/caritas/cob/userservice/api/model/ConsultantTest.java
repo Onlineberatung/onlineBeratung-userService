@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 
+import com.neovisionaries.i18n.LanguageCode;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,7 +17,8 @@ public class ConsultantTest {
   private static final String LASTNAME = "lastname";
   private static final Consultant CONSULTANT = new Consultant("yyy", "XXX", "consultant",
       FIRSTNAME, LASTNAME, "consultant@domain.de", false, false, null, false, null, 1L, null, null,
-      null, null, null, null, true, true, true, true, null, null, ConsultantStatus.CREATED, false);
+      null, null, null, null, true, true, true, true, null, null, ConsultantStatus.CREATED, false,
+      LanguageCode.de);
 
   @Test
   public void getFullName_Should_Return_FirstnameAndLastname() {
