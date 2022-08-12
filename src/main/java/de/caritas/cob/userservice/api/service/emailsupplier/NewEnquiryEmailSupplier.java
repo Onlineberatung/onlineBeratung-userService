@@ -7,6 +7,7 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
+import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
@@ -82,19 +83,15 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
   }
 
   private Function<ConsultantAgency, MailDTO> toEnquiryMailDTO(AgencyDTO agency) {
-    return consultantAgency -> buildMailDtoForNewEnquiryNotificationConsultant(
-        consultantAgency.getConsultant().getEmail(),
-        consultantAgency.getConsultant().getFullName(),
-        session.getPostcode(),
-        agency.getName()
+    return consultantAgency -> mailOf(
+        consultantAgency.getConsultant(), session.getPostcode(), agency.getName()
     );
   }
 
-  private MailDTO buildMailDtoForNewEnquiryNotificationConsultant(String email, String name,
-      String postCode, String agency) {
+  private MailDTO mailOf(Consultant consultant, String postCode, String agency) {
 
     var templateAttributes = new ArrayList<TemplateDataDTO>();
-    templateAttributes.add(new TemplateDataDTO().key("name").value(name));
+    templateAttributes.add(new TemplateDataDTO().key("name").value(consultant.getFullName()));
     templateAttributes.add(new TemplateDataDTO().key("plz").value(postCode));
     templateAttributes.add(new TemplateDataDTO().key("beratungsstelle").value(agency));
 
@@ -104,10 +101,14 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
       templateAttributes.addAll(tenantTemplateSupplier.getTemplateAttributes());
     }
 
+    var language = de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.fromValue(
+        consultant.getLanguageCode().toString()
+    );
+
     return new MailDTO()
         .template(TEMPLATE_NEW_ENQUIRY_NOTIFICATION)
-        .email(email)
-        //TODO: .language()
+        .email(consultant.getEmail())
+        .language(language)
         .templateData(templateAttributes);
   }
 
