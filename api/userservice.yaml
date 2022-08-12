@@ -1273,9 +1273,39 @@ paths:
     post:
       tags:
         - user-controller
-      summary: 'Create a new group chat [Authorization: Role: consultant with authority
+      summary: 'Create a new group chat with chat_agency relation so that all advice seekers from that agency can see this chat. [Authorization: Role: consultant with authority
         CREATE_NEW_CHAT]'
-      operationId: createChat
+      operationId: createChatV1
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/ChatDTO'
+        required: true
+      responses:
+        201:
+          description: CREATED - group chat was created successfully
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/CreateChatResponseDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
+        409:
+          description: CONFLICT - group chat with same name already existing
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+  /users/chat/v2/new:
+    post:
+      tags:
+        - user-controller
+      summary: 'Create a new group chat that will be visible to the user only by invitation [Authorization: Role: consultant with authority
+        CREATE_NEW_CHAT]'
+      operationId: createChatV2
       requestBody:
         content:
           'application/json':

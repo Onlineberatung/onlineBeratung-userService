@@ -1,0 +1,15 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+  <changeSet author="patric-dosch-vi" id="VIC-284-chat-consulting-type-optional">
+    <sqlFile
+      path="db/changelog/changeset/0032_chat_consulting_type_optional/chat-consulting-type-optional.sql"
+      stripComments="true"/>
+    <rollback>
+      <sqlFile
+        path="db/changelog/changeset/0032_chat_consulting_type_optional/chat-consulting-type-optional-rollback.sql"
+        stripComments="true"/>
+    </rollback>
+  </changeSet>
+</databaseChangeLog>

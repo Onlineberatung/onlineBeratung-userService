@@ -35,4 +35,5 @@
 	<include file="db/changelog/changeset/0029_session_gender_and_age/0029_changeSet.xml"/>
 	<include file="db/changelog/changeset/0030_session_counsellingrelation_and_topics/0030_changeSet.xml"/>
 	<include file="db/changelog/changeset/0031_add_preferred_language/0031_changeSet.xml"/>
+	<include file="db/changelog/changeset/0032_chat_consulting_type_optional/0032_changeSet.xml"/>
 </databaseChangeLog>
