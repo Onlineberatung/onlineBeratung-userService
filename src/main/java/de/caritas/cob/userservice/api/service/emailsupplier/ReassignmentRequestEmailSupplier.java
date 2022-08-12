@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.service.emailsupplier;
 
 import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.TEMPLATE_REASSIGN_REQUEST_NOTIFICATION;
 
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
@@ -15,6 +16,7 @@ import lombok.Builder;
 public class ReassignmentRequestEmailSupplier implements EmailSupplier {
 
   private final String receiverEmailAddress;
+  private final LanguageCode receiverLanguageCode;
   private final String receiverUsername;
   private final String applicationBaseUrl;
   private final TenantTemplateSupplier tenantTemplateSupplier;
@@ -40,8 +42,14 @@ public class ReassignmentRequestEmailSupplier implements EmailSupplier {
     return new MailDTO()
         .template(TEMPLATE_REASSIGN_REQUEST_NOTIFICATION)
         .email(receiverEmailAddress)
-        //TODO: .language()
+        .language(languageOf(receiverLanguageCode))
         .templateData(templateAttributes);
   }
 
+  private static de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode languageOf(
+      LanguageCode languageCode) {
+    return de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.fromValue(
+        languageCode.toString()
+    );
+  }
 }
