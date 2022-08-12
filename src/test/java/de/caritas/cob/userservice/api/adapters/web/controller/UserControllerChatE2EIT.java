@@ -206,7 +206,9 @@ class UserControllerChatE2EIT {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(VALID_CREATE_CHAT_BODY)
                 .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isCreated());
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("groupId", is("rcGroupId")))
+        .andExpect(jsonPath("chatLink").isNotEmpty());
   }
 
   @Test
@@ -224,7 +226,9 @@ class UserControllerChatE2EIT {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(VALID_CREATE_CHAT_BODY)
                 .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isCreated());
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("groupId", is("rcGroupId")))
+        .andExpect(jsonPath("chatLink").isEmpty());
   }
 
   @Test

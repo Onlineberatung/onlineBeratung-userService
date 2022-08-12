@@ -1,9 +1,7 @@
 package de.caritas.cob.userservice.api.facade;
 
-import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
-import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupResponseDTO;
@@ -17,12 +15,10 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInit
 import de.caritas.cob.userservice.api.helper.RocketChatRoomNameGenerator;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.Chat;
-import de.caritas.cob.userservice.api.model.Chat.ChatInterval;
 import de.caritas.cob.userservice.api.model.ChatAgency;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
-import java.time.LocalDateTime;
 import java.util.function.BiFunction;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +36,8 @@ public class CreateChatFacade {
   private final @NonNull RocketChatService rocketChatService;
   private final @NonNull UserHelper userHelper;
   private final @NonNull AgencyService agencyService;
+
+  private final @NonNull ChatConverter chatConverter;
 
   /**
    * Creates a chat in MariaDB, it's relation to the agency and Rocket.Chat-room.
@@ -60,7 +58,7 @@ public class CreateChatFacade {
    * @return the generated chat link URL (String)
    */
   public CreateChatResponseDTO createChatV2(ChatDTO chatDTO, Consultant consultant) {
-    return createChat(chatDTO, consultant, this::createChatRelation);
+    return createChat(chatDTO, consultant, this::createChat);
   }
 
   private CreateChatResponseDTO createChat(ChatDTO chatDTO, Consultant consultant,
@@ -87,8 +85,8 @@ public class CreateChatFacade {
         chat.getConsultingTypeId()) : StringUtils.EMPTY;
   }
 
-  private Chat createChatRelation(Consultant consultant, ChatDTO chatDTO) {
-    return chatService.saveChat(convertChatDTOtoChat(chatDTO, consultant));
+  private Chat createChat(Consultant consultant, ChatDTO chatDTO) {
+    return chatService.saveChat(chatConverter.convertToEntity(chatDTO, consultant));
   }
 
   private Chat createChatAgencyRelation(Consultant consultant, ChatDTO chatDTO) {
@@ -99,7 +97,7 @@ public class CreateChatFacade {
     Long agencyId = consultant.getConsultantAgencies().iterator().next().getAgencyId();
     AgencyDTO agency = this.agencyService.getAgency(agencyId);
 
-    Chat chat = chatService.saveChat(convertChatDTOtoChat(chatDTO, consultant, agency));
+    Chat chat = chatService.saveChat(chatConverter.convertToEntity(chatDTO, consultant, agency));
     chatService.saveChatAgencyRelation(new ChatAgency(chat, agencyId));
     return chat;
   }
@@ -137,31 +135,6 @@ public class CreateChatFacade {
           "Error while creating private group in Rocket.Chat for group chat: " + chatDTO
               .toString());
     }
-  }
-
-  private Chat convertChatDTOtoChat(ChatDTO chatDTO, Consultant consultant) {
-    return convertChatDTOtoChat(chatDTO, consultant, null);
-  }
-
-  private Chat convertChatDTOtoChat(ChatDTO chatDTO, Consultant consultant, AgencyDTO agencyDTO) {
-    LocalDateTime startDate = LocalDateTime.of(chatDTO.getStartDate(), chatDTO.getStartTime());
-
-    Chat.ChatBuilder builder = Chat.builder()
-        .topic(chatDTO.getTopic())
-        .chatOwner(consultant)
-        .initialStartDate(startDate)
-        .startDate(startDate)
-        .duration(chatDTO.getDuration())
-        .repetitive(isTrue(chatDTO.isRepetitive()))
-        // Note that the repetition interval can only be weekly atm.
-        .chatInterval(isTrue(chatDTO.isRepetitive()) ? ChatInterval.WEEKLY : null)
-        .updateDate(nowInUtc());
-
-    if (nonNull(agencyDTO)) {
-      builder.consultingTypeId(agencyDTO.getConsultingType());
-    }
-
-    return builder.build();
   }
 
   private void doRollback(Chat chat, String rcGroupId) {

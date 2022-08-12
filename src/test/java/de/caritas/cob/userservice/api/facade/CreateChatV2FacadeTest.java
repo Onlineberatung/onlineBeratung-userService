@@ -42,6 +42,7 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.slf4j.Logger;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -77,6 +78,9 @@ public class CreateChatV2FacadeTest {
 
   @Mock
   private GroupDTO groupDTO;
+
+  @Spy
+  private ChatConverter chatConverter;
 
   @Mock
   private Logger logger;
