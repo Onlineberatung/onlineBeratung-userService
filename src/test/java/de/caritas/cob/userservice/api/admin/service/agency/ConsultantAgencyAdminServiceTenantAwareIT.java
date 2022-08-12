@@ -268,6 +268,8 @@ public class ConsultantAgencyAdminServiceTenantAwareIT {
     consultant.setWalkThroughEnabled(true);
     consultant.setTeamConsultant(isTeamConsultant);
     consultant.setConsultantMobileTokens(Sets.newHashSet());
+    consultant.setLanguageCode(LanguageCode.de);
+
     return consultant;
   }
 

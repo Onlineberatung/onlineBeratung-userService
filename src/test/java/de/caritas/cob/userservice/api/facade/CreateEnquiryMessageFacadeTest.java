@@ -47,6 +47,7 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupResponseDTO;
@@ -262,7 +263,7 @@ public class CreateEnquiryMessageFacadeTest {
     consultant.setId(USER_ID);
     consultant.setRocketChatId(RC_USER_ID);
     this.user = new User(USER_ID, null, USERNAME, EMAIL, RC_USER_ID, IS_LANGUAGE_FORMAL, null,
-        null, null, null, null, null, null, null, true);
+        null, null, null, null, null, null, null, true, LanguageCode.de);
     this.extendedConsultingTypeResponseDTO = new ExtendedConsultingTypeResponseDTO();
     this.extendedConsultingTypeResponseDTO.setWelcomeMessage(new WelcomeMessageDTO());
     this.userInfoResponseDTO = new UserInfoResponseDTO();

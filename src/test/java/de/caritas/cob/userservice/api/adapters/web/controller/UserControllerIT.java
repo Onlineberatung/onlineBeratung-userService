@@ -135,6 +135,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.actions.registry.ActionContainer;
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
@@ -267,7 +268,8 @@ public class UserControllerIT {
   private final Consultant TEAM_CONSULTANT =
       new Consultant(CONSULTANT_ID, ROCKETCHAT_ID, "consultant", "first name", "last name",
           "consultant@cob.de", false, true, "", false, null, null, null, null, null,
-          null, null, null, true, true, true, true, null, null, ConsultantStatus.CREATED, false);
+          null, null, null, true, true, true, true, null, null, ConsultantStatus.CREATED, false,
+          LanguageCode.de);
   private final Set<String> ROLES_WITH_USER =
       new HashSet<>(Arrays.asList("dummyRoleA", UserRole.USER.getValue(), "dummyRoleB"));
   private final SessionDTO SESSION_DTO = new SessionDTO()

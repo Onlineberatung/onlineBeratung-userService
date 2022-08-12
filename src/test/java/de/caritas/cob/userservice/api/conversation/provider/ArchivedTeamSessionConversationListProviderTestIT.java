@@ -11,6 +11,7 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.util.Lists;
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
@@ -193,6 +194,8 @@ public class ArchivedTeamSessionConversationListProviderTestIT {
     consultant.setNotifyNewChatMessageFromAdviceSeeker(true);
     consultant.setNotifyNewFeedbackMessageFromAdviceSeeker(true);
     consultant.setWalkThroughEnabled(true);
+    consultant.setLanguageCode(LanguageCode.de);
+
     return consultant;
   }
 

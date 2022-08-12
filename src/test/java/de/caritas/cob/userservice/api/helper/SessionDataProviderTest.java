@@ -4,7 +4,6 @@ import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc
 import static de.caritas.cob.userservice.api.model.Session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.ADDICTIVE_DRUGS_VALUE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGE;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGE_VALUE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
@@ -13,7 +12,6 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.EMAIL;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.GENDER_VALUE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.IS_MONITORING;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.IS_TEAM_SESSION;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RELATION_VALUE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.ROCKETCHAT_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.STATE_VALUE;
@@ -31,6 +29,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDataDTO;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.Consultant;
@@ -67,7 +66,7 @@ public class SessionDataProviderTest {
   private final Consultant CONSULTANT = new Consultant(CONSULTANT_ID, USERNAME, ROCKETCHAT_ID,
       "first name", "last name", "consultant@cob.de", false, false, null, false, null,
       null, null, null, null, null, null, null, true, true, true, true, null, null,
-      ConsultantStatus.CREATED, false);
+      ConsultantStatus.CREATED, false, LanguageCode.de);
   private final Session INITIALIZED_SESSION_SUCHT =
       Session.builder()
           .id(1L)

@@ -4,6 +4,7 @@ import static de.caritas.cob.userservice.api.config.auth.UserRole.CONSULTANT;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
@@ -151,6 +152,7 @@ public class ConsultantCreatorService {
         .tenantId(consultantCreationInput.getTenantId())
         .status(ConsultantStatus.IN_PROGRESS)
         .walkThroughEnabled(true)
+        .languageCode(LanguageCode.de)
         .build();
   }
 
