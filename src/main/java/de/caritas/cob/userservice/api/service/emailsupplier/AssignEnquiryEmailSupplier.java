@@ -6,6 +6,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.service.ConsultantService;
@@ -83,11 +84,11 @@ public class AssignEnquiryEmailSupplier implements EmailSupplier {
 
     Optional<Consultant> senderConsultant = consultantService.getConsultant(senderUserId);
     if (senderConsultant.isPresent()) {
-      return singletonList(buildMailDtoForAssignEnquiryNotification(
-          receiverConsultant.getEmail(),
-          senderConsultant.get().getFullName(),
-          receiverConsultant.getFullName(),
-          new UsernameTranscoder().decodeUsername(askerUserName)));
+      var nameUser = new UsernameTranscoder().decodeUsername(askerUserName);
+      var mailDTO = mailOf(receiverConsultant.getEmail(), senderConsultant.get().getFullName(),
+          receiverConsultant.getFullName(), nameUser, receiverConsultant.getLanguageCode());
+
+      return singletonList(mailDTO);
     }
     log.error(
         "EmailNotificationFacade error: Error while sending assign message notification: Sender "
@@ -97,8 +98,8 @@ public class AssignEnquiryEmailSupplier implements EmailSupplier {
     return emptyList();
   }
 
-  private MailDTO buildMailDtoForAssignEnquiryNotification(String email, String nameSender,
-      String nameRecipient, String nameUser) {
+  private MailDTO mailOf(String email, String nameSender, String nameRecipient, String nameUser,
+      LanguageCode languageCode) {
     var templateAttributes = new ArrayList<TemplateDataDTO>();
     templateAttributes.add(new TemplateDataDTO().key("name_sender").value(nameSender));
     templateAttributes.add(new TemplateDataDTO().key("name_recipient").value(nameRecipient));
@@ -110,10 +111,13 @@ public class AssignEnquiryEmailSupplier implements EmailSupplier {
       templateAttributes.addAll(tenantTemplateSupplier.getTemplateAttributes());
     }
 
+    var language = de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.fromValue(
+        languageCode.toString());
+
     return new MailDTO()
         .template(TEMPLATE_ASSIGN_ENQUIRY_NOTIFICATION)
         .email(email)
-        //TODO: .language()
+        .language(language)
         .templateData(templateAttributes);
   }
 
