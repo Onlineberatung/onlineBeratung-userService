@@ -130,7 +130,6 @@ import org.springframework.web.util.UriTemplateHandler;
 @AutoConfigureMockMvc
 @ActiveProfiles("testing")
 @AutoConfigureTestDatabase
-@TestPropertySource(properties = "spring.profiles.active=testing")
 @TestPropertySource(properties = "feature.topics.enabled=true")
 class UserControllerE2EIT {
 
@@ -892,6 +891,23 @@ class UserControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  void patchUserDataShouldRespondWithBadRequestOnUnknownPreferredLanguage() throws Exception {
+    givenAValidConsultant();
+    var patchDtoMap = givenAnUnknownPreferredLanguagePatchDto();
+
+    mockMvc.perform(
+        patch("/users/data")
+            .cookie(CSRF_COOKIE)
+            .cookie(RC_TOKEN_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(patchDtoMap))
+            .accept(MediaType.APPLICATION_JSON)
+    ).andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   void patchUserDataShouldRespondWithNoContentOnEmailToggleAndChangeDbConsultant()
       throws Exception {
     givenAValidConsultant();
@@ -1313,7 +1329,6 @@ class UserControllerE2EIT {
   private void givenAValidRocketChatSubscriptionsResponse() {
     var subscriptionsGetDTO = new SubscriptionsGetDTO();
     subscriptionsGetDTO.setUpdate(new SubscriptionsUpdateDTO[]{});
-    var urlSuffix = "/subscriptions.get";
     when(rocketChatRestTemplate.exchange(
         Mockito.anyString(), eq(HttpMethod.GET),
         any(HttpEntity.class), eq(SubscriptionsGetDTO.class))
@@ -1358,8 +1373,9 @@ class UserControllerE2EIT {
     when(authenticatedUser.getGrantedAuthorities()).thenReturn(Set.of("anAuthority"));
   }
 
+  @SuppressWarnings("SameParameterValue")
   private void givenAValidConsultantWithId(String id) {
-    consultant = consultantRepository.findById(id).get();
+    consultant = consultantRepository.findById(id).orElseThrow();
     when(authenticatedUser.getUserId()).thenReturn(consultant.getId());
     when(authenticatedUser.isAdviceSeeker()).thenReturn(false);
     when(authenticatedUser.isConsultant()).thenReturn(true);
@@ -1448,6 +1464,13 @@ class UserControllerE2EIT {
   private HashMap<String, Object> givenAPartialPatchDto() {
     var patchDtoAsMap = new HashMap<String, Object>(1);
     patchDtoAsMap.put("displayName", RandomStringUtils.randomAlphabetic(4));
+
+    return patchDtoAsMap;
+  }
+
+  private HashMap<String, Object> givenAnUnknownPreferredLanguagePatchDto() {
+    var patchDtoAsMap = new HashMap<String, Object>(1);
+    patchDtoAsMap.put("preferredLanguage", "xx");
 
     return patchDtoAsMap;
   }
