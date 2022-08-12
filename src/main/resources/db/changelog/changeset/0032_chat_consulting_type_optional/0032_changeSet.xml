@@ -4,11 +4,11 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
   <changeSet author="patric-dosch-vi" id="VIC-284-chat-consulting-type-optional">
     <sqlFile
-      path="db/changelog/changeset/0031_chat_consulting_type_optional/chat-consulting-type-optional.sql"
+      path="db/changelog/changeset/0032_chat_consulting_type_optional/chat-consulting-type-optional.sql"
       stripComments="true"/>
     <rollback>
       <sqlFile
-        path="db/changelog/changeset/0031_chat_consulting_type_optional/chat-consulting-type-optional-rollback.sql"
+        path="db/changelog/changeset/0032_chat_consulting_type_optional/chat-consulting-type-optional-rollback.sql"
         stripComments="true"/>
     </rollback>
   </changeSet>
