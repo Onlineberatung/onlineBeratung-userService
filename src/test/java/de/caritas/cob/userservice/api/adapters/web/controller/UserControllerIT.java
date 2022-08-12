@@ -34,6 +34,7 @@ import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_T
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_NEGATIVE_OFFSET;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_USER_DATA;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_CHAT_NEW;
+import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_CHAT_NEW_V2;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_REGISTER_NEW_CONSULTING_TYPE;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_REGISTER_USER;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_ADD_MOBILE_TOKEN;
@@ -1988,7 +1989,7 @@ public class UserControllerIT {
         .thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant())
         .thenReturn(TEAM_CONSULTANT);
-    when(createChatFacade.createChat(Mockito.any(), Mockito.any()))
+    when(createChatFacade.createChatV1(Mockito.any(), Mockito.any()))
         .thenThrow(new InternalServerErrorException(""));
 
     mvc.perform(post(PATH_POST_CHAT_NEW)
@@ -2005,13 +2006,60 @@ public class UserControllerIT {
         .thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant())
         .thenReturn(TEAM_CONSULTANT);
-    when(createChatFacade.createChat(Mockito.any(), Mockito.any()))
+    when(createChatFacade.createChatV1(Mockito.any(), Mockito.any()))
         .thenReturn(CREATE_CHAT_RESPONSE_DTO);
 
     mvc.perform(post(PATH_POST_CHAT_NEW)
-        .content(VALID_CREATE_CHAT_BODY)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .content(VALID_CREATE_CHAT_BODY)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().is(HttpStatus.CREATED.value()));
+  }
+
+  @Test
+  public void createChatV2_Should_ReturnBadRequest_WhenQueryParamsAreInvalid() throws Exception {
+
+    mvc.perform(post(PATH_POST_CHAT_NEW_V2)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
+    verifyNoMoreInteractions(chatService);
+    verifyNoMoreInteractions(accountProvider);
+  }
+
+  @Test
+  public void createChatV2_Should_ReturnInternalServerErrorAndLogError_When_ChatCouldNotBeCreated()
+      throws Exception {
+
+    when(authenticatedUser.getUserId())
+        .thenReturn(CONSULTANT_ID);
+    when(accountProvider.retrieveValidatedConsultant())
+        .thenReturn(TEAM_CONSULTANT);
+    when(createChatFacade.createChatV2(Mockito.any(), Mockito.any()))
+        .thenThrow(new InternalServerErrorException(""));
+
+    mvc.perform(post(PATH_POST_CHAT_NEW_V2)
+            .content(VALID_CREATE_CHAT_BODY)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
+  }
+
+  @Test
+  public void createChatV2_Should_ReturnCreated_When_ChatWasCreated() throws Exception {
+
+    when(authenticatedUser.getUserId())
+        .thenReturn(CONSULTANT_ID);
+    when(accountProvider.retrieveValidatedConsultant())
+        .thenReturn(TEAM_CONSULTANT);
+    when(createChatFacade.createChatV2(Mockito.any(), Mockito.any()))
+        .thenReturn(CREATE_CHAT_RESPONSE_DTO);
+
+    mvc.perform(post(PATH_POST_CHAT_NEW_V2)
+            .content(VALID_CREATE_CHAT_BODY)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.CREATED.value()));
   }
 
@@ -2022,8 +2070,8 @@ public class UserControllerIT {
   public void startChat_Should_ReturnBadRequest_WhenPathParamsAreInvalid() throws Exception {
 
     mvc.perform(put(PATH_PUT_CHAT_START_WITH_INVALID_PATH_PARAMS)
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
 
     verifyNoMoreInteractions(chatService);
