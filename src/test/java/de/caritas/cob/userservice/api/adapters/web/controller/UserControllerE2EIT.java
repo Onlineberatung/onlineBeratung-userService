@@ -20,6 +20,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.endsWith;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -99,8 +100,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.admin.client.token.TokenManager;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
@@ -228,6 +231,7 @@ class UserControllerE2EIT {
   private PasswordDTO passwordDto;
   private DeleteUserAccountDTO deleteUserAccountDto;
   private UserInfoResponseDTO userInfoResponse;
+  private UserResource userResource;
 
   @AfterEach
   void reset() {
@@ -267,6 +271,7 @@ class UserControllerE2EIT {
     deleteUserAccountDto = null;
     userInfoResponse = null;
     identityConfig.setDisplayNameAllowedForConsultants(false);
+    userResource = null;
   }
 
   @Test
@@ -711,6 +716,7 @@ class UserControllerE2EIT {
   void patchUserDataShouldSaveAdviceSeekerAndRespondWithNoContent() throws Exception {
     givenAValidUser();
     givenAFullPatchDto();
+    givenAValidKeycloakUpdateLocaleResponse(user.getUserId());
 
     mockMvc.perform(
         patch("/users/data")
@@ -726,6 +732,11 @@ class UserControllerE2EIT {
     assertEquals(patchUserDTO.getEncourage2fa(), savedUser.getEncourage2fa());
     assertEquals(patchUserDTO.getPreferredLanguage().getValue(),
         savedUser.getLanguageCode().toString());
+
+    var userRepCaptor = ArgumentCaptor.forClass(UserRepresentation.class);
+    verify(userResource).update(userRepCaptor.capture());
+    var locale = userRepCaptor.getValue().getAttributes().get("locale");
+    assertEquals(patchUserDTO.getPreferredLanguage().toString(), locale.get(0));
   }
 
   @Test
@@ -734,6 +745,7 @@ class UserControllerE2EIT {
     givenAValidConsultant();
     givenAFullPatchDto();
     givenAValidRocketChatUpdateUserResponse();
+    givenAValidKeycloakUpdateLocaleResponse(consultant.getId());
 
     mockMvc.perform(
         patch("/users/data")
@@ -751,6 +763,11 @@ class UserControllerE2EIT {
     assertEquals(patchUserDTO.getEncourage2fa(), savedConsultant.getEncourage2fa());
     assertEquals(patchUserDTO.getPreferredLanguage().toString(),
         savedConsultant.getLanguageCode().toString());
+
+    var userRepCaptor = ArgumentCaptor.forClass(UserRepresentation.class);
+    verify(userResource).update(userRepCaptor.capture());
+    var locale = userRepCaptor.getValue().getAttributes().get("locale");
+    assertEquals(patchUserDTO.getPreferredLanguage().toString(), locale.get(0));
 
     var urlSuffix = "/api/v1/users.update";
     verify(rocketChatRestTemplate).postForEntity(
@@ -770,6 +787,7 @@ class UserControllerE2EIT {
     givenAValidConsultant();
     givenAFullPatchDto(false);
     givenAValidRocketChatUpdateUserResponse();
+    givenAValidKeycloakUpdateLocaleResponse(consultant.getId());
 
     mockMvc.perform(
         patch("/users/data")
@@ -784,6 +802,11 @@ class UserControllerE2EIT {
     var savedConsultant = consultantRepository.findById(consultant.getId());
     assertTrue(savedConsultant.isPresent());
     assertEquals(false, savedConsultant.get().getEncourage2fa());
+
+    var userRepCaptor = ArgumentCaptor.forClass(UserRepresentation.class);
+    verify(userResource).update(userRepCaptor.capture());
+    var locale = userRepCaptor.getValue().getAttributes().get("locale");
+    assertEquals(patchUserDTO.getPreferredLanguage().toString(), locale.get(0));
   }
 
   @Test
@@ -798,6 +821,8 @@ class UserControllerE2EIT {
 
     givenAFullPatchDto(false);
     givenAValidRocketChatUpdateUserResponse();
+    givenAValidKeycloakUpdateLocaleResponse(consultant.getId());
+
     mockMvc.perform(
         patch("/users/data")
             .cookie(CSRF_COOKIE)
@@ -812,6 +837,11 @@ class UserControllerE2EIT {
     assertEquals(false, savedConsultant.getEncourage2fa());
     assertEquals(patchUserDTO.getPreferredLanguage().toString(),
         savedConsultant.getLanguageCode().toString());
+
+    var userRepCaptor = ArgumentCaptor.forClass(UserRepresentation.class);
+    verify(userResource).update(userRepCaptor.capture());
+    var locale = userRepCaptor.getValue().getAttributes().get("locale");
+    assertEquals(patchUserDTO.getPreferredLanguage().toString(), locale.get(0));
 
     givenAFullPatchDto(true);
     mockMvc.perform(
@@ -828,6 +858,10 @@ class UserControllerE2EIT {
     assertEquals(true, savedConsultant.getEncourage2fa());
     assertEquals(patchUserDTO.getPreferredLanguage().toString(),
         savedConsultant.getLanguageCode().toString());
+
+    verify(userResource, times(2)).update(userRepCaptor.capture());
+    locale = userRepCaptor.getValue().getAttributes().get("locale");
+    assertEquals(patchUserDTO.getPreferredLanguage().toString(), locale.get(0));
   }
 
   @Test
@@ -1233,6 +1267,16 @@ class UserControllerE2EIT {
     when(restTemplate.postForEntity(
         endsWith(urlSuffix), any(HttpEntity.class), eq(KeycloakLoginResponseDTO.class)
     )).thenReturn(ResponseEntity.ok().body(loginResponse));
+  }
+
+  private void givenAValidKeycloakUpdateLocaleResponse(String id) {
+    var usersResource = mock(UsersResource.class);
+    userResource = mock(UserResource.class);
+    when(usersResource.get(id)).thenReturn(userResource);
+
+    var realmResource = mock(RealmResource.class);
+    when(realmResource.users()).thenReturn(usersResource);
+    when(keycloak.realm(anyString())).thenReturn(realmResource);
   }
 
   private void givenAnInvalidKeycloakLoginResponseFailingPassword() {

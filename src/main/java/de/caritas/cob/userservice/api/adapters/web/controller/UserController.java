@@ -454,6 +454,9 @@ public class UserController implements UsersApi {
     );
 
     accountManager.patchUser(patchMap).orElseThrow();
+    userDtoMapper
+        .preferredLanguageOf(patchUserDTO)
+        .ifPresent(lang -> identityManager.changeLanguage(authenticatedUser.getUserId(), lang));
 
     return ResponseEntity.noContent().build();
   }

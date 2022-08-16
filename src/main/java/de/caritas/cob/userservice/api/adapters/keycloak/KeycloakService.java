@@ -123,6 +123,16 @@ public class KeycloakService implements IdentityClient {
     return true;
   }
 
+  public void changeLanguage(final String userId, final String locale) {
+    var user = new UserRepresentation()
+        .singleAttribute("locale", locale);
+
+    keycloakClient
+        .getUsersResource()
+        .get(userId)
+        .update(user);
+  }
+
   /**
    * Performs a Keycloak login and returns the Keycloak {@link KeycloakLoginResponseDTO} on
    * success.
