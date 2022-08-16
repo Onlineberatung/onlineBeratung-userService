@@ -366,6 +366,26 @@ public class KeycloakServiceTest {
   }
 
   @Test
+  public void createKeycloakUser_Should_createUserWithDefaultLocale() {
+    var userDTO = easyRandom.nextObject(UserDTO.class);
+    var usersResource = mock(UsersResource.class);
+    var response = mock(Response.class);
+    when(response.getStatus()).thenReturn(HttpStatus.CREATED.value());
+    when(usersResource.create(any())).thenReturn(response);
+    when(keycloakClient.getUsersResource()).thenReturn(usersResource);
+
+    var keycloakUser = keycloakService.createKeycloakUser(userDTO);
+
+    assertThat(keycloakUser.getStatus(), is(HttpStatus.CREATED));
+
+    var argumentCaptor = ArgumentCaptor.forClass(UserRepresentation.class);
+    verify(usersResource).create(argumentCaptor.capture());
+
+    var locales = argumentCaptor.getValue().getAttributes().get("locale");
+    assertEquals("de", locales.get(0));
+  }
+
+  @Test
   public void createKeycloakUser_Should_throwExpectedStatusException_When_keycloakResponseHasEmailErrorMessage() {
     var emailError = givenADuplicatedEmailErrorMessage();
     UserDTO userDTO = new EasyRandom().nextObject(UserDTO.class);
