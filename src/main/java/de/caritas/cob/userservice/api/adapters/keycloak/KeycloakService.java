@@ -124,8 +124,7 @@ public class KeycloakService implements IdentityClient {
   }
 
   public void changeLanguage(final String userId, final String locale) {
-    var user = new UserRepresentation()
-        .singleAttribute("locale", locale);
+    var user = keycloakMapper.userRepresentationOf(locale);
 
     keycloakClient
         .getUsersResource()
