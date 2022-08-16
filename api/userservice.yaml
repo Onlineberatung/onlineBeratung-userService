@@ -1497,6 +1497,31 @@ paths:
                 $ref: '#/components/schemas/ChatInfoResponseDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
+        404:
+          description: NOT FOUND - Chat not found
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+  /users/chat/{chatId}/assign:
+    put:
+      tags:
+        - user-controller
+      summary: 'Assign the user to the given chat [Authorization: Role: consultant or user]'
+      operationId: assignChat
+      parameters:
+        - name: chatId
+          in: path
+          description: Chat Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK - successful operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
         401:
           description: UNAUTHORIZED - no/invalid Keycloak token
         403:

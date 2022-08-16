@@ -55,11 +55,13 @@ import de.caritas.cob.userservice.api.helper.CustomLocalDateTime;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.ChatAgency;
+import de.caritas.cob.userservice.api.model.ChatUser;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.model.UserAgency;
 import de.caritas.cob.userservice.api.port.out.ChatAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.ChatRepository;
+import de.caritas.cob.userservice.api.port.out.ChatUserRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.UserAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
@@ -129,6 +131,9 @@ class UserControllerChatE2EIT {
 
   @Autowired
   private ChatAgencyRepository chatAgencyRepository;
+
+  @Autowired
+  private ChatUserRepository chatUserRepository;
 
   @Autowired
   private UserAgencyRepository userAgencyRepository;
@@ -446,6 +451,45 @@ class UserControllerChatE2EIT {
     verify(rocketChatRestTemplate).exchange(
         endsWith(urlSuffix), eq(HttpMethod.GET), any(HttpEntity.class), eq(RoomResponse.class)
     );
+  }
+
+  @Test
+  void assignChat_Should_ReturnUnauthorized_When_UserIsMissing() throws Exception {
+    mockMvc.perform(put("/users/chat/{chatId}/assign", 999)
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
+  void assignChat_Should_ReturnNotFound_When_ChatIsNotFound() throws Exception {
+    givenAValidUser(true);
+
+    mockMvc.perform(put("/users/chat/{chatId}/assign", 999)
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
+  void assignChat_Should_ReturnOK() throws Exception {
+    givenAValidUser(true);
+    givenAValidConsultant();
+    givenAValidChat(false);
+
+    mockMvc.perform(put("/users/chat/{chatId}/assign", chat.getId())
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    ChatUser storedChatUser = chatUserRepository.findByChatAndUser(chat, user).orElseThrow();
+    assertEquals(storedChatUser.getChat(), chat);
+    assertEquals(storedChatUser.getUser(), user);
   }
 
   @Test
