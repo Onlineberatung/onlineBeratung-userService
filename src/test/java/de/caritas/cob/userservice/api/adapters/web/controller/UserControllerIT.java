@@ -183,6 +183,7 @@ import de.caritas.cob.userservice.api.facade.GetChatMembersFacade;
 import de.caritas.cob.userservice.api.facade.JoinAndLeaveChatFacade;
 import de.caritas.cob.userservice.api.facade.StartChatFacade;
 import de.caritas.cob.userservice.api.facade.StopChatFacade;
+import de.caritas.cob.userservice.api.facade.UsersStatisticsFacade;
 import de.caritas.cob.userservice.api.facade.assignsession.AssignEnquiryFacade;
 import de.caritas.cob.userservice.api.facade.assignsession.AssignSessionFacade;
 import de.caritas.cob.userservice.api.facade.sessionlist.SessionListFacade;
@@ -501,6 +502,9 @@ public class UserControllerIT {
   @MockBean
   @SuppressWarnings("unused")
   private KeycloakUserDataProvider keycloakUserDataProvider;
+
+  @MockBean
+  private UsersStatisticsFacade usersStatisticsFacade;
 
   @MockBean
   @SuppressWarnings("unused")
