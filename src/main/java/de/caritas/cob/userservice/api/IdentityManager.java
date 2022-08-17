@@ -51,6 +51,11 @@ public class IdentityManager implements IdentityManaging {
   }
 
   @Override
+  public void changeLanguage(String userId, String language) {
+    identityClient.changeLanguage(userId, language);
+  }
+
+  @Override
   public void deleteOneTimePassword(String username) {
     identityClient.deleteOtpCredential(username);
   }
