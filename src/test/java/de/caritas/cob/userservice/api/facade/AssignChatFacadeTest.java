@@ -37,7 +37,7 @@ class AssignChatFacadeTest {
   private UserService userService;
 
   @Test
-  void joinChat_Should_ThrowNotFoundException_WhenChatDoesNotExist() {
+  void assignChat_Should_ThrowNotFoundException_WhenChatDoesNotExist() {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.empty());
 
     NotFoundException exception = assertThrows(NotFoundException.class,
@@ -49,7 +49,7 @@ class AssignChatFacadeTest {
   }
 
   @Test
-  void joinChat_Should_ThrowNotFoundException_WhenUserDoesNotExist() {
+  void assignChat_Should_ThrowNotFoundException_WhenUserDoesNotExist() {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(
@@ -64,7 +64,7 @@ class AssignChatFacadeTest {
   }
 
   @Test
-  void joinChat_Should_AddUserToChat() {
+  void assignChat_Should_AddUserToChat() {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
     when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(
         Optional.of(USER));
