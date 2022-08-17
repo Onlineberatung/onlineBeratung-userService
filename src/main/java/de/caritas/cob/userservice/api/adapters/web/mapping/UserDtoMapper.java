@@ -73,6 +73,16 @@ public class UserDtoMapper {
     return null;
   }
 
+  public Optional<String> preferredLanguageOf(PatchUserDTO patchUserDTO) {
+    if (nonNull(patchUserDTO.getPreferredLanguage())) {
+      var preferredLanguage = patchUserDTO.getPreferredLanguage().toString();
+
+      return Optional.of(preferredLanguage);
+    }
+
+    return Optional.empty();
+  }
+
   public Optional<Map<String, Object>> mapOf(PatchUserDTO patchUserDTO, AuthenticatedUser user) {
     if (isNull(patchUserDTO.getEncourage2fa()) && isNull(patchUserDTO.getDisplayName()) && isNull(
         patchUserDTO.getWalkThroughEnabled()) && isNull(patchUserDTO.getEmailToggles()) && isNull(

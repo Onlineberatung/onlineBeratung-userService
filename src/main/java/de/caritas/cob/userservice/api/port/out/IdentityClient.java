@@ -14,6 +14,8 @@ public interface IdentityClient {
 
   boolean changePassword(final String userId, final String password);
 
+  void changeLanguage(final String userId, final String language);
+
   KeycloakLoginResponseDTO loginUser(final String userName, final String password);
 
   boolean logoutUser(final String refreshToken);
