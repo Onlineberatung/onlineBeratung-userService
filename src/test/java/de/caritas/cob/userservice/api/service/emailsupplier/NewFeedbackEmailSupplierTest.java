@@ -20,6 +20,7 @@ import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
@@ -145,6 +146,8 @@ public class NewFeedbackEmailSupplierTest {
     MailDTO generatedMail = generatedMails.get(0);
     assertThat(generatedMail.getTemplate(), is(TEMPLATE_NEW_FEEDBACK_MESSAGE_NOTIFICATION));
     assertThat(generatedMail.getEmail(), is("email@email.com"));
+    assertThat(generatedMail.getLanguage(), is(
+        de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.DE));
     List<TemplateDataDTO> templateData = generatedMail.getTemplateData();
     assertThat(templateData, hasSize(4));
     assertThat(templateData.get(0).getKey(), is("name_sender"));
@@ -168,6 +171,7 @@ public class NewFeedbackEmailSupplierTest {
     var consultant = mock(Consultant.class);
     when(consultant.getId()).thenReturn(UUID.randomUUID().toString());
     when(consultant.getEmail()).thenReturn("a@b.com");
+    when(consultant.getLanguageCode()).thenReturn(LanguageCode.de);
     when(consultant.isAbsent()).thenReturn(false);
     when(consultant.getRocketChatId()).thenReturn(RandomStringUtils.randomAlphanumeric(17));
     when(consultant.getNotifyNewFeedbackMessageFromAdviceSeeker()).thenReturn(true);
@@ -228,6 +232,8 @@ public class NewFeedbackEmailSupplierTest {
     MailDTO generatedMail = generatedMails.get(0);
     assertThat(generatedMail.getTemplate(), is(TEMPLATE_NEW_FEEDBACK_MESSAGE_NOTIFICATION));
     assertThat(generatedMail.getEmail(), is("email@email.com"));
+    assertThat(generatedMail.getLanguage(), is(
+        de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.DE));
     List<TemplateDataDTO> templateData = generatedMail.getTemplateData();
     assertThat(templateData, hasSize(4));
     assertThat(templateData.get(0).getKey(), is("name_sender"));

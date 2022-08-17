@@ -698,4 +698,8 @@ public class SessionService {
         consultant.get(), user.get(), consultingTypeId);
     return session.orElseThrow().getGroupId();
   }
+
+  public List<Session> findAllSessions() {
+    return Lists.newArrayList(sessionRepository.findAll());
+  }
 }

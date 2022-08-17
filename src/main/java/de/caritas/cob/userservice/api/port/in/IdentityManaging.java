@@ -16,6 +16,8 @@ public interface IdentityManaging {
 
   boolean changePassword(String userId, String password);
 
+  void changeLanguage(String userId, String locale);
+
   void deleteOneTimePassword(String username);
 
   OtpInfoDTO getOtpCredential(String username);

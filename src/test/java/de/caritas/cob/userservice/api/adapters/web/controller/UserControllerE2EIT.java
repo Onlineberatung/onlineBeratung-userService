@@ -5,7 +5,9 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENT
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS_TECHNICAL_A;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_TOKEN;
 import static java.util.Objects.nonNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -20,6 +22,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.endsWith;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -48,6 +51,8 @@ import de.caritas.cob.userservice.api.adapters.web.dto.EmailType;
 import de.caritas.cob.userservice.api.adapters.web.dto.PasswordDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PatchUserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ReassignmentNotificationDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.RegistrationStatisticsListResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.RegistrationStatisticsResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
@@ -89,18 +94,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.servlet.http.Cookie;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.assertj.core.util.Lists;
+import org.hamcrest.Matchers;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.admin.client.token.TokenManager;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
@@ -122,6 +132,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplateHandler;
@@ -130,7 +141,6 @@ import org.springframework.web.util.UriTemplateHandler;
 @AutoConfigureMockMvc
 @ActiveProfiles("testing")
 @AutoConfigureTestDatabase
-@TestPropertySource(properties = "spring.profiles.active=testing")
 @TestPropertySource(properties = "feature.topics.enabled=true")
 class UserControllerE2EIT {
 
@@ -229,6 +239,7 @@ class UserControllerE2EIT {
   private PasswordDTO passwordDto;
   private DeleteUserAccountDTO deleteUserAccountDto;
   private UserInfoResponseDTO userInfoResponse;
+  private UserResource userResource;
 
   @AfterEach
   void reset() {
@@ -268,6 +279,7 @@ class UserControllerE2EIT {
     deleteUserAccountDto = null;
     userInfoResponse = null;
     identityConfig.setDisplayNameAllowedForConsultants(false);
+    userResource = null;
   }
 
   @Test
@@ -532,6 +544,53 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("sessions[0].session.topic.status", is("INACTIVE")));
   }
 
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.SINGLE_TENANT_ADMIN})
+  void getSessionsStatisticsAuthenticatedConsultant_ShouldGetSessionsWithTopics()
+      throws Exception {
+    givenABearerToken();
+    givenAValidConsultantWithId("34c3x5b1-0677-4fd2-a7ea-56a71aefd099");
+    givenConsultingTypeServiceResponse();
+    givenAValidTopicServiceResponse();
+
+    MvcResult mvcResult = mockMvc.perform(
+            get("/users/statistics/registration")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header("rcToken", RC_TOKEN)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("registrationStatistics", hasSize(greaterThan(0))))
+        .andExpect(jsonPath("registrationStatistics[0].userId", is(notNullValue())))
+        .andExpect(jsonPath("registrationStatistics[0].registrationDate", is(notNullValue())))
+        .andExpect(jsonPath("registrationStatistics[0].age").isEmpty())
+        .andExpect(jsonPath("registrationStatistics[0].gender").isEmpty())
+        .andExpect(jsonPath("registrationStatistics[0].counsellingRelation").isEmpty())
+        .andExpect(jsonPath("registrationStatistics[0].postalCode", is(notNullValue())))
+        .andReturn();
+
+
+    var response = new ObjectMapper().readValue(mvcResult.getResponse().getContentAsString(), de.caritas.cob.userservice.api.adapters.web.dto.RegistrationStatisticsListResponseDTO.class);
+
+    assertGender(response);
+    assertAge(response);
+  }
+
+  private void assertGender(RegistrationStatisticsListResponseDTO response) {
+    var resultList = response.getRegistrationStatistics().stream()
+        .map(registration -> registration.getGender()).distinct().collect(
+            Collectors.toList());
+
+    assertThat(resultList).contains("FEMALE", "MALE", null);
+  }
+
+  private void assertAge(RegistrationStatisticsListResponseDTO response) {
+    var resultList = response.getRegistrationStatistics().stream()
+        .map(registration -> registration.getAge()).distinct().collect(
+            Collectors.toList());
+
+    assertThat(resultList).contains(15, 25, null);
+  }
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
@@ -587,6 +646,7 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("twoFactorAuth.isToEncourage", is(consultant.getEncourage2fa())))
         .andExpect(jsonPath("absent", is(consultant.isAbsent())))
         .andExpect(jsonPath("formalLanguage", is(consultant.isLanguageFormal())))
+        .andExpect(jsonPath("preferredLanguage", is(consultant.getLanguageCode().toString())))
         .andExpect(jsonPath("e2eEncryptionEnabled", is(false)))
         .andExpect(jsonPath("emailToggles", hasSize(3)))
         .andExpect(jsonPath("emailToggles[*].name", containsInAnyOrder(
@@ -642,6 +702,7 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("twoFactorAuth.isToEncourage", is(user.getEncourage2fa())))
         .andExpect(jsonPath("absent", is(false)))
         .andExpect(jsonPath("formalLanguage", is(user.isLanguageFormal())))
+        .andExpect(jsonPath("preferredLanguage", is(user.getLanguageCode().toString())))
         .andExpect(jsonPath("e2eEncryptionEnabled", is(false)))
         .andExpect(jsonPath("emailToggles", is(nullValue())))
         .andExpect(jsonPath("inTeamAgency", is(false)));
@@ -710,6 +771,7 @@ class UserControllerE2EIT {
   void patchUserDataShouldSaveAdviceSeekerAndRespondWithNoContent() throws Exception {
     givenAValidUser();
     givenAFullPatchDto();
+    givenAValidKeycloakUpdateLocaleResponse(user.getUserId());
 
     mockMvc.perform(
         patch("/users/data")
@@ -721,9 +783,15 @@ class UserControllerE2EIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
-    var savedUser = userRepository.findById(user.getUserId());
-    assertTrue(savedUser.isPresent());
-    assertEquals(patchUserDTO.getEncourage2fa(), savedUser.get().getEncourage2fa());
+    var savedUser = userRepository.findById(user.getUserId()).orElseThrow();
+    assertEquals(patchUserDTO.getEncourage2fa(), savedUser.getEncourage2fa());
+    assertEquals(patchUserDTO.getPreferredLanguage().getValue(),
+        savedUser.getLanguageCode().toString());
+
+    var userRepCaptor = ArgumentCaptor.forClass(UserRepresentation.class);
+    verify(userResource).update(userRepCaptor.capture());
+    var locale = userRepCaptor.getValue().getAttributes().get("locale");
+    assertEquals(patchUserDTO.getPreferredLanguage().toString(), locale.get(0));
   }
 
   @Test
@@ -732,6 +800,7 @@ class UserControllerE2EIT {
     givenAValidConsultant();
     givenAFullPatchDto();
     givenAValidRocketChatUpdateUserResponse();
+    givenAValidKeycloakUpdateLocaleResponse(consultant.getId());
 
     mockMvc.perform(
         patch("/users/data")
@@ -743,9 +812,17 @@ class UserControllerE2EIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
-    var savedConsultant = consultantRepository.findById(consultant.getId());
-    assertTrue(savedConsultant.isPresent());
-    assertEquals(patchUserDTO.getEncourage2fa(), savedConsultant.get().getEncourage2fa());
+    var savedConsultant = consultantRepository
+        .findById(consultant.getId())
+        .orElseThrow();
+    assertEquals(patchUserDTO.getEncourage2fa(), savedConsultant.getEncourage2fa());
+    assertEquals(patchUserDTO.getPreferredLanguage().toString(),
+        savedConsultant.getLanguageCode().toString());
+
+    var userRepCaptor = ArgumentCaptor.forClass(UserRepresentation.class);
+    verify(userResource).update(userRepCaptor.capture());
+    var locale = userRepCaptor.getValue().getAttributes().get("locale");
+    assertEquals(patchUserDTO.getPreferredLanguage().toString(), locale.get(0));
 
     var urlSuffix = "/api/v1/users.update";
     verify(rocketChatRestTemplate).postForEntity(
@@ -765,6 +842,7 @@ class UserControllerE2EIT {
     givenAValidConsultant();
     givenAFullPatchDto(false);
     givenAValidRocketChatUpdateUserResponse();
+    givenAValidKeycloakUpdateLocaleResponse(consultant.getId());
 
     mockMvc.perform(
         patch("/users/data")
@@ -779,6 +857,11 @@ class UserControllerE2EIT {
     var savedConsultant = consultantRepository.findById(consultant.getId());
     assertTrue(savedConsultant.isPresent());
     assertEquals(false, savedConsultant.get().getEncourage2fa());
+
+    var userRepCaptor = ArgumentCaptor.forClass(UserRepresentation.class);
+    verify(userResource).update(userRepCaptor.capture());
+    var locale = userRepCaptor.getValue().getAttributes().get("locale");
+    assertEquals(patchUserDTO.getPreferredLanguage().toString(), locale.get(0));
   }
 
   @Test
@@ -787,12 +870,14 @@ class UserControllerE2EIT {
       throws Exception {
     givenAValidConsultant();
 
-    var savedConsultant = consultantRepository.findById(consultant.getId());
-    assertTrue(savedConsultant.isPresent());
-    assertEquals(true, savedConsultant.get().getEncourage2fa());
+    var savedConsultant = consultantRepository.findById(consultant.getId()).orElseThrow();
+    assertEquals(true, savedConsultant.getEncourage2fa());
+    assertEquals("de", savedConsultant.getLanguageCode().toString());
 
     givenAFullPatchDto(false);
     givenAValidRocketChatUpdateUserResponse();
+    givenAValidKeycloakUpdateLocaleResponse(consultant.getId());
+
     mockMvc.perform(
         patch("/users/data")
             .cookie(CSRF_COOKIE)
@@ -803,9 +888,15 @@ class UserControllerE2EIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
-    savedConsultant = consultantRepository.findById(consultant.getId());
-    assertTrue(savedConsultant.isPresent());
-    assertEquals(false, savedConsultant.get().getEncourage2fa());
+    savedConsultant = consultantRepository.findById(consultant.getId()).orElseThrow();
+    assertEquals(false, savedConsultant.getEncourage2fa());
+    assertEquals(patchUserDTO.getPreferredLanguage().toString(),
+        savedConsultant.getLanguageCode().toString());
+
+    var userRepCaptor = ArgumentCaptor.forClass(UserRepresentation.class);
+    verify(userResource).update(userRepCaptor.capture());
+    var locale = userRepCaptor.getValue().getAttributes().get("locale");
+    assertEquals(patchUserDTO.getPreferredLanguage().toString(), locale.get(0));
 
     givenAFullPatchDto(true);
     mockMvc.perform(
@@ -818,9 +909,14 @@ class UserControllerE2EIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
-    savedConsultant = consultantRepository.findById(consultant.getId());
-    assertTrue(savedConsultant.isPresent());
-    assertEquals(true, savedConsultant.get().getEncourage2fa());
+    savedConsultant = consultantRepository.findById(consultant.getId()).orElseThrow();
+    assertEquals(true, savedConsultant.getEncourage2fa());
+    assertEquals(patchUserDTO.getPreferredLanguage().toString(),
+        savedConsultant.getLanguageCode().toString());
+
+    verify(userResource, times(2)).update(userRepCaptor.capture());
+    locale = userRepCaptor.getValue().getAttributes().get("locale");
+    assertEquals(patchUserDTO.getPreferredLanguage().toString(), locale.get(0));
   }
 
   @Test
@@ -886,6 +982,23 @@ class UserControllerE2EIT {
             .header(CSRF_HEADER, CSRF_VALUE)
             .contentType(MediaType.APPLICATION_JSON)
             .content(patchDtoJson)
+            .accept(MediaType.APPLICATION_JSON)
+    ).andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  void patchUserDataShouldRespondWithBadRequestOnUnknownPreferredLanguage() throws Exception {
+    givenAValidConsultant();
+    var patchDtoMap = givenAnUnknownPreferredLanguagePatchDto();
+
+    mockMvc.perform(
+        patch("/users/data")
+            .cookie(CSRF_COOKIE)
+            .cookie(RC_TOKEN_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(patchDtoMap))
             .accept(MediaType.APPLICATION_JSON)
     ).andExpect(status().isBadRequest());
   }
@@ -1211,6 +1324,16 @@ class UserControllerE2EIT {
     )).thenReturn(ResponseEntity.ok().body(loginResponse));
   }
 
+  private void givenAValidKeycloakUpdateLocaleResponse(String id) {
+    var usersResource = mock(UsersResource.class);
+    userResource = mock(UserResource.class);
+    when(usersResource.get(id)).thenReturn(userResource);
+
+    var realmResource = mock(RealmResource.class);
+    when(realmResource.users()).thenReturn(usersResource);
+    when(keycloak.realm(anyString())).thenReturn(realmResource);
+  }
+
   private void givenAnInvalidKeycloakLoginResponseFailingPassword() {
     var exception = new HttpClientErrorException(HttpStatus.UNAUTHORIZED);
     var urlSuffix = "/auth/realms/test/protocol/openid-connect/token";
@@ -1303,9 +1426,9 @@ class UserControllerE2EIT {
 
   private void givenAValidTopicServiceResponse() {
     var firstTopic = new TopicDTO().id(1L).name("topic name").description("topic desc")
-        .status("INACTIVE");
+        .status("INACTIVE").internalIdentifier("internal identifier 1");
     var secondTopic = new TopicDTO().id(2L).name("topic name 2").description("topic desc 2")
-        .status("ACTIVE");
+        .status("ACTIVE").internalIdentifier("internal identifier 2");;
     when(topicControllerApi.getApiClient()).thenReturn(new ApiClient());
     when(topicControllerApi.getAllTopics()).thenReturn(Lists.newArrayList(firstTopic, secondTopic));
   }
@@ -1313,7 +1436,6 @@ class UserControllerE2EIT {
   private void givenAValidRocketChatSubscriptionsResponse() {
     var subscriptionsGetDTO = new SubscriptionsGetDTO();
     subscriptionsGetDTO.setUpdate(new SubscriptionsUpdateDTO[]{});
-    var urlSuffix = "/subscriptions.get";
     when(rocketChatRestTemplate.exchange(
         Mockito.anyString(), eq(HttpMethod.GET),
         any(HttpEntity.class), eq(SubscriptionsGetDTO.class))
@@ -1358,8 +1480,9 @@ class UserControllerE2EIT {
     when(authenticatedUser.getGrantedAuthorities()).thenReturn(Set.of("anAuthority"));
   }
 
+  @SuppressWarnings("SameParameterValue")
   private void givenAValidConsultantWithId(String id) {
-    consultant = consultantRepository.findById(id).get();
+    consultant = consultantRepository.findById(id).orElseThrow();
     when(authenticatedUser.getUserId()).thenReturn(consultant.getId());
     when(authenticatedUser.isAdviceSeeker()).thenReturn(false);
     when(authenticatedUser.isConsultant()).thenReturn(true);
@@ -1448,6 +1571,13 @@ class UserControllerE2EIT {
   private HashMap<String, Object> givenAPartialPatchDto() {
     var patchDtoAsMap = new HashMap<String, Object>(1);
     patchDtoAsMap.put("displayName", RandomStringUtils.randomAlphabetic(4));
+
+    return patchDtoAsMap;
+  }
+
+  private HashMap<String, Object> givenAnUnknownPreferredLanguagePatchDto() {
+    var patchDtoAsMap = new HashMap<String, Object>(1);
+    patchDtoAsMap.put("preferredLanguage", "xx");
 
     return patchDtoAsMap;
   }

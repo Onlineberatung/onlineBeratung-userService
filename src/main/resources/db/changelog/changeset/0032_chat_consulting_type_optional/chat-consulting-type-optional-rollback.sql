@@ -1,0 +1,1 @@
+ALTER TABLE `userservice`.`chat` MODIFY `consulting_type` tinyint(4) unsigned NOT NULL;

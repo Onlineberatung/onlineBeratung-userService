@@ -7,6 +7,7 @@ import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO;
 import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantFilter;
@@ -206,6 +207,8 @@ public class ConsultantAdminFacadeIT {
     newConsultant.setNotifyEnquiriesRepeating(false);
     newConsultant.setNotifyNewChatMessageFromAdviceSeeker(false);
     newConsultant.setNotifyNewFeedbackMessageFromAdviceSeeker(false);
+    newConsultant.setLanguageCode(LanguageCode.de);
+
     consultantRepository.save(newConsultant);
   }
 
