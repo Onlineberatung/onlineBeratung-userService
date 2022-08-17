@@ -813,7 +813,7 @@ paths:
     get:
       tags:
         - user-controller
-      summary: 'Returns a list of registration data, filtered by state of the current state-admin'
+      summary: 'Returns a list of user registration data per tenant'
       operationId: getRegistrationStatistics
       responses:
         200:
