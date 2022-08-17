@@ -25,6 +25,11 @@ public class KeycloakMapper {
     return otpSetupDTO;
   }
 
+  public UserRepresentation userRepresentationOf(String locale) {
+    return new UserRepresentation()
+        .singleAttribute("locale", locale);
+  }
+
   public Map<String, String> mapOf(ResponseEntity<SuccessWithEmail> responseEntity) {
     var status = responseEntity.getStatusCode();
     var isCreated = status.equals(HttpStatus.CREATED);
