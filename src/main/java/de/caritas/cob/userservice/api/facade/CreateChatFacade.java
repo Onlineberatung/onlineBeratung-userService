@@ -47,7 +47,7 @@ public class CreateChatFacade {
    * @return the generated chat link URL (String)
    */
   public CreateChatResponseDTO createChatV1(ChatDTO chatDTO, Consultant consultant) {
-    return createChat(chatDTO, consultant, this::saveChatAndChatAgencyRelation);
+    return createChat(chatDTO, consultant, this::saveChatV1);
   }
 
   /**
@@ -58,7 +58,7 @@ public class CreateChatFacade {
    * @return the generated chat link URL (String)
    */
   public CreateChatResponseDTO createChatV2(ChatDTO chatDTO, Consultant consultant) {
-    return createChat(chatDTO, consultant, this::saveChat);
+    return createChat(chatDTO, consultant, this::saveChatV2);
   }
 
   private CreateChatResponseDTO createChat(ChatDTO chatDTO, Consultant consultant,
@@ -85,11 +85,7 @@ public class CreateChatFacade {
         chat.getConsultingTypeId()) : StringUtils.EMPTY;
   }
 
-  private Chat saveChat(Consultant consultant, ChatDTO chatDTO) {
-    return chatService.saveChat(chatConverter.convertToEntity(chatDTO, consultant));
-  }
-
-  private Chat saveChatAndChatAgencyRelation(Consultant consultant, ChatDTO chatDTO) {
+  private Chat saveChatV1(Consultant consultant, ChatDTO chatDTO) {
     if (isEmpty(consultant.getConsultantAgencies())) {
       throw new InternalServerErrorException(String
           .format("Consultant with id %s is not assigned to any agency", consultant.getId()));
@@ -98,8 +94,20 @@ public class CreateChatFacade {
     AgencyDTO agency = this.agencyService.getAgency(agencyId);
 
     Chat chat = chatService.saveChat(chatConverter.convertToEntity(chatDTO, consultant, agency));
-    chatService.saveChatAgencyRelation(new ChatAgency(chat, agencyId));
+    createChatAgencyRelation(chat, agencyId);
     return chat;
+  }
+
+  private Chat saveChatV2(Consultant consultant, ChatDTO chatDTO) {
+    Chat chat = chatService.saveChat(chatConverter.convertToEntity(chatDTO, consultant));
+    consultant.getConsultantAgencies().forEach(
+        consultantAgency -> createChatAgencyRelation(chat, consultantAgency.getAgencyId())
+    );
+    return chat;
+  }
+
+  private void createChatAgencyRelation(Chat chat, Long agencyId) {
+    chatService.saveChatAgencyRelation(new ChatAgency(chat, agencyId));
   }
 
   private String createRocketChatGroupWithTechnicalUser(ChatDTO chatDTO, Chat chat) {
