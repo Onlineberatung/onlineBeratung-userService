@@ -6,6 +6,7 @@ CREATE TABLE `userservice`.`chat_user` (
     `update_date` datetime NOT NULL DEFAULT UTC_TIMESTAMP(),
     PRIMARY KEY (`id`),
     KEY `chat_id` (`chat_id`),
+    CONSTRAINT CHAT_USER UNIQUE (`chat_id`, `user_id`),
     CONSTRAINT `chat_user_ibfk_1` FOREIGN KEY (`chat_id`) REFERENCES `userservice`.`chat` (`Id`) ON UPDATE CASCADE,
     CONSTRAINT `chat_user_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `userservice`.`user` (`user_id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

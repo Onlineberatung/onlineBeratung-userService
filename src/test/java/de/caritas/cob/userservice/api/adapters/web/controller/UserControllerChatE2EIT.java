@@ -490,6 +490,34 @@ class UserControllerChatE2EIT {
     ChatUser storedChatUser = chatUserRepository.findByChatAndUser(chat, user).orElseThrow();
     assertEquals(storedChatUser.getChat(), chat);
     assertEquals(storedChatUser.getUser(), user);
+
+    chatUserRepository.delete(storedChatUser);
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
+  void assignChat_Should_ReturnConflict_When_UserIsAlreadyAssigned() throws Exception {
+    givenAValidUser(true);
+    givenAValidConsultant();
+    givenAValidChat(false);
+
+    mockMvc.perform(put("/users/chat/{chatId}/assign", chat.getId())
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    ChatUser storedChatUser = chatUserRepository.findByChatAndUser(chat, user).orElseThrow();
+    assertEquals(storedChatUser.getChat(), chat);
+    assertEquals(storedChatUser.getUser(), user);
+
+    mockMvc.perform(put("/users/chat/{chatId}/assign", chat.getId())
+            .cookie(CSRF_COOKIE)
+            .header(CSRF_HEADER, CSRF_VALUE)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isConflict());
+
+    chatUserRepository.delete(storedChatUser);
   }
 
   @Test

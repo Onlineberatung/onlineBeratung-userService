@@ -9,6 +9,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -19,7 +20,9 @@ import lombok.Setter;
  * Represents the relation between a {@link Chat} and an {@link User}
  */
 @Entity
-@Table(name = "chat_user")
+@Table(name = "chat_user", uniqueConstraints = {
+    @UniqueConstraint(name = "UniqueChatAndUser", columnNames = {"chat_id", "user_id"})
+})
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
