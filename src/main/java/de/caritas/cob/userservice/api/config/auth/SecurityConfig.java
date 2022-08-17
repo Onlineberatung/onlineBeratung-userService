@@ -107,6 +107,9 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT)
         .antMatchers("/users/twoFactorAuth", "/users/2fa/**", "/users/mobile/app/token")
         .hasAnyAuthority(SINGLE_TENANT_ADMIN, TENANT_ADMIN, USER_DEFAULT, CONSULTANT_DEFAULT)
+        .antMatchers("/users/statistics/registration")
+        .hasAnyAuthority(SINGLE_TENANT_ADMIN, TENANT_ADMIN)
+
         .antMatchers("/users/sessions/{sessionId:[0-9]+}/enquiry/new",
             "/appointments/sessions/{sessionId:[0-9]+}/enquiry/new",
             "/users/askers/consultingType/new", "/users/account", "/users/mobiletoken",
