@@ -211,6 +211,7 @@ public class EmailNotificationFacade {
     if (hasUserValidEmailAddress(user)) {
       var reassignmentRequestEmailSupplier = ReassignmentRequestEmailSupplier.builder()
           .receiverEmailAddress(user.getEmail())
+          .receiverLanguageCode(user.getLanguageCode())
           .receiverUsername(user.getUsername())
           .tenantTemplateSupplier(tenantTemplateSupplier)
           .applicationBaseUrl(applicationBaseUrl)

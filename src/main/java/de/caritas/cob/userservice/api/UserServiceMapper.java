@@ -4,6 +4,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 import com.google.api.client.util.ArrayMap;
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Appointment;
@@ -53,6 +54,7 @@ public class UserServiceMapper {
     map.put("email", user.getEmail());
     map.put("encourage2fa", user.getEncourage2fa());
     map.put("chatUserId", user.getRcUserId());
+    map.put("preferredLanguage", user.getLanguageCode().toString());
 
     return map;
   }
@@ -71,6 +73,7 @@ public class UserServiceMapper {
         consultant.getNotifyNewFeedbackMessageFromAdviceSeeker());
     map.put("walkThroughEnabled", consultant.getWalkThroughEnabled());
     map.put("chatUserId", consultant.getRocketChatId());
+    map.put("preferredLanguage", consultant.getLanguageCode().toString());
 
     if (additionalMap.containsKey("displayName")) {
       var displayName = (String) additionalMap.get("displayName");
@@ -231,6 +234,10 @@ public class UserServiceMapper {
     if (patchMap.containsKey("encourage2fa")) {
       consultant.setEncourage2fa((Boolean) patchMap.get("encourage2fa"));
     }
+    if (patchMap.containsKey("preferredLanguage")) {
+      var preferredLanguage = (String) patchMap.get("preferredLanguage");
+      consultant.setLanguageCode(LanguageCode.valueOf(preferredLanguage));
+    }
     if (patchMap.containsKey("walkThroughEnabled")) {
       consultant.setWalkThroughEnabled((Boolean) patchMap.get("walkThroughEnabled"));
     }
@@ -266,6 +273,10 @@ public class UserServiceMapper {
     }
     if (patchMap.containsKey("encourage2fa")) {
       adviceSeeker.setEncourage2fa((Boolean) patchMap.get("encourage2fa"));
+    }
+    if (patchMap.containsKey("preferredLanguage")) {
+      var preferredLanguage = (String) patchMap.get("preferredLanguage");
+      adviceSeeker.setLanguageCode(LanguageCode.valueOf(preferredLanguage));
     }
 
     return adviceSeeker;

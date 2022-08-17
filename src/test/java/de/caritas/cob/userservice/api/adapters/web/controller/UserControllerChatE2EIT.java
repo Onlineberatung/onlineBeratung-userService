@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
+import static de.caritas.cob.userservice.api.testHelper.RequestBodyConstants.VALID_CREATE_CHAT_BODY;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS_SYSTEM_A;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS_TECHNICAL_A;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_TOKEN;
@@ -70,6 +71,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.servlet.http.Cookie;
+import javax.transaction.Transactional;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
@@ -187,6 +189,46 @@ class UserControllerChatE2EIT {
     subscriptionsGetResponse = null;
     groupDeleteResponse = null;
     identityConfig.setDisplayNameAllowedForConsultants(false);
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CREATE_NEW_CHAT)
+  @Transactional
+  void createChatV1_Should_ReturnCreated_When_ChatWasCreated() throws Exception {
+    givenAValidConsultant(true);
+    givenAValidRocketChatSystemUser();
+
+    mockMvc.perform(
+            post("/users/chat/new")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header("rcToken", RandomStringUtils.randomAlphabetic(16))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(VALID_CREATE_CHAT_BODY)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("groupId", is("rcGroupId")))
+        .andExpect(jsonPath("chatLink").isNotEmpty());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CREATE_NEW_CHAT)
+  @Transactional
+  void createChatV2_Should_ReturnCreated_When_ChatWasCreated() throws Exception {
+    givenAValidConsultant(true);
+    givenAValidRocketChatSystemUser();
+
+    mockMvc.perform(
+            post("/users/chat/v2/new")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header("rcToken", RandomStringUtils.randomAlphabetic(16))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(VALID_CREATE_CHAT_BODY)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("groupId", is("rcGroupId")))
+        .andExpect(jsonPath("chatLink").isEmpty());
   }
 
   @Test

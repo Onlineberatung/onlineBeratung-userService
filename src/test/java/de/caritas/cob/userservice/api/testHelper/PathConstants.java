@@ -64,6 +64,7 @@ public class PathConstants {
   public static final String PATH_PUT_UPDATE_MONITORING = "/users/sessions/monitoring/100";
   public static final String PATH_GET_CONSULTANTS = "/users/consultants";
   public static final String PATH_POST_CHAT_NEW = "/users/chat/new";
+  public static final String PATH_POST_CHAT_NEW_V2 = "/users/chat/v2/new";
   public static final String PATH_PUT_CHAT_START = "/users/chat/" + CHAT_ID + "/start";
   public static final String PATH_PUT_CHAT_START_WITH_INVALID_PATH_PARAMS =
       "/users/chat/" + INVALID_CHAT_ID + "/start";

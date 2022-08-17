@@ -339,7 +339,7 @@ public class KeycloakService implements IdentityClient {
    */
   public KeycloakCreateUserResponseDTO createKeycloakUser(final UserDTO user,
       final String firstName, final String lastName) {
-    var kcUser = getUserRepresentation(user, firstName, lastName);
+    var kcUser = getUserRepresentation(user, firstName, lastName, "de");
     try (var response = keycloakClient.getUsersResource().create(kcUser)) {
       if (response.getStatus() == HttpStatus.CREATED.value()) {
         return new KeycloakCreateUserResponseDTO(getCreatedUserId(response.getLocation()));
@@ -402,6 +402,11 @@ public class KeycloakService implements IdentityClient {
 
   private UserRepresentation getUserRepresentation(final UserDTO user, final String firstName,
       final String lastName) {
+    return getUserRepresentation(user, firstName, lastName, null);
+  }
+
+  private UserRepresentation getUserRepresentation(final UserDTO user, final String firstName,
+      final String lastName, final String locale) {
     var kcUser = new UserRepresentation();
     kcUser.setUsername(user.getUsername());
     kcUser.setEmail(user.getEmail());
@@ -412,9 +417,13 @@ public class KeycloakService implements IdentityClient {
     if (nonNull(lastName)) {
       kcUser.setLastName(lastName);
     }
+    if (nonNull(locale)) {
+      kcUser.singleAttribute("locale", locale);
+    }
     kcUser.setEnabled(true);
 
     updateTenantId(user, kcUser);
+
     return kcUser;
   }
 
