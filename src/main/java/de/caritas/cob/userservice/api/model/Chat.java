@@ -95,7 +95,7 @@ public class Chat {
 
   @OneToMany(mappedBy = "chat", orphanRemoval = true)
   @Exclude
-  private Set<ChatUser> chatUsers;
+  private Set<UserChat> chatUsers;
 
   @Column(name = "update_date")
   private LocalDateTime updateDate;

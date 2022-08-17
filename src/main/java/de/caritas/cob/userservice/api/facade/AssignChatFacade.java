@@ -3,15 +3,15 @@ package de.caritas.cob.userservice.api.facade;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.Chat;
-import de.caritas.cob.userservice.api.model.ChatUser;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.model.UserChat;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /**
- * Facade for capsuling to assign a chat.
+ * Facade for capsuling to assign a user to a chat.
  */
 @Service
 @RequiredArgsConstructor
@@ -32,7 +32,7 @@ public class AssignChatFacade {
     Chat chat = getChat(chatId);
     User user = getUser(authenticatedUser);
 
-    chatService.saveChatUserRelation(new ChatUser(chat, user));
+    chatService.saveUserChatRelation(UserChat.builder().user(user).chat(chat).build());
   }
 
 

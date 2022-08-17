@@ -55,15 +55,15 @@ import de.caritas.cob.userservice.api.helper.CustomLocalDateTime;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.ChatAgency;
-import de.caritas.cob.userservice.api.model.ChatUser;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.model.UserAgency;
+import de.caritas.cob.userservice.api.model.UserChat;
 import de.caritas.cob.userservice.api.port.out.ChatAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.ChatRepository;
-import de.caritas.cob.userservice.api.port.out.ChatUserRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.UserAgencyRepository;
+import de.caritas.cob.userservice.api.port.out.UserChatRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -133,7 +133,7 @@ class UserControllerChatE2EIT {
   private ChatAgencyRepository chatAgencyRepository;
 
   @Autowired
-  private ChatUserRepository chatUserRepository;
+  private UserChatRepository chatUserRepository;
 
   @Autowired
   private UserAgencyRepository userAgencyRepository;
@@ -487,7 +487,7 @@ class UserControllerChatE2EIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    ChatUser storedChatUser = chatUserRepository.findByChatAndUser(chat, user).orElseThrow();
+    UserChat storedChatUser = chatUserRepository.findByChatAndUser(chat, user).orElseThrow();
     assertEquals(storedChatUser.getChat(), chat);
     assertEquals(storedChatUser.getUser(), user);
 
@@ -507,7 +507,7 @@ class UserControllerChatE2EIT {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    ChatUser storedChatUser = chatUserRepository.findByChatAndUser(chat, user).orElseThrow();
+    UserChat storedChatUser = chatUserRepository.findByChatAndUser(chat, user).orElseThrow();
     assertEquals(storedChatUser.getChat(), chat);
     assertEquals(storedChatUser.getUser(), user);
 

@@ -11,7 +11,7 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.model.ChatUser;
+import de.caritas.cob.userservice.api.model.UserChat;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.Optional;
@@ -71,6 +71,7 @@ class AssignChatFacadeTest {
 
     assignChatFacade.assignChat(CHAT_ID, authenticatedUser);
 
-    verify(chatService).saveChatUserRelation(new ChatUser(ACTIVE_CHAT, USER));
+    verify(chatService).saveUserChatRelation(
+        UserChat.builder().user(USER).chat(ACTIVE_CHAT).build());
   }
 }

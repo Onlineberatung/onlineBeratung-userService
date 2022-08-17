@@ -11,24 +11,26 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Represents the relation between a {@link Chat} and an {@link User}
+ * Represents the relation between an {@link User} and a {@link Chat}
  */
 @Entity
-@Table(name = "chat_user", uniqueConstraints = {
-    @UniqueConstraint(name = "UniqueChatAndUser", columnNames = {"chat_id", "user_id"})
+@Table(name = "user_chat", uniqueConstraints = {
+    @UniqueConstraint(name = "UniqueUserAndChat", columnNames = {"user_id", "chat_id"})
 })
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class ChatUser {
+public class UserChat {
 
   @Id
   @SequenceGenerator(name = "id_seq", allocationSize = 1, sequenceName = "sequence_chat_user")
@@ -38,18 +40,12 @@ public class ChatUser {
   private Long id;
 
   @ManyToOne
-  @JoinColumn(name = "chat_id", nullable = false)
-  private Chat chat;
-
-  @ManyToOne
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
-
-  public ChatUser(Chat chat, User user) {
-    this.chat = chat;
-    this.user = user;
-  }
+  @ManyToOne
+  @JoinColumn(name = "chat_id", nullable = false)
+  private Chat chat;
 
   @Override
   public String toString() {

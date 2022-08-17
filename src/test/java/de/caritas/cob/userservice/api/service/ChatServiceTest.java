@@ -35,11 +35,11 @@ import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.ChatAgency;
-import de.caritas.cob.userservice.api.model.ChatUser;
 import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.UserChat;
 import de.caritas.cob.userservice.api.port.out.ChatAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.ChatRepository;
-import de.caritas.cob.userservice.api.port.out.ChatUserRepository;
+import de.caritas.cob.userservice.api.port.out.UserChatRepository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -66,7 +66,7 @@ public class ChatServiceTest {
   private ChatAgencyRepository chatAgencyRepository;
 
   @Mock
-  private ChatUserRepository chatUserRepository;
+  private UserChatRepository chatUserRepository;
 
   @Mock
   private Logger logger;
@@ -244,10 +244,10 @@ public class ChatServiceTest {
   }
 
   @Test
-  public void saveChatUserRelation_Should_saveChatUserInRepository() {
-    ChatUser chatUser = new ChatUser();
+  public void saveUserChatRelation_Should_saveUserChatInRepository() {
+    UserChat chatUser = new UserChat();
 
-    chatService.saveChatUserRelation(chatUser);
+    chatService.saveUserChatRelation(chatUser);
 
     verify(chatUserRepository).save(chatUser);
 

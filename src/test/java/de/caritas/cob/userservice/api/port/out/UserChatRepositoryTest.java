@@ -5,9 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import de.caritas.cob.userservice.api.helper.CustomLocalDateTime;
 import de.caritas.cob.userservice.api.model.Chat;
-import de.caritas.cob.userservice.api.model.ChatUser;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.model.UserChat;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +19,12 @@ import org.springframework.test.context.TestPropertySource;
 @DataJpaTest
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-class ChatUserRepositoryTest {
+class UserChatRepositoryTest {
 
   private static final EasyRandom easyRandom = new EasyRandom();
 
   @Autowired
-  ChatUserRepository chatUserRepository;
+  UserChatRepository chatUserRepository;
 
   @Autowired
   ChatRepository chatRepository;
@@ -36,13 +36,13 @@ class ChatUserRepositoryTest {
   ConsultantRepository consultantRepository;
 
   @Test
-  void save_Should_saveChatUserRelation() {
+  void save_Should_saveUserChatRelation() {
     // given
     var chat = givenChat();
     var user = givenUser();
 
     // when
-    var chatUser = chatUserRepository.save(new ChatUser(chat, user));
+    var chatUser = chatUserRepository.save(UserChat.builder().user(user).chat(chat).build());
 
     // then
     assertNotNull(chat.getId());
@@ -55,7 +55,7 @@ class ChatUserRepositoryTest {
     // given
     var chat = givenChat();
     var user = givenUser();
-    var chatUser = chatUserRepository.save(new ChatUser(chat, user));
+    var chatUser = chatUserRepository.save(UserChat.builder().user(user).chat(chat).build());
 
     // when
     var findByChatAndUser = chatUserRepository.findByChatAndUser(chat, user).orElseThrow();

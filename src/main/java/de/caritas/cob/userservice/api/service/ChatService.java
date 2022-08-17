@@ -16,12 +16,12 @@ import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.Chat.ChatInterval;
 import de.caritas.cob.userservice.api.model.ChatAgency;
-import de.caritas.cob.userservice.api.model.ChatUser;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.UserChat;
 import de.caritas.cob.userservice.api.port.out.ChatAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.ChatRepository;
-import de.caritas.cob.userservice.api.port.out.ChatUserRepository;
+import de.caritas.cob.userservice.api.port.out.UserChatRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -44,7 +44,7 @@ public class ChatService {
 
   private final @NonNull ChatRepository chatRepository;
   private final @NonNull ChatAgencyRepository chatAgencyRepository;
-  private final @NonNull ChatUserRepository chatUserRepository;
+  private final @NonNull UserChatRepository userChatRepository;
   private final @NonNull ConsultantService consultantService;
   private final @NonNull UserHelper userHelper;
 
@@ -98,13 +98,13 @@ public class ChatService {
   }
 
   /**
-   * Saves a {@link ChatUser} relation
+   * Saves a {@link UserChat} relation
    *
-   * @param chatUser {@link ChatUser}
-   * @return saved {@link ChatUser}
+   * @param userChat {@link UserChat}
+   * @return saved {@link UserChat}
    */
-  public ChatUser saveChatUserRelation(ChatUser chatUser) {
-    return chatUserRepository.save(chatUser);
+  public UserChat saveUserChatRelation(UserChat userChat) {
+    return userChatRepository.save(userChat);
   }
 
   /**

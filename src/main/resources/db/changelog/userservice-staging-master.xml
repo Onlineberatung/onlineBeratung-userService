@@ -36,5 +36,5 @@
 	<include file="db/changelog/changeset/0030_session_counsellingrelation_and_topics/0030_changeSet.xml"/>
 	<include file="db/changelog/changeset/0031_add_preferred_language/0031_changeSet.xml"/>
 	<include file="db/changelog/changeset/0032_chat_consulting_type_optional/0032_changeSet.xml"/>
-	<include file="db/changelog/changeset/0033_chat_add_chat_user_relation/0033_changeSet.xml"/>
+	<include file="db/changelog/changeset/0033_chat_add_user_chat_relation/0033_changeSet.xml"/>
 </databaseChangeLog>
