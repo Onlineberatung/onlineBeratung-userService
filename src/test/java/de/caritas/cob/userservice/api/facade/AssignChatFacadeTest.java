@@ -4,7 +4,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.ACTIVE_CHA
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -44,8 +44,8 @@ class AssignChatFacadeTest {
         () -> assignChatFacade.assignChat(CHAT_ID, authenticatedUser));
 
     verify(chatService).getChat(CHAT_ID);
-    assertEquals(String.format("Chat with id %s not found", CHAT_ID),
-        exception.getMessage());
+    assertThat(exception.getMessage())
+        .isEqualTo(String.format("Chat with id %s not found", CHAT_ID));
   }
 
   @Test
@@ -59,8 +59,8 @@ class AssignChatFacadeTest {
         () -> assignChatFacade.assignChat(CHAT_ID, authenticatedUser));
 
     verify(userService).getUserViaAuthenticatedUser(authenticatedUser);
-    assertEquals(String.format("User with id %s not found", USER_ID),
-        exception.getMessage());
+    assertThat(exception.getMessage())
+        .isEqualTo(String.format("User with id %s not found", USER_ID));
   }
 
   @Test

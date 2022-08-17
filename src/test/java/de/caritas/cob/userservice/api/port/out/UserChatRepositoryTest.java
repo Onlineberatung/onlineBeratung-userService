@@ -1,7 +1,6 @@
 package de.caritas.cob.userservice.api.port.out;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import de.caritas.cob.userservice.api.helper.CustomLocalDateTime;
 import de.caritas.cob.userservice.api.model.Chat;
@@ -45,9 +44,10 @@ class UserChatRepositoryTest {
     var chatUser = chatUserRepository.save(UserChat.builder().user(user).chat(chat).build());
 
     // then
-    assertNotNull(chat.getId());
-    assertEquals(chat, chatUser.getChat());
-    assertEquals(user, chatUser.getUser());
+    assertThat(chat).isNotNull();
+    assertThat(chat.getId()).isNotNull();
+    assertThat(chatUser.getUser()).isEqualTo(user);
+    assertThat(chatUser.getChat()).isEqualTo(chat);
   }
 
   @Test
@@ -61,9 +61,9 @@ class UserChatRepositoryTest {
     var findByChatAndUser = chatUserRepository.findByChatAndUser(chat, user).orElseThrow();
 
     // then
-    assertEquals(chatUser.getId(), findByChatAndUser.getId());
-    assertEquals(chatUser.getChat(), findByChatAndUser.getChat());
-    assertEquals(chatUser.getUser(), findByChatAndUser.getUser());
+    assertThat(findByChatAndUser.getId()).isEqualTo(chatUser.getId());
+    assertThat(findByChatAndUser.getUser()).isEqualTo(chatUser.getUser());
+    assertThat(findByChatAndUser.getChat()).isEqualTo(chatUser.getChat());
   }
 
   private Chat givenChat() {
