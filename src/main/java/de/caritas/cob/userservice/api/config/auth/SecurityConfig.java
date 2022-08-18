@@ -79,6 +79,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
    * Keycloak roles for specific REST API paths
    */
   @Override
+  @SuppressWarnings("java:S4502") // Disabling CSRF protections is security-sensitive
   protected void configure(HttpSecurity http) throws Exception {
     super.configure(http);
     var httpSecurity =
