@@ -21,6 +21,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -41,6 +42,14 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
+
+  @ExceptionHandler({DataIntegrityViolationException.class})
+  public ResponseEntity<Object> handleJPAConstraintViolationException(
+      final org.hibernate.exception.ConstraintViolationException ex, final WebRequest request) {
+    log.error("Bad Request: ", ex);
+
+    return handleExceptionInternal(ex, null, new HttpHeaders(), HttpStatus.CONFLICT, request);
+  }
 
   @ExceptionHandler({CreateEnquiryMessageException.class})
   public ResponseEntity<Object> handleCreateEnquiryMessageException(

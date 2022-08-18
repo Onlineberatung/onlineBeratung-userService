@@ -93,6 +93,10 @@ public class Chat {
   @Exclude
   private Set<ChatAgency> chatAgencies;
 
+  @OneToMany(mappedBy = "chat", orphanRemoval = true)
+  @Exclude
+  private Set<UserChat> chatUsers;
+
   @Column(name = "update_date")
   private LocalDateTime updateDate;
 

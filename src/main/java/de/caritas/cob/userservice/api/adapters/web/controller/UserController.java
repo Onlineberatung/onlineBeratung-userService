@@ -55,6 +55,7 @@ import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
+import de.caritas.cob.userservice.api.facade.AssignChatFacade;
 import de.caritas.cob.userservice.api.facade.CreateChatFacade;
 import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
 import de.caritas.cob.userservice.api.facade.CreateNewConsultingTypeFacade;
@@ -152,6 +153,7 @@ public class UserController implements UsersApi {
   private final @NotNull StartChatFacade startChatFacade;
   private final @NotNull GetChatFacade getChatFacade;
   private final @NotNull JoinAndLeaveChatFacade joinAndLeaveChatFacade;
+  private final @NotNull AssignChatFacade assignChatFacade;
   private final @NotNull CreateChatFacade createChatFacade;
   private final @NotNull StopChatFacade stopChatFacade;
   private final @NotNull GetChatMembersFacade getChatMembersFacade;
@@ -977,6 +979,14 @@ public class UserController implements UsersApi {
         });
 
     return new ResponseEntity<>(response, HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<Void> assignChat(Long chatId) {
+
+    assignChatFacade.assignChat(chatId, authenticatedUser);
+
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   /**

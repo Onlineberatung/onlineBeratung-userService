@@ -18,8 +18,10 @@ import de.caritas.cob.userservice.api.model.Chat.ChatInterval;
 import de.caritas.cob.userservice.api.model.ChatAgency;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.UserChat;
 import de.caritas.cob.userservice.api.port.out.ChatAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.ChatRepository;
+import de.caritas.cob.userservice.api.port.out.UserChatRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -42,6 +44,7 @@ public class ChatService {
 
   private final @NonNull ChatRepository chatRepository;
   private final @NonNull ChatAgencyRepository chatAgencyRepository;
+  private final @NonNull UserChatRepository userChatRepository;
   private final @NonNull ConsultantService consultantService;
   private final @NonNull UserHelper userHelper;
 
@@ -92,6 +95,16 @@ public class ChatService {
    */
   public ChatAgency saveChatAgencyRelation(ChatAgency chatAgency) {
     return chatAgencyRepository.save(chatAgency);
+  }
+
+  /**
+   * Saves a {@link UserChat} relation
+   *
+   * @param userChat {@link UserChat}
+   * @return saved {@link UserChat}
+   */
+  public UserChat saveUserChatRelation(UserChat userChat) {
+    return userChatRepository.save(userChat);
   }
 
   /**

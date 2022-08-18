@@ -33,11 +33,13 @@ import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestExceptio
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.port.out.ChatAgencyRepository;
-import de.caritas.cob.userservice.api.port.out.ChatRepository;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.ChatAgency;
 import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.UserChat;
+import de.caritas.cob.userservice.api.port.out.ChatAgencyRepository;
+import de.caritas.cob.userservice.api.port.out.ChatRepository;
+import de.caritas.cob.userservice.api.port.out.UserChatRepository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -62,6 +64,9 @@ public class ChatServiceTest {
 
   @Mock
   private ChatAgencyRepository chatAgencyRepository;
+
+  @Mock
+  private UserChatRepository chatUserRepository;
 
   @Mock
   private Logger logger;
@@ -233,18 +238,28 @@ public class ChatServiceTest {
   public void saveChatAgencyRelation_Should_saveChatAgencyInRepository() {
     ChatAgency chatAgency = new ChatAgency();
 
-    this.chatService.saveChatAgencyRelation(chatAgency);
+    chatService.saveChatAgencyRelation(chatAgency);
 
-    verify(this.chatAgencyRepository, times(1)).save(chatAgency);
+    verify(chatAgencyRepository).save(chatAgency);
+  }
+
+  @Test
+  public void saveUserChatRelation_Should_saveUserChatInRepository() {
+    UserChat chatUser = new UserChat();
+
+    chatService.saveUserChatRelation(chatUser);
+
+    verify(chatUserRepository).save(chatUser);
+
   }
 
   @Test
   public void deleteChat_Should_deleteChatInRepository() {
     Chat chat = new Chat();
 
-    this.chatService.deleteChat(chat);
+    chatService.deleteChat(chat);
 
-    verify(this.chatRepository, times(1)).delete(chat);
+    verify(chatRepository).delete(chat);
   }
 
 }
