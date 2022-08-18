@@ -15,11 +15,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
-import de.caritas.cob.userservice.api.workflow.delete.model.ConsultantDeletionWorkflowDTO;
-import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteUserException;
 import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.workflow.delete.model.ConsultantDeletionWorkflowDTO;
+import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
@@ -33,14 +33,11 @@ import org.slf4j.Logger;
 @RunWith(MockitoJUnitRunner.class)
 public class DeleteRocketChatConsultantActionTest {
 
-  @InjectMocks
-  private DeleteRocketChatConsultantAction deleteRocketChatConsultantAction;
+  @InjectMocks private DeleteRocketChatConsultantAction deleteRocketChatConsultantAction;
 
-  @Mock
-  private RocketChatService rocketChatService;
+  @Mock private RocketChatService rocketChatService;
 
-  @Mock
-  private Logger logger;
+  @Mock private Logger logger;
 
   @Before
   public void setup() {
@@ -48,12 +45,13 @@ public class DeleteRocketChatConsultantActionTest {
   }
 
   @Test
-  public void execute_Should_deleteRocketChatUserAndReturnEmptyList_When_consultantDeletionIsSuccessful()
-      throws RocketChatDeleteUserException {
+  public void
+      execute_Should_deleteRocketChatUserAndReturnEmptyList_When_consultantDeletionIsSuccessful()
+          throws RocketChatDeleteUserException {
     Consultant consultant = new Consultant();
     consultant.setRocketChatId("rcId");
-    ConsultantDeletionWorkflowDTO workflowDTO = new ConsultantDeletionWorkflowDTO(consultant,
-        emptyList());
+    ConsultantDeletionWorkflowDTO workflowDTO =
+        new ConsultantDeletionWorkflowDTO(consultant, emptyList());
 
     this.deleteRocketChatConsultantAction.execute(workflowDTO);
     List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
@@ -64,8 +62,8 @@ public class DeleteRocketChatConsultantActionTest {
 
   @Test
   public void execute_Should_notDeleteRocketChatUserAndReturnEmptyList_When_consultantHasNoRcId() {
-    ConsultantDeletionWorkflowDTO workflowDTO = new ConsultantDeletionWorkflowDTO(new Consultant(),
-        emptyList());
+    ConsultantDeletionWorkflowDTO workflowDTO =
+        new ConsultantDeletionWorkflowDTO(new Consultant(), emptyList());
 
     this.deleteRocketChatConsultantAction.execute(workflowDTO);
     List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
@@ -80,8 +78,8 @@ public class DeleteRocketChatConsultantActionTest {
     Consultant consultant = new Consultant();
     consultant.setRocketChatId("consultantId");
     doThrow(new RuntimeException()).when(this.rocketChatService).deleteUser(any());
-    ConsultantDeletionWorkflowDTO workflowDTO = new ConsultantDeletionWorkflowDTO(consultant,
-        new ArrayList<>());
+    ConsultantDeletionWorkflowDTO workflowDTO =
+        new ConsultantDeletionWorkflowDTO(consultant, new ArrayList<>());
 
     this.deleteRocketChatConsultantAction.execute(workflowDTO);
     List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
@@ -94,5 +92,4 @@ public class DeleteRocketChatConsultantActionTest {
     assertThat(workflowErrors.get(0).getTimestamp(), notNullValue());
     verify(logger).error(anyString(), any(RuntimeException.class));
   }
-
 }

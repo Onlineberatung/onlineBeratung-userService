@@ -37,32 +37,25 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ConsultantAgencyAdminServiceTest {
 
-  @InjectMocks
-  private ConsultantAgencyAdminService consultantAgencyAdminService;
+  @InjectMocks private ConsultantAgencyAdminService consultantAgencyAdminService;
 
-  @Mock
-  private ConsultantAgencyRepository consultantAgencyRepository;
+  @Mock private ConsultantAgencyRepository consultantAgencyRepository;
 
-  @Mock
-  private ConsultantRepository consultantRepository;
+  @Mock private ConsultantRepository consultantRepository;
 
-  @Mock
-  private SessionRepository sessionRepository;
+  @Mock private SessionRepository sessionRepository;
 
-  @Mock
-  private RemoveConsultantFromRocketChatService removeFromRocketChatService;
+  @Mock private RemoveConsultantFromRocketChatService removeFromRocketChatService;
 
-  @Mock
-  private AgencyService agencyService;
+  @Mock private AgencyService agencyService;
 
-  @Mock
-  private AgencyAdminService agencyAdminService;
+  @Mock private AgencyAdminService agencyAdminService;
 
-  @Mock
-  private ConsultantAgencyDeletionValidationService agencyDeletionValidationService;
+  @Mock private ConsultantAgencyDeletionValidationService agencyDeletionValidationService;
 
   @Test
-  public void markAllAssignedConsultantsAsTeamConsultant_Should_notThrowNotFoundException_When_agencyWithIdDoesNotExist() {
+  public void
+      markAllAssignedConsultantsAsTeamConsultant_Should_notThrowNotFoundException_When_agencyWithIdDoesNotExist() {
     when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(any()))
         .thenReturn(Collections.emptyList());
 
@@ -71,14 +64,15 @@ public class ConsultantAgencyAdminServiceTest {
   }
 
   @Test
-  public void markAllAssignedConsultantsAsTeamConsultant_Should_setFlagTeamConsultantToAllNotAlreadyTeamConsultants() {
-    List<ConsultantAgency> consultantAgencies = new EasyRandom()
-        .objects(ConsultantAgency.class, 10)
-        .collect(Collectors.toList());
-    long teamConsultants = consultantAgencies.stream()
-        .map(ConsultantAgency::getConsultant)
-        .filter(Consultant::isTeamConsultant)
-        .count();
+  public void
+      markAllAssignedConsultantsAsTeamConsultant_Should_setFlagTeamConsultantToAllNotAlreadyTeamConsultants() {
+    List<ConsultantAgency> consultantAgencies =
+        new EasyRandom().objects(ConsultantAgency.class, 10).collect(Collectors.toList());
+    long teamConsultants =
+        consultantAgencies.stream()
+            .map(ConsultantAgency::getConsultant)
+            .filter(Consultant::isTeamConsultant)
+            .count();
 
     when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(any()))
         .thenReturn(consultantAgencies);
@@ -103,15 +97,13 @@ public class ConsultantAgencyAdminServiceTest {
   }
 
   @Test
-  public void removeConsultantsFromTeamSessionsByAgencyId_Should_removeTeamConsultingFlag_When_theyAreNotInAnotherTeamAgency() {
+  public void
+      removeConsultantsFromTeamSessionsByAgencyId_Should_removeTeamConsultingFlag_When_theyAreNotInAnotherTeamAgency() {
     Session session = new EasyRandom().nextObject(Session.class);
     session.setTeamSession(true);
-    List<Consultant> consultants = new EasyRandom()
-        .objects(Consultant.class, 10)
-        .collect(Collectors.toList());
-    AgencyDTO agencyDTO = new AgencyDTO()
-        .id(1L)
-        .teamAgency(false);
+    List<Consultant> consultants =
+        new EasyRandom().objects(Consultant.class, 10).collect(Collectors.toList());
+    AgencyDTO agencyDTO = new AgencyDTO().id(1L).teamAgency(false);
 
     when(this.sessionRepository.findByAgencyIdAndStatusAndTeamSessionIsTrue(any(), any()))
         .thenReturn(singletonList(session));
@@ -125,12 +117,12 @@ public class ConsultantAgencyAdminServiceTest {
   }
 
   @Test(expected = InternalServerErrorException.class)
-  public void removeConsultantsFromTeamSessionsByAgencyId_Should_throwInternalServerErrorException_When_agencyServiceFails() {
+  public void
+      removeConsultantsFromTeamSessionsByAgencyId_Should_throwInternalServerErrorException_When_agencyServiceFails() {
     Session session = new EasyRandom().nextObject(Session.class);
     session.setTeamSession(true);
-    List<Consultant> consultants = new EasyRandom()
-        .objects(Consultant.class, 10)
-        .collect(Collectors.toList());
+    List<Consultant> consultants =
+        new EasyRandom().objects(Consultant.class, 10).collect(Collectors.toList());
 
     when(this.sessionRepository.findByAgencyIdAndStatusAndTeamSessionIsTrue(any(), any()))
         .thenReturn(singletonList(session));
@@ -142,22 +134,25 @@ public class ConsultantAgencyAdminServiceTest {
   }
 
   @Test
-  public void markConsultantAgencyForDeletion_Should_throwCustomValidationHttpStatusException_When_relationDoesNotExist() {
+  public void
+      markConsultantAgencyForDeletion_Should_throwCustomValidationHttpStatusException_When_relationDoesNotExist() {
     try {
       this.consultantAgencyAdminService.markConsultantAgencyForDeletion("", 1L);
       fail("Exception was not thrown");
     } catch (CustomValidationHttpStatusException e) {
-      assertThat(requireNonNull(e.getCustomHttpHeader().get("X-Reason")).iterator().next(),
+      assertThat(
+          requireNonNull(e.getCustomHttpHeader().get("X-Reason")).iterator().next(),
           is(CONSULTANT_AGENCY_RELATION_DOES_NOT_EXIST.name()));
     }
   }
 
   @Test
-  public void markConsultantAgencyForDeletion_Should_deleteConsultantAgency_When_consultantAgencyCanBeDeleted() {
+  public void
+      markConsultantAgencyForDeletion_Should_deleteConsultantAgency_When_consultantAgencyCanBeDeleted() {
     ConsultantAgency consultantAgency = new EasyRandom().nextObject(ConsultantAgency.class);
     consultantAgency.setDeleteDate(null);
-    when(this.consultantAgencyRepository
-        .findByConsultantIdAndAgencyIdAndDeleteDateIsNull(any(), any()))
+    when(this.consultantAgencyRepository.findByConsultantIdAndAgencyIdAndDeleteDateIsNull(
+            any(), any()))
         .thenReturn(singletonList(consultantAgency));
 
     this.consultantAgencyAdminService.markConsultantAgencyForDeletion("", 1L);
@@ -166,5 +161,4 @@ public class ConsultantAgencyAdminServiceTest {
     verify(this.consultantAgencyRepository).save(any(ConsultantAgency.class));
     verify(this.agencyDeletionValidationService).validateAndMarkForDeletion(any());
   }
-
 }

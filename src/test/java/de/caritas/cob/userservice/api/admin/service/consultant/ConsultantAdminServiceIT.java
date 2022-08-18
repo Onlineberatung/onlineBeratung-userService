@@ -45,28 +45,22 @@ public class ConsultantAdminServiceIT {
 
   private static final String EXISTING_CONSULTANT = "0b3b1cc6-be98-4787-aa56-212259d811b9";
 
-  @Autowired
-  private ConsultantAdminService consultantAdminService;
+  @Autowired private ConsultantAdminService consultantAdminService;
 
-  @Autowired
-  private ConsultantRepository consultantRepository;
+  @Autowired private ConsultantRepository consultantRepository;
 
-  @Autowired
-  private ConsultantAgencyRepository consultantAgencyRepository;
+  @Autowired private ConsultantAgencyRepository consultantAgencyRepository;
 
-  @MockBean
-  private ConsultantCreatorService consultantCreatorService;
+  @MockBean private ConsultantCreatorService consultantCreatorService;
 
-  @MockBean
-  private ConsultantUpdateService consultantUpdateService;
+  @MockBean private ConsultantUpdateService consultantUpdateService;
 
-  @MockBean
-  private AppointmentService appointmentService;
+  @MockBean private AppointmentService appointmentService;
 
   @Test
   public void findConsultantById_Should_returnExpectedConsultant_When_consultantIdExists() {
-    ConsultantAdminResponseDTO consultantById = this.consultantAdminService
-        .findConsultantById(EXISTING_CONSULTANT);
+    ConsultantAdminResponseDTO consultantById =
+        this.consultantAdminService.findConsultantById(EXISTING_CONSULTANT);
 
     assertThat(consultantById.getEmbedded(), notNullValue());
     assertThat(consultantById.getEmbedded().getEmail(), notNullValue());
@@ -83,28 +77,33 @@ public class ConsultantAdminServiceIT {
 
   @Test
   public void findConsultantById_Should_returnExpectedConsultantLinks_When_consultantIdExists() {
-    ConsultantAdminResponseDTO consultantById = this.consultantAdminService
-        .findConsultantById(EXISTING_CONSULTANT);
+    ConsultantAdminResponseDTO consultantById =
+        this.consultantAdminService.findConsultantById(EXISTING_CONSULTANT);
 
     assertThat(consultantById.getLinks(), notNullValue());
     assertThat(consultantById.getLinks().getSelf(), notNullValue());
-    assertThat(consultantById.getLinks().getSelf().getHref(),
+    assertThat(
+        consultantById.getLinks().getSelf().getHref(),
         endsWith("/useradmin/consultants/" + EXISTING_CONSULTANT));
     assertThat(consultantById.getLinks().getSelf().getMethod(), is(MethodEnum.GET));
     assertThat(consultantById.getLinks().getUpdate(), notNullValue());
-    assertThat(consultantById.getLinks().getUpdate().getHref(),
+    assertThat(
+        consultantById.getLinks().getUpdate().getHref(),
         endsWith("/useradmin/consultants/" + EXISTING_CONSULTANT));
     assertThat(consultantById.getLinks().getUpdate().getMethod(), is(MethodEnum.PUT));
     assertThat(consultantById.getLinks().getDelete(), notNullValue());
-    assertThat(consultantById.getLinks().getDelete().getHref(),
+    assertThat(
+        consultantById.getLinks().getDelete().getHref(),
         endsWith("/useradmin/consultants/" + EXISTING_CONSULTANT));
     assertThat(consultantById.getLinks().getDelete().getMethod(), is(MethodEnum.DELETE));
     assertThat(consultantById.getLinks().getAgencies(), notNullValue());
-    assertThat(consultantById.getLinks().getAgencies().getHref(),
+    assertThat(
+        consultantById.getLinks().getAgencies().getHref(),
         endsWith("/useradmin/consultants/" + EXISTING_CONSULTANT + "/agencies"));
     assertThat(consultantById.getLinks().getAgencies().getMethod(), is(MethodEnum.GET));
     assertThat(consultantById.getLinks().getAddAgency(), notNullValue());
-    assertThat(consultantById.getLinks().getAddAgency().getHref(),
+    assertThat(
+        consultantById.getLinks().getAddAgency().getHref(),
         endsWith("/useradmin/consultants/" + EXISTING_CONSULTANT + "/agencies"));
     assertThat(consultantById.getLinks().getAddAgency().getMethod(), is(MethodEnum.POST));
   }
@@ -153,30 +152,38 @@ public class ConsultantAdminServiceIT {
     var deletedConsultant = consultantRepository.findById(consultant.getId());
     assertThat(deletedConsultant.get().getDeleteDate(), notNullValue());
     assertThat(deletedConsultant.get().getStatus(), is(ConsultantStatus.IN_DELETION));
-    deletedConsultant.get().getConsultantAgencies().forEach(ca -> {
-      assertThat(ca.getDeleteDate(), notNullValue());
-    });
+    deletedConsultant
+        .get()
+        .getConsultantAgencies()
+        .forEach(
+            ca -> {
+              assertThat(ca.getDeleteDate(), notNullValue());
+            });
   }
 
   private Consultant givenAPersistedConsultantWithMultipleAgencies() {
-    var parameters = new EasyRandomParameters()
-        .stringLengthRange(1, 17)
-        .excludeField(FieldPredicates.named("consultantAgencies"))
-        .excludeField(FieldPredicates.named("languages"))
-        .excludeField(FieldPredicates.named("consultantMobileTokens"))
-        .excludeField(FieldPredicates.named("deleteDate"))
-        .excludeField(FieldPredicates.named("appointments"))
-        .excludeField(FieldPredicates.named("sessions"));
+    var parameters =
+        new EasyRandomParameters()
+            .stringLengthRange(1, 17)
+            .excludeField(FieldPredicates.named("consultantAgencies"))
+            .excludeField(FieldPredicates.named("languages"))
+            .excludeField(FieldPredicates.named("consultantMobileTokens"))
+            .excludeField(FieldPredicates.named("deleteDate"))
+            .excludeField(FieldPredicates.named("appointments"))
+            .excludeField(FieldPredicates.named("sessions"));
     var consultant = new EasyRandom(parameters).nextObject(Consultant.class);
     consultantRepository.save(consultant);
-    var consultantAgencies = new EasyRandom().objects(ConsultantAgency.class, 10)
-        .peek(agencyRelation -> {
-          agencyRelation.setAgencyId(1L);
-          agencyRelation.setConsultant(consultant);
-          agencyRelation.setDeleteDate(null);
-        }).collect(Collectors.toList());
+    var consultantAgencies =
+        new EasyRandom()
+            .objects(ConsultantAgency.class, 10)
+            .peek(
+                agencyRelation -> {
+                  agencyRelation.setAgencyId(1L);
+                  agencyRelation.setConsultant(consultant);
+                  agencyRelation.setDeleteDate(null);
+                })
+            .collect(Collectors.toList());
     consultantAgencyRepository.saveAll(consultantAgencies);
     return consultant;
   }
-
 }

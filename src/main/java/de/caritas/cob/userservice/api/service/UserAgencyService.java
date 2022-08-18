@@ -1,14 +1,14 @@
 package de.caritas.cob.userservice.api.service;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.model.UserAgency;
+import de.caritas.cob.userservice.api.port.out.UserAgencyRepository;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
-import de.caritas.cob.userservice.api.model.User;
-import de.caritas.cob.userservice.api.model.UserAgency;
-import de.caritas.cob.userservice.api.port.out.UserAgencyRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -26,8 +26,8 @@ public class UserAgencyService {
     try {
       return userAgencyRepository.save(userAgency);
     } catch (DataAccessException ex) {
-      throw new InternalServerErrorException("Database error while saving user agency",
-          LogService::logDatabaseError);
+      throw new InternalServerErrorException(
+          "Database error while saving user agency", LogService::logDatabaseError);
     }
   }
 
@@ -41,8 +41,8 @@ public class UserAgencyService {
     try {
       return userAgencyRepository.findByUser(user);
     } catch (DataAccessException ex) {
-      throw new InternalServerErrorException("Database error while retrieving user agencies",
-          LogService::logDatabaseError);
+      throw new InternalServerErrorException(
+          "Database error while retrieving user agencies", LogService::logDatabaseError);
     }
   }
 
@@ -56,9 +56,8 @@ public class UserAgencyService {
       userAgencyRepository.delete(userAgency);
 
     } catch (DataAccessException | IllegalArgumentException ex) {
-      throw new InternalServerErrorException("Database error while saving user agency",
-          LogService::logDatabaseError);
+      throw new InternalServerErrorException(
+          "Database error while saving user agency", LogService::logDatabaseError);
     }
   }
-
 }

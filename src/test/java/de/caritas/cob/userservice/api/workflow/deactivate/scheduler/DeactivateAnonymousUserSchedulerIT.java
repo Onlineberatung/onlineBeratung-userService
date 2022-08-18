@@ -4,11 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
-import de.caritas.cob.userservice.api.conversation.facade.CreateAnonymousEnquiryFacade;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAnonymousEnquiryDTO;
+import de.caritas.cob.userservice.api.conversation.facade.CreateAnonymousEnquiryFacade;
 import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.api.testConfig.ApiControllerTestConfig;
 import de.caritas.cob.userservice.api.testConfig.KeycloakTestConfig;
@@ -31,20 +31,15 @@ import org.springframework.test.context.TestPropertySource;
 @Import({KeycloakTestConfig.class, RocketChatTestConfig.class, ApiControllerTestConfig.class})
 class DeactivateAnonymousUserSchedulerIT {
 
-  @Autowired
-  private DeactivateAnonymousUserScheduler deactivateAnonymousUserScheduler;
+  @Autowired private DeactivateAnonymousUserScheduler deactivateAnonymousUserScheduler;
 
-  @Autowired
-  private CreateAnonymousEnquiryFacade createAnonymousEnquiryFacade;
+  @Autowired private CreateAnonymousEnquiryFacade createAnonymousEnquiryFacade;
 
-  @Autowired
-  private SessionRepository sessionRepository;
+  @Autowired private SessionRepository sessionRepository;
 
-  @Autowired
-  private UserService userService;
+  @Autowired private UserService userService;
 
-  @Autowired
-  private ActionsRegistry actionsRegistry;
+  @Autowired private ActionsRegistry actionsRegistry;
 
   @Value("${user.anonymous.deactivateworkflow.periodMinutes}")
   private long deactivatePeriodInMinutes;
@@ -53,8 +48,7 @@ class DeactivateAnonymousUserSchedulerIT {
 
   @BeforeEach
   public void setup() {
-    var createAnonymousEnquiryDTO = new CreateAnonymousEnquiryDTO()
-        .consultingType(12);
+    var createAnonymousEnquiryDTO = new CreateAnonymousEnquiryDTO().consultingType(12);
     var responseDTO =
         createAnonymousEnquiryFacade.createAnonymousEnquiry(createAnonymousEnquiryDTO);
 
@@ -88,10 +82,8 @@ class DeactivateAnonymousUserSchedulerIT {
   @Test
   void performDeletionWorkflow_Should_putSessionToDone_When_SessionAreDoneWithinDeletionPeriod() {
     currentSession.setStatus(SessionStatus.IN_PROGRESS);
-    var oneMinuteBeforeDeletionPeriodIsOver = LocalDateTime
-        .now()
-        .minusMinutes(deactivatePeriodInMinutes)
-        .plusMinutes(1L);
+    var oneMinuteBeforeDeletionPeriodIsOver =
+        LocalDateTime.now().minusMinutes(deactivatePeriodInMinutes).plusMinutes(1L);
     currentSession.setUpdateDate(oneMinuteBeforeDeletionPeriodIsOver);
     sessionRepository.save(currentSession);
 
@@ -103,7 +95,8 @@ class DeactivateAnonymousUserSchedulerIT {
   }
 
   @Test
-  void performDeactivationWorkflow_Should_deleteUser_When_UserSessionIsDoneAndOutsideOfDeletionPeriod() {
+  void
+      performDeactivationWorkflow_Should_deleteUser_When_UserSessionIsDoneAndOutsideOfDeletionPeriod() {
     prepareCurrentSessionForDeactivation();
 
     deactivateAnonymousUserScheduler.performDeactivationWorkflow();
@@ -115,11 +108,8 @@ class DeactivateAnonymousUserSchedulerIT {
 
   private void prepareCurrentSessionForDeactivation() {
     currentSession.setStatus(SessionStatus.IN_PROGRESS);
-    var timeToDeactivation = LocalDateTime
-        .now()
-        .minusMinutes(deactivatePeriodInMinutes);
+    var timeToDeactivation = LocalDateTime.now().minusMinutes(deactivatePeriodInMinutes);
     currentSession.setUpdateDate(timeToDeactivation);
     sessionRepository.save(currentSession);
   }
-
 }

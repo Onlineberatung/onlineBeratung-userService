@@ -14,9 +14,7 @@ import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-/**
- * Provides conditions used for Rocket.Chat group interactions.
- */
+/** Provides conditions used for Rocket.Chat group interactions. */
 @RequiredArgsConstructor
 class RocketChatOperationConditionProvider {
 
@@ -40,29 +38,29 @@ class RocketChatOperationConditionProvider {
 
   private boolean isTeamSessionAndMainConsultant() {
     return this.session.getStatus().equals(SessionStatus.IN_PROGRESS)
-        && this.session.isTeamSession() && canAddToTeamConsultingSession();
+        && this.session.isTeamSession()
+        && canAddToTeamConsultingSession();
   }
 
   private Boolean canAddToTeamConsultingSession() {
-    var consultingTypeSettings = consultingTypeManager
-        .getConsultingTypeSettings(this.session.getConsultingTypeId());
-    return (nonNull(consultingTypeSettings) && isFalse(
-        consultingTypeSettings.getExcludeNonMainConsultantsFromTeamSessions()))
+    var consultingTypeSettings =
+        consultingTypeManager.getConsultingTypeSettings(this.session.getConsultingTypeId());
+    return (nonNull(consultingTypeSettings)
+            && isFalse(consultingTypeSettings.getExcludeNonMainConsultantsFromTeamSessions()))
         || isMainConsultant();
   }
 
   private boolean isMainConsultant() {
-    return identityClient
-        .userHasAuthority(this.consultant.getId(), AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS)
-        || identityClient
-        .userHasRole(this.consultant.getId(), UserRole.MAIN_CONSULTANT.name());
+    return identityClient.userHasAuthority(
+            this.consultant.getId(), AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS)
+        || identityClient.userHasRole(this.consultant.getId(), UserRole.MAIN_CONSULTANT.name());
   }
 
   /**
    * Checks if a given {@link Consultant} can be added to a Rocket.Chat feedback group.
    *
    * @return true if {@link Session} has feedback room and {@link Session} is an enquiry or {@link
-   * Consultant} is a main consultant
+   *     Consultant} is a main consultant
    */
   boolean canAddToRocketChatFeedbackGroup() {
     if (isNull(this.session.getFeedbackGroupId())) {
@@ -70,5 +68,4 @@ class RocketChatOperationConditionProvider {
     }
     return isEnquiry() || isMainConsultant();
   }
-
 }

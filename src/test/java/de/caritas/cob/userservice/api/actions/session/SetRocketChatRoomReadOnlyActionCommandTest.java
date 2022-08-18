@@ -9,8 +9,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
-import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.model.Session;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -25,11 +25,9 @@ import org.slf4j.Logger;
 @ExtendWith(MockitoExtension.class)
 class SetRocketChatRoomReadOnlyActionCommandTest {
 
-  @InjectMocks
-  private SetRocketChatRoomReadOnlyActionCommand actionCommand;
+  @InjectMocks private SetRocketChatRoomReadOnlyActionCommand actionCommand;
 
-  @Mock
-  private RocketChatService rocketChatService;
+  @Mock private RocketChatService rocketChatService;
 
   private static final Logger LOGGER = mock(Logger.class);
 
@@ -73,5 +71,4 @@ class SetRocketChatRoomReadOnlyActionCommandTest {
 
     verify(LOGGER).error(anyString(), anyString());
   }
-
 }

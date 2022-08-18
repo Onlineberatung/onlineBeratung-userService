@@ -23,11 +23,9 @@ class ChatRepositoryIT {
 
   private static final EasyRandom easyRandom = new EasyRandom();
 
-  @Autowired
-  private ChatRepository underTest;
+  @Autowired private ChatRepository underTest;
 
-  @Autowired
-  private ConsultantRepository consultantRepository;
+  @Autowired private ConsultantRepository consultantRepository;
 
   private Consultant consultant;
 

@@ -22,7 +22,8 @@ public class RocketChatClient {
 
   private final RocketChatCredentialsProvider rcCredentialHelper;
 
-  public RocketChatClient(@Qualifier("rocketChatRestTemplate") final RestTemplate restTemplate,
+  public RocketChatClient(
+      @Qualifier("rocketChatRestTemplate") final RestTemplate restTemplate,
       final RocketChatCredentials rocketChatCredentials,
       final RocketChatCredentialsProvider rocketChatCredentialsProvider) {
     this.restTemplate = restTemplate;
@@ -36,8 +37,8 @@ public class RocketChatClient {
     return restTemplate.postForEntity(url, entity, responseType);
   }
 
-  public <T> ResponseEntity<T> postForEntity(String url, String userId, Object request,
-      Class<T> responseType) {
+  public <T> ResponseEntity<T> postForEntity(
+      String url, String userId, Object request, Class<T> responseType) {
     var entity = new HttpEntity<>(request, httpHeaders(userId));
 
     return restTemplate.postForEntity(url, entity, responseType);
@@ -72,6 +73,4 @@ public class RocketChatClient {
 
     return httpHeaders;
   }
-
-
 }

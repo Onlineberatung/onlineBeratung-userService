@@ -23,9 +23,7 @@ import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 
-/**
- * Create new chat model
- */
+/** Create new chat model */
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -66,7 +64,16 @@ public class ChatDTO {
 
   @Override
   public String toString() {
-    return "ChatDTO [topic=" + topic + ", startDate=" + startDate + ", startTime=" + startTime
-        + ", duration=" + duration + ", repetitive=" + repetitive + "]";
+    return "ChatDTO [topic="
+        + topic
+        + ", startDate="
+        + startDate
+        + ", startTime="
+        + startTime
+        + ", duration="
+        + duration
+        + ", repetitive="
+        + repetitive
+        + "]";
   }
 }

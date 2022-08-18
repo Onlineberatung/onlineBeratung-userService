@@ -5,9 +5,7 @@ import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc
 import java.time.LocalDateTime;
 import java.util.Set;
 
-/**
- * Definition for required input data used to create a new consultantAgency.
- */
+/** Definition for required input data used to create a new consultantAgency. */
 public interface ConsultantAgencyCreationInput {
 
   String getConsultantId();
@@ -23,5 +21,4 @@ public interface ConsultantAgencyCreationInput {
   default LocalDateTime getUpdateDate() {
     return nowInUtc();
   }
-
 }

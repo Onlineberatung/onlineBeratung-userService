@@ -23,9 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 
-/**
- * Service class to provide live event triggers to the live service.
- */
+/** Service class to provide live event triggers to the live service. */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -37,8 +35,7 @@ public class LiveEventNotificationService {
   private final @NonNull MobilePushNotificationService mobilePushNotificationService;
 
   private static final String RC_GROUP_ID_MESSAGE_TEMPLATE = "Rocket.Chat group ID: %s";
-  private static final String NEW_ANONYMOUS_ENQUIRY_MESSAGE_TEMPLATE =
-      "Anonymous Enquiry ID: %s";
+  private static final String NEW_ANONYMOUS_ENQUIRY_MESSAGE_TEMPLATE = "Anonymous Enquiry ID: %s";
 
   /**
    * Sends a anonymous enquiry accepted event to the live service,
@@ -47,20 +44,20 @@ public class LiveEventNotificationService {
    */
   public void sendAcceptAnonymousEnquiryEventToUser(String userId) {
     if (isNotBlank(userId)) {
-      var liveEventMessage = new LiveEventMessage()
-          .eventType(ANONYMOUSENQUIRYACCEPTED)
-          .userIds(singletonList(userId));
+      var liveEventMessage =
+          new LiveEventMessage().eventType(ANONYMOUSENQUIRYACCEPTED).userIds(singletonList(userId));
       sendLiveEventMessage(liveEventMessage);
     }
   }
 
   private void sendLiveEventMessage(LiveEventMessage liveEventMessage) {
-    sendLiveEventMessage(liveEventMessage,
+    sendLiveEventMessage(
+        liveEventMessage,
         () -> String.format("Unable to trigger live event message %s", liveEventMessage));
   }
 
-  private void sendLiveEventMessage(LiveEventMessage liveEventMessage,
-      Supplier<String> errorMessageSupplier) {
+  private void sendLiveEventMessage(
+      LiveEventMessage liveEventMessage, Supplier<String> errorMessageSupplier) {
     try {
       this.liveControllerApi.sendLiveEvent(liveEventMessage);
     } catch (RestClientException e) {
@@ -76,10 +73,13 @@ public class LiveEventNotificationService {
    */
   public void sendLiveDirectMessageEventToUsers(String rcGroupId) {
     if (isNotBlank(rcGroupId)) {
-      var userIds = this.userIdsProviderFactory.byRocketChatGroup(rcGroupId)
-          .collectUserIds(rcGroupId).stream()
-          .filter(this::notInitiatingUser)
-          .collect(Collectors.toList());
+      var userIds =
+          this.userIdsProviderFactory
+              .byRocketChatGroup(rcGroupId)
+              .collectUserIds(rcGroupId)
+              .stream()
+              .filter(this::notInitiatingUser)
+              .collect(Collectors.toList());
 
       triggerDirectMessageLiveEvent(userIds, rcGroupId);
       this.mobilePushNotificationService.triggerMobilePushNotification(userIds);
@@ -92,40 +92,41 @@ public class LiveEventNotificationService {
 
   private void triggerDirectMessageLiveEvent(List<String> userIds, String rcGroupId) {
     if (isNotEmpty(userIds)) {
-      var liveEventMessage = new LiveEventMessage()
-          .eventType(DIRECTMESSAGE)
-          .userIds(userIds);
+      var liveEventMessage = new LiveEventMessage().eventType(DIRECTMESSAGE).userIds(userIds);
 
-      sendLiveEventMessage(liveEventMessage, () -> {
-        var rcMessage = String.format(RC_GROUP_ID_MESSAGE_TEMPLATE, rcGroupId);
-        return makeUserIdsEventTypeMessage(liveEventMessage, rcMessage);
-      });
+      sendLiveEventMessage(
+          liveEventMessage,
+          () -> {
+            var rcMessage = String.format(RC_GROUP_ID_MESSAGE_TEMPLATE, rcGroupId);
+            return makeUserIdsEventTypeMessage(liveEventMessage, rcMessage);
+          });
     }
   }
 
-  private String makeUserIdsEventTypeMessage(LiveEventMessage triggeredLiveEventMessage,
-      String withMessage) {
-    return String.format("Unable to trigger %s live event message %s",
+  private String makeUserIdsEventTypeMessage(
+      LiveEventMessage triggeredLiveEventMessage, String withMessage) {
+    return String.format(
+        "Unable to trigger %s live event message %s",
         triggeredLiveEventMessage.getEventType(), withMessage);
   }
 
   /**
    * Sends a new anonymous enquiry live event to the provided user IDs.
    *
-   * @param userIds   list of consultant user IDs
+   * @param userIds list of consultant user IDs
    * @param sessionId anonymous enquiry ID
    */
   public void sendLiveNewAnonymousEnquiryEventToUsers(List<String> userIds, Long sessionId) {
     if (isNotEmpty(userIds)) {
-      var liveEventMessage = new LiveEventMessage()
-          .eventType(NEWANONYMOUSENQUIRY)
-          .userIds(userIds);
+      var liveEventMessage = new LiveEventMessage().eventType(NEWANONYMOUSENQUIRY).userIds(userIds);
 
-      sendLiveEventMessage(liveEventMessage, () -> {
-        var anonymousEnquiryMessage =
-            String.format(NEW_ANONYMOUS_ENQUIRY_MESSAGE_TEMPLATE, sessionId);
-        return makeUserIdsEventTypeMessage(liveEventMessage, anonymousEnquiryMessage);
-      });
+      sendLiveEventMessage(
+          liveEventMessage,
+          () -> {
+            var anonymousEnquiryMessage =
+                String.format(NEW_ANONYMOUS_ENQUIRY_MESSAGE_TEMPLATE, sessionId);
+            return makeUserIdsEventTypeMessage(liveEventMessage, anonymousEnquiryMessage);
+          });
     }
   }
 
@@ -134,16 +135,16 @@ public class LiveEventNotificationService {
    *
    * @param userIds list of consultant user IDs
    */
-  public void sendLiveFinishedAnonymousConversationToUsers(List<String> userIds,
-      FinishConversationPhaseEnum finishConversationPhase) {
+  public void sendLiveFinishedAnonymousConversationToUsers(
+      List<String> userIds, FinishConversationPhaseEnum finishConversationPhase) {
     if (isNotEmpty(userIds)) {
-      var liveEventMessage = new LiveEventMessage()
-          .eventType(ANONYMOUSCONVERSATIONFINISHED)
-          .eventContent(new StatusSource().finishConversationPhase(finishConversationPhase))
-          .userIds(userIds);
+      var liveEventMessage =
+          new LiveEventMessage()
+              .eventType(ANONYMOUSCONVERSATIONFINISHED)
+              .eventContent(new StatusSource().finishConversationPhase(finishConversationPhase))
+              .userIds(userIds);
 
       sendLiveEventMessage(liveEventMessage);
     }
   }
-
 }

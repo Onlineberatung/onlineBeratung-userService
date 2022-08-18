@@ -56,22 +56,20 @@ import org.springframework.web.client.RestTemplate;
 @RunWith(MockitoJUnitRunner.class)
 public class RocketChatCredentialsProviderTest {
 
-  /**
-   * FIELD Names
-   */
+  /** FIELD Names */
+  private static final String FIELD_NAME_TECHNICAL_USER_A = "techUserA";
 
-  private final static String FIELD_NAME_TECHNICAL_USER_A = "techUserA";
-  private final static String FIELD_NAME_TECHNICAL_USER_B = "techUserB";
-  private final static String FIELD_NAME_TECHNICAL_USER_C = "techUserB";
+  private static final String FIELD_NAME_TECHNICAL_USER_B = "techUserB";
+  private static final String FIELD_NAME_TECHNICAL_USER_C = "techUserB";
 
-  private final static String FIELD_NAME_SYSTEM_USER_A = "systemUserA";
-  private final static String FIELD_NAME_SYSTEM_USER_B = "systemUserB";
+  private static final String FIELD_NAME_SYSTEM_USER_A = "systemUserA";
+  private static final String FIELD_NAME_SYSTEM_USER_B = "systemUserB";
 
-  private final static String FIELD_NAME_TECHNICAL_USERNAME = "technicalUsername";
-  private final static String FIELD_NAME_TECHNICAL_PASSWORD = "technicalPassword";
+  private static final String FIELD_NAME_TECHNICAL_USERNAME = "technicalUsername";
+  private static final String FIELD_NAME_TECHNICAL_PASSWORD = "technicalPassword";
 
-  private final static String FIELD_NAME_SYSTEM_USERNAME = "systemUsername";
-  private final static String FIELD_NAME_SYSTEM_PASSWORD = "systemPassword";
+  private static final String FIELD_NAME_SYSTEM_USERNAME = "systemUsername";
+  private static final String FIELD_NAME_SYSTEM_PASSWORD = "systemPassword";
 
   private final String RC_URL_CHAT_USER_LOGIN = "http://localhost/api/v1/login";
 
@@ -101,38 +99,40 @@ public class RocketChatCredentialsProviderTest {
   LoginResponseDTO LOGIN_RESPONSE_DTO_SYSTEM_USER_B =
       new LoginResponseDTO("status", new DataDTO(SYSTEM_USER_B_ID, SYSTEM_USER_B_TOKEN, null));
 
+  LoginResponseDTO LOGIN_RESPONSE_DTO_TECHNICAL_USER_A =
+      new LoginResponseDTO(
+          "status", new DataDTO(TECHNICAL_USER_A_ID, TECHNICAL_USER_A_TOKEN, null));
 
-  LoginResponseDTO LOGIN_RESPONSE_DTO_TECHNICAL_USER_A = new LoginResponseDTO("status",
-      new DataDTO(TECHNICAL_USER_A_ID, TECHNICAL_USER_A_TOKEN, null));
+  LoginResponseDTO LOGIN_RESPONSE_DTO_TECHNICAL_USER_B =
+      new LoginResponseDTO(
+          "status", new DataDTO(TECHNICAL_USER_B_ID, TECHNICAL_USER_B_TOKEN, null));
 
-  LoginResponseDTO LOGIN_RESPONSE_DTO_TECHNICAL_USER_B = new LoginResponseDTO("status",
-      new DataDTO(TECHNICAL_USER_B_ID, TECHNICAL_USER_B_TOKEN, null));
+  LogoutResponseDTO LOGOUT_RESPONSE_DTO_SYSTEM_USER_A =
+      new LogoutResponseDTO(
+          "status",
+          SYSTEM_USER_USERNAME,
+          new de.caritas.cob.userservice.api.adapters.rocketchat.dto.logout.DataDTO(
+              SYSTEM_USER_A_USERNAME));
 
-  LogoutResponseDTO LOGOUT_RESPONSE_DTO_SYSTEM_USER_A = new LogoutResponseDTO("status",
-      SYSTEM_USER_USERNAME,
-      new de.caritas.cob.userservice.api.adapters.rocketchat.dto.logout.DataDTO(
-          SYSTEM_USER_A_USERNAME));
+  LogoutResponseDTO LOGOUT_RESPONSE_DTO_TECHNICAL_USER_A =
+      new LogoutResponseDTO(
+          "status",
+          TECHNICAL_USER_USERNAME,
+          new de.caritas.cob.userservice.api.adapters.rocketchat.dto.logout.DataDTO(
+              TECHNICAL_USER_A_USERNAME));
 
-  LogoutResponseDTO LOGOUT_RESPONSE_DTO_TECHNICAL_USER_A = new LogoutResponseDTO("status",
-      TECHNICAL_USER_USERNAME,
-      new de.caritas.cob.userservice.api.adapters.rocketchat.dto.logout.DataDTO(
-          TECHNICAL_USER_A_USERNAME));
+  private static final String TECHNICAL_USER_USERNAME = "techUserName";
+  private static final String TECHNICAL_USER_PW = "techUserPW";
 
-  private final static String TECHNICAL_USER_USERNAME = "techUserName";
-  private final static String TECHNICAL_USER_PW = "techUserPW";
+  private static final String SYSTEM_USER_USERNAME = "sysUserName";
+  private static final String SYSTEM_USER_PW = "sysUserPW";
 
-  private final static String SYSTEM_USER_USERNAME = "sysUserName";
-  private final static String SYSTEM_USER_PW = "sysUserPW";
+  private final RocketChatConfig rocketChatConfig =
+      new RocketChatConfig(new MockHttpServletRequest());
 
-  private final RocketChatConfig rocketChatConfig = new RocketChatConfig(
-      new MockHttpServletRequest()
-  );
+  @InjectMocks private RocketChatCredentialsProvider rcCredentialHelper;
 
-  @InjectMocks
-  private RocketChatCredentialsProvider rcCredentialHelper;
-
-  @Mock
-  private RestTemplate restTemplate;
+  @Mock private RestTemplate restTemplate;
 
   @Before
   public void setup() throws NoSuchFieldException {
@@ -145,13 +145,9 @@ public class RocketChatCredentialsProviderTest {
     setField(rcCredentialHelper, "rocketChatConfig", rocketChatConfig);
   }
 
-  /**
-   * Method: updateCredentials
-   **/
-
+  /** Method: updateCredentials */
   @Test
-  public void updateCredentials_Should_LoginAUsers_WhenNoUsersAreLoggedIn()
-      throws Exception {
+  public void updateCredentials_Should_LoginAUsers_WhenNoUsersAreLoggedIn() throws Exception {
     // Prepare Header for Requests
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -160,18 +156,21 @@ public class RocketChatCredentialsProviderTest {
     HttpEntity<MultiValueMap<String, String>> requestTechnical =
         new HttpEntity<>(MULTI_VALUE_MAP_WITH_TECHNICAL_USER_CREDENTIALS, headers);
 
-    when(restTemplate.postForEntity(ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGIN),
-        ArgumentMatchers.eq(requestTechnical), ArgumentMatchers.<Class<LoginResponseDTO>>any()))
+    when(restTemplate.postForEntity(
+            ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGIN),
+            ArgumentMatchers.eq(requestTechnical),
+            ArgumentMatchers.<Class<LoginResponseDTO>>any()))
         .thenReturn(new ResponseEntity<>(LOGIN_RESPONSE_DTO_TECHNICAL_USER_A, HttpStatus.OK));
 
     // Prepare intercept login system user
     HttpEntity<MultiValueMap<String, String>> requestSys =
         new HttpEntity<>(MULTI_VALUE_MAP_WITH_SYSTEM_USER_CREDENTIALS, headers);
 
-    when(restTemplate.postForEntity(ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGIN),
-        ArgumentMatchers.eq(requestSys), ArgumentMatchers.<Class<LoginResponseDTO>>any()))
-        .thenReturn(new ResponseEntity<>(LOGIN_RESPONSE_DTO_SYSTEM_USER_A,
-            HttpStatus.OK));
+    when(restTemplate.postForEntity(
+            ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGIN),
+            ArgumentMatchers.eq(requestSys),
+            ArgumentMatchers.<Class<LoginResponseDTO>>any()))
+        .thenReturn(new ResponseEntity<>(LOGIN_RESPONSE_DTO_SYSTEM_USER_A, HttpStatus.OK));
 
     // Execute test
     rcCredentialHelper.updateCredentials();
@@ -190,44 +189,48 @@ public class RocketChatCredentialsProviderTest {
   }
 
   @Test
-  public void updateCredentials_Should_LoginBUsers_WhenAUsersAreLoggedIn()
-      throws Exception {
+  public void updateCredentials_Should_LoginBUsers_WhenAUsersAreLoggedIn() throws Exception {
     // Prepare Header for Requests
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
     // Prepare intercept login technical user
     HttpEntity<MultiValueMap<String, String>> requestTechnical =
-        new HttpEntity<>(
-            MULTI_VALUE_MAP_WITH_TECHNICAL_USER_CREDENTIALS, headers);
+        new HttpEntity<>(MULTI_VALUE_MAP_WITH_TECHNICAL_USER_CREDENTIALS, headers);
 
-    when(restTemplate.postForEntity(ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGIN),
-        ArgumentMatchers.eq(requestTechnical), ArgumentMatchers.<Class<LoginResponseDTO>>any()))
-        .thenReturn(new ResponseEntity<>(LOGIN_RESPONSE_DTO_TECHNICAL_USER_B,
-            HttpStatus.OK));
+    when(restTemplate.postForEntity(
+            ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGIN),
+            ArgumentMatchers.eq(requestTechnical),
+            ArgumentMatchers.<Class<LoginResponseDTO>>any()))
+        .thenReturn(new ResponseEntity<>(LOGIN_RESPONSE_DTO_TECHNICAL_USER_B, HttpStatus.OK));
 
     // Prepare intercept login system user
     HttpEntity<MultiValueMap<String, String>> requestSys =
         new HttpEntity<>(MULTI_VALUE_MAP_WITH_SYSTEM_USER_CREDENTIALS, headers);
 
-    when(restTemplate.postForEntity(ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGIN),
-        ArgumentMatchers.eq(requestSys), ArgumentMatchers.<Class<LoginResponseDTO>>any()))
-        .thenReturn(new ResponseEntity<>(LOGIN_RESPONSE_DTO_SYSTEM_USER_B,
-            HttpStatus.OK));
+    when(restTemplate.postForEntity(
+            ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGIN),
+            ArgumentMatchers.eq(requestSys),
+            ArgumentMatchers.<Class<LoginResponseDTO>>any()))
+        .thenReturn(new ResponseEntity<>(LOGIN_RESPONSE_DTO_SYSTEM_USER_B, HttpStatus.OK));
 
     RocketChatCredentials systemA =
-        RocketChatCredentials.builder().rocketChatToken(SYSTEM_USER_A_TOKEN)
-            .rocketChatUserId(SYSTEM_USER_A_ID).rocketChatUsername(SYSTEM_USER_A_USERNAME)
-            .timeStampCreated(nowInUtc().minusMinutes(5)).build();
-    setField(rcCredentialHelper, FIELD_NAME_SYSTEM_USER_A,
-        new AtomicReference<>(systemA));
+        RocketChatCredentials.builder()
+            .rocketChatToken(SYSTEM_USER_A_TOKEN)
+            .rocketChatUserId(SYSTEM_USER_A_ID)
+            .rocketChatUsername(SYSTEM_USER_A_USERNAME)
+            .timeStampCreated(nowInUtc().minusMinutes(5))
+            .build();
+    setField(rcCredentialHelper, FIELD_NAME_SYSTEM_USER_A, new AtomicReference<>(systemA));
 
     RocketChatCredentials technicalA =
-        RocketChatCredentials.builder().rocketChatToken(TECHNICAL_USER_A_TOKEN)
-            .rocketChatUserId(TECHNICAL_USER_A_ID).rocketChatUsername(TECHNICAL_USER_A_USERNAME)
-            .timeStampCreated(nowInUtc().minusMinutes(5)).build();
-    setField(rcCredentialHelper, FIELD_NAME_TECHNICAL_USER_A,
-        new AtomicReference<>(technicalA));
+        RocketChatCredentials.builder()
+            .rocketChatToken(TECHNICAL_USER_A_TOKEN)
+            .rocketChatUserId(TECHNICAL_USER_A_ID)
+            .rocketChatUsername(TECHNICAL_USER_A_USERNAME)
+            .timeStampCreated(nowInUtc().minusMinutes(5))
+            .build();
+    setField(rcCredentialHelper, FIELD_NAME_TECHNICAL_USER_A, new AtomicReference<>(technicalA));
 
     // Get and check system user - pre test needs to be User A
     RocketChatCredentials systemUser = rcCredentialHelper.getSystemUser();
@@ -266,35 +269,43 @@ public class RocketChatCredentialsProviderTest {
 
     // create and set technical A user
     RocketChatCredentials technicalA =
-        RocketChatCredentials.builder().rocketChatToken(TECHNICAL_USER_A_TOKEN)
-            .rocketChatUserId(TECHNICAL_USER_A_ID).rocketChatUsername(TECHNICAL_USER_A_USERNAME)
-            .timeStampCreated(nowInUtc().minusMinutes(5)).build();
-    setField(rcCredentialHelper, FIELD_NAME_TECHNICAL_USER_A,
-        new AtomicReference<>(technicalA));
+        RocketChatCredentials.builder()
+            .rocketChatToken(TECHNICAL_USER_A_TOKEN)
+            .rocketChatUserId(TECHNICAL_USER_A_ID)
+            .rocketChatUsername(TECHNICAL_USER_A_USERNAME)
+            .timeStampCreated(nowInUtc().minusMinutes(5))
+            .build();
+    setField(rcCredentialHelper, FIELD_NAME_TECHNICAL_USER_A, new AtomicReference<>(technicalA));
 
     // create and set technical B user
     RocketChatCredentials technicalB =
-        RocketChatCredentials.builder().rocketChatToken(TECHNICAL_USER_B_TOKEN)
-            .rocketChatUserId(TECHNICAL_USER_B_ID).rocketChatUsername(TECHNICAL_USER_B_USERNAME)
-            .timeStampCreated(nowInUtc().minusMinutes(1)).build();
-    setField(rcCredentialHelper, FIELD_NAME_TECHNICAL_USER_B,
-        new AtomicReference<>(technicalB));
+        RocketChatCredentials.builder()
+            .rocketChatToken(TECHNICAL_USER_B_TOKEN)
+            .rocketChatUserId(TECHNICAL_USER_B_ID)
+            .rocketChatUsername(TECHNICAL_USER_B_USERNAME)
+            .timeStampCreated(nowInUtc().minusMinutes(1))
+            .build();
+    setField(rcCredentialHelper, FIELD_NAME_TECHNICAL_USER_B, new AtomicReference<>(technicalB));
 
     // create and set system A user
     RocketChatCredentials systemA =
-        RocketChatCredentials.builder().rocketChatToken(SYSTEM_USER_A_TOKEN)
-            .rocketChatUserId(SYSTEM_USER_A_ID).rocketChatUsername(SYSTEM_USER_A_USERNAME)
-            .timeStampCreated(nowInUtc().minusMinutes(5)).build();
-    setField(rcCredentialHelper, FIELD_NAME_SYSTEM_USER_A,
-        new AtomicReference<>(systemA));
+        RocketChatCredentials.builder()
+            .rocketChatToken(SYSTEM_USER_A_TOKEN)
+            .rocketChatUserId(SYSTEM_USER_A_ID)
+            .rocketChatUsername(SYSTEM_USER_A_USERNAME)
+            .timeStampCreated(nowInUtc().minusMinutes(5))
+            .build();
+    setField(rcCredentialHelper, FIELD_NAME_SYSTEM_USER_A, new AtomicReference<>(systemA));
 
     // create and set system B user
     RocketChatCredentials systemB =
-        RocketChatCredentials.builder().rocketChatToken(SYSTEM_USER_B_TOKEN)
-            .rocketChatUserId(SYSTEM_USER_B_ID).rocketChatUsername(SYSTEM_USER_A_USERNAME)
-            .timeStampCreated(nowInUtc().minusMinutes(1)).build();
-    setField(rcCredentialHelper, FIELD_NAME_SYSTEM_USER_B,
-        new AtomicReference<>(systemB));
+        RocketChatCredentials.builder()
+            .rocketChatToken(SYSTEM_USER_B_TOKEN)
+            .rocketChatUserId(SYSTEM_USER_B_ID)
+            .rocketChatUsername(SYSTEM_USER_A_USERNAME)
+            .timeStampCreated(nowInUtc().minusMinutes(1))
+            .build();
+    setField(rcCredentialHelper, FIELD_NAME_SYSTEM_USER_B, new AtomicReference<>(systemB));
 
     // prepare logout intercept for system user
     HttpHeaders headersLogoutSys = new HttpHeaders();
@@ -303,10 +314,11 @@ public class RocketChatCredentialsProviderTest {
     headersLogoutSys.add("X-User-Id", SYSTEM_USER_A_ID);
     HttpEntity<Void> requestSysLogout = new HttpEntity<>(headersLogoutSys);
     var rcUrlChatUserLogout = "http://localhost/api/v1/logout";
-    when(restTemplate.postForEntity(ArgumentMatchers.eq(rcUrlChatUserLogout),
-        ArgumentMatchers.eq(requestSysLogout), ArgumentMatchers.<Class<LogoutResponseDTO>>any()))
-        .thenReturn(new ResponseEntity<>(LOGOUT_RESPONSE_DTO_SYSTEM_USER_A,
-            HttpStatus.OK));
+    when(restTemplate.postForEntity(
+            ArgumentMatchers.eq(rcUrlChatUserLogout),
+            ArgumentMatchers.eq(requestSysLogout),
+            ArgumentMatchers.<Class<LogoutResponseDTO>>any()))
+        .thenReturn(new ResponseEntity<>(LOGOUT_RESPONSE_DTO_SYSTEM_USER_A, HttpStatus.OK));
 
     // prepare logout intercept for technical user
     HttpHeaders headersLogoutTec = new HttpHeaders();
@@ -314,26 +326,29 @@ public class RocketChatCredentialsProviderTest {
     headersLogoutTec.add("X-Auth-Token", TECHNICAL_USER_A_TOKEN);
     headersLogoutTec.add("X-User-Id", TECHNICAL_USER_A_ID);
     HttpEntity<Void> requestTechnicalLogout = new HttpEntity<>(headersLogoutTec);
-    when(restTemplate.postForEntity(ArgumentMatchers.eq(rcUrlChatUserLogout),
-        ArgumentMatchers.eq(requestTechnicalLogout),
-        ArgumentMatchers.<Class<LogoutResponseDTO>>any()))
+    when(restTemplate.postForEntity(
+            ArgumentMatchers.eq(rcUrlChatUserLogout),
+            ArgumentMatchers.eq(requestTechnicalLogout),
+            ArgumentMatchers.<Class<LogoutResponseDTO>>any()))
         .thenReturn(new ResponseEntity<>(LOGOUT_RESPONSE_DTO_TECHNICAL_USER_A, HttpStatus.OK));
 
     // prepare login intercept for system user
     HttpEntity<MultiValueMap<String, String>> requestSysLogin =
         new HttpEntity<>(MULTI_VALUE_MAP_WITH_SYSTEM_USER_CREDENTIALS, headers);
-    when(restTemplate.postForEntity(ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGIN),
-        ArgumentMatchers.eq(requestSysLogin), ArgumentMatchers.<Class<LoginResponseDTO>>any()))
+    when(restTemplate.postForEntity(
+            ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGIN),
+            ArgumentMatchers.eq(requestSysLogin),
+            ArgumentMatchers.<Class<LoginResponseDTO>>any()))
         .thenReturn(new ResponseEntity<>(LOGIN_RESPONSE_DTO_SYSTEM_USER_B, HttpStatus.OK));
 
     // prepare login intercept for technical user
     HttpEntity<MultiValueMap<String, String>> requestTechnicalLogin =
         new HttpEntity<>(MULTI_VALUE_MAP_WITH_TECHNICAL_USER_CREDENTIALS, headers);
-    when(restTemplate.postForEntity(ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGIN),
-        ArgumentMatchers.eq(requestTechnicalLogin),
-        ArgumentMatchers.<Class<LoginResponseDTO>>any()))
-        .thenReturn(new ResponseEntity<>(LOGIN_RESPONSE_DTO_TECHNICAL_USER_B,
-            HttpStatus.OK));
+    when(restTemplate.postForEntity(
+            ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGIN),
+            ArgumentMatchers.eq(requestTechnicalLogin),
+            ArgumentMatchers.<Class<LoginResponseDTO>>any()))
+        .thenReturn(new ResponseEntity<>(LOGIN_RESPONSE_DTO_TECHNICAL_USER_B, HttpStatus.OK));
 
     // Execute test
     rcCredentialHelper.updateCredentials();
@@ -349,24 +364,21 @@ public class RocketChatCredentialsProviderTest {
     assertNotEquals(systemB.getTimeStampCreated(), systemUser.getTimeStampCreated());
 
     // ensure logout interception was called
-    verify(restTemplate, times(1)).postForEntity(rcUrlChatUserLogout, requestTechnicalLogout,
-        LogoutResponseDTO.class);
-    verify(restTemplate, times(1)).postForEntity(rcUrlChatUserLogout, requestSysLogout,
-        LogoutResponseDTO.class);
+    verify(restTemplate, times(1))
+        .postForEntity(rcUrlChatUserLogout, requestTechnicalLogout, LogoutResponseDTO.class);
+    verify(restTemplate, times(1))
+        .postForEntity(rcUrlChatUserLogout, requestSysLogout, LogoutResponseDTO.class);
     // ensure login interception was called
-    verify(restTemplate, times(1)).postForEntity(RC_URL_CHAT_USER_LOGIN, requestSysLogin,
-        LoginResponseDTO.class);
-    verify(restTemplate, times(1)).postForEntity(RC_URL_CHAT_USER_LOGIN, requestTechnicalLogin,
-        LoginResponseDTO.class);
-
+    verify(restTemplate, times(1))
+        .postForEntity(RC_URL_CHAT_USER_LOGIN, requestSysLogin, LoginResponseDTO.class);
+    verify(restTemplate, times(1))
+        .postForEntity(RC_URL_CHAT_USER_LOGIN, requestTechnicalLogin, LoginResponseDTO.class);
   }
 
-  /**
-   * Method: createPrivateGroup
-   **/
-
+  /** Method: createPrivateGroup */
   @Test
-  public void getTechnicalUser_Should_ThrowRocketChatUserNotInitializedException_WhenNoUserIsInitialized() {
+  public void
+      getTechnicalUser_Should_ThrowRocketChatUserNotInitializedException_WhenNoUserIsInitialized() {
     try {
       rcCredentialHelper.getTechnicalUser();
       fail("Expected exception: RocketChatUserNotInitializedException");
@@ -376,9 +388,10 @@ public class RocketChatCredentialsProviderTest {
   }
 
   @Test
-  public void getTechnicalUser_Should_ReturnUserA_WhenOnlyUserAIsInitialized()
-      throws Exception {
-    setField(rcCredentialHelper, FIELD_NAME_TECHNICAL_USER_A,
+  public void getTechnicalUser_Should_ReturnUserA_WhenOnlyUserAIsInitialized() throws Exception {
+    setField(
+        rcCredentialHelper,
+        FIELD_NAME_TECHNICAL_USER_A,
         new AtomicReference<>(RC_CREDENTIALS_TECHNICAL_A));
 
     RocketChatCredentials technicalUser = rcCredentialHelper.getTechnicalUser();
@@ -387,9 +400,10 @@ public class RocketChatCredentialsProviderTest {
   }
 
   @Test
-  public void getTechnicalUser_Should_ReturnUserB_WhenOnlyUserBIsInitialized()
-      throws Exception {
-    setField(rcCredentialHelper, FIELD_NAME_TECHNICAL_USER_B,
+  public void getTechnicalUser_Should_ReturnUserB_WhenOnlyUserBIsInitialized() throws Exception {
+    setField(
+        rcCredentialHelper,
+        FIELD_NAME_TECHNICAL_USER_B,
         new AtomicReference<>(RC_CREDENTIALS_TECHNICAL_B));
 
     RocketChatCredentials technicalUser = rcCredentialHelper.getTechnicalUser();
@@ -399,9 +413,13 @@ public class RocketChatCredentialsProviderTest {
 
   @Test
   public void getTechnicalUser_Should_ReturnUserA_WhenUserAIsNewer() throws Exception {
-    setField(rcCredentialHelper, FIELD_NAME_TECHNICAL_USER_A,
+    setField(
+        rcCredentialHelper,
+        FIELD_NAME_TECHNICAL_USER_A,
         new AtomicReference<>(RC_CREDENTIALS_TECHNICAL_A));
-    setField(rcCredentialHelper, FIELD_NAME_TECHNICAL_USER_C,
+    setField(
+        rcCredentialHelper,
+        FIELD_NAME_TECHNICAL_USER_C,
         new AtomicReference<>(RC_CREDENTIALS_TECHNICAL_C));
 
     // Get User from Class (actual test)
@@ -413,9 +431,13 @@ public class RocketChatCredentialsProviderTest {
 
   @Test
   public void getTechnicalUser_Should_ReturnUserB_WhenUserBIsNewer() throws Exception {
-    setField(rcCredentialHelper, FIELD_NAME_TECHNICAL_USER_A,
+    setField(
+        rcCredentialHelper,
+        FIELD_NAME_TECHNICAL_USER_A,
         new AtomicReference<>(RC_CREDENTIALS_TECHNICAL_A));
-    setField(rcCredentialHelper, FIELD_NAME_TECHNICAL_USER_B,
+    setField(
+        rcCredentialHelper,
+        FIELD_NAME_TECHNICAL_USER_B,
         new AtomicReference<>(RC_CREDENTIALS_TECHNICAL_B));
 
     // Get User from Class (actual test)
@@ -425,12 +447,10 @@ public class RocketChatCredentialsProviderTest {
     assertEquals(RC_CREDENTIALS_TECHNICAL_B, technicalUser);
   }
 
-  /**
-   * Method: getSystemUser
-   **/
-
+  /** Method: getSystemUser */
   @Test
-  public void getSystemUser_Should_ThrowRocketChatUserNotInitializedException_WhenNoUserIsInitialized() {
+  public void
+      getSystemUser_Should_ThrowRocketChatUserNotInitializedException_WhenNoUserIsInitialized() {
     try {
       rcCredentialHelper.getSystemUser();
       fail("Expected exception: RocketChatUserNotInitializedException");
@@ -440,9 +460,10 @@ public class RocketChatCredentialsProviderTest {
   }
 
   @Test
-  public void getSystemUser_Should_ReturnUserA_WhenOnlyUserAIsInitialized()
-      throws Exception {
-    setField(rcCredentialHelper, FIELD_NAME_SYSTEM_USER_A,
+  public void getSystemUser_Should_ReturnUserA_WhenOnlyUserAIsInitialized() throws Exception {
+    setField(
+        rcCredentialHelper,
+        FIELD_NAME_SYSTEM_USER_A,
         new AtomicReference<>(RC_CREDENTIALS_SYSTEM_A));
 
     RocketChatCredentials systemUser = rcCredentialHelper.getSystemUser();
@@ -451,9 +472,10 @@ public class RocketChatCredentialsProviderTest {
   }
 
   @Test
-  public void getSystemUser_Should_ReturnUserB_WhenOnlyUserBIsInitialized()
-      throws Exception {
-    setField(rcCredentialHelper, FIELD_NAME_SYSTEM_USER_B,
+  public void getSystemUser_Should_ReturnUserB_WhenOnlyUserBIsInitialized() throws Exception {
+    setField(
+        rcCredentialHelper,
+        FIELD_NAME_SYSTEM_USER_B,
         new AtomicReference<>(RC_CREDENTIALS_SYSTEM_B));
 
     RocketChatCredentials systemUser = rcCredentialHelper.getSystemUser();
@@ -463,9 +485,13 @@ public class RocketChatCredentialsProviderTest {
 
   @Test
   public void getSystemUser_Should_ReturnUserA_WhenUserAIsNewer() throws Exception {
-    setField(rcCredentialHelper, FIELD_NAME_SYSTEM_USER_A,
+    setField(
+        rcCredentialHelper,
+        FIELD_NAME_SYSTEM_USER_A,
         new AtomicReference<>(RC_CREDENTIALS_SYSTEM_A));
-    setField(rcCredentialHelper, FIELD_NAME_SYSTEM_USER_B,
+    setField(
+        rcCredentialHelper,
+        FIELD_NAME_SYSTEM_USER_B,
         new AtomicReference<>(RC_CREDENTIALS_SYSTEM_C));
 
     // Get User from Class (actual test)
@@ -477,9 +503,13 @@ public class RocketChatCredentialsProviderTest {
 
   @Test
   public void getSystemUser_Should_ReturnUserB_WhenUserBIsNewer() throws Exception {
-    setField(rcCredentialHelper, FIELD_NAME_SYSTEM_USER_A,
+    setField(
+        rcCredentialHelper,
+        FIELD_NAME_SYSTEM_USER_A,
         new AtomicReference<>(RC_CREDENTIALS_SYSTEM_A));
-    setField(rcCredentialHelper, FIELD_NAME_SYSTEM_USER_B,
+    setField(
+        rcCredentialHelper,
+        FIELD_NAME_SYSTEM_USER_B,
         new AtomicReference<>(RC_CREDENTIALS_SYSTEM_B));
 
     // Get User from Class (actual test)
@@ -488,5 +518,4 @@ public class RocketChatCredentialsProviderTest {
     // Verify it is User A since he is newer
     assertEquals(RC_CREDENTIALS_SYSTEM_B, systemUser);
   }
-
 }

@@ -9,9 +9,9 @@ import java.io.IOException;
 public class DecodeUsernameJsonSerializer extends JsonSerializer<String> {
 
   @Override
-  public void serialize(String username, JsonGenerator jsonGenerator,
-      SerializerProvider serializers) throws IOException {
+  public void serialize(
+      String username, JsonGenerator jsonGenerator, SerializerProvider serializers)
+      throws IOException {
     jsonGenerator.writeObject(new UsernameTranscoder().decodeUsername(username));
   }
-
 }

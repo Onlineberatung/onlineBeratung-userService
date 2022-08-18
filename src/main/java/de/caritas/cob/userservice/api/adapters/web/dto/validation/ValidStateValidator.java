@@ -3,8 +3,8 @@ package de.caritas.cob.userservice.api.adapters.web.dto.validation;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
-import de.caritas.cob.userservice.api.manager.consultingtype.registration.mandatoryfields.MandatoryFields;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
+import de.caritas.cob.userservice.api.manager.consultingtype.registration.mandatoryfields.MandatoryFields;
 import java.util.regex.Pattern;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -42,11 +42,9 @@ public class ValidStateValidator implements ConstraintValidator<ValidState, User
     }
 
     return true;
-
   }
 
   private boolean isStateValid(UserDTO userDTO) {
-    return nonNull(userDTO.getState())
-        && Pattern.matches("[0-9]|1[0-6]", userDTO.getState());
+    return nonNull(userDTO.getState()) && Pattern.matches("[0-9]|1[0-6]", userDTO.getState());
   }
 }

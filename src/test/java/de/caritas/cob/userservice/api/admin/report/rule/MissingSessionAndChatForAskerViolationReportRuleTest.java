@@ -9,8 +9,8 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.ViolationDTO;
 import de.caritas.cob.userservice.api.model.User;
-import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.port.out.UserAgencyRepository;
+import de.caritas.cob.userservice.api.port.out.UserRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
@@ -23,14 +23,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class MissingSessionAndChatForAskerViolationReportRuleTest {
 
-  @InjectMocks
-  private MissingSessionAndChatForAskerViolationReportRule reportRule;
+  @InjectMocks private MissingSessionAndChatForAskerViolationReportRule reportRule;
 
-  @Mock
-  private UserRepository userRepository;
+  @Mock private UserRepository userRepository;
 
-  @Mock
-  private UserAgencyRepository userAgencyRepository;
+  @Mock private UserAgencyRepository userAgencyRepository;
 
   @Test
   public void generateViolations_Should_returnEmptyList_When_noViolationExists() {
@@ -56,8 +53,7 @@ public class MissingSessionAndChatForAskerViolationReportRuleTest {
 
   @Test
   public void generateViolations_Should_returnViolationsOnlyForAskersWithoutSessions() {
-    List<User> users = new EasyRandom().objects(User.class, 10)
-        .collect(Collectors.toList());
+    List<User> users = new EasyRandom().objects(User.class, 10).collect(Collectors.toList());
     users.get(0).setSessions(null);
     users.get(2).setSessions(null);
     users.get(4).setSessions(null);
@@ -69,5 +65,4 @@ public class MissingSessionAndChatForAskerViolationReportRuleTest {
 
     assertThat(violations, hasSize(5));
   }
-
 }

@@ -4,9 +4,7 @@ import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc
 
 import java.time.LocalDateTime;
 
-/**
- * Definition for required input data used to create a new consultant.
- */
+/** Definition for required input data used to create a new consultant. */
 interface ConsultantCreationInput {
 
   Long getIdOld();
@@ -38,6 +36,4 @@ interface ConsultantCreationInput {
   }
 
   Long getTenantId();
-
-
 }

@@ -8,12 +8,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.List;
 import java.util.Optional;
@@ -28,19 +28,15 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class RelevantUserAccountIdsByChatProviderTest {
 
-  private final static EasyRandom easyRandom = new EasyRandom();
+  private static final EasyRandom easyRandom = new EasyRandom();
 
-  @InjectMocks
-  private RelevantUserAccountIdsByChatProvider byChatProvider;
+  @InjectMocks private RelevantUserAccountIdsByChatProvider byChatProvider;
 
-  @Mock
-  private RocketChatService rocketChatService;
+  @Mock private RocketChatService rocketChatService;
 
-  @Mock
-  private UserService userService;
+  @Mock private UserService userService;
 
-  @Mock
-  private ConsultantService consultantService;
+  @Mock private ConsultantService consultantService;
 
   @Test
   public void collectUserIds_Should_returnEmptyList_When_rocketChatServiceThrowsException()
@@ -56,8 +52,8 @@ public class RelevantUserAccountIdsByChatProviderTest {
   @Test
   public void collectUserIds_Should_returnAllMergedDependingIds_When_rcGroupHasMembers()
       throws RocketChatGetGroupMembersException {
-    List<GroupMemberDTO> groupMembers = asList(
-        memberDTOWithRcId("rc1"), memberDTOWithRcId("rc2"), memberDTOWithRcId("rc3"));
+    List<GroupMemberDTO> groupMembers =
+        asList(memberDTOWithRcId("rc1"), memberDTOWithRcId("rc2"), memberDTOWithRcId("rc3"));
     when(this.rocketChatService.getMembersOfGroup(any())).thenReturn(groupMembers);
     when(this.consultantService.getConsultantByRcUserId(eq("rc1")))
         .thenReturn(Optional.of(consultantWithId("consultant1")));
@@ -88,17 +84,21 @@ public class RelevantUserAccountIdsByChatProviderTest {
 
   private User userWithId(String userId) {
     var username = RandomStringUtils.randomAlphabetic(8);
-    var email = RandomStringUtils.randomAlphabetic(4, 8) + "@"
-        + RandomStringUtils.randomAlphabetic(4, 8) + ".com";
+    var email =
+        RandomStringUtils.randomAlphabetic(4, 8)
+            + "@"
+            + RandomStringUtils.randomAlphabetic(4, 8)
+            + ".com";
 
     return new User(userId, null, username, email, false);
   }
 
   @Test
-  public void collectUserIds_Should_returnAllMergedDependingIdsInsteadOfNotAvailableUser_When_rcGroupHasMembers()
-      throws RocketChatGetGroupMembersException {
-    List<GroupMemberDTO> groupMembers = asList(
-        memberDTOWithRcId("rc1"), memberDTOWithRcId("rc2"), memberDTOWithRcId("rc3"));
+  public void
+      collectUserIds_Should_returnAllMergedDependingIdsInsteadOfNotAvailableUser_When_rcGroupHasMembers()
+          throws RocketChatGetGroupMembersException {
+    List<GroupMemberDTO> groupMembers =
+        asList(memberDTOWithRcId("rc1"), memberDTOWithRcId("rc2"), memberDTOWithRcId("rc3"));
     when(this.rocketChatService.getMembersOfGroup(any())).thenReturn(groupMembers);
     when(this.consultantService.getConsultantByRcUserId(eq("rc1")))
         .thenReturn(Optional.of(consultantWithId("consultant1")));
@@ -111,5 +111,4 @@ public class RelevantUserAccountIdsByChatProviderTest {
     assertThat(collectedUserIds.get(0), is("consultant1"));
     assertThat(collectedUserIds.get(1), is("user2"));
   }
-
 }

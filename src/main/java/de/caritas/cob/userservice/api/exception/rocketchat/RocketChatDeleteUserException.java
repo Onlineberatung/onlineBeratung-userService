@@ -5,5 +5,4 @@ public class RocketChatDeleteUserException extends Exception {
   public RocketChatDeleteUserException(Exception cause) {
     super(cause);
   }
-
 }

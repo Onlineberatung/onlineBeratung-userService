@@ -4,7 +4,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
-import de.caritas.cob.userservice.api.workflow.enquirynotification.scheduler.EnquiryNotificationScheduler;
 import de.caritas.cob.userservice.api.workflow.enquirynotification.service.EnquiryNotificationService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,14 +17,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class EnquiryNotificationSchedulerTest {
 
-  @InjectMocks
-  private EnquiryNotificationScheduler enquiryNotificationScheduler;
+  @InjectMocks private EnquiryNotificationScheduler enquiryNotificationScheduler;
 
-  @Mock
-  private EnquiryNotificationService enquiryNotificationService;
+  @Mock private EnquiryNotificationService enquiryNotificationService;
 
   @Test
-  void sendEmailNotificationsForOpenEnquiries_Should_callEnquiryNotificationService_When_featureIsEnabled() {
+  void
+      sendEmailNotificationsForOpenEnquiries_Should_callEnquiryNotificationService_When_featureIsEnabled() {
     setField(enquiryNotificationScheduler, "enquiryNotificationsEnabled", true);
 
     enquiryNotificationScheduler.sendEmailNotificationsForOpenEnquiries();
@@ -36,12 +34,13 @@ class EnquiryNotificationSchedulerTest {
   @ParameterizedTest
   @NullSource
   @ValueSource(booleans = false)
-  void sendEmailNotificationsForOpenEnquiries_Should_notCallEnquiryNotificationService_When_featureToggleIsNullOrDisabled(Boolean enabled) {
+  void
+      sendEmailNotificationsForOpenEnquiries_Should_notCallEnquiryNotificationService_When_featureToggleIsNullOrDisabled(
+          Boolean enabled) {
     setField(enquiryNotificationScheduler, "enquiryNotificationsEnabled", enabled);
 
     enquiryNotificationScheduler.sendEmailNotificationsForOpenEnquiries();
 
     verifyNoInteractions(enquiryNotificationService);
   }
-
 }

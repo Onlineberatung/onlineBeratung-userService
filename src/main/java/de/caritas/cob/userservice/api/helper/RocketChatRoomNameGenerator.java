@@ -47,7 +47,7 @@ public class RocketChatRoomNameGenerator {
    * Generates a unique name for a private Rocket.Chat group with sessionId and suffix
    *
    * @param sessionId the session id
-   * @param suffix    the suffix
+   * @param suffix the suffix
    * @return the group name
    */
   private String generateName(Long sessionId, String suffix) {

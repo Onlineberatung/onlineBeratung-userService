@@ -49,9 +49,9 @@ public class AccountManager implements AccountManaging {
   @Override
   public Optional<Map<String, Object>> findConsultant(String id) {
     var userMap = new HashMap<String, Object>();
-    consultantRepository.findByIdAndDeleteDateIsNull(id).ifPresent(dbConsultant ->
-        userMap.putAll(findByDbConsultant(dbConsultant))
-    );
+    consultantRepository
+        .findByIdAndDeleteDateIsNull(id)
+        .ifPresent(dbConsultant -> userMap.putAll(findByDbConsultant(dbConsultant)));
 
     return userMap.isEmpty() ? Optional.empty() : Optional.of(userMap);
   }
@@ -61,17 +61,18 @@ public class AccountManager implements AccountManaging {
     var dbConsultantRef = new AtomicReference<Consultant>();
     var transformedUsername = usernameTranscoder.transformedOf(username);
 
-    consultantRepository.findByUsernameAndDeleteDateIsNull(username)
-        .ifPresentOrElse(dbConsultantRef::set, () ->
-            consultantRepository.findByUsernameAndDeleteDateIsNull(transformedUsername)
-                .ifPresent(dbConsultantRef::set)
-        );
+    consultantRepository
+        .findByUsernameAndDeleteDateIsNull(username)
+        .ifPresentOrElse(
+            dbConsultantRef::set,
+            () ->
+                consultantRepository
+                    .findByUsernameAndDeleteDateIsNull(transformedUsername)
+                    .ifPresent(dbConsultantRef::set));
 
     var dbConsultant = dbConsultantRef.get();
 
-    return isNull(dbConsultant)
-        ? Optional.empty()
-        : Optional.of(findByDbConsultant(dbConsultant));
+    return isNull(dbConsultant) ? Optional.empty() : Optional.of(findByDbConsultant(dbConsultant));
   }
 
   public Map<String, Object> findConsultantsByInfix(
@@ -81,9 +82,8 @@ public class AccountManager implements AccountManaging {
     var pageRequest = PageRequest.of(pageNumber, pageSize, direction, fieldName);
     var consultantPage = consultantRepository.findAllByInfix(infix, pageRequest);
 
-    var consultantIds = consultantPage.stream()
-        .map(ConsultantBase::getId)
-        .collect(Collectors.toList());
+    var consultantIds =
+        consultantPage.stream().map(ConsultantBase::getId).collect(Collectors.toList());
     var fullConsultants = consultantRepository.findAllByIdIn(consultantIds);
 
     var consultingAgencies = consultantAgencyRepository.findByConsultantIdIn(consultantIds);
@@ -97,8 +97,9 @@ public class AccountManager implements AccountManaging {
   public boolean isTeamAdvisedBy(Long sessionId, String consultantId) {
     var session = sessionRepository.findById(sessionId).orElseThrow();
 
-    return session.isTeamSession() && consultantAgencyRepository
-        .existsByConsultantIdAndAgencyIdAndDeleteDateIsNull(consultantId, session.getAgencyId());
+    return session.isTeamSession()
+        && consultantAgencyRepository.existsByConsultantIdAndAgencyIdAndDeleteDateIsNull(
+            consultantId, session.getAgencyId());
   }
 
   @Override
@@ -106,12 +107,15 @@ public class AccountManager implements AccountManaging {
     var id = (String) patchMap.get("id");
     var userMap = new HashMap<String, Object>();
 
-    userRepository.findByUserIdAndDeleteDateIsNull(id).ifPresentOrElse(
-        user -> userMap.putAll(patchAdviceSeeker(user, patchMap)),
-        () -> consultantRepository.findByIdAndDeleteDateIsNull(id).ifPresent(
-            consultant -> userMap.putAll(patchConsultant(consultant, patchMap))
-        )
-    );
+    userRepository
+        .findByUserIdAndDeleteDateIsNull(id)
+        .ifPresentOrElse(
+            user -> userMap.putAll(patchAdviceSeeker(user, patchMap)),
+            () ->
+                consultantRepository
+                    .findByIdAndDeleteDateIsNull(id)
+                    .ifPresent(
+                        consultant -> userMap.putAll(patchConsultant(consultant, patchMap))));
 
     return userMap.isEmpty() ? Optional.empty() : Optional.of(userMap);
   }
@@ -124,9 +128,9 @@ public class AccountManager implements AccountManaging {
   @Override
   public Optional<Map<String, Object>> findAdviceSeeker(String id) {
     var userMap = new HashMap<String, Object>();
-    userRepository.findByUserIdAndDeleteDateIsNull(id).ifPresent(user ->
-        userMap.putAll(userServiceMapper.mapOf(user))
-    );
+    userRepository
+        .findByUserIdAndDeleteDateIsNull(id)
+        .ifPresent(user -> userMap.putAll(userServiceMapper.mapOf(user)));
 
     return userMap.isEmpty() ? Optional.empty() : Optional.of(userMap);
   }
@@ -147,9 +151,11 @@ public class AccountManager implements AccountManaging {
     var patchedConsultant = userServiceMapper.consultantOf(consultant, patchMap);
     var savedConsultant = consultantRepository.save(patchedConsultant);
 
-    userServiceMapper.displayNameOf(patchMap).ifPresent(displayName ->
-        messageClient.updateUser(savedConsultant.getRocketChatId(), displayName)
-    );
+    userServiceMapper
+        .displayNameOf(patchMap)
+        .ifPresent(
+            displayName ->
+                messageClient.updateUser(savedConsultant.getRocketChatId(), displayName));
 
     return userServiceMapper.mapOf(savedConsultant, patchMap);
   }
@@ -157,18 +163,19 @@ public class AccountManager implements AccountManaging {
   private Map<String, Object> findByDbConsultant(Consultant dbConsultant) {
     var userMap = new HashMap<String, Object>();
 
-    messageClient.findUser(dbConsultant.getRocketChatId()).ifPresentOrElse(
-        chatUserMap -> userMap.putAll(userServiceMapper.mapOf(dbConsultant, chatUserMap)),
-        throwPersistenceConflict(dbConsultant.getId(), dbConsultant.getRocketChatId())
-    );
+    messageClient
+        .findUser(dbConsultant.getRocketChatId())
+        .ifPresentOrElse(
+            chatUserMap -> userMap.putAll(userServiceMapper.mapOf(dbConsultant, chatUserMap)),
+            throwPersistenceConflict(dbConsultant.getId(), dbConsultant.getRocketChatId()));
 
     return userMap;
   }
 
   private Runnable throwPersistenceConflict(String dbUserId, String chatUserId) {
-    var message = String.format(
-        "User (%s) found in database but not in Rocket.Chat (%s)", dbUserId, chatUserId
-    );
+    var message =
+        String.format(
+            "User (%s) found in database but not in Rocket.Chat (%s)", dbUserId, chatUserId);
 
     return () -> {
       throw new InternalServerErrorException(message);

@@ -13,18 +13,18 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.actions.ActionCommandMockProvider;
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteUserException;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
+import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.workflow.delete.action.asker.DeleteDatabaseAskerAction;
 import de.caritas.cob.userservice.api.workflow.delete.action.asker.DeleteRocketChatAskerAction;
 import de.caritas.cob.userservice.api.workflow.delete.action.consultant.DeleteDatabaseConsultantAction;
 import de.caritas.cob.userservice.api.workflow.delete.action.consultant.DeleteRocketChatConsultantAction;
 import de.caritas.cob.userservice.api.workflow.delete.model.AskerDeletionWorkflowDTO;
 import de.caritas.cob.userservice.api.workflow.delete.model.ConsultantDeletionWorkflowDTO;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteUserException;
-import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
-import de.caritas.cob.userservice.api.model.User;
-import de.caritas.cob.userservice.api.port.out.UserRepository;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -34,20 +34,15 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class DeleteUserAccountServiceTest {
 
-  @InjectMocks
-  private DeleteUserAccountService deleteUserAccountService;
+  @InjectMocks private DeleteUserAccountService deleteUserAccountService;
 
-  @Mock
-  private UserRepository userRepository;
+  @Mock private UserRepository userRepository;
 
-  @Mock
-  private ConsultantRepository consultantRepository;
+  @Mock private ConsultantRepository consultantRepository;
 
-  @Mock
-  private ActionsRegistry actionsRegistry;
+  @Mock private ActionsRegistry actionsRegistry;
 
-  @Mock
-  private WorkflowErrorMailService workflowErrorMailService;
+  @Mock private WorkflowErrorMailService workflowErrorMailService;
 
   private final ActionCommandMockProvider commandMockProvider = new ActionCommandMockProvider();
 
@@ -75,7 +70,8 @@ public class DeleteUserAccountServiceTest {
   }
 
   @Test
-  public void deleteUserAccounts_Should_performConsultantDeletion_When_consultantIsMarkedAsDeleted() {
+  public void
+      deleteUserAccounts_Should_performConsultantDeletion_When_consultantIsMarkedAsDeleted() {
     Consultant consultant = new Consultant();
     when(this.consultantRepository.findAllByDeleteDateNotNull())
         .thenReturn(singletonList(consultant));
@@ -105,12 +101,12 @@ public class DeleteUserAccountServiceTest {
     RocketChatService rocketChatService = mock(RocketChatService.class);
     DeleteRocketChatAskerAction deleteRocketChatAskerAction =
         new DeleteRocketChatAskerAction(rocketChatService);
-    this.commandMockProvider
-        .setCustomClassForAction(DeleteRocketChatAskerAction.class, deleteRocketChatAskerAction);
+    this.commandMockProvider.setCustomClassForAction(
+        DeleteRocketChatAskerAction.class, deleteRocketChatAskerAction);
     DeleteRocketChatConsultantAction deleteRocketChatConsultantAction =
         new DeleteRocketChatConsultantAction(rocketChatService);
-    this.commandMockProvider.setCustomClassForAction(DeleteRocketChatConsultantAction.class,
-        deleteRocketChatConsultantAction);
+    this.commandMockProvider.setCustomClassForAction(
+        DeleteRocketChatConsultantAction.class, deleteRocketChatConsultantAction);
     when(this.actionsRegistry.buildContainerForType(ConsultantDeletionWorkflowDTO.class))
         .thenReturn(
             this.commandMockProvider.getActionContainer(ConsultantDeletionWorkflowDTO.class));
@@ -122,5 +118,4 @@ public class DeleteUserAccountServiceTest {
 
     verify(this.workflowErrorMailService, times(1)).buildAndSendErrorMail(anyList());
   }
-
 }

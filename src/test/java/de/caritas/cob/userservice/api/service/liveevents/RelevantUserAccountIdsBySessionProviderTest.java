@@ -8,8 +8,8 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -22,11 +22,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class RelevantUserAccountIdsBySessionProviderTest {
 
-  @InjectMocks
-  private RelevantUserAccountIdsBySessionProvider bySessionProvider;
+  @InjectMocks private RelevantUserAccountIdsBySessionProvider bySessionProvider;
 
-  @Mock
-  private SessionRepository sessionRepository;
+  @Mock private SessionRepository sessionRepository;
 
   @Test
   public void collectUserIds_Should_returnEmptyList_When_sessionDoesNotExist() {
@@ -53,8 +51,11 @@ public class RelevantUserAccountIdsBySessionProviderTest {
     session.setConsultant(consultant);
 
     var username = RandomStringUtils.randomAlphabetic(8);
-    var email = RandomStringUtils.randomAlphabetic(4, 8) + "@"
-        + RandomStringUtils.randomAlphabetic(4, 8) + ".com";
+    var email =
+        RandomStringUtils.randomAlphabetic(4, 8)
+            + "@"
+            + RandomStringUtils.randomAlphabetic(4, 8)
+            + ".com";
     var user = new User("user", null, username, email, false);
     session.setUser(user);
 
@@ -73,7 +74,8 @@ public class RelevantUserAccountIdsBySessionProviderTest {
   }
 
   @Test
-  public void collectUserIds_Should_returnAllUserIds_When_consultantIsAuthenticatedUserAndRcIdIsFeedbackGroupId() {
+  public void
+      collectUserIds_Should_returnAllUserIds_When_consultantIsAuthenticatedUserAndRcIdIsFeedbackGroupId() {
     when(sessionRepository.findByFeedbackGroupId(any()))
         .thenReturn(buildSessionWithUserAndConsultant());
 
@@ -85,7 +87,8 @@ public class RelevantUserAccountIdsBySessionProviderTest {
   }
 
   @Test
-  public void collectUserIds_Should_returnAllUserIds_When_userIsAuthenticatedUserAndRcIdIsFeedbackGroupId() {
+  public void
+      collectUserIds_Should_returnAllUserIds_When_userIsAuthenticatedUserAndRcIdIsFeedbackGroupId() {
     when(sessionRepository.findByFeedbackGroupId(any()))
         .thenReturn(buildSessionWithUserAndConsultant());
 
@@ -108,7 +111,8 @@ public class RelevantUserAccountIdsBySessionProviderTest {
   }
 
   @Test
-  public void collectUserIds_Should_returnAllUserIds_When_authenticatedUserIsOtherAndRcIdIsFeedbackGroupId() {
+  public void
+      collectUserIds_Should_returnAllUserIds_When_authenticatedUserIsOtherAndRcIdIsFeedbackGroupId() {
     when(sessionRepository.findByFeedbackGroupId(any()))
         .thenReturn(buildSessionWithUserAndConsultant());
 
@@ -127,5 +131,4 @@ public class RelevantUserAccountIdsBySessionProviderTest {
 
     assertThat(userIds, hasSize(0));
   }
-
 }

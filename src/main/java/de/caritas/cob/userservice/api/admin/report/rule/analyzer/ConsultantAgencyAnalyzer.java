@@ -11,9 +11,7 @@ import java.util.function.Predicate;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-/**
- * Analyzer class to figure out if a given {@link Consultant} has no team agency assigned.
- */
+/** Analyzer class to figure out if a given {@link Consultant} has no team agency assigned. */
 @RequiredArgsConstructor
 public class ConsultantAgencyAnalyzer {
 
@@ -47,8 +45,7 @@ public class ConsultantAgencyAnalyzer {
   }
 
   private Predicate<AgencyAdminResponseDTO> byConsultantAgency(ConsultantAgency consultantAgency) {
-    return agencyAdminResponseDTO -> consultantAgency.getAgencyId()
-        .equals(agencyAdminResponseDTO.getId());
+    return agencyAdminResponseDTO ->
+        consultantAgency.getAgencyId().equals(agencyAdminResponseDTO.getId());
   }
-
 }

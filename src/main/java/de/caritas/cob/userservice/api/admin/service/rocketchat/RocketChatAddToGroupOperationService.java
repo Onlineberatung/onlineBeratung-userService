@@ -10,17 +10,17 @@ import de.caritas.cob.userservice.api.service.LogService;
 import java.util.List;
 import java.util.function.Consumer;
 
-/**
- * Provider for group operations with Rocket.Chat.
- */
+/** Provider for group operations with Rocket.Chat. */
 public class RocketChatAddToGroupOperationService extends RocketChatGroupOperation {
 
   private List<Session> sessions;
   private Consultant consultant;
   private final ConsultingTypeManager consultingTypeManager;
 
-  private RocketChatAddToGroupOperationService(RocketChatFacade rocketChatFacade,
-      IdentityClient identityClient, Consumer<String> logMethod,
+  private RocketChatAddToGroupOperationService(
+      RocketChatFacade rocketChatFacade,
+      IdentityClient identityClient,
+      Consumer<String> logMethod,
       ConsultingTypeManager consultingTypeManager) {
     super(rocketChatFacade, identityClient);
     this.logMethod = logMethod;
@@ -33,11 +33,13 @@ public class RocketChatAddToGroupOperationService extends RocketChatGroupOperati
    * @param rocketChatFacade the target service to perform operations
    * @return the {@link RocketChatAddToGroupOperationService} instance
    */
-  public static RocketChatAddToGroupOperationService getInstance(RocketChatFacade rocketChatFacade,
-      IdentityClient identityClient, Consumer<String> logMethod,
+  public static RocketChatAddToGroupOperationService getInstance(
+      RocketChatFacade rocketChatFacade,
+      IdentityClient identityClient,
+      Consumer<String> logMethod,
       ConsultingTypeManager consultingTypeManager) {
-    return new RocketChatAddToGroupOperationService(rocketChatFacade, identityClient,
-        logMethod, consultingTypeManager);
+    return new RocketChatAddToGroupOperationService(
+        rocketChatFacade, identityClient, logMethod, consultingTypeManager);
   }
 
   /**
@@ -62,9 +64,7 @@ public class RocketChatAddToGroupOperationService extends RocketChatGroupOperati
     return this;
   }
 
-  /**
-   * Adds the user to configured groups.
-   */
+  /** Adds the user to configured groups. */
   public void addToGroupsOrRollbackOnFailure() {
     this.sessions.forEach(this::addToSpecificSessionOrRollbackOnFailure);
   }
@@ -78,7 +78,8 @@ public class RocketChatAddToGroupOperationService extends RocketChatGroupOperati
           String.format(
               "ERROR: Consultant could not be added to rc group %s: Technical user could not be"
                   + " added to group (%s).",
-              session.getGroupId(), resolveTypeOfSession(session)), e,
+              session.getGroupId(), resolveTypeOfSession(session)),
+          e,
           LogService::logRocketChatError);
     }
   }
@@ -92,10 +93,11 @@ public class RocketChatAddToGroupOperationService extends RocketChatGroupOperati
       removeConsultantsFromSessionGroups(session, List.of(this.consultant));
     } catch (Exception e) {
       throw new InternalServerErrorException(
-          String.format("ERROR: Failed to rollback %s of group %s:",
-              resolveTypeOfSession(session), session.getGroupId()), e,
+          String.format(
+              "ERROR: Failed to rollback %s of group %s:",
+              resolveTypeOfSession(session), session.getGroupId()),
+          e,
           LogService::logRocketChatError);
     }
   }
-
 }

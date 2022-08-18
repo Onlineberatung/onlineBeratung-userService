@@ -1,8 +1,8 @@
 package de.caritas.cob.userservice.api.service;
 
+import de.caritas.cob.userservice.api.config.CacheManagerConfig;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
-import de.caritas.cob.userservice.api.config.CacheManagerConfig;
 import de.caritas.cob.userservice.consultingtypeservice.generated.ApiClient;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.ConsultingTypeControllerApi;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.BasicConsultingTypeResponseDTO;
@@ -15,9 +15,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 
-/**
- * Service class to communicate with the ConsultingTypeService.
- */
+/** Service class to communicate with the ConsultingTypeService. */
 @Component
 @RequiredArgsConstructor
 public class ConsultingTypeService {
@@ -58,5 +56,4 @@ public class ConsultingTypeService {
     tenantHeaderSupplier.addTenantHeader(headers);
     headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
   }
-
 }

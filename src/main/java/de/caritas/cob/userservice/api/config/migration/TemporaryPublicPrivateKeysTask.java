@@ -43,4 +43,3 @@ public class TemporaryPublicPrivateKeysTask implements CustomTaskChange {
     return null;
   }
 }
-

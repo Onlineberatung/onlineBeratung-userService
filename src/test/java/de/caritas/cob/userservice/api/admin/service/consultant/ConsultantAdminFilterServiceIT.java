@@ -13,7 +13,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest(classes = UserServiceApplication.class)
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class ConsultantAdminFilterServiceIT extends ConsultantAdminFilterServiceBase  {
+public class ConsultantAdminFilterServiceIT extends ConsultantAdminFilterServiceBase {
 
   @Test
   public void findFilteredConsultants_Should_returnAllConsultants_When_noFilterIsGiven() {
@@ -76,19 +76,22 @@ public class ConsultantAdminFilterServiceIT extends ConsultantAdminFilterService
   }
 
   @Test
-  public void findFilteredConsultants_Should_returnResultWithoutExpectedNextLink_When_pageIsNotTheLast() {
+  public void
+      findFilteredConsultants_Should_returnResultWithoutExpectedNextLink_When_pageIsNotTheLast() {
     super
         .findFilteredConsultants_Should_returnResultWithoutExpectedNextLink_When_pageIsNotTheLast();
   }
 
   @Test
-  public void findFilteredConsultants_Should_returnResultWithoutExpectedPreviousLink_When_pageIsNotTheFirst() {
+  public void
+      findFilteredConsultants_Should_returnResultWithoutExpectedPreviousLink_When_pageIsNotTheFirst() {
     super
         .findFilteredConsultants_Should_returnResultWithoutExpectedPreviousLink_When_pageIsNotTheFirst();
   }
 
   @Test
-  public void findFilteredConsultants_Should_orderResultByFirstNameDESC_When_sortParameterIsGiven() {
+  public void
+      findFilteredConsultants_Should_orderResultByFirstNameDESC_When_sortParameterIsGiven() {
     super.findFilteredConsultants_Should_orderResultByFirstNameDESC_When_sortParameterIsGiven();
   }
 
@@ -96,5 +99,4 @@ public class ConsultantAdminFilterServiceIT extends ConsultantAdminFilterService
   public void findFilteredConsultants_Should_orderResultByEmailASC_When_sortParameterIsGiven() {
     super.findFilteredConsultants_Should_orderResultByEmailASC_When_sortParameterIsGiven();
   }
-
 }

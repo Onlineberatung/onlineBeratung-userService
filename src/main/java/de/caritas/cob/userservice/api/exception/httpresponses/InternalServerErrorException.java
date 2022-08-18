@@ -8,7 +8,7 @@ public class InternalServerErrorException extends CustomHttpStatusException {
   /**
    * InternalServerError exception.
    *
-   * @param message       an additional message
+   * @param message an additional message
    * @param loggingMethod the method being used to log this exception
    */
   public InternalServerErrorException(String message, Consumer<Exception> loggingMethod) {
@@ -18,12 +18,12 @@ public class InternalServerErrorException extends CustomHttpStatusException {
   /**
    * InternalServerError exception.
    *
-   * @param message       the exception message
-   * @param ex            the exception
+   * @param message the exception message
+   * @param ex the exception
    * @param loggingMethod the logging method
    */
-  public InternalServerErrorException(String message, Exception ex,
-      Consumer<Exception> loggingMethod) {
+  public InternalServerErrorException(
+      String message, Exception ex, Consumer<Exception> loggingMethod) {
     super(message, ex, loggingMethod);
   }
 
@@ -44,5 +44,4 @@ public class InternalServerErrorException extends CustomHttpStatusException {
   public InternalServerErrorException(String message, Exception ex) {
     super(message, ex, LogService::logInternalServerError);
   }
-
 }

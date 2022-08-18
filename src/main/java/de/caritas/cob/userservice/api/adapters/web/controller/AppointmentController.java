@@ -3,12 +3,12 @@ package de.caritas.cob.userservice.api.adapters.web.controller;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
 import de.caritas.cob.userservice.api.adapters.web.dto.Appointment;
 import de.caritas.cob.userservice.api.adapters.web.dto.AppointmentStatus;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateEnquiryMessageResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.EnquiryAppointmentDTO;
 import de.caritas.cob.userservice.api.adapters.web.mapping.AppointmentDtoMapper;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
@@ -59,9 +59,10 @@ public class AppointmentController implements AppointmentsApi {
 
   @Override
   public ResponseEntity<Appointment> getAppointment(UUID id) {
-    var appointmentMap = organizer.findAppointment(id.toString()).orElseThrow(() ->
-        new NotFoundException("Appointment (%s) not found.", id.toString())
-    );
+    var appointmentMap =
+        organizer
+            .findAppointment(id.toString())
+            .orElseThrow(() -> new NotFoundException("Appointment (%s) not found.", id.toString()));
 
     var appointment = mapper.appointmentOf(appointmentMap, currentUser.isConsultant());
 
@@ -73,9 +74,10 @@ public class AppointmentController implements AppointmentsApi {
     if (isNull(appointment.getId()) || !appointment.getId().equals(id)) {
       throw new BadRequestException("Appointment ID from path and payload mismatch.");
     }
-    var savedAppointmentMap = organizer.findAppointment(id.toString()).orElseThrow(() ->
-        new NotFoundException("Appointment (%s) not found.", id.toString())
-    );
+    var savedAppointmentMap =
+        organizer
+            .findAppointment(id.toString())
+            .orElseThrow(() -> new NotFoundException("Appointment (%s) not found.", id.toString()));
     var updatedAppointmentMap = mapper.mapOf(savedAppointmentMap, appointment);
     var savedMap = organizer.upsertAppointment(updatedAppointmentMap);
     var savedAppointment = mapper.appointmentOf(savedMap, true);
@@ -94,10 +96,10 @@ public class AppointmentController implements AppointmentsApi {
 
   @Override
   public ResponseEntity<List<Appointment>> getAppointments() {
-    var appointments = organizer.findAllTodaysAndFutureAppointments(currentUser.getUserId())
-        .stream()
-        .map(appointmentMap -> mapper.appointmentOf(appointmentMap, currentUser.isConsultant()))
-        .collect(Collectors.toList());
+    var appointments =
+        organizer.findAllTodaysAndFutureAppointments(currentUser.getUserId()).stream()
+            .map(appointmentMap -> mapper.appointmentOf(appointmentMap, currentUser.isConsultant()))
+            .collect(Collectors.toList());
 
     return ResponseEntity.ok(appointments);
   }
@@ -120,22 +122,37 @@ public class AppointmentController implements AppointmentsApi {
 
   @Override
   public ResponseEntity<CreateEnquiryMessageResponseDTO> createEnquiryAppointment(
-      @PathVariable Long sessionId, @RequestHeader String rcToken, @RequestHeader String rcUserId,
+      @PathVariable Long sessionId,
+      @RequestHeader String rcToken,
+      @RequestHeader String rcUserId,
       @RequestBody EnquiryAppointmentDTO enquiryAppointmentDTO) {
 
     var user = this.userAccountProvider.retrieveValidatedUser();
-    var rocketChatCredentials = RocketChatCredentials.builder()
-        .rocketChatToken(rcToken)
-        .rocketChatUserId(rcUserId)
-        .build();
+    var rocketChatCredentials =
+        RocketChatCredentials.builder().rocketChatToken(rcToken).rocketChatUserId(rcUserId).build();
 
-    AppointmentData appointmentData = new AppointmentData(enquiryAppointmentDTO.getTitle(), enquiryAppointmentDTO.getUserName(), enquiryAppointmentDTO.getCounselorEmail(), enquiryAppointmentDTO.getDate(), enquiryAppointmentDTO.getDuration());
-    var enquiryData = new EnquiryData(user, sessionId, null, null,
-        rocketChatCredentials, enquiryAppointmentDTO.getT(), enquiryAppointmentDTO.getOrg(), appointmentData);
+    AppointmentData appointmentData =
+        new AppointmentData(
+            enquiryAppointmentDTO.getTitle(),
+            enquiryAppointmentDTO.getUserName(),
+            enquiryAppointmentDTO.getCounselorEmail(),
+            enquiryAppointmentDTO.getDate(),
+            enquiryAppointmentDTO.getDuration());
+    var enquiryData =
+        new EnquiryData(
+            user,
+            sessionId,
+            null,
+            null,
+            rocketChatCredentials,
+            enquiryAppointmentDTO.getT(),
+            enquiryAppointmentDTO.getOrg(),
+            appointmentData);
 
     var response = createEnquiryMessageFacade.createEnquiryMessage(enquiryData);
 
-    var consultant = consultantService.getConsultantByEmail(enquiryAppointmentDTO.getCounselorEmail());
+    var consultant =
+        consultantService.getConsultantByEmail(enquiryAppointmentDTO.getCounselorEmail());
     var session = sessionService.getSession(sessionId);
     this.assignEnquiryFacade.assignRegisteredEnquiry(session.get(), consultant.get());
 

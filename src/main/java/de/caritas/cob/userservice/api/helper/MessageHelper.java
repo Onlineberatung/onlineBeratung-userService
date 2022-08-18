@@ -26,9 +26,8 @@ public class MessageHelper {
    * @param placeholderMap
    * @return the message with the replaced placeholders
    */
-  public static String replacePlaceholderInMessage(String message,
-      Map<String, Object> placeholderMap) {
+  public static String replacePlaceholderInMessage(
+      String message, Map<String, Object> placeholderMap) {
     return new StringSubstitutor(placeholderMap, "${", "}").replace(message);
   }
-
 }

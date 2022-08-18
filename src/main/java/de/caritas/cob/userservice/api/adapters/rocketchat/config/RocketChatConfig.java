@@ -38,11 +38,9 @@ public class RocketChatConfig {
 
   private final HttpServletRequest httpServletRequest;
 
-  @URL
-  private String baseUrl;
+  @URL private String baseUrl;
 
-  @NotBlank
-  private String credentialCron;
+  @NotBlank private String credentialCron;
 
   @Bean("rocketChatRestTemplate")
   public RestTemplate rocketChatRestTemplate(RestTemplateBuilder restTemplateBuilder) {
@@ -93,10 +91,11 @@ public class RocketChatConfig {
     }
 
     var builder = fromUriString(baseUrl);
-    Arrays.stream(StringUtils
-        .trimLeadingCharacter(path, PATH_SEPARATOR)
-        .replaceAll("(\\{).*(})", arg)
-        .split(Character.toString(PATH_SEPARATOR))).forEach(builder::pathSegment);
+    Arrays.stream(
+            StringUtils.trimLeadingCharacter(path, PATH_SEPARATOR)
+                .replaceAll("(\\{).*(})", arg)
+                .split(Character.toString(PATH_SEPARATOR)))
+        .forEach(builder::pathSegment);
     queryParams.forEach(builder::queryParam);
 
     return builder.toUriString();

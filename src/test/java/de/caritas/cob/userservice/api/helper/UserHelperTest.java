@@ -36,16 +36,14 @@ public class UserHelperTest {
 
   private static final EasyRandom easyRandom = new EasyRandom();
 
-  @InjectMocks
-  private UserHelper userHelper;
+  @InjectMocks private UserHelper userHelper;
 
-  @Mock
-  private ConsultingTypeManager consultingTypeManager;
+  @Mock private ConsultingTypeManager consultingTypeManager;
 
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
-    ReflectionTestUtils.setField(userHelper, FIELD_NAME_EMAIL_DUMMY_SUFFIX,
-        FIELD_VALUE_EMAIL_DUMMY_SUFFIX);
+    ReflectionTestUtils.setField(
+        userHelper, FIELD_NAME_EMAIL_DUMMY_SUFFIX, FIELD_VALUE_EMAIL_DUMMY_SUFFIX);
     ReflectionTestUtils.setField(userHelper, FIELD_NAME_HOST_BASE_URL, HOST_BASE_URL);
   }
 
@@ -125,15 +123,22 @@ public class UserHelperTest {
   }
 
   private String givenARandomEmail() {
-    return randomAlphabetic(16) + "@" + randomAlphabetic(8)
-        + "." + (easyRandom.nextBoolean() ? "de" : "com");
+    return randomAlphabetic(16)
+        + "@"
+        + randomAlphabetic(8)
+        + "."
+        + (easyRandom.nextBoolean() ? "de" : "com");
   }
 
   private String givenARandomEmailWithAnUmlaut() {
     var umlauts = List.of("ä", "ö", "ü");
 
     return randomAlphabetic(8)
-        + umlauts.get(easyRandom.nextInt(umlauts.size())) + randomAlphabetic(8) + "@"
-        + randomAlphabetic(8) + "." + (easyRandom.nextBoolean() ? "de" : "com");
+        + umlauts.get(easyRandom.nextInt(umlauts.size()))
+        + randomAlphabetic(8)
+        + "@"
+        + randomAlphabetic(8)
+        + "."
+        + (easyRandom.nextBoolean() ? "de" : "com");
   }
 }

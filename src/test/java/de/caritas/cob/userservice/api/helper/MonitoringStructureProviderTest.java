@@ -13,9 +13,9 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.MonitoringDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.adapters.web.dto.MonitoringDTO;
 import de.caritas.cob.userservice.api.model.Monitoring;
 import de.caritas.cob.userservice.api.model.Monitoring.MonitoringType;
 import de.caritas.cob.userservice.api.model.MonitoringOption;
@@ -53,22 +53,21 @@ public class MonitoringStructureProviderTest {
   private static final String SELF_HELP = "selfHelp";
   private static final String INFORMATION = "information";
 
-  @Spy
-  @InjectMocks
-  private MonitoringStructureProvider monitoringStructureProvider;
+  @Spy @InjectMocks private MonitoringStructureProvider monitoringStructureProvider;
 
-  @Mock
-  private ConsultingTypeManager consultingTypeManager;
+  @Mock private ConsultingTypeManager consultingTypeManager;
 
   private final List<Monitoring> SORTED_MONITORING_LIST = new ArrayList<>();
   private final List<Monitoring> UNSORTED_MONITORING_LIST = new ArrayList<>();
   private final List<MonitoringOption> DRUGS_MONITORING_OPTION_LIST = new ArrayList<>();
   private final Monitoring ALCOHOL_MONITORING =
       new Monitoring(SESSION_ID, MonitoringType.ADDICTIVE_DRUGS, ALCOHOL, true);
-  private final Monitoring DRUGS_MONITORING = new Monitoring(SESSION_ID,
-      MonitoringType.ADDICTIVE_DRUGS, DRUGS, null, DRUGS_MONITORING_OPTION_LIST);
-  private final MonitoringOption OTHERS_MONITORING_OPTION = new MonitoringOption(SESSION_ID,
-      MonitoringType.ADDICTIVE_DRUGS, DRUGS, OTHERS, false, DRUGS_MONITORING);
+  private final Monitoring DRUGS_MONITORING =
+      new Monitoring(
+          SESSION_ID, MonitoringType.ADDICTIVE_DRUGS, DRUGS, null, DRUGS_MONITORING_OPTION_LIST);
+  private final MonitoringOption OTHERS_MONITORING_OPTION =
+      new MonitoringOption(
+          SESSION_ID, MonitoringType.ADDICTIVE_DRUGS, DRUGS, OTHERS, false, DRUGS_MONITORING);
 
   @Before
   public void setUp() {
@@ -77,8 +76,8 @@ public class MonitoringStructureProviderTest {
     LinkedHashMap<String, Object> sortedAddictiveDrugsMap = new LinkedHashMap<String, Object>();
     sortedAddictiveDrugsMap.put(ALCOHOL, true);
     sortedAddictiveDrugsMap.put(DRUGS, drugsMap);
-    SORTED_MONITORING_DTO.addProperties(MonitoringType.ADDICTIVE_DRUGS.getKey(),
-        sortedAddictiveDrugsMap);
+    SORTED_MONITORING_DTO.addProperties(
+        MonitoringType.ADDICTIVE_DRUGS.getKey(), sortedAddictiveDrugsMap);
 
     DRUGS_MONITORING_OPTION_LIST.add(OTHERS_MONITORING_OPTION);
     SORTED_MONITORING_LIST.add(ALCOHOL_MONITORING);
@@ -94,7 +93,8 @@ public class MonitoringStructureProviderTest {
     List<Monitoring> monitoringList =
         monitoringStructureProvider.createMonitoringList(SORTED_MONITORING_DTO, SESSION_ID);
 
-    assertEquals(monitoringList.get(0).getMonitoringOptionList(),
+    assertEquals(
+        monitoringList.get(0).getMonitoringOptionList(),
         SORTED_MONITORING_LIST.get(0).getMonitoringOptionList());
   }
 
@@ -107,9 +107,8 @@ public class MonitoringStructureProviderTest {
 
   @Test
   public void createMonitoringList_should_returnEmptyList_When_monitoringDtoIsEmpty() {
-    List<Monitoring> monitoringList = monitoringStructureProvider
-        .createMonitoringList(new MonitoringDTO(),
-            1L);
+    List<Monitoring> monitoringList =
+        monitoringStructureProvider.createMonitoringList(new MonitoringDTO(), 1L);
 
     assertThat(monitoringList, hasSize(0));
   }
@@ -118,8 +117,8 @@ public class MonitoringStructureProviderTest {
   public void createMonitoringList_should_returnEmptyList_When_rootEntryValueIsNotAMap() {
     MonitoringDTO monitoringDTO = new MonitoringDTO();
     monitoringDTO.addProperties(MonitoringType.ADDICTIVE_DRUGS.getKey(), false);
-    List<Monitoring> monitoringList = monitoringStructureProvider
-        .createMonitoringList(monitoringDTO, 1L);
+    List<Monitoring> monitoringList =
+        monitoringStructureProvider.createMonitoringList(monitoringDTO, 1L);
 
     assertThat(monitoringList, hasSize(0));
   }
@@ -128,8 +127,8 @@ public class MonitoringStructureProviderTest {
   public void createMonitoringList_should_returnEmptyList_When_secondLevelMapIsEmptyp() {
     MonitoringDTO monitoringDTO = new MonitoringDTO();
     monitoringDTO.addProperties(MonitoringType.ADDICTIVE_DRUGS.getKey(), emptyMap());
-    List<Monitoring> monitoringList = monitoringStructureProvider
-        .createMonitoringList(monitoringDTO, 1L);
+    List<Monitoring> monitoringList =
+        monitoringStructureProvider.createMonitoringList(monitoringDTO, 1L);
 
     assertThat(monitoringList, hasSize(0));
   }
@@ -137,27 +136,35 @@ public class MonitoringStructureProviderTest {
   @Test
   public void createMonitoringList_Should_ReturnCorrectComplexMonitoringHirarchy_When_Called() {
     MonitoringDTO monitoringDTO = new MonitoringDTO();
-    Map<String, Object> addictiveDrugsMap = MonitoringStructureBuilder.getInstance()
-        .addEntry(ALCOHOL, true)
-        .addSubLevel(DRUGS, MonitoringStructureBuilder.getInstance()
-            .addEntry(CANNABIS, true)
-            .addEntry(COCAINE_CRACK, true)
-            .addEntry(OTHERS, false)
-            .getMonitoringStructure())
-        .addEntry(LEGAL_HIGHS, false)
-        .addSubLevel(GAMBLING, MonitoringStructureBuilder.getInstance()
-            .addEntry(ONLINE, true)
-            .addEntry(OFFLINE, false)
-            .getMonitoringStructure())
-        .getMonitoringStructure();
-    Map<String, Object> interventionMap = MonitoringStructureBuilder.getInstance()
-        .addEntry(CONSULTING, false)
-        .addSubLevel(CONVEYANCE, MonitoringStructureBuilder.getInstance()
-            .addEntry(SELF_HELP, true)
-            .addEntry(OTHERS, false)
-            .getMonitoringStructure())
-        .addEntry(INFORMATION, false)
-        .getMonitoringStructure();
+    Map<String, Object> addictiveDrugsMap =
+        MonitoringStructureBuilder.getInstance()
+            .addEntry(ALCOHOL, true)
+            .addSubLevel(
+                DRUGS,
+                MonitoringStructureBuilder.getInstance()
+                    .addEntry(CANNABIS, true)
+                    .addEntry(COCAINE_CRACK, true)
+                    .addEntry(OTHERS, false)
+                    .getMonitoringStructure())
+            .addEntry(LEGAL_HIGHS, false)
+            .addSubLevel(
+                GAMBLING,
+                MonitoringStructureBuilder.getInstance()
+                    .addEntry(ONLINE, true)
+                    .addEntry(OFFLINE, false)
+                    .getMonitoringStructure())
+            .getMonitoringStructure();
+    Map<String, Object> interventionMap =
+        MonitoringStructureBuilder.getInstance()
+            .addEntry(CONSULTING, false)
+            .addSubLevel(
+                CONVEYANCE,
+                MonitoringStructureBuilder.getInstance()
+                    .addEntry(SELF_HELP, true)
+                    .addEntry(OTHERS, false)
+                    .getMonitoringStructure())
+            .addEntry(INFORMATION, false)
+            .getMonitoringStructure();
     monitoringDTO.addProperties(MonitoringType.ADDICTIVE_DRUGS.getKey(), addictiveDrugsMap);
     monitoringDTO.addProperties(MonitoringType.INTERVENTION.getKey(), interventionMap);
 
@@ -190,41 +197,63 @@ public class MonitoringStructureProviderTest {
     assertDirectTypesOnIndex(monitoringList, 6, MonitoringType.INTERVENTION, INFORMATION, false);
   }
 
-  private void assertDirectTypesOnIndex(List<Monitoring> monitoringList, int index,
-      MonitoringType monitoringType, String expectedKey, boolean expectedvalue) {
+  private void assertDirectTypesOnIndex(
+      List<Monitoring> monitoringList,
+      int index,
+      MonitoringType monitoringType,
+      String expectedKey,
+      boolean expectedvalue) {
     assertThat(monitoringList.get(index).getMonitoringType(), is(monitoringType));
     assertThat(monitoringList.get(index).getMonitoringOptionList(), nullValue());
     assertThat(monitoringList.get(index).getKey(), is(expectedKey));
     assertThat(monitoringList.get(index).getValue(), is(expectedvalue));
   }
 
-  private void assertKeyValuePair(List<Monitoring> monitoringList, int firstLevelIndex,
-      int secondLevelIndex, String expectedKey, boolean expectedValue) {
-    assertThat(monitoringList.get(firstLevelIndex).getMonitoringOptionList().get(secondLevelIndex)
-        .getKey(), is(expectedKey));
-    assertThat(monitoringList.get(firstLevelIndex).getMonitoringOptionList().get(secondLevelIndex)
-        .getValue(), is(expectedValue));
+  private void assertKeyValuePair(
+      List<Monitoring> monitoringList,
+      int firstLevelIndex,
+      int secondLevelIndex,
+      String expectedKey,
+      boolean expectedValue) {
+    assertThat(
+        monitoringList
+            .get(firstLevelIndex)
+            .getMonitoringOptionList()
+            .get(secondLevelIndex)
+            .getKey(),
+        is(expectedKey));
+    assertThat(
+        monitoringList
+            .get(firstLevelIndex)
+            .getMonitoringOptionList()
+            .get(secondLevelIndex)
+            .getValue(),
+        is(expectedValue));
   }
 
   @Test
-  public void getMonitoringInitialList_Should_returnExpectedMonitoring_When_consultingTypeHAsMonitoring() {
+  public void
+      getMonitoringInitialList_Should_returnExpectedMonitoring_When_consultingTypeHAsMonitoring() {
     ExtendedConsultingTypeResponseDTO settings = mock(ExtendedConsultingTypeResponseDTO.class);
-    var monitoringDTO = new de.caritas.cob.userservice.consultingtypeservice.generated.web.model.MonitoringDTO();
+    var monitoringDTO =
+        new de.caritas.cob.userservice.consultingtypeservice.generated.web.model.MonitoringDTO();
     monitoringDTO.setMonitoringTemplateFile("/monitoring/sucht.json");
     when(settings.getMonitoring()).thenReturn(monitoringDTO);
     when(this.consultingTypeManager.getConsultingTypeSettings(anyInt())).thenReturn(settings);
 
-    MonitoringDTO monitoringInitalList = this.monitoringStructureProvider
-        .getMonitoringInitialList(0);
+    MonitoringDTO monitoringInitalList =
+        this.monitoringStructureProvider.getMonitoringInitialList(0);
 
     assertThat(monitoringInitalList, notNullValue());
     assertThat(monitoringInitalList.getProperties().entrySet(), hasSize(2));
   }
 
   @Test(expected = InternalServerErrorException.class)
-  public void getMonitoringInitialList_Should_throwInternalServerErrorException_When_monitoringFilePathIsNull() {
+  public void
+      getMonitoringInitialList_Should_throwInternalServerErrorException_When_monitoringFilePathIsNull() {
     ExtendedConsultingTypeResponseDTO settings = mock(ExtendedConsultingTypeResponseDTO.class);
-    var monitoringDTO = new de.caritas.cob.userservice.consultingtypeservice.generated.web.model.MonitoringDTO();
+    var monitoringDTO =
+        new de.caritas.cob.userservice.consultingtypeservice.generated.web.model.MonitoringDTO();
     monitoringDTO.setMonitoringTemplateFile(null);
     when(settings.getMonitoring()).thenReturn(monitoringDTO);
     when(this.consultingTypeManager.getConsultingTypeSettings(anyInt())).thenReturn(settings);
@@ -234,7 +263,8 @@ public class MonitoringStructureProviderTest {
 
   @Test
   public void sortMonitoringMap_Should_ReturnCorrectlySortedMap_WhenCalled() {
-    doReturn(SORTED_MONITORING_DTO).when(monitoringStructureProvider)
+    doReturn(SORTED_MONITORING_DTO)
+        .when(monitoringStructureProvider)
         .getMonitoringInitialList(anyInt());
 
     LinkedHashMap<String, Object> drugsMap = new LinkedHashMap<String, Object>();
@@ -245,34 +275,42 @@ public class MonitoringStructureProviderTest {
     LinkedHashMap<String, Object> unsortedMap = new LinkedHashMap<String, Object>();
     unsortedMap.put(MonitoringType.ADDICTIVE_DRUGS.getKey(), unsortedAddictiveDrugsMap);
 
-    Map<String, Object> sortedMap = monitoringStructureProvider
-        .sortMonitoringMap(unsortedMap, 0);
+    Map<String, Object> sortedMap = monitoringStructureProvider.sortMonitoringMap(unsortedMap, 0);
 
-    assertEquals(sortedMap.get(String.valueOf(CONSULTING_TYPE_ID_SUCHT)),
+    assertEquals(
+        sortedMap.get(String.valueOf(CONSULTING_TYPE_ID_SUCHT)),
         SORTED_MONITORING_LIST.get(0).getMonitoringOptionList());
   }
 
   @Test
-  public void sortMonitoringMap_Should_removeEntryInSortedMap_When_entryDoesNotExistInChildLevelUnsortedMap() {
-    Map<String, Object> sortedMap = MonitoringStructureBuilder.getInstance()
-        .addEntry(ALCOHOL, false)
-        .addSubLevel(DRUGS, MonitoringStructureBuilder.getInstance()
-            .addEntry(OTHERS, false)
-            .getMonitoringStructure())
-        .getMonitoringStructure();
+  public void
+      sortMonitoringMap_Should_removeEntryInSortedMap_When_entryDoesNotExistInChildLevelUnsortedMap() {
+    Map<String, Object> sortedMap =
+        MonitoringStructureBuilder.getInstance()
+            .addEntry(ALCOHOL, false)
+            .addSubLevel(
+                DRUGS,
+                MonitoringStructureBuilder.getInstance()
+                    .addEntry(OTHERS, false)
+                    .getMonitoringStructure())
+            .getMonitoringStructure();
     MonitoringDTO monitoringDTO = new MonitoringDTO();
     monitoringDTO.addProperties(MonitoringType.ADDICTIVE_DRUGS.getKey(), sortedMap);
-    doReturn(monitoringDTO).when(monitoringStructureProvider)
+    doReturn(monitoringDTO)
+        .when(monitoringStructureProvider)
         .getMonitoringInitialList(Mockito.anyInt());
-    Map<String, Object> unsortedMap = MonitoringStructureBuilder.getInstance()
-        .addSubLevel(ADDICTIVE_DRUGS, MonitoringStructureBuilder.getInstance()
-            .addSubLevel(DRUGS, new LinkedHashMap<>())
-            .addEntry(ALCOHOL, true)
-            .getMonitoringStructure())
-        .getMonitoringStructure();
+    Map<String, Object> unsortedMap =
+        MonitoringStructureBuilder.getInstance()
+            .addSubLevel(
+                ADDICTIVE_DRUGS,
+                MonitoringStructureBuilder.getInstance()
+                    .addSubLevel(DRUGS, new LinkedHashMap<>())
+                    .addEntry(ALCOHOL, true)
+                    .getMonitoringStructure())
+            .getMonitoringStructure();
 
-    Map<String, Object> sortedResultMap = monitoringStructureProvider
-        .sortMonitoringMap(unsortedMap, 0);
+    Map<String, Object> sortedResultMap =
+        monitoringStructureProvider.sortMonitoringMap(unsortedMap, 0);
 
     assertThat(sortedResultMap, notNullValue());
     Map<String, Object> rootResult = (Map<String, Object>) sortedResultMap.get(ADDICTIVE_DRUGS);
@@ -283,26 +321,35 @@ public class MonitoringStructureProviderTest {
 
   @Test
   public void sortMonitoringMap_Should_preferValuesOfJsonMap_When_entryHasOtherStructureElement() {
-    Map<String, Object> sortedMap = MonitoringStructureBuilder.getInstance()
-        .addEntry(ALCOHOL, false)
-        .addSubLevel(DRUGS, MonitoringStructureBuilder.getInstance()
-            .addEntry(OTHERS, false)
-            .getMonitoringStructure())
-        .getMonitoringStructure();
+    Map<String, Object> sortedMap =
+        MonitoringStructureBuilder.getInstance()
+            .addEntry(ALCOHOL, false)
+            .addSubLevel(
+                DRUGS,
+                MonitoringStructureBuilder.getInstance()
+                    .addEntry(OTHERS, false)
+                    .getMonitoringStructure())
+            .getMonitoringStructure();
     MonitoringDTO monitoringDTO = new MonitoringDTO();
     monitoringDTO.addProperties(MonitoringType.ADDICTIVE_DRUGS.getKey(), sortedMap);
-    doReturn(monitoringDTO).when(monitoringStructureProvider)
+    doReturn(monitoringDTO)
+        .when(monitoringStructureProvider)
         .getMonitoringInitialList(Mockito.anyInt());
-    Map<String, Object> unsortedMap = MonitoringStructureBuilder.getInstance()
-        .addSubLevel(ADDICTIVE_DRUGS, MonitoringStructureBuilder.getInstance()
-            .addSubLevel(DRUGS, MonitoringStructureBuilder.getInstance()
-                .addEntry(CANNABIS, true)
-                .getMonitoringStructure())
-            .getMonitoringStructure())
-        .getMonitoringStructure();
+    Map<String, Object> unsortedMap =
+        MonitoringStructureBuilder.getInstance()
+            .addSubLevel(
+                ADDICTIVE_DRUGS,
+                MonitoringStructureBuilder.getInstance()
+                    .addSubLevel(
+                        DRUGS,
+                        MonitoringStructureBuilder.getInstance()
+                            .addEntry(CANNABIS, true)
+                            .getMonitoringStructure())
+                    .getMonitoringStructure())
+            .getMonitoringStructure();
 
-    Map<String, Object> sortedResultMap = monitoringStructureProvider
-        .sortMonitoringMap(unsortedMap, 0);
+    Map<String, Object> sortedResultMap =
+        monitoringStructureProvider.sortMonitoringMap(unsortedMap, 0);
 
     assertThat(sortedResultMap, notNullValue());
     Map<String, Object> rootResult = (Map<String, Object>) sortedResultMap.get(ADDICTIVE_DRUGS);
@@ -312,38 +359,50 @@ public class MonitoringStructureProviderTest {
   }
 
   @Test
-  public void sortMonitoringMap_Should_addDefaultValueForMissingUnsortedProperty_When_monitoringStructureHasEntriesOnChildLevelWhichAreNotAvailableInUnsortedMap() {
-    Map<String, Object> sortedMap = MonitoringStructureBuilder.getInstance()
-        .addEntry(ALCOHOL, false)
-        .addSubLevel(DRUGS, MonitoringStructureBuilder.getInstance()
-            .addEntry(CANNABIS, false)
-            .addEntry(COCAINE_CRACK, false)
-            .addEntry(OTHERS, false)
-            .getMonitoringStructure())
-        .addEntry(LEGAL_HIGHS, false)
-        .addSubLevel(GAMBLING, MonitoringStructureBuilder.getInstance()
-            .addEntry(ONLINE, false)
-            .addEntry(OFFLINE, false)
-            .getMonitoringStructure())
-        .getMonitoringStructure();
+  public void
+      sortMonitoringMap_Should_addDefaultValueForMissingUnsortedProperty_When_monitoringStructureHasEntriesOnChildLevelWhichAreNotAvailableInUnsortedMap() {
+    Map<String, Object> sortedMap =
+        MonitoringStructureBuilder.getInstance()
+            .addEntry(ALCOHOL, false)
+            .addSubLevel(
+                DRUGS,
+                MonitoringStructureBuilder.getInstance()
+                    .addEntry(CANNABIS, false)
+                    .addEntry(COCAINE_CRACK, false)
+                    .addEntry(OTHERS, false)
+                    .getMonitoringStructure())
+            .addEntry(LEGAL_HIGHS, false)
+            .addSubLevel(
+                GAMBLING,
+                MonitoringStructureBuilder.getInstance()
+                    .addEntry(ONLINE, false)
+                    .addEntry(OFFLINE, false)
+                    .getMonitoringStructure())
+            .getMonitoringStructure();
     MonitoringDTO monitoringDTO = new MonitoringDTO();
     monitoringDTO.addProperties(MonitoringType.ADDICTIVE_DRUGS.getKey(), sortedMap);
-    doReturn(monitoringDTO).when(monitoringStructureProvider)
+    doReturn(monitoringDTO)
+        .when(monitoringStructureProvider)
         .getMonitoringInitialList(Mockito.anyInt());
-    Map<String, Object> unsortedMap = MonitoringStructureBuilder.getInstance()
-        .addSubLevel(ADDICTIVE_DRUGS, MonitoringStructureBuilder.getInstance()
-            .addEntry(LEGAL_HIGHS, true)
-            .addSubLevel(DRUGS, MonitoringStructureBuilder.getInstance()
-                .addEntry(COCAINE_CRACK, true)
-                .addEntry(OTHERS, false)
-                .addEntry(CANNABIS, true)
-                .getMonitoringStructure())
-            .addEntry(ALCOHOL, false)
-            .getMonitoringStructure())
-        .getMonitoringStructure();
+    Map<String, Object> unsortedMap =
+        MonitoringStructureBuilder.getInstance()
+            .addSubLevel(
+                ADDICTIVE_DRUGS,
+                MonitoringStructureBuilder.getInstance()
+                    .addEntry(LEGAL_HIGHS, true)
+                    .addSubLevel(
+                        DRUGS,
+                        MonitoringStructureBuilder.getInstance()
+                            .addEntry(COCAINE_CRACK, true)
+                            .addEntry(OTHERS, false)
+                            .addEntry(CANNABIS, true)
+                            .getMonitoringStructure())
+                    .addEntry(ALCOHOL, false)
+                    .getMonitoringStructure())
+            .getMonitoringStructure();
 
-    Map<String, Object> sortedResultMap = monitoringStructureProvider
-        .sortMonitoringMap(unsortedMap, 0);
+    Map<String, Object> sortedResultMap =
+        monitoringStructureProvider.sortMonitoringMap(unsortedMap, 0);
 
     assertThat(sortedResultMap, notNullValue());
     Map<String, Object> rootResult = (Map<String, Object>) sortedResultMap.get(ADDICTIVE_DRUGS);
@@ -360,30 +419,37 @@ public class MonitoringStructureProviderTest {
 
   @Test
   public void sortMonitoringMap_Should_addDefaultValuesForAllMissingUnsortedProperties() {
-    Map<String, Object> sortedMap = MonitoringStructureBuilder.getInstance()
-        .addEntry(ALCOHOL, false)
-        .addSubLevel(DRUGS, MonitoringStructureBuilder.getInstance()
-            .addEntry(CANNABIS, false)
-            .addEntry(COCAINE_CRACK, false)
-            .addEntry(OTHERS, false)
-            .getMonitoringStructure())
-        .addEntry(LEGAL_HIGHS, false)
-        .addSubLevel(GAMBLING, MonitoringStructureBuilder.getInstance()
-            .addEntry(ONLINE, false)
-            .addEntry(OFFLINE, false)
-            .getMonitoringStructure())
-        .getMonitoringStructure();
+    Map<String, Object> sortedMap =
+        MonitoringStructureBuilder.getInstance()
+            .addEntry(ALCOHOL, false)
+            .addSubLevel(
+                DRUGS,
+                MonitoringStructureBuilder.getInstance()
+                    .addEntry(CANNABIS, false)
+                    .addEntry(COCAINE_CRACK, false)
+                    .addEntry(OTHERS, false)
+                    .getMonitoringStructure())
+            .addEntry(LEGAL_HIGHS, false)
+            .addSubLevel(
+                GAMBLING,
+                MonitoringStructureBuilder.getInstance()
+                    .addEntry(ONLINE, false)
+                    .addEntry(OFFLINE, false)
+                    .getMonitoringStructure())
+            .getMonitoringStructure();
     MonitoringDTO monitoringDTO = new MonitoringDTO();
     monitoringDTO.addProperties(MonitoringType.ADDICTIVE_DRUGS.getKey(), sortedMap);
-    doReturn(monitoringDTO).when(monitoringStructureProvider)
+    doReturn(monitoringDTO)
+        .when(monitoringStructureProvider)
         .getMonitoringInitialList(Mockito.anyInt());
-    Map<String, Object> unsortedMap = MonitoringStructureBuilder.getInstance()
-        .addSubLevel(ADDICTIVE_DRUGS, MonitoringStructureBuilder.getInstance()
-            .getMonitoringStructure())
-        .getMonitoringStructure();
+    Map<String, Object> unsortedMap =
+        MonitoringStructureBuilder.getInstance()
+            .addSubLevel(
+                ADDICTIVE_DRUGS, MonitoringStructureBuilder.getInstance().getMonitoringStructure())
+            .getMonitoringStructure();
 
-    Map<String, Object> sortedResultMap = monitoringStructureProvider
-        .sortMonitoringMap(unsortedMap, 0);
+    Map<String, Object> sortedResultMap =
+        monitoringStructureProvider.sortMonitoringMap(unsortedMap, 0);
 
     assertThat(sortedResultMap, notNullValue());
     Map<String, Object> rootResult = (Map<String, Object>) sortedResultMap.get(ADDICTIVE_DRUGS);
@@ -400,39 +466,56 @@ public class MonitoringStructureProviderTest {
 
   @Test
   public void sortMonitoringMap_Should_setValuesOfSameOtherKeyDependingOnTheirStructurePosition() {
-    Map<String, Object> sortedMap = MonitoringStructureBuilder.getInstance()
-        .addSubLevel(DRUGS, MonitoringStructureBuilder.getInstance()
+    Map<String, Object> sortedMap =
+        MonitoringStructureBuilder.getInstance()
+            .addSubLevel(
+                DRUGS,
+                MonitoringStructureBuilder.getInstance()
+                    .addEntry(OTHERS, false)
+                    .getMonitoringStructure())
             .addEntry(OTHERS, false)
-            .getMonitoringStructure())
-        .addEntry(OTHERS, false)
-        .addSubLevel(GAMBLING, MonitoringStructureBuilder.getInstance()
-            .addEntry(OTHERS, false)
-            .getMonitoringStructure())
-        .addSubLevel(LEGAL_HIGHS, MonitoringStructureBuilder.getInstance()
-            .addEntry(OTHERS, false)
-            .getMonitoringStructure())
-        .getMonitoringStructure();
+            .addSubLevel(
+                GAMBLING,
+                MonitoringStructureBuilder.getInstance()
+                    .addEntry(OTHERS, false)
+                    .getMonitoringStructure())
+            .addSubLevel(
+                LEGAL_HIGHS,
+                MonitoringStructureBuilder.getInstance()
+                    .addEntry(OTHERS, false)
+                    .getMonitoringStructure())
+            .getMonitoringStructure();
     MonitoringDTO monitoringDTO = new MonitoringDTO();
     monitoringDTO.addProperties(MonitoringType.ADDICTIVE_DRUGS.getKey(), sortedMap);
-    doReturn(monitoringDTO).when(monitoringStructureProvider)
+    doReturn(monitoringDTO)
+        .when(monitoringStructureProvider)
         .getMonitoringInitialList(Mockito.anyInt());
-    Map<String, Object> unsortedMap = MonitoringStructureBuilder.getInstance()
-        .addSubLevel(ADDICTIVE_DRUGS, MonitoringStructureBuilder.getInstance()
-            .addSubLevel(DRUGS, MonitoringStructureBuilder.getInstance()
-                .addEntry(OTHERS, true)
-                .getMonitoringStructure())
-            .addEntry(OTHERS, true)
-            .addSubLevel(GAMBLING, MonitoringStructureBuilder.getInstance()
-                .addEntry(OTHERS, false)
-                .getMonitoringStructure())
-            .addSubLevel(LEGAL_HIGHS, MonitoringStructureBuilder.getInstance()
-                .addEntry(OTHERS, true)
-                .getMonitoringStructure())
-            .getMonitoringStructure())
-        .getMonitoringStructure();
+    Map<String, Object> unsortedMap =
+        MonitoringStructureBuilder.getInstance()
+            .addSubLevel(
+                ADDICTIVE_DRUGS,
+                MonitoringStructureBuilder.getInstance()
+                    .addSubLevel(
+                        DRUGS,
+                        MonitoringStructureBuilder.getInstance()
+                            .addEntry(OTHERS, true)
+                            .getMonitoringStructure())
+                    .addEntry(OTHERS, true)
+                    .addSubLevel(
+                        GAMBLING,
+                        MonitoringStructureBuilder.getInstance()
+                            .addEntry(OTHERS, false)
+                            .getMonitoringStructure())
+                    .addSubLevel(
+                        LEGAL_HIGHS,
+                        MonitoringStructureBuilder.getInstance()
+                            .addEntry(OTHERS, true)
+                            .getMonitoringStructure())
+                    .getMonitoringStructure())
+            .getMonitoringStructure();
 
-    Map<String, Object> sortedResultMap = monitoringStructureProvider
-        .sortMonitoringMap(unsortedMap, 0);
+    Map<String, Object> sortedResultMap =
+        monitoringStructureProvider.sortMonitoringMap(unsortedMap, 0);
 
     assertThat(sortedResultMap, notNullValue());
     Map<String, Object> rootResult = (Map<String, Object>) sortedResultMap.get(ADDICTIVE_DRUGS);
@@ -444,5 +527,4 @@ public class MonitoringStructureProviderTest {
     Map<String, Object> legalHighs = (Map<String, Object>) rootResult.get(LEGAL_HIGHS);
     assertThat(legalHighs.get(OTHERS), is(true));
   }
-
 }

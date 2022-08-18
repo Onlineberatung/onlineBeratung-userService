@@ -61,9 +61,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
-/**
- * Service for Keycloak REST API calls.
- */
+/** Service for Keycloak REST API calls. */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -108,7 +106,7 @@ public class KeycloakService implements IdentityClient {
   /**
    * Changes the (Keycloak) password of a user and returns true on success.
    *
-   * @param userId   Keycloak user ID
+   * @param userId Keycloak user ID
    * @param password Keycloak password
    * @return true if password change was successful
    */
@@ -126,15 +124,11 @@ public class KeycloakService implements IdentityClient {
   public void changeLanguage(final String userId, final String locale) {
     var user = keycloakMapper.userRepresentationOf(locale);
 
-    keycloakClient
-        .getUsersResource()
-        .get(userId)
-        .update(user);
+    keycloakClient.getUsersResource().get(userId).update(user);
   }
 
   /**
-   * Performs a Keycloak login and returns the Keycloak {@link KeycloakLoginResponseDTO} on
-   * success.
+   * Performs a Keycloak login and returns the Keycloak {@link KeycloakLoginResponseDTO} on success.
    *
    * @param userName the username
    * @param password the password
@@ -153,16 +147,17 @@ public class KeycloakService implements IdentityClient {
       return restTemplate
           .postForEntity(
               identityClientConfig.getOpenIdConnectUrl(ENDPOINT_OPENID_CONNECT_LOGIN),
-              request, KeycloakLoginResponseDTO.class
-          )
+              request,
+              KeycloakLoginResponseDTO.class)
           .getBody();
 
     } catch (RestClientResponseException exception) {
-      throw new BadRequestException(String.format("Could not log in user %s into Keycloak: %s",
-          userName, exception.getMessage()), exception);
+      throw new BadRequestException(
+          String.format(
+              "Could not log in user %s into Keycloak: %s", userName, exception.getMessage()),
+          exception);
     }
   }
-
 
   @Override
   public boolean verifyIgnoringOtp(String username, String password) {
@@ -201,8 +196,8 @@ public class KeycloakService implements IdentityClient {
   public boolean logoutUser(final String refreshToken) {
 
     var httpHeaders =
-        getAuthorizedHttpHeaders(authenticatedUser.getAccessToken(),
-            MediaType.APPLICATION_FORM_URLENCODED);
+        getAuthorizedHttpHeaders(
+            authenticatedUser.getAccessToken(), MediaType.APPLICATION_FORM_URLENCODED);
     MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
     map.add(BODY_KEY_CLIENT_ID, keycloakClientId);
     map.add(BODY_KEY_GRANT_TYPE, KEYCLOAK_GRANT_TYPE_REFRESH_TOKEN);
@@ -256,9 +251,7 @@ public class KeycloakService implements IdentityClient {
 
   @Override
   public Map<String, String> findUserByEmail(String email) {
-    return keycloakClient.getUsersResource()
-        .search(email, 0, Integer.MAX_VALUE)
-        .stream()
+    return keycloakClient.getUsersResource().search(email, 0, Integer.MAX_VALUE).stream()
         .filter(userRepresentation -> userRepresentation.getEmail().equals(email))
         .findFirst()
         .map(keycloakMapper::mapOf)
@@ -320,8 +313,9 @@ public class KeycloakService implements IdentityClient {
     var requestUrl = identityClientConfig.getOtpUrl(ENDPOINT_OTP_FINISH_EMAIL, username);
 
     try {
-      var response = keycloakClient.postForEntity(bearerToken, requestUrl, otpSetupDTO,
-          SuccessWithEmail.class);
+      var response =
+          keycloakClient.postForEntity(
+              bearerToken, requestUrl, otpSetupDTO, SuccessWithEmail.class);
       return keycloakMapper.mapOf(response);
     } catch (HttpClientErrorException exception) {
       return keycloakMapper.mapOf(exception);
@@ -341,13 +335,13 @@ public class KeycloakService implements IdentityClient {
   /**
    * Creates a user with firstname and lastname in Keycloak and returns its Keycloak user ID.
    *
-   * @param user      {@link UserDTO}
+   * @param user {@link UserDTO}
    * @param firstName first name of user
-   * @param lastName  last name of user
+   * @param lastName last name of user
    * @return {@link KeycloakCreateUserResponseDTO}
    */
-  public KeycloakCreateUserResponseDTO createKeycloakUser(final UserDTO user,
-      final String firstName, final String lastName) {
+  public KeycloakCreateUserResponseDTO createKeycloakUser(
+      final UserDTO user, final String firstName, final String lastName) {
     var kcUser = getUserRepresentation(user, firstName, lastName, "de");
     try (var response = keycloakClient.getUsersResource().create(kcUser)) {
       if (response.getStatus() == HttpStatus.CREATED.value()) {
@@ -356,8 +350,8 @@ public class KeycloakService implements IdentityClient {
       handleCreateKeycloakUserError(response);
     }
     throw new InternalServerErrorException(
-        String.format("Could not create Keycloak account for: %s %nKeycloak error: %s", user,
-            keycloakError));
+        String.format(
+            "Could not create Keycloak account for: %s %nKeycloak error: %s", user, keycloakError));
   }
 
   private void handleCreateKeycloakUserError(Response response) {
@@ -394,9 +388,7 @@ public class KeycloakService implements IdentityClient {
 
   @Synchronized
   private boolean isEmailNotAvailable(String email) {
-    return keycloakClient.getUsersResource()
-        .search(email, 0, Integer.MAX_VALUE)
-        .stream()
+    return keycloakClient.getUsersResource().search(email, 0, Integer.MAX_VALUE).stream()
         .anyMatch(userRepresentation -> userRepresentation.getEmail().equals(email));
   }
 
@@ -409,13 +401,13 @@ public class KeycloakService implements IdentityClient {
     return credentials;
   }
 
-  private UserRepresentation getUserRepresentation(final UserDTO user, final String firstName,
-      final String lastName) {
+  private UserRepresentation getUserRepresentation(
+      final UserDTO user, final String firstName, final String lastName) {
     return getUserRepresentation(user, firstName, lastName, null);
   }
 
-  private UserRepresentation getUserRepresentation(final UserDTO user, final String firstName,
-      final String lastName, final String locale) {
+  private UserRepresentation getUserRepresentation(
+      final UserDTO user, final String firstName, final String lastName, final String locale) {
     var kcUser = new UserRepresentation();
     kcUser.setUsername(user.getUsername());
     kcUser.setEmail(user.getEmail());
@@ -478,7 +470,7 @@ public class KeycloakService implements IdentityClient {
    * Assigns the given {@link UserRole} to the given user ID.
    *
    * @param userId Keycloak user ID
-   * @param role   {@link UserRole}
+   * @param role {@link UserRole}
    */
   public void updateRole(final String userId, final UserRole role) {
     this.updateRole(userId, role.getValue());
@@ -487,7 +479,7 @@ public class KeycloakService implements IdentityClient {
   /**
    * Assigns the role with the given name to the given user ID.
    *
-   * @param userId   Keycloak user ID
+   * @param userId Keycloak user ID
    * @param roleName Keycloak role name
    */
   public void updateRole(final String userId, final String roleName) {
@@ -502,8 +494,7 @@ public class KeycloakService implements IdentityClient {
     if (isNull(roleRepresentation.getAttributes())) {
       roleRepresentation.setAttributes(new LinkedHashMap<>());
     }
-    user.roles().realmLevel()
-        .add(Collections.singletonList(roleRepresentation));
+    user.roles().realmLevel().add(Collections.singletonList(roleRepresentation));
 
     // Check if role has been assigned successfully
     List<RoleRepresentation> userRoles = user.roles().realmLevel().listAll();
@@ -522,7 +513,7 @@ public class KeycloakService implements IdentityClient {
   /**
    * Updates the Keycloak password for a user.
    *
-   * @param userId   Keycloak user ID
+   * @param userId Keycloak user ID
    * @param password user password
    */
   public void updatePassword(final String userId, final String password) {
@@ -538,7 +529,7 @@ public class KeycloakService implements IdentityClient {
    * success/error status possible, because the Keycloak Client doesn't provide one either. *
    *
    * @param userId Keycloak user ID
-   * @param user   {@link UserDTO}
+   * @param user {@link UserDTO}
    * @return the (dummy) email address
    */
   public String updateDummyEmail(final String userId, UserDTO user) {
@@ -564,15 +555,14 @@ public class KeycloakService implements IdentityClient {
   /**
    * Updates first name, last name and email address of user with given id in keycloak.
    *
-   * @param userId    Keycloak user ID
-   * @param userDTO   {@link UserDTO}
+   * @param userId Keycloak user ID
+   * @param userDTO {@link UserDTO}
    * @param firstName the new first name
-   * @param lastName  the new last name
+   * @param lastName the new last name
    */
-  public void updateUserData(final String userId, UserDTO userDTO,
-      String firstName, String lastName) {
-    var userResource = keycloakClient.getUsersResource()
-        .get(userId);
+  public void updateUserData(
+      final String userId, UserDTO userDTO, String firstName, String lastName) {
+    var userResource = keycloakClient.getUsersResource().get(userId);
     verifyEmail(userResource, userDTO.getEmail());
     userResource.update(getUserRepresentation(userDTO, firstName, lastName));
   }
@@ -592,11 +582,10 @@ public class KeycloakService implements IdentityClient {
     }
   }
 
-
   /**
    * Updates the email address of user with given id in keycloak.
    *
-   * @param userId       Keycloak user ID
+   * @param userId Keycloak user ID
    * @param emailAddress the email address to set
    */
   public void updateEmail(String userId, String emailAddress) {
@@ -633,7 +622,7 @@ public class KeycloakService implements IdentityClient {
   /**
    * Returns true if the given user has the provided authority.
    *
-   * @param userId    Keycloak user ID
+   * @param userId Keycloak user ID
    * @param authority Keycloak authority
    * @return true if user hast provided authority
    */
@@ -655,7 +644,7 @@ public class KeycloakService implements IdentityClient {
   /**
    * Returns true if the given user has the provided role.
    *
-   * @param userId   Keycloak user ID
+   * @param userId Keycloak user ID
    * @param userRole Keycloak role
    * @return true if user hast provided role
    */
@@ -679,11 +668,7 @@ public class KeycloakService implements IdentityClient {
   }
 
   private List<RoleRepresentation> getUserRoles(String userId) {
-    return keycloakClient.getUsersResource()
-        .get(userId)
-        .roles()
-        .realmLevel()
-        .listAll();
+    return keycloakClient.getUsersResource().get(userId).roles().realmLevel().listAll();
   }
 
   /**
@@ -721,8 +706,7 @@ public class KeycloakService implements IdentityClient {
    * @param userId the user id to be deactivated
    */
   public void deactivateUser(String userId) {
-    var userResource = keycloakClient.getUsersResource()
-        .get(userId);
+    var userResource = keycloakClient.getUsersResource().get(userId);
     var userRepresentation = userResource.toRepresentation();
     userRepresentation.setEnabled(false);
     userResource.update(userRepresentation);

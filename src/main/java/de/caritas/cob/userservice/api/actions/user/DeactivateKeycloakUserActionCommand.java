@@ -10,9 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-/**
- * Deactivates a user in Keycloak.
- */
+/** Deactivates a user in Keycloak. */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -34,5 +32,4 @@ public class DeactivateKeycloakUserActionCommand implements ActionCommand<User> 
       log.error(getStackTrace(e));
     }
   }
-
 }

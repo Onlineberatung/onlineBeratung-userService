@@ -8,9 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.web.client.RestTemplate;
 
-/**
- * Configuration class for the LiveService API client.
- */
+/** Configuration class for the LiveService API client. */
 @Configuration
 public class LiveServiceApiClientConfig {
 
@@ -39,5 +37,4 @@ public class LiveServiceApiClientConfig {
   public ApiClient liveServiceApiClient(RestTemplate restTemplate) {
     return new ApiClient(restTemplate).setBasePath(this.liveServiceApiUrl);
   }
-
 }

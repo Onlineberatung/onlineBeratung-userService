@@ -18,5 +18,4 @@ public class GroupsListAllResponseDTO {
 
   @JsonProperty("groups")
   private GroupDTO[] groups;
-
 }

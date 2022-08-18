@@ -1,16 +1,16 @@
 package de.caritas.cob.userservice.api.testConfig;
 
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatClient;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatMapper;
-import de.caritas.cob.userservice.api.adapters.rocketchat.config.RocketChatConfig;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatMapper;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.config.RocketChatConfig;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.DataDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.MeDTO;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -27,12 +27,20 @@ public class RocketChatTestConfig {
       "auth-token configured in " + RocketChatTestConfig.class.getName();
 
   @Bean
-  public RocketChatService rocketChatService(RestTemplate restTemplate,
+  public RocketChatService rocketChatService(
+      RestTemplate restTemplate,
       RocketChatCredentialsProvider rocketChatCredentialsProvider,
-      RocketChatConfig rocketChatConfig, RocketChatClient rocketChatClient,
-      RocketChatMapper rocketChatMapper, RocketChatCredentials rocketChatCredentials) {
-    return new RocketChatService(restTemplate, rocketChatCredentialsProvider, rocketChatClient,
-        rocketChatConfig, rocketChatMapper, rocketChatCredentials) {
+      RocketChatConfig rocketChatConfig,
+      RocketChatClient rocketChatClient,
+      RocketChatMapper rocketChatMapper,
+      RocketChatCredentials rocketChatCredentials) {
+    return new RocketChatService(
+        restTemplate,
+        rocketChatCredentialsProvider,
+        rocketChatClient,
+        rocketChatConfig,
+        rocketChatMapper,
+        rocketChatCredentials) {
       @Override
       public ResponseEntity<LoginResponseDTO> loginUserFirstTime(String username, String password) {
         var loginResponseDTO = new LoginResponseDTO();
@@ -48,8 +56,8 @@ public class RocketChatTestConfig {
       }
 
       @Override
-      public Optional<GroupResponseDTO> createPrivateGroup(String name,
-          RocketChatCredentials rocketChatCredentials) {
+      public Optional<GroupResponseDTO> createPrivateGroup(
+          String name, RocketChatCredentials rocketChatCredentials) {
         var groupResponseDTO = new GroupResponseDTO();
         groupResponseDTO.setSuccess(true);
         var group = new GroupDTO();
@@ -61,12 +69,10 @@ public class RocketChatTestConfig {
       }
 
       @Override
-      public void deleteGroupAsTechnicalUser(String groupId) {
-      }
+      public void deleteGroupAsTechnicalUser(String groupId) {}
 
       @Override
-      public void addUserToGroup(String rcUserId, String rcGroupId) {
-      }
+      public void addUserToGroup(String rcUserId, String rcGroupId) {}
 
       @Override
       public void addTechnicalUserToGroup(String rcGroupId) {
@@ -84,21 +90,17 @@ public class RocketChatTestConfig {
       }
 
       @Override
-      public void removeAllStandardUsersFromGroup(String rcGroupId) {
-      }
+      public void removeAllStandardUsersFromGroup(String rcGroupId) {}
 
       @Override
-      public void removeSystemMessages(String rcGroupId, LocalDateTime oldest,
-          LocalDateTime latest) {
-      }
+      public void removeSystemMessages(
+          String rcGroupId, LocalDateTime oldest, LocalDateTime latest) {}
 
       @Override
-      public void removeAllMessages(String rcGroupId) {
-      }
+      public void removeAllMessages(String rcGroupId) {}
 
       @Override
-      public void deleteUser(String rcUserId) {
-      }
+      public void deleteUser(String rcUserId) {}
     };
   }
 }

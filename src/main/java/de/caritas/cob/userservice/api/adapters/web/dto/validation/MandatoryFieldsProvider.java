@@ -11,9 +11,7 @@ import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.Exte
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-/**
- * Helper class for getting the mandatory fields for a given consulting type.
- */
+/** Helper class for getting the mandatory fields for a given consulting type. */
 @Component
 @RequiredArgsConstructor
 public class MandatoryFieldsProvider {
@@ -27,24 +25,25 @@ public class MandatoryFieldsProvider {
    * @return the {@link MandatoryFields} for the given consulting type
    */
   public MandatoryFields fetchMandatoryFieldsForConsultingType(String consultingTypeId) {
-    var extendedConsultingTypeResponseDTO = consultingTypeManager
-        .getConsultingTypeSettings(consultingTypeId);
+    var extendedConsultingTypeResponseDTO =
+        consultingTypeManager.getConsultingTypeSettings(consultingTypeId);
     ensureConsultingTypeSettingsAreNotNull(consultingTypeId, extendedConsultingTypeResponseDTO);
     var registration = extendedConsultingTypeResponseDTO.getRegistration();
     assert nonNull(registration) && nonNull(registration.getMandatoryFields());
-    return MandatoryFields
-        .convertMandatoryFieldsDTOtoMandatoryFields(registration.getMandatoryFields());
-
+    return MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(
+        registration.getMandatoryFields());
   }
 
-  private void ensureConsultingTypeSettingsAreNotNull(String consultingTypeId,
+  private void ensureConsultingTypeSettingsAreNotNull(
+      String consultingTypeId,
       ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO) {
     if (isNull(extendedConsultingTypeResponseDTO.getRegistration())
         || isNull(extendedConsultingTypeResponseDTO.getRegistration().getMandatoryFields())) {
-      throw new InternalServerErrorException(String.format(
-          "Could not get mandatory fields for consulting type %s. Please check configuration",
-          consultingTypeId), LogService::logInternalServerError);
+      throw new InternalServerErrorException(
+          String.format(
+              "Could not get mandatory fields for consulting type %s. Please check configuration",
+              consultingTypeId),
+          LogService::logInternalServerError);
     }
   }
-
 }

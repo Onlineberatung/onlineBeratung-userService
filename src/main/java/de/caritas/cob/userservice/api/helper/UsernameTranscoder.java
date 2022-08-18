@@ -4,9 +4,7 @@ import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-/**
- * Transcoder class to encode and decode username with base32.
- */
+/** Transcoder class to encode and decode username with base32. */
 @Component
 public class UsernameTranscoder {
 
@@ -27,13 +25,12 @@ public class UsernameTranscoder {
   }
 
   private String base32EncodeUsername(String username) {
-    return ENCODING_PREFIX + base32EncodeAndReplacePlaceholder(username,
-        BASE32_PLACEHOLDER_USERNAME_REPLACE_STRING);
+    return ENCODING_PREFIX
+        + base32EncodeAndReplacePlaceholder(username, BASE32_PLACEHOLDER_USERNAME_REPLACE_STRING);
   }
 
   public String base32EncodeAndReplacePlaceholder(String value, String replaceString) {
-    return base32.encodeAsString(value.getBytes())
-        .replace(BASE32_PLACEHOLDER, replaceString);
+    return base32.encodeAsString(value.getBytes()).replace(BASE32_PLACEHOLDER, replaceString);
   }
 
   /**
@@ -47,8 +44,12 @@ public class UsernameTranscoder {
   }
 
   private String base32DecodeUsername(String username) {
-    return new String(base32.decode(username.replace(ENCODING_PREFIX, StringUtils.EMPTY)
-        .toUpperCase().replace(BASE32_PLACEHOLDER_USERNAME_REPLACE_STRING, BASE32_PLACEHOLDER)));
+    return new String(
+        base32.decode(
+            username
+                .replace(ENCODING_PREFIX, StringUtils.EMPTY)
+                .toUpperCase()
+                .replace(BASE32_PLACEHOLDER_USERNAME_REPLACE_STRING, BASE32_PLACEHOLDER)));
   }
 
   public String transformedOf(String s) {

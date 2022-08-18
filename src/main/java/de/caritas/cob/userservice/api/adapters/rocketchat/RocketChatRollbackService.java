@@ -1,9 +1,9 @@
 package de.caritas.cob.userservice.api.adapters.rocketchat;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +17,8 @@ public class RocketChatRollbackService {
   private final RocketChatCredentialsProvider rcCredentialsHelper;
 
   @Autowired
-  public RocketChatRollbackService(RocketChatService rocketChatService,
-      RocketChatCredentialsProvider rcCredentialsHelper) {
+  public RocketChatRollbackService(
+      RocketChatService rocketChatService, RocketChatCredentialsProvider rcCredentialsHelper) {
     this.rocketChatService = rocketChatService;
     this.rcCredentialsHelper = rcCredentialsHelper;
   }
@@ -28,8 +28,8 @@ public class RocketChatRollbackService {
    *
    * @param memberList
    */
-  public void rollbackRemoveUsersFromRocketChatGroup(String groupId,
-      List<GroupMemberDTO> memberList) {
+  public void rollbackRemoveUsersFromRocketChatGroup(
+      String groupId, List<GroupMemberDTO> memberList) {
 
     if (memberList != null && groupId != null) {
       try {
@@ -40,8 +40,10 @@ public class RocketChatRollbackService {
           try {
             rocketChatService.addTechnicalUserToGroup(groupId);
           } catch (RocketChatAddUserToGroupException e) {
-            log.error("Internal Server Error: Could not add technical user from Rocket.Chat group "
-                + "id {} during roll back.", groupId);
+            log.error(
+                "Internal Server Error: Could not add technical user from Rocket.Chat group "
+                    + "id {} during roll back.",
+                groupId);
             return;
           }
         }
@@ -58,13 +60,18 @@ public class RocketChatRollbackService {
         try {
           rocketChatService.removeTechnicalUserFromGroup(groupId);
         } catch (RocketChatRemoveUserFromGroupException e) {
-          log.error("Internal Server Error: Could not remove technical user from Rocket.Chat group "
-              + "id {} during roll back.", groupId);
+          log.error(
+              "Internal Server Error: Could not remove technical user from Rocket.Chat group "
+                  + "id {} during roll back.",
+              groupId);
         }
 
       } catch (Exception ex) {
-        log.error("Internal Server Error: Error during rollback while adding back the users to the "
-            + "Rocket.Chat group with id {}", groupId, ex);
+        log.error(
+            "Internal Server Error: Error during rollback while adding back the users to the "
+                + "Rocket.Chat group with id {}",
+            groupId,
+            ex);
       }
     }
   }

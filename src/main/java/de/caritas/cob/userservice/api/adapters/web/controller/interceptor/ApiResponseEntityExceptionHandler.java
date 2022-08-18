@@ -53,8 +53,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
 
   @ExceptionHandler({CreateEnquiryMessageException.class})
   public ResponseEntity<Object> handleCreateEnquiryMessageException(
-      final CreateEnquiryMessageException ex,
-      final WebRequest request) {
+      final CreateEnquiryMessageException ex, final WebRequest request) {
     log.error("Bad Request: ", ex);
 
     return handleExceptionInternal(ex, null, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
@@ -64,11 +63,11 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
    * Custom BadRequest exception.
    *
    * @param request the invoking request
-   * @param ex      the thrown exception
+   * @param ex the thrown exception
    */
   @ExceptionHandler({BadRequestException.class})
-  public ResponseEntity<Object> handleCustomBadRequest(final BadRequestException ex,
-      final WebRequest request) {
+  public ResponseEntity<Object> handleCustomBadRequest(
+      final BadRequestException ex, final WebRequest request) {
     log.warn("Bad Request: ", ex);
 
     return handleExceptionInternal(ex, null, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
@@ -78,26 +77,25 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
    * Custom BadRequest exception with header reason.
    *
    * @param request the invoking request
-   * @param ex      the thrown exception
+   * @param ex the thrown exception
    */
   @ExceptionHandler({CustomValidationHttpStatusException.class})
-  public ResponseEntity<Object> handleCustomBadRequest(final CustomValidationHttpStatusException ex,
-      final WebRequest request) {
+  public ResponseEntity<Object> handleCustomBadRequest(
+      final CustomValidationHttpStatusException ex, final WebRequest request) {
     ex.executeLogging();
 
-    return handleExceptionInternal(ex, null, ex.getCustomHttpHeader(), ex.getHttpStatus(),
-        request);
+    return handleExceptionInternal(ex, null, ex.getCustomHttpHeader(), ex.getHttpStatus(), request);
   }
 
   /**
    * Constraint violations.
    *
    * @param request the invoking request
-   * @param ex      the thrown exception
+   * @param ex the thrown exception
    */
   @ExceptionHandler(ConstraintViolationException.class)
-  public ResponseEntity<Object> handleBadRequest(final RuntimeException ex,
-      final WebRequest request) {
+  public ResponseEntity<Object> handleBadRequest(
+      final RuntimeException ex, final WebRequest request) {
     LogService.logWarn(ex);
 
     return handleExceptionInternal(null, null, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
@@ -107,11 +105,13 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
    * Incoming request body could not be deserialized.
    *
    * @param request the invoking request
-   * @param ex      the thrown exception
+   * @param ex the thrown exception
    */
   @Override
   protected ResponseEntity<Object> handleHttpMessageNotReadable(
-      final HttpMessageNotReadableException ex, final HttpHeaders headers, final HttpStatus status,
+      final HttpMessageNotReadableException ex,
+      final HttpHeaders headers,
+      final HttpStatus status,
       final WebRequest request) {
     log.warn("UserService API: {}: {}", status.getReasonPhrase(), ex.getStackTrace());
 
@@ -122,11 +122,13 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
    * On object fails validation.
    *
    * @param request the invoking request
-   * @param ex      the thrown exception
+   * @param ex the thrown exception
    */
   @Override
   protected ResponseEntity<Object> handleMethodArgumentNotValid(
-      final MethodArgumentNotValidException ex, final HttpHeaders headers, final HttpStatus status,
+      final MethodArgumentNotValidException ex,
+      final HttpHeaders headers,
+      final HttpStatus status,
       final WebRequest request) {
     log.warn("UserService API: {}: {}", status.getReasonPhrase(), ex.getStackTrace());
 
@@ -136,13 +138,13 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
   /**
    * 401 - Unauthorized.
    *
-   * @param ex      {@link RocketChatUnauthorizedException}
+   * @param ex {@link RocketChatUnauthorizedException}
    * @param request {@link WebRequest}
    * @return {@link HttpStatus#UNAUTHORIZED} without body or detailed information
    */
   @ExceptionHandler(RocketChatUnauthorizedException.class)
-  public ResponseEntity<Object> handleUnauthorized(final RocketChatUnauthorizedException ex,
-      final WebRequest request) {
+  public ResponseEntity<Object> handleUnauthorized(
+      final RocketChatUnauthorizedException ex, final WebRequest request) {
     log.warn(ExceptionUtils.getStackTrace(ex));
 
     return handleExceptionInternal(null, null, new HttpHeaders(), HttpStatus.UNAUTHORIZED, request);
@@ -152,11 +154,11 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
    * 409 - Conflict.
    *
    * @param request the invoking request
-   * @param ex      the thrown exception
+   * @param ex the thrown exception
    */
   @ExceptionHandler({InvalidDataAccessApiUsageException.class})
-  protected ResponseEntity<Object> handleConflict(final RuntimeException ex,
-      final WebRequest request) {
+  protected ResponseEntity<Object> handleConflict(
+      final RuntimeException ex, final WebRequest request) {
     log.warn("UserService API: {}: {}", HttpStatus.CONFLICT, ex.getStackTrace());
 
     return handleExceptionInternal(null, null, new HttpHeaders(), HttpStatus.CONFLICT, request);
@@ -166,11 +168,11 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
    * 409 - Conflict.
    *
    * @param request the invoking request
-   * @param ex      the thrown exception
+   * @param ex the thrown exception
    */
   @ExceptionHandler({ConflictException.class})
-  protected ResponseEntity<Object> handleCustomConflict(final ConflictException ex,
-      final WebRequest request) {
+  protected ResponseEntity<Object> handleCustomConflict(
+      final ConflictException ex, final WebRequest request) {
     ex.executeLogging();
 
     return handleExceptionInternal(null, null, new HttpHeaders(), HttpStatus.CONFLICT, request);
@@ -180,11 +182,11 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
    * 403 - Forbidden.
    *
    * @param request the invoking request
-   * @param ex      the thrown exception
+   * @param ex the thrown exception
    */
   @ExceptionHandler({ForbiddenException.class})
-  public ResponseEntity<Object> handleForbidden(final ForbiddenException ex,
-      final WebRequest request) {
+  public ResponseEntity<Object> handleForbidden(
+      final ForbiddenException ex, final WebRequest request) {
     ex.executeLogging();
 
     return handleExceptionInternal(null, null, new HttpHeaders(), HttpStatus.FORBIDDEN, request);
@@ -194,11 +196,11 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
    * 404 - Not Found.
    *
    * @param request the invoking request
-   * @param ex      the thrown exception
+   * @param ex the thrown exception
    */
   @ExceptionHandler({NotFoundException.class})
-  public ResponseEntity<Object> handleForbidden(final NotFoundException ex,
-      final WebRequest request) {
+  public ResponseEntity<Object> handleForbidden(
+      final NotFoundException ex, final WebRequest request) {
     ex.executeLogging();
 
     return handleExceptionInternal(null, null, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
@@ -208,45 +210,50 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
    * 500 - Internal Server Error.
    *
    * @param request the invoking request
-   * @param ex      the thrown exception
+   * @param ex the thrown exception
    */
-  @ExceptionHandler({NullPointerException.class, IllegalArgumentException.class,
-      IllegalStateException.class, KeycloakException.class, DataAccessException.class,
-      UnknownHostException.class, CustomCryptoException.class, NoMasterKeyException.class})
-  public ResponseEntity<Object> handleInternal(final RuntimeException ex,
-      final WebRequest request) {
+  @ExceptionHandler({
+    NullPointerException.class,
+    IllegalArgumentException.class,
+    IllegalStateException.class,
+    KeycloakException.class,
+    DataAccessException.class,
+    UnknownHostException.class,
+    CustomCryptoException.class,
+    NoMasterKeyException.class
+  })
+  public ResponseEntity<Object> handleInternal(
+      final RuntimeException ex, final WebRequest request) {
     LogService.logInternalServerError(ex);
 
-    return handleExceptionInternal(null, null, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR,
-        request);
+    return handleExceptionInternal(
+        null, null, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
   }
 
   /**
    * 500 - Custom Internal Server Error.
    *
    * @param request the invoking request
-   * @param ex      the thrown exception
+   * @param ex the thrown exception
    */
   @ExceptionHandler({InternalServerErrorException.class})
-  public ResponseEntity<Object> handleInternal(final InternalServerErrorException ex,
-      final WebRequest request) {
+  public ResponseEntity<Object> handleInternal(
+      final InternalServerErrorException ex, final WebRequest request) {
     ex.executeLogging();
 
-    return handleExceptionInternal(null, null, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR,
-        request);
+    return handleExceptionInternal(
+        null, null, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
   }
 
   /**
    * 204 - No Content.
    *
    * @param request the invoking request
-   * @param ex      the thrown exception
+   * @param ex the thrown exception
    */
   @ExceptionHandler({NoContentException.class})
-  public ResponseEntity<Object> handleInternal(final NoContentException ex,
-      final WebRequest request) {
-    return handleExceptionInternal(null, null, new HttpHeaders(), HttpStatus.NO_CONTENT,
-        request);
+  public ResponseEntity<Object> handleInternal(
+      final NoContentException ex, final WebRequest request) {
+    return handleExceptionInternal(null, null, new HttpHeaders(), HttpStatus.NO_CONTENT, request);
   }
-
 }

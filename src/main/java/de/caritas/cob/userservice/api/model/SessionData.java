@@ -33,8 +33,11 @@ public class SessionData {
     private final int value;
   }
 
-  public SessionData(@NonNull Session session, @NonNull SessionDataType sessionDataType,
-      @NonNull String key, String value) {
+  public SessionData(
+      @NonNull Session session,
+      @NonNull SessionDataType sessionDataType,
+      @NonNull String key,
+      String value) {
     this.session = session;
     this.sessionDataType = sessionDataType;
     this.key = key;

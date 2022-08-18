@@ -11,9 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
-/**
- * Registry to provide {@link ActionContainer} for {@link ActionCommand}s by given type.
- */
+/** Registry to provide {@link ActionContainer} for {@link ActionCommand}s by given type. */
 @Component
 @RequiredArgsConstructor
 public class ActionsRegistry {
@@ -43,5 +41,4 @@ public class ActionsRegistry {
         .map(Type::getTypeName)
         .anyMatch(typeName -> typeName.contains(type.getTypeName()));
   }
-
 }

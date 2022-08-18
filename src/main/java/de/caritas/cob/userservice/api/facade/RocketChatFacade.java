@@ -1,27 +1,25 @@
 package de.caritas.cob.userservice.api.facade;
 
-import static de.caritas.cob.userservice.api.helper.Helper.ONE_DAY_IN_HOURS;
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
+import static de.caritas.cob.userservice.api.helper.Helper.ONE_DAY_IN_HOURS;
 import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-/**
- * Facade to encapsulate rocket chat logic with exception handling.
- */
+/** Facade to encapsulate rocket chat logic with exception handling. */
 @Service
 @RequiredArgsConstructor
 public class RocketChatFacade {
@@ -32,7 +30,7 @@ public class RocketChatFacade {
    * Adds the provided user to the Rocket.Chat group with given groupId.
    *
    * @param rcUserId Rocket.Chat userId
-   * @param groupId  Rocket.Chat roomId
+   * @param groupId Rocket.Chat roomId
    */
   public void addUserToRocketChatGroup(String rcUserId, String groupId) {
     try {
@@ -40,9 +38,10 @@ public class RocketChatFacade {
       rocketChatService.addUserToGroup(rcUserId, groupId);
       removeTechnicalUserFromGroup(groupId);
     } catch (RocketChatAddUserToGroupException addUserEx) {
-      var message = String.format(
-          "Could not add user with id %s to Rocket.Chat group with id %s. Initiate rollback.",
-          rcUserId, groupId);
+      var message =
+          String.format(
+              "Could not add user with id %s to Rocket.Chat group with id %s. Initiate rollback.",
+              rcUserId, groupId);
       throw new InternalServerErrorException(message, LogService::logInternalServerError);
     }
   }
@@ -56,12 +55,12 @@ public class RocketChatFacade {
   public void removeSystemMessagesFromRocketChatGroup(String groupId) {
     try {
       addTechnicalUserToGroup(groupId);
-      rocketChatService
-          .removeSystemMessages(groupId, nowInUtc().minusHours(ONE_DAY_IN_HOURS), nowInUtc());
+      rocketChatService.removeSystemMessages(
+          groupId, nowInUtc().minusHours(ONE_DAY_IN_HOURS), nowInUtc());
       removeTechnicalUserFromGroup(groupId);
     } catch (RocketChatRemoveSystemMessagesException | RocketChatUserNotInitializedException e) {
-      var message = String
-          .format("Could not remove system messages from Rocket.Chat group id %s", groupId);
+      var message =
+          String.format("Could not remove system messages from Rocket.Chat group id %s", groupId);
       throw new InternalServerErrorException(message, LogService::logInternalServerError);
     }
   }
@@ -82,9 +81,10 @@ public class RocketChatFacade {
       removeTechnicalUserFromGroup(rcGroupId);
       return memberList;
     } catch (RocketChatGetGroupMembersException getGroupMembersEx) {
-      var message = String.format(
-          "Could not get Rocket.Chat group members of group id %s. Initiate rollback.",
-          rcGroupId);
+      var message =
+          String.format(
+              "Could not get Rocket.Chat group members of group id %s. Initiate rollback.",
+              rcGroupId);
       throw new InternalServerErrorException(message, LogService::logInternalServerError);
     }
   }
@@ -98,9 +98,10 @@ public class RocketChatFacade {
     try {
       rocketChatService.addTechnicalUserToGroup(groupId);
     } catch (RocketChatAddUserToGroupException | RocketChatUserNotInitializedException addUserEx) {
-      var message = String.format(
-          "Could not add Rocket.Chat technical user to Rocket.Chat group with id %s. Initiate rollback.",
-          groupId);
+      var message =
+          String.format(
+              "Could not add Rocket.Chat technical user to Rocket.Chat group with id %s. Initiate rollback.",
+              groupId);
       throw new InternalServerErrorException(message, LogService::logInternalServerError);
     }
   }
@@ -114,8 +115,8 @@ public class RocketChatFacade {
     try {
       rocketChatService.removeTechnicalUserFromGroup(groupId);
     } catch (RocketChatRemoveUserFromGroupException | RocketChatUserNotInitializedException e) {
-      var message = String.format(
-          "Could not remove technical user from Rocket.Chat group id %s", groupId);
+      var message =
+          String.format("Could not remove technical user from Rocket.Chat group id %s", groupId);
       throw new InternalServerErrorException(message, LogService::logInternalServerError);
     }
   }
@@ -124,14 +125,15 @@ public class RocketChatFacade {
    * Removes the provided user from the Rocket.Chat group with given groupId.
    *
    * @param rcUserId Rocket.Chat userId
-   * @param groupId  Rocket.Chat roomId
+   * @param groupId Rocket.Chat roomId
    */
   public void removeUserFromGroup(String rcUserId, String groupId) {
     try {
       this.rocketChatService.removeUserFromGroup(rcUserId, groupId);
     } catch (RocketChatRemoveUserFromGroupException e) {
-      var message = String.format(
-          "Could not remove user with id %s from Rocket.Chat group id %s", rcUserId, groupId);
+      var message =
+          String.format(
+              "Could not remove user with id %s from Rocket.Chat group id %s", rcUserId, groupId);
       throw new InternalServerErrorException(message, LogService::logInternalServerError);
     }
   }

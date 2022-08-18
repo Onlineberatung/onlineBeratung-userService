@@ -31,24 +31,16 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 public class UserAgencyServiceTest {
 
-  @InjectMocks
-  private UserAgencyService userAgencyService;
-  @Mock
-  private LogService logService;
-  @Mock
-  private UserAgencyRepository userAgencyRepository;
+  @InjectMocks private UserAgencyService userAgencyService;
+  @Mock private LogService logService;
+  @Mock private UserAgencyRepository userAgencyRepository;
 
-
-  /**
-   * Method: saveUserAgency
-   */
-
+  /** Method: saveUserAgency */
   @Test
   public void saveUserAgency_Should_ThrowInternalServerErrorException_When_DatabaseFails() {
 
     @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException(ERROR) {
-    };
+    DataAccessException ex = new DataAccessException(ERROR) {};
     when(userAgencyRepository.save(Mockito.any())).thenThrow(ex);
 
     try {
@@ -70,17 +62,13 @@ public class UserAgencyServiceTest {
     assertEquals(USER_AGENCY, result);
   }
 
-  /**
-   * Method: getUserAgenciesByUser
-   */
-
+  /** Method: getUserAgenciesByUser */
   @Test
   public void getUserAgenciesByUser_Should_ReturnInternalServerErrorException_When_RepositoryFails()
       throws Exception {
 
     @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException(ERROR) {
-    };
+    DataAccessException ex = new DataAccessException(ERROR) {};
     when(userAgencyRepository.findByUser(Mockito.any())).thenThrow(ex);
 
     try {
@@ -92,7 +80,8 @@ public class UserAgencyServiceTest {
   }
 
   @Test
-  public void getUserAgenciesByUser_Should_ReturnListOfUserAgencyObjects_When_RepositoryCallIsSuccessfull() {
+  public void
+      getUserAgenciesByUser_Should_ReturnListOfUserAgencyObjects_When_RepositoryCallIsSuccessfull() {
 
     when(userAgencyRepository.findByUser(Mockito.any())).thenReturn(USER_AGENCY_LIST);
 
@@ -101,16 +90,12 @@ public class UserAgencyServiceTest {
     assertThat(result, everyItem(instanceOf(UserAgency.class)));
   }
 
-  /**
-   * Method: deleteUser
-   */
-
+  /** Method: deleteUser */
   @Test
   public void deleteUserAgency_Should_ThrowInternalServerErrorException_When_DatabaseFails() {
 
     @SuppressWarnings("serial")
-    DataAccessException ex = new DataAccessException(ERROR) {
-    };
+    DataAccessException ex = new DataAccessException(ERROR) {};
     doThrow(ex).when(userAgencyRepository).delete(USER_AGENCY);
 
     try {
@@ -142,5 +127,4 @@ public class UserAgencyServiceTest {
 
     verify(userAgencyRepository, times(1)).delete(USER_AGENCY);
   }
-
 }

@@ -17,21 +17,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class KeycloakUserDataProviderTest {
 
-  @Mock
-  AuthenticatedUser authenticatedUser;
+  @Mock AuthenticatedUser authenticatedUser;
 
-  @Mock
-  KeycloakService keycloakService;
+  @Mock KeycloakService keycloakService;
 
-  @InjectMocks
-  KeycloakUserDataProvider keycloakUserDataProvider;
+  @InjectMocks KeycloakUserDataProvider keycloakUserDataProvider;
 
   @Test
   void retrieveData_Should_ThrowExceptionIfCalledInAnonymousUserContext() {
     // given
     Mockito.when(authenticatedUser.isAnonymous()).thenReturn(true);
     // when, then
-    assertThrows(IllegalArgumentException.class,
+    assertThrows(
+        IllegalArgumentException.class,
         () -> keycloakUserDataProvider.retrieveAuthenticatedUserData());
   }
 
@@ -43,7 +41,8 @@ class KeycloakUserDataProviderTest {
     UserRepresentation userRepresentation = giveUserRepresentation();
     Mockito.when(keycloakService.getById("userId")).thenReturn(userRepresentation);
     // when
-    UserDataResponseDTO userDataResponseDTO = keycloakUserDataProvider.retrieveAuthenticatedUserData();
+    UserDataResponseDTO userDataResponseDTO =
+        keycloakUserDataProvider.retrieveAuthenticatedUserData();
     // then
     assertKeycloakUserRepresentationAttributesConverted(userRepresentation, userDataResponseDTO);
     assertRolesTakenFromAuthenticatedUserBean(userDataResponseDTO);
@@ -52,7 +51,8 @@ class KeycloakUserDataProviderTest {
 
   private void assertRolesTakenFromAuthenticatedUserBean(UserDataResponseDTO userDataResponseDTO) {
     assertThat(userDataResponseDTO.getUserRoles()).isEqualTo(authenticatedUser.getRoles());
-    assertThat(userDataResponseDTO.getGrantedAuthorities()).isEqualTo(authenticatedUser.getGrantedAuthorities());
+    assertThat(userDataResponseDTO.getGrantedAuthorities())
+        .isEqualTo(authenticatedUser.getGrantedAuthorities());
   }
 
   private void assertOtherDtoAttributesSetToDefaults(UserDataResponseDTO userDataResponseDTO) {
@@ -64,8 +64,8 @@ class KeycloakUserDataProviderTest {
     assertThat(userDataResponseDTO.getAgencies()).isEmpty();
   }
 
-  private void assertKeycloakUserRepresentationAttributesConverted(UserRepresentation userRepresentation,
-      UserDataResponseDTO userDataResponseDTO) {
+  private void assertKeycloakUserRepresentationAttributesConverted(
+      UserRepresentation userRepresentation, UserDataResponseDTO userDataResponseDTO) {
     assertThat(userDataResponseDTO.getUserId()).isEqualTo(userRepresentation.getId());
     assertThat(userDataResponseDTO.getUserName()).isEqualTo(userRepresentation.getUsername());
     assertThat(userDataResponseDTO.getEmail()).isEqualTo(userRepresentation.getEmail());

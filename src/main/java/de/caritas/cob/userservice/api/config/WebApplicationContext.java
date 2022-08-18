@@ -6,9 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-/**
- * Configuration class for additional web mvc handlings.
- */
+/** Configuration class for additional web mvc handlings. */
 @Component
 public class WebApplicationContext implements WebMvcConfigurer {
 

@@ -45,35 +45,40 @@ public class Messenger implements Messaging {
 
   @Override
   public void unbanUsersInChat(Long chatId, String consultantId) {
-    findChatMetaInfo(chatId, consultantId).ifPresent(chatMetaInfoMap -> {
-      var chat = chatRepository.findById(chatId).orElseThrow();
-      mapper.bannedUsernamesOfMap(chatMetaInfoMap).forEach(username ->
-          messageClient.unmuteUserInChat(username, chat.getGroupId())
-      );
-    });
+    findChatMetaInfo(chatId, consultantId)
+        .ifPresent(
+            chatMetaInfoMap -> {
+              var chat = chatRepository.findById(chatId).orElseThrow();
+              mapper
+                  .bannedUsernamesOfMap(chatMetaInfoMap)
+                  .forEach(username -> messageClient.unmuteUserInChat(username, chat.getGroupId()));
+            });
   }
 
   @Override
   public Boolean updateE2eKeys(String chatUserId, String publicKey) {
     var allUpdated = new AtomicReference<>(true);
 
-    messageClient.findAllChats(chatUserId).ifPresent(chats -> {
-      var masterKey = stringConverter.hashOf(chatUserId);
-      for (var chat : chats) {
-        var userId = mapper.userIdOf(chat);
-        var roomId = mapper.roomIdOf(chat);
-        if (mapper.e2eKeyOf(chat).isPresent()) {
-          var roomKeyId = mapper.e2eKeyOf(chat).orElseThrow();
-          var updatedE2eKey = createE2eKey(publicKey, masterKey, roomKeyId);
-          if (!messageClient.updateChatE2eKey(userId, roomId, updatedE2eKey)) {
-            allUpdated.set(false);
-            break;
-          }
-        } else {
-          log.info("Ignoring non-temp chat ({}) of user ({})", roomId, userId);
-        }
-      }
-    });
+    messageClient
+        .findAllChats(chatUserId)
+        .ifPresent(
+            chats -> {
+              var masterKey = stringConverter.hashOf(chatUserId);
+              for (var chat : chats) {
+                var userId = mapper.userIdOf(chat);
+                var roomId = mapper.roomIdOf(chat);
+                if (mapper.e2eKeyOf(chat).isPresent()) {
+                  var roomKeyId = mapper.e2eKeyOf(chat).orElseThrow();
+                  var updatedE2eKey = createE2eKey(publicKey, masterKey, roomKeyId);
+                  if (!messageClient.updateChatE2eKey(userId, roomId, updatedE2eKey)) {
+                    allUpdated.set(false);
+                    break;
+                  }
+                } else {
+                  log.info("Ignoring non-temp chat ({}) of user ({})", roomId, userId);
+                }
+              }
+            });
 
     return allUpdated.get();
   }
@@ -92,21 +97,21 @@ public class Messenger implements Messaging {
   @Override
   public boolean removeUserFromSession(String chatUserId, String chatId) {
     var session = sessionRepository.findByGroupId(chatId).orElseThrow();
-    var consultant = consultantRepository.findByRocketChatIdAndDeleteDateIsNull(chatUserId)
-        .orElseThrow();
+    var consultant =
+        consultantRepository.findByRocketChatIdAndDeleteDateIsNull(chatUserId).orElseThrow();
     var removedOrIgnored = new AtomicBoolean(true);
 
     if (!session.isAdvisedBy(consultant) && !isResponsible(session, consultant)) {
-      if (isInChat(chatId, chatUserId) && !isTeaming(session, consultant) && !isPeering(session,
-          consultant)) {
+      if (isInChat(chatId, chatUserId)
+          && !isTeaming(session, consultant)
+          && !isPeering(session, consultant)) {
         removedOrIgnored.set(messageClient.removeUserFromSession(chatUserId, chatId));
       }
 
       var feedbackChatId = session.getFeedbackGroupId();
       if (isInChat(feedbackChatId, chatUserId) && !isMain(consultant)) {
-        removedOrIgnored.compareAndExchange(true,
-            messageClient.removeUserFromSession(chatUserId, feedbackChatId)
-        );
+        removedOrIgnored.compareAndExchange(
+            true, messageClient.removeUserFromSession(chatUserId, feedbackChatId));
       }
     }
 

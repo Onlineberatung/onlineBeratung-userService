@@ -41,12 +41,13 @@ public class ConsultantResponseDTOBuilder implements HalLinkBuilder {
    * @return the generated {@link ConsultantAdminResponseDTO}
    */
   public ConsultantAdminResponseDTO buildResponseDTO() {
-    var consultantLinks = new ConsultantLinks()
-        .self(buildSelfLink())
-        .update(buildUpdateLink())
-        .delete(buildDeleteLink())
-        .agencies(buildAgenciesLink())
-        .addAgency(buildAddAgencyLink());
+    var consultantLinks =
+        new ConsultantLinks()
+            .self(buildSelfLink())
+            .update(buildUpdateLink())
+            .delete(buildDeleteLink())
+            .agencies(buildAgenciesLink())
+            .addAgency(buildAddAgencyLink());
 
     return new ConsultantAdminResponseDTO()
         .embedded(buildConsultantDTO(consultant))
@@ -71,28 +72,31 @@ public class ConsultantResponseDTOBuilder implements HalLinkBuilder {
   }
 
   private HalLink buildSelfLink() {
-    return buildHalLink(methodOn(UseradminApi.class)
-        .getConsultant(this.consultant.getId()), MethodEnum.GET);
+    return buildHalLink(
+        methodOn(UseradminApi.class).getConsultant(this.consultant.getId()), MethodEnum.GET);
   }
 
   private HalLink buildUpdateLink() {
-    return buildHalLink(methodOn(UseradminApi.class)
-        .updateConsultant(this.consultant.getId(), null), MethodEnum.PUT);
+    return buildHalLink(
+        methodOn(UseradminApi.class).updateConsultant(this.consultant.getId(), null),
+        MethodEnum.PUT);
   }
 
   private HalLink buildDeleteLink() {
-    return buildHalLink(methodOn(UseradminApi.class)
-        .markConsultantForDeletion(this.consultant.getId()), MethodEnum.DELETE);
+    return buildHalLink(
+        methodOn(UseradminApi.class).markConsultantForDeletion(this.consultant.getId()),
+        MethodEnum.DELETE);
   }
 
   private HalLink buildAgenciesLink() {
-    return buildHalLink(methodOn(UseradminApi.class)
-        .getConsultantAgencies(this.consultant.getId()), MethodEnum.GET);
+    return buildHalLink(
+        methodOn(UseradminApi.class).getConsultantAgencies(this.consultant.getId()),
+        MethodEnum.GET);
   }
 
   private HalLink buildAddAgencyLink() {
-    return buildHalLink(methodOn(UseradminApi.class)
-        .createConsultantAgency(this.consultant.getId(), null), MethodEnum.POST);
+    return buildHalLink(
+        methodOn(UseradminApi.class).createConsultantAgency(this.consultant.getId(), null),
+        MethodEnum.POST);
   }
-
 }

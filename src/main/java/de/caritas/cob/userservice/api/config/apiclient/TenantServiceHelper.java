@@ -27,8 +27,9 @@ public class TenantServiceHelper {
     MultiValueMap<String, String> paramMap = new LinkedMultiValueMap<>();
 
     try {
-      Arrays.asList(Introspector.getBeanInfo(queryValue.getClass(), Object.class)
-          .getPropertyDescriptors())
+      Arrays.asList(
+              Introspector.getBeanInfo(queryValue.getClass(), Object.class)
+                  .getPropertyDescriptors())
           .stream()
           .filter(descriptor -> nonNull(descriptor.getReadMethod()))
           .forEach(descriptor -> setMethodKeyValuePairs(queryValue, paramMap, descriptor));
@@ -41,8 +42,8 @@ public class TenantServiceHelper {
     }
   }
 
-  private static void setMethodKeyValuePairs(Object queryValue, MultiValueMap<String, String> map,
-      PropertyDescriptor descriptor) {
+  private static void setMethodKeyValuePairs(
+      Object queryValue, MultiValueMap<String, String> map, PropertyDescriptor descriptor) {
     try {
       Object value = descriptor.getReadMethod().invoke(queryValue);
       if (nonNull(value)) {
@@ -54,5 +55,4 @@ public class TenantServiceHelper {
           exception);
     }
   }
-
 }

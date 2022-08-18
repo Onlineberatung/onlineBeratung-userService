@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.neovisionaries.i18n.LanguageCode;
-import de.caritas.cob.userservice.api.model.Session.RegistrationType;
 import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.model.Session.RegistrationType;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.SessionData;
 import de.caritas.cob.userservice.api.model.SessionData.SessionDataType;
@@ -29,11 +29,9 @@ class SessionRepositoryIT {
 
   private static final EasyRandom easyRandom = new EasyRandom();
 
-  @Autowired
-  private SessionRepository underTest;
+  @Autowired private SessionRepository underTest;
 
-  @Autowired
-  private UserRepository userRepository;
+  @Autowired private UserRepository userRepository;
 
   private User user;
 
@@ -75,13 +73,19 @@ class SessionRepositoryIT {
     session.setLanguageCode(easyRandom.nextObject(LanguageCode.class));
     session.setStatus(easyRandom.nextObject(SessionStatus.class));
 
-    var sessionData1 = new SessionData(
-        session, SessionDataType.REGISTRATION, RandomStringUtils.randomAlphanumeric(1, 255),
-        RandomStringUtils.randomAlphanumeric(1, 255));
+    var sessionData1 =
+        new SessionData(
+            session,
+            SessionDataType.REGISTRATION,
+            RandomStringUtils.randomAlphanumeric(1, 255),
+            RandomStringUtils.randomAlphanumeric(1, 255));
 
-    var sessionData2 = new SessionData(
-        session, SessionDataType.REGISTRATION, RandomStringUtils.randomAlphanumeric(1, 255),
-        RandomStringUtils.randomAlphanumeric(1, 255));
+    var sessionData2 =
+        new SessionData(
+            session,
+            SessionDataType.REGISTRATION,
+            RandomStringUtils.randomAlphanumeric(1, 255),
+            RandomStringUtils.randomAlphanumeric(1, 255));
 
     session.setSessionData(List.of(sessionData1, sessionData2));
   }

@@ -14,8 +14,8 @@ import de.caritas.cob.userservice.agencyserivce.generated.web.AgencyControllerAp
 import de.caritas.cob.userservice.agencyserivce.generated.web.model.AgencyResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
-import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
+import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,28 +36,23 @@ public class AgencySecurityHeaderSupplierTest {
 
   private final String GET_AGENCY_METHOD_NAME = "getAgency";
   private final String GET_AGENCIES_METHOD_NAME = "getAgencies";
-  private final Class<?>[] GET_AGENCY_METHOD_PARAMS = new Class[]{Long.class};
-  private final Class<?>[] GET_AGENCIES_METHOD_PARAMS = new Class[]{List.class};
+  private final Class<?>[] GET_AGENCY_METHOD_PARAMS = new Class[] {Long.class};
+  private final Class<?>[] GET_AGENCIES_METHOD_PARAMS = new Class[] {List.class};
 
-  @InjectMocks
-  private AgencyService agencyService;
+  @InjectMocks private AgencyService agencyService;
 
-  @Mock
-  private AgencyControllerApi agencyControllerApi;
+  @Mock private AgencyControllerApi agencyControllerApi;
 
-  @Mock
-  private SecurityHeaderSupplier securityHeaderSupplier;
+  @Mock private SecurityHeaderSupplier securityHeaderSupplier;
 
   private List<AgencyResponseDTO> agencyResponseDTOS;
 
-  @Mock
-  private TenantHeaderSupplier tenantHeaderSupplier;
+  @Mock private TenantHeaderSupplier tenantHeaderSupplier;
 
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
-    this.agencyResponseDTOS = AGENCY_DTO_LIST.stream()
-        .map(this::toAgencyResponseDTO)
-        .collect(Collectors.toList());
+    this.agencyResponseDTOS =
+        AGENCY_DTO_LIST.stream().map(this::toAgencyResponseDTO).collect(Collectors.toList());
     when(this.securityHeaderSupplier.getCsrfHttpHeaders()).thenReturn(new HttpHeaders());
   }
 
@@ -68,8 +63,8 @@ public class AgencySecurityHeaderSupplierTest {
   @SneakyThrows
   private AgencyResponseDTO toAgencyResponseDTO(AgencyDTO agencyDTO) {
     ObjectMapper objectMapper = new ObjectMapper();
-    return objectMapper.readValue(objectMapper.writeValueAsString(agencyDTO),
-        AgencyResponseDTO.class);
+    return objectMapper.readValue(
+        objectMapper.writeValueAsString(agencyDTO), AgencyResponseDTO.class);
   }
 
   @Test
@@ -83,14 +78,18 @@ public class AgencySecurityHeaderSupplierTest {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Test
-  public void test_Should_Fail_When_MethodgetAgenciesFromAgencyServiceDoesNotHaveCacheableAnnotation()
-      throws NoSuchMethodException, SecurityException {
+  public void
+      test_Should_Fail_When_MethodgetAgenciesFromAgencyServiceDoesNotHaveCacheableAnnotation()
+          throws NoSuchMethodException, SecurityException {
 
-    AgencyService agencyService = new AgencyService(mock(AgencyControllerApi.class),
-        mock(SecurityHeaderSupplier.class), mock(TenantHeaderSupplier.class));
+    AgencyService agencyService =
+        new AgencyService(
+            mock(AgencyControllerApi.class),
+            mock(SecurityHeaderSupplier.class),
+            mock(TenantHeaderSupplier.class));
     Class classToTest = agencyService.getClass();
-    Method methodToTest = classToTest
-        .getMethod(GET_AGENCIES_METHOD_NAME, GET_AGENCIES_METHOD_PARAMS);
+    Method methodToTest =
+        classToTest.getMethod(GET_AGENCIES_METHOD_NAME, GET_AGENCIES_METHOD_PARAMS);
     Cacheable annotation = methodToTest.getAnnotation(Cacheable.class);
 
     assertNotNull(annotation);
@@ -106,15 +105,16 @@ public class AgencySecurityHeaderSupplierTest {
     resetRequestAttributes();
   }
 
-
-
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Test
   public void test_Should_Fail_When_MethodgetAgencyFromAgencyServiceDoesNotHaveCacheableAnnotation()
       throws NoSuchMethodException, SecurityException {
 
-    AgencyService agencyService = new AgencyService(mock(AgencyControllerApi.class),
-        mock(SecurityHeaderSupplier.class), mock(TenantHeaderSupplier.class));
+    AgencyService agencyService =
+        new AgencyService(
+            mock(AgencyControllerApi.class),
+            mock(SecurityHeaderSupplier.class),
+            mock(TenantHeaderSupplier.class));
     Class classToTest = agencyService.getClass();
     Method methodToTest = classToTest.getMethod(GET_AGENCY_METHOD_NAME, GET_AGENCY_METHOD_PARAMS);
     Cacheable annotation = methodToTest.getAnnotation(Cacheable.class);
@@ -131,5 +131,4 @@ public class AgencySecurityHeaderSupplierTest {
     assertThat(agencyService.getAgencyWithoutCaching(AGENCY_ID), instanceOf(AgencyDTO.class));
     resetRequestAttributes();
   }
-
 }

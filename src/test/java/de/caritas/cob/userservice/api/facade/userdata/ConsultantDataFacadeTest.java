@@ -25,11 +25,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ConsultantDataFacadeTest {
 
-  @InjectMocks
-  private ConsultantDataFacade consultantDataFacade;
+  @InjectMocks private ConsultantDataFacade consultantDataFacade;
 
-  @Mock
-  private ConsultantService consultantService;
+  @Mock private ConsultantService consultantService;
 
   @Test
   public void updateConsultantAbsent_Should_UpdateAbsenceMessageAndIsAbsence() {
@@ -42,11 +40,12 @@ public class ConsultantDataFacadeTest {
   }
 
   @Test
-  public void saveEnquiryMessageAndRocketChatGroupId_Should_RemoveHtmlCodeAndJsFromMessageForXssProtection() {
+  public void
+      saveEnquiryMessageAndRocketChatGroupId_Should_RemoveHtmlCodeAndJsFromMessageForXssProtection() {
     when(consultantService.saveConsultant(Mockito.any(Consultant.class))).thenReturn(CONSULTANT);
 
-    Consultant consultant = consultantDataFacade.updateConsultantAbsent(CONSULTANT,
-        ABSENCE_DTO_WITH_HTML_AND_JS);
+    Consultant consultant =
+        consultantDataFacade.updateConsultantAbsent(CONSULTANT, ABSENCE_DTO_WITH_HTML_AND_JS);
 
     assertEquals(consultant.isAbsent(), ABSENCE_DTO_WITH_HTML_AND_JS.getAbsent());
     assertNotEquals(consultant.getAbsenceMessage(), ABSENCE_DTO_WITH_HTML_AND_JS.getMessage());
@@ -54,7 +53,8 @@ public class ConsultantDataFacadeTest {
   }
 
   @Test
-  public void updateConsultantAbsent_Should_SetAbsenceMessageToNull_WhenAbsenceMessageFromDtoIsEmpty() {
+  public void
+      updateConsultantAbsent_Should_SetAbsenceMessageToNull_WhenAbsenceMessageFromDtoIsEmpty() {
     consultantDataFacade.updateConsultantAbsent(CONSULTANT, ABSENCE_DTO_WITH_EMPTY_MESSAGE);
 
     ArgumentCaptor<Consultant> captor = ArgumentCaptor.forClass(Consultant.class);
@@ -63,7 +63,8 @@ public class ConsultantDataFacadeTest {
   }
 
   @Test
-  public void updateConsultantAbsent_Should_SetAbsenceMessageToNull_WhenAbsenceMessageFromDtoIsNull() {
+  public void
+      updateConsultantAbsent_Should_SetAbsenceMessageToNull_WhenAbsenceMessageFromDtoIsNull() {
     consultantDataFacade.updateConsultantAbsent(CONSULTANT, ABSENCE_DTO_WITH_NULL_MESSAGE);
 
     ArgumentCaptor<Consultant> captor = ArgumentCaptor.forClass(Consultant.class);

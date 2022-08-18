@@ -78,9 +78,7 @@ import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-/**
- * Service for Rocket.Chat functionalities.
- */
+/** Service for Rocket.Chat functionalities. */
 @Slf4j
 @Getter
 @Service
@@ -109,15 +107,17 @@ public class RocketChatService implements MessageClient {
   private static final String ENDPOINT_USER_LOGIN = "/login";
   private static final String ENDPOINT_USER_LOGOUT = "/logout";
 
-  private static final String ERROR_MESSAGE = "Error during rollback: Rocket.Chat group with id "
-      + "%s could not be deleted";
+  private static final String ERROR_MESSAGE =
+      "Error during rollback: Rocket.Chat group with id " + "%s could not be deleted";
   private static final String RC_DATE_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
-  private static final String CHAT_ROOM_ERROR_MESSAGE = "Could not get Rocket.Chat rooms for user id %s";
-  private static final String GROUPS_LIST_ALL_ERROR_MESSAGE = "Could not get all rocket chat groups";
-  private static final String USERS_LIST_ERROR_MESSAGE = "Could not get users list from Rocket.Chat";
+  private static final String CHAT_ROOM_ERROR_MESSAGE =
+      "Could not get Rocket.Chat rooms for user id %s";
+  private static final String GROUPS_LIST_ALL_ERROR_MESSAGE =
+      "Could not get all rocket chat groups";
+  private static final String USERS_LIST_ERROR_MESSAGE =
+      "Could not get users list from Rocket.Chat";
   private static final String USER_LIST_GET_FIELD_SELECTION = "{\"_id\":1}";
   private final LocalDateTime localDateTime1900 = LocalDateTime.of(1900, 1, 1, 0, 0);
-
 
   private final LocalDateTime localDateTimeFuture = nowInUtc().plusYears(1L);
   private final @NonNull RestTemplate restTemplate;
@@ -191,7 +191,8 @@ public class RocketChatService implements MessageClient {
     } catch (RestClientResponseException | RocketChatUserNotInitializedException ex) {
       throw new InternalServerErrorException(
           String.format("Could not update Rocket.Chat user of user id %s", requestDTO.getUserId()),
-          ex, LogService::logRocketChatError);
+          ex,
+          LogService::logRocketChatError);
     }
   }
 
@@ -241,8 +242,9 @@ public class RocketChatService implements MessageClient {
    * @param rocketChatCredentials {@link RocketChatCredentials}
    * @return the group id
    */
-  public Optional<GroupResponseDTO> createPrivateGroup(String name,
-      RocketChatCredentials rocketChatCredentials) throws RocketChatCreateGroupException {
+  public Optional<GroupResponseDTO> createPrivateGroup(
+      String name, RocketChatCredentials rocketChatCredentials)
+      throws RocketChatCreateGroupException {
 
     GroupResponseDTO response;
 
@@ -250,8 +252,7 @@ public class RocketChatService implements MessageClient {
 
       var headers = getStandardHttpHeaders(rocketChatCredentials);
       var groupCreateBodyDto = new GroupCreateBodyDTO(name, false);
-      HttpEntity<GroupCreateBodyDTO> request =
-          new HttpEntity<>(groupCreateBodyDto, headers);
+      HttpEntity<GroupCreateBodyDTO> request = new HttpEntity<>(groupCreateBodyDto, headers);
       var url = rocketChatConfig.getApiUrl(ENDPOINT_GROUP_CREATE);
       response = restTemplate.postForObject(url, request, GroupResponseDTO.class);
 
@@ -265,7 +266,6 @@ public class RocketChatService implements MessageClient {
     }
 
     return Optional.ofNullable(response);
-
   }
 
   private boolean isCreateGroupResponseSuccess(GroupResponseDTO response) {
@@ -324,7 +324,7 @@ public class RocketChatService implements MessageClient {
   /**
    * Deletion of a Rocket.Chat group.
    *
-   * @param groupId               the group id
+   * @param groupId the group id
    * @param rocketChatCredentials {@link RocketChatCredentials}
    * @return true, if successfully
    */
@@ -336,16 +336,16 @@ public class RocketChatService implements MessageClient {
 
       var headers = getStandardHttpHeaders(rocketChatCredentials);
       var groupDeleteBodyDto = new GroupDeleteBodyDTO(groupId);
-      HttpEntity<GroupDeleteBodyDTO> request =
-          new HttpEntity<>(groupDeleteBodyDto, headers);
+      HttpEntity<GroupDeleteBodyDTO> request = new HttpEntity<>(groupDeleteBodyDto, headers);
       var url = rocketChatConfig.getApiUrl(ENDPOINT_GROUP_DELETE);
       response = restTemplate.postForObject(url, request, GroupDeleteResponseDTO.class);
 
     } catch (Exception ex) {
       log.error(
           "Rocket.Chat Error: Error during rollback: Rocket.Chat group with id {} could not be "
-              + "deleted", groupId, ex
-      );
+              + "deleted",
+          groupId,
+          ex);
     }
 
     if (response != null && response.isSuccess()) {
@@ -353,12 +353,11 @@ public class RocketChatService implements MessageClient {
     } else {
       log.error(
           "Rocket.Chat Error: Error during rollback: Rocket.Chat group with id {} could not be "
-              + "deleted (Error: unknown / ErrorType: unknown)", groupId
-      );
+              + "deleted (Error: unknown / ErrorType: unknown)",
+          groupId);
 
       return false;
     }
-
   }
 
   private boolean isGroupIdAvailable(GroupResponseDTO response) {
@@ -377,8 +376,8 @@ public class RocketChatService implements MessageClient {
   /**
    * Retrieves the userId for the given credentials.
    *
-   * @param username   the username
-   * @param password   the password
+   * @param username the username
+   * @param password the password
    * @param firstLogin true, if first login in Rocket.Chat. This requires a special API call.
    * @return the userid
    * @throws RocketChatLoginException on failure
@@ -394,9 +393,11 @@ public class RocketChatService implements MessageClient {
       response = this.rcCredentialHelper.loginUser(username, password);
     }
 
-    var rocketChatCredentials = RocketChatCredentials.builder()
-        .rocketChatUserId(response.getBody().getData().getUserId())
-        .rocketChatToken(response.getBody().getData().getAuthToken()).build();
+    var rocketChatCredentials =
+        RocketChatCredentials.builder()
+            .rocketChatUserId(response.getBody().getData().getUserId())
+            .rocketChatToken(response.getBody().getData().getAuthToken())
+            .build();
 
     logoutUser(rocketChatCredentials);
 
@@ -454,8 +455,8 @@ public class RocketChatService implements MessageClient {
     } catch (Exception ex) {
       log.error(
           "Rocket.Chat Error: Could not log out user id ({}) from Rocket.Chat",
-          rocketChatCredentials.getRocketChatUserId(), ex
-      );
+          rocketChatCredentials.getRocketChatUserId(),
+          ex);
 
       return false;
     }
@@ -464,7 +465,7 @@ public class RocketChatService implements MessageClient {
   /**
    * Adds the provided user to the Rocket.Chat group with given groupId.
    *
-   * @param rcUserId  Rocket.Chat userId
+   * @param rcUserId Rocket.Chat userId
    * @param rcGroupId Rocket.Chat roomId
    */
   public void addUserToGroup(String rcUserId, String rcGroupId)
@@ -481,8 +482,9 @@ public class RocketChatService implements MessageClient {
       response = restTemplate.postForObject(url, request, GroupResponseDTO.class);
 
     } catch (Exception ex) {
-      throw new RocketChatAddUserToGroupException(String.format(
-          "Could not add user %s to Rocket.Chat group with id %s", rcUserId, rcGroupId));
+      throw new RocketChatAddUserToGroupException(
+          String.format(
+              "Could not add user %s to Rocket.Chat group with id %s", rcUserId, rcGroupId));
     }
 
     if (nonNull(response) && !response.isSuccess()) {
@@ -504,7 +506,7 @@ public class RocketChatService implements MessageClient {
   /**
    * Removes the provided user from the Rocket.Chat group with given groupId.
    *
-   * @param rcUserId  Rocket.Chat userId
+   * @param rcUserId Rocket.Chat userId
    * @param rcGroupId Rocket.Chat roomId
    * @throws RocketChatRemoveUserFromGroupException on failure
    */
@@ -516,15 +518,15 @@ public class RocketChatService implements MessageClient {
       RocketChatCredentials technicalUser = rcCredentialHelper.getTechnicalUser();
       var header = getStandardHttpHeaders(technicalUser);
       var body = new GroupRemoveUserBodyDTO(rcUserId, rcGroupId);
-      HttpEntity<GroupRemoveUserBodyDTO> request =
-          new HttpEntity<>(body, header);
+      HttpEntity<GroupRemoveUserBodyDTO> request = new HttpEntity<>(body, header);
 
       var url = rocketChatConfig.getApiUrl(ENDPOINT_GROUP_KICK);
       response = restTemplate.postForObject(url, request, GroupResponseDTO.class);
 
     } catch (Exception ex) {
-      throw new RocketChatRemoveUserFromGroupException(String.format(
-          "Could not remove user %s from Rocket.Chat group with id %s", rcUserId, rcGroupId));
+      throw new RocketChatRemoveUserFromGroupException(
+          String.format(
+              "Could not remove user %s from Rocket.Chat group with id %s", rcUserId, rcGroupId));
     }
 
     if (response != null && !response.isSuccess()) {
@@ -554,8 +556,8 @@ public class RocketChatService implements MessageClient {
    */
   public void removeTechnicalUserFromGroup(String rcGroupId)
       throws RocketChatRemoveUserFromGroupException, RocketChatUserNotInitializedException {
-    this.removeUserFromGroup(rcCredentialHelper.getTechnicalUser().getRocketChatUserId(),
-        rcGroupId);
+    this.removeUserFromGroup(
+        rcCredentialHelper.getTechnicalUser().getRocketChatUserId(), rcGroupId);
   }
 
   /**
@@ -568,8 +570,7 @@ public class RocketChatService implements MessageClient {
   public List<GroupMemberDTO> getStandardMembersOfGroup(String rcGroupId)
       throws RocketChatGetGroupMembersException, RocketChatUserNotInitializedException {
 
-    List<GroupMemberDTO> groupMemberList =
-        new ArrayList<>(getMembersOfGroup(rcGroupId));
+    List<GroupMemberDTO> groupMemberList = new ArrayList<>(getMembersOfGroup(rcGroupId));
 
     if (groupMemberList.isEmpty()) {
       throw new RocketChatGetGroupMembersException(
@@ -579,16 +580,17 @@ public class RocketChatService implements MessageClient {
     Iterator<GroupMemberDTO> groupMemberListIterator = groupMemberList.iterator();
     while (groupMemberListIterator.hasNext()) {
       var groupMemberDTO = groupMemberListIterator.next();
-      if (groupMemberDTO.get_id()
-          .equals(rcCredentialHelper.getTechnicalUser().getRocketChatUserId())
-          || groupMemberDTO.get_id()
-          .equals(rcCredentialHelper.getSystemUser().getRocketChatUserId())) {
+      if (groupMemberDTO
+              .get_id()
+              .equals(rcCredentialHelper.getTechnicalUser().getRocketChatUserId())
+          || groupMemberDTO
+              .get_id()
+              .equals(rcCredentialHelper.getSystemUser().getRocketChatUserId())) {
         groupMemberListIterator.remove();
       }
     }
 
     return groupMemberList;
-
   }
 
   /**
@@ -597,7 +599,8 @@ public class RocketChatService implements MessageClient {
    * @param rcGroupId the rocket chat group id
    */
   public void removeAllStandardUsersFromGroup(String rcGroupId)
-      throws RocketChatGetGroupMembersException, RocketChatRemoveUserFromGroupException, RocketChatUserNotInitializedException {
+      throws RocketChatGetGroupMembersException, RocketChatRemoveUserFromGroupException,
+          RocketChatUserNotInitializedException {
     List<GroupMemberDTO> groupMemberList = getMembersOfGroup(rcGroupId);
 
     if (groupMemberList.isEmpty()) {
@@ -640,12 +643,17 @@ public class RocketChatService implements MessageClient {
       var header = getStandardHttpHeaders(systemUser);
       HttpEntity<GroupAddUserBodyDTO> request = new HttpEntity<>(header);
 
-      response = restTemplate.exchange(buildGetGroupMembersPath(rcGroupId),
-          HttpMethod.GET, request, GroupMemberResponseDTO.class);
+      response =
+          restTemplate.exchange(
+              buildGetGroupMembersPath(rcGroupId),
+              HttpMethod.GET,
+              request,
+              GroupMemberResponseDTO.class);
 
     } catch (Exception ex) {
-      throw new RocketChatGetGroupMembersException(String.format("Could not get Rocket.Chat group"
-          + " members for room id %s", rcGroupId), ex);
+      throw new RocketChatGetGroupMembersException(
+          String.format("Could not get Rocket.Chat group" + " members for room id %s", rcGroupId),
+          ex);
     }
 
     if (response.getStatusCode() == HttpStatus.OK && nonNull(response.getBody())) {
@@ -659,11 +667,12 @@ public class RocketChatService implements MessageClient {
   private String buildGetGroupMembersPath(String rcGroupId) {
     var url = rocketChatConfig.getApiUrl(ENDPOINT_GROUP_MEMBERS);
 
-    return UriComponentsBuilder
-        .fromUriString(url)
+    return UriComponentsBuilder.fromUriString(url)
         .queryParam("roomId", rcGroupId)
         .queryParam("count", 0)
-        .build().encode().toUriString();
+        .build()
+        .encode()
+        .toUriString();
   }
 
   /**
@@ -671,14 +680,14 @@ public class RocketChatService implements MessageClient {
    * the last 24 hours (avoiding time zone failures).
    *
    * @param rcGroupId the rocket chat group id
-   * @param oldest    the oldest message time
-   * @param latest    the latest message time
+   * @param oldest the oldest message time
+   * @param latest the latest message time
    */
   public void removeSystemMessages(String rcGroupId, LocalDateTime oldest, LocalDateTime latest)
       throws RocketChatRemoveSystemMessagesException, RocketChatUserNotInitializedException {
     RocketChatCredentials technicalUser = rcCredentialHelper.getTechnicalUser();
-    this.removeMessages(rcGroupId, new String[]{technicalUser.getRocketChatUsername()}, oldest,
-        latest);
+    this.removeMessages(
+        rcGroupId, new String[] {technicalUser.getRocketChatUsername()}, oldest, latest);
   }
 
   /**
@@ -686,22 +695,24 @@ public class RocketChatService implements MessageClient {
    *
    * @param rcGroupId the rocket chat group id
    */
-  public void removeAllMessages(String rcGroupId)
-      throws RocketChatRemoveSystemMessagesException {
+  public void removeAllMessages(String rcGroupId) throws RocketChatRemoveSystemMessagesException {
     removeMessages(rcGroupId, null, localDateTime1900, localDateTimeFuture);
   }
 
-  private void removeMessages(String rcGroupId, String[] users, LocalDateTime oldest,
-      LocalDateTime latest) throws RocketChatRemoveSystemMessagesException {
+  private void removeMessages(
+      String rcGroupId, String[] users, LocalDateTime oldest, LocalDateTime latest)
+      throws RocketChatRemoveSystemMessagesException {
 
     StandardResponseDTO response;
     try {
       RocketChatCredentials technicalUser = rcCredentialHelper.getTechnicalUser();
       var header = getStandardHttpHeaders(technicalUser);
-      var body = new GroupCleanHistoryDTO(rcGroupId,
-          oldest.format(DateTimeFormatter.ofPattern(RC_DATE_TIME_PATTERN)),
-          latest.format(DateTimeFormatter.ofPattern(RC_DATE_TIME_PATTERN)),
-          (isNotEmpty(users)) ? users : new String[]{});
+      var body =
+          new GroupCleanHistoryDTO(
+              rcGroupId,
+              oldest.format(DateTimeFormatter.ofPattern(RC_DATE_TIME_PATTERN)),
+              latest.format(DateTimeFormatter.ofPattern(RC_DATE_TIME_PATTERN)),
+              (isNotEmpty(users)) ? users : new String[] {});
       HttpEntity<GroupCleanHistoryDTO> request = new HttpEntity<>(body, header);
 
       var url = rocketChatConfig.getApiUrl(ENDPOINT_ROOM_CLEAN_HISTORY);
@@ -770,8 +781,8 @@ public class RocketChatService implements MessageClient {
     var updateUser = mapper.updateGroupKeyOf(chatUserId, roomId, key);
 
     try {
-      var response = rocketChatClient.postForEntity(url, chatUserId, updateUser,
-          StandardResponseDTO.class);
+      var response =
+          rocketChatClient.postForEntity(url, chatUserId, updateUser, StandardResponseDTO.class);
       return response.getStatusCode().is2xxSuccessful();
     } catch (HttpClientErrorException exception) {
       log.error("Updating E2E group key failed.", exception);
@@ -796,16 +807,17 @@ public class RocketChatService implements MessageClient {
       response = restTemplate.exchange(url, HttpMethod.GET, request, RoomsGetDTO.class);
 
     } catch (Exception ex) {
-      throw new InternalServerErrorException(String.format(
-          CHAT_ROOM_ERROR_MESSAGE, rocketChatCredentials.getRocketChatUserId()), ex,
+      throw new InternalServerErrorException(
+          String.format(CHAT_ROOM_ERROR_MESSAGE, rocketChatCredentials.getRocketChatUserId()),
+          ex,
           LogService::logRocketChatError);
     }
 
     if (response.getStatusCode() == HttpStatus.OK && nonNull(response.getBody())) {
       return Arrays.asList(response.getBody().getUpdate());
     } else {
-      var error = String.format(CHAT_ROOM_ERROR_MESSAGE,
-          rocketChatCredentials.getRocketChatUserId());
+      var error =
+          String.format(CHAT_ROOM_ERROR_MESSAGE, rocketChatCredentials.getRocketChatUserId());
       throw new InternalServerErrorException(error, LogService::logRocketChatError);
     }
   }
@@ -826,21 +838,23 @@ public class RocketChatService implements MessageClient {
 
       var fields = "{\"userRooms\":1}";
       var url = rocketChatConfig.getApiUrl(ENDPOINT_USER_INFO + rcUserId) + "&fields={fields}";
-      response = restTemplate
-          .exchange(url, HttpMethod.GET, request, UserInfoResponseDTO.class, fields);
+      response =
+          restTemplate.exchange(url, HttpMethod.GET, request, UserInfoResponseDTO.class, fields);
 
     } catch (RestClientResponseException | RocketChatUserNotInitializedException ex) {
       throw new InternalServerErrorException(
-          String.format("Could not get Rocket.Chat user info of user id %s", rcUserId), ex,
+          String.format("Could not get Rocket.Chat user info of user id %s", rcUserId),
+          ex,
           LogService::logRocketChatError);
-
     }
 
     if (isResponseNotSuccess(response)) {
       throw new InternalServerErrorException(
           String.format(
               "Could not get Rocket.Chat user info of user id %s.%n Status: %s.%n error: %s.%n error type: %s",
-              rcUserId, response.getStatusCodeValue(), response.getBody().getError(),
+              rcUserId,
+              response.getStatusCodeValue(),
+              response.getBody().getError(),
               response.getBody().getErrorType()),
           LogService::logRocketChatError);
     }
@@ -850,8 +864,9 @@ public class RocketChatService implements MessageClient {
 
   private boolean isResponseNotSuccess(ResponseEntity<UserInfoResponseDTO> response) {
     UserInfoResponseDTO responseBody = response.getBody();
-    return isNull(responseBody) || response.getStatusCode() != HttpStatus.OK || !responseBody
-        .isSuccess();
+    return isNull(responseBody)
+        || response.getStatusCode() != HttpStatus.OK
+        || !responseBody.isSuccess();
   }
 
   private ResponseEntity<UserInfoResponseDTO> updateUserData(UserUpdateRequestDTO requestDTO)
@@ -865,7 +880,9 @@ public class RocketChatService implements MessageClient {
       throw new InternalServerErrorException(
           String.format(
               "Could not get Rocket.Chat user info of user id %s.%n Status: %s.%n error: %s.%n error type: %s",
-              requestDTO.getUserId(), response.getStatusCodeValue(), response.getBody().getError(),
+              requestDTO.getUserId(),
+              response.getStatusCodeValue(),
+              response.getBody().getError(),
               response.getBody().getErrorType()),
           LogService::logRocketChatError);
     }
@@ -909,8 +926,11 @@ public class RocketChatService implements MessageClient {
           String.format(
               "Could not delete Rocket.Chat user with user id %s.%n Status: %s.%n error: %s.%n "
                   + "error type: %s",
-              rcUserId, response.getStatusCodeValue(), response.getBody().getError(),
-              response.getBody().getErrorType()), LogService::logRocketChatError);
+              rcUserId,
+              response.getStatusCodeValue(),
+              response.getBody().getError(),
+              response.getBody().getErrorType()),
+          LogService::logRocketChatError);
     }
   }
 
@@ -948,8 +968,8 @@ public class RocketChatService implements MessageClient {
     if (nonNull(responseBody) && !responseBody.isSuccess()) {
       log.error(
           "Rocket.Chat Error: Mark group with id {} as read only failed with reason {}",
-          rcRoomId, responseBody.getError()
-      );
+          rcRoomId,
+          responseBody.getError());
     }
   }
 
@@ -961,24 +981,25 @@ public class RocketChatService implements MessageClient {
    * @return a {@link List} of {@link GroupDTO} instances
    */
   public List<GroupDTO> fetchAllInactivePrivateGroupsSinceGivenDate(
-      LocalDateTime dateTimeSinceInactive)
-      throws RocketChatGetGroupsListAllException {
+      LocalDateTime dateTimeSinceInactive) throws RocketChatGetGroupsListAllException {
 
     final var GROUP_RESPONSE_LAST_MESSAGE_TIMESTAMP_FIELD = "lastMessage.ts";
     final var GROUP_RESPONSE_GROUP_TYPE_FIELD = "t";
     final var GROUP_RESPONSE_GROUP_TYPE_PRIVATE = "p";
 
-    DBObject mongoDbQuery = QueryBuilder
-        .start(GROUP_RESPONSE_LAST_MESSAGE_TIMESTAMP_FIELD)
-        .lessThan(QueryBuilder
-            .start("$date")
-            .is(dateTimeSinceInactive.format(DateTimeFormatter.ofPattern(RC_DATE_TIME_PATTERN)))
-            .get())
-        .and(QueryBuilder
-            .start(GROUP_RESPONSE_GROUP_TYPE_FIELD)
-            .is(GROUP_RESPONSE_GROUP_TYPE_PRIVATE)
-            .get())
-        .get();
+    DBObject mongoDbQuery =
+        QueryBuilder.start(GROUP_RESPONSE_LAST_MESSAGE_TIMESTAMP_FIELD)
+            .lessThan(
+                QueryBuilder.start("$date")
+                    .is(
+                        dateTimeSinceInactive.format(
+                            DateTimeFormatter.ofPattern(RC_DATE_TIME_PATTERN)))
+                    .get())
+            .and(
+                QueryBuilder.start(GROUP_RESPONSE_GROUP_TYPE_FIELD)
+                    .is(GROUP_RESPONSE_GROUP_TYPE_PRIVATE)
+                    .get())
+            .get();
 
     return getGroupsListAll(mongoDbQuery);
   }
@@ -999,11 +1020,13 @@ public class RocketChatService implements MessageClient {
       var header = getStandardHttpHeaders(technicalUser);
       HttpEntity<GroupAddUserBodyDTO> request = new HttpEntity<>(header);
       var url = rocketChatConfig.getApiUrl(ENDPOINT_GROUP_LIST) + "?query={query}";
-      response = restTemplate.exchange(url,
-          HttpMethod.GET,
-          request,
-          GroupsListAllResponseDTO.class,
-          mongoDbQuery.toString());
+      response =
+          restTemplate.exchange(
+              url,
+              HttpMethod.GET,
+              request,
+              GroupsListAllResponseDTO.class,
+              mongoDbQuery.toString());
     } catch (Exception ex) {
       throw new RocketChatGetGroupsListAllException(GROUPS_LIST_ALL_ERROR_MESSAGE, ex);
     }
@@ -1022,20 +1045,21 @@ public class RocketChatService implements MessageClient {
    * @return the Rocket.Chat user id
    * @throws RocketChatGetUserIdException when request fails
    */
-  public String getRocketChatUserIdByUsername(String username)
-      throws RocketChatGetUserIdException {
+  public String getRocketChatUserIdByUsername(String username) throws RocketChatGetUserIdException {
 
     ResponseEntity<UsersListReponseDTO> response;
     try {
       var technicalUser = rcCredentialHelper.getTechnicalUser();
       var header = getStandardHttpHeaders(technicalUser);
       HttpEntity<UsersListReponseDTO> request = new HttpEntity<>(header);
-      response = restTemplate.exchange(buildUsersListGetUrl(),
-          HttpMethod.GET,
-          request,
-          UsersListReponseDTO.class,
-          buildUsernameQuery(username),
-          USER_LIST_GET_FIELD_SELECTION);
+      response =
+          restTemplate.exchange(
+              buildUsersListGetUrl(),
+              HttpMethod.GET,
+              request,
+              UsersListReponseDTO.class,
+              buildUsernameQuery(username),
+              USER_LIST_GET_FIELD_SELECTION);
     } catch (Exception ex) {
       throw new RocketChatGetUserIdException(USERS_LIST_ERROR_MESSAGE, ex);
     }
@@ -1066,7 +1090,6 @@ public class RocketChatService implements MessageClient {
 
     throw new RocketChatGetUserIdException(
         String.format("Found %s users by username", users.length));
-
   }
 
   private String buildUsersListGetUrl() {

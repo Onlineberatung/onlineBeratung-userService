@@ -35,5 +35,4 @@ public class GlobalMethodSecurityConfig extends GlobalMethodSecurityConfiguratio
   public GrantedAuthorityDefaults grantedAuthorityDefaults() {
     return new GrantedAuthorityDefaults(AuthorityValue.PREFIX);
   }
-
 }

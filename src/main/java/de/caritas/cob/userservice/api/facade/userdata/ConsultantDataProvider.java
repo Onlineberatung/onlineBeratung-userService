@@ -27,9 +27,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-/**
- * Provider for consultant information.
- */
+/** Provider for consultant information. */
 @Component
 @RequiredArgsConstructor
 public class ConsultantDataProvider {
@@ -48,17 +46,14 @@ public class ConsultantDataProvider {
   public UserDataResponseDTO retrieveData(Consultant consultant) {
     if (isEmpty(consultant.getConsultantAgencies())) {
       throw new InternalServerErrorException(
-          String.format("No agency available for consultant %s", consultant.getId())
-      );
+          String.format("No agency available for consultant %s", consultant.getId()));
     }
 
     return userDataResponseDtoOf(consultant);
   }
 
   private List<Long> agencyIdsOf(Set<ConsultantAgency> agencies) {
-    return agencies.stream()
-        .map(ConsultantAgency::getAgencyId)
-        .collect(Collectors.toList());
+    return agencies.stream().map(ConsultantAgency::getAgencyId).collect(Collectors.toList());
   }
 
   private UserDataResponseDTO userDataResponseDtoOf(Consultant consultant) {
@@ -82,8 +77,7 @@ public class ConsultantDataProvider {
         .isWalkThroughEnabled(consultant.getWalkThroughEnabled())
         .emailToggles(emailTogglesOf(consultant))
         .hasAnonymousConversations(
-            hasAtLeastOneTypeWithAllowedAnonymousConversations(agencyDTOsOf(consultant))
-        )
+            hasAtLeastOneTypeWithAllowedAnonymousConversations(agencyDTOsOf(consultant)))
         .hasArchive(hasArchive(consultant))
         .build();
   }
@@ -105,9 +99,7 @@ public class ConsultantDataProvider {
   }
 
   private List<AgencyDTO> agencyDTOsOf(Consultant consultant) {
-    return agencyService.getAgencies(
-        agencyIdsOf(consultant.getConsultantAgencies())
-    );
+    return agencyService.getAgencies(agencyIdsOf(consultant.getConsultantAgencies()));
   }
 
   private Set<String> languageStringsOf(Set<Language> languages) {
@@ -120,8 +112,7 @@ public class ConsultantDataProvider {
   private de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode preferredLanguageOf(
       LanguageCode languageCode) {
     return de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode.fromValue(
-       languageCode.toString()
-   );
+        languageCode.toString());
   }
 
   private boolean hasAtLeastOneTypeWithAllowedAnonymousConversations(List<AgencyDTO> agencyDTOS) {
@@ -133,19 +124,21 @@ public class ConsultantDataProvider {
 
   private boolean hasAnonymousConversationAllowed(
       ExtendedConsultingTypeResponseDTO consultingTypeResponseDTO) {
-    return nonNull(consultingTypeResponseDTO) && isTrue(
-        consultingTypeResponseDTO.getIsAnonymousConversationAllowed());
+    return nonNull(consultingTypeResponseDTO)
+        && isTrue(consultingTypeResponseDTO.getIsAnonymousConversationAllowed());
   }
 
   private boolean hasArchive(Consultant consultant) {
-    return hasAtLeastOneRegisteredSessionInProgressOrArchive(consultant) || consultant
-        .isTeamConsultant();
+    return hasAtLeastOneRegisteredSessionInProgressOrArchive(consultant)
+        || consultant.isTeamConsultant();
   }
 
   private boolean hasAtLeastOneRegisteredSessionInProgressOrArchive(Consultant consultant) {
-    Long count = sessionRepository.countByConsultantAndStatusInAndRegistrationType(consultant,
-        List.of(SessionStatus.IN_PROGRESS, SessionStatus.IN_ARCHIVE), RegistrationType.REGISTERED);
+    Long count =
+        sessionRepository.countByConsultantAndStatusInAndRegistrationType(
+            consultant,
+            List.of(SessionStatus.IN_PROGRESS, SessionStatus.IN_ARCHIVE),
+            RegistrationType.REGISTERED);
     return nonNull(count) && count > 0L;
   }
-
 }

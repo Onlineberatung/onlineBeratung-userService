@@ -69,8 +69,7 @@ public class UserDataResponseDTO {
   private String displayName;
   private Boolean isDisplayNameEditable;
 
-  @JsonIgnore
-  private Boolean encourage2fa;
+  @JsonIgnore private Boolean encourage2fa;
 
   private Boolean e2eEncryptionEnabled;
 

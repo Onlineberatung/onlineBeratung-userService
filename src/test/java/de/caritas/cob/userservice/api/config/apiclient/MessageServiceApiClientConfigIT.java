@@ -21,8 +21,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 public class MessageServiceApiClientConfigIT {
 
-  @Autowired
-  private MessageControllerApi messageControllerApi;
+  @Autowired private MessageControllerApi messageControllerApi;
 
   @Value("${message.service.api.url}")
   private String messageServiceApiUrl;

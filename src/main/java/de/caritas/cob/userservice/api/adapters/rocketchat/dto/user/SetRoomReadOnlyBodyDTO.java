@@ -11,5 +11,4 @@ public class SetRoomReadOnlyBodyDTO {
 
   private String roomId;
   private boolean readOnly;
-
 }

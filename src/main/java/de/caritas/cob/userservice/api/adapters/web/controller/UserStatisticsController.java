@@ -22,13 +22,13 @@ public class UserStatisticsController implements UserstatisticsApi {
    * Retrieve a session via session id or Rocket.Chat group id.
    *
    * @param sessionId The id of the session.
-   * @param rcGroupId The rc group id of the session. if the session id is also passed, the query is done via it.
+   * @param rcGroupId The rc group id of the session. if the session id is also passed, the query is
+   *     done via it.
    * @return a {@link SessionStatisticsResultDTO} instance
    */
   @Override
   public ResponseEntity<SessionStatisticsResultDTO> getSession(Long sessionId, String rcGroupId) {
     return new ResponseEntity<>(
-        sessionStatisticsService.retrieveSession(sessionId, rcGroupId),
-        HttpStatus.OK);
+        sessionStatisticsService.retrieveSession(sessionId, rcGroupId), HttpStatus.OK);
   }
 }

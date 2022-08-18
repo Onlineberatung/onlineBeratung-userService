@@ -5,9 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * DataDTO for {@link LogoutResponseDTO}
- */
+/** DataDTO for {@link LogoutResponseDTO} */
 @Getter
 @Setter
 @NoArgsConstructor

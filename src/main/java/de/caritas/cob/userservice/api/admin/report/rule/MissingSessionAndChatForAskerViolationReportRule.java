@@ -3,11 +3,11 @@ package de.caritas.cob.userservice.api.admin.report.rule;
 import static de.caritas.cob.userservice.api.adapters.web.dto.ViolationDTO.ViolationTypeEnum.ASKER;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
-import de.caritas.cob.userservice.api.admin.report.model.ViolationReportRule;
 import de.caritas.cob.userservice.api.adapters.web.dto.ViolationDTO;
+import de.caritas.cob.userservice.api.admin.report.model.ViolationReportRule;
 import de.caritas.cob.userservice.api.model.User;
-import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.port.out.UserAgencyRepository;
+import de.caritas.cob.userservice.api.port.out.UserRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -15,9 +15,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-/**
- * Violation rule to find askers without session or chat relation.
- */
+/** Violation rule to find askers without session or chat relation. */
 @Component
 @RequiredArgsConstructor
 public class MissingSessionAndChatForAskerViolationReportRule implements ViolationReportRule {
@@ -48,5 +46,4 @@ public class MissingSessionAndChatForAskerViolationReportRule implements Violati
         .violationType(ASKER)
         .reason("Use has neither chat nor session relation");
   }
-
 }

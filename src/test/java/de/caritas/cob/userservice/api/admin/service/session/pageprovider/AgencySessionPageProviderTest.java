@@ -18,14 +18,11 @@ import org.springframework.data.domain.PageRequest;
 @RunWith(MockitoJUnitRunner.class)
 public class AgencySessionPageProviderTest {
 
-  @InjectMocks
-  private AgencySessionPageProvider agencySessionPageProvider;
+  @InjectMocks private AgencySessionPageProvider agencySessionPageProvider;
 
-  @Mock
-  private SessionRepository sessionRepository;
+  @Mock private SessionRepository sessionRepository;
 
-  @Mock
-  private SessionFilter sessionFilter;
+  @Mock private SessionFilter sessionFilter;
 
   @Test
   public void supports_Should_returnTrue_When_agencyFilterIsSet() {
@@ -54,5 +51,4 @@ public class AgencySessionPageProviderTest {
 
     verify(this.sessionRepository, atLeastOnce()).findByAgencyId(1L, pageable);
   }
-
 }

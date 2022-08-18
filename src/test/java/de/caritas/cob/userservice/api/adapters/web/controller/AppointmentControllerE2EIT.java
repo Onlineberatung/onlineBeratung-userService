@@ -55,23 +55,17 @@ class AppointmentControllerE2EIT {
   private static final String CSRF_VALUE = "test";
   private static final Cookie CSRF_COOKIE = new Cookie("csrfCookie", CSRF_VALUE);
 
-  @Autowired
-  private MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
 
-  @Autowired
-  private ObjectMapper objectMapper;
+  @Autowired private ObjectMapper objectMapper;
 
-  @Autowired
-  private ConsultantRepository consultantRepository;
+  @Autowired private ConsultantRepository consultantRepository;
 
-  @Autowired
-  private AppointmentRepository appointmentRepository;
+  @Autowired private AppointmentRepository appointmentRepository;
 
-  @MockBean
-  private AuthenticatedUser authenticatedUser;
+  @MockBean private AuthenticatedUser authenticatedUser;
 
-  @MockBean
-  private Clock clock;
+  @MockBean private Clock clock;
 
   private Appointment appointment;
 
@@ -92,12 +86,12 @@ class AppointmentControllerE2EIT {
     givenAValidConsultant(true);
     givenASavedAppointment();
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             get("/appointments/{id}", savedAppointment.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("id", is(notNullValue())))
         .andExpect(jsonPath("description", is(savedAppointment.getDescription())))
@@ -112,12 +106,12 @@ class AppointmentControllerE2EIT {
     givenAValidConsultant(false);
     givenASavedAppointment();
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             get("/appointments/{id}", savedAppointment.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("id", is(savedAppointment.getId().toString())))
         .andExpect(jsonPath("status", is(savedAppointment.getStatus().toString().toLowerCase())))
@@ -132,12 +126,12 @@ class AppointmentControllerE2EIT {
     givenAValidConsultant(false);
     givenASavedAppointment();
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             get("/appointments/{id}", savedAppointment.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("id", is(savedAppointment.getId().toString())))
         .andExpect(jsonPath("status", is(savedAppointment.getStatus().toString().toLowerCase())))
@@ -150,12 +144,13 @@ class AppointmentControllerE2EIT {
   void getAppointmentShouldReturnClientErrorOnWrongIdFormat() throws Exception {
     givenAValidConsultant(true);
 
-    mockMvc.perform(
-        get("/appointments/{id}", RandomStringUtils.randomAlphabetic(36))
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .accept(MediaType.APPLICATION_JSON)
-    ).andExpect(status().is4xxClientError());
+    mockMvc
+        .perform(
+            get("/appointments/{id}", RandomStringUtils.randomAlphabetic(36))
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().is4xxClientError());
   }
 
   @Test
@@ -163,12 +158,13 @@ class AppointmentControllerE2EIT {
   void getAppointmentShouldReturnNotFoundIfIdUnknown() throws Exception {
     givenAValidConsultant(true);
 
-    mockMvc.perform(
-        get("/appointments/{id}", UUID.randomUUID())
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .accept(MediaType.APPLICATION_JSON)
-    ).andExpect(status().isNotFound());
+    mockMvc
+        .perform(
+            get("/appointments/{id}", UUID.randomUUID())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
   }
 
   @Test
@@ -179,14 +175,14 @@ class AppointmentControllerE2EIT {
     givenAValidAppointmentDto(savedAppointment.getId(), null);
 
     assertEquals(1, appointmentRepository.count());
-    mockMvc.perform(
+    mockMvc
+        .perform(
             put("/appointments/{id}", appointment.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(appointment))
-        )
+                .content(objectMapper.writeValueAsString(appointment)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("id", is(appointment.getId().toString())))
         .andExpect(jsonPath("description", is(appointment.getDescription())))
@@ -196,7 +192,8 @@ class AppointmentControllerE2EIT {
     assertEquals(1, appointmentRepository.count());
     var updatedAppointment = appointmentRepository.findById(appointment.getId()).orElseThrow();
     assertEquals(appointment.getId(), updatedAppointment.getId());
-    assertEquals(appointment.getStatus().getValue(),
+    assertEquals(
+        appointment.getStatus().getValue(),
         updatedAppointment.getStatus().toString().toLowerCase());
     assertEquals(appointment.getDatetime(), updatedAppointment.getDatetime());
     assertEquals(appointment.getDescription(), updatedAppointment.getDescription());
@@ -209,14 +206,14 @@ class AppointmentControllerE2EIT {
     givenASavedAppointment();
     givenAValidAppointmentDto(savedAppointment.getId(), null);
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             put("/appointments/{id}", UUID.randomUUID())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(appointment))
-        )
+                .content(objectMapper.writeValueAsString(appointment)))
         .andExpect(status().isBadRequest());
   }
 
@@ -227,14 +224,14 @@ class AppointmentControllerE2EIT {
     var id = UUID.randomUUID();
     givenAValidAppointmentDto(id, null);
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             put("/appointments/{id}", id)
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(appointment))
-        )
+                .content(objectMapper.writeValueAsString(appointment)))
         .andExpect(status().isNotFound());
   }
 
@@ -243,12 +240,12 @@ class AppointmentControllerE2EIT {
   void deleteAppointmentShouldReturnNotFoundIfAppointmentDoesNotExist() throws Exception {
     givenAValidAppointmentDto();
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             delete("/appointments/{id}", appointment.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }
 
@@ -258,12 +255,12 @@ class AppointmentControllerE2EIT {
     givenAValidConsultant(true);
     givenASavedAppointment();
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             delete("/appointments/{id}", savedAppointment.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
     assertEquals(0, appointmentRepository.count());
@@ -273,12 +270,12 @@ class AppointmentControllerE2EIT {
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   void getAppointmentsShouldReturnOk() throws Exception {
     when(clock.instant()).thenReturn(Instant.now());
-    mockMvc.perform(
+    mockMvc
+        .perform(
             get("/appointments")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$").isArray());
   }
@@ -289,14 +286,14 @@ class AppointmentControllerE2EIT {
     givenAValidAppointmentDto(null, AppointmentStatus.CREATED);
     givenAValidConsultant(true);
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             post("/appointments")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(appointment))
-        )
+                .content(objectMapper.writeValueAsString(appointment)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("id", is(notNullValue())))
         .andExpect(jsonPath("description", is(appointment.getDescription())))
@@ -312,14 +309,14 @@ class AppointmentControllerE2EIT {
     givenAValidAppointmentDto(UUID.randomUUID(), AppointmentStatus.CREATED);
     givenAValidConsultant(true);
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             post("/appointments")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(appointment))
-        )
+                .content(objectMapper.writeValueAsString(appointment)))
         .andExpect(status().isBadRequest());
   }
 
@@ -329,14 +326,14 @@ class AppointmentControllerE2EIT {
     givenAnAppointmentMissingStatus();
     givenAValidConsultant(true);
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             post("/appointments")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(appointment))
-        )
+                .content(objectMapper.writeValueAsString(appointment)))
         .andExpect(status().isBadRequest());
   }
 
@@ -346,14 +343,14 @@ class AppointmentControllerE2EIT {
     givenAnAppointmentMissingDatetime();
     givenAValidConsultant(true);
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             post("/appointments")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(appointment))
-        )
+                .content(objectMapper.writeValueAsString(appointment)))
         .andExpect(status().isBadRequest());
   }
 
@@ -371,12 +368,12 @@ class AppointmentControllerE2EIT {
     givenASavedAppointment(tomorrow);
     givenASavedAppointment(today);
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             get("/appointments")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(2)))
         .andExpect(jsonPath("[0].datetime", is(today.toString())))
@@ -406,8 +403,8 @@ class AppointmentControllerE2EIT {
   }
 
   public void givenASavedAppointment(Instant datetime) {
-    savedAppointment = easyRandom.nextObject(
-        de.caritas.cob.userservice.api.model.Appointment.class);
+    savedAppointment =
+        easyRandom.nextObject(de.caritas.cob.userservice.api.model.Appointment.class);
     savedAppointment.setConsultant(consultant);
     savedAppointment.setId(null);
     var desc = savedAppointment.getDescription();

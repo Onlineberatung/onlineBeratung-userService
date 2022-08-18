@@ -49,7 +49,9 @@ import org.springframework.lang.Nullable;
 @Getter
 @Setter
 @ToString
-@FilterDef(name = "tenantFilter", parameters = {@ParamDef(name = "tenantId", type = "long")})
+@FilterDef(
+    name = "tenantFilter",
+    parameters = {@ParamDef(name = "tenantId", type = "long")})
 @Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
 public class Session implements TenantAware {
 
@@ -71,7 +73,8 @@ public class Session implements TenantAware {
     private final int value;
 
     public static Optional<SessionStatus> valueOf(int value) {
-      return Arrays.stream(SessionStatus.values()).filter(legNo -> legNo.value == value)
+      return Arrays.stream(SessionStatus.values())
+          .filter(legNo -> legNo.value == value)
           .findFirst();
     }
 
@@ -80,11 +83,15 @@ public class Session implements TenantAware {
     }
   }
 
-  /**
-   * Represents a session of a user
-   */
-  public Session(User user, int consultingTypeId, @NonNull String postcode, Long agencyId,
-      @NonNull SessionStatus status, boolean teamSession, boolean monitoring) {
+  /** Represents a session of a user */
+  public Session(
+      User user,
+      int consultingTypeId,
+      @NonNull String postcode,
+      Long agencyId,
+      @NonNull SessionStatus status,
+      boolean teamSession,
+      boolean monitoring) {
     this.user = user;
     this.consultingTypeId = consultingTypeId;
     this.postcode = postcode;
@@ -110,10 +117,18 @@ public class Session implements TenantAware {
   @Fetch(FetchMode.SELECT)
   private Consultant consultant;
 
-  @Column(name = "consulting_type", updatable = false, nullable = false, columnDefinition = "tinyint")
+  @Column(
+      name = "consulting_type",
+      updatable = false,
+      nullable = false,
+      columnDefinition = "tinyint")
   private int consultingTypeId;
 
-  @Column(name = "registration_type", updatable = false, nullable = false, columnDefinition = "varchar(20) not null default 'REGISTERED'")
+  @Column(
+      name = "registration_type",
+      updatable = false,
+      nullable = false,
+      columnDefinition = "varchar(20) not null default 'REGISTERED'")
   @Enumerated(EnumType.STRING)
   @NonNull
   private RegistrationType registrationType;
@@ -189,7 +204,6 @@ public class Session implements TenantAware {
       cascade = CascadeType.ALL,
       orphanRemoval = true)
   private List<SessionTopic> sessionTopics;
-
 
   @Override
   public boolean equals(Object o) {

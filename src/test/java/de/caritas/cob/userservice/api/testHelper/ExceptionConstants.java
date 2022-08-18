@@ -12,23 +12,23 @@ import org.springframework.web.client.HttpStatusCodeException;
 
 public class ExceptionConstants {
 
-  /**
-   * Common exceptions
-   */
+  /** Common exceptions */
   public static final Exception EXCEPTION = new Exception();
 
   /*
    * Enquiry exceptions
    */
   public static final CreateEnquiryExceptionInformation CREATE_ENQUIRY_EXCEPTION_PARAMETER =
-      CreateEnquiryExceptionInformation.builder().rcGroupId(TestConstants.RC_GROUP_ID)
-          .rcFeedbackGroupId(TestConstants.RC_FEEDBACK_GROUP_ID).session(TestConstants.SESSION).build();
+      CreateEnquiryExceptionInformation.builder()
+          .rcGroupId(TestConstants.RC_GROUP_ID)
+          .rcFeedbackGroupId(TestConstants.RC_FEEDBACK_GROUP_ID)
+          .session(TestConstants.SESSION)
+          .build();
 
-  /**
-   * Monitoring exceptions
-   */
+  /** Monitoring exceptions */
   public static final CreateMonitoringException CREATE_MONITORING_EXCEPTION =
-      new CreateMonitoringException(TestConstants.MESSAGE, EXCEPTION, CREATE_ENQUIRY_EXCEPTION_PARAMETER);
+      new CreateMonitoringException(
+          TestConstants.MESSAGE, EXCEPTION, CREATE_ENQUIRY_EXCEPTION_PARAMETER);
 
   /*
    * Rocket.Chat exceptions
@@ -38,27 +38,22 @@ public class ExceptionConstants {
       new RocketChatCreateGroupException(new Exception());
   public static final RocketChatPostMessageException RC_POST_MESSAGE_EXCEPTION =
       new RocketChatPostMessageException(TestConstants.MESSAGE, CREATE_ENQUIRY_EXCEPTION_PARAMETER);
-  public static final RocketChatRemoveSystemMessagesException RC_CHAT_REMOVE_SYSTEM_MESSAGES_EXCEPTION =
-      new RocketChatRemoveSystemMessagesException(TestConstants.MESSAGE);
+  public static final RocketChatRemoveSystemMessagesException
+      RC_CHAT_REMOVE_SYSTEM_MESSAGES_EXCEPTION =
+          new RocketChatRemoveSystemMessagesException(TestConstants.MESSAGE);
   public static final RocketChatAddUserToGroupException RC_ADD_USER_TO_GROUP_EXCEPTION =
       new RocketChatAddUserToGroupException(TestConstants.MESSAGE);
 
-
-  /**
-   * HttpStatusCode exception
-   */
+  /** HttpStatusCode exception */
   @SuppressWarnings("serial")
   public static final HttpStatusCodeException HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR_EXCEPTION =
-      new HttpStatusCodeException(HttpStatus.INTERNAL_SERVER_ERROR) {
-      };
+      new HttpStatusCodeException(HttpStatus.INTERNAL_SERVER_ERROR) {};
+
   @SuppressWarnings("serial")
   public static final HttpStatusCodeException HTTP_STATUS_CODE_UNAUTHORIZED_EXCEPTION =
-      new HttpStatusCodeException(HttpStatus.UNAUTHORIZED) {
-      };
+      new HttpStatusCodeException(HttpStatus.UNAUTHORIZED) {};
 
-  /**
-   * InternalServerErrorException
-   */
+  /** InternalServerErrorException */
   public static final InternalServerErrorException INTERNAL_SERVER_ERROR_EXCEPTION =
       new InternalServerErrorException(EXCEPTION.getMessage());
 }

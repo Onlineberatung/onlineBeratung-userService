@@ -13,16 +13,16 @@ import static org.mockito.Mockito.when;
 
 import com.google.api.client.util.Lists;
 import de.caritas.cob.userservice.api.UserServiceApplication;
-import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
-import de.caritas.cob.userservice.api.conversation.model.PageableListRequest;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
+import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
+import de.caritas.cob.userservice.api.conversation.model.PageableListRequest;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import java.util.List;
@@ -51,14 +51,11 @@ public class RegisteredEnquiryConversationListProviderIT {
   @Autowired
   private RegisteredEnquiryConversationListProvider registeredEnquiryConversationListProvider;
 
-  @Autowired
-  private SessionRepository sessionRepository;
+  @Autowired private SessionRepository sessionRepository;
 
-  @Autowired
-  private UserRepository userRepository;
+  @Autowired private UserRepository userRepository;
 
-  @MockBean
-  private ValidatedUserAccountProvider userAccountProvider;
+  @MockBean private ValidatedUserAccountProvider userAccountProvider;
 
   @Before
   public void setup() {
@@ -75,15 +72,13 @@ public class RegisteredEnquiryConversationListProviderIT {
   }
 
   @Test
-  public void buildConversations_Should_returnExpectedResponseDTO_When_consultantHasRegisteredEnquiries() {
+  public void
+      buildConversations_Should_returnExpectedResponseDTO_When_consultantHasRegisteredEnquiries() {
     saveRegisteredSessions(10);
-    PageableListRequest request = PageableListRequest.builder()
-        .count(5)
-        .offset(0)
-        .build();
+    PageableListRequest request = PageableListRequest.builder().count(5).offset(0).build();
 
-    ConsultantSessionListResponseDTO responseDTO = this.registeredEnquiryConversationListProvider
-        .buildConversations(request);
+    ConsultantSessionListResponseDTO responseDTO =
+        this.registeredEnquiryConversationListProvider.buildConversations(request);
 
     assertThat(responseDTO.getCount(), is(5));
     assertThat(responseDTO.getOffset(), is(0));
@@ -94,13 +89,10 @@ public class RegisteredEnquiryConversationListProviderIT {
   @Test
   public void buildConversations_Should_returnExpectedElements_When_paginationParamsAreAtTheEnd() {
     saveRegisteredSessions(10);
-    PageableListRequest request = PageableListRequest.builder()
-        .count(3)
-        .offset(9)
-        .build();
+    PageableListRequest request = PageableListRequest.builder().count(3).offset(9).build();
 
-    ConsultantSessionListResponseDTO responseDTO = this.registeredEnquiryConversationListProvider
-        .buildConversations(request);
+    ConsultantSessionListResponseDTO responseDTO =
+        this.registeredEnquiryConversationListProvider.buildConversations(request);
 
     assertThat(responseDTO.getCount(), is(1));
     assertThat(responseDTO.getOffset(), is(9));
@@ -111,13 +103,10 @@ public class RegisteredEnquiryConversationListProviderIT {
   @Test
   public void buildConversations_Should_returnElementsInExpectedOrder() {
     saveRegisteredSessions(100);
-    PageableListRequest request = PageableListRequest.builder()
-        .count(100)
-        .offset(0)
-        .build();
+    PageableListRequest request = PageableListRequest.builder().count(100).offset(0).build();
 
-    ConsultantSessionListResponseDTO responseDTO = this.registeredEnquiryConversationListProvider
-        .buildConversations(request);
+    ConsultantSessionListResponseDTO responseDTO =
+        this.registeredEnquiryConversationListProvider.buildConversations(request);
 
     PeekingIterator<ConsultantSessionResponseDTO> peeker =
         new PeekingIterator<>(responseDTO.getSessions().iterator());
@@ -132,34 +121,34 @@ public class RegisteredEnquiryConversationListProviderIT {
 
   @Test
   public void providedType_Should_return_registeredEnquiry() {
-    ConversationListType conversationListType = this.registeredEnquiryConversationListProvider
-        .providedType();
+    ConversationListType conversationListType =
+        this.registeredEnquiryConversationListProvider.providedType();
 
     assertThat(conversationListType, is(REGISTERED_ENQUIRY));
   }
 
   private void saveRegisteredSessions(int amount) {
     var random = new Random();
-    List<Session> sessions = new EasyRandom().objects(Session.class, amount + 4)
-        .collect(Collectors.toList());
+    List<Session> sessions =
+        new EasyRandom().objects(Session.class, amount + 4).collect(Collectors.toList());
     User user = this.userRepository.findAll().iterator().next();
-    sessions.forEach(session -> {
-      session.setRegistrationType(REGISTERED);
-      session.setConsultant(null);
-      session.setUser(user);
-      session.setId(null);
-      session.setSessionData(null);
-      session.setPostcode("12345");
-      session.setAgencyId(1L);
-      session.setStatus(SessionStatus.NEW);
-      session.setConsultingTypeId(random.nextInt(127));
-      session.setSessionTopics(Lists.newArrayList());
-    });
+    sessions.forEach(
+        session -> {
+          session.setRegistrationType(REGISTERED);
+          session.setConsultant(null);
+          session.setUser(user);
+          session.setId(null);
+          session.setSessionData(null);
+          session.setPostcode("12345");
+          session.setAgencyId(1L);
+          session.setStatus(SessionStatus.NEW);
+          session.setConsultingTypeId(random.nextInt(127));
+          session.setSessionTopics(Lists.newArrayList());
+        });
     sessions.get(0).setStatus(SessionStatus.INITIAL);
     sessions.get(1).setStatus(SessionStatus.IN_PROGRESS);
     sessions.get(2).setStatus(SessionStatus.DONE);
     sessions.get(3).setStatus(SessionStatus.IN_ARCHIVE);
     this.sessionRepository.saveAll(sessions);
   }
-
 }

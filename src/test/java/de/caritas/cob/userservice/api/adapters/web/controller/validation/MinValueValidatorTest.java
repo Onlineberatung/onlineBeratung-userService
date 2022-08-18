@@ -7,8 +7,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.adapters.web.controller.validation.MinValue;
-import de.caritas.cob.userservice.api.adapters.web.controller.validation.MinValueValidator;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
@@ -24,21 +22,16 @@ public class MinValueValidatorTest {
 
   private final MinValueValidator minValueValidator = new MinValueValidator();
 
-  @Mock
-  private MethodParameter methodParameter;
+  @Mock private MethodParameter methodParameter;
 
-  @Mock
-  private NativeWebRequest nativeWebRequest;
+  @Mock private NativeWebRequest nativeWebRequest;
 
-  @Mock
-  private MinValue minValue;
+  @Mock private MinValue minValue;
 
-  @Mock
-  private Parameter parameter;
+  @Mock private Parameter parameter;
 
   public MinValueValidatorTest()
-      throws IllegalAccessException, InvocationTargetException, InstantiationException {
-  }
+      throws IllegalAccessException, InvocationTargetException, InstantiationException {}
 
   @Test
   public void supportsParameter_Should_ReturnFalse_When_methodParameterHasNoAnnotation() {
@@ -73,8 +66,8 @@ public class MinValueValidatorTest {
     when(methodParameter.getParameterAnnotation(any())).thenReturn(minValue);
     when(nativeWebRequest.getParameter(any())).thenReturn("10");
 
-    Integer result = minValueValidator.resolveArgument(methodParameter, null, nativeWebRequest,
-        null);
+    Integer result =
+        minValueValidator.resolveArgument(methodParameter, null, nativeWebRequest, null);
 
     assertThat(result, is(10));
   }
@@ -86,8 +79,7 @@ public class MinValueValidatorTest {
     when(methodParameter.getParameterAnnotation(any())).thenReturn(minValue);
     when(nativeWebRequest.getParameter(any())).thenReturn(null);
 
-    minValueValidator.resolveArgument(methodParameter, null, nativeWebRequest,
-        null);
+    minValueValidator.resolveArgument(methodParameter, null, nativeWebRequest, null);
   }
 
   @Test(expected = BadRequestException.class)
@@ -98,8 +90,6 @@ public class MinValueValidatorTest {
     when(minValue.value()).thenReturn(11);
     when(nativeWebRequest.getParameter(any())).thenReturn("10");
 
-    minValueValidator.resolveArgument(methodParameter, null, nativeWebRequest,
-        null);
+    minValueValidator.resolveArgument(methodParameter, null, nativeWebRequest, null);
   }
-
 }

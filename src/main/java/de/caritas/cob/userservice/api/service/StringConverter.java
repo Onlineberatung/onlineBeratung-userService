@@ -40,8 +40,9 @@ public class StringConverter {
   public byte[] rsaEncrypt(final String s, final String mod) {
     try {
       var cypher = Cipher.getInstance(RSA_TRANSFORMATION);
-      var oaepSpec = new OAEPParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256,
-          PSource.PSpecified.DEFAULT);
+      var oaepSpec =
+          new OAEPParameterSpec(
+              "SHA-256", "MGF1", MGF1ParameterSpec.SHA256, PSource.PSpecified.DEFAULT);
 
       var exponentBytes = Base64.getDecoder().decode("AQAB");
       var exponent = new BigInteger(1, exponentBytes);
@@ -109,8 +110,7 @@ public class StringConverter {
   }
 
   @SuppressWarnings("java:S4790") // Using weak hashing algorithms is security-sensitive
-  private byte[][] generateKeyAndIV(byte[] salt, byte[] password)
-      throws NoSuchAlgorithmException {
+  private byte[][] generateKeyAndIV(byte[] salt, byte[] password) throws NoSuchAlgorithmException {
     var md = MessageDigest.getInstance("MD5");
     var digestLength = md.getDigestLength();
     var requiredLength = (48 + digestLength - 1) / digestLength * digestLength;

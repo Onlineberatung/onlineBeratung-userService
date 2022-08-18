@@ -7,9 +7,7 @@ import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 
-/**
- * Special {@link OffsetDateTime} serializer with ISO_DATE_TIME format.
- */
+/** Special {@link OffsetDateTime} serializer with ISO_DATE_TIME format. */
 public class OffsetDateTimeToStringSerializer extends JsonSerializer<OffsetDateTime> {
 
   @Override

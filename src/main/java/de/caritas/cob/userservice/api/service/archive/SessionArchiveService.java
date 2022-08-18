@@ -17,9 +17,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-/**
- * Service for archive functionality.
- */
+/** Service for archive functionality. */
 @Service
 @RequiredArgsConstructor
 public class SessionArchiveService {
@@ -36,7 +34,8 @@ public class SessionArchiveService {
    * @param sessionId the session id
    */
   public void archiveSession(Long sessionId) {
-    changeSessionStatus(sessionId,
+    changeSessionStatus(
+        sessionId,
         SessionStatus.IN_ARCHIVE,
         sessionArchiveValidator::isValidForArchiving,
         rocketChatService::setRoomReadOnly);
@@ -48,13 +47,16 @@ public class SessionArchiveService {
    * @param sessionId the session id
    */
   public void dearchiveSession(Long sessionId) {
-    changeSessionStatus(sessionId,
+    changeSessionStatus(
+        sessionId,
         SessionStatus.IN_PROGRESS,
         sessionArchiveValidator::isValidForDearchiving,
         rocketChatService::setRoomWriteable);
   }
 
-  private void changeSessionStatus(Long sessionId, SessionStatus sessionStatusTo,
+  private void changeSessionStatus(
+      Long sessionId,
+      SessionStatus sessionStatusTo,
       Consumer<Session> sessionValidateMethod,
       ThrowingConsumer<String, RocketChatUserNotInitializedException> rcUpdateRoomStateMethod) {
 
@@ -80,11 +82,14 @@ public class SessionArchiveService {
   }
 
   private Session retrieveSession(Long sessionId) {
-    return sessionRepository.findById(sessionId).orElseThrow(
-        () -> new NotFoundException(String.format("Session with id %s not found.", sessionId)));
+    return sessionRepository
+        .findById(sessionId)
+        .orElseThrow(
+            () -> new NotFoundException(String.format("Session with id %s not found.", sessionId)));
   }
 
-  private void executeArchiving(SessionStatus sessionStatusTo,
+  private void executeArchiving(
+      SessionStatus sessionStatusTo,
       ThrowingConsumer<String, RocketChatUserNotInitializedException> rcUpdateRoomStateMethod,
       Session session) {
     try {
@@ -93,18 +98,20 @@ public class SessionArchiveService {
       session.setStatus(sessionStatusTo);
       sessionRepository.save(session);
     } catch (InternalServerErrorException | RocketChatUserNotInitializedException ex) {
-      throw new InternalServerErrorException(String
-          .format("Could not archive/dearchive session %s for user %s",
-              session.getId(), authenticatedUser.getUserId()), ex);
+      throw new InternalServerErrorException(
+          String.format(
+              "Could not archive/dearchive session %s for user %s",
+              session.getId(), authenticatedUser.getUserId()),
+          ex);
     }
   }
 
-  private void setRocketChatRoomState(String rcRoomId,
+  private void setRocketChatRoomState(
+      String rcRoomId,
       ThrowingConsumer<String, RocketChatUserNotInitializedException> rcUpdateRoomStateMethod)
       throws RocketChatUserNotInitializedException {
     if (isNotBlank(rcRoomId)) {
       rcUpdateRoomStateMethod.accept(rcRoomId);
     }
   }
-
 }

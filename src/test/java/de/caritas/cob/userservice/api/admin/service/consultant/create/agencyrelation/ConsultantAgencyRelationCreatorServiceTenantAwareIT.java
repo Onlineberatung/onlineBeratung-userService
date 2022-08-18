@@ -23,7 +23,6 @@ import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.model.Language;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
-import de.caritas.cob.userservice.api.model.SessionTopic;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.model.UserAgency;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
@@ -66,35 +65,25 @@ public class ConsultantAgencyRelationCreatorServiceTenantAwareIT {
 
   private final EasyRandom easyRandom = new EasyRandom();
 
-  @Autowired
-  private ConsultantAgencyRelationCreatorService consultantAgencyRelationCreatorService;
+  @Autowired private ConsultantAgencyRelationCreatorService consultantAgencyRelationCreatorService;
 
-  @Autowired
-  private ConsultantRepository consultantRepository;
+  @Autowired private ConsultantRepository consultantRepository;
 
-  @Autowired
-  private UserRepository userRepository;
+  @Autowired private UserRepository userRepository;
 
-  @Autowired
-  private UserAgencyRepository userAgencyRepository;
+  @Autowired private UserAgencyRepository userAgencyRepository;
 
-  @Autowired
-  private ConsultantAgencyRepository consultantAgencyRepository;
+  @Autowired private ConsultantAgencyRepository consultantAgencyRepository;
 
-  @Autowired
-  private SessionRepository sessionRepository;
+  @Autowired private SessionRepository sessionRepository;
 
-  @MockBean
-  private AgencyService agencyService;
+  @MockBean private AgencyService agencyService;
 
-  @MockBean
-  private IdentityClient identityClient;
+  @MockBean private IdentityClient identityClient;
 
-  @MockBean
-  private RocketChatFacade rocketChatFacade;
+  @MockBean private RocketChatFacade rocketChatFacade;
 
-  @MockBean
-  private ConsultingTypeManager consultingTypeManager;
+  @MockBean private ConsultingTypeManager consultingTypeManager;
 
   @Before
   public void beforeTests() {
@@ -107,7 +96,8 @@ public class ConsultantAgencyRelationCreatorServiceTenantAwareIT {
   }
 
   @Test
-  public void createNewConsultantAgency_Should_addConsultantToEnquiriesRocketChatGroups_When_ParamsAreValidAndMultitenancyEnabled() {
+  public void
+      createNewConsultantAgency_Should_addConsultantToEnquiriesRocketChatGroups_When_ParamsAreValidAndMultitenancyEnabled() {
 
     Consultant consultant = createConsultantWithoutAgencyAndSession();
 
@@ -123,31 +113,36 @@ public class ConsultantAgencyRelationCreatorServiceTenantAwareIT {
     agencyDTO.setConsultingType(0);
     when(agencyService.getAgencyWithoutCaching(15L)).thenReturn(agencyDTO);
 
-    Session enquirySessionWithoutConsultant = createSessionWithoutConsultant(agencyDTO.getId(),
-        SessionStatus.NEW);
+    Session enquirySessionWithoutConsultant =
+        createSessionWithoutConsultant(agencyDTO.getId(), SessionStatus.NEW);
 
-    final var consultingTypeResponse = easyRandom.nextObject(
-        ExtendedConsultingTypeResponseDTO.class);
+    final var consultingTypeResponse =
+        easyRandom.nextObject(ExtendedConsultingTypeResponseDTO.class);
     when(consultingTypeManager.getConsultingTypeSettings(0)).thenReturn(consultingTypeResponse);
 
-    this.consultantAgencyRelationCreatorService
-        .createNewConsultantAgency(consultant.getId(), createConsultantAgencyDTO);
+    this.consultantAgencyRelationCreatorService.createNewConsultantAgency(
+        consultant.getId(), createConsultantAgencyDTO);
 
-    verifyAsync((a) -> verify(rocketChatFacade, times(1))
-        .addUserToRocketChatGroup(consultant.getRocketChatId(),
-            enquirySessionWithoutConsultant.getGroupId()));
-    verifyAsync((a) -> verify(rocketChatFacade, times(1))
-        .addUserToRocketChatGroup(consultant.getRocketChatId(),
-            enquirySessionWithoutConsultant.getFeedbackGroupId()));
-    List<ConsultantAgency> result = this.consultantAgencyRepository
-        .findByConsultantIdAndDeleteDateIsNull(consultant.getId());
+    verifyAsync(
+        (a) ->
+            verify(rocketChatFacade, times(1))
+                .addUserToRocketChatGroup(
+                    consultant.getRocketChatId(), enquirySessionWithoutConsultant.getGroupId()));
+    verifyAsync(
+        (a) ->
+            verify(rocketChatFacade, times(1))
+                .addUserToRocketChatGroup(
+                    consultant.getRocketChatId(),
+                    enquirySessionWithoutConsultant.getFeedbackGroupId()));
+    List<ConsultantAgency> result =
+        this.consultantAgencyRepository.findByConsultantIdAndDeleteDateIsNull(consultant.getId());
 
     assertThat(result, notNullValue());
     assertThat(result, hasSize(1));
     assertEquals(1, enquirySessionWithoutConsultant.getTenantId());
 
-    List<ConsultantAgency> agenciesForConsultant = this.consultantAgencyRepository
-        .findByConsultantId(consultant.getId());
+    List<ConsultantAgency> agenciesForConsultant =
+        this.consultantAgencyRepository.findByConsultantId(consultant.getId());
     assertEquals(1, agenciesForConsultant.get(0).getTenantId());
   }
 
@@ -193,6 +188,4 @@ public class ConsultantAgencyRelationCreatorServiceTenantAwareIT {
     session.setLanguageCode(LanguageCode.de);
     return this.sessionRepository.save(session);
   }
-
-
 }

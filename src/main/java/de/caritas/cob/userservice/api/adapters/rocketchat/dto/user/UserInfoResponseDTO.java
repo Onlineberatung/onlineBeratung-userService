@@ -1,15 +1,11 @@
 package de.caritas.cob.userservice.api.adapters.rocketchat.dto.user;
 
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.RocketChatUserDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Rocket.Chat users.info DTO
- */
-
+/** Rocket.Chat users.info DTO */
 @Setter
 @Getter
 @AllArgsConstructor
@@ -20,5 +16,4 @@ public class UserInfoResponseDTO {
   private boolean success;
   private String error;
   private String errorType;
-
 }

@@ -27,9 +27,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
-/**
- * Supplier to provide mails to be sent when a new enquiry was created.
- */
+/** Supplier to provide mails to be sent when a new enquiry was created. */
 @RequiredArgsConstructor
 @Service
 @Slf4j
@@ -38,6 +36,7 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
 
   private final @NonNull ConsultantAgencyRepository consultantAgencyRepository;
   private final @NonNull AgencyService agencyService;
+
   @Value("${app.base.url}")
   private String applicationBaseUrl;
 
@@ -83,9 +82,8 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
   }
 
   private Function<ConsultantAgency, MailDTO> toEnquiryMailDTO(AgencyDTO agency) {
-    return consultantAgency -> mailOf(
-        consultantAgency.getConsultant(), session.getPostcode(), agency.getName()
-    );
+    return consultantAgency ->
+        mailOf(consultantAgency.getConsultant(), session.getPostcode(), agency.getName());
   }
 
   private MailDTO mailOf(Consultant consultant, String postCode, String agency) {
@@ -101,9 +99,9 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
       templateAttributes.addAll(tenantTemplateSupplier.getTemplateAttributes());
     }
 
-    var language = de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.fromValue(
-        consultant.getLanguageCode().toString()
-    );
+    var language =
+        de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.fromValue(
+            consultant.getLanguageCode().toString());
 
     return new MailDTO()
         .template(TEMPLATE_NEW_ENQUIRY_NOTIFICATION)
@@ -111,5 +109,4 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
         .language(language)
         .templateData(templateAttributes);
   }
-
 }

@@ -26,14 +26,11 @@ import org.slf4j.Logger;
 @RunWith(MockitoJUnitRunner.class)
 public class FirebasePushMessageServiceTest {
 
-  @InjectMocks
-  private FirebasePushMessageService firebasePushMessageService;
+  @InjectMocks private FirebasePushMessageService firebasePushMessageService;
 
-  @Mock
-  private FirebaseMessaging firebaseMessaging;
+  @Mock private FirebaseMessaging firebaseMessaging;
 
-  @Mock
-  private Logger logger;
+  @Mock private Logger logger;
 
   @Before
   public void setup() {
@@ -87,5 +84,4 @@ public class FirebasePushMessageServiceTest {
 
     verifyNoMoreInteractions(this.firebaseMessaging);
   }
-
 }

@@ -13,17 +13,14 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-/**
- * Analyser methods for the session list.
- */
+/** Analyser methods for the session list. */
 @Component
 public class SessionListAnalyser {
 
   private final DecryptionService decryptionService;
 
   @Autowired
-  public SessionListAnalyser(
-      DecryptionService decryptionService) {
+  public SessionListAnalyser(DecryptionService decryptionService) {
     this.decryptionService = requireNonNull(decryptionService);
   }
 
@@ -49,11 +46,11 @@ public class SessionListAnalyser {
    * Check, if messages for given session were read by user.
    *
    * @param messagesReadMap list with room information from Rocket.Chat
-   * @param groupId         the Rocket.Chat group id of the session or chat
+   * @param groupId the Rocket.Chat group id of the session or chat
    * @return true, if messages were read for given thread or no messages in chat room available
    */
-  public boolean areMessagesForRocketChatGroupReadByUser(Map<String, Boolean> messagesReadMap,
-      String groupId) {
+  public boolean areMessagesForRocketChatGroupReadByUser(
+      Map<String, Boolean> messagesReadMap, String groupId) {
     return messagesReadMap.getOrDefault(groupId, true);
   }
 
@@ -61,7 +58,7 @@ public class SessionListAnalyser {
    * Check if if the last message is available for a Rocket.Chat group.
    *
    * @param roomLastMessageMap the map with the rooms update of Rocket.Chat
-   * @param groupId            the group id
+   * @param groupId the group id
    * @return true, if last message is available
    */
   public boolean isLastMessageForRocketChatGroupIdAvailable(
@@ -72,12 +69,12 @@ public class SessionListAnalyser {
   /**
    * Get a {@link SessionAttachmentDTO} from the Rocket.Chat room info.
    *
-   * @param rcUserId            the Rocket.Chat user id
+   * @param rcUserId the Rocket.Chat user id
    * @param roomsLastMessageDto the Rocket.Chat room info
    * @return a {@link SessionAttachmentDTO} instance
    */
-  public SessionAttachmentDTO getAttachmentFromRocketChatMessageIfAvailable(String rcUserId,
-      RoomsLastMessageDTO roomsLastMessageDto) {
+  public SessionAttachmentDTO getAttachmentFromRocketChatMessageIfAvailable(
+      String rcUserId, RoomsLastMessageDTO roomsLastMessageDto) {
     if (isNull(roomsLastMessageDto.getFile())) {
       return null;
     }
@@ -86,5 +83,4 @@ public class SessionListAnalyser {
         .imagePreview(roomsLastMessageDto.getAttachements()[0].getImagePreview())
         .fileReceived(!rcUserId.equals(roomsLastMessageDto.getUser().getId()));
   }
-
 }

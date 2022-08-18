@@ -2,23 +2,21 @@ package de.caritas.cob.userservice.api.conversation.facade;
 
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.CreateAnonymousEnquiryDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.CreateAnonymousEnquiryResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
+import de.caritas.cob.userservice.api.conversation.model.AnonymousUserCredentials;
 import de.caritas.cob.userservice.api.conversation.service.AnonymousConversationCreatorService;
 import de.caritas.cob.userservice.api.conversation.service.user.anonymous.AnonymousUserCreatorService;
 import de.caritas.cob.userservice.api.conversation.service.user.anonymous.AnonymousUsernameRegistry;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.adapters.web.dto.CreateAnonymousEnquiryDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.CreateAnonymousEnquiryResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
-import de.caritas.cob.userservice.api.conversation.model.AnonymousUserCredentials;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-/**
- * Facade to encapsulate the steps of creating a new anonymous conversation.
- */
+/** Facade to encapsulate the steps of creating a new anonymous conversation. */
 @Service
 @RequiredArgsConstructor
 public class CreateAnonymousEnquiryFacade {

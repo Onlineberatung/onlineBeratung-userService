@@ -10,9 +10,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-/**
- * Deactivate action to set the status of a session to done.
- */
+/** Deactivate action to set the status of a session to done. */
 @Component
 @RequiredArgsConstructor
 public class DeactivateSessionActionCommand implements ActionCommand<Session> {
@@ -33,5 +31,4 @@ public class DeactivateSessionActionCommand implements ActionCommand<Session> {
     session.setStatus(DONE);
     sessionService.saveSession(session);
   }
-
 }

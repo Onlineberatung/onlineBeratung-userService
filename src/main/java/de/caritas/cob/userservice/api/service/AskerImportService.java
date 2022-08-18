@@ -5,12 +5,15 @@ import static de.caritas.cob.userservice.api.helper.SessionDataProvider.fromUser
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.MonitoringDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.ImportException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -33,9 +36,6 @@ import de.caritas.cob.userservice.api.model.UserAgency;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
@@ -62,25 +62,29 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-/**
- * Imports the askers from the created CSV file of the old Caritas system.
- */
+/** Imports the askers from the created CSV file of the old Caritas system. */
 @Service
 @RequiredArgsConstructor
 public class AskerImportService {
 
   @Value("${asker.import.filename}")
   private String importFilenameAsker;
+
   @Value("${asker.import.withoutsession.filename}")
   private String importFilenameAskerWithoutSession;
+
   @Value("${asker.import.protocol.filename}")
   private String protocolFilename;
+
   @Value("${rocket.systemuser.username}")
   private String ROCKET_CHAT_SYSTEM_USER_USERNAME;
+
   @Value("${rocket.systemuser.password}")
   private String ROCKET_CHAT_SYSTEM_USER_PASSWORD;
+
   @Value("${asker.import.welcome.message.filename}")
   private String welcomeMsgFilename;
+
   @Value("${asker.import.welcome.message.filename.replace.value}")
   private String welcomeMsgFilenameReplaceValue;
 
@@ -103,11 +107,10 @@ public class AskerImportService {
   private final @NonNull UserHelper userHelper;
   private final @NonNull UserAgencyService userAgencyService;
   private final @NonNull RocketChatCredentialsProvider rocketChatCredentialsProvider;
-  private final RocketChatRoomNameGenerator rocketChatRoomNameGenerator = new RocketChatRoomNameGenerator();
+  private final RocketChatRoomNameGenerator rocketChatRoomNameGenerator =
+      new RocketChatRoomNameGenerator();
 
-  /**
-   * Imports askers without session by a predefined import list (for the format see readme.md)
-   */
+  /** Imports askers without session by a predefined import list (for the format see readme.md) */
   public void startImportForAskersWithoutSession() {
 
     String protocolFile = protocolFilename + "." + System.currentTimeMillis();
@@ -121,7 +124,8 @@ public class AskerImportService {
 
     } catch (Exception exception) {
       writeToImportLog(
-          String.format("Error while reading import file: %s",
+          String.format(
+              "Error while reading import file: %s",
               org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception)),
           protocolFile);
       return;
@@ -134,25 +138,30 @@ public class AskerImportService {
 
         // Check if username is valid
         if (!userHelper.isUsernameValid(record.getUsername())) {
-          writeToImportLog(String.format("Username length is invalid. Skipping import for user %s",
-              record.getUsername()), protocolFile);
+          writeToImportLog(
+              String.format(
+                  "Username length is invalid. Skipping import for user %s", record.getUsername()),
+              protocolFile);
           continue;
         }
 
         // Get the agency
-        AgencyDTO agencyDTO = agencyService
-            .getAgencyWithoutCaching(Long.valueOf(record.getAgencyId()));
+        AgencyDTO agencyDTO =
+            agencyService.getAgencyWithoutCaching(Long.valueOf(record.getAgencyId()));
 
         if (agencyDTO == null) {
-          throw new ImportException(String
-              .format("Could not get consulting type (agency) for user %s", record.getUsername()));
+          throw new ImportException(
+              String.format(
+                  "Could not get consulting type (agency) for user %s", record.getUsername()));
         }
 
         // Check if decoded username is already taken
         if (!identityClient.isUsernameAvailable(record.getUsername())) {
-          writeToImportLog(String.format(
-              "Could not create Keycloak user %s - username or e-mail address is already taken.",
-              record.getUsername()), protocolFile);
+          writeToImportLog(
+              String.format(
+                  "Could not create Keycloak user %s - username or e-mail address is already taken.",
+                  record.getUsername()),
+              protocolFile);
           continue;
         }
 
@@ -160,8 +169,7 @@ public class AskerImportService {
             convertAskerWithoutSessionToUserDTO(record, agencyDTO.getConsultingType());
 
         // Create Keycloak user
-        KeycloakCreateUserResponseDTO response =
-            identityClient.createKeycloakUser(userDTO, "", "");
+        KeycloakCreateUserResponseDTO response = identityClient.createKeycloakUser(userDTO, "", "");
         String keycloakUserId = response.getUserId();
 
         if (record.getEmail() == null || record.getEmail().equals(StringUtils.EMPTY)) {
@@ -179,8 +187,12 @@ public class AskerImportService {
         ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO =
             consultingTypeManager.getConsultingTypeSettings(agencyDTO.getConsultingType());
         User dbUser =
-            userService.createUser(keycloakUserId, record.getIdOld(), record.getUsernameEncoded(),
-                userDTO.getEmail(), extendedConsultingTypeResponseDTO.getLanguageFormal());
+            userService.createUser(
+                keycloakUserId,
+                record.getIdOld(),
+                record.getUsernameEncoded(),
+                userDTO.getEmail(),
+                extendedConsultingTypeResponseDTO.getLanguageFormal());
         if (dbUser.getUserId() == null || dbUser.getUserId().equals(StringUtils.EMPTY)) {
           throw new ImportException(
               String.format("Could not create user %s in mariaDB", record.getUsername()));
@@ -191,31 +203,40 @@ public class AskerImportService {
             rocketChatService.loginUserFirstTime(record.getUsernameEncoded(), record.getPassword());
         String rcUserToken = rcUserResponse.getBody().getData().getAuthToken();
         String rcUserId = rcUserResponse.getBody().getData().getUserId();
-        if (rcUserToken == null || rcUserToken.equals(StringUtils.EMPTY) || rcUserId == null
+        if (rcUserToken == null
+            || rcUserToken.equals(StringUtils.EMPTY)
+            || rcUserId == null
             || rcUserId.equals(StringUtils.EMPTY)) {
           throw new ImportException(
               String.format("Could not log in user %s into Rocket.Chat", record.getUsername()));
         }
 
         // Log out user from Rocket.Chat
-        RocketChatCredentials rocketChatUserCredentials = RocketChatCredentials.builder()
-            .rocketChatToken(rcUserToken).rocketChatUserId(rcUserId).build();
+        RocketChatCredentials rocketChatUserCredentials =
+            RocketChatCredentials.builder()
+                .rocketChatToken(rcUserToken)
+                .rocketChatUserId(rcUserId)
+                .build();
         rocketChatService.logoutUser(rocketChatUserCredentials);
 
         // Update rcUserId in user table
         dbUser.setRcUserId(rcUserId);
         User updatedUser = userService.saveUser(dbUser);
         if (updatedUser.getUserId() == null || updatedUser.getUserId().equals(StringUtils.EMPTY)) {
-          throw new ImportException(String
-              .format("Could not update Rocket.Chat user id for user %s", record.getUsername()));
+          throw new ImportException(
+              String.format(
+                  "Could not update Rocket.Chat user id for user %s", record.getUsername()));
         }
 
         // Create user-agency-relation
         UserAgency userAgency = getUserAgency(dbUser, agencyDTO.getId());
         userAgencyService.saveUserAgency(userAgency);
 
-        writeToImportLog(String.format("User with old id %s and username %s imported. New id: %s",
-            record.getIdOld(), record.getUsername(), dbUser.getUserId()), protocolFile);
+        writeToImportLog(
+            String.format(
+                "User with old id %s and username %s imported. New id: %s",
+                record.getIdOld(), record.getUsername(), dbUser.getUserId()),
+            protocolFile);
 
       } catch (ImportException importException) {
         writeToImportLog(importException.getMessage(), protocolFile);
@@ -227,23 +248,22 @@ public class AskerImportService {
         writeToImportLog(rcLoginException.getMessage(), protocolFile);
         break;
       } catch (CustomValidationHttpStatusException e) {
-        writeToImportLog(String.format(
-            "Could not create Keycloak user for user %s - username or e-mail address is already taken.",
-            getImportRecordAskerWithoutSession(csvRecord).getUsername()), protocolFile);
+        writeToImportLog(
+            String.format(
+                "Could not create Keycloak user for user %s - username or e-mail address is already taken.",
+                getImportRecordAskerWithoutSession(csvRecord).getUsername()),
+            protocolFile);
         break;
       } catch (Exception exception) {
-        writeToImportLog(org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception),
+        writeToImportLog(
+            org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception),
             protocolFile);
         break;
       }
-
     }
-
   }
 
-  /**
-   * Imports askers by a predefined import list (for the format see readme.md)
-   */
+  /** Imports askers by a predefined import list (for the format see readme.md) */
   public void startImport() {
 
     String protocolFile = protocolFilename + "." + System.currentTimeMillis();
@@ -258,13 +278,16 @@ public class AskerImportService {
       in = new FileReader(importFilenameAsker);
       records = CSVFormat.DEFAULT.parse(in);
 
-      ResponseEntity<LoginResponseDTO> rcSystemUserResonse = rocketChatCredentialsProvider
-          .loginUser(ROCKET_CHAT_SYSTEM_USER_USERNAME, ROCKET_CHAT_SYSTEM_USER_PASSWORD);
+      ResponseEntity<LoginResponseDTO> rcSystemUserResonse =
+          rocketChatCredentialsProvider.loginUser(
+              ROCKET_CHAT_SYSTEM_USER_USERNAME, ROCKET_CHAT_SYSTEM_USER_PASSWORD);
       systemUserId = rcSystemUserResonse.getBody().getData().getUserId();
       systemUserToken = rcSystemUserResonse.getBody().getData().getAuthToken();
 
-      if (rcSystemUserResonse == null || rcSystemUserResonse.getStatusCode() != HttpStatus.OK
-          || systemUserId == null || systemUserToken == null) {
+      if (rcSystemUserResonse == null
+          || rcSystemUserResonse.getStatusCode() != HttpStatus.OK
+          || systemUserId == null
+          || systemUserToken == null) {
         throw new ImportException("Could not log in Rocket.Chat system message user.");
       }
 
@@ -287,25 +310,29 @@ public class AskerImportService {
 
         // Check if username is valid
         if (!userHelper.isUsernameValid(record.getUsername())) {
-          writeToImportLog(String.format("Username length is invalid. Skipping import for user %s",
-              record.getUsername()), protocolFile);
+          writeToImportLog(
+              String.format(
+                  "Username length is invalid. Skipping import for user %s", record.getUsername()),
+              protocolFile);
           continue;
         }
 
         // Get the agency for the consulting type
-        AgencyDTO agencyDTO = agencyService
-            .getAgencyWithoutCaching(Long.valueOf(record.getAgencyId()));
+        AgencyDTO agencyDTO =
+            agencyService.getAgencyWithoutCaching(Long.valueOf(record.getAgencyId()));
 
         if (agencyDTO == null) {
-          throw new ImportException(String
-              .format("Could not get consulting type (agency) for user %s", record.getUsername()));
+          throw new ImportException(
+              String.format(
+                  "Could not get consulting type (agency) for user %s", record.getUsername()));
         }
 
         // Check if consultant exists and is in agency
         Optional<Consultant> consultant = consultantService.getConsultant(record.getConsultantId());
         if (!consultant.isPresent()) {
           writeToImportLog(
-              String.format("Consultant with id %s does not exist. Skipping import of user %s",
+              String.format(
+                  "Consultant with id %s does not exist. Skipping import of user %s",
                   record.getConsultantId(), record.getUsername()),
               protocolFile);
           continue;
@@ -313,7 +340,8 @@ public class AskerImportService {
         if (!consultant.get().getConsultantAgencies().stream()
             .anyMatch(agency -> Objects.equals(agency.getAgencyId(), record.getAgencyId()))) {
           writeToImportLog(
-              String.format("Consultant with id %s is not in agency %s. Skipping import of user %s",
+              String.format(
+                  "Consultant with id %s is not in agency %s. Skipping import of user %s",
                   record.getConsultantId(), record.getAgencyId(), record.getUsername()),
               protocolFile);
           continue;
@@ -323,15 +351,16 @@ public class AskerImportService {
 
         // Check if decoded username is already taken
         if (!identityClient.isUsernameAvailable(record.getUsername())) {
-          writeToImportLog(String.format(
-              "Could not create Keycloak user %s - username or e-mail address is already taken.",
-              record.getUsername()), protocolFile);
+          writeToImportLog(
+              String.format(
+                  "Could not create Keycloak user %s - username or e-mail address is already taken.",
+                  record.getUsername()),
+              protocolFile);
           continue;
         }
 
         // Create Keycloak user
-        KeycloakCreateUserResponseDTO response =
-            identityClient.createKeycloakUser(userDTO, "", "");
+        KeycloakCreateUserResponseDTO response = identityClient.createKeycloakUser(userDTO, "", "");
         String keycloakUserId = response.getUserId();
 
         if (record.getEmail() == null || record.getEmail().equals(StringUtils.EMPTY)) {
@@ -349,16 +378,20 @@ public class AskerImportService {
         ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO =
             consultingTypeManager.getConsultingTypeSettings(agencyDTO.getConsultingType());
         User dbUser =
-            userService.createUser(keycloakUserId, record.getIdOld(), record.getUsernameEncoded(),
-                userDTO.getEmail(), extendedConsultingTypeResponseDTO.getLanguageFormal());
+            userService.createUser(
+                keycloakUserId,
+                record.getIdOld(),
+                record.getUsernameEncoded(),
+                userDTO.getEmail(),
+                extendedConsultingTypeResponseDTO.getLanguageFormal());
         if (dbUser.getUserId() == null || dbUser.getUserId().equals(StringUtils.EMPTY)) {
           throw new ImportException(
               String.format("Could not create user %s in mariaDB", record.getUsername()));
         }
 
         // Initialize Session (need session id for Rocket.Chat group name)
-        Session session = sessionService
-            .initializeSession(dbUser, userDTO, isTrue(agencyDTO.getTeamAgency()));
+        Session session =
+            sessionService.initializeSession(dbUser, userDTO, isTrue(agencyDTO.getTeamAgency()));
         if (session.getId() == null) {
           throw new ImportException(
               String.format("Could not create session for user %s", record.getUsername()));
@@ -369,22 +402,32 @@ public class AskerImportService {
             rocketChatService.loginUserFirstTime(record.getUsernameEncoded(), record.getPassword());
         String rcUserToken = rcUserResponse.getBody().getData().getAuthToken();
         String rcUserId = rcUserResponse.getBody().getData().getUserId();
-        if (rcUserToken == null || rcUserToken.equals(StringUtils.EMPTY) || rcUserId == null
+        if (rcUserToken == null
+            || rcUserToken.equals(StringUtils.EMPTY)
+            || rcUserId == null
             || rcUserId.equals(StringUtils.EMPTY)) {
           throw new ImportException(
               String.format("Could not log in user %s into Rocket.Chat", record.getUsername()));
         }
 
         // Create Rocket.Chat group
-        RocketChatCredentials rocketChatUserCredentials = RocketChatCredentials.builder()
-            .rocketChatToken(rcUserToken).rocketChatUserId(rcUserId).build();
+        RocketChatCredentials rocketChatUserCredentials =
+            RocketChatCredentials.builder()
+                .rocketChatToken(rcUserToken)
+                .rocketChatUserId(rcUserId)
+                .build();
         String rcGroupId =
             rocketChatService
-                .createPrivateGroup(rocketChatRoomNameGenerator.generateGroupName(session),
-                    rocketChatUserCredentials).get().getGroup().getId();
+                .createPrivateGroup(
+                    rocketChatRoomNameGenerator.generateGroupName(session),
+                    rocketChatUserCredentials)
+                .get()
+                .getGroup()
+                .getId();
         if (rcGroupId == null || rcGroupId.equals(StringUtils.EMPTY)) {
-          throw new ImportException(String.format("Could not create Rocket.Chat group for user %s",
-              record.getUsername()));
+          throw new ImportException(
+              String.format(
+                  "Could not create Rocket.Chat group for user %s", record.getUsername()));
         }
 
         // Log out user from Rocket.Chat
@@ -394,8 +437,9 @@ public class AskerImportService {
         dbUser.setRcUserId(rcUserId);
         User updatedUser = userService.saveUser(dbUser);
         if (updatedUser.getUserId() == null || updatedUser.getUserId().equals(StringUtils.EMPTY)) {
-          throw new ImportException(String
-              .format("Could not update Rocket.Chat user id for user %s", record.getUsername()));
+          throw new ImportException(
+              String.format(
+                  "Could not update Rocket.Chat user id for user %s", record.getUsername()));
         }
 
         List<ConsultantAgency> agencyList =
@@ -403,34 +447,40 @@ public class AskerImportService {
 
         // Create feedback group and add consultants if enabled for this agency/consulting type
         if (extendedConsultingTypeResponseDTO.getInitializeFeedbackChat().booleanValue()) {
-          String rcFeedbackGroupId = rocketChatService
-              .createPrivateGroupWithSystemUser(
-                  rocketChatRoomNameGenerator.generateFeedbackGroupName(session))
-              .get().getGroup().getId();
+          String rcFeedbackGroupId =
+              rocketChatService
+                  .createPrivateGroupWithSystemUser(
+                      rocketChatRoomNameGenerator.generateFeedbackGroupName(session))
+                  .get()
+                  .getGroup()
+                  .getId();
           if (rcFeedbackGroupId == null || rcFeedbackGroupId.equals(StringUtils.EMPTY)) {
-            throw new ImportException(String.format(
-                "Could not create Rocket.Chat feedback group for user %s", record.getUsername()));
+            throw new ImportException(
+                String.format(
+                    "Could not create Rocket.Chat feedback group for user %s",
+                    record.getUsername()));
           }
 
           // Add the assigned consultant and all consultants of the session's agency to the feedback
           // group that have the right to view all feedback sessions
           for (ConsultantAgency agency : agencyList) {
-            if (identityClient.userHasAuthority(agency.getConsultant().getId(),
-                AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS)
+            if (identityClient.userHasAuthority(
+                    agency.getConsultant().getId(), AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS)
                 || agency.getConsultant().getId().equals(record.getConsultantId())) {
-              rocketChatService.addUserToGroup(agency.getConsultant().getRocketChatId(),
-                  rcFeedbackGroupId);
+              rocketChatService.addUserToGroup(
+                  agency.getConsultant().getRocketChatId(), rcFeedbackGroupId);
             }
           }
 
           // Remove all system messages from feedback group
           try {
-            rocketChatService.removeSystemMessages(rcFeedbackGroupId,
-                nowInUtc().minusHours(Helper.ONE_DAY_IN_HOURS), nowInUtc());
+            rocketChatService.removeSystemMessages(
+                rcFeedbackGroupId, nowInUtc().minusHours(Helper.ONE_DAY_IN_HOURS), nowInUtc());
           } catch (RocketChatRemoveSystemMessagesException e) {
-            throw new ImportException(String.format(
-                "Could not remove system messages from feedback group id %s for user %s",
-                rcFeedbackGroupId, record.getUsername()));
+            throw new ImportException(
+                String.format(
+                    "Could not remove system messages from feedback group id %s for user %s",
+                    rcFeedbackGroupId, record.getUsername()));
           }
 
           // Update the session's feedback group id
@@ -457,15 +507,15 @@ public class AskerImportService {
               // If feedback chat enabled add all main consultants and the assigned consultant. If
               // it is a "normal" team session add all consultants.
               if (extendedConsultingTypeResponseDTO.getInitializeFeedbackChat().booleanValue()) {
-                if (identityClient.userHasAuthority(agency.getConsultant().getId(),
-                    AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS)
+                if (identityClient.userHasAuthority(
+                        agency.getConsultant().getId(), AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS)
                     || agency.getConsultant().getId().equals(record.getConsultantId())) {
-                  rocketChatService.addUserToGroup(agency.getConsultant().getRocketChatId(),
-                      rcGroupId);
+                  rocketChatService.addUserToGroup(
+                      agency.getConsultant().getRocketChatId(), rcGroupId);
                 }
               } else {
-                rocketChatService.addUserToGroup(agency.getConsultant().getRocketChatId(),
-                    rcGroupId);
+                rocketChatService.addUserToGroup(
+                    agency.getConsultant().getRocketChatId(), rcGroupId);
               }
             }
           }
@@ -478,44 +528,54 @@ public class AskerImportService {
         rocketChatService.addUserToGroup(systemUserId, rcGroupId);
 
         // Send welcome message
-        messageServiceProvider
-            .postWelcomeMessageIfConfigured(rcGroupId, dbUser, extendedConsultingTypeResponseDTO,
-                CreateEnquiryExceptionInformation.builder().build());
+        messageServiceProvider.postWelcomeMessageIfConfigured(
+            rcGroupId,
+            dbUser,
+            extendedConsultingTypeResponseDTO,
+            CreateEnquiryExceptionInformation.builder().build());
 
         // Remove all system messages from group
         try {
-          rocketChatService.removeSystemMessages(rcGroupId,
-              nowInUtc().minusHours(Helper.ONE_DAY_IN_HOURS), nowInUtc());
+          rocketChatService.removeSystemMessages(
+              rcGroupId, nowInUtc().minusHours(Helper.ONE_DAY_IN_HOURS), nowInUtc());
         } catch (RocketChatRemoveSystemMessagesException e) {
           throw new ImportException(
-              String.format("Could not remove system messages from group id %s for user %s",
+              String.format(
+                  "Could not remove system messages from group id %s for user %s",
                   rcGroupId, record.getUsername()));
         }
 
         // Create an initial monitoring data set for the session
         if (extendedConsultingTypeResponseDTO.getMonitoring().getMonitoringTemplateFile() != null
-            && !extendedConsultingTypeResponseDTO.getMonitoring().getMonitoringTemplateFile()
-            .equals(StringUtils.EMPTY)) {
+            && !extendedConsultingTypeResponseDTO
+                .getMonitoring()
+                .getMonitoringTemplateFile()
+                .equals(StringUtils.EMPTY)) {
           MonitoringDTO monitoringDTO =
               monitoringStructureProvider.getMonitoringInitialList(agencyDTO.getConsultingType());
           if (monitoringDTO != null) {
             monitoringService.updateMonitoring(session.getId(), monitoringDTO);
           } else {
-            throw new ImportException(String.format("Could not get initial monitoring for user %s",
-                record.getUsername()));
+            throw new ImportException(
+                String.format(
+                    "Could not get initial monitoring for user %s", record.getUsername()));
           }
         }
 
         // Save session data
         sessionDataService.saveSessionData(session, fromUserDTO(userDTO));
 
-        writeToImportLog(String.format("User with old id %s and username %s imported. New id: %s",
-            record.getIdOld(), record.getUsername(), dbUser.getUserId()), protocolFile);
+        writeToImportLog(
+            String.format(
+                "User with old id %s and username %s imported. New id: %s",
+                record.getIdOld(), record.getUsername(), dbUser.getUserId()),
+            protocolFile);
 
       } catch (ImportException importException) {
         writeToImportLog(importException.getMessage(), protocolFile);
         break;
-      } catch (InternalServerErrorException | RocketChatPostWelcomeMessageException serviceException) {
+      } catch (InternalServerErrorException
+          | RocketChatPostWelcomeMessageException serviceException) {
         writeToImportLog(serviceException.getMessage(), protocolFile);
         break;
       } catch (RocketChatLoginException rcLoginException) {
@@ -525,11 +585,11 @@ public class AskerImportService {
         writeToImportLog(rcCreateGroupException.getMessage(), protocolFile);
         break;
       } catch (Exception exception) {
-        writeToImportLog(org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception),
+        writeToImportLog(
+            org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(exception),
             protocolFile);
         break;
       }
-
     }
 
     try {
@@ -541,23 +601,36 @@ public class AskerImportService {
 
   private void writeToImportLog(String message, String protocolFile) {
     try {
-      Files.write(Paths.get(protocolFile), (message + NEWLINE_CHAR).getBytes(IMPORT_LOG_CHARSET),
-          StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+      Files.write(
+          Paths.get(protocolFile),
+          (message + NEWLINE_CHAR).getBytes(IMPORT_LOG_CHARSET),
+          StandardOpenOption.CREATE,
+          StandardOpenOption.APPEND);
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
 
   private UserDTO convertAskerToUserDTO(ImportRecordAsker record, int consultingTypeId) {
-    return new UserDTO(record.getUsernameEncoded(), record.getPostcode(), record.getAgencyId(),
-        record.getPassword(), record.getEmail(), new Date().toString(),
+    return new UserDTO(
+        record.getUsernameEncoded(),
+        record.getPostcode(),
+        record.getAgencyId(),
+        record.getPassword(),
+        record.getEmail(),
+        new Date().toString(),
         Integer.toString(consultingTypeId));
   }
 
-  private UserDTO convertAskerWithoutSessionToUserDTO(ImportRecordAskerWithoutSession record,
-      int consultingTypeId) {
-    return new UserDTO(record.getUsernameEncoded(), DUMMY_POSTCODE, record.getAgencyId(),
-        record.getPassword(), record.getEmail(), new Date().toString(),
+  private UserDTO convertAskerWithoutSessionToUserDTO(
+      ImportRecordAskerWithoutSession record, int consultingTypeId) {
+    return new UserDTO(
+        record.getUsernameEncoded(),
+        DUMMY_POSTCODE,
+        record.getAgencyId(),
+        record.getPassword(),
+        record.getEmail(),
+        new Date().toString(),
         Integer.toString(consultingTypeId));
   }
 
@@ -572,20 +645,22 @@ public class AskerImportService {
     importRecord.setUsername(StringUtils.trim(record.get(1)));
     importRecord.setUsernameEncoded(
         new UsernameTranscoder().encodeUsername(StringUtils.trim(record.get(1))));
-    String email = StringUtils.deleteWhitespace(
-        record.get(2).trim().equals(StringUtils.EMPTY) ? "" : record.get(2).trim());
-    if (!email.equals(StringUtils.EMPTY)
-        && !EmailValidator.getInstance().isValid(email)) {
+    String email =
+        StringUtils.deleteWhitespace(
+            record.get(2).trim().equals(StringUtils.EMPTY) ? "" : record.get(2).trim());
+    if (!email.equals(StringUtils.EMPTY) && !EmailValidator.getInstance().isValid(email)) {
       throw new ImportException(
-          String.format("Asker with old id %s could not be imported: Invalid email address",
+          String.format(
+              "Asker with old id %s could not be imported: Invalid email address",
               importRecord.getIdOld()));
     }
     importRecord.setEmail(email);
     importRecord.setConsultantId(StringUtils.deleteWhitespace(record.get(3)));
     importRecord.setPostcode(StringUtils.deleteWhitespace(record.get(4)));
     importRecord.setAgencyId(Long.valueOf(record.get(5)));
-    importRecord
-        .setPassword(record.get(6).trim().equals(StringUtils.EMPTY) ? userHelper.getRandomPassword()
+    importRecord.setPassword(
+        record.get(6).trim().equals(StringUtils.EMPTY)
+            ? userHelper.getRandomPassword()
             : record.get(6));
 
     return importRecord;
@@ -602,18 +677,20 @@ public class AskerImportService {
     importRecord.setUsername(StringUtils.trim(record.get(1)));
     importRecord.setUsernameEncoded(
         new UsernameTranscoder().encodeUsername(StringUtils.trim(record.get(1))));
-    String email = StringUtils.deleteWhitespace(
-        record.get(2).trim().equals(StringUtils.EMPTY) ? "" : record.get(2).trim());
-    if (!email.equals(StringUtils.EMPTY)
-        && !EmailValidator.getInstance().isValid(email)) {
+    String email =
+        StringUtils.deleteWhitespace(
+            record.get(2).trim().equals(StringUtils.EMPTY) ? "" : record.get(2).trim());
+    if (!email.equals(StringUtils.EMPTY) && !EmailValidator.getInstance().isValid(email)) {
       throw new ImportException(
-          String.format("Asker with old id %s could not be imported: Invalid email address",
+          String.format(
+              "Asker with old id %s could not be imported: Invalid email address",
               importRecord.getIdOld()));
     }
     importRecord.setEmail(email);
     importRecord.setAgencyId(Long.valueOf(record.get(3)));
-    importRecord
-        .setPassword(record.get(4).trim().equals(StringUtils.EMPTY) ? userHelper.getRandomPassword()
+    importRecord.setPassword(
+        record.get(4).trim().equals(StringUtils.EMPTY)
+            ? userHelper.getRandomPassword()
             : record.get(4));
 
     return importRecord;
@@ -625,7 +702,6 @@ public class AskerImportService {
     userAgency.setAgencyId(agencyId);
     userAgency.setUser(user);
     return userAgency;
-
   }
 
   @Getter
@@ -653,5 +729,4 @@ public class AskerImportService {
     Long agencyId;
     String password;
   }
-
 }

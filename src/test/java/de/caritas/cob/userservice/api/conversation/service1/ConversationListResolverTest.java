@@ -8,12 +8,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.conversation.provider.ConversationListProvider;
-import de.caritas.cob.userservice.api.conversation.registry.ConversationListProviderRegistry;
-import de.caritas.cob.userservice.api.conversation.service.ConversationListResolver;
-import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
+import de.caritas.cob.userservice.api.conversation.provider.ConversationListProvider;
+import de.caritas.cob.userservice.api.conversation.registry.ConversationListProviderRegistry;
+import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,25 +25,21 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ConversationListResolverTest {
 
-  @InjectMocks
-  private ConversationListResolver conversationListResolver;
+  @InjectMocks private ConversationListResolver conversationListResolver;
 
-  @Mock
-  private ConversationListProviderRegistry conversationListProviderRegistry;
+  @Mock private ConversationListProviderRegistry conversationListProviderRegistry;
 
-  @Mock
-  private ConsultantSessionListResponseDTO consultantSessionListResponseDTO;
+  @Mock private ConsultantSessionListResponseDTO consultantSessionListResponseDTO;
 
-  @Mock
-  private ConversationListProvider conversationListProvider;
+  @Mock private ConversationListProvider conversationListProvider;
 
   @Test
   void resolveConversations_Should_returnExpectedResponse_When_paramsAreValid() {
     whenConversationListProviderReturnsAnonymousResponseSessions(
         List.of(mock(ConsultantSessionResponseDTO.class)));
 
-    var responseDTO = this.conversationListResolver
-        .resolveConversations(0, 1, ANONYMOUS_ENQUIRY, "");
+    var responseDTO =
+        this.conversationListResolver.resolveConversations(0, 1, ANONYMOUS_ENQUIRY, "");
 
     assertThat(responseDTO, is(consultantSessionListResponseDTO));
   }
@@ -55,8 +50,7 @@ class ConversationListResolverTest {
         .thenReturn(this.consultantSessionListResponseDTO);
     when(this.conversationListProviderRegistry.findByConversationType(ANONYMOUS_ENQUIRY))
         .thenReturn(this.conversationListProvider);
-    when(this.consultantSessionListResponseDTO.getSessions())
-        .thenReturn(responseSessions);
+    when(this.consultantSessionListResponseDTO.getSessions()).thenReturn(responseSessions);
   }
 
   @ParameterizedTest
@@ -65,8 +59,10 @@ class ConversationListResolverTest {
       List<ConsultantSessionResponseDTO> emptySessions) {
     whenConversationListProviderReturnsAnonymousResponseSessions(emptySessions);
 
-    assertThrows(NoContentException.class, () -> {
-      this.conversationListResolver.resolveConversations(0, 1, ANONYMOUS_ENQUIRY, "");
-    });
+    assertThrows(
+        NoContentException.class,
+        () -> {
+          this.conversationListResolver.resolveConversations(0, 1, ANONYMOUS_ENQUIRY, "");
+        });
   }
 }

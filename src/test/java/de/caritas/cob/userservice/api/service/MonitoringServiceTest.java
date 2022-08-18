@@ -1,15 +1,10 @@
 package de.caritas.cob.userservice.api.service;
 
-import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.api.model.Session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.api.model.Session.SessionStatus.IN_PROGRESS;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WIT_MONITORING;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.IS_MONITORING;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.IS_NO_TEAM_SESSION;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.POSTCODE;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
@@ -19,13 +14,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.MonitoringDTO;
 import de.caritas.cob.userservice.api.exception.CreateMonitoringException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.MonitoringStructureProvider;
-import de.caritas.cob.userservice.api.adapters.web.dto.MonitoringDTO;
-import de.caritas.cob.userservice.api.model.Session.SessionStatus;
-import de.caritas.cob.userservice.api.port.out.MonitoringRepository;
 import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.port.out.MonitoringRepository;
 import java.util.HashMap;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,15 +35,10 @@ import org.springframework.dao.DataAccessException;
 @RunWith(MockitoJUnitRunner.class)
 public class MonitoringServiceTest {
 
-  @Spy
-  @InjectMocks
-  private MonitoringService monitoringService;
-  @Mock
-  private MonitoringRepository monitoringRepository;
-  @Mock
-  private MonitoringStructureProvider monitoringStructureProvider;
-  @Mock
-  private Logger logger;
+  @Spy @InjectMocks private MonitoringService monitoringService;
+  @Mock private MonitoringRepository monitoringRepository;
+  @Mock private MonitoringStructureProvider monitoringStructureProvider;
+  @Mock private Logger logger;
 
   private final String ERROR = "error";
   private final Long SESSION_ID = 123L;
@@ -57,8 +46,7 @@ public class MonitoringServiceTest {
       Session.builder()
           .id(SESSION_ID)
           .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
-          .registrationType(
-              REGISTERED)
+          .registrationType(REGISTERED)
           .postcode(POSTCODE)
           .status(IN_PROGRESS)
           .build();
@@ -74,15 +62,11 @@ public class MonitoringServiceTest {
     setInternalState(LogService.class, "LOGGER", logger);
   }
 
-  /**
-   * Method: updateMonitoring Role: consultant
-   */
-
+  /** Method: updateMonitoring Role: consultant */
   @Test
   public void updateMonitoring_Should_ThrowInternalServerErrorException_OnDatabaseError() {
 
-    DataAccessException ex = new DataAccessException(ERROR) {
-    };
+    DataAccessException ex = new DataAccessException(ERROR) {};
 
     when(monitoringRepository.saveAll(Mockito.any())).thenThrow(ex);
 
@@ -100,18 +84,13 @@ public class MonitoringServiceTest {
     monitoringService.updateMonitoring(SESSION_ID, MONITORING_DTO);
 
     verify(monitoringRepository, times(1)).saveAll(Mockito.any());
-
   }
 
-  /**
-   * Method: deleteMonitoring Role: consultant
-   */
-
+  /** Method: deleteMonitoring Role: consultant */
   @Test
   public void deleteMonitoring_Should_ThrowInternalServerErrorException_OnDatabaseError() {
 
-    DataAccessException ex = new DataAccessException(ERROR) {
-    };
+    DataAccessException ex = new DataAccessException(ERROR) {};
 
     doThrow(ex).when(monitoringRepository).deleteAll(Mockito.any());
 
@@ -129,37 +108,33 @@ public class MonitoringServiceTest {
     monitoringService.deleteMonitoring(SESSION_ID, MONITORING_DTO);
 
     verify(monitoringRepository, times(1)).deleteAll(Mockito.any());
-
   }
 
-  /**
-   * Method: crateMonitoring
-   */
-
+  /** Method: crateMonitoring */
   @Test
-  public void createMonitoring_Should_UpdateMonitoring_WithInitialMonitoringListOfSessionsConsultingType()
-      throws CreateMonitoringException {
+  public void
+      createMonitoring_Should_UpdateMonitoring_WithInitialMonitoringListOfSessionsConsultingType()
+          throws CreateMonitoringException {
 
-    doReturn(MONITORING_DTO).when(monitoringStructureProvider)
+    doReturn(MONITORING_DTO)
+        .when(monitoringStructureProvider)
         .getMonitoringInitialList(Mockito.anyInt());
 
-    monitoringService
-        .createMonitoringIfConfigured(SESSION, CONSULTING_TYPE_SETTINGS_WIT_MONITORING);
+    monitoringService.createMonitoringIfConfigured(
+        SESSION, CONSULTING_TYPE_SETTINGS_WIT_MONITORING);
 
     verify(monitoringService, times(1)).updateMonitoring(SESSION_ID, MONITORING_DTO);
     verify(monitoringStructureProvider, times(1))
         .getMonitoringInitialList(SESSION.getConsultingTypeId());
-
   }
 
-  /**
-   * Method: deleteInitialMonitoring
-   */
-
+  /** Method: deleteInitialMonitoring */
   @Test
-  public void deleteInitialMonitoring_Should_DeleteMonitoring_WithInitialMonitoringListOfSessionsConsultingType() {
+  public void
+      deleteInitialMonitoring_Should_DeleteMonitoring_WithInitialMonitoringListOfSessionsConsultingType() {
 
-    doReturn(MONITORING_DTO).when(monitoringStructureProvider)
+    doReturn(MONITORING_DTO)
+        .when(monitoringStructureProvider)
         .getMonitoringInitialList(Mockito.anyInt());
 
     monitoringService.rollbackInitializeMonitoring(SESSION);
@@ -167,6 +142,5 @@ public class MonitoringServiceTest {
     verify(monitoringService, times(1)).deleteMonitoring(SESSION_ID, MONITORING_DTO);
     verify(monitoringStructureProvider, times(1))
         .getMonitoringInitialList(SESSION.getConsultingTypeId());
-
   }
 }

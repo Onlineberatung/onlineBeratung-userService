@@ -11,12 +11,10 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
-import de.caritas.cob.userservice.api.facade.userdata.AskerDataProvider;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.Optional;
-import lombok.NonNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -27,17 +25,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class UserAdminFacadeTest {
 
-  @InjectMocks
-  private UserAdminFacade userAdminFacade;
+  @InjectMocks private UserAdminFacade userAdminFacade;
 
-  @Mock
-  private KeycloakService keycloakService;
+  @Mock private KeycloakService keycloakService;
 
-  @Mock
-  private UserService userService;
+  @Mock private UserService userService;
 
-  @Mock
-  private UsernameTranscoder usernameTranscoder;
+  @Mock private UsernameTranscoder usernameTranscoder;
 
   @Test(expected = NotFoundException.class)
   public void markAskerForDeletion_Should_throwNotFoundException_When_askerDoesNotExist() {
@@ -47,7 +41,8 @@ public class UserAdminFacadeTest {
   }
 
   @Test(expected = ConflictException.class)
-  public void markAskerForDeletion_Should_throwConflictException_When_askerIsAlreadyMarkedForDeletion() {
+  public void
+      markAskerForDeletion_Should_throwConflictException_When_askerIsAlreadyMarkedForDeletion() {
     User user = new User();
     user.setDeleteDate(nowInUtc());
     when(this.userService.getUser(any())).thenReturn(Optional.of(user));
@@ -56,7 +51,8 @@ public class UserAdminFacadeTest {
   }
 
   @Test
-  public void markAskerForDeletion_Should_markUserForDeletion_When_askerExistsAndIsNotMarkedForDeletion() {
+  public void
+      markAskerForDeletion_Should_markUserForDeletion_When_askerExistsAndIsNotMarkedForDeletion() {
     User user = new User();
     when(this.userService.getUser(any())).thenReturn(Optional.of(user));
 
@@ -67,5 +63,4 @@ public class UserAdminFacadeTest {
     verify(this.userService, times(1)).saveUser(argumentCaptor.capture());
     assertThat(argumentCaptor.getValue().getDeleteDate(), notNullValue());
   }
-
 }

@@ -22,36 +22,38 @@ import org.springframework.web.client.RestClientException;
 @ExtendWith(MockitoExtension.class)
 class ConsultingTypeManagerTest {
 
-  @InjectMocks
-  private ConsultingTypeManager consultingTypeManager;
+  @InjectMocks private ConsultingTypeManager consultingTypeManager;
 
-  @Mock
-  private ConsultingTypeService consultingTypeService;
+  @Mock private ConsultingTypeService consultingTypeService;
 
   @Test
-  void getConsultantTypeSettings_Should_Throw_MissingConsultingTypeException_When_RestClientException() {
+  void
+      getConsultantTypeSettings_Should_Throw_MissingConsultingTypeException_When_RestClientException() {
     when(consultingTypeService.getExtendedConsultingTypeResponseDTO(anyInt()))
         .thenThrow(new RestClientException(""));
 
-    assertThrows(MissingConsultingTypeException.class,
+    assertThrows(
+        MissingConsultingTypeException.class,
         () -> consultingTypeManager.getConsultingTypeSettings(1));
   }
 
   @Test
   void getConsultantTypeSettings_Should_Return_ExtendedConsultingTypeResponseDTO()
       throws MissingConsultingTypeException {
-    ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO = new ExtendedConsultingTypeResponseDTO();
+    ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO =
+        new ExtendedConsultingTypeResponseDTO();
     when(consultingTypeService.getExtendedConsultingTypeResponseDTO(anyInt()))
         .thenReturn(extendedConsultingTypeResponseDTO);
 
-    assertEquals(extendedConsultingTypeResponseDTO,
+    assertEquals(
+        extendedConsultingTypeResponseDTO,
         consultingTypeManager.getConsultingTypeSettings(anyInt()));
   }
 
   @Test
-  void isConsultantBoundedToAgency_Should_Return_True()
-      throws MissingConsultingTypeException {
-    ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO = new ExtendedConsultingTypeResponseDTO();
+  void isConsultantBoundedToAgency_Should_Return_True() throws MissingConsultingTypeException {
+    ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO =
+        new ExtendedConsultingTypeResponseDTO();
     extendedConsultingTypeResponseDTO.setConsultantBoundedToConsultingType(true);
     when(consultingTypeService.getExtendedConsultingTypeResponseDTO(anyInt()))
         .thenReturn(extendedConsultingTypeResponseDTO);
@@ -60,9 +62,9 @@ class ConsultingTypeManagerTest {
   }
 
   @Test
-  void isConsultantBoundedToAgency_Should_Return_False()
-      throws MissingConsultingTypeException {
-    ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO = new ExtendedConsultingTypeResponseDTO();
+  void isConsultantBoundedToAgency_Should_Return_False() throws MissingConsultingTypeException {
+    ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO =
+        new ExtendedConsultingTypeResponseDTO();
     extendedConsultingTypeResponseDTO.setConsultantBoundedToConsultingType(false);
     when(consultingTypeService.getExtendedConsultingTypeResponseDTO(anyInt()))
         .thenReturn(extendedConsultingTypeResponseDTO);
@@ -71,8 +73,7 @@ class ConsultingTypeManagerTest {
   }
 
   @Test
-  void getAllConsultingTypeIds_Should_Return_The_Same_List()
-      throws MissingConsultingTypeException {
+  void getAllConsultingTypeIds_Should_Return_The_Same_List() throws MissingConsultingTypeException {
     Long tenant1 = 1L;
     Long tenant2 = 2L;
     when(consultingTypeService.getAllConsultingTypeIds(null))

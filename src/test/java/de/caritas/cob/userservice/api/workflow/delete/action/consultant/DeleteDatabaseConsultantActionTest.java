@@ -14,10 +14,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
-import de.caritas.cob.userservice.api.workflow.delete.model.ConsultantDeletionWorkflowDTO;
-import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
+import de.caritas.cob.userservice.api.workflow.delete.model.ConsultantDeletionWorkflowDTO;
+import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
@@ -31,14 +31,11 @@ import org.slf4j.Logger;
 @RunWith(MockitoJUnitRunner.class)
 public class DeleteDatabaseConsultantActionTest {
 
-  @InjectMocks
-  private DeleteDatabaseConsultantAction deleteDatabaseConsultantAction;
+  @InjectMocks private DeleteDatabaseConsultantAction deleteDatabaseConsultantAction;
 
-  @Mock
-  private ConsultantRepository consultantRepository;
+  @Mock private ConsultantRepository consultantRepository;
 
-  @Mock
-  private Logger logger;
+  @Mock private Logger logger;
 
   @Before
   public void setup() {
@@ -76,5 +73,4 @@ public class DeleteDatabaseConsultantActionTest {
     assertThat(workflowErrors.get(0).getTimestamp(), notNullValue());
     verify(logger).error(anyString(), any(RuntimeException.class));
   }
-
 }

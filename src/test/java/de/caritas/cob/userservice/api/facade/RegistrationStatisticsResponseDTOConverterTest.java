@@ -32,14 +32,15 @@ class RegistrationStatisticsResponseDTOConverterTest {
     easyRandom = new EasyRandom();
     topicDTOMap.put(1L, new TopicDTO().internalIdentifier("angeho01"));
     topicDTOMap.put(2L, new TopicDTO().internalIdentifier("angeho02"));
-    registrationStatisticsResponseDTOConverter = new RegistrationStatisticsResponseDTOConverter(topicDTOMap);
+    registrationStatisticsResponseDTOConverter =
+        new RegistrationStatisticsResponseDTOConverter(topicDTOMap);
   }
 
   @Test
   void convert_Should_ConvertEmptySessionListToEmptyResponse() {
     // given, when
-    RegistrationStatisticsListResponseDTO convert = registrationStatisticsResponseDTOConverter.convert(
-        Lists.newArrayList());
+    RegistrationStatisticsListResponseDTO convert =
+        registrationStatisticsResponseDTOConverter.convert(Lists.newArrayList());
 
     // then
     assertThat(convert.getRegistrationStatistics()).isEmpty();
@@ -50,19 +51,19 @@ class RegistrationStatisticsResponseDTOConverterTest {
     // given
     Session session = getRandomSessionWithTopics();
 
-    var expectedResponse = new RegistrationStatisticsResponseDTO()
-        .userId(session.getUser().getUserId())
-        .age(session.getUserAge())
-        .gender(session.getUserGender())
-        .counsellingRelation(session.getCounsellingRelation())
-        .topicsInternalAttributes(Lists.newArrayList("angeho01", "angeho02", ""))
-        .mainTopicInternalAttribute("angeho01")
-        .registrationDate(toIsoTime(session.getCreateDate()))
-        .postalCode(session.getPostcode());
+    var expectedResponse =
+        new RegistrationStatisticsResponseDTO()
+            .userId(session.getUser().getUserId())
+            .age(session.getUserAge())
+            .gender(session.getUserGender())
+            .counsellingRelation(session.getCounsellingRelation())
+            .topicsInternalAttributes(Lists.newArrayList("angeho01", "angeho02", ""))
+            .mainTopicInternalAttribute("angeho01")
+            .registrationDate(toIsoTime(session.getCreateDate()))
+            .postalCode(session.getPostcode());
 
     // when
-    var converted = registrationStatisticsResponseDTOConverter.convert(
-        Lists.newArrayList(session));
+    var converted = registrationStatisticsResponseDTOConverter.convert(Lists.newArrayList(session));
 
     // then
     assertThat(converted.getRegistrationStatistics()).hasSize(1);
@@ -74,54 +75,57 @@ class RegistrationStatisticsResponseDTOConverterTest {
     // given
     User user = new User();
     user.setUserId("userId");
-    Session session = Session.builder()
-        .user(user)
-        .registrationType(RegistrationType.REGISTERED)
-        .postcode("00000")
-        .sessionTopics(Lists.newArrayList())
-        .status(SessionStatus.INITIAL)
-        .build();
+    Session session =
+        Session.builder()
+            .user(user)
+            .registrationType(RegistrationType.REGISTERED)
+            .postcode("00000")
+            .sessionTopics(Lists.newArrayList())
+            .status(SessionStatus.INITIAL)
+            .build();
     session.setCreateDate(LocalDateTime.now());
 
-
-    var expectedResponse = new RegistrationStatisticsResponseDTO()
-        .userId(session.getUser().getUserId())
-        .age(null)
-        .gender(null)
-        .counsellingRelation(null)
-        .topicsInternalAttributes(Lists.newArrayList())
-        .mainTopicInternalAttribute("")
-        .registrationDate(toIsoTime(session.getCreateDate()))
-        .postalCode(session.getPostcode());
+    var expectedResponse =
+        new RegistrationStatisticsResponseDTO()
+            .userId(session.getUser().getUserId())
+            .age(null)
+            .gender(null)
+            .counsellingRelation(null)
+            .topicsInternalAttributes(Lists.newArrayList())
+            .mainTopicInternalAttribute("")
+            .registrationDate(toIsoTime(session.getCreateDate()))
+            .postalCode(session.getPostcode());
 
     // when
-    var converted = registrationStatisticsResponseDTOConverter.convert(
-        Lists.newArrayList(session));
+    var converted = registrationStatisticsResponseDTOConverter.convert(Lists.newArrayList(session));
 
     // then
     assertThat(converted.getRegistrationStatistics()).hasSize(1);
     assertThat(converted.getRegistrationStatistics().get(0)).isEqualTo(expectedResponse);
   }
 
-
   @Test
   void convert_Should_ConvertMoreThanOneSessionObjectToAValidResponse() {
     // given
-    var sessions = Lists.newArrayList(getRandomSessionWithTopics(),
-        getRandomSessionWithTopics());
+    var sessions = Lists.newArrayList(getRandomSessionWithTopics(), getRandomSessionWithTopics());
 
     // when
-    var converted = registrationStatisticsResponseDTOConverter.convert(
-        sessions);
+    var converted = registrationStatisticsResponseDTOConverter.convert(sessions);
 
     // then
     assertThat(converted.getRegistrationStatistics()).hasSize(2);
     assertThat(converted.getRegistrationStatistics()).extracting("userId").isNotEmpty();
     assertThat(converted.getRegistrationStatistics()).extracting("age").isNotEmpty();
     assertThat(converted.getRegistrationStatistics()).extracting("gender").isNotEmpty();
-    assertThat(converted.getRegistrationStatistics()).extracting("counsellingRelation").isNotEmpty();
-    assertThat(converted.getRegistrationStatistics()).extracting("topicsInternalAttributes").isNotEmpty();
-    assertThat(converted.getRegistrationStatistics()).extracting("mainTopicInternalAttribute").isNotEmpty();
+    assertThat(converted.getRegistrationStatistics())
+        .extracting("counsellingRelation")
+        .isNotEmpty();
+    assertThat(converted.getRegistrationStatistics())
+        .extracting("topicsInternalAttributes")
+        .isNotEmpty();
+    assertThat(converted.getRegistrationStatistics())
+        .extracting("mainTopicInternalAttribute")
+        .isNotEmpty();
     assertThat(converted.getRegistrationStatistics()).extracting("registrationDate").isNotEmpty();
     assertThat(converted.getRegistrationStatistics()).extracting("postalCode").isNotEmpty();
   }
@@ -129,7 +133,9 @@ class RegistrationStatisticsResponseDTOConverterTest {
   private Session getRandomSessionWithTopics() {
     Session session = easyRandom.nextObject(Session.class);
     session.setMainTopicId(1);
-    session.setSessionTopics(Lists.newArrayList(getSessionTopic(session, 1), getSessionTopic(session, 2),  getSessionTopic(session, 3)));
+    session.setSessionTopics(
+        Lists.newArrayList(
+            getSessionTopic(session, 1), getSessionTopic(session, 2), getSessionTopic(session, 3)));
     return session;
   }
 

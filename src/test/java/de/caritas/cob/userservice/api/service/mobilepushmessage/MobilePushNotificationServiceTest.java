@@ -30,17 +30,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class MobilePushNotificationServiceTest {
 
-  @InjectMocks
-  private MobilePushNotificationService mobilePushNotificationService;
+  @InjectMocks private MobilePushNotificationService mobilePushNotificationService;
 
-  @Mock
-  private UserService userService;
+  @Mock private UserService userService;
 
-  @Mock
-  private ConsultantService consultantService;
+  @Mock private ConsultantService consultantService;
 
-  @Mock
-  private FirebasePushMessageService firebasePushMessageService;
+  @Mock private FirebasePushMessageService firebasePushMessageService;
 
   @Test
   void sendLiveDirectMessageEventToUsers_Should_sendPushMessage_When_usersHaveMobileToken() {
@@ -82,33 +78,37 @@ class MobilePushNotificationServiceTest {
   }
 
   @Test
-  void sendLiveDirectMessageEventToUsers_Should_sendPushMessageToAllDevices_When_usersHaveMultipleMobileTokensIncludingU25MobileTOken() {
+  void
+      sendLiveDirectMessageEventToUsers_Should_sendPushMessageToAllDevices_When_usersHaveMultipleMobileTokensIncludingU25MobileTOken() {
     var user = new EasyRandom().nextObject(User.class);
-    var allUserMobileTokens = Stream.concat(Stream.of(user.getMobileToken()),
-            user.getUserMobileTokens().stream()
-                .map(UserMobileToken::getMobileAppToken))
-        .collect(Collectors.toList());
+    var allUserMobileTokens =
+        Stream.concat(
+                Stream.of(user.getMobileToken()),
+                user.getUserMobileTokens().stream().map(UserMobileToken::getMobileAppToken))
+            .collect(Collectors.toList());
     when(this.userService.getUser(anyString())).thenReturn(Optional.of(user));
 
     this.mobilePushNotificationService.triggerMobilePushNotification(List.of("user id"));
 
-    verify(this.firebasePushMessageService, times(allUserMobileTokens.size())).pushNewMessageEvent(
-        anyString());
+    verify(this.firebasePushMessageService, times(allUserMobileTokens.size()))
+        .pushNewMessageEvent(anyString());
   }
 
   @Test
-  void sendLiveDirectMessageEventToUsers_Should_sendPushMessageToAllDevices_When_usersHaveMultipleMobileTokens() {
+  void
+      sendLiveDirectMessageEventToUsers_Should_sendPushMessageToAllDevices_When_usersHaveMultipleMobileTokens() {
     var user = new EasyRandom().nextObject(User.class);
     user.setMobileToken(null);
-    var allUserMobileTokens = user.getUserMobileTokens().stream()
-        .map(UserMobileToken::getMobileAppToken)
-        .collect(Collectors.toList());
+    var allUserMobileTokens =
+        user.getUserMobileTokens().stream()
+            .map(UserMobileToken::getMobileAppToken)
+            .collect(Collectors.toList());
     when(this.userService.getUser(anyString())).thenReturn(Optional.of(user));
 
     this.mobilePushNotificationService.triggerMobilePushNotification(List.of("user id"));
 
-    verify(this.firebasePushMessageService, times(allUserMobileTokens.size())).pushNewMessageEvent(
-        anyString());
+    verify(this.firebasePushMessageService, times(allUserMobileTokens.size()))
+        .pushNewMessageEvent(anyString());
   }
 
   @Test
@@ -139,7 +139,8 @@ class MobilePushNotificationServiceTest {
   }
 
   @Test
-  void sendLiveDirectMessageEventToUsers_Should_notSendPushMessage_When_noConsultantHasMobileToken() {
+  void
+      sendLiveDirectMessageEventToUsers_Should_notSendPushMessage_When_noConsultantHasMobileToken() {
     when(this.consultantService.getConsultant(any())).thenReturn(Optional.of(new Consultant()));
 
     this.mobilePushNotificationService.triggerMobilePushNotification(asList("1", "2"));
@@ -148,18 +149,18 @@ class MobilePushNotificationServiceTest {
   }
 
   @Test
-  void sendLiveDirectMessageEventToUsers_Should_sendPushMessageToAllDevices_When_consultantsHaveMultipleMobileTokens() {
+  void
+      sendLiveDirectMessageEventToUsers_Should_sendPushMessageToAllDevices_When_consultantsHaveMultipleMobileTokens() {
     var consultant = new EasyRandom().nextObject(Consultant.class);
-    var allConsultantMobileTokens = consultant.getConsultantMobileTokens().stream()
-        .map(ConsultantMobileToken::getMobileAppToken)
-        .collect(Collectors.toList());
+    var allConsultantMobileTokens =
+        consultant.getConsultantMobileTokens().stream()
+            .map(ConsultantMobileToken::getMobileAppToken)
+            .collect(Collectors.toList());
     when(this.consultantService.getConsultant(anyString())).thenReturn(Optional.of(consultant));
 
     this.mobilePushNotificationService.triggerMobilePushNotification(List.of("consultant id"));
 
-    verify(this.firebasePushMessageService,
-        times(allConsultantMobileTokens.size())).pushNewMessageEvent(
-        anyString());
+    verify(this.firebasePushMessageService, times(allConsultantMobileTokens.size()))
+        .pushNewMessageEvent(anyString());
   }
-
 }

@@ -66,10 +66,7 @@ public class UserChatDTO {
   @ApiModelProperty(example = "ajsasdkjsdfkj3, 23njds9f8jhi", position = 14)
   private String[] moderators;
 
-  @JsonIgnore
-  private LocalDateTime startDateWithTime;
+  @JsonIgnore private LocalDateTime startDateWithTime;
 
-  @ApiModelProperty
-  private LastMessageDTO e2eLastMessage;
-
+  @ApiModelProperty private LastMessageDTO e2eLastMessage;
 }

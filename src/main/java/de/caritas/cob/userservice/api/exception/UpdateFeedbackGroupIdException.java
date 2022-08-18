@@ -7,11 +7,10 @@ public class UpdateFeedbackGroupIdException extends Exception {
   /**
    * Exception when the update of the feedback group id of a session fails.
    *
-   * @param message   an additional message
+   * @param message an additional message
    * @param exception the caused exception
    */
   public UpdateFeedbackGroupIdException(String message, Exception exception) {
     super(message, exception);
   }
-
 }

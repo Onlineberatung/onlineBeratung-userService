@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import de.caritas.cob.userservice.api.helper.json.OffsetDateTimeToStringSerializer;
 import de.caritas.cob.userservice.api.helper.CustomOffsetDateTime;
+import de.caritas.cob.userservice.api.helper.json.OffsetDateTimeToStringSerializer;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.AssignSessionStatisticsEventMessage;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.UserRole;
@@ -24,8 +24,8 @@ public class AssignSessionStatisticsEvent implements StatisticsEvent {
   private final @NonNull UserRole userRole;
   private final @NonNull Long sessionId;
 
-  public AssignSessionStatisticsEvent(@NonNull String userId, @NonNull UserRole userRole,
-      @NonNull Long sessionId) {
+  public AssignSessionStatisticsEvent(
+      @NonNull String userId, @NonNull UserRole userRole, @NonNull Long sessionId) {
     this.userId = userId;
     this.userRole = userRole;
     this.sessionId = sessionId;
@@ -33,24 +33,21 @@ public class AssignSessionStatisticsEvent implements StatisticsEvent {
     OBJECT_MAPPER.registerModule(buildSimpleModule());
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public EventType getEventType() {
     return EVENT_TYPE;
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   @Override
   public Optional<String> getPayload() {
-    var assignSessionStatisticsEventMessage = new AssignSessionStatisticsEventMessage()
-        .eventType(EVENT_TYPE)
-        .userId(userId)
-        .userRole(userRole)
-        .sessionId(sessionId)
-        .timestamp(CustomOffsetDateTime.nowInUtc());
+    var assignSessionStatisticsEventMessage =
+        new AssignSessionStatisticsEventMessage()
+            .eventType(EVENT_TYPE)
+            .userId(userId)
+            .userRole(userRole)
+            .sessionId(sessionId)
+            .timestamp(CustomOffsetDateTime.nowInUtc());
 
     try {
       return Optional.of(OBJECT_MAPPER.writeValueAsString(assignSessionStatisticsEventMessage));

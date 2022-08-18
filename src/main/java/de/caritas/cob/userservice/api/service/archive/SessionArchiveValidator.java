@@ -20,8 +20,7 @@ public class SessionArchiveValidator {
     if (!session.getStatus().equals(SessionStatus.IN_PROGRESS)) {
       throw new ConflictException(
           String.format(
-              "Session %s should be archived but has not status IN_PROGRESS",
-              session.getId()));
+              "Session %s should be archived but has not status IN_PROGRESS", session.getId()));
     }
   }
 
@@ -34,10 +33,7 @@ public class SessionArchiveValidator {
     if (!session.getStatus().equals(SessionStatus.IN_ARCHIVE)) {
       throw new ConflictException(
           String.format(
-              "Session %s should be archived but has not status IN_ARCHIVE",
-              session.getId()));
+              "Session %s should be archived but has not status IN_ARCHIVE", session.getId()));
     }
   }
-
 }
-

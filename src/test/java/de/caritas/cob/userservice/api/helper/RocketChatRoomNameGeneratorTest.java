@@ -31,7 +31,8 @@ public class RocketChatRoomNameGeneratorTest {
   }
 
   @Test
-  public void generateFeedbackGroupName_Should_ReturnGroupNameContainingSessionIdAndTimestampAndFeedbackIdentifier() {
+  public void
+      generateFeedbackGroupName_Should_ReturnGroupNameContainingSessionIdAndTimestampAndFeedbackIdentifier() {
 
     String groupName = rocketChatRoomNameGenerator.generateFeedbackGroupName(SESSION);
 
@@ -40,12 +41,12 @@ public class RocketChatRoomNameGeneratorTest {
   }
 
   @Test
-  public void generateGroupChatName_Should_ReturnGroupNameContainingSessionIdAndTimestampAndGroupChatIdentifier() {
+  public void
+      generateGroupChatName_Should_ReturnGroupNameContainingSessionIdAndTimestampAndGroupChatIdentifier() {
 
     String groupName = rocketChatRoomNameGenerator.generateGroupChatName(ACTIVE_CHAT);
 
     assertThat(groupName, startsWith(String.valueOf(ACTIVE_CHAT.getId())));
     assertTrue(groupName.matches("^[0-9]+_group_chat_[0-9]+"));
   }
-
 }
