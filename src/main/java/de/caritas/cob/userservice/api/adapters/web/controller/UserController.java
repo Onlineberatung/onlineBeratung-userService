@@ -55,6 +55,7 @@ import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
+import de.caritas.cob.userservice.api.facade.AssignChatFacade;
 import de.caritas.cob.userservice.api.facade.CreateChatFacade;
 import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
 import de.caritas.cob.userservice.api.facade.CreateNewConsultingTypeFacade;
@@ -152,6 +153,7 @@ public class UserController implements UsersApi {
   private final @NotNull StartChatFacade startChatFacade;
   private final @NotNull GetChatFacade getChatFacade;
   private final @NotNull JoinAndLeaveChatFacade joinAndLeaveChatFacade;
+  private final @NotNull AssignChatFacade assignChatFacade;
   private final @NotNull CreateChatFacade createChatFacade;
   private final @NotNull StopChatFacade stopChatFacade;
   private final @NotNull GetChatMembersFacade getChatMembersFacade;
@@ -910,8 +912,8 @@ public class UserController implements UsersApi {
   }
 
   /**
-   * Creates a new chat and agency_chat assignment with the given details and returns the generated
-   * chat link.
+   * Creates a new chat with the given details and returns the generated chat link.
+   * <p>The old version (v1) assumed, that the consultant is assigned to exactly one agency.
    *
    * @param chatDTO {@link ChatDTO} (required)
    * @return {@link ResponseEntity} containing {@link CreateChatResponseDTO}
@@ -927,8 +929,8 @@ public class UserController implements UsersApi {
 
   /**
    * Creates a new chat with the given details and returns the generated chat link.
-   * <p>The new version (v2) creates only the chat and the advice seekers can be invited in a
-   * separate step.
+   * <p>The new version (v2) creates chat_agency relations for all agencies the consultant is
+   * assigned, but ignores the consulting_type stored in the chat.
    *
    * @param chatDTO {@link ChatDTO} (required)
    * @return {@link ResponseEntity} containing {@link CreateChatResponseDTO}
@@ -977,6 +979,14 @@ public class UserController implements UsersApi {
         });
 
     return new ResponseEntity<>(response, HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<Void> assignChat(Long chatId) {
+
+    assignChatFacade.assignChat(chatId, authenticatedUser);
+
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   /**

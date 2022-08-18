@@ -68,6 +68,10 @@ public class PathConstants {
   public static final String PATH_PUT_CHAT_START = "/users/chat/" + CHAT_ID + "/start";
   public static final String PATH_PUT_CHAT_START_WITH_INVALID_PATH_PARAMS =
       "/users/chat/" + INVALID_CHAT_ID + "/start";
+  public static final String PATH_PUT_ASSIGN_CHAT_WITH_INVALID_PATH_PARAMS =
+      "/users/chat/" + INVALID_CHAT_ID + "/assign";
+  public static final String PATH_PUT_ASSIGN_CHAT =
+      "/users/chat/" + CHAT_ID + "/assign";
   public static final String PATH_PUT_JOIN_CHAT = "/users/chat/" + CHAT_ID + "/join";
   public static final String PATH_PUT_JOIN_CHAT_WITH_INVALID_PATH_PARAMS =
       "/users/chat/" + INVALID_CHAT_ID + "/join";
