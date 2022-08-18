@@ -419,17 +419,20 @@ public class TestConstants {
   /*
    * ConsultantAgency
    */
-  public static final ConsultantAgency[] CONSULTANT_AGENCY = new ConsultantAgency[]{
+
+  public static final ConsultantAgency CONSULTANT_AGENCY_1 =
       new ConsultantAgency(1L, CONSULTANT, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc(), null,
-          null)};
+          null);
   public static final ConsultantAgency CONSULTANT_AGENCY_2 =
       new ConsultantAgency(2L, CONSULTANT, AGENCY_ID_2, nowInUtc(), nowInUtc(), nowInUtc(), null,
           null);
-  public static final Set<ConsultantAgency> CONSULTANT_AGENCY_SET =
-      new HashSet<>(Arrays.asList(CONSULTANT_AGENCY));
+  public static final ConsultantAgency[] CONSULTANT_AGENCIES = new ConsultantAgency[]{
+      CONSULTANT_AGENCY_1, CONSULTANT_AGENCY_2};
+  public static final Set<ConsultantAgency> CONSULTANT_AGENCIES_SET =
+      new HashSet<>(Arrays.asList(CONSULTANT_AGENCIES));
   public static final Consultant CONSULTANT_WITH_AGENCY = new Consultant(CONSULTANT_ID,
       ROCKETCHAT_ID, USERNAME, "first name", "last name", EMAIL, false, false, "absent", false,
-      null, null, null, new HashSet<>(Arrays.asList(CONSULTANT_AGENCY)), null, null,
+      null, null, null, new HashSet<>(Arrays.asList(CONSULTANT_AGENCIES)), null, null,
       null, null, true, true, true, true, null, null, ConsultantStatus.CREATED, false,
       LanguageCode.de);
   public static final Consultant CONSULTANT_WITH_AGENCY_2 = new Consultant(CONSULTANT_ID_2,
