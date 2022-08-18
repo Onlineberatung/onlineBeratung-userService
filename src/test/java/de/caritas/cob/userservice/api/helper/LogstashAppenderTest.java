@@ -10,18 +10,14 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.encoder.Encoder;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.concurrent.TimeUnit;
 import lombok.Setter;
 import net.logstash.logback.encoder.StreamingEncoder;
-
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,8 +25,7 @@ class LogstashAppenderTest {
 
   private static final int LOG_BUFFER_SIZE = 2;
 
-  @InjectMocks
-  TestableLogstashAppender logstashAppender = getTestableLogstashAppender();
+  @InjectMocks TestableLogstashAppender logstashAppender = getTestableLogstashAppender();
 
   private TestableLogstashAppender getTestableLogstashAppender() {
     TestableLogstashAppender testableLogstashAppender = new TestableLogstashAppender();
@@ -38,23 +33,22 @@ class LogstashAppenderTest {
     return testableLogstashAppender;
   }
 
-  @Mock
-  CloseableHttpClient closeableHttpClientMock;
+  @Mock CloseableHttpClient closeableHttpClientMock;
 
-  @Mock
-  CustomStreamingEncoder streamingEncoder;
+  @Mock CustomStreamingEncoder streamingEncoder;
 
-  @Mock
-  ILoggingEvent loggingEvent;
+  @Mock ILoggingEvent loggingEvent;
 
   @Test
-  void append_Should_callLogbackEndpointIfNumberOfLogsExceedBufferSize() throws IOException, InterruptedException {
+  void append_Should_callLogbackEndpointIfNumberOfLogsExceedBufferSize()
+      throws IOException, InterruptedException {
     // when
     logstashAppender.append(loggingEvent);
     logstashAppender.append(loggingEvent);
     logstashAppender.append(loggingEvent);
     // then
-    verify(streamingEncoder, timeout(1000).times(3)).encode(eq(loggingEvent), any(OutputStream.class));
+    verify(streamingEncoder, timeout(1000).times(3))
+        .encode(eq(loggingEvent), any(OutputStream.class));
     verify(closeableHttpClientMock, timeout(1000).times(2)).execute(any(HttpPut.class));
   }
 
@@ -85,7 +79,5 @@ class LogstashAppenderTest {
     }
   }
 
-  private interface CustomStreamingEncoder extends Encoder, StreamingEncoder {
-
-  }
+  private interface CustomStreamingEncoder extends Encoder, StreamingEncoder {}
 }

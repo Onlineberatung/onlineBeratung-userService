@@ -10,9 +10,7 @@ import org.jsoup.nodes.Document.OutputSettings;
 import org.jsoup.safety.Whitelist;
 import org.springframework.stereotype.Component;
 
-/**
- * Helper class
- */
+/** Helper class */
 @Component
 public class Helper {
 
@@ -62,5 +60,4 @@ public class Helper {
       return null;
     }
   }
-
 }

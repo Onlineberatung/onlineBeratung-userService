@@ -6,10 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * {@link ExtendedConsultingTypeResponseDTO} for registration
- */
-
+/** {@link ExtendedConsultingTypeResponseDTO} for registration */
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter

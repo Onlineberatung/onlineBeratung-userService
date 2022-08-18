@@ -7,9 +7,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.ViolationDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ViolationDTO.ViolationTypeEnum;
 import de.caritas.cob.userservice.api.model.Consultant;
 
-/**
- * Builder to create a {@link ViolationDTO} based on a {@link Consultant}.
- */
+/** Builder to create a {@link ViolationDTO} based on a {@link Consultant}. */
 public class ViolationByConsultantBuilder {
 
   private final Consultant consultant;
@@ -55,9 +53,6 @@ public class ViolationByConsultantBuilder {
   }
 
   private AdditionalInformationDTO additionalInformation(String key, String value) {
-    return new AdditionalInformationDTO()
-        .name(key)
-        .value(value);
+    return new AdditionalInformationDTO().name(key).value(value);
   }
-
 }

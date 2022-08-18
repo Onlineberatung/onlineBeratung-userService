@@ -9,9 +9,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-/**
- * Facade to encapsulate the gathering of user statistics
- */
+/** Facade to encapsulate the gathering of user statistics */
 @Service
 @RequiredArgsConstructor
 public class UsersStatisticsFacade {
@@ -23,7 +21,8 @@ public class UsersStatisticsFacade {
   public RegistrationStatisticsListResponseDTO getRegistrationStatistics() {
 
     List<Session> sessions = sessionService.findAllSessions();
-    RegistrationStatisticsResponseDTOConverter converter = new RegistrationStatisticsResponseDTOConverter(topicService.getAllTopicsMap());
+    RegistrationStatisticsResponseDTOConverter converter =
+        new RegistrationStatisticsResponseDTOConverter(topicService.getAllTopicsMap());
     return converter.convert(sessions);
   }
 }

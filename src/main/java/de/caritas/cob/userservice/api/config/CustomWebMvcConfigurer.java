@@ -22,7 +22,8 @@ public class CustomWebMvcConfigurer implements WebMvcConfigurer {
 
   @Override
   public void addResourceHandlers(ResourceHandlerRegistry registry) {
-    registry.addResourceHandler(docuPath + "/**")
+    registry
+        .addResourceHandler(docuPath + "/**")
         .addResourceLocations("classpath:/META-INF/resources/");
   }
 
@@ -32,7 +33,8 @@ public class CustomWebMvcConfigurer implements WebMvcConfigurer {
   }
 
   private void addCorsMapping(CorsRegistry registry, String path) {
-    registry.addMapping(path)
+    registry
+        .addMapping(path)
         .allowCredentials(true)
         .allowedMethods("OPTIONS", "POST")
         .allowedOrigins(allowedOrigins);

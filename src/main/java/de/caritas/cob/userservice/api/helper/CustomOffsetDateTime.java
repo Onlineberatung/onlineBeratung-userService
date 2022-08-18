@@ -16,5 +16,4 @@ public class CustomOffsetDateTime {
   public static OffsetDateTime nowInUtc() {
     return OffsetDateTime.now(ZoneOffset.UTC);
   }
-
 }

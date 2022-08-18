@@ -47,5 +47,4 @@ public class UserTest {
 
     assertThat(equals, is(true));
   }
-
 }

@@ -19,9 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-/**
- * Action to post a conversation finished alias message in rocket chat via the message service.
- */
+/** Action to post a conversation finished alias message in rocket chat via the message service. */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -31,7 +29,6 @@ public class PostConversationFinishedAliasMessageActionCommand implements Action
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
   private final @NonNull TenantHeaderSupplier tenantHeaderSupplier;
   private final @NonNull IdentityClient identityClient;
-
 
   @Value("${keycloakService.technical.username}")
   private String keycloakTechnicalUsername;
@@ -49,7 +46,8 @@ public class PostConversationFinishedAliasMessageActionCommand implements Action
     if (nonNull(actionTarget) && isNotBlank(actionTarget.getGroupId())) {
       try {
         addDefaultHeaders(messageControllerApi.getApiClient());
-        this.messageControllerApi.saveAliasOnlyMessage(actionTarget.getGroupId(),
+        this.messageControllerApi.saveAliasOnlyMessage(
+            actionTarget.getGroupId(),
             new AliasOnlyMessageDTO().messageType(FINISHED_CONVERSATION));
       } catch (Exception e) {
         log.error("Unable to post conversation finished message");
@@ -59,11 +57,11 @@ public class PostConversationFinishedAliasMessageActionCommand implements Action
   }
 
   private void addDefaultHeaders(ApiClient apiClient) {
-    var keycloakLoginResponseDTO = identityClient.loginUser(
-        keycloakTechnicalUsername, keycloakTechnicalPassword
-    );
-    var headers = this.securityHeaderSupplier
-        .getKeycloakAndCsrfHttpHeaders(keycloakLoginResponseDTO.getAccessToken());
+    var keycloakLoginResponseDTO =
+        identityClient.loginUser(keycloakTechnicalUsername, keycloakTechnicalPassword);
+    var headers =
+        this.securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders(
+            keycloakLoginResponseDTO.getAccessToken());
     tenantHeaderSupplier.addTenantHeader(headers);
     headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
   }

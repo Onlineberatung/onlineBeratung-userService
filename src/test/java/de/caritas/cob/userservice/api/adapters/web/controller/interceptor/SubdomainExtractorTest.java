@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.adapters.web.controller.interceptor;
 
-
 import static java.util.Optional.of;
 
 import java.net.URISyntaxException;
@@ -16,8 +15,7 @@ class SubdomainExtractorTest {
   private static final String MUCOVISCIDOSE = "mucoviscidose";
   private static final String ONLINBEBERATUNG_DE = ".onlineberatung.de";
 
-  @InjectMocks
-  SubdomainExtractor subdomainExtractor;
+  @InjectMocks SubdomainExtractor subdomainExtractor;
 
   @Test
   void resolveSubdomain_Should_resolveSubdomain() throws URISyntaxException {
@@ -33,8 +31,7 @@ class SubdomainExtractorTest {
     // given
     String url = "compound.subdomain" + ONLINBEBERATUNG_DE;
     // when, then
-    AssertionsForClassTypes.assertThat(subdomainExtractor.getSubdomain(url)).isEqualTo(
-        of("compound"));
+    AssertionsForClassTypes.assertThat(subdomainExtractor.getSubdomain(url))
+        .isEqualTo(of("compound"));
   }
-
 }

@@ -22,8 +22,9 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
 
   @Override
   @SuppressWarnings("NullableProblems")
-  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-      FilterChain chain) throws ServletException, IOException {
+  protected void doFilterInternal(
+      HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+      throws ServletException, IOException {
 
     var correlationId = request.getHeader(HEADER_NAME);
 

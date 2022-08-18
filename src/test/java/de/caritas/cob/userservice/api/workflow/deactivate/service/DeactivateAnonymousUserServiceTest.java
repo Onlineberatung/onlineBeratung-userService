@@ -16,11 +16,11 @@ import de.caritas.cob.userservice.api.actions.session.PostConversationFinishedAl
 import de.caritas.cob.userservice.api.actions.session.SendFinishedAnonymousConversationEventActionCommand;
 import de.caritas.cob.userservice.api.actions.session.SetRocketChatRoomReadOnlyActionCommand;
 import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
-import de.caritas.cob.userservice.api.model.Session.RegistrationType;
 import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.port.out.SessionRepository;
+import de.caritas.cob.userservice.api.model.Session.RegistrationType;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,21 +43,18 @@ class DeactivateAnonymousUserServiceTest {
 
   private static final int DEACTIVATE_PERIOD_MINUTES = 360;
 
-  @InjectMocks
-  private DeactivateAnonymousUserService deactivateAnonymousUserService;
+  @InjectMocks private DeactivateAnonymousUserService deactivateAnonymousUserService;
 
-  @Mock
-  private SessionRepository sessionRepository;
+  @Mock private SessionRepository sessionRepository;
 
-  @Mock
-  private ActionsRegistry actionsRegistry;
+  @Mock private ActionsRegistry actionsRegistry;
 
   private final ActionCommandMockProvider commandMockProvider = new ActionCommandMockProvider();
 
   @BeforeEach
   public void setUp() {
-    ReflectionTestUtils.setField(deactivateAnonymousUserService, "deactivatePeriodMinutes",
-        DEACTIVATE_PERIOD_MINUTES);
+    ReflectionTestUtils.setField(
+        deactivateAnonymousUserService, "deactivatePeriodMinutes", DEACTIVATE_PERIOD_MINUTES);
   }
 
   @Test
@@ -83,8 +80,8 @@ class DeactivateAnonymousUserServiceTest {
     this.deactivateAnonymousUserService.deactivateStaleAnonymousUsers();
 
     verify(this.sessionRepository, times(1))
-        .findByStatusInAndRegistrationType(Set.of(SessionStatus.NEW, SessionStatus.IN_PROGRESS),
-            RegistrationType.ANONYMOUS);
+        .findByStatusInAndRegistrationType(
+            Set.of(SessionStatus.NEW, SessionStatus.IN_PROGRESS), RegistrationType.ANONYMOUS);
     verify(this.actionsRegistry, atLeastOnce()).buildContainerForType(User.class);
     verify(this.actionsRegistry, atLeastOnce()).buildContainerForType(Session.class);
     verifyNoMoreInteractions(deactivateUserAction, deactivateSessionAction);
@@ -99,9 +96,10 @@ class DeactivateAnonymousUserServiceTest {
   private void whenSessionRepositoryFindByStatus_ThenReturnUserSessionsWithStatus(
       SessionStatus... sessionStatus) {
     var user = new User();
-    var userSessions = Stream.of(sessionStatus)
-        .map(createSessionForUserWithUpdateDateNow(user))
-        .collect(Collectors.toSet());
+    var userSessions =
+        Stream.of(sessionStatus)
+            .map(createSessionForUserWithUpdateDateNow(user))
+            .collect(Collectors.toSet());
     user.setSessions(userSessions);
 
     when(this.sessionRepository.findByStatusInAndRegistrationType(any(), any()))
@@ -112,13 +110,13 @@ class DeactivateAnonymousUserServiceTest {
     return createSessionForUserWithUpdateDate(user, LocalDateTime.now());
   }
 
-  private Function<SessionStatus, Session> createSessionForUserWithUpdateDate(User user,
-      LocalDateTime sessionUpdateDate) {
+  private Function<SessionStatus, Session> createSessionForUserWithUpdateDate(
+      User user, LocalDateTime sessionUpdateDate) {
     return (sessionStatus) -> createSessionForUser(user, sessionUpdateDate, sessionStatus);
   }
 
-  private Session createSessionForUser(User user, LocalDateTime updateDate,
-      SessionStatus sessionStatus) {
+  private Session createSessionForUser(
+      User user, LocalDateTime updateDate, SessionStatus sessionStatus) {
     Session session = new Session();
     session.setId((long) sessionStatus.getValue());
     session.setUpdateDate(updateDate);
@@ -130,8 +128,9 @@ class DeactivateAnonymousUserServiceTest {
 
   @ParameterizedTest
   @MethodSource("createUpdateDatesWithinDeactivationPeriod")
-  void deactivateStaleAnonymousUsers_Should_notPerformAnyDeactivation_When_sessionsAreInProgressWithinDeactivatePeriod(
-      LocalDateTime updateDate) {
+  void
+      deactivateStaleAnonymousUsers_Should_notPerformAnyDeactivation_When_sessionsAreInProgressWithinDeactivatePeriod(
+          LocalDateTime updateDate) {
     var user = createUserWithSingleSession(updateDate);
     when(this.sessionRepository.findByStatusInAndRegistrationType(any(), any()))
         .thenReturn(new ArrayList<>(user.getSessions()));
@@ -145,8 +144,8 @@ class DeactivateAnonymousUserServiceTest {
     this.deactivateAnonymousUserService.deactivateStaleAnonymousUsers();
 
     verify(this.sessionRepository, times(1))
-        .findByStatusInAndRegistrationType(Set.of(SessionStatus.NEW, SessionStatus.IN_PROGRESS),
-            RegistrationType.ANONYMOUS);
+        .findByStatusInAndRegistrationType(
+            Set.of(SessionStatus.NEW, SessionStatus.IN_PROGRESS), RegistrationType.ANONYMOUS);
     verify(this.actionsRegistry, atLeastOnce()).buildContainerForType(User.class);
     verify(this.actionsRegistry, atLeastOnce()).buildContainerForType(Session.class);
     verifyNoMoreInteractions(deactivateUserAction, deactivateSessionAction);
@@ -154,9 +153,8 @@ class DeactivateAnonymousUserServiceTest {
 
   private static List<LocalDateTime> createUpdateDatesWithinDeactivationPeriod() {
     LocalDateTime now = LocalDateTime.now();
-    LocalDateTime oneSecondWithinDeletionPeriod = now
-        .minusMinutes(DEACTIVATE_PERIOD_MINUTES)
-        .plusSeconds(10);
+    LocalDateTime oneSecondWithinDeletionPeriod =
+        now.minusMinutes(DEACTIVATE_PERIOD_MINUTES).plusSeconds(10);
     LocalDateTime timeInTheFuture = now.plusSeconds(20);
 
     return List.of(now, oneSecondWithinDeletionPeriod, timeInTheFuture);
@@ -172,8 +170,9 @@ class DeactivateAnonymousUserServiceTest {
 
   @ParameterizedTest
   @MethodSource("createOverdueUpdateDates")
-  void deactivateStaleAnonymousUsers_Should_callUserAndSessionDeactivateActions_When_userSessionsAreInProgressForTooLong(
-      LocalDateTime overdueUpdateDate) {
+  void
+      deactivateStaleAnonymousUsers_Should_callUserAndSessionDeactivateActions_When_userSessionsAreInProgressForTooLong(
+          LocalDateTime overdueUpdateDate) {
     var user = createUserWithSingleSession(overdueUpdateDate);
 
     when(this.sessionRepository.findByStatusInAndRegistrationType(any(), any()))
@@ -188,31 +187,41 @@ class DeactivateAnonymousUserServiceTest {
     this.deactivateAnonymousUserService.deactivateStaleAnonymousUsers();
 
     verify(this.sessionRepository, times(1))
-        .findByStatusInAndRegistrationType(Set.of(SessionStatus.NEW, SessionStatus.IN_PROGRESS),
-            RegistrationType.ANONYMOUS);
+        .findByStatusInAndRegistrationType(
+            Set.of(SessionStatus.NEW, SessionStatus.IN_PROGRESS), RegistrationType.ANONYMOUS);
     verify(this.actionsRegistry, atLeastOnce()).buildContainerForType(User.class);
     verify(this.actionsRegistry, atLeastOnce()).buildContainerForType(Session.class);
     verify(deactivateUserAction, times(1)).execute(user);
-    user.getSessions().forEach(session -> {
-      verify(this.commandMockProvider.getActionMock(DeactivateSessionActionCommand.class), times(1))
-          .execute(session);
-      verify(this.commandMockProvider.getActionMock(SetRocketChatRoomReadOnlyActionCommand.class),
-          times(1)).execute(session);
-      verify(this.commandMockProvider.getActionMock(
-          SendFinishedAnonymousConversationEventActionCommand.class), times(1)).execute(session);
-      verify(this.commandMockProvider
-          .getActionMock(PostConversationFinishedAliasMessageActionCommand.class), times(1))
-          .execute(session);
-    });
+    user.getSessions()
+        .forEach(
+            session -> {
+              verify(
+                      this.commandMockProvider.getActionMock(DeactivateSessionActionCommand.class),
+                      times(1))
+                  .execute(session);
+              verify(
+                      this.commandMockProvider.getActionMock(
+                          SetRocketChatRoomReadOnlyActionCommand.class),
+                      times(1))
+                  .execute(session);
+              verify(
+                      this.commandMockProvider.getActionMock(
+                          SendFinishedAnonymousConversationEventActionCommand.class),
+                      times(1))
+                  .execute(session);
+              verify(
+                      this.commandMockProvider.getActionMock(
+                          PostConversationFinishedAliasMessageActionCommand.class),
+                      times(1))
+                  .execute(session);
+            });
   }
 
   private static List<LocalDateTime> createOverdueUpdateDates() {
     LocalDateTime now = LocalDateTime.now();
-    LocalDateTime oneDeletionPeriodAgo = now
-        .minusMinutes(DEACTIVATE_PERIOD_MINUTES);
+    LocalDateTime oneDeletionPeriodAgo = now.minusMinutes(DEACTIVATE_PERIOD_MINUTES);
     LocalDateTime timeLongInThePast = oneDeletionPeriodAgo.minusMinutes(10);
 
     return List.of(oneDeletionPeriodAgo, timeLongInThePast);
   }
-
 }

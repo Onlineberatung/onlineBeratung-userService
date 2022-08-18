@@ -3,20 +3,18 @@ package de.caritas.cob.userservice.api.workflow.delete.action;
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import de.caritas.cob.userservice.api.workflow.delete.model.DeletionSourceType;
-import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteUserException;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteUserException;
+import de.caritas.cob.userservice.api.workflow.delete.model.DeletionSourceType;
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionTargetType;
+import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-/**
- * Action to delete a user account in Rocker.Chat.
- */
+/** Action to delete a user account in Rocker.Chat. */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -32,8 +30,11 @@ public abstract class DeleteRocketChatUserAction {
     }
   }
 
-  protected void appendErrorsForSourceType(List<DeletionWorkflowError> workflowErrors,
-      DeletionSourceType deletionSourceType, String rcUserId, Exception e) {
+  protected void appendErrorsForSourceType(
+      List<DeletionWorkflowError> workflowErrors,
+      DeletionSourceType deletionSourceType,
+      String rcUserId,
+      Exception e) {
     log.error("UserService delete workflow error: ", e);
     workflowErrors.add(
         DeletionWorkflowError.builder()
@@ -42,8 +43,6 @@ public abstract class DeleteRocketChatUserAction {
             .identifier(rcUserId)
             .reason(ERROR_REASON)
             .timestamp(nowInUtc())
-            .build()
-    );
+            .build());
   }
-
 }

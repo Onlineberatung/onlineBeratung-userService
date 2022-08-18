@@ -9,12 +9,12 @@ public class CreateMonitoringException extends CreateEnquiryException {
   /**
    * Exception when creating the initial monitoring fails
    *
-   * @param message              Error Message
-   * @param exception            Exception
+   * @param message Error Message
+   * @param exception Exception
    * @param exceptionInformation {@link CreateEnquiryExceptionInformation}
    */
-  public CreateMonitoringException(String message, Exception exception,
-      CreateEnquiryExceptionInformation exceptionInformation) {
+  public CreateMonitoringException(
+      String message, Exception exception, CreateEnquiryExceptionInformation exceptionInformation) {
     super(message, exception, exceptionInformation);
   }
 }

@@ -18,15 +18,15 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteGroupException;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.out.MonitoringRepository;
+import de.caritas.cob.userservice.api.port.out.SessionDataRepository;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.workflow.delete.model.AskerDeletionWorkflowDTO;
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteGroupException;
-import de.caritas.cob.userservice.api.port.out.MonitoringRepository;
-import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.port.out.SessionRepository;
-import de.caritas.cob.userservice.api.port.out.SessionDataRepository;
-import de.caritas.cob.userservice.api.model.User;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,23 +42,17 @@ import org.slf4j.Logger;
 @RunWith(MockitoJUnitRunner.class)
 public class DeleteAskerRoomsAndSessionsActionTest {
 
-  @InjectMocks
-  private DeleteAskerRoomsAndSessionsAction deleteAskerRoomsAndSessionsAction;
+  @InjectMocks private DeleteAskerRoomsAndSessionsAction deleteAskerRoomsAndSessionsAction;
 
-  @Mock
-  private SessionRepository sessionRepository;
+  @Mock private SessionRepository sessionRepository;
 
-  @Mock
-  private SessionDataRepository sessionDataRepository;
+  @Mock private SessionDataRepository sessionDataRepository;
 
-  @Mock
-  private MonitoringRepository monitoringRepository;
+  @Mock private MonitoringRepository monitoringRepository;
 
-  @Mock
-  private RocketChatService rocketChatService;
+  @Mock private RocketChatService rocketChatService;
 
-  @Mock
-  private Logger logger;
+  @Mock private Logger logger;
 
   @Before
   public void setup() {
@@ -73,13 +67,14 @@ public class DeleteAskerRoomsAndSessionsActionTest {
     List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
 
     assertThat(workflowErrors, hasSize(0));
-    verifyNoMoreInteractions(this.sessionDataRepository, this.monitoringRepository,
-        this.rocketChatService, this.logger);
+    verifyNoMoreInteractions(
+        this.sessionDataRepository, this.monitoringRepository, this.rocketChatService, this.logger);
   }
 
   @Test
-  public void execute_Should_returnEmptyListAndPerformAllDeletions_When_userSessionIsDeletedSuccessful()
-      throws Exception {
+  public void
+      execute_Should_returnEmptyListAndPerformAllDeletions_When_userSessionIsDeletedSuccessful()
+          throws Exception {
     Session session = new EasyRandom().nextObject(Session.class);
     when(this.sessionRepository.findByUser(any())).thenReturn(singletonList(session));
     AskerDeletionWorkflowDTO workflowDTO = new AskerDeletionWorkflowDTO(new User(), emptyList());
@@ -98,17 +93,19 @@ public class DeleteAskerRoomsAndSessionsActionTest {
   }
 
   @Test
-  public void execute_Should_returnExpectedWorkflowErrors_When_noUserSessionDeletedStepIsSuccessful()
-      throws Exception {
+  public void
+      execute_Should_returnExpectedWorkflowErrors_When_noUserSessionDeletedStepIsSuccessful()
+          throws Exception {
     Session session = new EasyRandom().nextObject(Session.class);
     when(this.sessionRepository.findByUser(any())).thenReturn(singletonList(session));
-    doThrow(new RocketChatDeleteGroupException(new RuntimeException())).when(this.rocketChatService)
+    doThrow(new RocketChatDeleteGroupException(new RuntimeException()))
+        .when(this.rocketChatService)
         .deleteGroupAsTechnicalUser(any());
     doThrow(new RuntimeException()).when(this.monitoringRepository).deleteAll(any());
     doThrow(new RuntimeException()).when(this.sessionDataRepository).deleteAll(any());
     doThrow(new RuntimeException()).when(this.sessionRepository).delete(any());
-    AskerDeletionWorkflowDTO workflowDTO = new AskerDeletionWorkflowDTO(new User(),
-        new ArrayList<>());
+    AskerDeletionWorkflowDTO workflowDTO =
+        new AskerDeletionWorkflowDTO(new User(), new ArrayList<>());
 
     this.deleteAskerRoomsAndSessionsAction.execute(workflowDTO);
     List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
@@ -120,16 +117,17 @@ public class DeleteAskerRoomsAndSessionsActionTest {
   @Test
   public void execute_Should_returnExpectedAmountOfWorkflowErrors_When_manySessionDeletionsFailed()
       throws Exception {
-    List<Session> sessions = new EasyRandom().objects(Session.class, 3)
-        .collect(Collectors.toList());
+    List<Session> sessions =
+        new EasyRandom().objects(Session.class, 3).collect(Collectors.toList());
     when(this.sessionRepository.findByUser(any())).thenReturn(sessions);
-    doThrow(new RocketChatDeleteGroupException(new RuntimeException())).when(this.rocketChatService)
+    doThrow(new RocketChatDeleteGroupException(new RuntimeException()))
+        .when(this.rocketChatService)
         .deleteGroupAsTechnicalUser(any());
     doThrow(new RuntimeException()).when(this.monitoringRepository).deleteAll(any());
     doThrow(new RuntimeException()).when(this.sessionDataRepository).deleteAll(any());
     doThrow(new RuntimeException()).when(this.sessionRepository).delete(any());
-    AskerDeletionWorkflowDTO workflowDTO = new AskerDeletionWorkflowDTO(new User(),
-        new ArrayList<>());
+    AskerDeletionWorkflowDTO workflowDTO =
+        new AskerDeletionWorkflowDTO(new User(), new ArrayList<>());
 
     this.deleteAskerRoomsAndSessionsAction.execute(workflowDTO);
     List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
@@ -143,10 +141,11 @@ public class DeleteAskerRoomsAndSessionsActionTest {
       throws Exception {
     Session session = new EasyRandom().nextObject(Session.class);
     when(this.sessionRepository.findByUser(any())).thenReturn(singletonList(session));
-    doThrow(new RocketChatDeleteGroupException(new RuntimeException())).when(this.rocketChatService)
+    doThrow(new RocketChatDeleteGroupException(new RuntimeException()))
+        .when(this.rocketChatService)
         .deleteGroupAsTechnicalUser(any());
-    AskerDeletionWorkflowDTO workflowDTO = new AskerDeletionWorkflowDTO(new User(),
-        new ArrayList<>());
+    AskerDeletionWorkflowDTO workflowDTO =
+        new AskerDeletionWorkflowDTO(new User(), new ArrayList<>());
 
     this.deleteAskerRoomsAndSessionsAction.execute(workflowDTO);
     List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
@@ -170,8 +169,8 @@ public class DeleteAskerRoomsAndSessionsActionTest {
     Session session = new EasyRandom().nextObject(Session.class);
     when(this.sessionRepository.findByUser(any())).thenReturn(singletonList(session));
     doThrow(new RuntimeException()).when(this.monitoringRepository).deleteAll(any());
-    AskerDeletionWorkflowDTO workflowDTO = new AskerDeletionWorkflowDTO(new User(),
-        new ArrayList<>());
+    AskerDeletionWorkflowDTO workflowDTO =
+        new AskerDeletionWorkflowDTO(new User(), new ArrayList<>());
 
     this.deleteAskerRoomsAndSessionsAction.execute(workflowDTO);
     List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
@@ -190,8 +189,8 @@ public class DeleteAskerRoomsAndSessionsActionTest {
     Session session = new EasyRandom().nextObject(Session.class);
     when(this.sessionRepository.findByUser(any())).thenReturn(singletonList(session));
     doThrow(new RuntimeException()).when(this.sessionDataRepository).deleteAll(any());
-    AskerDeletionWorkflowDTO workflowDTO = new AskerDeletionWorkflowDTO(new User(),
-        new ArrayList<>());
+    AskerDeletionWorkflowDTO workflowDTO =
+        new AskerDeletionWorkflowDTO(new User(), new ArrayList<>());
 
     this.deleteAskerRoomsAndSessionsAction.execute(workflowDTO);
     List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
@@ -210,8 +209,8 @@ public class DeleteAskerRoomsAndSessionsActionTest {
     Session session = new EasyRandom().nextObject(Session.class);
     when(this.sessionRepository.findByUser(any())).thenReturn(singletonList(session));
     doThrow(new RuntimeException()).when(this.sessionRepository).delete(any());
-    AskerDeletionWorkflowDTO workflowDTO = new AskerDeletionWorkflowDTO(new User(),
-        new ArrayList<>());
+    AskerDeletionWorkflowDTO workflowDTO =
+        new AskerDeletionWorkflowDTO(new User(), new ArrayList<>());
 
     this.deleteAskerRoomsAndSessionsAction.execute(workflowDTO);
     List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
@@ -224,5 +223,4 @@ public class DeleteAskerRoomsAndSessionsActionTest {
     assertThat(workflowErrors.get(0).getReason(), is("Unable to delete session"));
     assertThat(workflowErrors.get(0).getTimestamp(), notNullValue());
   }
-
 }

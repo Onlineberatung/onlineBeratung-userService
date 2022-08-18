@@ -27,9 +27,9 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.model.ConsultantMobileToken;
 import de.caritas.cob.userservice.api.port.out.ConsultantMobileTokenRepository;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import java.util.Collections;
 import java.util.Optional;
@@ -45,20 +45,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ConsultantServiceTest {
 
-  @InjectMocks
-  private ConsultantService consultantService;
+  @InjectMocks private ConsultantService consultantService;
 
-  @Mock
-  private ConsultantRepository consultantRepository;
+  @Mock private ConsultantRepository consultantRepository;
 
-  @Mock
-  private ConsultantMobileTokenRepository consultantMobileTokenRepository;
+  @Mock private ConsultantMobileTokenRepository consultantMobileTokenRepository;
 
-  @Mock
-  private ValidatedUserAccountProvider validatedUserAccountProvider;
+  @Mock private ValidatedUserAccountProvider validatedUserAccountProvider;
 
-  @Mock
-  private AuthenticatedUser authenticatedUser;
+  @Mock private AuthenticatedUser authenticatedUser;
 
   @Test
   void getConsultant_Should_ReturnConsultantWhenFound() {
@@ -69,7 +64,6 @@ class ConsultantServiceTest {
 
     assertTrue(result.isPresent());
     assertEquals(CONSULTANT, result.get());
-
   }
 
   @Test
@@ -81,7 +75,6 @@ class ConsultantServiceTest {
 
     assertTrue(result.isPresent());
     assertEquals(CONSULTANT, result.get());
-
   }
 
   @Test
@@ -93,7 +86,6 @@ class ConsultantServiceTest {
 
     assertTrue(result.isPresent());
     assertEquals(CONSULTANT, result.get());
-
   }
 
   @Test
@@ -105,7 +97,6 @@ class ConsultantServiceTest {
 
     assertTrue(result.isPresent());
     assertEquals(CONSULTANT, result.get());
-
   }
 
   @Test
@@ -117,11 +108,11 @@ class ConsultantServiceTest {
     var result = consultantService.findConsultantByUsernameOrEmail(USERNAME_DECODED, EMAIL);
 
     assertFalse(result.isPresent());
-
   }
 
   @Test
-  void findConsultantByUsernameOrEmail_Should_ReturnConsultantOptional_WhenConsultantIsFoundByDecodedUsername() {
+  void
+      findConsultantByUsernameOrEmail_Should_ReturnConsultantOptional_WhenConsultantIsFoundByDecodedUsername() {
     when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_DECODED))
         .thenReturn(Optional.of(CONSULTANT));
 
@@ -129,11 +120,11 @@ class ConsultantServiceTest {
 
     assertTrue(result.isPresent());
     assertEquals(CONSULTANT, result.get());
-
   }
 
   @Test
-  void findConsultantByUsernameOrEmail_Should_ReturnConsultantOptional_WhenConsultantIsFoundByEncodedUsername() {
+  void
+      findConsultantByUsernameOrEmail_Should_ReturnConsultantOptional_WhenConsultantIsFoundByEncodedUsername() {
     when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_DECODED))
         .thenReturn(Optional.empty());
     when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_ENCODED))
@@ -143,11 +134,11 @@ class ConsultantServiceTest {
 
     assertTrue(result.isPresent());
     assertEquals(CONSULTANT, result.get());
-
   }
 
   @Test
-  void findConsultantByUsernameOrEmail_Should_ReturnConsultantOptional_WhenConsultantIsFoundByEmail() {
+  void
+      findConsultantByUsernameOrEmail_Should_ReturnConsultantOptional_WhenConsultantIsFoundByEmail() {
     when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_DECODED))
         .thenReturn(Optional.empty());
     when(consultantRepository.findByUsernameAndDeleteDateIsNull(USERNAME_ENCODED))
@@ -159,7 +150,6 @@ class ConsultantServiceTest {
 
     assertTrue(result.isPresent());
     assertEquals(CONSULTANT, result.get());
-
   }
 
   @Test
@@ -168,8 +158,8 @@ class ConsultantServiceTest {
         .thenReturn(Optional.empty());
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
 
-    var viaAuthenticatedUser = consultantService
-        .getConsultantViaAuthenticatedUser(authenticatedUser);
+    var viaAuthenticatedUser =
+        consultantService.getConsultantViaAuthenticatedUser(authenticatedUser);
 
     assertThat(viaAuthenticatedUser, is(Optional.empty()));
   }
@@ -184,7 +174,6 @@ class ConsultantServiceTest {
 
     assertTrue(result.isPresent());
     assertEquals(CONSULTANT, result.get());
-
   }
 
   @Test
@@ -197,7 +186,6 @@ class ConsultantServiceTest {
     assertNotNull(result);
     assertEquals(1, result.size());
     assertEquals(CONSULTANT, result.get(0));
-
   }
 
   @Test
@@ -253,8 +241,7 @@ class ConsultantServiceTest {
     when(this.consultantMobileTokenRepository.findByMobileAppToken(any()))
         .thenReturn(Optional.of(new ConsultantMobileToken()));
 
-    assertThrows(ConflictException.class, () ->
-        this.consultantService.addMobileAppToken("id", "token"));
+    assertThrows(
+        ConflictException.class, () -> this.consultantService.addMobileAppToken("id", "token"));
   }
-
 }

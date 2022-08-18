@@ -70,10 +70,10 @@ public class KeycloakConfig {
         throw new KeycloakException("Keycloak data missing.", exception);
       }
 
-      var authorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities()
-          .stream()
-          .map(Object::toString)
-          .collect(Collectors.toSet());
+      var authorities =
+          SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+              .map(Object::toString)
+              .collect(Collectors.toSet());
       authenticatedUser.setGrantedAuthorities(authorities);
     }
 
@@ -91,20 +91,15 @@ public class KeycloakConfig {
         .build();
   }
 
-  @URL
-  private String authServerUrl;
+  @URL private String authServerUrl;
 
-  @NotBlank
-  private String realm;
+  @NotBlank private String realm;
 
-  @NotBlank
-  private String resource;
+  @NotBlank private String resource;
 
-  @NotBlank
-  private String principalAttribute;
+  @NotBlank private String principalAttribute;
 
-  @NotNull
-  private Boolean cors;
+  @NotNull private Boolean cors;
 
   private KeycloakCustomConfig config;
 }

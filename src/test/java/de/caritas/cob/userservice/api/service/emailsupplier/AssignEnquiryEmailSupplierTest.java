@@ -30,22 +30,26 @@ public class AssignEnquiryEmailSupplierTest {
 
   private AssignEnquiryEmailSupplier assignEnquiryEmailSupplier;
 
-  @Mock
-  private Consultant receiverConsultant;
+  @Mock private Consultant receiverConsultant;
 
-  @Mock
-  private ConsultantService consultantService;
+  @Mock private ConsultantService consultantService;
 
-  @Mock
-  private Logger logger;
+  @Mock private Logger logger;
 
   @Before
   public void setup() {
     String applicationBaseUrl = "application base url";
     String askerUserName = "asker user name";
     String senderUserId = "sender user id";
-    this.assignEnquiryEmailSupplier = new AssignEnquiryEmailSupplier(receiverConsultant,
-        senderUserId, askerUserName, applicationBaseUrl, consultantService, null, false);
+    this.assignEnquiryEmailSupplier =
+        new AssignEnquiryEmailSupplier(
+            receiverConsultant,
+            senderUserId,
+            askerUserName,
+            applicationBaseUrl,
+            consultantService,
+            null,
+            false);
     setInternalState(AssignEnquiryEmailSupplier.class, "log", logger);
   }
 
@@ -58,7 +62,8 @@ public class AssignEnquiryEmailSupplierTest {
   }
 
   @Test
-  public void generateEmails_Should_ReturnEmptyListAndLogError_When_ReceiverIsValidAndSenderDoesntExist() {
+  public void
+      generateEmails_Should_ReturnEmptyListAndLogError_When_ReceiverIsValidAndSenderDoesntExist() {
     when(receiverConsultant.getEmail()).thenReturn("Valid email");
     when(consultantService.getConsultant(any())).thenReturn(Optional.empty());
 
@@ -84,8 +89,9 @@ public class AssignEnquiryEmailSupplierTest {
     MailDTO generatedMail = generatedMails.get(0);
     assertThat(generatedMail.getTemplate(), is(TEMPLATE_ASSIGN_ENQUIRY_NOTIFICATION));
     assertThat(generatedMail.getEmail(), is("Valid email"));
-    assertThat(generatedMail.getLanguage(), is(
-        de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.DE));
+    assertThat(
+        generatedMail.getLanguage(),
+        is(de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.DE));
     List<TemplateDataDTO> templateData = generatedMail.getTemplateData();
     assertThat(templateData, hasSize(4));
     assertThat(templateData.get(0).getKey(), is("name_sender"));
@@ -97,5 +103,4 @@ public class AssignEnquiryEmailSupplierTest {
     assertThat(templateData.get(3).getKey(), is("url"));
     assertThat(templateData.get(3).getValue(), is("application base url"));
   }
-
 }

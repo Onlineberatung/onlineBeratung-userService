@@ -1,20 +1,18 @@
 package de.caritas.cob.userservice.api.service;
 
-import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDataDTO;
+import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
+import de.caritas.cob.userservice.api.helper.SessionDataProvider;
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.model.SessionData;
+import de.caritas.cob.userservice.api.port.out.SessionDataRepository;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import de.caritas.cob.userservice.api.helper.SessionDataProvider;
-import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.model.SessionData;
-import de.caritas.cob.userservice.api.port.out.SessionDataRepository;
 
-/**
- * Service for session data.
- */
+/** Service for session data. */
 @Service
 @RequiredArgsConstructor
 public class SessionDataService {
@@ -26,19 +24,24 @@ public class SessionDataService {
   /**
    * Saves additional registration information in session data for the given session ID.
    *
-   * @param sessionId   the session ID
+   * @param sessionId the session ID
    * @param sessionData {@link SessionData}
    */
   public void saveSessionData(Long sessionId, SessionDataDTO sessionData) {
-    Session session = sessionService.getSession(sessionId).orElseThrow(() -> new NotFoundException(
-        String.format("Session with id %s not found.", sessionId)));
+    Session session =
+        sessionService
+            .getSession(sessionId)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("Session with id %s not found.", sessionId)));
     this.saveSessionData(session, sessionData);
   }
 
   /**
    * Saves additional registration information in session data for the given session.
    *
-   * @param session     the {@link Session}
+   * @param session the {@link Session}
    * @param sessionData {@link SessionData}
    */
   public void saveSessionData(Session session, SessionDataDTO sessionData) {

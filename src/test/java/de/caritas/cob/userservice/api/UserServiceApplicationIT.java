@@ -9,6 +9,5 @@ import org.springframework.test.context.ActiveProfiles;
 class UserServiceApplicationIT {
 
   @Test
-  void contextLoads() {
-  }
+  void contextLoads() {}
 }

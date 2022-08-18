@@ -28,5 +28,4 @@ public class MonitoringStructureBuilder {
   public Map<String, Object> getMonitoringStructure() {
     return this.monitoringStructure;
   }
-
 }

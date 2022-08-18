@@ -6,7 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Response body object for Rocket.Chat API Call login https://rocket.chat/docs/developer-guides/rest-api/authentication/login
+ * Response body object for Rocket.Chat API Call login
+ * https://rocket.chat/docs/developer-guides/rest-api/authentication/login
  */
 @Getter
 @Setter

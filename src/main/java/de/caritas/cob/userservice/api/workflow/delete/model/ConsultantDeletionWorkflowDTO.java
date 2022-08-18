@@ -11,5 +11,4 @@ public class ConsultantDeletionWorkflowDTO {
 
   private Consultant consultant;
   private List<DeletionWorkflowError> deletionWorkflowErrors;
-
 }

@@ -38,17 +38,13 @@ public class AvailableLastMessageUpdaterTest {
 
   private static final String GROUP_ID = "GroupId";
 
-  @InjectMocks
-  private AvailableLastMessageUpdater availableLastMessageUpdater;
+  @InjectMocks private AvailableLastMessageUpdater availableLastMessageUpdater;
 
-  @Mock
-  private SessionListAnalyser sessionListAnalyser;
+  @Mock private SessionListAnalyser sessionListAnalyser;
 
-  @Mock
-  private RocketChatRoomInformation rocketChatRoomInformation;
+  @Mock private RocketChatRoomInformation rocketChatRoomInformation;
 
-  @Mock
-  private RoomsLastMessageDTO roomsLastMessageDTO;
+  @Mock private RoomsLastMessageDTO roomsLastMessageDTO;
   private SessionDTO session;
 
   @Before
@@ -61,25 +57,29 @@ public class AvailableLastMessageUpdaterTest {
   }
 
   @Test
-  public void updateSessionWithAvailableLastMessage_Should_notSetVideoCallMessageDto_When_lastMessageHasNoAlias() {
+  public void
+      updateSessionWithAvailableLastMessage_Should_notSetVideoCallMessageDto_When_lastMessageHasNoAlias() {
 
-    this.availableLastMessageUpdater.updateSessionWithAvailableLastMessage(session,
-        mock(Consumer.class), this.rocketChatRoomInformation, "");
+    this.availableLastMessageUpdater.updateSessionWithAvailableLastMessage(
+        session, mock(Consumer.class), this.rocketChatRoomInformation, "");
 
     assertThat(session.getVideoCallMessageDTO(), nullValue());
   }
 
   @Test
-  public void updateSessionWithAvailableLastMessage_Should_setVideoCallMessageDto_When_lastMessageHasAlias() {
-    when(this.roomsLastMessageDTO.getAlias()).thenReturn(
-        new AliasMessageDTO()
-            .videoCallMessageDTO(new VideoCallMessageDTO()
-                .eventType(EventTypeEnum.IGNORED_CALL)
-                .initiatorUserName("initiator")
-                .initiatorRcUserId("user id")));
+  public void
+      updateSessionWithAvailableLastMessage_Should_setVideoCallMessageDto_When_lastMessageHasAlias() {
+    when(this.roomsLastMessageDTO.getAlias())
+        .thenReturn(
+            new AliasMessageDTO()
+                .videoCallMessageDTO(
+                    new VideoCallMessageDTO()
+                        .eventType(EventTypeEnum.IGNORED_CALL)
+                        .initiatorUserName("initiator")
+                        .initiatorRcUserId("user id")));
 
-    this.availableLastMessageUpdater.updateSessionWithAvailableLastMessage(session,
-        mock(Consumer.class), this.rocketChatRoomInformation, "");
+    this.availableLastMessageUpdater.updateSessionWithAvailableLastMessage(
+        session, mock(Consumer.class), this.rocketChatRoomInformation, "");
 
     assertThat(session.getVideoCallMessageDTO(), notNullValue());
     assertThat(session.getVideoCallMessageDTO().getEventType(), is(EventTypeEnum.IGNORED_CALL));
@@ -91,20 +91,20 @@ public class AvailableLastMessageUpdaterTest {
   public void updateSessionWithAvailableLastMessage_Should_useAnalyser_When_lasMessageIsPresent() {
     when(roomsLastMessageDTO.getMessage()).thenReturn("message");
 
-    this.availableLastMessageUpdater.updateSessionWithAvailableLastMessage(session,
-        mock(Consumer.class), this.rocketChatRoomInformation, "");
+    this.availableLastMessageUpdater.updateSessionWithAvailableLastMessage(
+        session, mock(Consumer.class), this.rocketChatRoomInformation, "");
 
     verify(sessionListAnalyser).prepareMessageForSessionList("message", GROUP_ID);
   }
 
   @Test
-  public void updateSessionWithAvailableLastMessage_Should_setFurtherStepsMessage_When_lasMessageHasFurtherStepsAlias() {
+  public void
+      updateSessionWithAvailableLastMessage_Should_setFurtherStepsMessage_When_lasMessageHasFurtherStepsAlias() {
     when(roomsLastMessageDTO.getAlias())
         .thenReturn(new AliasMessageDTO().messageType(MessageType.FURTHER_STEPS));
 
-    this.availableLastMessageUpdater
-        .updateSessionWithAvailableLastMessage(session, mock(Consumer.class),
-            this.rocketChatRoomInformation, "");
+    this.availableLastMessageUpdater.updateSessionWithAvailableLastMessage(
+        session, mock(Consumer.class), this.rocketChatRoomInformation, "");
 
     var expectedLastMessage = new LastMessageDTO();
     expectedLastMessage.setMsg("So geht es weiter");
@@ -115,11 +115,11 @@ public class AvailableLastMessageUpdaterTest {
   @Test
   public void updateSessionWithAvailableLastMessage_should_set_rocket_chat_type() {
     givenAnE2eRoomsLastMessage();
-    when(sessionListAnalyser.prepareMessageForSessionList("e2e_encrypted_message",
-        GROUP_ID)).thenReturn("e2e_encrypted_message");
+    when(sessionListAnalyser.prepareMessageForSessionList("e2e_encrypted_message", GROUP_ID))
+        .thenReturn("e2e_encrypted_message");
 
-    this.availableLastMessageUpdater.updateSessionWithAvailableLastMessage(session,
-        mock(Consumer.class), this.rocketChatRoomInformation, "rc4711");
+    this.availableLastMessageUpdater.updateSessionWithAvailableLastMessage(
+        session, mock(Consumer.class), this.rocketChatRoomInformation, "rc4711");
 
     var expectedLastMessage = new LastMessageDTO();
     expectedLastMessage.setMsg("e2e_encrypted_message");
@@ -129,11 +129,12 @@ public class AvailableLastMessageUpdaterTest {
   }
 
   @Test
-  public void updateSessionWithAvailableLastMessage_should_set_message_type_for_messages_without_last_message() {
+  public void
+      updateSessionWithAvailableLastMessage_should_set_message_type_for_messages_without_last_message() {
     when(rocketChatRoomInformation.getLastMessagesRoom()).thenReturn(Collections.emptyMap());
 
-    this.availableLastMessageUpdater.updateSessionWithAvailableLastMessage(session,
-        mock(Consumer.class), this.rocketChatRoomInformation, "rc4711");
+    this.availableLastMessageUpdater.updateSessionWithAvailableLastMessage(
+        session, mock(Consumer.class), this.rocketChatRoomInformation, "rc4711");
 
     var expectedLastMessage = new LastMessageDTO();
     expectedLastMessage.setMsg("So geht es weiter");
@@ -148,11 +149,11 @@ public class AvailableLastMessageUpdaterTest {
     chat.setGroupId(GROUP_ID);
     AtomicReference<Date> date = new AtomicReference<>();
     givenAnE2eRoomsLastMessage();
-    when(sessionListAnalyser.prepareMessageForSessionList("e2e_encrypted_message",
-        GROUP_ID)).thenReturn("e2e_encrypted_message");
+    when(sessionListAnalyser.prepareMessageForSessionList("e2e_encrypted_message", GROUP_ID))
+        .thenReturn("e2e_encrypted_message");
 
-    this.availableLastMessageUpdater.updateChatWithAvailableLastMessage(chat, date::set,
-        this.rocketChatRoomInformation, "rc4711");
+    this.availableLastMessageUpdater.updateChatWithAvailableLastMessage(
+        chat, date::set, this.rocketChatRoomInformation, "rc4711");
 
     var expectedLastMessage = new LastMessageDTO();
     expectedLastMessage.setMsg("e2e_encrypted_message");
@@ -164,14 +165,15 @@ public class AvailableLastMessageUpdaterTest {
   }
 
   @Test
-  public void updateChatWithAvailableLastMessage_should_set_fallback_date_if_rc_last_message_is_unavailable() {
+  public void
+      updateChatWithAvailableLastMessage_should_set_fallback_date_if_rc_last_message_is_unavailable() {
     var chat = new UserChatDTO();
     var startDateWithTime = LocalDateTime.of(2022, 5, 22, 13, 37);
     chat.setStartDateWithTime(startDateWithTime);
     AtomicReference<Date> date = new AtomicReference<>();
 
-    this.availableLastMessageUpdater.updateChatWithAvailableLastMessage(chat, date::set,
-        this.rocketChatRoomInformation, "rc4711");
+    this.availableLastMessageUpdater.updateChatWithAvailableLastMessage(
+        chat, date::set, this.rocketChatRoomInformation, "rc4711");
 
     assertThat(chat.getE2eLastMessage(), is(nullValue()));
     assertThat(chat.getLastMessage(), is(nullValue()));

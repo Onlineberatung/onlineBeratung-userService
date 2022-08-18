@@ -24,24 +24,21 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class AssignChatFacadeTest {
 
-  @InjectMocks
-  private AssignChatFacade assignChatFacade;
+  @InjectMocks private AssignChatFacade assignChatFacade;
 
-  @Mock
-  private ChatService chatService;
+  @Mock private ChatService chatService;
 
-  @Mock
-  private AuthenticatedUser authenticatedUser;
+  @Mock private AuthenticatedUser authenticatedUser;
 
-  @Mock
-  private UserService userService;
+  @Mock private UserService userService;
 
   @Test
   void assignChat_Should_ThrowNotFoundException_WhenChatDoesNotExist() {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.empty());
 
-    NotFoundException exception = assertThrows(NotFoundException.class,
-        () -> assignChatFacade.assignChat(CHAT_ID, authenticatedUser));
+    NotFoundException exception =
+        assertThrows(
+            NotFoundException.class, () -> assignChatFacade.assignChat(CHAT_ID, authenticatedUser));
 
     verify(chatService).getChat(CHAT_ID);
     assertThat(exception.getMessage())
@@ -52,11 +49,11 @@ class AssignChatFacadeTest {
   void assignChat_Should_ThrowNotFoundException_WhenUserDoesNotExist() {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
-    when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(
-        Optional.empty());
+    when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(Optional.empty());
 
-    NotFoundException exception = assertThrows(NotFoundException.class,
-        () -> assignChatFacade.assignChat(CHAT_ID, authenticatedUser));
+    NotFoundException exception =
+        assertThrows(
+            NotFoundException.class, () -> assignChatFacade.assignChat(CHAT_ID, authenticatedUser));
 
     verify(userService).getUserViaAuthenticatedUser(authenticatedUser);
     assertThat(exception.getMessage())
@@ -66,12 +63,11 @@ class AssignChatFacadeTest {
   @Test
   void assignChat_Should_AddUserToChat() {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
-    when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(
-        Optional.of(USER));
+    when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(Optional.of(USER));
 
     assignChatFacade.assignChat(CHAT_ID, authenticatedUser);
 
-    verify(chatService).saveUserChatRelation(
-        UserChat.builder().user(USER).chat(ACTIVE_CHAT).build());
+    verify(chatService)
+        .saveUserChatRelation(UserChat.builder().user(USER).chat(ACTIVE_CHAT).build());
   }
 }

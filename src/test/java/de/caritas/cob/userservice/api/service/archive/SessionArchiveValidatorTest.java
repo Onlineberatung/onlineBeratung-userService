@@ -1,9 +1,9 @@
 package de.caritas.cob.userservice.api.service.archive;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.model.Session;
@@ -27,9 +27,8 @@ class SessionArchiveValidatorTest {
     Session session = Mockito.mock(Session.class);
     when(session.getStatus()).thenReturn(SessionStatus.IN_ARCHIVE);
     when(session.getId()).thenReturn(1L);
-    assertThrows(ConflictException.class,
-        () -> sessionArchiveValidator.isValidForArchiving(session));
-
+    assertThrows(
+        ConflictException.class, () -> sessionArchiveValidator.isValidForArchiving(session));
   }
 
   @Test
@@ -39,7 +38,6 @@ class SessionArchiveValidatorTest {
     when(session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
     sessionArchiveValidator.isValidForArchiving(session);
     verify(session, times(1)).getStatus();
-
   }
 
   @Test
@@ -48,9 +46,8 @@ class SessionArchiveValidatorTest {
     Session session = Mockito.mock(Session.class);
     when(session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
     when(session.getId()).thenReturn(1L);
-    assertThrows(ConflictException.class,
-        () -> sessionArchiveValidator.isValidForDearchiving(session));
-
+    assertThrows(
+        ConflictException.class, () -> sessionArchiveValidator.isValidForDearchiving(session));
   }
 
   @Test
@@ -60,7 +57,5 @@ class SessionArchiveValidatorTest {
     when(session.getStatus()).thenReturn(SessionStatus.IN_ARCHIVE);
     sessionArchiveValidator.isValidForDearchiving(session);
     verify(session, times(1)).getStatus();
-
   }
-
 }

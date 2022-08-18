@@ -16,9 +16,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
-/**
- * Push service to send new message notifications via firebase to mobile devices.
- */
+/** Push service to send new message notifications via firebase to mobile devices. */
 @Service
 public class FirebasePushMessageService {
 
@@ -33,9 +31,7 @@ public class FirebasePushMessageService {
 
   private FirebaseMessaging firebaseMessaging;
 
-  /**
-   * Initializes the basic firebase configuration.
-   */
+  /** Initializes the basic firebase configuration. */
   @SneakyThrows
   @EventListener(ApplicationReadyEvent.class)
   public void initializeFirebase() {
@@ -43,9 +39,10 @@ public class FirebasePushMessageService {
       var path = FileUtils.getFile(firebaseConfiguration).toPath();
       var inputStream = Files.newInputStream(path);
 
-      var options = FirebaseOptions.builder()
-          .setCredentials(GoogleCredentials.fromStream(inputStream))
-          .build();
+      var options =
+          FirebaseOptions.builder()
+              .setCredentials(GoogleCredentials.fromStream(inputStream))
+              .build();
 
       FirebaseApp.initializeApp(options);
       this.firebaseMessaging = FirebaseMessaging.getInstance();
@@ -63,12 +60,11 @@ public class FirebasePushMessageService {
     if (!this.isEnabled) {
       return;
     }
-    var message = Message.builder()
-        .setNotification(Notification.builder()
-            .setBody(this.pushNotificationMessage)
-            .build())
-        .setToken(registrationToken)
-        .build();
+    var message =
+        Message.builder()
+            .setNotification(Notification.builder().setBody(this.pushNotificationMessage).build())
+            .setToken(registrationToken)
+            .build();
 
     try {
       this.firebaseMessaging.send(message);
@@ -76,5 +72,4 @@ public class FirebasePushMessageService {
       LogService.logWarn(e);
     }
   }
-
 }

@@ -18,9 +18,9 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.model.Consultant;
@@ -39,17 +39,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class UnauthorizedMembersProviderTest {
 
-  @InjectMocks
-  UnauthorizedMembersProvider unauthorizedMembersProvider;
+  @InjectMocks UnauthorizedMembersProvider unauthorizedMembersProvider;
 
-  @Mock
-  ConsultantService consultantService;
+  @Mock ConsultantService consultantService;
 
-  @Mock
-  RocketChatCredentialsProvider rocketChatCredentialsProvider;
+  @Mock RocketChatCredentialsProvider rocketChatCredentialsProvider;
 
-  @Mock
-  KeycloakService keycloakService;
+  @Mock KeycloakService keycloakService;
 
   EasyRandom easyRandom = new EasyRandom();
   Consultant newConsultant = easyRandom.nextObject(Consultant.class);
@@ -65,7 +61,9 @@ public class UnauthorizedMembersProviderTest {
 
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
-    setField(unauthorizedMembersProvider, FIELD_NAME_ROCKET_CHAT_SYSTEM_USER_ID,
+    setField(
+        unauthorizedMembersProvider,
+        FIELD_NAME_ROCKET_CHAT_SYSTEM_USER_ID,
         ROCKET_CHAT_SYSTEM_USER_ID);
     newConsultant.setRocketChatId("newConsultantRcId");
     normalConsultant.setRocketChatId("normalConsultantRcId");
@@ -83,27 +81,35 @@ public class UnauthorizedMembersProviderTest {
     peerConsultant2.setRocketChatId("peerConsultantRcId2");
     peerConsultant2.setTeamConsultant(true);
     techUserRcCredentials.setRocketChatUserId("techUserRcId");
-    initialMemberList = asList(
-        new GroupMemberDTO("userRcId", null, "name", null, null),
-        new GroupMemberDTO("newConsultantRcId", null, "name", null, null),
-        new GroupMemberDTO("normalConsultantRcId", null, "name", null, null),
-        new GroupMemberDTO("otherRcId", null, "name", null, null),
-        new GroupMemberDTO("otherRcId2", null, "name", null, null),
-        new GroupMemberDTO("teamConsultantRcId", null, "name", null, null),
-        new GroupMemberDTO("teamConsultantRcId2", null, "name", null, null),
-        new GroupMemberDTO("mainConsultantRcId", null, "name", null, null),
-        new GroupMemberDTO("mainConsultantRcId2", null, "name", null, null),
-        new GroupMemberDTO("peerConsultantRcId", null, "name", null, null),
-        new GroupMemberDTO("peerConsultantRcId2", null, "name", null, null),
-        new GroupMemberDTO("rcTechnicalRcId", null, "name", null, null),
-        new GroupMemberDTO(ROCKET_CHAT_SYSTEM_USER_ID, null, "name", null, null),
-        new GroupMemberDTO("techUserRcId", null, "name", null, null)
-    );
-    List.of(newConsultant, normalConsultant, teamConsultant, teamConsultant2, mainConsultant,
-            mainConsultant2, peerConsultant, peerConsultant2)
-        .forEach(consultant ->
-            when(consultantService.getConsultantByRcUserId(consultant.getRocketChatId()))
-                .thenReturn(Optional.of(consultant)));
+    initialMemberList =
+        asList(
+            new GroupMemberDTO("userRcId", null, "name", null, null),
+            new GroupMemberDTO("newConsultantRcId", null, "name", null, null),
+            new GroupMemberDTO("normalConsultantRcId", null, "name", null, null),
+            new GroupMemberDTO("otherRcId", null, "name", null, null),
+            new GroupMemberDTO("otherRcId2", null, "name", null, null),
+            new GroupMemberDTO("teamConsultantRcId", null, "name", null, null),
+            new GroupMemberDTO("teamConsultantRcId2", null, "name", null, null),
+            new GroupMemberDTO("mainConsultantRcId", null, "name", null, null),
+            new GroupMemberDTO("mainConsultantRcId2", null, "name", null, null),
+            new GroupMemberDTO("peerConsultantRcId", null, "name", null, null),
+            new GroupMemberDTO("peerConsultantRcId2", null, "name", null, null),
+            new GroupMemberDTO("rcTechnicalRcId", null, "name", null, null),
+            new GroupMemberDTO(ROCKET_CHAT_SYSTEM_USER_ID, null, "name", null, null),
+            new GroupMemberDTO("techUserRcId", null, "name", null, null));
+    List.of(
+            newConsultant,
+            normalConsultant,
+            teamConsultant,
+            teamConsultant2,
+            mainConsultant,
+            mainConsultant2,
+            peerConsultant,
+            peerConsultant2)
+        .forEach(
+            consultant ->
+                when(consultantService.getConsultantByRcUserId(consultant.getRocketChatId()))
+                    .thenReturn(Optional.of(consultant)));
   }
 
   @Test
@@ -113,14 +119,15 @@ public class UnauthorizedMembersProviderTest {
     var consultant = easyRandom.nextObject(Consultant.class);
     when(rocketChatCredentialsProvider.getTechnicalUser()).thenReturn(techUserRcCredentials);
 
-    var consultantsToRemove = unauthorizedMembersProvider.obtainConsultantsToRemove(
-        RC_GROUP_ID, SESSION_WITH_ASKER_AND_CONSULTANT, consultant, initialMemberList
-    );
+    var consultantsToRemove =
+        unauthorizedMembersProvider.obtainConsultantsToRemove(
+            RC_GROUP_ID, SESSION_WITH_ASKER_AND_CONSULTANT, consultant, initialMemberList);
 
-    consultantsToRemove.forEach(consultantToRemove -> {
-      assertNotEquals(consultantToRemove.getId(), consultant.getId());
-      assertNotEquals(consultantToRemove.getRocketChatId(), consultant.getRocketChatId());
-    });
+    consultantsToRemove.forEach(
+        consultantToRemove -> {
+          assertNotEquals(consultantToRemove.getId(), consultant.getId());
+          assertNotEquals(consultantToRemove.getRocketChatId(), consultant.getRocketChatId());
+        });
   }
 
   @Test
@@ -130,19 +137,20 @@ public class UnauthorizedMembersProviderTest {
     var consultant = easyRandom.nextObject(Consultant.class);
     when(rocketChatCredentialsProvider.getTechnicalUser()).thenReturn(techUserRcCredentials);
     var memberList = new ArrayList<>(initialMemberList);
-    var consultantAsGroupMember = new GroupMemberDTO(
-        consultant.getRocketChatId(), null, consultant.getUsername(), null, null
-    );
+    var consultantAsGroupMember =
+        new GroupMemberDTO(
+            consultant.getRocketChatId(), null, consultant.getUsername(), null, null);
     memberList.add(consultantAsGroupMember);
 
-    var consultantsToRemove = unauthorizedMembersProvider.obtainConsultantsToRemove(
-        RC_GROUP_ID, SESSION_WITH_ASKER_AND_CONSULTANT, consultant, memberList
-    );
+    var consultantsToRemove =
+        unauthorizedMembersProvider.obtainConsultantsToRemove(
+            RC_GROUP_ID, SESSION_WITH_ASKER_AND_CONSULTANT, consultant, memberList);
 
-    consultantsToRemove.forEach(consultantToRemove -> {
-      assertNotEquals(consultantToRemove.getId(), consultant.getId());
-      assertNotEquals(consultantToRemove.getRocketChatId(), consultant.getRocketChatId());
-    });
+    consultantsToRemove.forEach(
+        consultantToRemove -> {
+          assertNotEquals(consultantToRemove.getId(), consultant.getId());
+          assertNotEquals(consultantToRemove.getRocketChatId(), consultant.getRocketChatId());
+        });
   }
 
   @Test
@@ -152,115 +160,170 @@ public class UnauthorizedMembersProviderTest {
     var consultant = easyRandom.nextObject(Consultant.class);
     when(rocketChatCredentialsProvider.getTechnicalUser()).thenReturn(techUserRcCredentials);
     var memberList = new ArrayList<>(initialMemberList);
-    var consultantAsGroupMember = new GroupMemberDTO(
-        consultant.getRocketChatId(), null, consultant.getUsername(), null, null
-    );
+    var consultantAsGroupMember =
+        new GroupMemberDTO(
+            consultant.getRocketChatId(), null, consultant.getUsername(), null, null);
     memberList.add(consultantAsGroupMember);
     var consultantToKeep = easyRandom.nextObject(Consultant.class);
-    var consultantToKeepAsGroupMember = new GroupMemberDTO(
-        consultantToKeep.getRocketChatId(), null, consultantToKeep.getUsername(), null, null
-    );
+    var consultantToKeepAsGroupMember =
+        new GroupMemberDTO(
+            consultantToKeep.getRocketChatId(), null, consultantToKeep.getUsername(), null, null);
     memberList.add(consultantToKeepAsGroupMember);
 
-    var consultantsToRemove = unauthorizedMembersProvider.obtainConsultantsToRemove(
-        RC_GROUP_ID, SESSION_WITH_ASKER_AND_CONSULTANT, consultant, memberList, consultantToKeep
-    );
+    var consultantsToRemove =
+        unauthorizedMembersProvider.obtainConsultantsToRemove(
+            RC_GROUP_ID,
+            SESSION_WITH_ASKER_AND_CONSULTANT,
+            consultant,
+            memberList,
+            consultantToKeep);
 
-    consultantsToRemove.forEach(consultantToRemove -> {
-      assertNotEquals(consultantToRemove.getId(), consultantToKeep.getId());
-      assertNotEquals(consultantToRemove.getRocketChatId(), consultantToKeep.getRocketChatId());
-    });
+    consultantsToRemove.forEach(
+        consultantToRemove -> {
+          assertNotEquals(consultantToRemove.getId(), consultantToKeep.getId());
+          assertNotEquals(consultantToRemove.getRocketChatId(), consultantToKeep.getRocketChatId());
+        });
   }
 
   @Test
-  public void obtainConsultantsToRemove_Should_ReturnCorrectUnauthorizedMemberList_When_SessionIsNoTeamSession()
-      throws RocketChatUserNotInitializedException {
+  public void
+      obtainConsultantsToRemove_Should_ReturnCorrectUnauthorizedMemberList_When_SessionIsNoTeamSession()
+          throws RocketChatUserNotInitializedException {
     newConsultant.setTeamConsultant(false);
     when(rocketChatCredentialsProvider.getTechnicalUser()).thenReturn(techUserRcCredentials);
 
-    List<Consultant> result = unauthorizedMembersProvider.obtainConsultantsToRemove(RC_GROUP_ID,
-        SESSION_WITH_ASKER_AND_CONSULTANT, newConsultant, initialMemberList);
+    List<Consultant> result =
+        unauthorizedMembersProvider.obtainConsultantsToRemove(
+            RC_GROUP_ID, SESSION_WITH_ASKER_AND_CONSULTANT, newConsultant, initialMemberList);
 
     assertThat(result.size(), is(7));
-    assertThat(result, contains(normalConsultant, teamConsultant, teamConsultant2, mainConsultant,
-        mainConsultant2, peerConsultant, peerConsultant2));
+    assertThat(
+        result,
+        contains(
+            normalConsultant,
+            teamConsultant,
+            teamConsultant2,
+            mainConsultant,
+            mainConsultant2,
+            peerConsultant,
+            peerConsultant2));
   }
 
   @Test
-  public void obtainConsultantsToRemove_Should_ReturnCorrectUnauthorizedMemberList_When_SessionIsNormalTeamSession()
-      throws RocketChatUserNotInitializedException {
+  public void
+      obtainConsultantsToRemove_Should_ReturnCorrectUnauthorizedMemberList_When_SessionIsNormalTeamSession()
+          throws RocketChatUserNotInitializedException {
     newConsultant.setTeamConsultant(true);
     when(rocketChatCredentialsProvider.getTechnicalUser()).thenReturn(techUserRcCredentials);
-    when(consultantService
-        .findConsultantsByAgencyId(TEAM_SESSION_WITH_ASKER_AND_CONSULTANT.getAgencyId()))
-        .thenReturn(asList(newConsultant, normalConsultant, teamConsultant, teamConsultant2,
-            mainConsultant, mainConsultant2, peerConsultant, peerConsultant2));
+    when(consultantService.findConsultantsByAgencyId(
+            TEAM_SESSION_WITH_ASKER_AND_CONSULTANT.getAgencyId()))
+        .thenReturn(
+            asList(
+                newConsultant,
+                normalConsultant,
+                teamConsultant,
+                teamConsultant2,
+                mainConsultant,
+                mainConsultant2,
+                peerConsultant,
+                peerConsultant2));
 
-    var result = unauthorizedMembersProvider.obtainConsultantsToRemove(RC_GROUP_ID,
-        TEAM_SESSION_WITH_ASKER_AND_CONSULTANT, newConsultant, initialMemberList);
+    var result =
+        unauthorizedMembersProvider.obtainConsultantsToRemove(
+            RC_GROUP_ID, TEAM_SESSION_WITH_ASKER_AND_CONSULTANT, newConsultant, initialMemberList);
 
     assertThat(result.size(), is(1));
     assertThat(result, contains(normalConsultant));
   }
 
   @Test
-  public void obtainConsultantsToRemove_Should_ReturnCorrectUnauthorizedMemberList_When_SessionIsFeedbackSessionForNormalGroup()
-      throws RocketChatUserNotInitializedException {
+  public void
+      obtainConsultantsToRemove_Should_ReturnCorrectUnauthorizedMemberList_When_SessionIsFeedbackSessionForNormalGroup()
+          throws RocketChatUserNotInitializedException {
     newConsultant.setTeamConsultant(true);
     when(rocketChatCredentialsProvider.getTechnicalUser()).thenReturn(techUserRcCredentials);
-    var consultantList = asList(newConsultant, normalConsultant, teamConsultant, teamConsultant2,
-        mainConsultant, mainConsultant2, peerConsultant, peerConsultant2);
-    when(consultantService
-        .findConsultantsByAgencyId(FEEDBACK_SESSION_WITH_ASKER_AND_CONSULTANT.getAgencyId()))
+    var consultantList =
+        asList(
+            newConsultant,
+            normalConsultant,
+            teamConsultant,
+            teamConsultant2,
+            mainConsultant,
+            mainConsultant2,
+            peerConsultant,
+            peerConsultant2);
+    when(consultantService.findConsultantsByAgencyId(
+            FEEDBACK_SESSION_WITH_ASKER_AND_CONSULTANT.getAgencyId()))
         .thenReturn(consultantList);
-    consultantList.forEach(consultant ->
-        when(consultantService.getConsultantByRcUserId(consultant.getRocketChatId()))
-            .thenReturn(Optional.of(consultant)));
-    when(keycloakService
-        .userHasAuthority(mainConsultant.getId(), VIEW_ALL_PEER_SESSIONS)).thenReturn(true);
-    when(keycloakService
-        .userHasAuthority(mainConsultant2.getId(), VIEW_ALL_PEER_SESSIONS)).thenReturn(true);
+    consultantList.forEach(
+        consultant ->
+            when(consultantService.getConsultantByRcUserId(consultant.getRocketChatId()))
+                .thenReturn(Optional.of(consultant)));
+    when(keycloakService.userHasAuthority(mainConsultant.getId(), VIEW_ALL_PEER_SESSIONS))
+        .thenReturn(true);
+    when(keycloakService.userHasAuthority(mainConsultant2.getId(), VIEW_ALL_PEER_SESSIONS))
+        .thenReturn(true);
 
-    List<Consultant> result = unauthorizedMembersProvider
-        .obtainConsultantsToRemove(RC_GROUP_ID, FEEDBACK_SESSION_WITH_ASKER_AND_CONSULTANT,
-            newConsultant, initialMemberList);
+    List<Consultant> result =
+        unauthorizedMembersProvider.obtainConsultantsToRemove(
+            RC_GROUP_ID,
+            FEEDBACK_SESSION_WITH_ASKER_AND_CONSULTANT,
+            newConsultant,
+            initialMemberList);
 
     assertThat(result.size(), is(5));
-    assertThat(result, contains(normalConsultant, teamConsultant, teamConsultant2, peerConsultant,
-        peerConsultant2));
+    assertThat(
+        result,
+        contains(
+            normalConsultant, teamConsultant, teamConsultant2, peerConsultant, peerConsultant2));
   }
 
   @Test
-  public void obtainConsultantsToRemove_Should_ReturnCorrectUnauthorizedMemberList_When_SessionIsFeedbackSessionForFeedbackGroup()
-      throws RocketChatUserNotInitializedException {
+  public void
+      obtainConsultantsToRemove_Should_ReturnCorrectUnauthorizedMemberList_When_SessionIsFeedbackSessionForFeedbackGroup()
+          throws RocketChatUserNotInitializedException {
     newConsultant.setTeamConsultant(true);
     when(rocketChatCredentialsProvider.getTechnicalUser()).thenReturn(techUserRcCredentials);
-    var consultantList = asList(newConsultant, normalConsultant, teamConsultant, teamConsultant2,
-        mainConsultant, mainConsultant2, peerConsultant, peerConsultant2);
-    when(consultantService
-        .findConsultantsByAgencyId(FEEDBACK_SESSION_WITH_ASKER_AND_CONSULTANT.getAgencyId()))
+    var consultantList =
+        asList(
+            newConsultant,
+            normalConsultant,
+            teamConsultant,
+            teamConsultant2,
+            mainConsultant,
+            mainConsultant2,
+            peerConsultant,
+            peerConsultant2);
+    when(consultantService.findConsultantsByAgencyId(
+            FEEDBACK_SESSION_WITH_ASKER_AND_CONSULTANT.getAgencyId()))
         .thenReturn(consultantList);
-    when(keycloakService
-        .userHasAuthority(mainConsultant.getId(), VIEW_ALL_FEEDBACK_SESSIONS)).thenReturn(true);
-    when(keycloakService
-        .userHasAuthority(mainConsultant2.getId(), VIEW_ALL_FEEDBACK_SESSIONS)).thenReturn(true);
+    when(keycloakService.userHasAuthority(mainConsultant.getId(), VIEW_ALL_FEEDBACK_SESSIONS))
+        .thenReturn(true);
+    when(keycloakService.userHasAuthority(mainConsultant2.getId(), VIEW_ALL_FEEDBACK_SESSIONS))
+        .thenReturn(true);
 
-    List<Consultant> result = unauthorizedMembersProvider
-        .obtainConsultantsToRemove(RC_FEEDBACK_GROUP_ID_2,
-            FEEDBACK_SESSION_WITH_ASKER_AND_CONSULTANT, newConsultant, initialMemberList);
+    List<Consultant> result =
+        unauthorizedMembersProvider.obtainConsultantsToRemove(
+            RC_FEEDBACK_GROUP_ID_2,
+            FEEDBACK_SESSION_WITH_ASKER_AND_CONSULTANT,
+            newConsultant,
+            initialMemberList);
 
     assertThat(result.size(), is(5));
-    assertThat(result, contains(normalConsultant, teamConsultant, teamConsultant2, peerConsultant,
-        peerConsultant2));
+    assertThat(
+        result,
+        contains(
+            normalConsultant, teamConsultant, teamConsultant2, peerConsultant, peerConsultant2));
   }
 
   @Test(expected = InternalServerErrorException.class)
-  public void obtainConsultantsToRemove_Should_ThrowInternalServerError_When_TechUserIsNotInitialized()
-      throws RocketChatUserNotInitializedException {
+  public void
+      obtainConsultantsToRemove_Should_ThrowInternalServerError_When_TechUserIsNotInitialized()
+          throws RocketChatUserNotInitializedException {
     when(rocketChatCredentialsProvider.getTechnicalUser())
         .thenThrow(new RocketChatUserNotInitializedException(""));
 
-    unauthorizedMembersProvider.obtainConsultantsToRemove(RC_GROUP_ID,
-        FEEDBACK_SESSION_WITH_ASKER_AND_CONSULTANT, newConsultant, initialMemberList);
+    unauthorizedMembersProvider.obtainConsultantsToRemove(
+        RC_GROUP_ID, FEEDBACK_SESSION_WITH_ASKER_AND_CONSULTANT, newConsultant, initialMemberList);
   }
 }

@@ -47,35 +47,45 @@ public class NewFeedbackEmailSupplierTest {
 
   private NewFeedbackEmailSupplier newFeedbackEmailSupplier;
 
-  @Mock
-  private Session session;
+  @Mock private Session session;
 
-  @Mock
-  private ConsultantService consultantService;
+  @Mock private ConsultantService consultantService;
 
-  @Mock
-  private RocketChatService rocketChatService;
+  @Mock private RocketChatService rocketChatService;
 
-  @Mock
-  private KeycloakService keycloakService;
+  @Mock private KeycloakService keycloakService;
 
-  @Mock
-  private Logger logger;
+  @Mock private Logger logger;
 
   @Before
   public void setup() {
-    this.newFeedbackEmailSupplier = new NewFeedbackEmailSupplier(session, "feedbackGroupId",
-        "userId", "applicationBaseUrl", consultantService, rocketChatService,
-        "rocketChatSystemUserId", keycloakService);
+    this.newFeedbackEmailSupplier =
+        new NewFeedbackEmailSupplier(
+            session,
+            "feedbackGroupId",
+            "userId",
+            "applicationBaseUrl",
+            consultantService,
+            rocketChatService,
+            "rocketChatSystemUserId",
+            keycloakService);
     setInternalState(NewFeedbackEmailSupplier.class, "log", logger);
   }
 
   @Test
   public void generateEmails_Should_ReturnEmptyListAndLogError_When_SessionIsNull()
       throws RocketChatGetGroupMembersException {
-    List<MailDTO> generatedMails = new NewFeedbackEmailSupplier(null, "feedbackGroupId",
-        "userId", "applicationBaseUrl", consultantService, rocketChatService,
-        "rocketChatSystemUserId", keycloakService).generateEmails();
+    List<MailDTO> generatedMails =
+        new NewFeedbackEmailSupplier(
+                null,
+                "feedbackGroupId",
+                "userId",
+                "applicationBaseUrl",
+                consultantService,
+                rocketChatService,
+                "rocketChatSystemUserId",
+                keycloakService)
+            .generateEmails();
 
     assertThat(generatedMails, hasSize(0));
     verify(logger).error(anyString(), anyString());
@@ -92,8 +102,9 @@ public class NewFeedbackEmailSupplierTest {
   }
 
   @Test
-  public void generateEmails_Should_ReturnEmptyLisAndLogError_When_SessionHasConsultantAndWriterIsNotAConsultant()
-      throws RocketChatGetGroupMembersException {
+  public void
+      generateEmails_Should_ReturnEmptyLisAndLogError_When_SessionHasConsultantAndWriterIsNotAConsultant()
+          throws RocketChatGetGroupMembersException {
     when(session.getConsultant()).thenReturn(CONSULTANT);
 
     List<MailDTO> generatedMails = newFeedbackEmailSupplier.generateEmails();
@@ -103,8 +114,9 @@ public class NewFeedbackEmailSupplierTest {
   }
 
   @Test
-  public void generateEmails_Should_ReturnEmptyListAndLogError_When_SessionHasConsultantIsWriterAndNoMembersAreInFeedbackGroup()
-      throws RocketChatGetGroupMembersException {
+  public void
+      generateEmails_Should_ReturnEmptyListAndLogError_When_SessionHasConsultantIsWriterAndNoMembersAreInFeedbackGroup()
+          throws RocketChatGetGroupMembersException {
     when(session.getConsultant()).thenReturn(CONSULTANT);
     setField(newFeedbackEmailSupplier, "userId", CONSULTANT.getId());
     when(consultantService.getConsultant(anyString())).thenReturn(Optional.of(CONSULTANT));
@@ -116,8 +128,9 @@ public class NewFeedbackEmailSupplierTest {
   }
 
   @Test
-  public void generateEmails_Should_ReturnEmptyListAndLogError_When_SessionHasConsultantAndNoFeedbackGroupMemberExists()
-      throws RocketChatGetGroupMembersException {
+  public void
+      generateEmails_Should_ReturnEmptyListAndLogError_When_SessionHasConsultantAndNoFeedbackGroupMemberExists()
+          throws RocketChatGetGroupMembersException {
     when(session.getConsultant()).thenReturn(CONSULTANT);
     setField(newFeedbackEmailSupplier, "userId", CONSULTANT.getId());
     when(consultantService.getConsultant(anyString())).thenReturn(Optional.of(CONSULTANT));
@@ -130,8 +143,9 @@ public class NewFeedbackEmailSupplierTest {
   }
 
   @Test
-  public void generateEmails_Should_ReturnExpectedMails_When_SessionHasConsultantIsWriterAndMembersAreInFeedbackGroup()
-      throws RocketChatGetGroupMembersException {
+  public void
+      generateEmails_Should_ReturnExpectedMails_When_SessionHasConsultantIsWriterAndMembersAreInFeedbackGroup()
+          throws RocketChatGetGroupMembersException {
     when(session.getUser()).thenReturn(USER);
     when(session.getConsultant()).thenReturn(CONSULTANT);
     setField(newFeedbackEmailSupplier, "userId", CONSULTANT.getId());
@@ -146,8 +160,9 @@ public class NewFeedbackEmailSupplierTest {
     MailDTO generatedMail = generatedMails.get(0);
     assertThat(generatedMail.getTemplate(), is(TEMPLATE_NEW_FEEDBACK_MESSAGE_NOTIFICATION));
     assertThat(generatedMail.getEmail(), is("email@email.com"));
-    assertThat(generatedMail.getLanguage(), is(
-        de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.DE));
+    assertThat(
+        generatedMail.getLanguage(),
+        is(de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.DE));
     List<TemplateDataDTO> templateData = generatedMail.getTemplateData();
     assertThat(templateData, hasSize(4));
     assertThat(templateData.get(0).getKey(), is("name_sender"));
@@ -232,8 +247,9 @@ public class NewFeedbackEmailSupplierTest {
     MailDTO generatedMail = generatedMails.get(0);
     assertThat(generatedMail.getTemplate(), is(TEMPLATE_NEW_FEEDBACK_MESSAGE_NOTIFICATION));
     assertThat(generatedMail.getEmail(), is("email@email.com"));
-    assertThat(generatedMail.getLanguage(), is(
-        de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.DE));
+    assertThat(
+        generatedMail.getLanguage(),
+        is(de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.DE));
     List<TemplateDataDTO> templateData = generatedMail.getTemplateData();
     assertThat(templateData, hasSize(4));
     assertThat(templateData.get(0).getKey(), is("name_sender"));
@@ -247,8 +263,9 @@ public class NewFeedbackEmailSupplierTest {
   }
 
   @Test
-  public void generateEmails_Should_ReturnExpectedMail_When_AnotherConsultantWroteAndFeedbackToggleIsOn()
-      throws RocketChatGetGroupMembersException {
+  public void
+      generateEmails_Should_ReturnExpectedMail_When_AnotherConsultantWroteAndFeedbackToggleIsOn()
+          throws RocketChatGetGroupMembersException {
     when(session.getUser()).thenReturn(USER);
     when(session.getConsultant()).thenReturn(CONSULTANT_2);
     setField(newFeedbackEmailSupplier, "userId", CONSULTANT.getId());
@@ -334,8 +351,6 @@ public class NewFeedbackEmailSupplierTest {
   }
 
   private void whenConsultantIsMain(boolean returnValue) {
-    when(
-        keycloakService.userHasRole(anyString(), eq("main-consultant"))
-    ).thenReturn(returnValue);
+    when(keycloakService.userHasRole(anyString(), eq("main-consultant"))).thenReturn(returnValue);
   }
 }

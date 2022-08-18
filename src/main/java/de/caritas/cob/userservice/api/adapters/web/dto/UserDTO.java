@@ -8,13 +8,6 @@ import static de.caritas.cob.userservice.api.helper.UserHelper.STATE_REGEXP;
 import static de.caritas.cob.userservice.api.helper.UserHelper.TERMS_ACCEPTED_REGEXP;
 import static de.caritas.cob.userservice.api.helper.UserHelper.VALID_POSTCODE_REGEX;
 
-import java.util.Collection;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,15 +18,20 @@ import de.caritas.cob.userservice.api.adapters.web.dto.validation.ValidAge;
 import de.caritas.cob.userservice.api.adapters.web.dto.validation.ValidState;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.Collection;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * User model
- */
+/** User model */
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -132,8 +130,14 @@ public class UserDTO implements UserRegistrationDTO {
     this.email = email;
   }
 
-  public UserDTO(String username, String postcode, Long agencyId, String password, String email,
-      String termsAccepted, String consultingTypeId) {
+  public UserDTO(
+      String username,
+      String postcode,
+      Long agencyId,
+      String password,
+      String email,
+      String termsAccepted,
+      String consultingTypeId) {
     this.username = username;
     this.postcode = postcode;
     this.agencyId = agencyId;
@@ -152,18 +156,41 @@ public class UserDTO implements UserRegistrationDTO {
   @Override
   public String toString() {
     return "UserDTO{"
-        + "username='" + username + '\''
-        + ", postcode='" + postcode + '\''
-        + ", agencyId=" + agencyId
-        + ", age='" + age + '\''
-        + ", state='" + state + '\''
-        + ", termsAccepted='" + termsAccepted + '\''
-        + ", consultingType='" + consultingType + '\''
-        + ", tenantId='" + tenantId + '\''
-        + ", mainTopicId='" + mainTopicId + '\''
-        + ", gender='" + userGender + '\''
-        + ", topicIds='" + topicIds + '\''
-        + ", counsellingRelation='" + counsellingRelation + '\''
+        + "username='"
+        + username
+        + '\''
+        + ", postcode='"
+        + postcode
+        + '\''
+        + ", agencyId="
+        + agencyId
+        + ", age='"
+        + age
+        + '\''
+        + ", state='"
+        + state
+        + '\''
+        + ", termsAccepted='"
+        + termsAccepted
+        + '\''
+        + ", consultingType='"
+        + consultingType
+        + '\''
+        + ", tenantId='"
+        + tenantId
+        + '\''
+        + ", mainTopicId='"
+        + mainTopicId
+        + '\''
+        + ", gender='"
+        + userGender
+        + '\''
+        + ", topicIds='"
+        + topicIds
+        + '\''
+        + ", counsellingRelation='"
+        + counsellingRelation
+        + '\''
         + '}';
   }
 }

@@ -8,9 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.web.client.RestTemplate;
 
-/**
- * Configuration class for the MessageService API client.
- */
+/** Configuration class for the MessageService API client. */
 @Configuration
 public class MessageServiceApiClientConfig {
 

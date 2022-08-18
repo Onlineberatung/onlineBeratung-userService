@@ -859,29 +859,27 @@
 				</configuration>
 			</plugin>
 			<!-- Code style check -->
-	    	<plugin>
-			    <groupId>org.apache.maven.plugins</groupId>
-			    <artifactId>maven-checkstyle-plugin</artifactId>
-			    <version>3.1.1</version>
-			    <executions>
-			        <execution>
-			            <id>validate</id>
-			            <phase>validate</phase>
-			            <configuration>
-			                <configLocation>google_checks_light.xml</configLocation>
-			                <encoding>UTF-8</encoding>
-			                <failsOnError>true</failsOnError>
-			                <consoleOutput>true</consoleOutput>
-			                <failOnViolation>true</failOnViolation>
-							<logViolationsToConsole>true</logViolationsToConsole>
-							<violationSeverity>warning</violationSeverity>
-			                <includeTestSourceDirectory>true</includeTestSourceDirectory>
-			            </configuration>
-			            <goals>
-			                <goal>check</goal>
-			            </goals>
-			        </execution>
-			    </executions>
+			<plugin>
+				<groupId>com.diffplug.spotless</groupId>
+				<artifactId>spotless-maven-plugin</artifactId>
+				<version>2.23.0</version>
+				<configuration>
+					<java>
+						<toggleOffOn />
+						<googleJavaFormat>
+							<version>1.15.0</version>
+							<style>GOOGLE</style>
+						</googleJavaFormat>
+					</java>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<phase>compile</phase>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

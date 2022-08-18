@@ -34,8 +34,7 @@ public class Language {
       columnDefinition = "varchar(36)",
       name = "consultant_id",
       nullable = false,
-      foreignKey = @ForeignKey(name = "language_code_consultant_constraint")
-  )
+      foreignKey = @ForeignKey(name = "language_code_consultant_constraint"))
   @ToString.Exclude
   private Consultant consultant;
 
@@ -44,4 +43,3 @@ public class Language {
   @Column(length = 2)
   private LanguageCode languageCode;
 }
-

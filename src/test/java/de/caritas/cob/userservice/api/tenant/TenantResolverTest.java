@@ -30,23 +30,17 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 class TenantResolverTest {
 
   public static final long TECHNICAL_CONTEXT = 0L;
-  @Mock
-  SubdomainExtractor subdomainExtractor;
+  @Mock SubdomainExtractor subdomainExtractor;
 
-  @Mock
-  TenantService tenantService;
+  @Mock TenantService tenantService;
 
-  @Mock
-  TenantAdminService tenantAdminService;
+  @Mock TenantAdminService tenantAdminService;
 
-  @Mock
-  TenantHeaderSupplier tenantHeaderSupplier;
+  @Mock TenantHeaderSupplier tenantHeaderSupplier;
 
-  @Mock
-  HttpServletRequest authenticatedRequest;
+  @Mock HttpServletRequest authenticatedRequest;
 
-  @Mock
-  HttpServletRequest nonAuthenticatedRequest;
+  @Mock HttpServletRequest nonAuthenticatedRequest;
 
   @Mock(answer = Answers.RETURNS_DEEP_STUBS)
   KeycloakAuthenticationToken token;
@@ -54,26 +48,23 @@ class TenantResolverTest {
   @Mock(answer = Answers.RETURNS_DEEP_STUBS)
   AccessToken accessToken;
 
-  @Mock
-  Access access;
+  @Mock Access access;
 
-  @InjectMocks
-  TenantResolver tenantResolver;
+  @InjectMocks TenantResolver tenantResolver;
 
-  @Mock
-  private ServletRequestAttributes requestAttributes;
+  @Mock private ServletRequestAttributes requestAttributes;
 
-  @Mock
-  private HttpServletRequest httpServletRequest;
+  @Mock private HttpServletRequest httpServletRequest;
 
   @Test
   void resolve_Should_ResolveFromAccessTokenForAuthenticatedUser() {
     // given
     when(authenticatedRequest.getUserPrincipal()).thenReturn(token);
     when(subdomainExtractor.getCurrentSubdomain()).thenReturn(Optional.of("mucoviscidose"));
-    when(tenantService.getRestrictedTenantData("mucoviscidose")).thenReturn(
-        new de.caritas.cob.userservice.tenantservice.generated.web.model.RestrictedTenantDTO()
-            .id(1L));
+    when(tenantService.getRestrictedTenantData("mucoviscidose"))
+        .thenReturn(
+            new de.caritas.cob.userservice.tenantservice.generated.web.model.RestrictedTenantDTO()
+                .id(1L));
     HashMap<String, Object> claimMap = givenClaimMapContainingTenantId(1);
     when(token.getAccount().getKeycloakSecurityContext().getToken().getOtherClaims())
         .thenReturn(claimMap);
@@ -96,21 +87,23 @@ class TenantResolverTest {
   }
 
   @Test
-  void resolve_Should_ThrowAccessDeniedExceptionForNotAuthenticatedUser_IfSubdomainCouldNotBeDetermined() {
+  void
+      resolve_Should_ThrowAccessDeniedExceptionForNotAuthenticatedUser_IfSubdomainCouldNotBeDetermined() {
     // given
     when(subdomainExtractor.getCurrentSubdomain()).thenReturn(Optional.empty());
     // when, then
-    assertThrows(AccessDeniedException.class,
-        () -> tenantResolver.resolve(nonAuthenticatedRequest));
+    assertThrows(
+        AccessDeniedException.class, () -> tenantResolver.resolve(nonAuthenticatedRequest));
   }
 
   @Test
   void resolve_Should_ResolveTenantId_IfSubdomainCouldBeDetermined() {
     // given
     when(subdomainExtractor.getCurrentSubdomain()).thenReturn(Optional.of("mucoviscidose"));
-    when(tenantService.getRestrictedTenantData("mucoviscidose")).thenReturn(
-        new de.caritas.cob.userservice.tenantservice.generated.web.model.RestrictedTenantDTO()
-            .id(1L));
+    when(tenantService.getRestrictedTenantData("mucoviscidose"))
+        .thenReturn(
+            new de.caritas.cob.userservice.tenantservice.generated.web.model.RestrictedTenantDTO()
+                .id(1L));
     // when
     Long resolved = tenantResolver.resolve(nonAuthenticatedRequest);
     // then
@@ -121,8 +114,7 @@ class TenantResolverTest {
   void resolve_Should_ResolveTenantId_ForTechnicalUserRole() {
     // given
     when(authenticatedRequest.getUserPrincipal()).thenReturn(token);
-    when(token.getAccount()
-        .getKeycloakSecurityContext().getToken()).thenReturn(accessToken);
+    when(token.getAccount().getKeycloakSecurityContext().getToken()).thenReturn(accessToken);
 
     when(accessToken.getRealmAccess().getRoles()).thenReturn(Sets.newLinkedHashSet("technical"));
     Long resolved = tenantResolver.resolve(authenticatedRequest);
@@ -134,8 +126,7 @@ class TenantResolverTest {
   void resolve_Should_ResolveTenantId_ForTenantSuperAdminUserRole() {
     // given
     when(authenticatedRequest.getUserPrincipal()).thenReturn(token);
-    when(token.getAccount()
-        .getKeycloakSecurityContext().getToken()).thenReturn(accessToken);
+    when(token.getAccount().getKeycloakSecurityContext().getToken()).thenReturn(accessToken);
 
     when(accessToken.getRealmAccess().getRoles()).thenReturn(Sets.newLinkedHashSet("tenant-admin"));
     Long resolved = tenantResolver.resolve(authenticatedRequest);
@@ -143,13 +134,12 @@ class TenantResolverTest {
     assertThat(resolved).isEqualTo(TECHNICAL_CONTEXT);
   }
 
-
   @Test
-  void resolve_Should_ThrowAccessDeniedException_IfTokenDoesNotHaveRealmTechnicalRoleAndTenantIdNotExistInClaims() {
+  void
+      resolve_Should_ThrowAccessDeniedException_IfTokenDoesNotHaveRealmTechnicalRoleAndTenantIdNotExistInClaims() {
     // given, when
     when(authenticatedRequest.getUserPrincipal()).thenReturn(token);
-    when(token.getAccount()
-        .getKeycloakSecurityContext().getToken()).thenReturn(accessToken);
+    when(token.getAccount().getKeycloakSecurityContext().getToken()).thenReturn(accessToken);
 
     when(accessToken.getRealmAccess().getRoles()).thenReturn(Sets.newLinkedHashSet("anyOtherRole"));
     // then
@@ -174,5 +164,4 @@ class TenantResolverTest {
     claimMap.put("tenantId", tenantId);
     return claimMap;
   }
-
 }

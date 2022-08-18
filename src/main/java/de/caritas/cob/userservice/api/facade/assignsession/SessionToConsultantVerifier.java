@@ -23,23 +23,20 @@ public class SessionToConsultantVerifier {
 
   private final @NonNull SessionToConsultantConditionProvider conditionProvider;
 
-  /**
-   * verifies if {@link Session} is not already in progress.
-   */
+  /** verifies if {@link Session} is not already in progress. */
   public void verifySessionIsNotInProgress(ConsultantSessionDTO consultantSessionDTO) {
     if (this.conditionProvider.isSessionInProgress(consultantSessionDTO.getSession())) {
-      var message = String.format(
-          "Session %s is already assigned to a consultant and cannot be accepted by consultant %s.",
-          consultantSessionDTO.getSession().getId().toString(),
-          consultantSessionDTO.getConsultant().getId());
+      var message =
+          String.format(
+              "Session %s is already assigned to a consultant and cannot be accepted by consultant %s.",
+              consultantSessionDTO.getSession().getId().toString(),
+              consultantSessionDTO.getConsultant().getId());
 
       throw new ConflictException(message, LogService::logAssignSessionFacadeWarning);
     }
   }
 
-  /**
-   * verifies necessary input data of {@link Session} and {@link Consultant}.
-   */
+  /** verifies necessary input data of {@link Session} and {@link Consultant}. */
   public void verifyPreconditionsForAssignment(ConsultantSessionDTO consultantSessionDTO) {
     verifyIfSessionIsAlreadyAssignedToConsultant(consultantSessionDTO);
     verifyUserAndConsultantHaveRocketChatId(consultantSessionDTO);
@@ -59,21 +56,22 @@ public class SessionToConsultantVerifier {
     }
 
     if (this.conditionProvider.isNewSession(consultantSessionDTO.getSession())) {
-      var message = String.format(
-          "Session %s is already assigned to a consultant and cannot be accepted by consultant %s.",
-          consultantSessionDTO.getSession().getId().toString(),
-          consultantSessionDTO.getConsultant().getId());
+      var message =
+          String.format(
+              "Session %s is already assigned to a consultant and cannot be accepted by consultant %s.",
+              consultantSessionDTO.getSession().getId().toString(),
+              consultantSessionDTO.getConsultant().getId());
 
       throw new ConflictException(message, LogService::logAssignSessionFacadeWarning);
     }
 
-    if (this.conditionProvider
-        .isSessionAlreadyAssignedToConsultant(consultantSessionDTO.getConsultant(),
-            consultantSessionDTO.getSession())) {
-      var message = String.format(
-          "Session %s is already assigned to this consultant. Assignment to consultant %s is not possible.",
-          consultantSessionDTO.getSession().getId().toString(),
-          consultantSessionDTO.getConsultant().getId());
+    if (this.conditionProvider.isSessionAlreadyAssignedToConsultant(
+        consultantSessionDTO.getConsultant(), consultantSessionDTO.getSession())) {
+      var message =
+          String.format(
+              "Session %s is already assigned to this consultant. Assignment to consultant %s is not possible.",
+              consultantSessionDTO.getSession().getId().toString(),
+              consultantSessionDTO.getConsultant().getId());
 
       throw new ConflictException(message, LogService::logAssignSessionFacadeWarning);
     }
@@ -82,17 +80,19 @@ public class SessionToConsultantVerifier {
   private void verifyUserAndConsultantHaveRocketChatId(ConsultantSessionDTO consultantSessionDTO) {
 
     if (this.conditionProvider.hasSessionUserNoRcId(consultantSessionDTO.getSession())) {
-      var message = String.format(
-          "The provided user with id %s does not have a Rocket.Chat id assigned in the database.",
-          consultantSessionDTO.getSession().getUser().getUserId());
+      var message =
+          String.format(
+              "The provided user with id %s does not have a Rocket.Chat id assigned in the database.",
+              consultantSessionDTO.getSession().getUser().getUserId());
 
       throw new InternalServerErrorException(message, LogService::logAssignSessionFacadeError);
     }
 
     if (this.conditionProvider.hasConsultantNoRcId(consultantSessionDTO.getConsultant())) {
-      var message = String.format(
-          "The provided consultant with id %s does not have a Rocket.Chat id assigned in the database.",
-          consultantSessionDTO.getConsultant().getId());
+      var message =
+          String.format(
+              "The provided consultant with id %s does not have a Rocket.Chat id assigned in the database.",
+              consultantSessionDTO.getConsultant().getId());
 
       throw new InternalServerErrorException(message, LogService::logAssignSessionFacadeError);
     }
@@ -101,10 +101,12 @@ public class SessionToConsultantVerifier {
   private void verifyIfConsultantIsAssignedToAgency(ConsultantSessionDTO consultantSessionDTO) {
     if (this.conditionProvider.isSessionsAgencyNotAvailableInConsultantAgencies(
         consultantSessionDTO.getConsultant(), consultantSessionDTO.getSession())) {
-      var message = String.format("Agency %s of session %s is not assigned to consultant %s.",
-          consultantSessionDTO.getSession().getAgencyId().toString(),
-          consultantSessionDTO.getSession().getId().toString(),
-          consultantSessionDTO.getConsultant().getId());
+      var message =
+          String.format(
+              "Agency %s of session %s is not assigned to consultant %s.",
+              consultantSessionDTO.getSession().getAgencyId().toString(),
+              consultantSessionDTO.getSession().getId().toString(),
+              consultantSessionDTO.getConsultant().getId());
 
       throw new ForbiddenException(message, LogService::logAssignSessionFacadeWarning);
     }
@@ -114,14 +116,14 @@ public class SessionToConsultantVerifier {
       ConsultantSessionDTO consultantSessionDTO) {
     if (this.conditionProvider.isSessionsConsultingTypeNotAvailableForConsultant(
         consultantSessionDTO.getConsultant(), consultantSessionDTO.getSession())) {
-      var message = String.format(
-          "Consulting type %s of session %s is not available for consultant %s.",
-          consultantSessionDTO.getSession().getConsultingTypeId(),
-          consultantSessionDTO.getSession().getId().toString(),
-          consultantSessionDTO.getConsultant().getId());
+      var message =
+          String.format(
+              "Consulting type %s of session %s is not available for consultant %s.",
+              consultantSessionDTO.getSession().getConsultingTypeId(),
+              consultantSessionDTO.getSession().getId().toString(),
+              consultantSessionDTO.getConsultant().getId());
 
       throw new ForbiddenException(message, LogService::logAssignSessionFacadeWarning);
     }
   }
-
 }

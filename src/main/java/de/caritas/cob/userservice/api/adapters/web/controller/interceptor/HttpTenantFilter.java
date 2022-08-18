@@ -14,11 +14,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-
-/**
- * Sets tenantId for current thread needed for tenant feature.
- */
-
+/** Sets tenantId for current thread needed for tenant feature. */
 @Component
 @ConditionalOnExpression("${multitenancy.enabled:true}")
 @RequiredArgsConstructor
@@ -28,8 +24,9 @@ public class HttpTenantFilter extends OncePerRequestFilter {
   private final @Nullable TenantResolver tenantResolver;
 
   @Override
-  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-      FilterChain filterChain) throws ServletException, IOException {
+  protected void doFilterInternal(
+      HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+      throws ServletException, IOException {
     log.debug("Trying to resolve tenant for request coming from URI {}", request.getRequestURI());
     Long tenantId = tenantResolver.resolve(request);
     log.debug("Setting current tenant context to: " + tenantId);

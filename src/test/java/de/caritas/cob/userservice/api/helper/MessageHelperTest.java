@@ -23,7 +23,6 @@ public class MessageHelperTest {
   private final String MESSAGE_WITH_REPLACED_PLACEHOLDERS =
       "test " + PLACEHOLDER1_VALUE + " test " + PLACEHOLDER2_VALUE;
 
-
   @Test
   public void replaceUsernameInMessage_Should_ReplaceUsernamePlaceholderInGivenMessage() {
 
@@ -31,7 +30,6 @@ public class MessageHelperTest {
         MessageHelper.replaceUsernameInMessage(MESSAGE_WITH_USERNAME_PLACEHOLDER, USERNAME);
 
     assertEquals(MESSAGE_WITH_REPLACED_USERNAME_PLACEHOLDER, result);
-
   }
 
   @Test
@@ -45,7 +43,5 @@ public class MessageHelperTest {
         MessageHelper.replacePlaceholderInMessage(MESSAGE_WITH_PLACEHOLDERS, placeholderMap);
 
     assertEquals(MESSAGE_WITH_REPLACED_PLACEHOLDERS, result);
-
   }
-
 }

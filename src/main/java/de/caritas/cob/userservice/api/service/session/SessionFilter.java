@@ -12,7 +12,8 @@ public enum SessionFilter {
   private final String value;
 
   public static Optional<SessionFilter> getByValue(String value) {
-    return Arrays.stream(values()).filter(sessionFilter -> sessionFilter.value.equals(value))
+    return Arrays.stream(values())
+        .filter(sessionFilter -> sessionFilter.value.equals(value))
         .findFirst();
   }
 }

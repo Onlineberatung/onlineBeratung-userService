@@ -47,5 +47,4 @@ public class SessionTest {
 
     assertThat(equals, is(true));
   }
-
 }

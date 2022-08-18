@@ -12,6 +12,4 @@ public class NoUserSessionException extends Exception {
   public NoUserSessionException(String message) {
     super(message);
   }
-
-
 }

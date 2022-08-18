@@ -26,8 +26,7 @@ public class KeycloakMapper {
   }
 
   public UserRepresentation userRepresentationOf(String locale) {
-    return new UserRepresentation()
-        .singleAttribute("locale", locale);
+    return new UserRepresentation().singleAttribute("locale", locale);
   }
 
   public Map<String, String> mapOf(ResponseEntity<SuccessWithEmail> responseEntity) {
@@ -39,11 +38,9 @@ public class KeycloakMapper {
     return Map.of(
         "created", String.valueOf(isCreated),
         "createdBefore", String.valueOf(hasBeenCreatedBefore),
-        "attemptsLeft", String.valueOf(
-            !hasBeenTriedTooOften && !isCreated && !hasBeenCreatedBefore
-        ),
-        "email", Objects.requireNonNull(responseEntity.getBody()).getEmail()
-    );
+        "attemptsLeft",
+            String.valueOf(!hasBeenTriedTooOften && !isCreated && !hasBeenCreatedBefore),
+        "email", Objects.requireNonNull(responseEntity.getBody()).getEmail());
   }
 
   public Map<String, String> mapOf(HttpClientErrorException exception) {
@@ -53,8 +50,7 @@ public class KeycloakMapper {
         "created", "false",
         "createdBefore", "false",
         "attemptsLeft", String.valueOf(!status.equals(HttpStatus.TOO_MANY_REQUESTS)),
-        "email", "null"
-    );
+        "email", "null");
   }
 
   public Map<String, String> mapOf(UserRepresentation userRepresentation) {
@@ -63,7 +59,6 @@ public class KeycloakMapper {
     return Map.of(
         "encodedUsername", username,
         "decodedUsername", usernameTranscoder.decodeUsername(username),
-        "email", userRepresentation.getEmail()
-    );
+        "email", userRepresentation.getEmail());
   }
 }

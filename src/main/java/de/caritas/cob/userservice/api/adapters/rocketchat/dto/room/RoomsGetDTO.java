@@ -5,10 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Rocket.Chat rooms.get DTO
- */
-
+/** Rocket.Chat rooms.get DTO */
 @Setter
 @Getter
 @AllArgsConstructor
@@ -19,5 +16,4 @@ public class RoomsGetDTO {
   private boolean success;
   private String status;
   private String message;
-
 }

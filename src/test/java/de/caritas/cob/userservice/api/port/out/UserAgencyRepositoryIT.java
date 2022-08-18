@@ -26,11 +26,9 @@ class UserAgencyRepositoryIT {
 
   private UserAgency userAgency;
 
-  @Autowired
-  private UserAgencyRepository underTest;
+  @Autowired private UserAgencyRepository underTest;
 
-  @Autowired
-  private UserRepository userRepository;
+  @Autowired private UserRepository userRepository;
 
   @AfterEach
   public void reset() {

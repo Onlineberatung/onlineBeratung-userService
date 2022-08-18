@@ -15,7 +15,8 @@ import org.springframework.stereotype.Service;
 public class IdentityManager implements IdentityManaging {
 
   private static final String VIEW_ALL_PEER_SESSIONS = "AUTHORIZATION_VIEW_ALL_PEER_SESSIONS";
-  private static final String VIEW_ALL_FEEDBACK_SESSIONS = "AUTHORIZATION_VIEW_ALL_FEEDBACK_SESSIONS";
+  private static final String VIEW_ALL_FEEDBACK_SESSIONS =
+      "AUTHORIZATION_VIEW_ALL_FEEDBACK_SESSIONS";
 
   private final IdentityClient identityClient;
 

@@ -19,11 +19,12 @@ class ReassignmentConfirmationEmailSupplierTest {
   void generateEmails_Should_returnMailWithExpectedData() {
     var easyRandom = new EasyRandom();
     var receiverConsultant = easyRandom.nextObject(Consultant.class);
-    var reassignmentSupplier = ReassignmentConfirmationEmailSupplier.builder()
-        .receiverConsultant(receiverConsultant)
-        .senderConsultantName("seder name")
-        .applicationBaseUrl("base")
-        .build();
+    var reassignmentSupplier =
+        ReassignmentConfirmationEmailSupplier.builder()
+            .receiverConsultant(receiverConsultant)
+            .senderConsultantName("seder name")
+            .applicationBaseUrl("base")
+            .build();
 
     var mails = reassignmentSupplier.generateEmails();
 
@@ -44,5 +45,4 @@ class ReassignmentConfirmationEmailSupplierTest {
     assertThat(mail.getTemplateData().get(2).getKey(), is("url"));
     assertThat(mail.getTemplateData().get(2).getValue(), is("base"));
   }
-
 }

@@ -13,9 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-/**
- * Registry to generate, hold and handle all current anonymous usernames.
- */
+/** Registry to generate, hold and handle all current anonymous usernames. */
 @Component
 @RequiredArgsConstructor
 public class AnonymousUsernameRegistry {
@@ -87,5 +85,4 @@ public class AnonymousUsernameRegistry {
       // do nothing
     }
   }
-
 }

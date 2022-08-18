@@ -13,12 +13,13 @@ import org.junit.Test;
 
 public class AgencyDependedViolationReportRuleTest {
 
-  private AgencyDependedViolationReportRule reportRule = new AgencyDependedViolationReportRule() {
-    @Override
-    public List<ViolationDTO> generateViolations() {
-      return emptyList();
-    }
-  };
+  private AgencyDependedViolationReportRule reportRule =
+      new AgencyDependedViolationReportRule() {
+        @Override
+        public List<ViolationDTO> generateViolations() {
+          return emptyList();
+        }
+      };
 
   @Test
   public void getAllAgencies_Should_returnEmptyList_When_noAgenciesHaveBeenSet() {
@@ -29,8 +30,8 @@ public class AgencyDependedViolationReportRuleTest {
 
   @Test
   public void getAllAgencies_Should_returnExpectedList_When_agenciesHaveBeenSet() {
-    List<AgencyAdminResponseDTO> agencies = asList(new AgencyAdminResponseDTO(),
-        new AgencyAdminResponseDTO());
+    List<AgencyAdminResponseDTO> agencies =
+        asList(new AgencyAdminResponseDTO(), new AgencyAdminResponseDTO());
 
     this.reportRule.setAllAgencies(agencies);
     List<AgencyAdminResponseDTO> allAgencies = reportRule.getAllAgencies();
@@ -38,5 +39,4 @@ public class AgencyDependedViolationReportRuleTest {
     assertThat(allAgencies, hasSize(2));
     assertThat(allAgencies, is(agencies));
   }
-
 }

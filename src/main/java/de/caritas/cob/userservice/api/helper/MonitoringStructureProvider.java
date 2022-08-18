@@ -7,10 +7,10 @@ import static org.apache.commons.collections4.MapUtils.isNotEmpty;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.caritas.cob.userservice.api.adapters.web.dto.MonitoringDTO;
 import de.caritas.cob.userservice.api.exception.InitializeMonitoringException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.adapters.web.dto.MonitoringDTO;
 import de.caritas.cob.userservice.api.model.Monitoring;
 import de.caritas.cob.userservice.api.model.Monitoring.MonitoringType;
 import de.caritas.cob.userservice.api.model.MonitoringOption;
@@ -31,9 +31,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-/**
- * Structure mapping class to provide sorted monitoring structure representation.
- */
+/** Structure mapping class to provide sorted monitoring structure representation. */
 @Component
 @RequiredArgsConstructor
 public class MonitoringStructureProvider {
@@ -45,7 +43,7 @@ public class MonitoringStructureProvider {
    * Session}.
    *
    * @param monitoringDTO the given {@link MonitoringDTO}
-   * @param sessionId     the given id of the session
+   * @param sessionId the given id of the session
    * @return the created monitoring {@link List}
    */
   public List<Monitoring> createMonitoringList(MonitoringDTO monitoringDTO, Long sessionId) {
@@ -74,8 +72,8 @@ public class MonitoringStructureProvider {
     return emptyList();
   }
 
-  private List<Monitoring> fromSecondLevel(Map<String, Object> secondLevel, Long sessionId,
-      MonitoringType monitoringType) {
+  private List<Monitoring> fromSecondLevel(
+      Map<String, Object> secondLevel, Long sessionId, MonitoringType monitoringType) {
     if (isNotEmpty(secondLevel)) {
       return secondLevel.entrySet().stream()
           .filter(entry -> nonNull(entry.getValue()))
@@ -86,26 +84,36 @@ public class MonitoringStructureProvider {
   }
 
   @SuppressWarnings("unchecked")
-  private Monitoring fromSecondLevelEntry(Entry<String, Object> entry, Long sessionId,
-      MonitoringType monitoringType) {
+  private Monitoring fromSecondLevelEntry(
+      Entry<String, Object> entry, Long sessionId, MonitoringType monitoringType) {
     if (entry.getValue() instanceof Boolean) {
       return new Monitoring(sessionId, monitoringType, entry.getKey(), (Boolean) entry.getValue());
     } else {
-      var monitoring = new Monitoring(sessionId, monitoringType, entry.getKey(), null,
-          new ArrayList<>());
-      buildMonitoringOptions((Map<String, Object>) entry.getValue(), sessionId, monitoringType,
-          monitoring);
+      var monitoring =
+          new Monitoring(sessionId, monitoringType, entry.getKey(), null, new ArrayList<>());
+      buildMonitoringOptions(
+          (Map<String, Object>) entry.getValue(), sessionId, monitoringType, monitoring);
       return monitoring;
     }
   }
 
-  private void buildMonitoringOptions(Map<String, Object> thirdLevel, Long sessionId,
-      MonitoringType monitoringType, Monitoring parentMonitoring) {
-    thirdLevel.forEach((key, value) -> {
-      var monitoringOption = new MonitoringOption(sessionId, monitoringType,
-          parentMonitoring.getKey(), key, (Boolean) value, parentMonitoring);
-      parentMonitoring.getMonitoringOptionList().add(monitoringOption);
-    });
+  private void buildMonitoringOptions(
+      Map<String, Object> thirdLevel,
+      Long sessionId,
+      MonitoringType monitoringType,
+      Monitoring parentMonitoring) {
+    thirdLevel.forEach(
+        (key, value) -> {
+          var monitoringOption =
+              new MonitoringOption(
+                  sessionId,
+                  monitoringType,
+                  parentMonitoring.getKey(),
+                  key,
+                  (Boolean) value,
+                  parentMonitoring);
+          parentMonitoring.getMonitoringOptionList().add(monitoringOption);
+        });
   }
 
   /**
@@ -128,14 +136,18 @@ public class MonitoringStructureProvider {
   private InputStream getMonitoringJSONStream(int consultingTypeId) {
     String monitoringFilePath = null;
     try {
-      monitoringFilePath = Objects
-          .requireNonNull(consultingTypeManager.getConsultingTypeSettings(consultingTypeId)
-              .getMonitoring()).getMonitoringTemplateFile();
+      monitoringFilePath =
+          Objects.requireNonNull(
+                  consultingTypeManager.getConsultingTypeSettings(consultingTypeId).getMonitoring())
+              .getMonitoringTemplateFile();
       return TypeReference.class.getResourceAsStream(monitoringFilePath);
     } catch (NullPointerException e) {
-      throw new InternalServerErrorException(String
-          .format("Stream for monitoring json file with path \"%s\" can not be opened",
-              monitoringFilePath), e, LogService::logInternalServerError);
+      throw new InternalServerErrorException(
+          String.format(
+              "Stream for monitoring json file with path \"%s\" can not be opened",
+              monitoringFilePath),
+          e,
+          LogService::logInternalServerError);
     }
   }
 
@@ -150,31 +162,30 @@ public class MonitoringStructureProvider {
    * Returns a sorted {@link Map} of monitoring items according to the order that is defined in the
    * monitoring JSON file.
    *
-   * @param unsortedMap      the {@link Map} before sorting
+   * @param unsortedMap the {@link Map} before sorting
    * @param consultingTypeId the consultingType ID to use for sorting
    * @return the sorted {@link Map}
    */
-  public Map<String, Object> sortMonitoringMap(Map<String, Object> unsortedMap,
-      int consultingTypeId) {
+  public Map<String, Object> sortMonitoringMap(
+      Map<String, Object> unsortedMap, int consultingTypeId) {
 
-    Map<String, Object> sortedMap =
-        getMonitoringInitialList(consultingTypeId).getProperties();
+    Map<String, Object> sortedMap = getMonitoringInitialList(consultingTypeId).getProperties();
     setValuesForSortedMonitoringMap(sortedMap, unsortedMap);
 
     return sortedMap;
   }
 
-  private void setValuesForSortedMonitoringMap(Map<String, Object> sortedConfiguration,
-      Map<String, Object> loadedInput) {
-    sortedConfiguration.entrySet()
-        .forEach(entry -> handleEntryValueType(loadedInput, entry));
+  private void setValuesForSortedMonitoringMap(
+      Map<String, Object> sortedConfiguration, Map<String, Object> loadedInput) {
+    sortedConfiguration.entrySet().forEach(entry -> handleEntryValueType(loadedInput, entry));
   }
 
   @SuppressWarnings("unchecked")
-  private void handleEntryValueType(Map<String, Object> loadedInput,
-      Entry<String, Object> configEntry) {
+  private void handleEntryValueType(
+      Map<String, Object> loadedInput, Entry<String, Object> configEntry) {
     if (configEntry.getValue() instanceof Map) {
-      setValuesForSortedMonitoringMap((Map<String, Object>) configEntry.getValue(),
+      setValuesForSortedMonitoringMap(
+          (Map<String, Object>) configEntry.getValue(),
           (Map<String, Object>) loadedInput.getOrDefault(configEntry.getKey(), emptyMap()));
     } else if (configEntry.getValue() instanceof Boolean) {
       Boolean value = findValueForKeyName(configEntry.getKey(), loadedInput);
@@ -186,5 +197,4 @@ public class MonitoringStructureProvider {
   private Boolean findValueForKeyName(String key, Map<String, Object> loadedInput) {
     return loadedInput.containsKey(key) ? (Boolean) loadedInput.get(key) : Boolean.FALSE;
   }
-
 }

@@ -6,7 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Body object for Rocket.Chat API Call for deleting a group https://rocket.chat/docs/developer-guides/rest-api/groups/delete/
+ * Body object for Rocket.Chat API Call for deleting a group
+ * https://rocket.chat/docs/developer-guides/rest-api/groups/delete/
  */
 @Setter
 @Getter
@@ -15,5 +16,4 @@ import lombok.Setter;
 public class GroupDeleteBodyDTO {
 
   private String roomId;
-
 }

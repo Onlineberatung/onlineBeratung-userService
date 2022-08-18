@@ -5,11 +5,11 @@ import static java.util.Collections.emptyMap;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsLastMessageDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsUpdateDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.subscriptions.SubscriptionsUpdateDTO;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
 import java.util.Date;
 import java.util.List;
@@ -47,8 +47,8 @@ public class RocketChatRoomInformationProvider {
 
     var userRooms = roomsForUpdate.stream().map(RoomsUpdateDTO::getId).collect(Collectors.toList());
     var lastMessagesRoom = getRcRoomLastMessages(roomsForUpdate);
-    var groupIdToLastMessageFallbackDate = collectFallbackDateOfRoomsWithoutLastMessage(
-        roomsForUpdate);
+    var groupIdToLastMessageFallbackDate =
+        collectFallbackDateOfRoomsWithoutLastMessage(roomsForUpdate);
 
     return RocketChatRoomInformation.builder()
         .readMessages(readMessages)
@@ -62,8 +62,8 @@ public class RocketChatRoomInformationProvider {
   private Map<String, Boolean> buildMessagesWithReadInfo(
       RocketChatCredentials rocketChatCredentials) {
 
-    List<SubscriptionsUpdateDTO> subscriptions = rocketChatService
-        .getSubscriptionsOfUser(rocketChatCredentials);
+    List<SubscriptionsUpdateDTO> subscriptions =
+        rocketChatService.getSubscriptionsOfUser(rocketChatCredentials);
 
     return subscriptions.stream()
         .collect(Collectors.toMap(SubscriptionsUpdateDTO::getRoomId, this::isMessageRead));
@@ -92,5 +92,4 @@ public class RocketChatRoomInformationProvider {
         .filter(room -> nonNull(room.getLastMessageDate()))
         .collect(Collectors.toMap(RoomsUpdateDTO::getId, RoomsUpdateDTO::getLastMessageDate));
   }
-
 }

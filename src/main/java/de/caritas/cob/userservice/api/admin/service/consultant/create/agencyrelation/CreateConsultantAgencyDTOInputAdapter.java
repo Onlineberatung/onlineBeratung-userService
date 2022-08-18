@@ -27,5 +27,4 @@ public class CreateConsultantAgencyDTOInputAdapter implements ConsultantAgencyCr
   public Long getAgencyId() {
     return this.createConsultantAgencyDTO.getAgencyId();
   }
-
 }

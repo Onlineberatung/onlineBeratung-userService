@@ -15,5 +15,4 @@ public abstract class AgencyDependedViolationReportRule implements ViolationRepo
   public List<AgencyAdminResponseDTO> getAllAgencies() {
     return isNotEmpty(this.allAgencies) ? this.allAgencies : emptyList();
   }
-
 }

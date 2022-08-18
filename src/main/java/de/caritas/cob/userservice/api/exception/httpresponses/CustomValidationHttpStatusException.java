@@ -6,9 +6,7 @@ import lombok.Getter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 
-/**
- * Custom validation exception for http status with reason.
- */
+/** Custom validation exception for http status with reason. */
 @Getter
 public class CustomValidationHttpStatusException extends CustomHttpStatusException {
 
@@ -23,8 +21,7 @@ public class CustomValidationHttpStatusException extends CustomHttpStatusExcepti
    */
   public CustomValidationHttpStatusException(HttpStatusExceptionReason httpStatusExceptionReason) {
     super();
-    this.customHttpHeader = new CustomHttpHeader(httpStatusExceptionReason)
-        .buildHeader();
+    this.customHttpHeader = new CustomHttpHeader(httpStatusExceptionReason).buildHeader();
     this.httpStatus = HttpStatus.BAD_REQUEST;
   }
 
@@ -32,15 +29,13 @@ public class CustomValidationHttpStatusException extends CustomHttpStatusExcepti
    * Creates a {@link CustomValidationHttpStatusException} with custom {@link HttpStatus} to be
    * returned.
    *
-   * @param reason     the reason for the exception
+   * @param reason the reason for the exception
    * @param httpStatus the {@link HttpStatus} to be returned
    */
-  public CustomValidationHttpStatusException(HttpStatusExceptionReason reason,
-      HttpStatus httpStatus) {
+  public CustomValidationHttpStatusException(
+      HttpStatusExceptionReason reason, HttpStatus httpStatus) {
     super();
-    this.customHttpHeader = new CustomHttpHeader(reason)
-        .buildHeader();
+    this.customHttpHeader = new CustomHttpHeader(reason).buildHeader();
     this.httpStatus = httpStatus;
   }
-
 }

@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.service.emailsupplier;
 
-import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.TEMPLATE_NEW_ENQUIRY_NOTIFICATION;
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
+import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.TEMPLATE_NEW_ENQUIRY_NOTIFICATION;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_DTO_U25;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.MAIN_CONSULTANT;
 import static java.util.Arrays.asList;
@@ -14,8 +14,8 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
-import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
@@ -32,19 +32,16 @@ public class NewEnquiryEmailSupplierTest {
 
   private NewEnquiryEmailSupplier newEnquiryEmailSupplier;
 
-  @Mock
-  private Session session;
+  @Mock private Session session;
 
-  @Mock
-  private ConsultantAgencyRepository consultantAgencyRepository;
+  @Mock private ConsultantAgencyRepository consultantAgencyRepository;
 
-  @Mock
-  private AgencyService agencyService;
+  @Mock private AgencyService agencyService;
 
   @Before
   public void setup() {
-    this.newEnquiryEmailSupplier = new NewEnquiryEmailSupplier(
-        consultantAgencyRepository, agencyService, null);
+    this.newEnquiryEmailSupplier =
+        new NewEnquiryEmailSupplier(consultantAgencyRepository, agencyService, null);
     this.newEnquiryEmailSupplier.setCurrentSession(session);
   }
 
@@ -60,12 +57,14 @@ public class NewEnquiryEmailSupplierTest {
     Consultant absentConsultant = new Consultant();
     absentConsultant.setAbsent(true);
     absentConsultant.setEmail("email");
-    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(anyLong())).thenReturn(asList(
-        null,
-        new ConsultantAgency(0L, new Consultant(), 0L, nowInUtc(), nowInUtc(),
-            nowInUtc(), null, null),
-        new ConsultantAgency(1L, absentConsultant, 1L, nowInUtc(), nowInUtc(),
-            nowInUtc(), null, null)));
+    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(anyLong()))
+        .thenReturn(
+            asList(
+                null,
+                new ConsultantAgency(
+                    0L, new Consultant(), 0L, nowInUtc(), nowInUtc(), nowInUtc(), null, null),
+                new ConsultantAgency(
+                    1L, absentConsultant, 1L, nowInUtc(), nowInUtc(), nowInUtc(), null, null)));
 
     List<MailDTO> generatedMails = newEnquiryEmailSupplier.generateEmails();
 
@@ -74,11 +73,13 @@ public class NewEnquiryEmailSupplierTest {
 
   @Test
   public void generateEmails_Should_ReturnExpectedMailDTO_When_PresentConsultantsWereFound() {
-    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(anyLong())).thenReturn(asList(
-        new ConsultantAgency(0L, MAIN_CONSULTANT, 0L, nowInUtc(), nowInUtc(),
-            nowInUtc(), null, null),
-        new ConsultantAgency(1L, MAIN_CONSULTANT, 1L, nowInUtc(), nowInUtc(),
-            nowInUtc(), null, null)));
+    when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(anyLong()))
+        .thenReturn(
+            asList(
+                new ConsultantAgency(
+                    0L, MAIN_CONSULTANT, 0L, nowInUtc(), nowInUtc(), nowInUtc(), null, null),
+                new ConsultantAgency(
+                    1L, MAIN_CONSULTANT, 1L, nowInUtc(), nowInUtc(), nowInUtc(), null, null)));
     when(agencyService.getAgency(any())).thenReturn(AGENCY_DTO_U25);
     when(session.getPostcode()).thenReturn("12345");
 
@@ -99,5 +100,4 @@ public class NewEnquiryEmailSupplierTest {
     assertThat(templateData.get(2).getValue(), is("Test Beratungsstelle"));
     assertThat(templateData.get(3).getKey(), is("url"));
   }
-
 }

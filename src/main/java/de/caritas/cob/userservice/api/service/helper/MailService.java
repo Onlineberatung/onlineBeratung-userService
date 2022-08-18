@@ -11,9 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
-/**
- * Service class to communicate with the MailService.
- */
+/** Service class to communicate with the MailService. */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -55,5 +53,4 @@ public class MailService {
       log.error("MailServiceHelper error: Error while calling the MailService", e);
     }
   }
-
 }

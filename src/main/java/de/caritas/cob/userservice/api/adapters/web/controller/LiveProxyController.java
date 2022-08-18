@@ -10,9 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Controller to consume live events and send them to the live service.
- */
+/** Controller to consume live events and send them to the live service. */
 @RestController
 @RequiredArgsConstructor
 @Api(tags = "live-controller")

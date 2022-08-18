@@ -12,5 +12,4 @@ public class MissingConsultingTypeException extends RuntimeException {
   public MissingConsultingTypeException(String message) {
     super(message);
   }
-
 }

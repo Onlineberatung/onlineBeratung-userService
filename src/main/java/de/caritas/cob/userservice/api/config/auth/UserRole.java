@@ -8,7 +8,6 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum UserRole {
-
   ANONYMOUS("anonymous"),
   USER("user"),
   CONSULTANT("consultant"),

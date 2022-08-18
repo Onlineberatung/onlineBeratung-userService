@@ -23,13 +23,14 @@ public class StopChatFacade {
   /**
    * Stops the given {@link Chat} and resets or deletes it depending on if it's repetitive or not.
    *
-   * @param chat       {@link Chat}
+   * @param chat {@link Chat}
    * @param consultant {@link Consultant}
    */
   public void stopChat(Chat chat, Consultant consultant) {
     checkConsultantChatPermission(chat, consultant);
 
-    this.actionsRegistry.buildContainerForType(Chat.class)
+    this.actionsRegistry
+        .buildContainerForType(Chat.class)
         .addActionToExecute(StopChatActionCommand.class)
         .executeActions(chat);
   }
@@ -37,9 +38,9 @@ public class StopChatFacade {
   private void checkConsultantChatPermission(Chat chat, Consultant consultant) {
     if (!chatPermissionVerifier.hasSameAgencyAssigned(chat, consultant)) {
       throw new ForbiddenException(
-          String.format("Consultant with id %s has no permission to stop chat with id %s",
+          String.format(
+              "Consultant with id %s has no permission to stop chat with id %s",
               consultant.getId(), chat.getId()));
     }
   }
-
 }

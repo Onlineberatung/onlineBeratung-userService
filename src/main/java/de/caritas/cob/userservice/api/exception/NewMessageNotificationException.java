@@ -22,5 +22,4 @@ public class NewMessageNotificationException extends RuntimeException {
   public NewMessageNotificationException(String message, Exception ex) {
     super(message, ex);
   }
-
 }

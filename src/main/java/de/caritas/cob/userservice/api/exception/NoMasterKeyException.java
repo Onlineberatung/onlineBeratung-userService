@@ -12,5 +12,4 @@ public class NoMasterKeyException extends RuntimeException {
   public NoMasterKeyException(String message) {
     super(message);
   }
-
 }

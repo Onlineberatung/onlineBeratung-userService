@@ -7,7 +7,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
-import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.StatelessCsrfFilter;
 import de.caritas.cob.userservice.api.config.CsrfSecurityProperties;
 import de.caritas.cob.userservice.api.config.CsrfSecurityProperties.ConfigProperty;
 import de.caritas.cob.userservice.api.config.CsrfSecurityProperties.Whitelist;
@@ -34,20 +33,15 @@ public class StatelessCsrfFilterTest {
 
   private StatelessCsrfFilter csrfFilter;
 
-  @Mock
-  private CsrfSecurityProperties csrfSecurityProperties;
+  @Mock private CsrfSecurityProperties csrfSecurityProperties;
 
-  @Mock
-  private HttpServletRequest request;
+  @Mock private HttpServletRequest request;
 
-  @Mock
-  private HttpServletResponse response;
+  @Mock private HttpServletResponse response;
 
-  @Mock
-  private FilterChain filterChain;
+  @Mock private FilterChain filterChain;
 
-  @Mock
-  private AccessDeniedHandler accessDeniedHandler;
+  @Mock private AccessDeniedHandler accessDeniedHandler;
 
   @Before
   public void setup() {
@@ -59,8 +53,8 @@ public class StatelessCsrfFilterTest {
     whitelistProperty.setProperty(CSRF_WHITELIST_COOKIE);
 
     Whitelist whitelist = new Whitelist();
-    whitelist.setAdminUris(new String[]{ADMIN_URI_ON_WHITE_LIST});
-    whitelist.setConfigUris(new String[]{});
+    whitelist.setAdminUris(new String[] {ADMIN_URI_ON_WHITE_LIST});
+    whitelist.setConfigUris(new String[] {});
     whitelist.setHeader(whitelistProperty);
 
     when(csrfSecurityProperties.getHeader()).thenReturn(headerProperty);
@@ -145,8 +139,9 @@ public class StatelessCsrfFilterTest {
   }
 
   @Test
-  public void doFilterInternal_Should_callAccessDeniedHandler_When_csrfHeaderIsNotEqualToCookieToken()
-      throws IOException, ServletException {
+  public void
+      doFilterInternal_Should_callAccessDeniedHandler_When_csrfHeaderIsNotEqualToCookieToken()
+          throws IOException, ServletException {
     when(request.getRequestURI()).thenReturn("uri");
     when(request.getMethod()).thenReturn("POST");
     when(request.getHeader(CSRF_HEADER)).thenReturn("csrfHeaderTokenValue");
@@ -158,5 +153,4 @@ public class StatelessCsrfFilterTest {
     verify(this.accessDeniedHandler, times(1)).handle(any(), any(), any());
     verifyNoMoreInteractions(this.filterChain);
   }
-
 }

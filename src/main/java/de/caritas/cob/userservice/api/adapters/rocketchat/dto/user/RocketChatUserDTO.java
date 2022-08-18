@@ -15,8 +15,8 @@ public class RocketChatUserDTO {
 
   @JsonProperty("_id")
   private String id;
+
   private String username;
   private String name;
   private List<UserRoomDTO> rooms;
-
 }

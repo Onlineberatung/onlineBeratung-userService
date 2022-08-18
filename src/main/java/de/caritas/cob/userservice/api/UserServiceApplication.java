@@ -21,10 +21,13 @@ public class UserServiceApplication {
 
   @Value("${thread.executor.corePoolSize}")
   private int THREAD_CORE_POOL_SIZE;
+
   @Value("${thread.executor.maxPoolSize}")
   private int THREAD_MAX_POOL_SIZE;
+
   @Value("${thread.executor.queueCapacity}")
   private int THREAD_QUEUE_CAPACITY;
+
   @Value("${thread.executor.threadNamePrefix}")
   private String THREAD_NAME_PREFIX;
 
@@ -47,5 +50,4 @@ public class UserServiceApplication {
     executor.initialize();
     return executor;
   }
-
 }

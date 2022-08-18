@@ -26,9 +26,12 @@ public class ActionCommandMockProvider {
   @SuppressWarnings("unchecked")
   public ActionCommandMockProvider() {
     var reflections = new Reflections("de.caritas.cob.userservice.api");
-    reflections.getSubTypesOf(ActionCommand.class)
-        .forEach(actionClass -> actionMocks
-            .put((Class<? extends ActionCommand<?>>) actionClass, mock(actionClass)));
+    reflections
+        .getSubTypesOf(ActionCommand.class)
+        .forEach(
+            actionClass ->
+                actionMocks.put(
+                    (Class<? extends ActionCommand<?>>) actionClass, mock(actionClass)));
   }
 
   @SuppressWarnings("unchecked")
@@ -38,10 +41,12 @@ public class ActionCommandMockProvider {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   public <T> ActionContainer<T> getActionContainer(Class<T> classType) {
-    HashSet<ActionCommand<T>> actionCommands = new HashSet(this.actionMocks.keySet().stream()
-        .filter(actionClass -> byClassType(actionClass, classType))
-        .map(this.actionMocks::get)
-        .collect(Collectors.toUnmodifiableList()));
+    HashSet<ActionCommand<T>> actionCommands =
+        new HashSet(
+            this.actionMocks.keySet().stream()
+                .filter(actionClass -> byClassType(actionClass, classType))
+                .map(this.actionMocks::get)
+                .collect(Collectors.toUnmodifiableList()));
     return new ActionContainer(actionCommands);
   }
 
@@ -51,10 +56,9 @@ public class ActionCommandMockProvider {
         .anyMatch(typeName -> typeName.contains(type.getTypeName()));
   }
 
-  public void setCustomClassForAction(Class<? extends ActionCommand<?>> key,
-      ActionCommand<?> value) {
+  public void setCustomClassForAction(
+      Class<? extends ActionCommand<?>> key, ActionCommand<?> value) {
     this.actionMocks.remove(key);
     this.actionMocks.put(key, value);
   }
-
 }

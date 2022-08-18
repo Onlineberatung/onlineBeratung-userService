@@ -26,14 +26,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantAgencyDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
 import de.caritas.cob.userservice.api.admin.facade.UserAdminFacade;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
-import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantAgencyDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
 import java.util.List;
 import java.util.UUID;
 import javax.servlet.http.Cookie;
@@ -67,28 +67,22 @@ public class UserAdminControllerAuthorizationIT {
 
   private static final EasyRandom easyRandom = new EasyRandom();
 
-  @Autowired
-  private MockMvc mvc;
+  @Autowired private MockMvc mvc;
 
-  @MockBean
-  private SessionAdminService sessionAdminService;
+  @MockBean private SessionAdminService sessionAdminService;
 
-  @MockBean
-  private ViolationReportGenerator violationReportGenerator;
+  @MockBean private ViolationReportGenerator violationReportGenerator;
 
-  @MockBean
-  private ConsultantAdminFacade consultantAdminFacade;
+  @MockBean private ConsultantAdminFacade consultantAdminFacade;
 
-  @MockBean
-  private UserAdminFacade userAdminFacade;
+  @MockBean private UserAdminFacade userAdminFacade;
 
   @Test
-  public void getSessions_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
-      throws Exception {
+  public void
+      getSessions_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
+          throws Exception {
 
-    mvc.perform(get(SESSION_PATH)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE))
+    mvc.perform(get(SESSION_PATH).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(sessionAdminService);
@@ -96,19 +90,22 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(
-      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
-          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK,
-          AuthorityValue.CONSULTANT_DEFAULT,
-          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
-          AuthorityValue.START_CHAT,
-          AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT})
+      authorities = {
+        AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+        AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+        AuthorityValue.USE_FEEDBACK,
+        AuthorityValue.CONSULTANT_DEFAULT,
+        AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+        AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+        AuthorityValue.START_CHAT,
+        AuthorityValue.CREATE_NEW_CHAT,
+        AuthorityValue.STOP_CHAT,
+        AuthorityValue.UPDATE_CHAT
+      })
   public void getSessions_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
       throws Exception {
 
-    mvc.perform(get(SESSION_PATH)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE))
+    mvc.perform(get(SESSION_PATH).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(sessionAdminService);
@@ -119,23 +116,23 @@ public class UserAdminControllerAuthorizationIT {
   public void getSessions_Should_ReturnOkAndCallSessionAdminService_When_userAdminAuthority()
       throws Exception {
 
-    mvc.perform(get(SESSION_PATH)
-            .param(PAGE_PARAM, "0")
-            .param(PER_PAGE_PARAM, "1")
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE))
+    mvc.perform(
+            get(SESSION_PATH)
+                .param(PAGE_PARAM, "0")
+                .param(PER_PAGE_PARAM, "1")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isOk());
 
     verify(sessionAdminService, times(1)).findSessions(any(), anyInt(), any());
   }
 
   @Test
-  public void generateViolationReport_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
-      throws Exception {
+  public void
+      generateViolationReport_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
+          throws Exception {
 
-    mvc.perform(get(REPORT_PATH)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE))
+    mvc.perform(get(REPORT_PATH).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(violationReportGenerator);
@@ -143,19 +140,23 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(
-      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
-          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK,
-          AuthorityValue.CONSULTANT_DEFAULT,
-          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
-          AuthorityValue.START_CHAT,
-          AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT})
-  public void generateViolationReport_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
-      throws Exception {
+      authorities = {
+        AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+        AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+        AuthorityValue.USE_FEEDBACK,
+        AuthorityValue.CONSULTANT_DEFAULT,
+        AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+        AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+        AuthorityValue.START_CHAT,
+        AuthorityValue.CREATE_NEW_CHAT,
+        AuthorityValue.STOP_CHAT,
+        AuthorityValue.UPDATE_CHAT
+      })
+  public void
+      generateViolationReport_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
+          throws Exception {
 
-    mvc.perform(get(REPORT_PATH)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE))
+    mvc.perform(get(REPORT_PATH).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(violationReportGenerator);
@@ -163,24 +164,22 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
-  public void generateViolationReport_Should_ReturnOkAndCallViolationReportGenerator_When_userAdminAuthority()
-      throws Exception {
+  public void
+      generateViolationReport_Should_ReturnOkAndCallViolationReportGenerator_When_userAdminAuthority()
+          throws Exception {
 
-    mvc.perform(get(REPORT_PATH)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE))
+    mvc.perform(get(REPORT_PATH).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isOk());
 
     verify(violationReportGenerator, times(1)).generateReport();
   }
 
   @Test
-  public void getConsultants_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
-      throws Exception {
+  public void
+      getConsultants_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
+          throws Exception {
 
-    mvc.perform(get(FILTERED_CONSULTANTS_PATH)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE))
+    mvc.perform(get(FILTERED_CONSULTANTS_PATH).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -188,19 +187,22 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(
-      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
-          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK,
-          AuthorityValue.CONSULTANT_DEFAULT,
-          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
-          AuthorityValue.START_CHAT,
-          AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT})
+      authorities = {
+        AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+        AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+        AuthorityValue.USE_FEEDBACK,
+        AuthorityValue.CONSULTANT_DEFAULT,
+        AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+        AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+        AuthorityValue.START_CHAT,
+        AuthorityValue.CREATE_NEW_CHAT,
+        AuthorityValue.STOP_CHAT,
+        AuthorityValue.UPDATE_CHAT
+      })
   public void getConsultants_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
       throws Exception {
 
-    mvc.perform(get(FILTERED_CONSULTANTS_PATH)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE))
+    mvc.perform(get(FILTERED_CONSULTANTS_PATH).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -208,26 +210,27 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
-  public void getConsultants_Should_ReturnOkAndCallConsultantAdminFilterService_When_userAdminAuthority()
-      throws Exception {
+  public void
+      getConsultants_Should_ReturnOkAndCallConsultantAdminFilterService_When_userAdminAuthority()
+          throws Exception {
 
-    mvc.perform(get(FILTERED_CONSULTANTS_PATH)
-            .param(PAGE_PARAM, "0")
-            .param(PER_PAGE_PARAM, "1")
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE))
+    mvc.perform(
+            get(FILTERED_CONSULTANTS_PATH)
+                .param(PAGE_PARAM, "0")
+                .param(PER_PAGE_PARAM, "1")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isOk());
 
     verify(consultantAdminFacade, times(1)).findFilteredConsultants(any(), anyInt(), any(), any());
   }
 
   @Test
-  public void getConsultant_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
-      throws Exception {
+  public void
+      getConsultant_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
+          throws Exception {
 
-    mvc.perform(get(GET_CONSULTANT_PATH)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE))
+    mvc.perform(get(GET_CONSULTANT_PATH).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -235,19 +238,22 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(
-      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
-          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK,
-          AuthorityValue.CONSULTANT_DEFAULT,
-          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
-          AuthorityValue.START_CHAT,
-          AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT})
+      authorities = {
+        AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+        AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+        AuthorityValue.USE_FEEDBACK,
+        AuthorityValue.CONSULTANT_DEFAULT,
+        AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+        AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+        AuthorityValue.START_CHAT,
+        AuthorityValue.CREATE_NEW_CHAT,
+        AuthorityValue.STOP_CHAT,
+        AuthorityValue.UPDATE_CHAT
+      })
   public void getConsultant_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
       throws Exception {
 
-    mvc.perform(get(GET_CONSULTANT_PATH)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE))
+    mvc.perform(get(GET_CONSULTANT_PATH).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -255,26 +261,27 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
-  public void getConsultant_Should_ReturnOkAndCallConsultantAdminFilterService_When_userAdminAuthority()
-      throws Exception {
+  public void
+      getConsultant_Should_ReturnOkAndCallConsultantAdminFilterService_When_userAdminAuthority()
+          throws Exception {
 
-    mvc.perform(get(GET_CONSULTANT_PATH + "consultantId")
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE))
+    mvc.perform(
+            get(GET_CONSULTANT_PATH + "consultantId")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isOk());
 
     verify(consultantAdminFacade, times(1)).findConsultant(any());
   }
 
   @Test
-  public void getConsultantAgencies_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
-      throws Exception {
-    String consultantAgencyPath = String
-        .format(CONSULTANT_AGENCIES_PATH, "1da238c6-cd46-4162-80f1-bff74eafeAAA");
+  public void
+      getConsultantAgencies_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
+          throws Exception {
+    String consultantAgencyPath =
+        String.format(CONSULTANT_AGENCIES_PATH, "1da238c6-cd46-4162-80f1-bff74eafeAAA");
 
-    mvc.perform(get(consultantAgencyPath)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE))
+    mvc.perform(get(consultantAgencyPath).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -282,21 +289,25 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(
-      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
-          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK,
-          AuthorityValue.CONSULTANT_DEFAULT,
-          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
-          AuthorityValue.START_CHAT,
-          AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT})
-  public void getConsultantAgencies_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
-      throws Exception {
-    String consultantAgencyPath = String
-        .format(CONSULTANT_AGENCIES_PATH, "1da238c6-cd46-4162-80f1-bff74eafeAAA");
+      authorities = {
+        AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+        AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+        AuthorityValue.USE_FEEDBACK,
+        AuthorityValue.CONSULTANT_DEFAULT,
+        AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+        AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+        AuthorityValue.START_CHAT,
+        AuthorityValue.CREATE_NEW_CHAT,
+        AuthorityValue.STOP_CHAT,
+        AuthorityValue.UPDATE_CHAT
+      })
+  public void
+      getConsultantAgencies_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
+          throws Exception {
+    String consultantAgencyPath =
+        String.format(CONSULTANT_AGENCIES_PATH, "1da238c6-cd46-4162-80f1-bff74eafeAAA");
 
-    mvc.perform(get(consultantAgencyPath)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE))
+    mvc.perform(get(consultantAgencyPath).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -304,26 +315,24 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
-  public void getConsultantAgencies_Should_ReturnOkAndCallConsultantAdminFacade_When_userAdminAuthority()
-      throws Exception {
+  public void
+      getConsultantAgencies_Should_ReturnOkAndCallConsultantAdminFacade_When_userAdminAuthority()
+          throws Exception {
     String consultantId = "1da238c6-cd46-4162-80f1-bff74eafeAAA";
 
     String consultantAgencyPath = String.format(CONSULTANT_AGENCIES_PATH, consultantId);
 
-    mvc.perform(get(consultantAgencyPath)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE))
+    mvc.perform(get(consultantAgencyPath).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isOk());
 
     verify(consultantAdminFacade, times(1)).findConsultantAgencies(consultantId);
   }
 
   @Test
-  public void createConsultant_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
-      throws Exception {
-    mvc.perform(post(GET_CONSULTANT_PATH)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE))
+  public void
+      createConsultant_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
+          throws Exception {
+    mvc.perform(post(GET_CONSULTANT_PATH).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -331,18 +340,21 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(
-      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
-          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK,
-          AuthorityValue.CONSULTANT_DEFAULT,
-          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
-          AuthorityValue.START_CHAT,
-          AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT})
+      authorities = {
+        AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+        AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+        AuthorityValue.USE_FEEDBACK,
+        AuthorityValue.CONSULTANT_DEFAULT,
+        AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+        AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+        AuthorityValue.START_CHAT,
+        AuthorityValue.CREATE_NEW_CHAT,
+        AuthorityValue.STOP_CHAT,
+        AuthorityValue.UPDATE_CHAT
+      })
   public void createConsultant_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
       throws Exception {
-    mvc.perform(post(GET_CONSULTANT_PATH)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE))
+    mvc.perform(post(GET_CONSULTANT_PATH).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -350,27 +362,27 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
-  public void createConsultant_Should_ReturnOkAndCallConsultantAdminFilterService_When_userAdminAuthority()
-      throws Exception {
-    CreateConsultantDTO createConsultantDTO =
-        easyRandom.nextObject(CreateConsultantDTO.class);
+  public void
+      createConsultant_Should_ReturnOkAndCallConsultantAdminFilterService_When_userAdminAuthority()
+          throws Exception {
+    CreateConsultantDTO createConsultantDTO = easyRandom.nextObject(CreateConsultantDTO.class);
 
-    mvc.perform(post(GET_CONSULTANT_PATH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(createConsultantDTO)))
+    mvc.perform(
+            post(GET_CONSULTANT_PATH)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createConsultantDTO)))
         .andExpect(status().isOk());
 
     verify(consultantAdminFacade, times(1)).createNewConsultant(any());
   }
 
   @Test
-  public void updateConsultant_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
-      throws Exception {
-    mvc.perform(put(GET_CONSULTANT_PATH)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE))
+  public void
+      updateConsultant_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
+          throws Exception {
+    mvc.perform(put(GET_CONSULTANT_PATH).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -378,18 +390,21 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(
-      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
-          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK,
-          AuthorityValue.CONSULTANT_DEFAULT,
-          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
-          AuthorityValue.START_CHAT,
-          AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT})
+      authorities = {
+        AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+        AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+        AuthorityValue.USE_FEEDBACK,
+        AuthorityValue.CONSULTANT_DEFAULT,
+        AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+        AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+        AuthorityValue.START_CHAT,
+        AuthorityValue.CREATE_NEW_CHAT,
+        AuthorityValue.STOP_CHAT,
+        AuthorityValue.UPDATE_CHAT
+      })
   public void updateConsultant_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
       throws Exception {
-    mvc.perform(put(GET_CONSULTANT_PATH)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE))
+    mvc.perform(put(GET_CONSULTANT_PATH).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -397,27 +412,31 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
-  public void updateConsultant_Should_ReturnOkAndCallConsultantAdminFilterService_When_userAdminAuthority()
-      throws Exception {
+  public void
+      updateConsultant_Should_ReturnOkAndCallConsultantAdminFilterService_When_userAdminAuthority()
+          throws Exception {
     UpdateAdminConsultantDTO updateConsultantDTO =
         easyRandom.nextObject(UpdateAdminConsultantDTO.class);
 
-    mvc.perform(put(GET_CONSULTANT_PATH + "consultantId")
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(updateConsultantDTO)))
+    mvc.perform(
+            put(GET_CONSULTANT_PATH + "consultantId")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateConsultantDTO)))
         .andExpect(status().isOk());
 
     verify(consultantAdminFacade, times(1)).updateConsultant(anyString(), any());
   }
 
   @Test
-  public void createConsultantAgency_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
-      throws Exception {
-    mvc.perform(post(String.format(CONSULTANT_AGENCY_PATH, "consultantId"))
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE))
+  public void
+      createConsultantAgency_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
+          throws Exception {
+    mvc.perform(
+            post(String.format(CONSULTANT_AGENCY_PATH, "consultantId"))
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -425,18 +444,25 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(
-      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
-          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK,
-          AuthorityValue.CONSULTANT_DEFAULT,
-          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
-          AuthorityValue.START_CHAT,
-          AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT})
-  public void createConsultantAgency_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
-      throws Exception {
-    mvc.perform(post(String.format(CONSULTANT_AGENCY_PATH, "consultantId"))
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE))
+      authorities = {
+        AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+        AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+        AuthorityValue.USE_FEEDBACK,
+        AuthorityValue.CONSULTANT_DEFAULT,
+        AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+        AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+        AuthorityValue.START_CHAT,
+        AuthorityValue.CREATE_NEW_CHAT,
+        AuthorityValue.STOP_CHAT,
+        AuthorityValue.UPDATE_CHAT
+      })
+  public void
+      createConsultantAgency_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
+          throws Exception {
+    mvc.perform(
+            post(String.format(CONSULTANT_AGENCY_PATH, "consultantId"))
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -444,75 +470,76 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
-  public void createConsultantAgency_Should_ReturnCreatedAndCallConsultantAdminFilterService_When_userAdminAuthority()
-      throws Exception {
+  public void
+      createConsultantAgency_Should_ReturnCreatedAndCallConsultantAdminFilterService_When_userAdminAuthority()
+          throws Exception {
     CreateConsultantAgencyDTO createConsultantAgencyDTO =
         easyRandom.nextObject(CreateConsultantAgencyDTO.class);
 
-    mvc.perform(post(String.format(CONSULTANT_AGENCY_PATH, "consultantId"))
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(createConsultantAgencyDTO)))
+    mvc.perform(
+            post(String.format(CONSULTANT_AGENCY_PATH, "consultantId"))
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createConsultantAgencyDTO)))
         .andExpect(status().isCreated());
 
     verify(consultantAdminFacade, times(1)).createNewConsultantAgency(anyString(), any());
   }
 
   @Test
-  public void setConsultantAgenciesShouldReturnUnauthorizedAndCallNoMethodsWhenNoKeycloakAuthPresent()
-      throws Exception {
+  public void
+      setConsultantAgenciesShouldReturnUnauthorizedAndCallNoMethodsWhenNoKeycloakAuthPresent()
+          throws Exception {
     mvc.perform(
-        put("/useradmin/consultants/{consultantId}/agencies", UUID.randomUUID().toString())
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE))
+            put("/useradmin/consultants/{consultantId}/agencies", UUID.randomUUID().toString())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(consultantAdminFacade);
   }
 
   @Test
-  @WithMockUser(authorities = {
-      AuthorityValue.ANONYMOUS_DEFAULT,
-      AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
-      AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-      AuthorityValue.CONSULTANT_DEFAULT,
-      AuthorityValue.CREATE_NEW_CHAT,
-      AuthorityValue.START_CHAT,
-      AuthorityValue.STOP_CHAT,
-      AuthorityValue.UPDATE_CHAT,
-      AuthorityValue.USE_FEEDBACK,
-      AuthorityValue.USER_DEFAULT,
-      AuthorityValue.VIEW_AGENCY_CONSULTANTS,
-      AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS,
-      AuthorityValue.VIEW_ALL_PEER_SESSIONS,
-      AuthorityValue.ASSIGN_CONSULTANT_TO_PEER_SESSION
-  })
+  @WithMockUser(
+      authorities = {
+        AuthorityValue.ANONYMOUS_DEFAULT,
+        AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+        AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+        AuthorityValue.CONSULTANT_DEFAULT,
+        AuthorityValue.CREATE_NEW_CHAT,
+        AuthorityValue.START_CHAT,
+        AuthorityValue.STOP_CHAT,
+        AuthorityValue.UPDATE_CHAT,
+        AuthorityValue.USE_FEEDBACK,
+        AuthorityValue.USER_DEFAULT,
+        AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+        AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS,
+        AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+        AuthorityValue.ASSIGN_CONSULTANT_TO_PEER_SESSION
+      })
   public void setConsultantAgenciesShouldReturnForbiddenAndCallNoMethodsIfNotUserAdmin()
       throws Exception {
     mvc.perform(
-        put("/useradmin/consultants/{consultantId}/agencies", UUID.randomUUID().toString())
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-    ).andExpect(status().isForbidden());
+            put("/useradmin/consultants/{consultantId}/agencies", UUID.randomUUID().toString())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE))
+        .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantAdminFacade);
   }
 
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
-  public void setConsultantAgenciesShouldReturnOkAndCallConsultantAdminFacade()
-      throws Exception {
-    var agencies = List.of(
-        easyRandom.nextObject(CreateConsultantAgencyDTO.class)
-    );
+  public void setConsultantAgenciesShouldReturnOkAndCallConsultantAdminFacade() throws Exception {
+    var agencies = List.of(easyRandom.nextObject(CreateConsultantAgencyDTO.class));
 
     mvc.perform(
-        put("/useradmin/consultants/{consultantId}/agencies", UUID.randomUUID().toString())
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(agencies)))
+            put("/useradmin/consultants/{consultantId}/agencies", UUID.randomUUID().toString())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(agencies)))
         .andExpect(status().isOk());
 
     verify(consultantAdminFacade).markConsultantAgenciesForDeletion(anyString(), any());
@@ -522,12 +549,14 @@ public class UserAdminControllerAuthorizationIT {
   }
 
   @Test
-  public void changeAgencyType_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
-      throws Exception {
-    mvc.perform(post(AGENCY_CHANGE_TYPE_PATH)
-        .cookie(CSRF_COOKIE)
-        .header(CSRF_HEADER, CSRF_VALUE)
-        .contentType(MediaType.APPLICATION_JSON))
+  public void
+      changeAgencyType_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
+          throws Exception {
+    mvc.perform(
+            post(AGENCY_CHANGE_TYPE_PATH)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -535,19 +564,25 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(
-      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
-          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK,
-          AuthorityValue.CONSULTANT_DEFAULT,
-          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
-          AuthorityValue.START_CHAT,
-          AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT})
+      authorities = {
+        AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+        AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+        AuthorityValue.USE_FEEDBACK,
+        AuthorityValue.CONSULTANT_DEFAULT,
+        AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+        AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+        AuthorityValue.START_CHAT,
+        AuthorityValue.CREATE_NEW_CHAT,
+        AuthorityValue.STOP_CHAT,
+        AuthorityValue.UPDATE_CHAT
+      })
   public void changeAgencyType_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
       throws Exception {
-    mvc.perform(post(AGENCY_CHANGE_TYPE_PATH)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON))
+    mvc.perform(
+            post(AGENCY_CHANGE_TYPE_PATH)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -557,22 +592,25 @@ public class UserAdminControllerAuthorizationIT {
   @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
   public void changeAgencyType_Should_ReturnCreatedAndCallConsultantAdmin_When_userAdminAuthority()
       throws Exception {
-    mvc.perform(post(AGENCY_CHANGE_TYPE_PATH)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON))
+    mvc.perform(
+            post(AGENCY_CHANGE_TYPE_PATH)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     verify(this.consultantAdminFacade, times(1)).changeAgencyType(any(), any());
   }
 
   @Test
-  public void deleteConsultantAgency_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
-      throws Exception {
-    mvc.perform(delete(String.format(DELETE_CONSULTANT_AGENCY_PATH, "1", 1L))
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON))
+  public void
+      deleteConsultantAgency_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
+          throws Exception {
+    mvc.perform(
+            delete(String.format(DELETE_CONSULTANT_AGENCY_PATH, "1", 1L))
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -580,19 +618,26 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(
-      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
-          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK,
-          AuthorityValue.CONSULTANT_DEFAULT,
-          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
-          AuthorityValue.START_CHAT,
-          AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT})
-  public void deleteConsultantAgency_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
-      throws Exception {
-    mvc.perform(delete(String.format(DELETE_CONSULTANT_AGENCY_PATH, "1", 1L))
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON))
+      authorities = {
+        AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+        AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+        AuthorityValue.USE_FEEDBACK,
+        AuthorityValue.CONSULTANT_DEFAULT,
+        AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+        AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+        AuthorityValue.START_CHAT,
+        AuthorityValue.CREATE_NEW_CHAT,
+        AuthorityValue.STOP_CHAT,
+        AuthorityValue.UPDATE_CHAT
+      })
+  public void
+      deleteConsultantAgency_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
+          throws Exception {
+    mvc.perform(
+            delete(String.format(DELETE_CONSULTANT_AGENCY_PATH, "1", 1L))
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -600,24 +645,28 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
-  public void deleteConsultantAgency_Should_ReturnCreatedAndCallConsultantAdmin_When_userAdminAuthority()
-      throws Exception {
-    mvc.perform(delete(String.format(DELETE_CONSULTANT_AGENCY_PATH, "1", 1L))
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON))
+  public void
+      deleteConsultantAgency_Should_ReturnCreatedAndCallConsultantAdmin_When_userAdminAuthority()
+          throws Exception {
+    mvc.perform(
+            delete(String.format(DELETE_CONSULTANT_AGENCY_PATH, "1", 1L))
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     verify(this.consultantAdminFacade, times(1)).markConsultantAgencyForDeletion(any(), any());
   }
 
   @Test
-  public void deleteConsultant_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
-      throws Exception {
-    mvc.perform(delete(DELETE_CONSULTANT_PATH)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON))
+  public void
+      deleteConsultant_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
+          throws Exception {
+    mvc.perform(
+            delete(DELETE_CONSULTANT_PATH)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -625,19 +674,25 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(
-      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
-          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK,
-          AuthorityValue.CONSULTANT_DEFAULT,
-          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
-          AuthorityValue.START_CHAT,
-          AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT})
+      authorities = {
+        AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+        AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+        AuthorityValue.USE_FEEDBACK,
+        AuthorityValue.CONSULTANT_DEFAULT,
+        AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+        AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+        AuthorityValue.START_CHAT,
+        AuthorityValue.CREATE_NEW_CHAT,
+        AuthorityValue.STOP_CHAT,
+        AuthorityValue.UPDATE_CHAT
+      })
   public void deleteConsultant_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
       throws Exception {
-    mvc.perform(delete(DELETE_CONSULTANT_PATH)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON))
+    mvc.perform(
+            delete(DELETE_CONSULTANT_PATH)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -647,20 +702,21 @@ public class UserAdminControllerAuthorizationIT {
   @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
   public void deleteConsultant_Should_ReturnCreatedAndCallConsultantAdmin_When_userAdminAuthority()
       throws Exception {
-    mvc.perform(delete(DELETE_CONSULTANT_PATH)
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .contentType(MediaType.APPLICATION_JSON))
+    mvc.perform(
+            delete(DELETE_CONSULTANT_PATH)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     verify(this.consultantAdminFacade, times(1)).markConsultantForDeletion(any());
   }
 
   @Test
-  public void deleteAsker_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
-      throws Exception {
-    mvc.perform(delete(DELETE_ASKER_PATH)
-            .contentType(MediaType.APPLICATION_JSON))
+  public void
+      deleteAsker_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
+          throws Exception {
+    mvc.perform(delete(DELETE_ASKER_PATH).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(userAdminFacade);
@@ -668,17 +724,21 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(
-      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
-          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK,
-          AuthorityValue.CONSULTANT_DEFAULT,
-          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
-          AuthorityValue.START_CHAT,
-          AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT})
+      authorities = {
+        AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+        AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+        AuthorityValue.USE_FEEDBACK,
+        AuthorityValue.CONSULTANT_DEFAULT,
+        AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+        AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+        AuthorityValue.START_CHAT,
+        AuthorityValue.CREATE_NEW_CHAT,
+        AuthorityValue.STOP_CHAT,
+        AuthorityValue.UPDATE_CHAT
+      })
   public void deleteAsker_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
       throws Exception {
-    mvc.perform(delete(DELETE_ASKER_PATH)
-            .contentType(MediaType.APPLICATION_JSON))
+    mvc.perform(delete(DELETE_ASKER_PATH).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(userAdminFacade);
@@ -688,18 +748,18 @@ public class UserAdminControllerAuthorizationIT {
   @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
   public void deleteAsker_Should_ReturnOkAndCallUserAdminFacade_When_userAdminAuthority()
       throws Exception {
-    mvc.perform(delete(DELETE_ASKER_PATH)
-            .contentType(MediaType.APPLICATION_JSON))
+    mvc.perform(delete(DELETE_ASKER_PATH).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     verify(this.userAdminFacade, times(1)).markAskerForDeletion(any());
   }
 
   @Test
-  public void getAgencyConsultants_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
-      throws Exception {
-    mvc.perform(get(String.format(AGENCY_CONSULTANT_PATH, "1"))
-            .contentType(MediaType.APPLICATION_JSON))
+  public void
+      getAgencyConsultants_Should_ReturnUnauthorizedAndCallNoMethods_When_noKeycloakAuthorizationIsPresent()
+          throws Exception {
+    mvc.perform(
+            get(String.format(AGENCY_CONSULTANT_PATH, "1")).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -707,17 +767,23 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(
-      authorities = {AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
-          AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-          AuthorityValue.USE_FEEDBACK,
-          AuthorityValue.CONSULTANT_DEFAULT,
-          AuthorityValue.VIEW_AGENCY_CONSULTANTS, AuthorityValue.VIEW_ALL_PEER_SESSIONS,
-          AuthorityValue.START_CHAT,
-          AuthorityValue.CREATE_NEW_CHAT, AuthorityValue.STOP_CHAT, AuthorityValue.UPDATE_CHAT})
-  public void getAgencyConsultants_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
-      throws Exception {
-    mvc.perform(get(String.format(AGENCY_CONSULTANT_PATH, "1"))
-            .contentType(MediaType.APPLICATION_JSON))
+      authorities = {
+        AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
+        AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
+        AuthorityValue.USE_FEEDBACK,
+        AuthorityValue.CONSULTANT_DEFAULT,
+        AuthorityValue.VIEW_AGENCY_CONSULTANTS,
+        AuthorityValue.VIEW_ALL_PEER_SESSIONS,
+        AuthorityValue.START_CHAT,
+        AuthorityValue.CREATE_NEW_CHAT,
+        AuthorityValue.STOP_CHAT,
+        AuthorityValue.UPDATE_CHAT
+      })
+  public void
+      getAgencyConsultants_Should_ReturnForbiddenAndCallNoMethods_When_noUserAdminAuthority()
+          throws Exception {
+    mvc.perform(
+            get(String.format(AGENCY_CONSULTANT_PATH, "1")).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantAdminFacade);
@@ -727,11 +793,10 @@ public class UserAdminControllerAuthorizationIT {
   @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
   public void getAgencyConsultants_Should_ReturnOkAndCallUserAdminFacade_When_userAdminAuthority()
       throws Exception {
-    mvc.perform(get(String.format(AGENCY_CONSULTANT_PATH, "1"))
-            .contentType(MediaType.APPLICATION_JSON))
+    mvc.perform(
+            get(String.format(AGENCY_CONSULTANT_PATH, "1")).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     verify(this.consultantAdminFacade, times(1)).findConsultantsForAgency(any());
   }
-
 }

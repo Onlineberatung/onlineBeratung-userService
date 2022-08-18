@@ -6,8 +6,9 @@ import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.CreateConsultantDTOAbsenceInputAdapter;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.admin.service.tenant.TenantAdminService;
@@ -22,7 +23,6 @@ import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.ConsultantImportService.ImportRecord;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.tenantadminservice.generated.web.model.TenantDTO;
 import java.util.Set;
@@ -32,8 +32,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
- * Creator class to generate new {@link Consultant} instances in database, keycloak and rocket
- * chat.
+ * Creator class to generate new {@link Consultant} instances in database, keycloak and rocket chat.
  */
 @Service
 @RequiredArgsConstructor
@@ -67,11 +66,10 @@ public class ConsultantCreatorService {
   }
 
   /**
-   * Creates a new {@link Consultant} by {@link ImportRecord} in database, keycloak and rocket
-   * chat.
+   * Creates a new {@link Consultant} by {@link ImportRecord} in database, keycloak and rocket chat.
    *
    * @param importRecord the input record from csv used by the importer service
-   * @param roles        the roles to add to given {@link Consultant}
+   * @param roles the roles to add to given {@link Consultant}
    * @return the generated {@link Consultant}
    */
   public Consultant createNewConsultant(ImportRecord importRecord, Set<String> roles) {
@@ -80,8 +78,8 @@ public class ConsultantCreatorService {
     return createNewConsultant(consultantCreationInput, roles);
   }
 
-  private Consultant createNewConsultant(ConsultantCreationInput consultantCreationInput,
-      Set<String> roles) {
+  private Consultant createNewConsultant(
+      ConsultantCreationInput consultantCreationInput, Set<String> roles) {
     String keycloakUserId = createKeycloakUser(consultantCreationInput);
 
     String password = userHelper.getRandomPassword();
@@ -102,34 +100,38 @@ public class ConsultantCreatorService {
   }
 
   private String createKeycloakUser(ConsultantCreationInput consultantCreationInput) {
-    UserDTO userDto = buildUserDTO(consultantCreationInput.getUserName(),
-        consultantCreationInput.getEmail(), consultantCreationInput.getTenantId());
+    UserDTO userDto =
+        buildUserDTO(
+            consultantCreationInput.getUserName(),
+            consultantCreationInput.getEmail(),
+            consultantCreationInput.getTenantId());
 
     this.userAccountInputValidator.validateUserDTO(userDto);
 
     KeycloakCreateUserResponseDTO response =
-        identityClient
-            .createKeycloakUser(userDto, consultantCreationInput.getFirstName(),
-                consultantCreationInput.getLastName());
+        identityClient.createKeycloakUser(
+            userDto, consultantCreationInput.getFirstName(), consultantCreationInput.getLastName());
 
     this.userAccountInputValidator.validateKeycloakResponse(response);
 
     return response.getUserId();
   }
 
-  private String createRocketChatUser(ConsultantCreationInput consultantCreationInput,
-      String keycloakUserId, String password) {
+  private String createRocketChatUser(
+      ConsultantCreationInput consultantCreationInput, String keycloakUserId, String password) {
     try {
-      return this.rocketChatService
-          .getUserID(consultantCreationInput.getEncodedUsername(), password, true);
+      return this.rocketChatService.getUserID(
+          consultantCreationInput.getEncodedUsername(), password, true);
     } catch (RocketChatLoginException e) {
       throw new InternalServerErrorException(
           String.format("Unable to login user with id %s first time", keycloakUserId));
     }
   }
 
-  private Consultant buildConsultant(ConsultantCreationInput consultantCreationInput,
-      String keycloakUserId, String rocketChatUserId) {
+  private Consultant buildConsultant(
+      ConsultantCreationInput consultantCreationInput,
+      String keycloakUserId,
+      String rocketChatUserId) {
     return Consultant.builder()
         .id(keycloakUserId)
         .idOld(consultantCreationInput.getIdOld())
@@ -175,6 +177,4 @@ public class ConsultantCreatorService {
       }
     }
   }
-
-
 }

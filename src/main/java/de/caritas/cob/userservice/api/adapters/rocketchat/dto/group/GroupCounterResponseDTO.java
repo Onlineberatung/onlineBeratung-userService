@@ -10,7 +10,6 @@ import lombok.Setter;
  * Response object for Rocket.Chat API Call for getting the group counters
  * https://rocket.chat/docs/developer-guides/rest-api/groups/counters/
  */
-
 @Setter
 @Getter
 @AllArgsConstructor

@@ -13,11 +13,8 @@ public class MessageHasAlreadyBeenSavedException extends Exception {
     super(message);
   }
 
-  /**
-   * Enquiry message conflict exception.
-   */
+  /** Enquiry message conflict exception. */
   public MessageHasAlreadyBeenSavedException() {
     super();
   }
-
 }

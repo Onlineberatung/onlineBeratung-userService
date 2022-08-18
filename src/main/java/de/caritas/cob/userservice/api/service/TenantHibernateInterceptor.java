@@ -22,8 +22,8 @@ public class TenantHibernateInterceptor extends EmptyInterceptor {
       entity = entities.next();
       if (entity instanceof TenantAware) {
         var tenantAware = (TenantAware) entity;
-        if (tenantAware.getTenantId() == null && !TECHNICAL_TENANT_ID
-            .equals(TenantContext.getCurrentTenant())) {
+        if (tenantAware.getTenantId() == null
+            && !TECHNICAL_TENANT_ID.equals(TenantContext.getCurrentTenant())) {
           ((TenantAware) entity).setTenantId(TenantContext.getCurrentTenant());
         }
       }

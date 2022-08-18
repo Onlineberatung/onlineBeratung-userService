@@ -18,7 +18,6 @@ import de.caritas.cob.userservice.api.adapters.web.dto.AliasMessageDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ForwardMessageDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.VideoCallMessageDTO;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.deserializer.AliasJsonDeserializer;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,8 +31,8 @@ import org.springframework.util.ClassUtils;
 public class AliasJsonDeserializerTest {
 
   private static final String DECODED_USERNAME = "username";
-  private static final String ENCODE_USERNAME = new UsernameTranscoder()
-      .encodeUsername(DECODED_USERNAME);
+  private static final String ENCODE_USERNAME =
+      new UsernameTranscoder().encodeUsername(DECODED_USERNAME);
   private static final String MESSAGE_FORWARD_ALIAS_JSON_WITH_ENCODED_USERNAME =
       "{\"alias\":\"%7B%22timestamp%22%3A%221568128850636%22%2C%22username%22%3A%22"
           + ENCODE_USERNAME
@@ -70,8 +69,7 @@ public class AliasJsonDeserializerTest {
   }
 
   @Test
-  public void deserialize_Should_ReturnNull_IfAliasIsEmpty()
-      throws IOException {
+  public void deserialize_Should_ReturnNull_IfAliasIsEmpty() throws IOException {
     AliasMessageDTO result = deserializeOldAliasJson("");
     assertNull(result);
   }
@@ -79,11 +77,14 @@ public class AliasJsonDeserializerTest {
   @Test
   public void deserialize_Should_returnAliasDTOWithDecodedUsername_When_usernameIsEncoded()
       throws Exception {
-    String aliasMessageDTO = asJsonString(new AliasMessageDTO()
-        .videoCallMessageDTO(new VideoCallMessageDTO()
-            .eventType(IGNORED_CALL)
-            .initiatorUserName(ENCODE_USERNAME)
-            .initiatorRcUserId("rcUserId")));
+    String aliasMessageDTO =
+        asJsonString(
+            new AliasMessageDTO()
+                .videoCallMessageDTO(
+                    new VideoCallMessageDTO()
+                        .eventType(IGNORED_CALL)
+                        .initiatorUserName(ENCODE_USERNAME)
+                        .initiatorRcUserId("rcUserId")));
 
     AliasMessageDTO result = deserializeNewAliasJson(aliasMessageDTO);
 
@@ -96,11 +97,14 @@ public class AliasJsonDeserializerTest {
   @Test
   public void deserialize_Should_returnAliasDTOWithDecodedUsername_When_usernameIsDecoded()
       throws Exception {
-    String aliasMessageDTO = asJsonString(new AliasMessageDTO()
-        .videoCallMessageDTO(new VideoCallMessageDTO()
-            .eventType(IGNORED_CALL)
-            .initiatorUserName(DECODED_USERNAME)
-            .initiatorRcUserId("rcUserId")));
+    String aliasMessageDTO =
+        asJsonString(
+            new AliasMessageDTO()
+                .videoCallMessageDTO(
+                    new VideoCallMessageDTO()
+                        .eventType(IGNORED_CALL)
+                        .initiatorUserName(DECODED_USERNAME)
+                        .initiatorRcUserId("rcUserId")));
 
     AliasMessageDTO result = deserializeNewAliasJson(aliasMessageDTO);
 
@@ -113,16 +117,20 @@ public class AliasJsonDeserializerTest {
   @Test
   public void deserialize_Should_returnAliasDTOWithDecodedUsernames_When_usernamesAreEncoded()
       throws Exception {
-    String aliasMessageDTO = asJsonString(new AliasMessageDTO()
-        .forwardMessageDTO(new ForwardMessageDTO()
-            .message("message")
-            .rcUserId("rcUserId")
-            .timestamp("timestamp")
-            .username(ENCODE_USERNAME))
-        .videoCallMessageDTO(new VideoCallMessageDTO()
-            .eventType(IGNORED_CALL)
-            .initiatorUserName(ENCODE_USERNAME)
-            .initiatorRcUserId("rcUserId")));
+    String aliasMessageDTO =
+        asJsonString(
+            new AliasMessageDTO()
+                .forwardMessageDTO(
+                    new ForwardMessageDTO()
+                        .message("message")
+                        .rcUserId("rcUserId")
+                        .timestamp("timestamp")
+                        .username(ENCODE_USERNAME))
+                .videoCallMessageDTO(
+                    new VideoCallMessageDTO()
+                        .eventType(IGNORED_CALL)
+                        .initiatorUserName(ENCODE_USERNAME)
+                        .initiatorRcUserId("rcUserId")));
 
     AliasMessageDTO result = deserializeNewAliasJson(aliasMessageDTO);
 
@@ -155,5 +163,4 @@ public class AliasJsonDeserializerTest {
   private String asJsonString(AliasMessageDTO aliasMessageDTO) throws JsonProcessingException {
     return objectMapper.writeValueAsString(aliasMessageDTO);
   }
-
 }

@@ -23,9 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 
-/**
- * Mapper class to map a {@link Session} to possible dto objects.
- */
+/** Mapper class to map a {@link Session} to possible dto objects. */
 @RequiredArgsConstructor
 public class SessionMapper {
 
@@ -63,8 +61,10 @@ public class SessionMapper {
         .groupId(session.getGroupId())
         .feedbackGroupId(
             nonNull(session.getFeedbackGroupId()) ? session.getFeedbackGroupId() : null)
-        .askerRcId(nonNull(session.getUser()) && nonNull(session.getUser().getRcUserId())
-            ? session.getUser().getRcUserId() : null)
+        .askerRcId(
+            nonNull(session.getUser()) && nonNull(session.getUser().getRcUserId())
+                ? session.getUser().getRcUserId()
+                : null)
         .messageDate(toUnixTime(session.getEnquiryMessageDate()))
         .isTeamSession(session.isTeamSession())
         .language(LanguageCode.fromValue(session.getLanguageCode().name()))
@@ -73,14 +73,13 @@ public class SessionMapper {
         .registrationType(session.getRegistrationType().name())
         .createDate(toIsoTime(session.getCreateDate()))
         .topic(new SessionTopicDTO().id(session.getMainTopicId()));
-
   }
 
   private SessionUserDTO convertToSessionUserDTO(Session session) {
     if (nonNull(session.getUser()) && nonNull(session.getSessionData())) {
       var sessionUserDto = new SessionUserDTO();
-      sessionUserDto
-          .setUsername(new UsernameTranscoder().decodeUsername(session.getUser().getUsername()));
+      sessionUserDto.setUsername(
+          new UsernameTranscoder().decodeUsername(session.getUser().getUsername()));
       sessionUserDto.setSessionData(buildSessionDataMapFromSession(session));
       return sessionUserDto;
     }
@@ -89,10 +88,12 @@ public class SessionMapper {
 
   private SessionConsultantForConsultantDTO convertToSessionConsultantForConsultantDTO(
       Consultant consultant) {
-    return nonNull(consultant) ? new SessionConsultantForConsultantDTO()
-        .id(consultant.getId())
-        .firstName(consultant.getFirstName())
-        .lastName(consultant.getLastName()) : null;
+    return nonNull(consultant)
+        ? new SessionConsultantForConsultantDTO()
+            .id(consultant.getId())
+            .firstName(consultant.getFirstName())
+            .lastName(consultant.getLastName())
+        : null;
   }
 
   public Map<String, Object> buildSessionDataMapFromSession(Session session) {
@@ -106,41 +107,45 @@ public class SessionMapper {
 
   public GroupSessionResponseDTO toGroupSessionResponse(
       UserSessionResponseDTO userSessionResponse) {
-    var response = new GroupSessionResponseDTO()
-        .session(userSessionResponse.getSession())
-        .agency(userSessionResponse.getAgency())
-        .chat(userSessionResponse.getChat())
-        .latestMessage(userSessionResponse.getLatestMessage());
+    var response =
+        new GroupSessionResponseDTO()
+            .session(userSessionResponse.getSession())
+            .agency(userSessionResponse.getAgency())
+            .chat(userSessionResponse.getChat())
+            .latestMessage(userSessionResponse.getLatestMessage());
 
     var sessionConsultant = userSessionResponse.getConsultant();
     if (sessionConsultant == null) {
       return response;
     }
-    var consultant = GroupSessionConsultantDTO.builder()
-        .id(sessionConsultant.getConsultantId())
-        .username(sessionConsultant.getUsername())
-        .displayName(sessionConsultant.getDisplayName())
-        .isAbsent(sessionConsultant.isAbsent())
-        .absenceMessage(sessionConsultant.getAbsenceMessage());
+    var consultant =
+        GroupSessionConsultantDTO.builder()
+            .id(sessionConsultant.getConsultantId())
+            .username(sessionConsultant.getUsername())
+            .displayName(sessionConsultant.getDisplayName())
+            .isAbsent(sessionConsultant.isAbsent())
+            .absenceMessage(sessionConsultant.getAbsenceMessage());
     return response.consultant(consultant.build());
   }
 
   public GroupSessionResponseDTO toGroupSessionResponse(
       ConsultantSessionResponseDTO consultantSessionResponse) {
-    var response = new GroupSessionResponseDTO()
-        .session(consultantSessionResponse.getSession())
-        .user(consultantSessionResponse.getUser())
-        .chat(consultantSessionResponse.getChat())
-        .latestMessage(consultantSessionResponse.getLatestMessage());
+    var response =
+        new GroupSessionResponseDTO()
+            .session(consultantSessionResponse.getSession())
+            .user(consultantSessionResponse.getUser())
+            .chat(consultantSessionResponse.getChat())
+            .latestMessage(consultantSessionResponse.getLatestMessage());
 
     var sessionConsultant = consultantSessionResponse.getConsultant();
     if (sessionConsultant == null) {
       return response;
     }
-    var consultant = GroupSessionConsultantDTO.builder()
-        .id(sessionConsultant.getId())
-        .firstName(sessionConsultant.getFirstName())
-        .lastName(sessionConsultant.getLastName());
+    var consultant =
+        GroupSessionConsultantDTO.builder()
+            .id(sessionConsultant.getId())
+            .firstName(sessionConsultant.getFirstName())
+            .lastName(sessionConsultant.getLastName());
     return response.consultant(consultant.build());
   }
 }

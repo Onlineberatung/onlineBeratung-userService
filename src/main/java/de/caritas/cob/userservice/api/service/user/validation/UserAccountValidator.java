@@ -7,9 +7,7 @@ import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-/**
- * Validation class for user accounts.
- */
+/** Validation class for user accounts. */
 @Component
 @RequiredArgsConstructor
 public class UserAccountValidator {

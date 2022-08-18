@@ -24,11 +24,9 @@ import org.springframework.context.ApplicationContext;
 @RunWith(MockitoJUnitRunner.class)
 public class ConversationListProviderRegistryTest {
 
-  @InjectMocks
-  private ConversationListProviderRegistry conversationListProviderRegistry;
+  @InjectMocks private ConversationListProviderRegistry conversationListProviderRegistry;
 
-  @Mock
-  private ApplicationContext applicationContext;
+  @Mock private ApplicationContext applicationContext;
 
   @Before
   public void setup() {
@@ -36,8 +34,8 @@ public class ConversationListProviderRegistryTest {
     when(anonymous.providedType()).thenReturn(ANONYMOUS_ENQUIRY);
     ConversationListProvider registered = mock(RegisteredEnquiryConversationListProvider.class);
     when(registered.providedType()).thenReturn(REGISTERED_ENQUIRY);
-    when(this.applicationContext.getBeansOfType(any())).thenReturn(
-        Map.of("anonymous", anonymous, "registered", registered));
+    when(this.applicationContext.getBeansOfType(any()))
+        .thenReturn(Map.of("anonymous", anonymous, "registered", registered));
   }
 
   @Test(expected = NullPointerException.class)
@@ -46,7 +44,8 @@ public class ConversationListProviderRegistryTest {
   }
 
   @Test
-  public void findByConversationType_Should_returnAnonymousEnquiryProvider_When_requestedTypeIsAnonymouseEnquiry() {
+  public void
+      findByConversationType_Should_returnAnonymousEnquiryProvider_When_requestedTypeIsAnonymouseEnquiry() {
     this.conversationListProviderRegistry.initializeConversationSuppliers();
 
     ConversationListProvider resultProvider =
@@ -57,7 +56,8 @@ public class ConversationListProviderRegistryTest {
   }
 
   @Test
-  public void findByConversationType_Should_returnregisteredEnquiryProvider_When_requestedTypeIsRegisteredEnquiry() {
+  public void
+      findByConversationType_Should_returnregisteredEnquiryProvider_When_requestedTypeIsRegisteredEnquiry() {
     this.conversationListProviderRegistry.initializeConversationSuppliers();
 
     ConversationListProvider resultProvider =
@@ -73,5 +73,4 @@ public class ConversationListProviderRegistryTest {
 
     this.conversationListProviderRegistry.findByConversationType(null);
   }
-
 }

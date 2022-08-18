@@ -23,8 +23,7 @@ class SessionAdminResultDTOBuilderTest {
 
   private static final int MOCKED_SESSIONS_SIZE = 20;
 
-  @Mock
-  private Page<Session> resultPage;
+  @Mock private Page<Session> resultPage;
 
   void givenRandomSesisons() {
     EasyRandom easyRandom = new EasyRandom();
@@ -43,8 +42,8 @@ class SessionAdminResultDTOBuilderTest {
     assertThat(resultDTO.getLinks().getNext(), nullValue());
     assertThat(resultDTO.getLinks().getPrevious(), nullValue());
     assertThat(resultDTO.getLinks().getSelf(), notNullValue());
-    assertThat(resultDTO.getLinks().getSelf().getHref(),
-        is("/useradmin/sessions?page=1&perPage=20"));
+    assertThat(
+        resultDTO.getLinks().getSelf().getHref(), is("/useradmin/sessions?page=1&perPage=20"));
   }
 
   @Test
@@ -53,22 +52,24 @@ class SessionAdminResultDTOBuilderTest {
     when(this.resultPage.getTotalPages()).thenReturn(MOCKED_SESSIONS_SIZE / 2);
     when(this.resultPage.getTotalElements()).thenReturn(Long.valueOf(MOCKED_SESSIONS_SIZE));
 
-    SessionAdminResultDTO resultDTO = SessionAdminResultDTOBuilder.getInstance()
-        .withFilter(new SessionFilter().agency(1))
-        .withPage(2)
-        .withPerPage(2)
-        .withResultPage(this.resultPage)
-        .build();
+    SessionAdminResultDTO resultDTO =
+        SessionAdminResultDTOBuilder.getInstance()
+            .withFilter(new SessionFilter().agency(1))
+            .withPage(2)
+            .withPerPage(2)
+            .withResultPage(this.resultPage)
+            .build();
 
     assertThat(resultDTO, notNullValue());
     assertThat(resultDTO.getEmbedded(), hasSize(20));
     assertThat(resultDTO.getTotal(), is(MOCKED_SESSIONS_SIZE));
-    assertThat(resultDTO.getLinks().getNext().getHref(),
-        is("/useradmin/sessions?page=3&perPage=2"));
-    assertThat(resultDTO.getLinks().getPrevious().getHref(), is("/useradmin/sessions?page=1"
-        + "&perPage=2"));
-    assertThat(resultDTO.getLinks().getSelf().getHref(),
-        is("/useradmin/sessions?page=2&perPage=2"));
+    assertThat(
+        resultDTO.getLinks().getNext().getHref(), is("/useradmin/sessions?page=3&perPage=2"));
+    assertThat(
+        resultDTO.getLinks().getPrevious().getHref(),
+        is("/useradmin/sessions?page=1" + "&perPage=2"));
+    assertThat(
+        resultDTO.getLinks().getSelf().getHref(), is("/useradmin/sessions?page=2&perPage=2"));
   }
 
   @Test
@@ -76,11 +77,12 @@ class SessionAdminResultDTOBuilderTest {
     givenRandomSesisons();
     when(this.resultPage.getTotalPages()).thenReturn(MOCKED_SESSIONS_SIZE / 2);
 
-    SessionAdminResultDTO resultDTO = SessionAdminResultDTOBuilder.getInstance()
-        .withPage(1)
-        .withPerPage(2)
-        .withResultPage(this.resultPage)
-        .build();
+    SessionAdminResultDTO resultDTO =
+        SessionAdminResultDTOBuilder.getInstance()
+            .withPage(1)
+            .withPerPage(2)
+            .withResultPage(this.resultPage)
+            .build();
 
     assertThat(resultDTO.getLinks().getPrevious(), nullValue());
   }
@@ -90,13 +92,13 @@ class SessionAdminResultDTOBuilderTest {
     givenRandomSesisons();
     when(this.resultPage.getTotalPages()).thenReturn(MOCKED_SESSIONS_SIZE / 2);
 
-    SessionAdminResultDTO resultDTO = SessionAdminResultDTOBuilder.getInstance()
-        .withPage(10)
-        .withPerPage(2)
-        .withResultPage(this.resultPage)
-        .build();
+    SessionAdminResultDTO resultDTO =
+        SessionAdminResultDTOBuilder.getInstance()
+            .withPage(10)
+            .withPerPage(2)
+            .withResultPage(this.resultPage)
+            .build();
 
     assertThat(resultDTO.getLinks().getNext(), nullValue());
   }
-
 }

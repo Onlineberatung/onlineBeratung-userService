@@ -9,5 +9,4 @@ import org.springframework.data.repository.CrudRepository;
 public interface UserChatRepository extends CrudRepository<UserChat, Long> {
 
   Optional<UserChat> findByChatAndUser(Chat chat, User user);
-
 }

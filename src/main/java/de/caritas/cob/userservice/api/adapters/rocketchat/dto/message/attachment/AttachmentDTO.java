@@ -7,10 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Rocket.Chat attachment model (sub of MessagesDTO)
- */
-
+/** Rocket.Chat attachment model (sub of MessagesDTO) */
 @Getter
 @Setter
 @AllArgsConstructor
@@ -20,5 +17,4 @@ public class AttachmentDTO {
   @ApiModelProperty(required = true, example = "/9j/2wBDAAYEBQYFBAYGBQY", position = 2)
   @JsonProperty("image_preview")
   private String imagePreview;
-
 }

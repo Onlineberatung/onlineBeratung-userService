@@ -11,25 +11,20 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 
-/**
- * Representation of the via Keycloak authenticated user
- */
+/** Representation of the via Keycloak authenticated user */
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 public class AuthenticatedUser {
 
-  @NonNull
-  private String userId;
+  @NonNull private String userId;
 
-  @NonNull
-  private String username;
+  @NonNull private String username;
 
   private Set<String> roles;
 
-  @NonNull
-  private String accessToken;
+  @NonNull private String accessToken;
 
   private Set<String> grantedAuthorities;
 

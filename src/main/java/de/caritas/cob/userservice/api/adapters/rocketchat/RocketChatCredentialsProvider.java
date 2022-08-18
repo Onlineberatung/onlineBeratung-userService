@@ -6,10 +6,10 @@ import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
 import de.caritas.cob.userservice.api.adapters.rocketchat.config.RocketChatConfig;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.logout.LogoutResponseDTO;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.NonNull;
@@ -59,9 +59,7 @@ public class RocketChatCredentialsProvider {
   private final AtomicReference<RocketChatCredentials> systemUserA = new AtomicReference<>();
   private final AtomicReference<RocketChatCredentials> systemUserB = new AtomicReference<>();
 
-  /**
-   * Get valid technical user credentials
-   */
+  /** Get valid technical user credentials */
   public RocketChatCredentials getTechnicalUser() throws RocketChatUserNotInitializedException {
     return observeNonNullOrLatestUser(this.techUserA, this.techUserB);
   }
@@ -78,13 +76,13 @@ public class RocketChatCredentialsProvider {
         .orElseGet(() -> retrieveLatestUser(firstUser.get(), secondUser.get()));
   }
 
-  private boolean areBothUsersNull(RocketChatCredentials firstUser,
-      RocketChatCredentials secondUser) {
+  private boolean areBothUsersNull(
+      RocketChatCredentials firstUser, RocketChatCredentials secondUser) {
     return isNull(firstUser) && isNull(secondUser);
   }
 
-  private Optional<RocketChatCredentials> oneOfBothUsersNull(RocketChatCredentials firstUser,
-      RocketChatCredentials secondUser) {
+  private Optional<RocketChatCredentials> oneOfBothUsersNull(
+      RocketChatCredentials firstUser, RocketChatCredentials secondUser) {
     if (isNull(firstUser)) {
       return Optional.of(secondUser);
     }
@@ -94,8 +92,8 @@ public class RocketChatCredentialsProvider {
     return Optional.empty();
   }
 
-  private RocketChatCredentials retrieveLatestUser(RocketChatCredentials firstUser,
-      RocketChatCredentials secondUser) {
+  private RocketChatCredentials retrieveLatestUser(
+      RocketChatCredentials firstUser, RocketChatCredentials secondUser) {
     if (firstUser.getTimeStampCreated().isAfter(secondUser.getTimeStampCreated())) {
       return firstUser;
     } else {
@@ -103,9 +101,7 @@ public class RocketChatCredentialsProvider {
     }
   }
 
-  /**
-   * Get a valid system user
-   */
+  /** Get a valid system user */
   public RocketChatCredentials getSystemUser() throws RocketChatUserNotInitializedException {
     return observeNonNullOrLatestUser(this.systemUserA, this.systemUserB);
   }
@@ -115,9 +111,7 @@ public class RocketChatCredentialsProvider {
     return getSystemUser();
   }
 
-  /**
-   * Update the Credentials
-   */
+  /** Update the Credentials */
   public void updateCredentials() throws RocketChatLoginException {
     logoutUserWithLongerLoginTime(techUserA, techUserB);
     logoutUserWithLongerLoginTime(systemUserA, systemUserB);
@@ -125,7 +119,8 @@ public class RocketChatCredentialsProvider {
     loginNullUser(this.systemUserA, this.systemUserB, this.systemUsername, this.systemPassword);
   }
 
-  private void logoutUserWithLongerLoginTime(AtomicReference<RocketChatCredentials> firstUser,
+  private void logoutUserWithLongerLoginTime(
+      AtomicReference<RocketChatCredentials> firstUser,
       AtomicReference<RocketChatCredentials> secondUser) {
     if (nonNull(firstUser.get()) && nonNull(secondUser.get())) {
       if (firstUser.get().getTimeStampCreated().isBefore(secondUser.get().getTimeStampCreated())) {
@@ -136,8 +131,11 @@ public class RocketChatCredentialsProvider {
     }
   }
 
-  private void loginNullUser(AtomicReference<RocketChatCredentials> firstUser,
-      AtomicReference<RocketChatCredentials> secondUser, String username, String password)
+  private void loginNullUser(
+      AtomicReference<RocketChatCredentials> firstUser,
+      AtomicReference<RocketChatCredentials> secondUser,
+      String username,
+      String password)
       throws RocketChatLoginException {
     if (isNull(firstUser.get()) && isNull(secondUser.get())) {
       firstUser.set(obtainRocketCredentialsForUser(username, password));
@@ -155,10 +153,11 @@ public class RocketChatCredentialsProvider {
   private RocketChatCredentials obtainRocketCredentialsForUser(String username, String password)
       throws RocketChatLoginException {
 
-    RocketChatCredentials rcc = RocketChatCredentials.builder()
-        .timeStampCreated(nowInUtc())
-        .rocketChatUsername(username)
-        .build();
+    RocketChatCredentials rcc =
+        RocketChatCredentials.builder()
+            .timeStampCreated(nowInUtc())
+            .rocketChatUsername(username)
+            .build();
 
     try {
 
@@ -172,8 +171,10 @@ public class RocketChatCredentialsProvider {
     }
 
     if (isNull(rcc.getRocketChatToken()) || isNull(rcc.getRocketChatUserId())) {
-      String error = "Could not login " + username
-          + " user in Rocket.Chat correctly, no authToken or UserId received.";
+      String error =
+          "Could not login "
+              + username
+              + " user in Rocket.Chat correctly, no authToken or UserId received.";
       throw new RocketChatLoginException(error);
     }
 
@@ -199,8 +200,7 @@ public class RocketChatCredentialsProvider {
       map.add("username", username);
       map.add("password", password);
 
-      HttpEntity<MultiValueMap<String, String>> request =
-          new HttpEntity<>(map, headers);
+      HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
 
       var url = rocketChatConfig.getApiUrl(ENDPOINT_USER_LOGIN);
       return restTemplate.postForEntity(url, request, LoginResponseDTO.class);
@@ -213,7 +213,7 @@ public class RocketChatCredentialsProvider {
   /**
    * Performs a logout with the given credentials and returns true on success.
    *
-   * @param rcUserId    the rocket chat user id
+   * @param rcUserId the rocket chat user id
    * @param rcAuthToken the rocket chat auth token
    * @return true if logout was successful
    */
@@ -235,9 +235,7 @@ public class RocketChatCredentialsProvider {
     }
   }
 
-  /**
-   * Logout a RocketChatCredentials-User
-   */
+  /** Logout a RocketChatCredentials-User */
   private void logoutUser(AtomicReference<RocketChatCredentials> user) {
     this.logoutUser(user.get().getRocketChatUserId(), user.get().getRocketChatToken());
     user.set(null);
@@ -257,5 +255,4 @@ public class RocketChatCredentialsProvider {
 
     return httpHeaders;
   }
-
 }

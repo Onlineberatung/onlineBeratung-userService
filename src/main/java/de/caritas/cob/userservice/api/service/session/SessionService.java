@@ -51,9 +51,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-/**
- * Service for sessions
- */
+/** Service for sessions */
 @Service
 @RequiredArgsConstructor
 public class SessionService {
@@ -89,20 +87,19 @@ public class SessionService {
    * @param user {@link User}
    * @return list of {@link Session}
    */
-  public List<Session> getSessionsForUserByConsultingTypeId(User user,
-      int consultingTypeId) {
+  public List<Session> getSessionsForUserByConsultingTypeId(User user, int consultingTypeId) {
     return sessionRepository.findByUserAndConsultingTypeId(user, consultingTypeId);
   }
 
   /**
    * Updates the given session by assigning the provided consultant and {@link SessionStatus}.
    *
-   * @param session    the session
+   * @param session the session
    * @param consultant the consultant
-   * @param status     the status of the session
+   * @param status the status of the session
    */
-  public void updateConsultantAndStatusForSession(Session session, Consultant consultant,
-      SessionStatus status) {
+  public void updateConsultantAndStatusForSession(
+      Session session, Consultant consultant, SessionStatus status) {
     session.setConsultant(consultant);
     session.setStatus(status);
     saveSession(session);
@@ -111,7 +108,7 @@ public class SessionService {
   /**
    * Updates the feedback group id of the given {@link Session}.
    *
-   * @param session         an optional session
+   * @param session an optional session
    * @param feedbackGroupId the ID of the feedback group
    */
   public void updateFeedbackGroupId(Session session, String feedbackGroupId)
@@ -122,8 +119,10 @@ public class SessionService {
 
     } catch (InternalServerErrorException serviceException) {
       throw new UpdateFeedbackGroupIdException(
-          String.format("Could not update feedback group id %s for session %s", feedbackGroupId,
-              session.getId()), serviceException);
+          String.format(
+              "Could not update feedback group id %s for session %s",
+              feedbackGroupId, session.getId()),
+          serviceException);
     }
   }
 
@@ -138,10 +137,11 @@ public class SessionService {
     List<UserSessionResponseDTO> sessionResponseDTOs = new ArrayList<>();
     List<Session> sessions = sessionRepository.findByUserUserId(userId);
     if (isNotEmpty(sessions)) {
-      List<Long> agencyIds = sessions.stream()
-          .map(Session::getAgencyId)
-          .filter(Objects::nonNull)
-          .collect(Collectors.toList());
+      List<Long> agencyIds =
+          sessions.stream()
+              .map(Session::getAgencyId)
+              .filter(Objects::nonNull)
+              .collect(Collectors.toList());
       List<AgencyDTO> agencies = agencyService.getAgencies(agencyIds);
       sessionResponseDTOs = convertToUserSessionResponseDTO(sessions, agencies);
     }
@@ -151,14 +151,15 @@ public class SessionService {
   /**
    * Initialize a {@link Session} and assign given consultant directly.
    *
-   * @param user    the user
+   * @param user the user
    * @param userDto the dto of the user
    * @return the initialized session
    */
-  public Session initializeDirectSession(Consultant consultant, User user, UserDTO userDto,
-      boolean isTeamSession) {
-    var session = initializeSession(user, userDto, isTeamSession, RegistrationType.REGISTERED,
-        SessionStatus.INITIAL);
+  public Session initializeDirectSession(
+      Consultant consultant, User user, UserDTO userDto, boolean isTeamSession) {
+    var session =
+        initializeSession(
+            user, userDto, isTeamSession, RegistrationType.REGISTERED, SessionStatus.INITIAL);
     session.setConsultant(consultant);
     return saveSession(session);
   }
@@ -166,64 +167,71 @@ public class SessionService {
   /**
    * Initialize a {@link Session} as initial registered enquiry.
    *
-   * @param user    the user
+   * @param user the user
    * @param userDto the dto of the user
    * @return the initialized session
    */
   public Session initializeSession(User user, UserDTO userDto, boolean isTeamSession) {
-    return initializeSession(user, userDto, isTeamSession, RegistrationType.REGISTERED,
-        SessionStatus.INITIAL);
+    return initializeSession(
+        user, userDto, isTeamSession, RegistrationType.REGISTERED, SessionStatus.INITIAL);
   }
 
   /**
    * Initialize a {@link Session}.
    *
-   * @param user             {@link User}
-   * @param userDto          {@link UserDTO}
-   * @param isTeamSession    is team session flag
+   * @param user {@link User}
+   * @param userDto {@link UserDTO}
+   * @param isTeamSession is team session flag
    * @param registrationType {@link RegistrationType}
-   * @param sessionStatus    {@link SessionStatus}
+   * @param sessionStatus {@link SessionStatus}
    * @return the initialized {@link Session}
    */
-  public Session initializeSession(User user, UserDTO userDto, boolean isTeamSession,
-      RegistrationType registrationType, SessionStatus sessionStatus) {
+  public Session initializeSession(
+      User user,
+      UserDTO userDto,
+      boolean isTeamSession,
+      RegistrationType registrationType,
+      SessionStatus sessionStatus) {
     var extendedConsultingTypeResponseDTO = obtainConsultingTypeSettings(userDto);
 
-    var session = Session.builder()
-        .user(user)
-        .consultingTypeId(obtainCheckedConsultingTypeId(extendedConsultingTypeResponseDTO))
-        .registrationType(registrationType)
-        .postcode(userDto.getPostcode())
-        .agencyId(userDto.getAgencyId())
-        .languageCode(LanguageCode.de)
-        .status(sessionStatus)
-        .teamSession(isTeamSession)
-        .isPeerChat(isTrue(extendedConsultingTypeResponseDTO.getIsPeerChat()))
-        .monitoring(retrieveCheckedMonitoringProperty(extendedConsultingTypeResponseDTO))
-        .createDate(nowInUtc())
-        .updateDate(nowInUtc())
-        .mainTopicId(userDto.getMainTopicId())
-        .userGender(userDto.getUserGender())
-        .userAge(userDto.getUserAge())
-        .counsellingRelation(userDto.getCounsellingRelation())
-        .build();
+    var session =
+        Session.builder()
+            .user(user)
+            .consultingTypeId(obtainCheckedConsultingTypeId(extendedConsultingTypeResponseDTO))
+            .registrationType(registrationType)
+            .postcode(userDto.getPostcode())
+            .agencyId(userDto.getAgencyId())
+            .languageCode(LanguageCode.de)
+            .status(sessionStatus)
+            .teamSession(isTeamSession)
+            .isPeerChat(isTrue(extendedConsultingTypeResponseDTO.getIsPeerChat()))
+            .monitoring(retrieveCheckedMonitoringProperty(extendedConsultingTypeResponseDTO))
+            .createDate(nowInUtc())
+            .updateDate(nowInUtc())
+            .mainTopicId(userDto.getMainTopicId())
+            .userGender(userDto.getUserGender())
+            .userAge(userDto.getUserAge())
+            .counsellingRelation(userDto.getCounsellingRelation())
+            .build();
 
     session.setSessionTopics(createSessionTopics(userDto.getTopicIds(), session));
     return saveSession(session);
   }
 
-  private List<SessionTopic> createSessionTopics(Collection<Integer> topicsOfInterest, Session session) {
+  private List<SessionTopic> createSessionTopics(
+      Collection<Integer> topicsOfInterest, Session session) {
     if (topicsOfInterest != null) {
-      return topicsOfInterest.stream().map(topicId -> createNewSessionTopic(session, topicId))
-          .collect(
-              Collectors.toList());
+      return topicsOfInterest.stream()
+          .map(topicId -> createNewSessionTopic(session, topicId))
+          .collect(Collectors.toList());
     } else {
       return Lists.newArrayList();
     }
   }
 
   private SessionTopic createNewSessionTopic(Session session, Integer topicId) {
-    return SessionTopic.builder().topicId(topicId)
+    return SessionTopic.builder()
+        .topicId(topicId)
         .session(session)
         .createDate(LocalDateTime.now())
         .updateDate(LocalDateTime.now())
@@ -273,12 +281,15 @@ public class SessionService {
 
     Set<ConsultantAgency> consultantAgencies = consultant.getConsultantAgencies();
     if (nonNull(consultantAgencies)) {
-      List<Long> consultantAgencyIds = consultantAgencies.stream()
-          .map(ConsultantAgency::getAgencyId).collect(Collectors.toList());
+      List<Long> consultantAgencyIds =
+          consultantAgencies.stream()
+              .map(ConsultantAgency::getAgencyId)
+              .collect(Collectors.toList());
 
-      sessions = sessionRepository
-          .findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionOrderByEnquiryMessageDateAsc(
-              consultantAgencyIds, consultant, SessionStatus.IN_PROGRESS, true);
+      sessions =
+          sessionRepository
+              .findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionOrderByEnquiryMessageDateAsc(
+                  consultantAgencyIds, consultant, SessionStatus.IN_PROGRESS, true);
     }
 
     return mapSessionsToConsultantSessionDto(sessions);
@@ -301,9 +312,8 @@ public class SessionService {
 
   private List<ConsultantSessionResponseDTO> retrieveRegisteredEnquiriesForConsultantAgencies(
       Set<ConsultantAgency> consultantAgencies) {
-    List<Long> consultantAgencyIds = consultantAgencies.stream()
-        .map(ConsultantAgency::getAgencyId)
-        .collect(Collectors.toList());
+    List<Long> consultantAgencyIds =
+        consultantAgencies.stream().map(ConsultantAgency::getAgencyId).collect(Collectors.toList());
     final List<Session> sessions = retrieveRegisteredSessions(consultantAgencyIds);
     return mapSessionsToConsultantSessionDto(sessions);
   }
@@ -322,20 +332,21 @@ public class SessionService {
    */
   public List<ConsultantSessionResponseDTO> getActiveAndDoneSessionsForConsultant(
       Consultant consultant) {
-    return Stream.of(getSessionsForConsultantByStatus(consultant, SessionStatus.IN_PROGRESS),
-        getSessionsForConsultantByStatus(consultant, SessionStatus.DONE))
+    return Stream.of(
+            getSessionsForConsultantByStatus(consultant, SessionStatus.IN_PROGRESS),
+            getSessionsForConsultantByStatus(consultant, SessionStatus.DONE))
         .flatMap(Collection::stream)
         .map(session -> new SessionMapper().toConsultantSessionDto(session))
         .collect(Collectors.toList());
   }
 
-  private List<Session> getSessionsForConsultantByStatus(Consultant consultant,
-      SessionStatus sessionStatus) {
+  private List<Session> getSessionsForConsultantByStatus(
+      Consultant consultant, SessionStatus sessionStatus) {
     return sessionRepository.findByConsultantAndStatus(consultant, sessionStatus);
   }
 
-  private List<UserSessionResponseDTO> convertToUserSessionResponseDTO(List<Session> sessions,
-      List<AgencyDTO> agencies) {
+  private List<UserSessionResponseDTO> convertToUserSessionResponseDTO(
+      List<Session> sessions, List<AgencyDTO> agencies) {
     return sessions.stream()
         .map(session -> buildUserSessionDTO(session, agencies))
         .collect(Collectors.toList());
@@ -344,18 +355,24 @@ public class SessionService {
   private UserSessionResponseDTO buildUserSessionDTO(Session session, List<AgencyDTO> agencies) {
     return new UserSessionResponseDTO()
         .session(new SessionMapper().convertToSessionDTO(session))
-        .agency(agencies.stream()
-            .filter(agency -> agency.getId().longValue() == session.getAgencyId().longValue())
-            .findAny()
-            .orElse(null))
-        .consultant(nonNull(session.getConsultant()) ? convertToSessionConsultantForUserDTO(
-            session.getConsultant()) : null);
+        .agency(
+            agencies.stream()
+                .filter(agency -> agency.getId().longValue() == session.getAgencyId().longValue())
+                .findAny()
+                .orElse(null))
+        .consultant(
+            nonNull(session.getConsultant())
+                ? convertToSessionConsultantForUserDTO(session.getConsultant())
+                : null);
   }
 
   private SessionConsultantForUserDTO convertToSessionConsultantForUserDTO(Consultant consultant) {
-    return new SessionConsultantForUserDTO(consultant.getId(), consultant.getUsername(),
+    return new SessionConsultantForUserDTO(
+        consultant.getId(),
+        consultant.getUsername(),
         consultant.isAbsent(),
-        consultant.getAbsenceMessage(), null);
+        consultant.getAbsenceMessage(),
+        null);
   }
 
   /**
@@ -370,13 +387,13 @@ public class SessionService {
   /**
    * Retrieves user sessions by user ID and rocket chat group, or feedback group IDs
    *
-   * @param userId     the user ID
+   * @param userId the user ID
    * @param rcGroupIds rocket chat group or feedback group IDs
-   * @param roles      the roles of the given user
+   * @param roles the roles of the given user
    * @return {@link UserSessionResponseDTO}
    */
-  public List<UserSessionResponseDTO> getSessionsByUserAndGroupOrFeedbackGroupIds(String userId,
-      Set<String> rcGroupIds, Set<String> roles) {
+  public List<UserSessionResponseDTO> getSessionsByUserAndGroupOrFeedbackGroupIds(
+      String userId, Set<String> rcGroupIds, Set<String> roles) {
     checkForAskerRoles(roles);
     var sessions = sessionRepository.findByGroupOrFeedbackGroupIds(rcGroupIds);
     sessions.forEach(session -> checkAskerPermissionForSession(session, userId, roles));
@@ -387,26 +404,28 @@ public class SessionService {
   /**
    * Retrieves user sessions by user ID and session IDs
    *
-   * @param userId     the user ID
+   * @param userId the user ID
    * @param sessionIds the session IDs
-   * @param roles      the roles of the given user
+   * @param roles the roles of the given user
    * @return {@link UserSessionResponseDTO}
    */
-  public List<UserSessionResponseDTO> getSessionsByUserAndSessionIds(String userId,
-      Set<Long> sessionIds, Set<String> roles) {
+  public List<UserSessionResponseDTO> getSessionsByUserAndSessionIds(
+      String userId, Set<Long> sessionIds, Set<String> roles) {
     checkForAskerRoles(roles);
-    var sessions = StreamSupport.stream(sessionRepository.findAllById(sessionIds).spliterator(),
-        false).collect(Collectors.toList());
+    var sessions =
+        StreamSupport.stream(sessionRepository.findAllById(sessionIds).spliterator(), false)
+            .collect(Collectors.toList());
     sessions.forEach(session -> checkAskerPermissionForSession(session, userId, roles));
     List<AgencyDTO> agencies = fetchAgencies(sessions);
     return convertToUserSessionResponseDTO(sessions, agencies);
   }
 
   private List<AgencyDTO> fetchAgencies(List<Session> sessions) {
-    Set<Long> agencyIds = sessions.stream()
-        .map(Session::getAgencyId)
-        .filter(Objects::nonNull)
-        .collect(Collectors.toSet());
+    Set<Long> agencyIds =
+        sessions.stream()
+            .map(Session::getAgencyId)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
     return agencyService.getAgencies(new ArrayList<>(agencyIds));
   }
 
@@ -415,7 +434,7 @@ public class SessionService {
    *
    * @param consultant the ID of the consultant
    * @param rcGroupIds rocket chat group or feedback group IDs
-   * @param roles      the roles of the given consultant
+   * @param roles the roles of the given consultant
    * @return {@link ConsultantSessionResponseDTO}
    */
   public List<ConsultantSessionResponseDTO> getSessionsByConsultantAndGroupOrFeedbackGroupIds(
@@ -431,14 +450,15 @@ public class SessionService {
    *
    * @param consultant the ID of the consultant
    * @param sessionIds the session IDs
-   * @param roles      the roles of the given consultant
+   * @param roles the roles of the given consultant
    * @return {@link ConsultantSessionResponseDTO}
    */
-  public List<ConsultantSessionResponseDTO> getSessionsByIds(Consultant consultant,
-      Set<Long> sessionIds, Set<String> roles) {
+  public List<ConsultantSessionResponseDTO> getSessionsByIds(
+      Consultant consultant, Set<Long> sessionIds, Set<String> roles) {
     checkForUserOrConsultantRole(roles);
-    var sessions = StreamSupport.stream(sessionRepository.findAllById(sessionIds).spliterator(),
-        false).collect(Collectors.toList());
+    var sessions =
+        StreamSupport.stream(sessionRepository.findAllById(sessionIds).spliterator(), false)
+            .collect(Collectors.toList());
     sessions.forEach(session -> checkConsultantAssignment(consultant, session));
     return mapSessionsToConsultantSessionDto(sessions);
   }
@@ -448,8 +468,8 @@ public class SessionService {
    * not allowed to access this session.
    *
    * @param rcGroupId Rocket.Chat group ID
-   * @param userId    Rocket.Chat user ID
-   * @param roles     user roles
+   * @param userId Rocket.Chat user ID
+   * @param roles user roles
    * @return {@link Session}
    */
   public Session getSessionByGroupIdAndUser(String rcGroupId, String userId, Set<String> roles) {
@@ -460,9 +480,13 @@ public class SessionService {
   }
 
   public Session getSessionByGroupId(String rcGroupId) {
-    return sessionRepository.findByGroupId(rcGroupId).orElseThrow(
-        () -> new NotFoundException(String.format("Session with groupId %s not found.", rcGroupId),
-            LogService::logWarn));
+    return sessionRepository
+        .findByGroupId(rcGroupId)
+        .orElseThrow(
+            () ->
+                new NotFoundException(
+                    String.format("Session with groupId %s not found.", rcGroupId),
+                    LogService::logWarn));
   }
 
   private void checkUserPermissionForSession(Session session, String userId, Set<String> roles) {
@@ -474,23 +498,25 @@ public class SessionService {
   private void checkForUserOrConsultantRole(Set<String> roles) {
     if (!roles.contains(UserRole.USER.getValue())
         && !roles.contains(UserRole.CONSULTANT.getValue())) {
-      throw new ForbiddenException("No user or consultant role to retrieve sessions",
-          LogService::logForbidden);
+      throw new ForbiddenException(
+          "No user or consultant role to retrieve sessions", LogService::logForbidden);
     }
   }
 
   private void checkForAskerRoles(Set<String> roles) {
-    if (!roles.contains(UserRole.USER.getValue()) && !roles.contains(UserRole.ANONYMOUS.getValue())
+    if (!roles.contains(UserRole.USER.getValue())
+        && !roles.contains(UserRole.ANONYMOUS.getValue())
         && !roles.contains(UserRole.CONSULTANT.getValue())) {
-      throw new ForbiddenException("No user or consultant role to retrieve sessions",
-          LogService::logForbidden);
+      throw new ForbiddenException(
+          "No user or consultant role to retrieve sessions", LogService::logForbidden);
     }
   }
 
   private void checkAskerPermissionForSession(Session session, String userId, Set<String> roles) {
     if ((roles.contains(UserRole.USER.getValue())
-        || session.getRegistrationType() == RegistrationType.ANONYMOUS && roles.contains(
-        UserRole.ANONYMOUS.getValue())) && session.getUser().getUserId().equals(userId)) {
+            || session.getRegistrationType() == RegistrationType.ANONYMOUS
+                && roles.contains(UserRole.ANONYMOUS.getValue()))
+        && session.getUser().getUserId().equals(userId)) {
       return;
     }
     throw new ForbiddenException(
@@ -506,8 +532,8 @@ public class SessionService {
     }
   }
 
-  private void checkIfConsultantAndNotAssignedToSessionOrAgency(Session session, String userId,
-      Set<String> roles) {
+  private void checkIfConsultantAndNotAssignedToSessionOrAgency(
+      Session session, String userId, Set<String> roles) {
     if (roles.contains(UserRole.CONSULTANT.getValue())) {
       var consultant = loadConsultantOrThrow(userId);
       checkPermissionForConsultantSession(session, consultant);
@@ -515,32 +541,36 @@ public class SessionService {
   }
 
   private void checkConsultantAssignment(Consultant consultant, Session session) {
-    if (session.isAdvisedBy(consultant) || isAllowedToAdvise(consultant, session)
+    if (session.isAdvisedBy(consultant)
+        || isAllowedToAdvise(consultant, session)
         || isAnonymousEnquiryAndAllowedToAdviseConsultingType(consultant, session)) {
       return;
     }
     throw new ForbiddenException(
-        String.format("No permission for session %s by consultant %s", session.getId(),
-            consultant.getId()));
+        String.format(
+            "No permission for session %s by consultant %s", session.getId(), consultant.getId()));
   }
 
   private boolean isAllowedToAdvise(Consultant consultant, Session session) {
-    return isTeamSessionOrNew(session) && session.getAgencyId() != null && consultant.isInAgency(
-        session.getAgencyId());
+    return isTeamSessionOrNew(session)
+        && session.getAgencyId() != null
+        && consultant.isInAgency(session.getAgencyId());
   }
 
-  private boolean isAnonymousEnquiryAndAllowedToAdviseConsultingType(Consultant consultant,
-      Session session) {
+  private boolean isAnonymousEnquiryAndAllowedToAdviseConsultingType(
+      Consultant consultant, Session session) {
     if (session.getStatus() != SessionStatus.NEW
         || session.getRegistrationType() != RegistrationType.ANONYMOUS) {
       return false;
     }
-    var agencyIdsOfConsultant = consultant.getConsultantAgencies().stream()
-        .map(ConsultantAgency::getAgencyId)
-        .collect(Collectors.toList());
-    var consultingTypes = agencyService.getAgencies(agencyIdsOfConsultant).stream()
-        .map(AgencyDTO::getConsultingType)
-        .collect(Collectors.toSet());
+    var agencyIdsOfConsultant =
+        consultant.getConsultantAgencies().stream()
+            .map(ConsultantAgency::getAgencyId)
+            .collect(Collectors.toList());
+    var consultingTypes =
+        agencyService.getAgencies(agencyIdsOfConsultant).stream()
+            .map(AgencyDTO::getConsultingType)
+            .collect(Collectors.toSet());
     return consultingTypes.contains(session.getConsultingTypeId());
   }
 
@@ -557,16 +587,19 @@ public class SessionService {
   /**
    * Returns a {@link ConsultantSessionDTO} for a specific session.
    *
-   * @param sessionId  the session ID to fetch
+   * @param sessionId the session ID to fetch
    * @param consultant the calling consultant
    * @return {@link ConsultantSessionDTO} entity for the specific session
    */
-  public ConsultantSessionDTO fetchSessionForConsultant(@NonNull Long sessionId,
-      @NonNull Consultant consultant) {
+  public ConsultantSessionDTO fetchSessionForConsultant(
+      @NonNull Long sessionId, @NonNull Consultant consultant) {
 
-    var session = getSession(sessionId)
-        .orElseThrow(
-            () -> new NotFoundException(String.format("Session with id %s not found.", sessionId)));
+    var session =
+        getSession(sessionId)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("Session with id %s not found.", sessionId)));
     checkPermissionForConsultantSession(session, consultant);
     return toConsultantSessionDTO(session);
   }
@@ -580,8 +613,8 @@ public class SessionService {
   }
 
   private Supplier<BadRequestException> newBadRequestException(String userId) {
-    return () -> new BadRequestException(
-        String.format("Consultant with id %s does not exist", userId));
+    return () ->
+        new BadRequestException(String.format("Consultant with id %s does not exist", userId));
   }
 
   private ConsultantSessionDTO toConsultantSessionDTO(Session session) {
@@ -605,11 +638,12 @@ public class SessionService {
   }
 
   private void checkPermissionForConsultantSession(Session session, Consultant consultant) {
-    if (!session.isAdvisedBy(consultant) && !(session.isTeamSession() && consultant.isInAgency(
-        session.getAgencyId()))) {
-      throw new ForbiddenException(String
-          .format("No permission for session %s by consultant %s", session.getId(),
-              consultant.getId()));
+    if (!session.isAdvisedBy(consultant)
+        && !(session.isTeamSession() && consultant.isInAgency(session.getAgencyId()))) {
+      throw new ForbiddenException(
+          String.format(
+              "No permission for session %s by consultant %s",
+              session.getId(), consultant.getId()));
     }
   }
 
@@ -627,8 +661,8 @@ public class SessionService {
   }
 
   private List<Session> retrieveArchivedSessions(Consultant consultant) {
-    return this.sessionRepository
-        .findByConsultantAndStatusOrderByUpdateDateDesc(consultant, SessionStatus.IN_ARCHIVE);
+    return this.sessionRepository.findByConsultantAndStatusOrderByUpdateDateDesc(
+        consultant, SessionStatus.IN_ARCHIVE);
   }
 
   /**
@@ -646,8 +680,10 @@ public class SessionService {
   private List<Session> retrieveArchivedTeamSessionsForConsultant(Consultant consultant) {
     Set<ConsultantAgency> consultantAgencies = consultant.getConsultantAgencies();
     if (isNotEmpty(consultantAgencies)) {
-      List<Long> consultantAgencyIds = consultantAgencies.stream()
-          .map(ConsultantAgency::getAgencyId).collect(Collectors.toList());
+      List<Long> consultantAgencyIds =
+          consultantAgencies.stream()
+              .map(ConsultantAgency::getAgencyId)
+              .collect(Collectors.toList());
       return this.sessionRepository
           .findByAgencyIdInAndConsultantNotAndStatusAndTeamSessionIsTrueOrderByUpdateDateDesc(
               consultantAgencyIds, consultant, SessionStatus.IN_ARCHIVE);
@@ -668,22 +704,22 @@ public class SessionService {
   /**
    * Find one session by assigned consultant and user.
    *
-   * @param consultant       the consultant
-   * @param user             the user
+   * @param consultant the consultant
+   * @param user the user
    * @param consultingTypeId the id of the consulting type
    * @return an {@link Optional} of the result
    */
-  public Optional<Session> findSessionByConsultantAndUserAndConsultingType(Consultant consultant,
-      User user, Integer consultingTypeId) {
+  public Optional<Session> findSessionByConsultantAndUserAndConsultingType(
+      Consultant consultant, User user, Integer consultingTypeId) {
     if (nonNull(consultant) && nonNull(user)) {
-      return sessionRepository
-          .findByConsultantAndUserAndConsultingTypeId(consultant, user, consultingTypeId);
+      return sessionRepository.findByConsultantAndUserAndConsultingTypeId(
+          consultant, user, consultingTypeId);
     }
     return Optional.empty();
   }
 
-  public String findGroupIdByConsultantAndUserAndConsultingType(String consultantId, String askerId,
-      Integer consultingTypeId) {
+  public String findGroupIdByConsultantAndUserAndConsultingType(
+      String consultantId, String askerId, Integer consultingTypeId) {
     Optional<Consultant> consultant = consultantService.getConsultant(consultantId);
     if (!consultant.isPresent()) {
       throw new BadRequestException(
@@ -694,8 +730,9 @@ public class SessionService {
       throw new BadRequestException(String.format("Asker for given id %s not found", askerId));
     }
 
-    Optional<Session> session = findSessionByConsultantAndUserAndConsultingType(
-        consultant.get(), user.get(), consultingTypeId);
+    Optional<Session> session =
+        findSessionByConsultantAndUserAndConsultingType(
+            consultant.get(), user.get(), consultingTypeId);
     return session.orElseThrow().getGroupId();
   }
 

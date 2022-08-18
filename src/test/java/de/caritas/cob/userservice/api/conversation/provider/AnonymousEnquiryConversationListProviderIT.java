@@ -16,17 +16,17 @@ import static org.mockito.Mockito.when;
 
 import com.google.api.client.util.Lists;
 import de.caritas.cob.userservice.api.UserServiceApplication;
-import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
-import de.caritas.cob.userservice.api.conversation.model.PageableListRequest;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
+import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
+import de.caritas.cob.userservice.api.conversation.model.PageableListRequest;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
@@ -58,17 +58,13 @@ public class AnonymousEnquiryConversationListProviderIT {
   @Autowired
   private AnonymousEnquiryConversationListProvider anonymousEnquiryConversationListProvider;
 
-  @Autowired
-  private SessionRepository sessionRepository;
+  @Autowired private SessionRepository sessionRepository;
 
-  @Autowired
-  private UserRepository userRepository;
+  @Autowired private UserRepository userRepository;
 
-  @MockBean
-  private AgencyService agencyService;
+  @MockBean private AgencyService agencyService;
 
-  @MockBean
-  private ValidatedUserAccountProvider userAccountProvider;
+  @MockBean private ValidatedUserAccountProvider userAccountProvider;
 
   @Before
   public void setup() {
@@ -86,15 +82,13 @@ public class AnonymousEnquiryConversationListProviderIT {
   }
 
   @Test
-  public void buildConversations_Should_returnExpectedResponseDTO_When_consultantHasAnonymousEnquiries() {
+  public void
+      buildConversations_Should_returnExpectedResponseDTO_When_consultantHasAnonymousEnquiries() {
     saveAnonymousSessions(10);
-    PageableListRequest request = PageableListRequest.builder()
-        .count(5)
-        .offset(0)
-        .build();
+    PageableListRequest request = PageableListRequest.builder().count(5).offset(0).build();
 
-    ConsultantSessionListResponseDTO responseDTO = this.anonymousEnquiryConversationListProvider
-        .buildConversations(request);
+    ConsultantSessionListResponseDTO responseDTO =
+        this.anonymousEnquiryConversationListProvider.buildConversations(request);
 
     assertThat(responseDTO.getCount(), is(5));
     assertThat(responseDTO.getOffset(), is(0));
@@ -105,13 +99,10 @@ public class AnonymousEnquiryConversationListProviderIT {
   @Test
   public void buildConversations_Should_returnExpectedElements_When_paginationParamsAreAtTheEnd() {
     saveAnonymousSessions(10);
-    PageableListRequest request = PageableListRequest.builder()
-        .count(3)
-        .offset(9)
-        .build();
+    PageableListRequest request = PageableListRequest.builder().count(3).offset(9).build();
 
-    ConsultantSessionListResponseDTO responseDTO = this.anonymousEnquiryConversationListProvider
-        .buildConversations(request);
+    ConsultantSessionListResponseDTO responseDTO =
+        this.anonymousEnquiryConversationListProvider.buildConversations(request);
 
     assertThat(responseDTO.getCount(), is(1));
     assertThat(responseDTO.getOffset(), is(9));
@@ -122,13 +113,10 @@ public class AnonymousEnquiryConversationListProviderIT {
   @Test
   public void buildConversations_Should_returnElementsInExpectedOrder() {
     saveAnonymousSessions(100);
-    PageableListRequest request = PageableListRequest.builder()
-        .count(100)
-        .offset(0)
-        .build();
+    PageableListRequest request = PageableListRequest.builder().count(100).offset(0).build();
 
-    ConsultantSessionListResponseDTO responseDTO = this.anonymousEnquiryConversationListProvider
-        .buildConversations(request);
+    ConsultantSessionListResponseDTO responseDTO =
+        this.anonymousEnquiryConversationListProvider.buildConversations(request);
 
     PeekingIterator<ConsultantSessionResponseDTO> peeker =
         new PeekingIterator<>(responseDTO.getSessions().iterator());
@@ -143,27 +131,28 @@ public class AnonymousEnquiryConversationListProviderIT {
 
   @Test
   public void providedType_Should_return_anonymousEnquiry() {
-    ConversationListType conversationListType = this.anonymousEnquiryConversationListProvider
-        .providedType();
+    ConversationListType conversationListType =
+        this.anonymousEnquiryConversationListProvider.providedType();
 
     assertThat(conversationListType, is(ANONYMOUS_ENQUIRY));
   }
 
   private void saveAnonymousSessions(int amount) {
-    List<Session> sessions = new EasyRandom().objects(Session.class, amount + 4)
-        .collect(Collectors.toList());
+    List<Session> sessions =
+        new EasyRandom().objects(Session.class, amount + 4).collect(Collectors.toList());
     User user = this.userRepository.findAll().iterator().next();
-    sessions.forEach(session -> {
-      session.setRegistrationType(ANONYMOUS);
-      session.setConsultant(null);
-      session.setUser(user);
-      session.setId(null);
-      session.setSessionData(null);
-      session.setPostcode("12345");
-      session.setConsultingTypeId(CONSULTING_TYPE_ID_OFFENDER);
-      session.setStatus(SessionStatus.NEW);
-      session.setSessionTopics(Lists.newArrayList());
-    });
+    sessions.forEach(
+        session -> {
+          session.setRegistrationType(ANONYMOUS);
+          session.setConsultant(null);
+          session.setUser(user);
+          session.setId(null);
+          session.setSessionData(null);
+          session.setPostcode("12345");
+          session.setConsultingTypeId(CONSULTING_TYPE_ID_OFFENDER);
+          session.setStatus(SessionStatus.NEW);
+          session.setSessionTopics(Lists.newArrayList());
+        });
     sessions.get(0).setStatus(SessionStatus.INITIAL);
     sessions.get(1).setStatus(SessionStatus.IN_PROGRESS);
     sessions.get(2).setStatus(SessionStatus.DONE);
@@ -171,5 +160,4 @@ public class AnonymousEnquiryConversationListProviderIT {
 
     this.sessionRepository.saveAll(sessions);
   }
-
 }

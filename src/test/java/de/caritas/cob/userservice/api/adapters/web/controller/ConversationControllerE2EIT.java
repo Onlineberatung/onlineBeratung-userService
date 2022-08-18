@@ -14,16 +14,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.neovisionaries.i18n.LanguageCode;
-import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
-import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsGetDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsUpdateDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.subscriptions.SubscriptionsGetDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.subscriptions.SubscriptionsUpdateDTO;
+import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
+import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
+import de.caritas.cob.userservice.topicservice.generated.web.TopicControllerApi;
 import javax.servlet.http.Cookie;
 import org.assertj.core.util.Lists;
 import org.jeasy.random.EasyRandom;
@@ -41,7 +42,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.client.RestTemplate;
-import de.caritas.cob.userservice.topicservice.generated.web.TopicControllerApi;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -58,17 +58,13 @@ class ConversationControllerE2EIT {
   public static final String FIRST_TOPIC_DESC = "topic desc";
   public static final String FIRST_TOPIC_STATUS = "INACTIVE";
 
-  @Autowired
-  private MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
 
-  @Autowired
-  private ConsultantRepository consultantRepository;
+  @Autowired private ConsultantRepository consultantRepository;
 
-  @Autowired
-  private SessionRepository sessionRepository;
+  @Autowired private SessionRepository sessionRepository;
 
-  @MockBean
-  private AuthenticatedUser authenticatedUser;
+  @MockBean private AuthenticatedUser authenticatedUser;
 
   @MockBean
   @Qualifier("restTemplate")
@@ -103,14 +99,14 @@ class ConversationControllerE2EIT {
     givenRocketChatRoomsGet();
     givenAValidTopicServiceResponse();
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             get("/conversations/consultants/enquiries/registered")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
                 .param("offset", "0")
-                .param("count", "100")
-        )
+                .param("count", "100"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("offset", is(0)))
         .andExpect(jsonPath("count", is(1)))
@@ -133,14 +129,14 @@ class ConversationControllerE2EIT {
     givenRocketChatRoomsGet();
     givenAValidTopicServiceResponse();
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             get("/conversations/consultants/enquiries/registered")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
                 .param("offset", "0")
-                .param("count", "100")
-        )
+                .param("count", "100"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("offset", is(0)))
         .andExpect(jsonPath("count", is(1)))
@@ -156,20 +152,27 @@ class ConversationControllerE2EIT {
 
   private void givenAValidTopicServiceResponse() {
     var roomsGetDTO = new RoomsGetDTO();
-    roomsGetDTO.setUpdate(new RoomsUpdateDTO[]{});
-    var firstTopic = new de.caritas.cob.userservice.topicservice.generated.web.model.TopicDTO().id(
-        1L).name(
-        FIRST_TOPIC_NAME).description(FIRST_TOPIC_DESC).status(FIRST_TOPIC_STATUS);
-    var secondTopic = new de.caritas.cob.userservice.topicservice.generated.web.model.TopicDTO().id(
-        2L).name("topic name 2").description("topic desc 2").status("ACTIVE");
-    when(topicControllerApi.getApiClient()).thenReturn(
-        new de.caritas.cob.userservice.topicservice.generated.ApiClient());
+    roomsGetDTO.setUpdate(new RoomsUpdateDTO[] {});
+    var firstTopic =
+        new de.caritas.cob.userservice.topicservice.generated.web.model.TopicDTO()
+            .id(1L)
+            .name(FIRST_TOPIC_NAME)
+            .description(FIRST_TOPIC_DESC)
+            .status(FIRST_TOPIC_STATUS);
+    var secondTopic =
+        new de.caritas.cob.userservice.topicservice.generated.web.model.TopicDTO()
+            .id(2L)
+            .name("topic name 2")
+            .description("topic desc 2")
+            .status("ACTIVE");
+    when(topicControllerApi.getApiClient())
+        .thenReturn(new de.caritas.cob.userservice.topicservice.generated.ApiClient());
     when(topicControllerApi.getAllTopics()).thenReturn(Lists.newArrayList(firstTopic, secondTopic));
   }
 
   private void givenAConsultantWithMultipleAgencies() {
-    consultant = consultantRepository.findById("45816eb6-984b-411f-a818-996cd16e1f2a")
-        .orElseThrow();
+    consultant =
+        consultantRepository.findById("45816eb6-984b-411f-a818-996cd16e1f2a").orElseThrow();
     when(authenticatedUser.getUserId()).thenReturn(consultant.getId());
   }
 
@@ -185,7 +188,7 @@ class ConversationControllerE2EIT {
     var subscriptionsGetDTO = new SubscriptionsGetDTO();
     subscriptionsGetDTO.setSuccess(true);
     SubscriptionsUpdateDTO[] subscriptionUpdates = {
-        easyRandom.nextObject(SubscriptionsUpdateDTO.class)
+      easyRandom.nextObject(SubscriptionsUpdateDTO.class)
     };
     subscriptionsGetDTO.setUpdate(subscriptionUpdates);
     when(restTemplate.exchange(anyString(), any(), any(), eq(SubscriptionsGetDTO.class)))

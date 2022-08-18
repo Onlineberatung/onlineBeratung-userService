@@ -5,12 +5,12 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
+import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
 import de.caritas.cob.userservice.api.workflow.delete.service.provider.InactivePrivateGroupsProvider;
-import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.port.out.SessionRepository;
-import de.caritas.cob.userservice.api.model.User;
-import de.caritas.cob.userservice.api.port.out.UserRepository;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,21 +28,14 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class DeleteInactiveSessionsAndUserServiceTest {
 
-  @InjectMocks
-  private DeleteInactiveSessionsAndUserService deleteInactiveSessionsAndUserService;
+  @InjectMocks private DeleteInactiveSessionsAndUserService deleteInactiveSessionsAndUserService;
 
-  @Mock
-  private WorkflowErrorMailService workflowErrorMailService;
-  @Mock
-  private UserRepository userRepository;
-  @Mock
-  private SessionRepository sessionRepository;
-  @Mock
-  private DeleteUserAccountService deleteUserAccountService;
-  @Mock
-  private DeleteSessionService deleteSessionService;
-  @Mock
-  private InactivePrivateGroupsProvider inactivePrivateGroupsProvider;
+  @Mock private WorkflowErrorMailService workflowErrorMailService;
+  @Mock private UserRepository userRepository;
+  @Mock private SessionRepository sessionRepository;
+  @Mock private DeleteUserAccountService deleteUserAccountService;
+  @Mock private DeleteSessionService deleteSessionService;
+  @Mock private InactivePrivateGroupsProvider inactivePrivateGroupsProvider;
 
   @Test
   public void deleteInactiveSessionsAndUsers_Should_SendWorkflowErrorsMail() {
@@ -50,9 +43,12 @@ public class DeleteInactiveSessionsAndUserServiceTest {
     EasyRandom easyRandom = new EasyRandom();
     User user = easyRandom.nextObject(User.class);
     Session session = easyRandom.nextObject(Session.class);
-    Map<String, List<String>> userWithInactiveGroupsMap = new HashMap<>() {{
-        put(user.getUserId(), Collections.singletonList(session.getGroupId()));
-      }};
+    Map<String, List<String>> userWithInactiveGroupsMap =
+        new HashMap<>() {
+          {
+            put(user.getUserId(), Collections.singletonList(session.getGroupId()));
+          }
+        };
     when(inactivePrivateGroupsProvider.retrieveUserWithInactiveGroupsMap())
         .thenReturn(userWithInactiveGroupsMap);
     when(userRepository.findByRcUserIdAndDeleteDateIsNull(anyString()))
@@ -68,15 +64,19 @@ public class DeleteInactiveSessionsAndUserServiceTest {
   }
 
   @Test
-  public void deleteInactiveSessionsAndUsers_Should_DeleteEntireUserAccount_WhenUserHasOnlyInactiveSessions() {
+  public void
+      deleteInactiveSessionsAndUsers_Should_DeleteEntireUserAccount_WhenUserHasOnlyInactiveSessions() {
 
     EasyRandom easyRandom = new EasyRandom();
     User user = easyRandom.nextObject(User.class);
     Session session1 = easyRandom.nextObject(Session.class);
     Session session2 = easyRandom.nextObject(Session.class);
-    Map<String, List<String>> userWithInactiveGroupsMap = new HashMap<>() {{
-        put(user.getUserId(), Arrays.asList(session1.getGroupId(), session2.getGroupId()));
-      }};
+    Map<String, List<String>> userWithInactiveGroupsMap =
+        new HashMap<>() {
+          {
+            put(user.getUserId(), Arrays.asList(session1.getGroupId(), session2.getGroupId()));
+          }
+        };
     when(inactivePrivateGroupsProvider.retrieveUserWithInactiveGroupsMap())
         .thenReturn(userWithInactiveGroupsMap);
     when(userRepository.findByRcUserIdAndDeleteDateIsNull(anyString()))
@@ -89,15 +89,19 @@ public class DeleteInactiveSessionsAndUserServiceTest {
   }
 
   @Test
-  public void deleteInactiveSessionsAndUsers_Should_DeleteSingleSession_WhenUserHasActiveAndInactiveSessions() {
+  public void
+      deleteInactiveSessionsAndUsers_Should_DeleteSingleSession_WhenUserHasActiveAndInactiveSessions() {
 
     EasyRandom easyRandom = new EasyRandom();
     User user = easyRandom.nextObject(User.class);
     Session session1 = easyRandom.nextObject(Session.class);
     Session session2 = easyRandom.nextObject(Session.class);
-    Map<String, List<String>> userWithInactiveGroupsMap = new HashMap<>() {{
-        put(user.getUserId(), Collections.singletonList(session1.getGroupId()));
-      }};
+    Map<String, List<String>> userWithInactiveGroupsMap =
+        new HashMap<>() {
+          {
+            put(user.getUserId(), Collections.singletonList(session1.getGroupId()));
+          }
+        };
     when(inactivePrivateGroupsProvider.retrieveUserWithInactiveGroupsMap())
         .thenReturn(userWithInactiveGroupsMap);
     when(userRepository.findByRcUserIdAndDeleteDateIsNull(anyString()))
@@ -110,15 +114,19 @@ public class DeleteInactiveSessionsAndUserServiceTest {
   }
 
   @Test
-  public void deleteInactiveSessionsAndUsers_Should_SendWorkflowErrorMail_WhenUserHasActiveAndInactiveSessionsAndHasErrors() {
+  public void
+      deleteInactiveSessionsAndUsers_Should_SendWorkflowErrorMail_WhenUserHasActiveAndInactiveSessionsAndHasErrors() {
 
     EasyRandom easyRandom = new EasyRandom();
     User user = easyRandom.nextObject(User.class);
     Session session1 = easyRandom.nextObject(Session.class);
     Session session2 = easyRandom.nextObject(Session.class);
-    Map<String, List<String>> userWithInactiveGroupsMap = new HashMap<>() {{
-        put(user.getUserId(), Collections.singletonList(session1.getGroupId()));
-      }};
+    Map<String, List<String>> userWithInactiveGroupsMap =
+        new HashMap<>() {
+          {
+            put(user.getUserId(), Collections.singletonList(session1.getGroupId()));
+          }
+        };
     when(inactivePrivateGroupsProvider.retrieveUserWithInactiveGroupsMap())
         .thenReturn(userWithInactiveGroupsMap);
     when(userRepository.findByRcUserIdAndDeleteDateIsNull(anyString()))
@@ -134,16 +142,20 @@ public class DeleteInactiveSessionsAndUserServiceTest {
   }
 
   @Test
-  public void deleteInactiveSessionsAndUsers_Should_SendWorkflowErrorMail_WhenSessionCouldNotBeFound() {
+  public void
+      deleteInactiveSessionsAndUsers_Should_SendWorkflowErrorMail_WhenSessionCouldNotBeFound() {
 
     EasyRandom easyRandom = new EasyRandom();
     User user = easyRandom.nextObject(User.class);
     Session session1 = easyRandom.nextObject(Session.class);
     Session session2 = easyRandom.nextObject(Session.class);
     Session session3 = easyRandom.nextObject(Session.class);
-    Map<String, List<String>> userWithInactiveGroupsMap = new HashMap<>() {{
-        put(user.getUserId(), Collections.singletonList(session1.getGroupId()));
-      }};
+    Map<String, List<String>> userWithInactiveGroupsMap =
+        new HashMap<>() {
+          {
+            put(user.getUserId(), Collections.singletonList(session1.getGroupId()));
+          }
+        };
     when(inactivePrivateGroupsProvider.retrieveUserWithInactiveGroupsMap())
         .thenReturn(userWithInactiveGroupsMap);
     when(userRepository.findByRcUserIdAndDeleteDateIsNull(anyString()))
@@ -156,14 +168,18 @@ public class DeleteInactiveSessionsAndUserServiceTest {
   }
 
   @Test
-  public void deleteInactiveSessionsAndUsers_Should_SendWorkflowErrorMail_WhenUserCouldNotBeFound() {
+  public void
+      deleteInactiveSessionsAndUsers_Should_SendWorkflowErrorMail_WhenUserCouldNotBeFound() {
 
     EasyRandom easyRandom = new EasyRandom();
     User user = easyRandom.nextObject(User.class);
     Session session1 = easyRandom.nextObject(Session.class);
-    Map<String, List<String>> userWithInactiveGroupsMap = new HashMap<>() {{
-        put(user.getUserId(), Collections.singletonList(session1.getGroupId()));
-      }};
+    Map<String, List<String>> userWithInactiveGroupsMap =
+        new HashMap<>() {
+          {
+            put(user.getUserId(), Collections.singletonList(session1.getGroupId()));
+          }
+        };
     when(inactivePrivateGroupsProvider.retrieveUserWithInactiveGroupsMap())
         .thenReturn(userWithInactiveGroupsMap);
     when(userRepository.findByRcUserIdAndDeleteDateIsNull(anyString()))

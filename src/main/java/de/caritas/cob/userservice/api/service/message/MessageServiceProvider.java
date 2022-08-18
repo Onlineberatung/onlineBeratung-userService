@@ -31,9 +31,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 
-/**
- * Service class to provide message transmission to Rocket.Chat via the MessageService.
- */
+/** Service class to provide message transmission to Rocket.Chat via the MessageService. */
 @Service
 @RequiredArgsConstructor
 public class MessageServiceProvider {
@@ -46,22 +44,24 @@ public class MessageServiceProvider {
   /**
    * Posts an enquiry message via the MessageService to the given Rocket.Chat group ID.
    *
-   * @param rocketChatData       rocket chat data necessary for sending messages
+   * @param rocketChatData rocket chat data necessary for sending messages
    * @param exceptionInformation {@link CreateEnquiryExceptionInformation}
    * @return {@link MessageResponseDTO}
    * @throws RocketChatPostMessageException exception when posting the message fails
    */
-  public MessageResponseDTO postEnquiryMessage(RocketChatData rocketChatData,
-      CreateEnquiryExceptionInformation exceptionInformation)
+  public MessageResponseDTO postEnquiryMessage(
+      RocketChatData rocketChatData, CreateEnquiryExceptionInformation exceptionInformation)
       throws RocketChatPostMessageException {
 
     try {
       return this.postMessage(rocketChatData);
     } catch (RestClientException exception) {
       throw new RocketChatPostMessageException(
-          String.format("Could not post enquiry message to Rocket.Chat group %s with user %s",
+          String.format(
+              "Could not post enquiry message to Rocket.Chat group %s with user %s",
               rocketChatData.getRcGroupId(),
-              rocketChatData.getRocketChatCredentials().getRocketChatUserId()), exception,
+              rocketChatData.getRocketChatCredentials().getRocketChatUserId()),
+          exception,
           exceptionInformation);
     }
   }
@@ -69,25 +69,31 @@ public class MessageServiceProvider {
   private MessageResponseDTO postMessage(RocketChatData rocketChatData) {
     var rcCredentials = rocketChatData.getRocketChatCredentials();
     addDefaultHeaders(this.messageControllerApi.getApiClient());
-    var message = new MessageDTO()
-        .message(rocketChatData.getMessage())
-        .org(rocketChatData.getOrg())
-        .t(rocketChatData.getType());
-    return this.messageControllerApi.createMessage(rcCredentials.getRocketChatToken(),
-        rcCredentials.getRocketChatUserId(), rocketChatData.getRcGroupId(), message);
+    var message =
+        new MessageDTO()
+            .message(rocketChatData.getMessage())
+            .org(rocketChatData.getOrg())
+            .t(rocketChatData.getType());
+    return this.messageControllerApi.createMessage(
+        rcCredentials.getRocketChatToken(),
+        rcCredentials.getRocketChatUserId(),
+        rocketChatData.getRcGroupId(),
+        message);
   }
 
   /**
    * Posts a welcome message as system user to the given Rocket.Chat group if configured in the
    * provided {@link ExtendedConsultingTypeResponseDTO}.
    *
-   * @param rcGroupId                         Rocket.Chat group ID
-   * @param user                              {@link User} who receives the message
+   * @param rcGroupId Rocket.Chat group ID
+   * @param user {@link User} who receives the message
    * @param extendedConsultingTypeResponseDTO {@link ExtendedConsultingTypeResponseDTO}
-   * @param exceptionInformation              {@link CreateEnquiryExceptionInformation}
+   * @param exceptionInformation {@link CreateEnquiryExceptionInformation}
    * @throws RocketChatPostWelcomeMessageException exception when posting the welcome message fails
    */
-  public void postWelcomeMessageIfConfigured(String rcGroupId, User user,
+  public void postWelcomeMessageIfConfigured(
+      String rcGroupId,
+      User user,
       ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO,
       CreateEnquiryExceptionInformation exceptionInformation)
       throws RocketChatPostWelcomeMessageException {
@@ -98,7 +104,8 @@ public class MessageServiceProvider {
     }
 
     String welcomeMessage =
-        MessageHelper.replaceUsernameInMessage(welcomeMessageDTO.getWelcomeMessageText(),
+        MessageHelper.replaceUsernameInMessage(
+            welcomeMessageDTO.getWelcomeMessageText(),
             new UsernameTranscoder().decodeUsername(user.getUsername()));
 
     try {
@@ -107,7 +114,8 @@ public class MessageServiceProvider {
     } catch (RestClientException | RocketChatUserNotInitializedException exception) {
       throw new RocketChatPostWelcomeMessageException(
           String.format("Could not post welcome message in Rocket.Chat group %s", rcGroupId),
-          exception, exceptionInformation);
+          exception,
+          exceptionInformation);
     }
   }
 
@@ -122,11 +130,12 @@ public class MessageServiceProvider {
    * Posts an alias only message and/or save session data message as system user in the provided
    * Rocket.Chat group ID.
    *
-   * @param rcGroupId                         Rocket.Chat group ID
+   * @param rcGroupId Rocket.Chat group ID
    * @param extendedConsultingTypeResponseDTO {@link ExtendedConsultingTypeResponseDTO}
-   * @param exceptionInformation              {@link CreateEnquiryExceptionInformation}
+   * @param exceptionInformation {@link CreateEnquiryExceptionInformation}
    */
-  public void postFurtherStepsOrSaveSessionDataMessageIfConfigured(String rcGroupId,
+  public void postFurtherStepsOrSaveSessionDataMessageIfConfigured(
+      String rcGroupId,
       ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO,
       CreateEnquiryExceptionInformation exceptionInformation)
       throws RocketChatPostFurtherStepsMessageException {
@@ -140,7 +149,8 @@ public class MessageServiceProvider {
     }
   }
 
-  public MessageResponseDTO postSendAppointmentBookedMessage(String rcGroupId,
+  public MessageResponseDTO postSendAppointmentBookedMessage(
+      String rcGroupId,
       CreateEnquiryExceptionInformation exceptionInformation,
       AppointmentData appointmentData)
       throws RocketChatPostFurtherStepsMessageException {
@@ -148,28 +158,37 @@ public class MessageServiceProvider {
     addDefaultHeaders(this.messageControllerApi.getApiClient());
     try {
       ObjectMapper mapper = new ObjectMapper();
-      return this.messageControllerApi.saveAliasMessageWithContent(rcGroupId, new AliasMessageDTO()
-          .messageType(MessageType.APPOINTMENT_SET).content(mapper.writeValueAsString(appointmentData)));
+      return this.messageControllerApi.saveAliasMessageWithContent(
+          rcGroupId,
+          new AliasMessageDTO()
+              .messageType(MessageType.APPOINTMENT_SET)
+              .content(mapper.writeValueAsString(appointmentData)));
 
     } catch (RestClientException | JsonProcessingException exception) {
-      throw new RocketChatPostFurtherStepsMessageException(String
-          .format("Could not post further steps message in Rocket.Chat group with id %s",
-              rcGroupId), exception, exceptionInformation);
+      throw new RocketChatPostFurtherStepsMessageException(
+          String.format(
+              "Could not post further steps message in Rocket.Chat group with id %s", rcGroupId),
+          exception,
+          exceptionInformation);
     }
   }
 
-  private void postAliasOnlyMessage(String rcGroupId, MessageType messageType,
+  private void postAliasOnlyMessage(
+      String rcGroupId,
+      MessageType messageType,
       CreateEnquiryExceptionInformation exceptionInformation)
       throws RocketChatPostFurtherStepsMessageException {
     addDefaultHeaders(this.messageControllerApi.getApiClient());
     try {
-      this.messageControllerApi.saveAliasOnlyMessage(rcGroupId, new AliasOnlyMessageDTO()
-          .messageType(messageType));
+      this.messageControllerApi.saveAliasOnlyMessage(
+          rcGroupId, new AliasOnlyMessageDTO().messageType(messageType));
 
     } catch (RestClientException exception) {
-      throw new RocketChatPostFurtherStepsMessageException(String
-          .format("Could not post further steps message in Rocket.Chat group with id %s",
-              rcGroupId), exception, exceptionInformation);
+      throw new RocketChatPostFurtherStepsMessageException(
+          String.format(
+              "Could not post further steps message in Rocket.Chat group with id %s", rcGroupId),
+          exception,
+          exceptionInformation);
     }
   }
 

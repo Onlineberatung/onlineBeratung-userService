@@ -5,9 +5,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-/**
- * Action to delete a user account in keycloak.
- */
+/** Action to delete a user account in keycloak. */
 @Component
 @RequiredArgsConstructor
 public abstract class DeleteKeycloakUserAction {
@@ -19,5 +17,4 @@ public abstract class DeleteKeycloakUserAction {
   protected void deleteUserWithId(String userId) {
     identityClient.deleteUser(userId);
   }
-
 }

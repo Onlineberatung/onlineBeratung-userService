@@ -10,12 +10,12 @@ public class RocketChatAddConsultantsException extends CreateEnquiryException {
   /**
    * Exception when adding consultants to a Rocket.Chat group fails.
    *
-   * @param message              Error Message
-   * @param exception            Exception
+   * @param message Error Message
+   * @param exception Exception
    * @param exceptionInformation {@link CreateEnquiryExceptionInformation}
    */
-  public RocketChatAddConsultantsException(String message, Exception exception,
-      CreateEnquiryExceptionInformation exceptionInformation) {
+  public RocketChatAddConsultantsException(
+      String message, Exception exception, CreateEnquiryExceptionInformation exceptionInformation) {
     super(message, exception, exceptionInformation);
   }
 }

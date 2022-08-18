@@ -16,9 +16,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Represents the relation between consultant and mobile token.
- */
+/** Represents the relation between consultant and mobile token. */
 @Entity
 @Table(name = "consultant_mobile_token")
 @AllArgsConstructor
@@ -28,8 +26,10 @@ import lombok.Setter;
 public class ConsultantMobileToken {
 
   @Id
-  @SequenceGenerator(name = "id_seq", allocationSize = 1, sequenceName =
-      "sequence_consultant_mobile_token")
+  @SequenceGenerator(
+      name = "id_seq",
+      allocationSize = 1,
+      sequenceName = "sequence_consultant_mobile_token")
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "id_seq")
   @Column(name = "id", updatable = false, nullable = false)
   private Long id;

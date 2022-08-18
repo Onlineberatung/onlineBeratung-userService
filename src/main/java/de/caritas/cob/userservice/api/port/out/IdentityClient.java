@@ -40,8 +40,8 @@ public interface IdentityClient {
 
   KeycloakCreateUserResponseDTO createKeycloakUser(final UserDTO user);
 
-  KeycloakCreateUserResponseDTO createKeycloakUser(final UserDTO user, final String firstName,
-      final String lastName);
+  KeycloakCreateUserResponseDTO createKeycloakUser(
+      final UserDTO user, final String firstName, final String lastName);
 
   boolean isUsernameAvailable(String username);
 

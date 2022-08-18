@@ -38,14 +38,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 @Import({ConsultingTypeManagerTestConfig.class})
 public class SessionArchiveServiceIT {
 
-  @Autowired
-  SessionArchiveService sessionArchiveService;
-  @Autowired
-  SessionRepository sessionRepository;
-  @MockBean
-  AuthenticatedUser authenticatedUser;
-  @MockBean
-  RocketChatService rocketChatService;
+  @Autowired SessionArchiveService sessionArchiveService;
+  @Autowired SessionRepository sessionRepository;
+  @MockBean AuthenticatedUser authenticatedUser;
+  @MockBean RocketChatService rocketChatService;
 
   @Test
   public void archiveSession_Should_ChangeStatusOfSession_WhenConsultantHasPermission() {
@@ -58,7 +54,6 @@ public class SessionArchiveServiceIT {
     Optional<Session> session = sessionRepository.findById(2L);
     assert session.isPresent();
     assertThat(session.get().getStatus(), is(SessionStatus.IN_ARCHIVE));
-
   }
 
   @Test(expected = NotFoundException.class)
@@ -136,5 +131,4 @@ public class SessionArchiveServiceIT {
     when(authenticatedUser.isConsultant()).thenReturn(true);
     sessionArchiveService.dearchiveSession(1L);
   }
-
 }

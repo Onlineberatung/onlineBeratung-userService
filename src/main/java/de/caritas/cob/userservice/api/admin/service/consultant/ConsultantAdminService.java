@@ -20,9 +20,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-/**
- * Service class for admin operations on {@link Consultant} objects.
- */
+/** Service class for admin operations on {@link Consultant} objects. */
 @Service
 @RequiredArgsConstructor
 public class ConsultantAdminService {
@@ -41,11 +39,14 @@ public class ConsultantAdminService {
    * @return a generated {@link ConsultantResponseDTO}
    */
   public ConsultantAdminResponseDTO findConsultantById(String consultantId) {
-    Consultant consultant = this.consultantRepository.findByIdAndDeleteDateIsNull(consultantId)
-        .orElseThrow(() -> new NoContentException(
-            String.format("Consultant with id %s not found", consultantId)));
-    return ConsultantResponseDTOBuilder.getInstance(consultant)
-        .buildResponseDTO();
+    Consultant consultant =
+        this.consultantRepository
+            .findByIdAndDeleteDateIsNull(consultantId)
+            .orElseThrow(
+                () ->
+                    new NoContentException(
+                        String.format("Consultant with id %s not found", consultantId)));
+    return ConsultantResponseDTOBuilder.getInstance(consultant).buildResponseDTO();
   }
 
   /**
@@ -53,15 +54,14 @@ public class ConsultantAdminService {
    *
    * @param createConsultantDTO the input data used for {@link Consultant} creation
    * @return the generated and persisted {@link Consultant} representation as {@link
-   * ConsultantAdminResponseDTO}
+   *     ConsultantAdminResponseDTO}
    */
   public ConsultantAdminResponseDTO createNewConsultant(CreateConsultantDTO createConsultantDTO) {
     Consultant newConsultant =
         this.consultantCreatorService.createNewConsultant(createConsultantDTO);
 
-    ConsultantAdminResponseDTO consultantAdminResponseDTO = ConsultantResponseDTOBuilder
-        .getInstance(
-            newConsultant).buildResponseDTO();
+    ConsultantAdminResponseDTO consultantAdminResponseDTO =
+        ConsultantResponseDTOBuilder.getInstance(newConsultant).buildResponseDTO();
 
     this.appointmentService.createConsultant(consultantAdminResponseDTO);
 
@@ -71,19 +71,18 @@ public class ConsultantAdminService {
   /**
    * Updates a new {@link Consultant} based on the {@link UpdateConsultantDTO} input.
    *
-   * @param consultantId        the id of consultant to be updated
+   * @param consultantId the id of consultant to be updated
    * @param updateConsultantDTO the input data used for {@link Consultant} update
    * @return the generated and persisted {@link Consultant} representation as {@link
-   * ConsultantAdminResponseDTO}
+   *     ConsultantAdminResponseDTO}
    */
-  public ConsultantAdminResponseDTO updateConsultant(String consultantId,
-      UpdateAdminConsultantDTO updateConsultantDTO) {
-    Consultant updatedConsultant = this.consultantUpdateService.updateConsultant(consultantId,
-        updateConsultantDTO);
+  public ConsultantAdminResponseDTO updateConsultant(
+      String consultantId, UpdateAdminConsultantDTO updateConsultantDTO) {
+    Consultant updatedConsultant =
+        this.consultantUpdateService.updateConsultant(consultantId, updateConsultantDTO);
 
-    ConsultantAdminResponseDTO consultantAdminResponseDTO = ConsultantResponseDTOBuilder
-        .getInstance(
-            updatedConsultant).buildResponseDTO();
+    ConsultantAdminResponseDTO consultantAdminResponseDTO =
+        ConsultantResponseDTOBuilder.getInstance(updatedConsultant).buildResponseDTO();
 
     this.appointmentService.updateConsultant(consultantAdminResponseDTO);
     return consultantAdminResponseDTO;
@@ -95,9 +94,13 @@ public class ConsultantAdminService {
    * @param consultantId the consultant id
    */
   public void markConsultantForDeletion(String consultantId) {
-    var consultant = this.consultantRepository.findByIdAndDeleteDateIsNull(consultantId)
-        .orElseThrow(() -> new NotFoundException(
-            String.format("Consultant with id %s does not exist", consultantId)));
+    var consultant =
+        this.consultantRepository
+            .findByIdAndDeleteDateIsNull(consultantId)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("Consultant with id %s does not exist", consultantId)));
 
     this.consultantPreDeletionService.performPreDeletionSteps(consultant);
 

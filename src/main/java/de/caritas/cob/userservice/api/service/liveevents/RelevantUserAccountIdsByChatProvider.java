@@ -2,12 +2,12 @@ package de.caritas.cob.userservice.api.service.liveevents;
 
 import static java.util.Collections.emptyList;
 
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.List;
 import java.util.Objects;
@@ -17,9 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-/**
- * Provider to observe all assigned chat user ids instead of initiator.
- */
+/** Provider to observe all assigned chat user ids instead of initiator. */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -55,9 +53,13 @@ public class RelevantUserAccountIdsByChatProvider implements UserIdsProvider {
   }
 
   private String toUserAccountId(String rcUserId) {
-    return this.userService.findUserByRcUserId(rcUserId).map(User::getUserId)
-        .orElse(this.consultantService.getConsultantByRcUserId(rcUserId).map(Consultant::getId)
-            .orElse(null));
+    return this.userService
+        .findUserByRcUserId(rcUserId)
+        .map(User::getUserId)
+        .orElse(
+            this.consultantService
+                .getConsultantByRcUserId(rcUserId)
+                .map(Consultant::getId)
+                .orElse(null));
   }
-
 }

@@ -35,7 +35,8 @@ public class ConsultantPreDeletionService {
       throw new CustomValidationHttpStatusException(CONSULTANT_HAS_ACTIVE_SESSIONS);
     }
     if (nonNull(consultant.getConsultantAgencies())) {
-      consultant.getConsultantAgencies()
+      consultant
+          .getConsultantAgencies()
           .forEach(agencyDeletionValidationService::validateAndMarkForDeletion);
     }
     this.identityClient.deactivateUser(consultant.getId());
@@ -44,5 +45,4 @@ public class ConsultantPreDeletionService {
   private boolean hasConsultantActiveSessions(Consultant consultant) {
     return !this.sessionRepository.findByConsultantAndStatus(consultant, IN_PROGRESS).isEmpty();
   }
-
 }

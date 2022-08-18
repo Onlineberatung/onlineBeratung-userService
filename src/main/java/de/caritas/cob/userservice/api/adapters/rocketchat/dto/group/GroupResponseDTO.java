@@ -6,7 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Response object for Rocket.Chat API Call for creating a group https://rocket.chat/docs/developer-guides/rest-api/groups/create/
+ * Response object for Rocket.Chat API Call for creating a group
+ * https://rocket.chat/docs/developer-guides/rest-api/groups/create/
  */
 @Setter
 @Getter
@@ -18,5 +19,4 @@ public class GroupResponseDTO {
   private boolean success;
   private String error;
   private String errorType;
-
 }

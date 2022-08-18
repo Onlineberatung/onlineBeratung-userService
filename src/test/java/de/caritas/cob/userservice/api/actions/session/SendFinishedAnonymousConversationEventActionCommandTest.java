@@ -25,14 +25,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class SendFinishedAnonymousConversationEventActionCommandTest {
 
-  @InjectMocks
-  private SendFinishedAnonymousConversationEventActionCommand actionCommand;
+  @InjectMocks private SendFinishedAnonymousConversationEventActionCommand actionCommand;
 
-  @Mock
-  private AuthenticatedUser authenticatedUser;
+  @Mock private AuthenticatedUser authenticatedUser;
 
-  @Mock
-  private LiveEventNotificationService liveEventNotificationService;
+  @Mock private LiveEventNotificationService liveEventNotificationService;
 
   @ParameterizedTest
   @MethodSource("sessionsWithOnlyConsultantAndWithoutAnyUser")
@@ -58,8 +55,8 @@ class SendFinishedAnonymousConversationEventActionCommandTest {
     this.actionCommand.execute(session);
 
     verify(this.liveEventNotificationService, times(1))
-        .sendLiveFinishedAnonymousConversationToUsers(singletonList(session.getUser().getUserId()),
-            FinishConversationPhaseEnum.IN_PROGRESS);
+        .sendLiveFinishedAnonymousConversationToUsers(
+            singletonList(session.getUser().getUserId()), FinishConversationPhaseEnum.IN_PROGRESS);
   }
 
   @Test
@@ -84,12 +81,12 @@ class SendFinishedAnonymousConversationEventActionCommandTest {
 
     verify(this.liveEventNotificationService, times(1))
         .sendLiveFinishedAnonymousConversationToUsers(
-            singletonList(session.getUser().getUserId()),
-            FinishConversationPhaseEnum.NEW);
+            singletonList(session.getUser().getUserId()), FinishConversationPhaseEnum.NEW);
   }
 
   @Test
-  void execute_Should_triggerLiveEventWithStatusInProgressToUserAndConsultant_When_systemWasInitiator() {
+  void
+      execute_Should_triggerLiveEventWithStatusInProgressToUserAndConsultant_When_systemWasInitiator() {
     Session session = new EasyRandom().nextObject(Session.class);
     when(this.authenticatedUser.getUserId()).thenThrow(new RuntimeException(""));
 
@@ -100,5 +97,4 @@ class SendFinishedAnonymousConversationEventActionCommandTest {
             List.of(session.getConsultant().getId(), session.getUser().getUserId()),
             FinishConversationPhaseEnum.IN_PROGRESS);
   }
-
 }

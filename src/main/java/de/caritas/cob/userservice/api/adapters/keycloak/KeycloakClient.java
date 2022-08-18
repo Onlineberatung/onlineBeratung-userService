@@ -25,8 +25,10 @@ public class KeycloakClient {
 
   private final KeycloakConfig keycloakConfig;
 
-  public KeycloakClient(@Qualifier("keycloakRestTemplate") final RestTemplate restTemplate,
-      final Keycloak keycloak, final KeycloakConfig keycloakConfig) {
+  public KeycloakClient(
+      @Qualifier("keycloakRestTemplate") final RestTemplate restTemplate,
+      final Keycloak keycloak,
+      final KeycloakConfig keycloakConfig) {
     this.restTemplate = restTemplate;
     this.keycloak = keycloak;
     this.keycloakConfig = keycloakConfig;
@@ -42,8 +44,9 @@ public class KeycloakClient {
     return restTemplate.exchange(url, HttpMethod.GET, entity, responseType);
   }
 
-  public <T> ResponseEntity<T> putForEntity(String bearerToken, String url,
-      @Nullable Object request, Class<T> responseType) throws HttpClientErrorException {
+  public <T> ResponseEntity<T> putForEntity(
+      String bearerToken, String url, @Nullable Object request, Class<T> responseType)
+      throws HttpClientErrorException {
     var httpHeaders = headersWithBearerToken(bearerToken);
     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 
@@ -52,8 +55,9 @@ public class KeycloakClient {
     return restTemplate.exchange(url, HttpMethod.PUT, entity, responseType);
   }
 
-  public <T> ResponseEntity<T> postForEntity(String bearerToken, String url,
-      @Nullable Object request, Class<T> responseType) throws HttpClientErrorException {
+  public <T> ResponseEntity<T> postForEntity(
+      String bearerToken, String url, @Nullable Object request, Class<T> responseType)
+      throws HttpClientErrorException {
     var httpHeaders = headersWithBearerToken(bearerToken);
     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 

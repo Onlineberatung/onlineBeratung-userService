@@ -22,6 +22,7 @@ public class KeycloakConstants {
       new KeycloakCreateUserResponseDTO(HttpStatus.CONFLICT);
   public static final KeycloakCreateUserResponseDTO KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID =
       new KeycloakCreateUserResponseDTO(USER_ID);
-  public static final KeycloakCreateUserResponseDTO KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITHOUT_USER_ID =
-      new KeycloakCreateUserResponseDTO(HttpStatus.OK);
+  public static final KeycloakCreateUserResponseDTO
+      KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITHOUT_USER_ID =
+          new KeycloakCreateUserResponseDTO(HttpStatus.OK);
 }

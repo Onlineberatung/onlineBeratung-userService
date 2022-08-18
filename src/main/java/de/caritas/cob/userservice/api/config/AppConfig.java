@@ -15,9 +15,7 @@ import org.springframework.context.annotation.PropertySources;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.client.RestTemplate;
 
-/**
- * Contains some general spring boot application configurations
- */
+/** Contains some general spring boot application configurations */
 @Configuration
 @ComponentScan(basePackages = {"de.caritas.cob.userservice"})
 @PropertySources({@PropertySource("classpath:messages.properties")})

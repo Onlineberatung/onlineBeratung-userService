@@ -31,17 +31,19 @@ public class TestAgencyControllerApi extends AgencyControllerApi {
   }
 
   @Override
-  public List<AgencyResponseDTO> getAgenciesByIds(List<Long> agencyIds)
-      throws RestClientException {
+  public List<AgencyResponseDTO> getAgenciesByIds(List<Long> agencyIds) throws RestClientException {
     if (Objects.isNull(agencyIds)) {
       return List.of(new AgencyResponseDTO());
     }
 
-    return agencyIds.stream().map(id -> {
-      var agencyResponseDto = easyRandom.nextObject(AgencyResponseDTO.class);
-      agencyResponseDto.setId(id);
-      agencyResponseDto.setConsultingType(1);
-      return agencyResponseDto;
-    }).collect(Collectors.toList());
+    return agencyIds.stream()
+        .map(
+            id -> {
+              var agencyResponseDto = easyRandom.nextObject(AgencyResponseDTO.class);
+              agencyResponseDto.setId(id);
+              agencyResponseDto.setConsultingType(1);
+              return agencyResponseDto;
+            })
+        .collect(Collectors.toList());
   }
 }

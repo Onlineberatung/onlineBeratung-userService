@@ -16,9 +16,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-/**
- * Registry to hold all implementation beans of {@link ViolationReportRule}.
- */
+/** Registry to hold all implementation beans of {@link ViolationReportRule}. */
 @Component
 @RequiredArgsConstructor
 public class ViolationRuleRegistry {
@@ -33,8 +31,8 @@ public class ViolationRuleRegistry {
    */
   @EventListener(ApplicationReadyEvent.class)
   public void initialize() {
-    this.violationReportRules = this.applicationContext.getBeansOfType(ViolationReportRule.class)
-        .values();
+    this.violationReportRules =
+        this.applicationContext.getBeansOfType(ViolationReportRule.class).values();
   }
 
   /**
@@ -44,14 +42,16 @@ public class ViolationRuleRegistry {
    */
   public List<ViolationReportRule> getViolationReportRules(
       List<AgencyAdminResponseDTO> allAgencies) {
-    List<ViolationReportRule> reportingRules = isEmpty(this.violationReportRules) ? emptyList()
-        : new ArrayList<>(this.violationReportRules);
-    reportingRules.forEach(reportRule -> {
-      if (reportRule instanceof AgencyDependedViolationReportRule) {
-        ((AgencyDependedViolationReportRule) reportRule).setAllAgencies(allAgencies);
-      }
-    });
+    List<ViolationReportRule> reportingRules =
+        isEmpty(this.violationReportRules)
+            ? emptyList()
+            : new ArrayList<>(this.violationReportRules);
+    reportingRules.forEach(
+        reportRule -> {
+          if (reportRule instanceof AgencyDependedViolationReportRule) {
+            ((AgencyDependedViolationReportRule) reportRule).setAllAgencies(allAgencies);
+          }
+        });
     return reportingRules;
   }
-
 }

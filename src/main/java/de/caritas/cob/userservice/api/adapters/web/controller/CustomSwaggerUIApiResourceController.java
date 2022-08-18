@@ -14,5 +14,4 @@ public class CustomSwaggerUIApiResourceController extends ApiResourceController 
   public CustomSwaggerUIApiResourceController(SwaggerResourcesProvider swaggerResources) {
     super(swaggerResources);
   }
-
 }

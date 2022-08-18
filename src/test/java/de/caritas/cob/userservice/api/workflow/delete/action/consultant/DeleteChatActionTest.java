@@ -18,13 +18,13 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
-import de.caritas.cob.userservice.api.workflow.delete.model.ConsultantDeletionWorkflowDTO;
-import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteGroupException;
 import de.caritas.cob.userservice.api.model.Chat;
-import de.caritas.cob.userservice.api.port.out.ChatRepository;
 import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.port.out.ChatRepository;
+import de.caritas.cob.userservice.api.workflow.delete.model.ConsultantDeletionWorkflowDTO;
+import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,17 +40,13 @@ import org.slf4j.Logger;
 @RunWith(MockitoJUnitRunner.class)
 public class DeleteChatActionTest {
 
-  @InjectMocks
-  private DeleteChatAction deleteChatAction;
+  @InjectMocks private DeleteChatAction deleteChatAction;
 
-  @Mock
-  private ChatRepository chatRepository;
+  @Mock private ChatRepository chatRepository;
 
-  @Mock
-  private RocketChatService rocketChatService;
+  @Mock private RocketChatService rocketChatService;
 
-  @Mock
-  private Logger logger;
+  @Mock private Logger logger;
 
   @Before
   public void setup() {
@@ -75,8 +71,7 @@ public class DeleteChatActionTest {
   @Test
   public void execute_Should_returnEmptyListAndPerformDeletion_When_consultantIsChatOwner()
       throws RocketChatDeleteGroupException {
-    List<Chat> chats = new EasyRandom().objects(Chat.class, 5)
-        .collect(Collectors.toList());
+    List<Chat> chats = new EasyRandom().objects(Chat.class, 5).collect(Collectors.toList());
     when(this.chatRepository.findByChatOwner(any())).thenReturn(chats);
     ConsultantDeletionWorkflowDTO workflowDTO =
         new ConsultantDeletionWorkflowDTO(new Consultant(), emptyList());
@@ -94,10 +89,10 @@ public class DeleteChatActionTest {
   @Test
   public void execute_Should_returnExpectedWorkflowErrorsAndLogErrors_When_deletionOfChatsFailes()
       throws RocketChatDeleteGroupException {
-    List<Chat> chats = new EasyRandom().objects(Chat.class, 5)
-        .collect(Collectors.toList());
+    List<Chat> chats = new EasyRandom().objects(Chat.class, 5).collect(Collectors.toList());
     when(this.chatRepository.findByChatOwner(any())).thenReturn(chats);
-    doThrow(new RocketChatDeleteGroupException(new RuntimeException())).when(this.rocketChatService)
+    doThrow(new RocketChatDeleteGroupException(new RuntimeException()))
+        .when(this.rocketChatService)
         .deleteGroupAsTechnicalUser(any());
     doThrow(new RuntimeException()).when(this.chatRepository).deleteAll(any());
     ConsultantDeletionWorkflowDTO workflowDTO =
@@ -111,11 +106,13 @@ public class DeleteChatActionTest {
   }
 
   @Test
-  public void execute_Should_returnExpectedWorkflowErrorsAndLogErrors_When_deletionOfSingleChatFailes()
-      throws RocketChatDeleteGroupException {
+  public void
+      execute_Should_returnExpectedWorkflowErrorsAndLogErrors_When_deletionOfSingleChatFailes()
+          throws RocketChatDeleteGroupException {
     Chat chat = new EasyRandom().nextObject(Chat.class);
     when(this.chatRepository.findByChatOwner(any())).thenReturn(singletonList(chat));
-    doThrow(new RocketChatDeleteGroupException(new RuntimeException())).when(this.rocketChatService)
+    doThrow(new RocketChatDeleteGroupException(new RuntimeException()))
+        .when(this.rocketChatService)
         .deleteGroupAsTechnicalUser(any());
     doThrow(new RuntimeException()).when(this.chatRepository).deleteAll(any());
     ConsultantDeletionWorkflowDTO workflowDTO =
@@ -137,5 +134,4 @@ public class DeleteChatActionTest {
     assertThat(workflowErrors.get(1).getTimestamp(), notNullValue());
     verify(logger).error(anyString(), any(RuntimeException.class));
   }
-
 }

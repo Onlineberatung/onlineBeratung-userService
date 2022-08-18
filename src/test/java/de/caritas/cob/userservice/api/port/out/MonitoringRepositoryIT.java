@@ -22,11 +22,9 @@ class MonitoringRepositoryIT {
 
   private static final EasyRandom easyRandom = new EasyRandom();
 
-  @Autowired
-  private MonitoringRepository underTest;
+  @Autowired private MonitoringRepository underTest;
 
-  @Autowired
-  private SessionRepository sessionRepository;
+  @Autowired private SessionRepository sessionRepository;
 
   private Session session;
 
@@ -52,25 +50,26 @@ class MonitoringRepositoryIT {
     assertEquals(monitoring.getMonitoringType(), persistedSession.getMonitoringType());
     assertEquals(
         monitoring.getMonitoringOptionList().size(),
-        persistedSession.getMonitoringOptionList().size()
-    );
+        persistedSession.getMonitoringOptionList().size());
   }
 
   private void givenValidMonitoring() {
     monitoring = easyRandom.nextObject(Monitoring.class);
     monitoring.setSessionId(session.getId());
     monitoring.setKey(RandomStringUtils.randomAlphanumeric(1, 255));
-    monitoring.getMonitoringOptionList().forEach(option -> {
-      option.setSessionId(monitoring.getSessionId());
-      option.setMonitoringType(monitoring.getMonitoringType());
-      option.setMonitoringKey(monitoring.getKey());
-      option.setKey(RandomStringUtils.randomAlphanumeric(1, 255));
-      option.setMonitoring(monitoring);
-    });
+    monitoring
+        .getMonitoringOptionList()
+        .forEach(
+            option -> {
+              option.setSessionId(monitoring.getSessionId());
+              option.setMonitoringType(monitoring.getMonitoringType());
+              option.setMonitoringKey(monitoring.getKey());
+              option.setKey(RandomStringUtils.randomAlphanumeric(1, 255));
+              option.setMonitoring(monitoring);
+            });
   }
 
   private void givenASession() {
     session = sessionRepository.findAll().iterator().next();
   }
-
 }

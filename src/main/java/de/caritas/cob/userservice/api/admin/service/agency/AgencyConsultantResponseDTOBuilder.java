@@ -2,11 +2,11 @@ package de.caritas.cob.userservice.api.admin.service.agency;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-import de.caritas.cob.userservice.api.admin.hallink.HalLinkBuilder;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyConsultantResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAgencyLinks;
 import de.caritas.cob.userservice.api.adapters.web.dto.HalLink.MethodEnum;
+import de.caritas.cob.userservice.api.admin.hallink.HalLinkBuilder;
 import de.caritas.cob.userservice.generated.api.adapters.web.controller.UseradminApi;
 import java.util.List;
 
@@ -61,8 +61,8 @@ public class AgencyConsultantResponseDTOBuilder implements HalLinkBuilder {
 
   private ConsultantAgencyLinks buildConsultantAgencyLinks() {
     return new ConsultantAgencyLinks()
-        .self(buildHalLink(methodOn(UseradminApi.class).getAgencyConsultants(this.agencyId),
-            MethodEnum.GET));
+        .self(
+            buildHalLink(
+                methodOn(UseradminApi.class).getAgencyConsultants(this.agencyId), MethodEnum.GET));
   }
-
 }

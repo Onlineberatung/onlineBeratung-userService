@@ -13,5 +13,4 @@ public class DeletionWorkflowError {
   private String identifier;
   private String reason;
   private LocalDateTime timestamp;
-
 }

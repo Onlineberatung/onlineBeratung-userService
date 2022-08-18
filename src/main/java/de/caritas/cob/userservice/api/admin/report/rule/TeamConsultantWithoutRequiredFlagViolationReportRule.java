@@ -3,9 +3,9 @@ package de.caritas.cob.userservice.api.admin.report.rule;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ViolationDTO;
 import de.caritas.cob.userservice.api.admin.report.builder.ViolationByConsultantBuilder;
 import de.caritas.cob.userservice.api.admin.report.model.AgencyDependedViolationReportRule;
-import de.caritas.cob.userservice.api.adapters.web.dto.ViolationDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
@@ -16,13 +16,11 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-/**
- * Violation rule to find team consultants with missing flag is_team_consultant.
- */
+/** Violation rule to find team consultants with missing flag is_team_consultant. */
 @Component
 @RequiredArgsConstructor
-public class TeamConsultantWithoutRequiredFlagViolationReportRule extends
-    AgencyDependedViolationReportRule {
+public class TeamConsultantWithoutRequiredFlagViolationReportRule
+    extends AgencyDependedViolationReportRule {
 
   private final @NonNull ConsultantAgencyRepository consultantAgencyRepository;
 
@@ -53,9 +51,11 @@ public class TeamConsultantWithoutRequiredFlagViolationReportRule extends
     Consultant consultant = consultantAgency.getConsultant();
     Long agencyId = consultantAgency.getAgencyId();
     return ViolationByConsultantBuilder.getInstance(consultant)
-        .withReason("Consultant is assigned to team agency " + agencyId + " but is not marked as "
-            + "team consultant")
+        .withReason(
+            "Consultant is assigned to team agency "
+                + agencyId
+                + " but is not marked as "
+                + "team consultant")
         .build();
   }
-
 }

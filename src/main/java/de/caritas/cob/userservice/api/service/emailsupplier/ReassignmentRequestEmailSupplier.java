@@ -49,7 +49,6 @@ public class ReassignmentRequestEmailSupplier implements EmailSupplier {
   private static de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode languageOf(
       LanguageCode languageCode) {
     return de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.fromValue(
-        languageCode.toString()
-    );
+        languageCode.toString());
   }
 }

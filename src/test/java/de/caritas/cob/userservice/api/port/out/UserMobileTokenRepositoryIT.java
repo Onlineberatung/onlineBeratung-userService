@@ -19,11 +19,9 @@ import org.springframework.test.context.TestPropertySource;
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 class UserMobileTokenRepositoryIT {
 
-  @Autowired
-  private UserMobileTokenRepository underTest;
+  @Autowired private UserMobileTokenRepository underTest;
 
-  @Autowired
-  private UserRepository userRepository;
+  @Autowired private UserRepository userRepository;
 
   private User user;
 

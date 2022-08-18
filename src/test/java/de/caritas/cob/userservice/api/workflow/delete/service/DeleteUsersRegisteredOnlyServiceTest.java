@@ -25,24 +25,21 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class DeleteUsersRegisteredOnlyServiceTest {
 
-  @InjectMocks
-  private DeleteUsersRegisteredOnlyService deleteUsersRegisteredOnlyService;
+  @InjectMocks private DeleteUsersRegisteredOnlyService deleteUsersRegisteredOnlyService;
 
-  @Mock
-  private UserRepository userRepository;
+  @Mock private UserRepository userRepository;
 
-  @Mock
-  private DeleteUserAccountService deleteUserAccountService;
+  @Mock private DeleteUserAccountService deleteUserAccountService;
 
-  @Mock
-  private WorkflowErrorMailService workflowErrorMailService;
+  @Mock private WorkflowErrorMailService workflowErrorMailService;
 
   @Mock
   @SuppressWarnings("unused")
   private RocketChatService rocketChatService;
 
   @Test
-  public void deleteUserAccountsTimeSensitive_Should_notPerformAnyDeletion_When_noUserAccountWithoutRunningSessionsIsFound() {
+  public void
+      deleteUserAccountsTimeSensitive_Should_notPerformAnyDeletion_When_noUserAccountWithoutRunningSessionsIsFound() {
     deleteUsersRegisteredOnlyService.deleteUserAccountsTimeSensitive();
 
     verifyNoMoreInteractions(deleteUserAccountService);
@@ -50,9 +47,10 @@ public class DeleteUsersRegisteredOnlyServiceTest {
   }
 
   @Test
-  public void deleteUserAccountsTimeSensitive_Should_performUserDeletion_When_usersAreFoundWithoutRunningSession() {
+  public void
+      deleteUserAccountsTimeSensitive_Should_performUserDeletion_When_usersAreFoundWithoutRunningSession() {
     when(userRepository.findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThan(
-        Mockito.any()))
+            Mockito.any()))
         .thenReturn(Collections.singletonList(USER));
 
     deleteUsersRegisteredOnlyService.deleteUserAccountsTimeSensitive();
@@ -61,11 +59,12 @@ public class DeleteUsersRegisteredOnlyServiceTest {
   }
 
   @Test
-  public void deleteUserAccountsTimeSensitive_Should_SendWorkflowErrorMail_When_WorkflowsErrorsOccurs() {
+  public void
+      deleteUserAccountsTimeSensitive_Should_SendWorkflowErrorMail_When_WorkflowsErrorsOccurs() {
     var deletionWorkflowError = mock(DeletionWorkflowError.class);
     var workflowErrors = Collections.singletonList(deletionWorkflowError);
     when(userRepository.findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThan(
-        Mockito.any()))
+            Mockito.any()))
         .thenReturn(Collections.singletonList(USER));
     when(deleteUserAccountService.performUserDeletion(USER)).thenReturn(workflowErrors);
 
@@ -75,9 +74,10 @@ public class DeleteUsersRegisteredOnlyServiceTest {
   }
 
   @Test
-  public void deleteUserAccountsTimeSensitive_ShouldNot_SendWorkflowErrorMail_When_NoWorkflowsErrorsOccurs() {
+  public void
+      deleteUserAccountsTimeSensitive_ShouldNot_SendWorkflowErrorMail_When_NoWorkflowsErrorsOccurs() {
     when(userRepository.findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThan(
-        Mockito.any()))
+            Mockito.any()))
         .thenReturn(Collections.singletonList(USER));
     when(deleteUserAccountService.performUserDeletion(USER)).thenReturn(Collections.emptyList());
 
@@ -90,18 +90,14 @@ public class DeleteUsersRegisteredOnlyServiceTest {
   public void deleteUserAccountsTimeSensitive_Should_CheckUsersWithCorrectDate() {
     var thirtyDays = 30;
 
-    setField(deleteUsersRegisteredOnlyService,
-        "userRegisteredOnlyDeleteWorkflowCheckDays",
-        thirtyDays);
-    LocalDateTime dateToCheck = LocalDateTime
-        .now()
-        .with(LocalTime.MIDNIGHT)
-        .minusDays(thirtyDays);
+    setField(
+        deleteUsersRegisteredOnlyService, "userRegisteredOnlyDeleteWorkflowCheckDays", thirtyDays);
+    LocalDateTime dateToCheck = LocalDateTime.now().with(LocalTime.MIDNIGHT).minusDays(thirtyDays);
 
     deleteUsersRegisteredOnlyService.deleteUserAccountsTimeSensitive();
 
-    verify(userRepository).findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThan(
-        dateToCheck);
+    verify(userRepository)
+        .findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThan(dateToCheck);
   }
 
   @Test
@@ -111,8 +107,8 @@ public class DeleteUsersRegisteredOnlyServiceTest {
 
     deleteUsersRegisteredOnlyService.deleteUserAccountsTimeInsensitive();
 
-    verify(userRepository).findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThan(
-        dateToCheck);
+    verify(userRepository)
+        .findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThan(dateToCheck);
     assertTrue(dateToCheck.isAfter(LocalDateTime.now()));
   }
 }

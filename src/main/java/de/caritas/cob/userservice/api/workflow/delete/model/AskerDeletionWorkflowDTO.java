@@ -11,5 +11,4 @@ public class AskerDeletionWorkflowDTO {
 
   private User user;
   private List<DeletionWorkflowError> deletionWorkflowErrors;
-
 }

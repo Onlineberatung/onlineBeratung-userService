@@ -44,10 +44,7 @@ public class RocketChatMapper {
   }
 
   private MuteUnmuteUser muteOrUnmuteUserOf(String username, String roomId, boolean mute) {
-    var params = Map.of(
-        "rid", roomId,
-        "username", username.toLowerCase()
-    );
+    var params = Map.of("rid", roomId, "username", username.toLowerCase());
 
     var message = new Message();
     message.setParams(List.of(params));
@@ -72,10 +69,7 @@ public class RocketChatMapper {
     if (nonNull(body)) {
       var room = body.getRoom();
       var mutedUsers = isNull(room.getMuted()) ? List.of() : room.getMuted();
-      var map = Map.of(
-          "id", room.getId(),
-          "mutedUsers", mutedUsers
-      );
+      var map = Map.of("id", room.getId(), "mutedUsers", mutedUsers);
       return Optional.of(map);
     }
 
@@ -147,14 +141,11 @@ public class RocketChatMapper {
 
   public List<Map<String, String>> mapOf(List<GroupMemberDTO> members) {
     return members.stream()
-        .map(member ->
-            Map.of(
-                "chatUserId", member.get_id()
-            )
-        ).collect(Collectors.toList());
+        .map(member -> Map.of("chatUserId", member.get_id()))
+        .collect(Collectors.toList());
   }
 
-  public Map<String, Object> mapOfRoomSettings(String chatId,  boolean encrypted) {
+  public Map<String, Object> mapOfRoomSettings(String chatId, boolean encrypted) {
     var roomSettings = new RoomSettingsDTO(chatId, encrypted);
     var map = new HashMap<String, Object>();
 

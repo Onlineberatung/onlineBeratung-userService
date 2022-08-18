@@ -10,7 +10,5 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "videochat")
 public class VideoChatConfig {
 
-  @NotNull
-  private Boolean e2eEncryptionEnabled;
-
+  @NotNull private Boolean e2eEncryptionEnabled;
 }

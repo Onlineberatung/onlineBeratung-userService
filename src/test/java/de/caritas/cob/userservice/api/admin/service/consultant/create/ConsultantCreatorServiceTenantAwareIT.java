@@ -34,20 +34,18 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ConsultantCreatorServiceTenantAwareIT {
 
-  @Autowired
-  private ConsultantCreatorService consultantCreatorService;
+  @Autowired private ConsultantCreatorService consultantCreatorService;
 
-  @Autowired
-  private ConsultantRepository consultantRepository;
+  @Autowired private ConsultantRepository consultantRepository;
 
-  @MockBean
-  private TenantAdminService tenantAdminService;
+  @MockBean private TenantAdminService tenantAdminService;
 
   private final EasyRandom easyRandom = new EasyRandom();
 
   @Test(expected = CustomValidationHttpStatusException.class)
-  public void createNewConsultant_Should_throwCustomValidationHttpStatusException_When_LicensesAreExceeded() {
-    //given
+  public void
+      createNewConsultant_Should_throwCustomValidationHttpStatusException_When_LicensesAreExceeded() {
+    // given
     givenTenantApiCall();
     createConsultant("username1");
     createConsultant("username2");
@@ -92,9 +90,9 @@ public class ConsultantCreatorServiceTenantAwareIT {
     var licensing = new Licensing();
     licensing.setAllowedNumberOfUsers(2);
     dummyTenant.setLicensing(licensing);
-    ReflectionTestUtils
-        .setField(consultantCreatorService, "tenantAdminService", tenantAdminService);
-    when(tenantAdminService.getTenantById(TenantContext.getCurrentTenant())).thenReturn(dummyTenant);
+    ReflectionTestUtils.setField(
+        consultantCreatorService, "tenantAdminService", tenantAdminService);
+    when(tenantAdminService.getTenantById(TenantContext.getCurrentTenant()))
+        .thenReturn(dummyTenant);
   }
-
 }

@@ -44,9 +44,7 @@ public class RegistrationStatisticsResponseDTOConverter {
   }
 
   private List<String> findTopicsInternalAttributes(Session session) {
-    return session
-        .getSessionTopics()
-        .stream()
+    return session.getSessionTopics().stream()
         .map(sessionTopic -> findTopicInternalIdentifier(sessionTopic.getTopicId()))
         .collect(Collectors.toList());
   }

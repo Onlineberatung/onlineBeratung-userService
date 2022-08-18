@@ -4,9 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * PreferencesDTO for LoginResponseDTO
- */
+/** PreferencesDTO for LoginResponseDTO */
 @Getter
 @Setter
 @NoArgsConstructor

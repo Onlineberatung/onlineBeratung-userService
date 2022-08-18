@@ -9,9 +9,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-/**
- * Facade to encapsulate necessary steps to accept an anonymous enquiry.
- */
+/** Facade to encapsulate necessary steps to accept an anonymous enquiry. */
 @Service
 @RequiredArgsConstructor
 public class AcceptAnonymousEnquiryFacade {
@@ -28,13 +26,16 @@ public class AcceptAnonymousEnquiryFacade {
    * @param sessionId the id of the anonymous session
    */
   public void acceptAnonymousEnquiry(Long sessionId) {
-    var session = this.sessionService.getSession(sessionId)
-        .orElseThrow(() -> new NotFoundException(
-            String.format("Session with id %s does not exist", sessionId)));
+    var session =
+        this.sessionService
+            .getSession(sessionId)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("Session with id %s does not exist", sessionId)));
     var consultant = this.userAccountProvider.retrieveValidatedConsultant();
     this.assignEnquiryFacade.assignAnonymousEnquiry(session, consultant);
-    this.liveEventNotificationService
-        .sendAcceptAnonymousEnquiryEventToUser(session.getUser().getUserId());
+    this.liveEventNotificationService.sendAcceptAnonymousEnquiryEventToUser(
+        session.getUser().getUserId());
   }
-
 }

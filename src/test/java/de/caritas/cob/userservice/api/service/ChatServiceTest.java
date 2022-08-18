@@ -56,26 +56,19 @@ import org.slf4j.Logger;
 @RunWith(MockitoJUnitRunner.class)
 public class ChatServiceTest {
 
-  @InjectMocks
-  private ChatService chatService;
+  @InjectMocks private ChatService chatService;
 
-  @Mock
-  private ChatRepository chatRepository;
+  @Mock private ChatRepository chatRepository;
 
-  @Mock
-  private ChatAgencyRepository chatAgencyRepository;
+  @Mock private ChatAgencyRepository chatAgencyRepository;
 
-  @Mock
-  private UserChatRepository chatUserRepository;
+  @Mock private UserChatRepository chatUserRepository;
 
-  @Mock
-  private Logger logger;
+  @Mock private Logger logger;
 
-  @Mock
-  private UserHelper userHelper;
+  @Mock private UserHelper userHelper;
 
-  @Mock
-  private ConsultantService consultantService;
+  @Mock private ConsultantService consultantService;
 
   @Before
   public void setup() {
@@ -94,14 +87,17 @@ public class ChatServiceTest {
     assertNotNull(resultList.get(0).getChat());
     assertEquals(ACTIVE_CHAT.getId(), resultList.get(0).getChat().getId());
     assertEquals(ACTIVE_CHAT.getTopic(), resultList.get(0).getChat().getTopic());
-    assertThat(ACTIVE_CHAT.getConsultingTypeId(),
-        is(resultList.get(0).getChat().getConsultingType()));
+    assertThat(
+        ACTIVE_CHAT.getConsultingTypeId(), is(resultList.get(0).getChat().getConsultingType()));
     assertEquals(
-        LocalDate.of(ACTIVE_CHAT.getStartDate().getYear(), ACTIVE_CHAT.getStartDate().getMonth(),
+        LocalDate.of(
+            ACTIVE_CHAT.getStartDate().getYear(),
+            ACTIVE_CHAT.getStartDate().getMonth(),
             ACTIVE_CHAT.getStartDate().getDayOfMonth()),
         resultList.get(0).getChat().getStartDate());
     assertEquals(
-        LocalTime.of(ACTIVE_CHAT.getInitialStartDate().getHour(),
+        LocalTime.of(
+            ACTIVE_CHAT.getInitialStartDate().getHour(),
             ACTIVE_CHAT.getInitialStartDate().getMinute()),
         resultList.get(0).getChat().getStartTime());
     assertEquals(ACTIVE_CHAT.getDuration(), resultList.get(0).getChat().getDuration());
@@ -127,14 +123,17 @@ public class ChatServiceTest {
     assertNotNull(resultList.get(0).getChat());
     assertEquals(ACTIVE_CHAT.getId(), resultList.get(0).getChat().getId());
     assertEquals(ACTIVE_CHAT.getTopic(), resultList.get(0).getChat().getTopic());
-    assertThat(ACTIVE_CHAT.getConsultingTypeId(),
-        is(resultList.get(0).getChat().getConsultingType()));
+    assertThat(
+        ACTIVE_CHAT.getConsultingTypeId(), is(resultList.get(0).getChat().getConsultingType()));
     assertEquals(
-        LocalDate.of(ACTIVE_CHAT.getStartDate().getYear(), ACTIVE_CHAT.getStartDate().getMonth(),
+        LocalDate.of(
+            ACTIVE_CHAT.getStartDate().getYear(),
+            ACTIVE_CHAT.getStartDate().getMonth(),
             ACTIVE_CHAT.getStartDate().getDayOfMonth()),
         resultList.get(0).getChat().getStartDate());
     assertEquals(
-        LocalTime.of(ACTIVE_CHAT.getInitialStartDate().getHour(),
+        LocalTime.of(
+            ACTIVE_CHAT.getInitialStartDate().getHour(),
             ACTIVE_CHAT.getInitialStartDate().getMinute()),
         resultList.get(0).getChat().getStartTime());
     assertEquals(ACTIVE_CHAT.getDuration(), resultList.get(0).getChat().getDuration());
@@ -250,7 +249,6 @@ public class ChatServiceTest {
     chatService.saveUserChatRelation(chatUser);
 
     verify(chatUserRepository).save(chatUser);
-
   }
 
   @Test
@@ -261,5 +259,4 @@ public class ChatServiceTest {
 
     verify(chatRepository).delete(chat);
   }
-
 }

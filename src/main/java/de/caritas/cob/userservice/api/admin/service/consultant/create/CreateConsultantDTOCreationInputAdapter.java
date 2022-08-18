@@ -2,9 +2,8 @@ package de.caritas.cob.userservice.api.admin.service.consultant.create;
 
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
-import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
-
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
@@ -116,7 +115,7 @@ public class CreateConsultantDTOCreationInputAdapter implements ConsultantCreati
   public boolean isLanguageFormal() {
     return isTrue(this.createConsultantDTO.getFormalLanguage());
   }
-  
+
   /**
    * Provides the tenant id.
    *
@@ -127,5 +126,4 @@ public class CreateConsultantDTOCreationInputAdapter implements ConsultantCreati
     Integer tenantId = this.createConsultantDTO.getTenantId();
     return tenantId == null ? null : Long.valueOf(tenantId);
   }
-
 }

@@ -22,17 +22,13 @@ class UserChatRepositoryTest {
 
   private static final EasyRandom easyRandom = new EasyRandom();
 
-  @Autowired
-  UserChatRepository chatUserRepository;
+  @Autowired UserChatRepository chatUserRepository;
 
-  @Autowired
-  ChatRepository chatRepository;
+  @Autowired ChatRepository chatRepository;
 
-  @Autowired
-  UserRepository userRepository;
+  @Autowired UserRepository userRepository;
 
-  @Autowired
-  ConsultantRepository consultantRepository;
+  @Autowired ConsultantRepository consultantRepository;
 
   @Test
   void save_Should_saveUserChatRelation() {

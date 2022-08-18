@@ -164,7 +164,6 @@ class ChatConverterTest {
   }
 
   private AgencyDTO givenAgencyDTO() {
-    return new AgencyDTO()
-        .consultingType(1);
+    return new AgencyDTO().consultingType(1);
   }
 }

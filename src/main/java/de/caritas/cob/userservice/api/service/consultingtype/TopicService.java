@@ -4,6 +4,9 @@ import com.google.common.collect.Maps;
 import de.caritas.cob.userservice.api.config.CacheManagerConfig;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
+import de.caritas.cob.userservice.topicservice.generated.ApiClient;
+import de.caritas.cob.userservice.topicservice.generated.web.TopicControllerApi;
+import de.caritas.cob.userservice.topicservice.generated.web.model.TopicDTO;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -13,9 +16,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import de.caritas.cob.userservice.topicservice.generated.ApiClient;
-import de.caritas.cob.userservice.topicservice.generated.web.model.TopicDTO;
-import de.caritas.cob.userservice.topicservice.generated.web.TopicControllerApi;
 
 @Service
 @RequiredArgsConstructor
@@ -46,8 +46,6 @@ public class TopicService {
   }
 
   private Map<Long, TopicDTO> getAllTopicsMap(List<TopicDTO> allTopics) {
-    return allTopics.stream().collect(
-            Collectors.toMap(TopicDTO::getId, Function.identity()));
+    return allTopics.stream().collect(Collectors.toMap(TopicDTO::getId, Function.identity()));
   }
-
 }

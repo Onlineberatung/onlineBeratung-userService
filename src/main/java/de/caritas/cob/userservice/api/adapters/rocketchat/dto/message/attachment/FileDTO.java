@@ -7,10 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Rocket.Chat file model (sub of MessagesDTO.lastMessage)
- */
-
+/** Rocket.Chat file model (sub of MessagesDTO.lastMessage) */
 @Getter
 @Setter
 @AllArgsConstructor
@@ -20,7 +17,8 @@ public class FileDTO {
   @ApiModelProperty(required = true, example = "filename.png", position = 0)
   private String name;
 
-  @ApiModelProperty(required = true,
+  @ApiModelProperty(
+      required = true,
       example = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       position = 1)
   @JsonProperty("type")

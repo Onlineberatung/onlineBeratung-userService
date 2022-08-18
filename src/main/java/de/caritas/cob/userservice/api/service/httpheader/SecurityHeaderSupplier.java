@@ -70,5 +70,4 @@ public class SecurityHeaderSupplier {
 
     return httpHeaders;
   }
-
 }

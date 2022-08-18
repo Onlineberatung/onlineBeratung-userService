@@ -25,11 +25,9 @@ class AppointmentRepositoryIT {
 
   private Appointment appointment;
 
-  @Autowired
-  private AppointmentRepository underTest;
+  @Autowired private AppointmentRepository underTest;
 
-  @Autowired
-  private ConsultantRepository consultantRepository;
+  @Autowired private ConsultantRepository consultantRepository;
 
   @AfterEach
   public void reset() {
@@ -78,4 +76,3 @@ class AppointmentRepositoryIT {
     }
   }
 }
-

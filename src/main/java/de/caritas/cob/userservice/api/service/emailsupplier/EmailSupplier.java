@@ -5,9 +5,7 @@ import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import java.util.List;
 
-/**
- * Supplier to provide functionality to generate emails in several contexts.
- */
+/** Supplier to provide functionality to generate emails in several contexts. */
 public interface EmailSupplier {
 
   /**
@@ -16,5 +14,4 @@ public interface EmailSupplier {
    * @return the generated emails
    */
   List<MailDTO> generateEmails() throws RocketChatGetGroupMembersException;
-
 }

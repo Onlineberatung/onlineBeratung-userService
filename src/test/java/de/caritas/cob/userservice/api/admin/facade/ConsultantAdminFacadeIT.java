@@ -51,60 +51,70 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ConsultantAdminFacadeIT {
 
-  @Autowired
-  private ConsultantAdminFacade consultantAdminFacade;
+  @Autowired private ConsultantAdminFacade consultantAdminFacade;
 
-  @Autowired
-  private ConsultantRepository consultantRepository;
+  @Autowired private ConsultantRepository consultantRepository;
 
-  @Autowired
-  private ConsultantAgencyRepository consultantAgencyRepository;
+  @Autowired private ConsultantAgencyRepository consultantAgencyRepository;
 
-  @MockBean
-  private AgencyAdminService agencyAdminService;
+  @MockBean private AgencyAdminService agencyAdminService;
 
-  @MockBean
-  private ConsultingTypeManager consultingTypeManager;
+  @MockBean private ConsultingTypeManager consultingTypeManager;
 
   @Test
-  public void findFilteredConsultants_Should_retrieveDeletedAgencyRelations_When_consultantIsDeleted() {
+  public void
+      findFilteredConsultants_Should_retrieveDeletedAgencyRelations_When_consultantIsDeleted() {
     var consultant = givenAPersistedDeletedConsultantWithTenAgencies();
 
-    var searchResult = this.consultantAdminFacade
-        .findFilteredConsultants(1, 100, new ConsultantFilter(),
+    var searchResult =
+        this.consultantAdminFacade.findFilteredConsultants(
+            1,
+            100,
+            new ConsultantFilter(),
             new Sort().field(FieldEnum.FIRSTNAME).order(OrderEnum.ASC));
-    var resultConsultant = searchResult.getEmbedded().stream()
-        .filter(consultantResponse -> consultantResponse.getEmbedded().getId()
-            .equals(consultant.getId()))
-        .collect(Collectors.toSet())
-        .iterator().next();
+    var resultConsultant =
+        searchResult.getEmbedded().stream()
+            .filter(
+                consultantResponse ->
+                    consultantResponse.getEmbedded().getId().equals(consultant.getId()))
+            .collect(Collectors.toSet())
+            .iterator()
+            .next();
 
     assertThat(resultConsultant.getEmbedded().getDeleteDate(), notNullValue());
     assertThat(resultConsultant.getEmbedded().getAgencies(), hasSize(10));
   }
 
   @Test
-  public void findFilteredConsultants_Should_retrieveOnlyNonDeletedAgencyRelations_When_consultantIsNotDeleted() {
+  public void
+      findFilteredConsultants_Should_retrieveOnlyNonDeletedAgencyRelations_When_consultantIsNotDeleted() {
     var consultant = givenAPersistedNonDeletedConsultantWithDeletedAndNotDeletedAgencies();
 
-    var searchResult = this.consultantAdminFacade
-        .findFilteredConsultants(1, 100, new ConsultantFilter(),
+    var searchResult =
+        this.consultantAdminFacade.findFilteredConsultants(
+            1,
+            100,
+            new ConsultantFilter(),
             new Sort().field(FieldEnum.FIRSTNAME).order(OrderEnum.ASC));
-    var resultConsultant = searchResult.getEmbedded().stream()
-        .filter(consultantResponse -> consultantResponse.getEmbedded().getId()
-            .equals(consultant.getId()))
-        .collect(Collectors.toSet())
-        .iterator().next();
+    var resultConsultant =
+        searchResult.getEmbedded().stream()
+            .filter(
+                consultantResponse ->
+                    consultantResponse.getEmbedded().getId().equals(consultant.getId()))
+            .collect(Collectors.toSet())
+            .iterator()
+            .next();
 
     assertThat(resultConsultant.getEmbedded().getDeleteDate(), is("null"));
     assertThat(resultConsultant.getEmbedded().getAgencies(), hasSize(5));
-    resultConsultant.getEmbedded().getAgencies().forEach(agency ->
-        assertThat(agency.getDeleteDate(), is("null")));
+    resultConsultant
+        .getEmbedded()
+        .getAgencies()
+        .forEach(agency -> assertThat(agency.getDeleteDate(), is("null")));
   }
 
   private Consultant givenAPersistedNonDeletedConsultantWithDeletedAndNotDeletedAgencies() {
-    var parameters = baseConsultantParameters()
-        .excludeField(FieldPredicates.named("deleteDate"));
+    var parameters = baseConsultantParameters().excludeField(FieldPredicates.named("deleteDate"));
     var consultant = new EasyRandom(parameters).nextObject(Consultant.class);
     consultantRepository.save(consultant);
     var consultantAgencies = buildPersistedAgenciesForConsultant(20, 5, consultant);
@@ -115,11 +125,14 @@ public class ConsultantAdminFacadeIT {
   }
 
   private void mockAgencyServiceResponse(Set<ConsultantAgency> consultantAgencies) {
-    var mockedAgencies = consultantAgencies.stream()
-        .map(consultantAgency -> new AgencyAdminResponseDTO()
-            .id(consultantAgency.getAgencyId())
-            .deleteDate(String.valueOf(consultantAgency.getDeleteDate()))
-        ).collect(Collectors.toList());
+    var mockedAgencies =
+        consultantAgencies.stream()
+            .map(
+                consultantAgency ->
+                    new AgencyAdminResponseDTO()
+                        .id(consultantAgency.getAgencyId())
+                        .deleteDate(String.valueOf(consultantAgency.getDeleteDate())))
+            .collect(Collectors.toList());
     when(agencyAdminService.retrieveAllAgencies()).thenReturn(mockedAgencies);
   }
 
@@ -133,11 +146,13 @@ public class ConsultantAdminFacadeIT {
         .excludeField(FieldPredicates.named("sessions"));
   }
 
-  private Set<ConsultantAgency> buildPersistedAgenciesForConsultant(int amount,
-      int notDeletedAmount, Consultant consultant) {
-    var consultantAgencies = new EasyRandom().objects(ConsultantAgency.class, amount)
-        .peek(agencyRelation -> agencyRelation.setConsultant(consultant))
-        .collect(Collectors.toList());
+  private Set<ConsultantAgency> buildPersistedAgenciesForConsultant(
+      int amount, int notDeletedAmount, Consultant consultant) {
+    var consultantAgencies =
+        new EasyRandom()
+            .objects(ConsultantAgency.class, amount)
+            .peek(agencyRelation -> agencyRelation.setConsultant(consultant))
+            .collect(Collectors.toList());
     for (int i = 0; i < notDeletedAmount; i++) {
       consultantAgencies.get(i).setDeleteDate(null);
     }
@@ -162,8 +177,8 @@ public class ConsultantAdminFacadeIT {
     var consultantId = "id";
     givenConsultantWithoutAgency(consultantId);
     when(consultingTypeManager.isConsultantBoundedToAgency(anyInt())).thenReturn(false);
-    when(consultingTypeManager
-        .getConsultingTypeSettings(anyInt())).thenReturn(getExtendedConsultingTypeResponse());
+    when(consultingTypeManager.getConsultingTypeSettings(anyInt()))
+        .thenReturn(getExtendedConsultingTypeResponse());
 
     var agencyId = 999L;
     CreateConsultantAgencyDTO consultantAgencyDto = new CreateConsultantAgencyDTO();
@@ -172,19 +187,18 @@ public class ConsultantAdminFacadeIT {
     ConsultantFilter consultantFilter = new ConsultantFilter();
     consultantFilter.setAgencyId(agencyId);
 
-    var searchResult = this.consultantAdminFacade
-        .findFilteredConsultants(1, 100, consultantFilter,
-            new Sort().field(FieldEnum.FIRSTNAME).order(OrderEnum.ASC));
+    var searchResult =
+        this.consultantAdminFacade.findFilteredConsultants(
+            1, 100, consultantFilter, new Sort().field(FieldEnum.FIRSTNAME).order(OrderEnum.ASC));
 
     assertThat(searchResult.getEmbedded(), hasSize(0));
 
     consultantAdminFacade.createNewConsultantAgency(consultantId, consultantAgencyDto);
 
-    searchResult = this.consultantAdminFacade
-        .findFilteredConsultants(1, 100, consultantFilter,
-            new Sort().field(FieldEnum.FIRSTNAME).order(OrderEnum.ASC));
+    searchResult =
+        this.consultantAdminFacade.findFilteredConsultants(
+            1, 100, consultantFilter, new Sort().field(FieldEnum.FIRSTNAME).order(OrderEnum.ASC));
     assertThat(searchResult.getEmbedded(), hasSize(1));
-
   }
 
   private ExtendedConsultingTypeResponseDTO getExtendedConsultingTypeResponse() {
@@ -229,8 +243,8 @@ public class ConsultantAdminFacadeIT {
     newList.add(consultantAgency1);
 
     String consultanId = "45816eb6-984b-411f-a818-996cd16e1f2a";
-    List<Long> filteredList = consultantAdminFacade
-        .filterAgencyListForDeletion(consultanId, newList);
+    List<Long> filteredList =
+        consultantAdminFacade.filterAgencyListForDeletion(consultanId, newList);
     assertThat(filteredList.size(), is(1));
 
     CreateConsultantAgencyDTO consultantAgency2 = new CreateConsultantAgencyDTO();
@@ -268,6 +282,4 @@ public class ConsultantAdminFacadeIT {
     consultantAdminFacade.filterAgencyListForCreation(consultantId, newList);
     assertThat(newList.size(), is(1));
   }
-
-
 }

@@ -18,8 +18,7 @@ import org.springframework.stereotype.Component;
 @ConditionalOnExpression("${multitenancy.enabled:true}")
 public class TenantAspect {
 
-  @PersistenceContext
-  private final @NonNull EntityManager entityManager;
+  @PersistenceContext private final @NonNull EntityManager entityManager;
 
   @Before("execution(* de.caritas.cob.userservice.api.port..*(..)))")
   public void beforeQueryAspect() {
@@ -28,8 +27,7 @@ public class TenantAspect {
       return;
     }
 
-    var filter = entityManager.unwrap(Session.class)
-        .enableFilter("tenantFilter");
+    var filter = entityManager.unwrap(Session.class).enableFilter("tenantFilter");
     filter.setParameter("tenantId", TenantContext.getCurrentTenant());
     filter.validate();
   }

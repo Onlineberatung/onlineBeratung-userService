@@ -14,9 +14,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-/**
- * Facade to encapsulate logic to finish an anonymous conversation.
- */
+/** Facade to encapsulate logic to finish an anonymous conversation. */
 @Service
 @RequiredArgsConstructor
 public class FinishAnonymousConversationFacade {
@@ -30,20 +28,25 @@ public class FinishAnonymousConversationFacade {
    * @param sessionId the session id
    */
   public void finishConversation(Long sessionId) {
-    var session = this.sessionService.getSession(sessionId)
-        .orElseThrow(() -> new NotFoundException(
-            String.format("Session with id %s does not exist", sessionId)));
+    var session =
+        this.sessionService
+            .getSession(sessionId)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("Session with id %s does not exist", sessionId)));
 
-    this.actionsRegistry.buildContainerForType(User.class)
+    this.actionsRegistry
+        .buildContainerForType(User.class)
         .addActionToExecute(DeactivateKeycloakUserActionCommand.class)
         .executeActions(session.getUser());
 
-    this.actionsRegistry.buildContainerForType(Session.class)
+    this.actionsRegistry
+        .buildContainerForType(Session.class)
         .addActionToExecute(DeactivateSessionActionCommand.class)
         .addActionToExecute(PostConversationFinishedAliasMessageActionCommand.class)
         .addActionToExecute(SetRocketChatRoomReadOnlyActionCommand.class)
         .addActionToExecute(SendFinishedAnonymousConversationEventActionCommand.class)
         .executeActions(session);
   }
-
 }

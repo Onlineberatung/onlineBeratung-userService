@@ -2,15 +2,12 @@ package de.caritas.cob.userservice.api.adapters.web.dto;
 
 import static java.util.Objects.nonNull;
 
-/**
- * Builder to create an {@link UserDTO}.
- */
+/** Builder to create an {@link UserDTO}. */
 public class UserDTOBuilder {
 
   private NewRegistrationDto newRegistrationDto;
 
-  private UserDTOBuilder() {
-  }
+  private UserDTOBuilder() {}
 
   /**
    * Creates an {@link UserDTOBuilder} instance.

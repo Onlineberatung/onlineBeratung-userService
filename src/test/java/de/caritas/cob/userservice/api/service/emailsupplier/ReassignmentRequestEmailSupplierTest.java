@@ -21,11 +21,13 @@ class ReassignmentRequestEmailSupplierTest {
   void generateEmails_Should_returnMailWithExpectedData() {
     var receiverLanguageCode = easyRandom.nextObject(LanguageCode.class);
 
-    var reassignmentSupplier = ReassignmentRequestEmailSupplier.builder()
-        .receiverEmailAddress("receiverMail")
-        .receiverLanguageCode(receiverLanguageCode)
-        .applicationBaseUrl("base")
-        .receiverUsername("receiverUsername").build();
+    var reassignmentSupplier =
+        ReassignmentRequestEmailSupplier.builder()
+            .receiverEmailAddress("receiverMail")
+            .receiverLanguageCode(receiverLanguageCode)
+            .applicationBaseUrl("base")
+            .receiverUsername("receiverUsername")
+            .build();
 
     var mails = reassignmentSupplier.generateEmails();
 
@@ -41,5 +43,4 @@ class ReassignmentRequestEmailSupplierTest {
     assertThat(mail.getTemplateData().get(1).getKey(), is("url"));
     assertThat(mail.getTemplateData().get(1).getValue(), is("base"));
   }
-
 }
