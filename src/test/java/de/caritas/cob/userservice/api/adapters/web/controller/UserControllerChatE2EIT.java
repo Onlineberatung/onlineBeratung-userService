@@ -222,7 +222,7 @@ class UserControllerChatE2EIT {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("groupId", is("rcGroupId")))
-        .andExpect(jsonPath("chatLink").isEmpty());
+        .andExpect(jsonPath("chatLink").isNotEmpty());
   }
 
   @Test

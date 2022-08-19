@@ -135,4 +135,17 @@ public class UserHelper {
         + this.usernameTranscoder.base32EncodeAndReplacePlaceholder(
             Long.toString(chatId), BASE32_PLACEHOLDER_CHAT_ID_REPLACE_STRING);
   }
+
+  /**
+   * Generates the URL for a chat with the given {@link Chat} id.
+   *
+   * @param chatId the {@link Chat}'s id
+   * @return URL (String)
+   */
+  public String generateChatUrl(Long chatId) {
+    return hostBaseUrl
+        + "/"
+        + this.usernameTranscoder.base32EncodeAndReplacePlaceholder(
+            Long.toString(chatId), BASE32_PLACEHOLDER_CHAT_ID_REPLACE_STRING);
+  }
 }

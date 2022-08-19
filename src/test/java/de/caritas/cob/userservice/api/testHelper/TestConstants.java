@@ -1137,6 +1137,7 @@ public class TestConstants {
   public static final String GROUP_CHAT_NAME = "GROUP_CHAT_NAME";
   public static final String CHAT_LINK_SUCHT =
       HOST_BASE_URL + "/" + CONSULTING_TYPE_SUCHT_URL_NAME + "/" + CHAT_ID_ENCODED;
+  public static final String CHAT_LINK_SUCHT_V2 = HOST_BASE_URL + "/" + CHAT_ID_ENCODED;
   public static final ChatDTO CHAT_DTO =
       new ChatDTO(CHAT_TOPIC, CHAT_START_DATE, CHAT_START_TIME, CHAT_DURATION, CHAT_REPETITIVE);
   public static final CreateChatResponseDTO CREATE_CHAT_RESPONSE_DTO =
