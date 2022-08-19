@@ -37,9 +37,9 @@ public class MobilePushNotificationService {
   }
 
   private void sendPushNotificationForUser(String userId) {
-    this.userService.getUser(userId)
-        .ifPresent(this::sendPushNotificationIfUserHasMobileTokens);
-    this.consultantService.getConsultant(userId)
+    this.userService.getUser(userId).ifPresent(this::sendPushNotificationIfUserHasMobileTokens);
+    this.consultantService
+        .getConsultant(userId)
         .ifPresent(this::sendPushNotificationIfConsultantHasMobileTokens);
   }
 
@@ -51,8 +51,7 @@ public class MobilePushNotificationService {
 
   private Stream<String> extractMobileAppTokens(User user) {
     if (isNotEmpty(user.getUserMobileTokens())) {
-      return user.getUserMobileTokens().stream()
-          .map(UserMobileToken::getMobileAppToken);
+      return user.getUserMobileTokens().stream().map(UserMobileToken::getMobileAppToken);
     }
     return Stream.empty();
   }
@@ -65,5 +64,4 @@ public class MobilePushNotificationService {
           .forEach(this.firebasePushMessageService::pushNewMessageEvent);
     }
   }
-
 }

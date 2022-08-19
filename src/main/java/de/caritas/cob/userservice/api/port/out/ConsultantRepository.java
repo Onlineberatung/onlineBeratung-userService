@@ -37,10 +37,8 @@ public interface ConsultantRepository extends CrudRepository<Consultant, String>
               + "    UPPER(c.firstName) LIKE CONCAT('%', UPPER(?1), '%')"
               + "    OR UPPER(c.lastName) LIKE CONCAT('%', UPPER(?1), '%')"
               + "    OR UPPER(c.email) LIKE CONCAT('%', UPPER(?1), '%')"
-              + "  )"
-  )
+              + "  )")
   Page<ConsultantBase> findAllByInfix(String infix, Pageable pageable);
 
   long countByDeleteDateIsNull();
-
 }

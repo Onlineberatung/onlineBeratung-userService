@@ -17,5 +17,4 @@ public class RocketChatRoomInformation {
   private final List<String> userRooms;
   private final Map<String, RoomsLastMessageDTO> lastMessagesRoom;
   private final Map<String, Date> groupIdToLastMessageFallbackDate;
-
 }

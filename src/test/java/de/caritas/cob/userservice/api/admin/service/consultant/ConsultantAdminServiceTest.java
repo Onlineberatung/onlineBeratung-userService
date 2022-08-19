@@ -24,33 +24,29 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ConsultantAdminServiceTest {
 
-  @InjectMocks
-  private ConsultantAdminService consultantAdminService;
+  @InjectMocks private ConsultantAdminService consultantAdminService;
 
-  @Mock
-  private ConsultantRepository consultantRepository;
+  @Mock private ConsultantRepository consultantRepository;
 
-  @Mock
-  private ConsultantCreatorService consultantCreatorService;
+  @Mock private ConsultantCreatorService consultantCreatorService;
 
-  @Mock
-  private ConsultantUpdateService consultantUpdateService;
+  @Mock private ConsultantUpdateService consultantUpdateService;
 
-  @Mock
-  private ConsultantPreDeletionService consultantPreDeletionService;
+  @Mock private ConsultantPreDeletionService consultantPreDeletionService;
 
-  @Mock
-  private AppointmentService appointmentService;
+  @Mock private AppointmentService appointmentService;
 
   @Test(expected = NotFoundException.class)
-  public void markConsultantForDeletion_Should_throwNotFoundException_When_consultantdoesNotExist() {
+  public void
+      markConsultantForDeletion_Should_throwNotFoundException_When_consultantdoesNotExist() {
     when(this.consultantRepository.findByIdAndDeleteDateIsNull(any())).thenReturn(Optional.empty());
 
     this.consultantAdminService.markConsultantForDeletion("id");
   }
 
   @Test
-  public void markConsultantForDeletion_Should_executePreDeletionStepsAndMarkConsultantAsDeleted_When_consultantExists() {
+  public void
+      markConsultantForDeletion_Should_executePreDeletionStepsAndMarkConsultantAsDeleted_When_consultantExists() {
     Consultant consultant = mock(Consultant.class);
     when(this.consultantRepository.findByIdAndDeleteDateIsNull(any()))
         .thenReturn(Optional.of(consultant));
@@ -61,5 +57,4 @@ public class ConsultantAdminServiceTest {
     verify(consultant, times(1)).setDeleteDate(any());
     verify(this.consultantRepository, times(1)).save(eq(consultant));
   }
-
 }

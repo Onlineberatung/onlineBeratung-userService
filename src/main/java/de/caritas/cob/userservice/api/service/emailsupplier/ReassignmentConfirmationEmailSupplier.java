@@ -32,10 +32,15 @@ public class ReassignmentConfirmationEmailSupplier implements EmailSupplier {
   }
 
   private MailDTO buildMailDtoForReassignRequestNotification() {
-    var templateAttributes = new ArrayList<>(asList(
-        new TemplateDataDTO().key("name_recipient").value(decodedUsernameOf(receiverConsultant)),
-        new TemplateDataDTO().key("name_from_consultant")
-            .value(decodedUsernameOf(senderConsultantName))));
+    var templateAttributes =
+        new ArrayList<>(
+            asList(
+                new TemplateDataDTO()
+                    .key("name_recipient")
+                    .value(decodedUsernameOf(receiverConsultant)),
+                new TemplateDataDTO()
+                    .key("name_from_consultant")
+                    .value(decodedUsernameOf(senderConsultantName))));
 
     if (!multiTenancyEnabled) {
       templateAttributes.add(new TemplateDataDTO().key("url").value(applicationBaseUrl));
@@ -61,8 +66,6 @@ public class ReassignmentConfirmationEmailSupplier implements EmailSupplier {
   private static de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode languageOf(
       LanguageCode languageCode) {
     return de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.fromValue(
-        languageCode.toString()
-    );
+        languageCode.toString());
   }
-
 }

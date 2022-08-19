@@ -22,5 +22,4 @@ public class TenantContextProvider {
       TenantContext.setCurrentTenant(currentTenantId);
     }
   }
-
 }

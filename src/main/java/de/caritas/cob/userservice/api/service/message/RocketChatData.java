@@ -21,5 +21,4 @@ public class RocketChatData {
   private final String rcGroupId;
   private String type;
   private String org;
-
 }

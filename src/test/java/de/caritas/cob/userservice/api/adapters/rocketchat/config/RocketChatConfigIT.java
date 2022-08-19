@@ -11,8 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("testing")
 class RocketChatConfigIT {
 
-  @SpyBean
-  private RocketChatConfig underTest;
+  @SpyBean private RocketChatConfig underTest;
 
   @Test
   void configurationShouldLoadProperties() {

@@ -33,5 +33,4 @@ public class SessionConsultantForUserDTO {
   private String absenceMessage;
 
   private String displayName;
-
 }

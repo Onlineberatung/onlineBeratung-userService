@@ -23,9 +23,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-/**
- * Facade for capsuling to join a chat.
- */
+/** Facade for capsuling to join a chat. */
 @Service
 @RequiredArgsConstructor
 public class JoinAndLeaveChatFacade {
@@ -40,7 +38,7 @@ public class JoinAndLeaveChatFacade {
   /**
    * Join a chat.
    *
-   * @param chatId            the chat id
+   * @param chatId the chat id
    * @param authenticatedUser the authenticated user
    */
   public void joinChat(Long chatId, AuthenticatedUser authenticatedUser) {
@@ -57,7 +55,7 @@ public class JoinAndLeaveChatFacade {
   /**
    * Leave a chat.
    *
-   * @param chatId            the id of the chat
+   * @param chatId the id of the chat
    * @param authenticatedUser the authenticated user
    */
   public void leaveChat(Long chatId, AuthenticatedUser authenticatedUser) {
@@ -76,8 +74,8 @@ public class JoinAndLeaveChatFacade {
         }
       }
     } catch (RocketChatRemoveUserFromGroupException
-             | RocketChatUserNotInitializedException
-             | RocketChatGetGroupMembersException e) {
+        | RocketChatUserNotInitializedException
+        | RocketChatGetGroupMembersException e) {
       throw new InternalServerErrorException(e.getMessage(), LogService::logInternalServerError);
     }
   }
@@ -90,13 +88,16 @@ public class JoinAndLeaveChatFacade {
   }
 
   private Chat getChat(Long chatId) {
-    Chat chat = chatService.getChat(chatId)
-        .orElseThrow(
-            () -> new NotFoundException(String.format("Chat with id %s not found", chatId)));
+    Chat chat =
+        chatService
+            .getChat(chatId)
+            .orElseThrow(
+                () -> new NotFoundException(String.format("Chat with id %s not found", chatId)));
 
     if (isFalse(chat.isActive())) {
       throw new ConflictException(
-          String.format("User could not join/leave Chat with id %s, because it's not started.",
+          String.format(
+              "User could not join/leave Chat with id %s, because it's not started.",
               chat.getId()));
     }
 
@@ -117,12 +118,15 @@ public class JoinAndLeaveChatFacade {
 
   private String retrieveRcUserId(AuthenticatedUser authenticatedUser) {
     final AtomicReference<String> rcUserId = new AtomicReference<>();
-    consultantService.getConsultantViaAuthenticatedUser(authenticatedUser)
-        .ifPresentOrElse(consultant -> rcUserId.set(consultant.getRocketChatId()),
-            () -> userService.getUserViaAuthenticatedUser(authenticatedUser)
-                .ifPresent(user -> rcUserId.set(user.getRcUserId())));
+    consultantService
+        .getConsultantViaAuthenticatedUser(authenticatedUser)
+        .ifPresentOrElse(
+            consultant -> rcUserId.set(consultant.getRocketChatId()),
+            () ->
+                userService
+                    .getUserViaAuthenticatedUser(authenticatedUser)
+                    .ifPresent(user -> rcUserId.set(user.getRcUserId())));
 
     return rcUserId.get();
   }
-
 }

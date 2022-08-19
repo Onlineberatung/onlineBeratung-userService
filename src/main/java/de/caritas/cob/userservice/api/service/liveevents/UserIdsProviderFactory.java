@@ -5,9 +5,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-/**
- * Factory to decide which {@link UserIdsProvider} to be used for collecting user ids.
- */
+/** Factory to decide which {@link UserIdsProvider} to be used for collecting user ids. */
 @Component
 @RequiredArgsConstructor
 public class UserIdsProviderFactory {
@@ -21,7 +19,7 @@ public class UserIdsProviderFactory {
    *
    * @param rcGroupId the rocket chat group id
    * @return {@link RelevantUserAccountIdsByChatProvider} if the group id belongs to a chat and
-   * {@link RelevantUserAccountIdsBySessionProvider} if not
+   *     {@link RelevantUserAccountIdsBySessionProvider} if not
    */
   public UserIdsProvider byRocketChatGroup(String rcGroupId) {
     return isChat(rcGroupId) ? this.byChatProvider : this.bySessionProvider;
@@ -30,5 +28,4 @@ public class UserIdsProviderFactory {
   private boolean isChat(String rcGroupId) {
     return this.chatRepository.findByGroupId(rcGroupId).isPresent();
   }
-
 }

@@ -34,47 +34,34 @@ import org.mockito.quality.Strictness;
 import org.slf4j.Logger;
 
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT) // To allow "UnnecessaryStubbing" to keep tests clean
+@MockitoSettings(
+    strictness = Strictness.LENIENT) // To allow "UnnecessaryStubbing" to keep tests clean
 class AppointmentServiceTest {
 
   private static final String FIELD_NAME_APPOINTMENTS_ENABLED = "appointmentFeatureEnabled";
 
-  @Spy
-  @InjectMocks
-  AppointmentService appointmentService;
+  @Spy @InjectMocks AppointmentService appointmentService;
 
-  @Mock
-  ConsultantApi appointmentConsultantApi;
-  @Mock
-  AgencyApi appointmentAgencyApi;
-  @Mock
-  SecurityHeaderSupplier securityHeaderSupplier;
-  @Mock
-  TenantHeaderSupplier tenantHeaderSupplier;
-  @Mock
-  IdentityClient identityClient;
+  @Mock ConsultantApi appointmentConsultantApi;
+  @Mock AgencyApi appointmentAgencyApi;
+  @Mock SecurityHeaderSupplier securityHeaderSupplier;
+  @Mock TenantHeaderSupplier tenantHeaderSupplier;
+  @Mock IdentityClient identityClient;
 
-  @Mock
-  Logger log;
+  @Mock Logger log;
 
-  @Mock
-  ConsultantDTO consultantDTO;
+  @Mock ConsultantDTO consultantDTO;
 
-  @Mock
-  ConsultantAdminResponseDTO consultantAdminResponseDTO;
+  @Mock ConsultantAdminResponseDTO consultantAdminResponseDTO;
 
-  @Mock
-  KeycloakLoginResponseDTO keycloakLoginResponseDTO;
+  @Mock KeycloakLoginResponseDTO keycloakLoginResponseDTO;
 
-  @Mock
-  org.springframework.http.HttpHeaders httpHeaders;
+  @Mock org.springframework.http.HttpHeaders httpHeaders;
 
-  @Mock
-  ObjectMapper objectMapper;
+  @Mock ObjectMapper objectMapper;
 
   @Before
-  public void setup() {
-  }
+  public void setup() {}
 
   @BeforeEach
   public void beforeEach() throws JsonProcessingException {
@@ -82,8 +69,9 @@ class AppointmentServiceTest {
     when(identityClient.loginUser(any(), any())).thenReturn(keycloakLoginResponseDTO);
     when(securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders(any())).thenReturn(httpHeaders);
     when(consultantDTO.getId()).thenReturn("testId");
-    when(objectMapper.readValue(nullable(String.class),
-        ArgumentMatchers.<Class<ConsultantDTO>>any())).thenReturn(consultantDTO);
+    when(objectMapper.readValue(
+            nullable(String.class), ArgumentMatchers.<Class<ConsultantDTO>>any()))
+        .thenReturn(consultantDTO);
     when(appointmentService.getObjectMapper(anyBoolean())).thenReturn(objectMapper);
   }
 
@@ -145,6 +133,4 @@ class AppointmentServiceTest {
     appointmentService.syncAgencies("testId", new LinkedList<>());
     verify(appointmentAgencyApi, times(1)).agencyConsultantsSync(any());
   }
-
-
 }

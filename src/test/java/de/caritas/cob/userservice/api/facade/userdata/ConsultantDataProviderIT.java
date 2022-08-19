@@ -9,9 +9,9 @@ import static org.mockito.Mockito.when;
 
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.UserServiceApplication;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Language;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
@@ -38,25 +38,22 @@ public class ConsultantDataProviderIT {
 
   private final EasyRandom easyRandom = new EasyRandom();
 
-  @Autowired
-  private ConsultantDataProvider underTest;
+  @Autowired private ConsultantDataProvider underTest;
 
-  @MockBean
-  private AgencyService agencyService;
+  @MockBean private AgencyService agencyService;
 
   @MockBean
   @SuppressWarnings("unused")
   private AuthenticatedUser authenticatedUser;
 
-  @MockBean
-  private ConsultingTypeManager consultingTypeManager;
+  @MockBean private ConsultingTypeManager consultingTypeManager;
 
   @Test
-  public void retrieveData_Should_returnDataWithHasArchiveTrue_When_ConsultantHasRegisteredSessions() {
+  public void
+      retrieveData_Should_returnDataWithHasArchiveTrue_When_ConsultantHasRegisteredSessions() {
     var consultant = easyRandom.nextObject(Consultant.class);
     consultant.setId("94c3e0b1-0677-4fd2-a7ea-56a71aefd0e8");
-    when(agencyService.getAgencies(any()))
-        .thenReturn(List.of(new AgencyDTO().consultingType(1)));
+    when(agencyService.getAgencies(any())).thenReturn(List.of(new AgencyDTO().consultingType(1)));
     when(consultingTypeManager.getConsultingTypeSettings(anyInt()))
         .thenReturn(new ExtendedConsultingTypeResponseDTO().isAnonymousConversationAllowed(false));
 
@@ -66,12 +63,12 @@ public class ConsultantDataProviderIT {
   }
 
   @Test
-  public void retrieveData_Should_returnDataWithHasArchiveFalse_When_ConsultantHasNoRegisteredSessions() {
+  public void
+      retrieveData_Should_returnDataWithHasArchiveFalse_When_ConsultantHasNoRegisteredSessions() {
     var consultant = easyRandom.nextObject(Consultant.class);
 
     consultant.setId("42c3x532-0677-4fd2-a7ea-56a71aefd088");
-    when(agencyService.getAgencies(any()))
-        .thenReturn(List.of(new AgencyDTO().consultingType(1)));
+    when(agencyService.getAgencies(any())).thenReturn(List.of(new AgencyDTO().consultingType(1)));
     when(consultingTypeManager.getConsultingTypeSettings(anyInt()))
         .thenReturn(new ExtendedConsultingTypeResponseDTO().isAnonymousConversationAllowed(false));
 
@@ -83,10 +80,11 @@ public class ConsultantDataProviderIT {
   @Test
   public void retrieveDataShouldMapMultipleConsultantLanguages() {
     var consultant = easyRandom.nextObject(Consultant.class);
-    var languages = consultant.getLanguages().stream()
-        .map(Language::getLanguageCode)
-        .map(LanguageCode::name)
-        .collect(Collectors.toSet());
+    var languages =
+        consultant.getLanguages().stream()
+            .map(Language::getLanguageCode)
+            .map(LanguageCode::name)
+            .collect(Collectors.toSet());
 
     var result = underTest.retrieveData(consultant);
 

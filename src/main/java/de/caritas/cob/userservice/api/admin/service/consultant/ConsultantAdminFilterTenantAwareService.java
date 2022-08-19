@@ -14,9 +14,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
-/**
- * Service class to provide filtered search for all {@link Consultant} entities based on tenant.
- */
+/** Service class to provide filtered search for all {@link Consultant} entities based on tenant. */
 @Service
 @Primary
 @ConditionalOnExpression("${multitenancy.enabled:true}")
@@ -29,23 +27,31 @@ public class ConsultantAdminFilterTenantAwareService extends ConsultantAdminFilt
     super(entityManagerFactory);
   }
 
-  protected FullTextQuery buildFilteredQuery(ConsultantFilter consultantFilter,
-      FullTextEntityManager fullTextEntityManager) {
+  protected FullTextQuery buildFilteredQuery(
+      ConsultantFilter consultantFilter, FullTextEntityManager fullTextEntityManager) {
 
-    QueryBuilder queryBuilder = fullTextEntityManager.getSearchFactory()
-        .buildQueryBuilder()
-        .forEntity(Consultant.class)
-        .get();
+    QueryBuilder queryBuilder =
+        fullTextEntityManager
+            .getSearchFactory()
+            .buildQueryBuilder()
+            .forEntity(Consultant.class)
+            .get();
 
-    Query tenantQuery = fullTextEntityManager.getSearchFactory()
-        .buildQueryBuilder()
-        .forEntity(Consultant.class)
-        .get().keyword().onField(TENANT_ID_SEARCH_FIELD)
-        .matching(TenantContext.getCurrentTenant()).createQuery();
+    Query tenantQuery =
+        fullTextEntityManager
+            .getSearchFactory()
+            .buildQueryBuilder()
+            .forEntity(Consultant.class)
+            .get()
+            .keyword()
+            .onField(TENANT_ID_SEARCH_FIELD)
+            .matching(TenantContext.getCurrentTenant())
+            .createQuery();
 
-    Query query = ConsultantFilterQueryBuilder.getInstance(queryBuilder)
-        .onConsultantFilter(consultantFilter)
-        .buildQuery();
+    Query query =
+        ConsultantFilterQueryBuilder.getInstance(queryBuilder)
+            .onConsultantFilter(consultantFilter)
+            .buildQuery();
 
     Query resultQuery = queryBuilder.bool().must(tenantQuery).must(query).createQuery();
 

@@ -5,5 +5,4 @@ public interface AbsenceInputValidation {
   boolean isAbsent();
 
   String absenceMessage();
-
 }

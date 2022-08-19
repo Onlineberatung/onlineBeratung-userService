@@ -28,22 +28,21 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class FinishAnonymousConversationFacadeTest {
 
-  @InjectMocks
-  private FinishAnonymousConversationFacade finishAnonymousConversationFacade;
+  @InjectMocks private FinishAnonymousConversationFacade finishAnonymousConversationFacade;
 
-  @Mock
-  private SessionService sessionService;
+  @Mock private SessionService sessionService;
 
-  @Mock
-  private ActionsRegistry actionsRegistry;
+  @Mock private ActionsRegistry actionsRegistry;
 
-  private final ActionCommandMockProvider actionCommandMockProvider = new ActionCommandMockProvider();
+  private final ActionCommandMockProvider actionCommandMockProvider =
+      new ActionCommandMockProvider();
 
   @Test
   void finishConversation_Should_throwNotFoundException_When_sessionDoesNotExist() {
     when(this.sessionService.getSession(any())).thenReturn(Optional.empty());
 
-    assertThrows(NotFoundException.class,
+    assertThrows(
+        NotFoundException.class,
         () -> this.finishAnonymousConversationFacade.finishConversation(1L));
   }
 
@@ -58,21 +57,28 @@ class FinishAnonymousConversationFacadeTest {
 
     this.finishAnonymousConversationFacade.finishConversation(session.getId());
 
-    verify(this.actionCommandMockProvider
-        .getActionMock(SendFinishedAnonymousConversationEventActionCommand.class), times(1))
+    verify(
+            this.actionCommandMockProvider.getActionMock(
+                SendFinishedAnonymousConversationEventActionCommand.class),
+            times(1))
         .execute(session);
-    verify(this.actionCommandMockProvider
-        .getActionMock(DeactivateSessionActionCommand.class), times(1))
+    verify(
+            this.actionCommandMockProvider.getActionMock(DeactivateSessionActionCommand.class),
+            times(1))
         .execute(session);
-    verify(this.actionCommandMockProvider
-        .getActionMock(SetRocketChatRoomReadOnlyActionCommand.class), times(1))
+    verify(
+            this.actionCommandMockProvider.getActionMock(
+                SetRocketChatRoomReadOnlyActionCommand.class),
+            times(1))
         .execute(session);
-    verify(this.actionCommandMockProvider
-        .getActionMock(DeactivateKeycloakUserActionCommand.class), times(1))
+    verify(
+            this.actionCommandMockProvider.getActionMock(DeactivateKeycloakUserActionCommand.class),
+            times(1))
         .execute(session.getUser());
-    verify(this.actionCommandMockProvider
-        .getActionMock(PostConversationFinishedAliasMessageActionCommand.class), times(1))
+    verify(
+            this.actionCommandMockProvider.getActionMock(
+                PostConversationFinishedAliasMessageActionCommand.class),
+            times(1))
         .execute(session);
   }
-
 }

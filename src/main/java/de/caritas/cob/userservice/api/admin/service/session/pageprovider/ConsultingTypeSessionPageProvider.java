@@ -3,16 +3,14 @@ package de.caritas.cob.userservice.api.admin.service.session.pageprovider;
 import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionFilter;
-import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-/**
- * Page provider for {@link Session} filtered by the consulting ID.
- */
+/** Page provider for {@link Session} filtered by the consulting ID. */
 @RequiredArgsConstructor
 public class ConsultingTypeSessionPageProvider implements SessionPageProvider {
 
@@ -27,8 +25,8 @@ public class ConsultingTypeSessionPageProvider implements SessionPageProvider {
    */
   @Override
   public Page<Session> executeQuery(Pageable pageable) {
-    return this.sessionRepository
-        .findByConsultingTypeId(sessionFilter.getConsultingType(), pageable);
+    return this.sessionRepository.findByConsultingTypeId(
+        sessionFilter.getConsultingType(), pageable);
   }
 
   /**

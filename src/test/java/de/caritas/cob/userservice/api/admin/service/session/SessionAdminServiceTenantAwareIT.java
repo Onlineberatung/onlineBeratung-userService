@@ -24,12 +24,13 @@ import org.springframework.transaction.annotation.Transactional;
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 @TestPropertySource(properties = "multitenancy.enabled=true")
-@TestPropertySource(properties = "spring.datasource.data=classpath*:database/UserServiceDatabase.sql,classpath*:database/transformDataForTenants.sql")
+@TestPropertySource(
+    properties =
+        "spring.datasource.data=classpath*:database/UserServiceDatabase.sql,classpath*:database/transformDataForTenants.sql")
 @Transactional
 public class SessionAdminServiceTenantAwareIT {
 
-  @Autowired
-  private SessionAdminService sessionAdminService;
+  @Autowired private SessionAdminService sessionAdminService;
 
   @Before
   public void beforeTests() {
@@ -43,13 +44,12 @@ public class SessionAdminServiceTenantAwareIT {
 
   @Test
   public void findSessions_Should_haveCorrectPagedResults_When_noFilterIsGiven() {
-    SessionAdminResultDTO firstPage = this.sessionAdminService
-        .findSessions(1, 100, new SessionFilter());
-    SessionAdminResultDTO secondPage = this.sessionAdminService
-        .findSessions(2, 100, new SessionFilter());
+    SessionAdminResultDTO firstPage =
+        this.sessionAdminService.findSessions(1, 100, new SessionFilter());
+    SessionAdminResultDTO secondPage =
+        this.sessionAdminService.findSessions(2, 100, new SessionFilter());
 
     assertThat(firstPage.getEmbedded(), hasSize(100));
     assertThat(secondPage.getEmbedded(), hasSize(54));
   }
-
 }

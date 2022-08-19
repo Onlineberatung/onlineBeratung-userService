@@ -3,6 +3,10 @@ package de.caritas.cob.userservice.api.workflow.delete.service;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
+import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.workflow.delete.action.asker.DeleteAnonymousRegistryIdAction;
 import de.caritas.cob.userservice.api.workflow.delete.action.asker.DeleteAskerRoomsAndSessionsAction;
 import de.caritas.cob.userservice.api.workflow.delete.action.asker.DeleteDatabaseAskerAction;
@@ -17,10 +21,6 @@ import de.caritas.cob.userservice.api.workflow.delete.action.consultant.DeleteRo
 import de.caritas.cob.userservice.api.workflow.delete.model.AskerDeletionWorkflowDTO;
 import de.caritas.cob.userservice.api.workflow.delete.model.ConsultantDeletionWorkflowDTO;
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
-import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
-import de.caritas.cob.userservice.api.model.User;
-import de.caritas.cob.userservice.api.port.out.UserRepository;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -29,9 +29,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-/**
- * Service to trigger deletion of user accounts.
- */
+/** Service to trigger deletion of user accounts. */
 @Service
 @RequiredArgsConstructor
 public class DeleteUserAccountService {
@@ -41,9 +39,7 @@ public class DeleteUserAccountService {
   private final @NonNull ActionsRegistry actionsRegistry;
   private final @NonNull WorkflowErrorMailService workflowErrorMailService;
 
-  /**
-   * Deletes all user accounts marked as deleted in database.
-   */
+  /** Deletes all user accounts marked as deleted in database. */
   public void deleteUserAccounts() {
     var workflowErrors = deleteAskersAndCollectPossibleErrors();
     workflowErrors.addAll(deleteConsultantsAndCollectPossibleErrors());
@@ -64,7 +60,8 @@ public class DeleteUserAccountService {
 
     var deletionWorkflowDTO = new AskerDeletionWorkflowDTO(user, new ArrayList<>());
 
-    this.actionsRegistry.buildContainerForType(AskerDeletionWorkflowDTO.class)
+    this.actionsRegistry
+        .buildContainerForType(AskerDeletionWorkflowDTO.class)
         .addActionToExecute(DeleteKeycloakAskerAction.class)
         .addActionToExecute(DeleteAskerRoomsAndSessionsAction.class)
         .addActionToExecute(DeleteDatabaseAskerAgencyAction.class)
@@ -85,10 +82,10 @@ public class DeleteUserAccountService {
 
   private List<DeletionWorkflowError> performConsultantDeletion(Consultant consultant) {
 
-    var deletionWorkflowDTO =
-        new ConsultantDeletionWorkflowDTO(consultant, new ArrayList<>());
+    var deletionWorkflowDTO = new ConsultantDeletionWorkflowDTO(consultant, new ArrayList<>());
 
-    this.actionsRegistry.buildContainerForType(ConsultantDeletionWorkflowDTO.class)
+    this.actionsRegistry
+        .buildContainerForType(ConsultantDeletionWorkflowDTO.class)
         .addActionToExecute(DeleteKeycloakConsultantAction.class)
         .addActionToExecute(DeleteDatabaseConsultantAgencyAction.class)
         .addActionToExecute(DeleteChatAction.class)
@@ -98,5 +95,4 @@ public class DeleteUserAccountService {
 
     return deletionWorkflowDTO.getDeletionWorkflowErrors();
   }
-
 }

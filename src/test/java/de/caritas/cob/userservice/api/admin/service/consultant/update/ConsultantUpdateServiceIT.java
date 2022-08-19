@@ -35,5 +35,4 @@ public class ConsultantUpdateServiceIT extends ConsultantUpdateServiceBase {
   protected String getValidConsultantId() {
     return VALID_CONSULTANT_ID;
   }
-
 }

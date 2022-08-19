@@ -5,5 +5,4 @@ public class RocketChatDeleteGroupException extends Exception {
   public RocketChatDeleteGroupException(Exception cause) {
     super(cause);
   }
-
 }

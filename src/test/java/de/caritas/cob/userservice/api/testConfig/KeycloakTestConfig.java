@@ -1,17 +1,16 @@
 package de.caritas.cob.userservice.api.testConfig;
 
+import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakClient;
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakMapper;
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
-import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakClient;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
-import java.util.Random;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -24,13 +23,23 @@ import org.springframework.web.client.RestTemplate;
 public class KeycloakTestConfig {
 
   @Bean
-  public KeycloakService keycloakService(RestTemplate restTemplate,
-      AuthenticatedUser authenticatedUser, UserAccountInputValidator userAccountInputValidator,
-      IdentityClientConfig identityClientConfig, KeycloakClient keycloakClient,
-      KeycloakMapper keycloakMapper, UserHelper userHelper) {
+  public KeycloakService keycloakService(
+      RestTemplate restTemplate,
+      AuthenticatedUser authenticatedUser,
+      UserAccountInputValidator userAccountInputValidator,
+      IdentityClientConfig identityClientConfig,
+      KeycloakClient keycloakClient,
+      KeycloakMapper keycloakMapper,
+      UserHelper userHelper) {
 
-    return new KeycloakService(restTemplate, authenticatedUser, userAccountInputValidator,
-        identityClientConfig, keycloakClient, keycloakMapper, userHelper) {
+    return new KeycloakService(
+        restTemplate,
+        authenticatedUser,
+        userAccountInputValidator,
+        identityClientConfig,
+        keycloakClient,
+        keycloakMapper,
+        userHelper) {
       @Override
       public boolean changePassword(String userId, String password) {
         return super.changePassword(userId, password);
@@ -67,7 +76,6 @@ public class KeycloakTestConfig {
         return user.getUserGender() != null;
       }
 
-
       @Override
       public String updateDummyEmail(String userId, UserDTO user) {
         var dummyMail = userId + "@dummy.du";
@@ -76,41 +84,32 @@ public class KeycloakTestConfig {
       }
 
       @Override
-      public void updateUserRole(String userId) {
-      }
+      public void updateUserRole(String userId) {}
 
       @Override
-      public void updateRole(String userId, UserRole role) {
-      }
+      public void updateRole(String userId, UserRole role) {}
 
       @Override
-      public void updateRole(String userId, String roleName) {
-      }
+      public void updateRole(String userId, String roleName) {}
 
       @Override
-      public void updatePassword(String userId, String password) {
-      }
+      public void updatePassword(String userId, String password) {}
 
       @Override
-      public void updateUserData(String userId, UserDTO userDTO, String firstName,
-          String lastName) {
-      }
+      public void updateUserData(
+          String userId, UserDTO userDTO, String firstName, String lastName) {}
 
       @Override
-      public void updateEmail(String userId, String emailAddress) {
-      }
+      public void updateEmail(String userId, String emailAddress) {}
 
       @Override
-      public void rollBackUser(String userId) {
-      }
+      public void rollBackUser(String userId) {}
 
       @Override
-      public void deleteUser(String userId) {
-      }
+      public void deleteUser(String userId) {}
 
       @Override
-      public void deactivateUser(String userId) {
-      }
+      public void deactivateUser(String userId) {}
     };
   }
 }

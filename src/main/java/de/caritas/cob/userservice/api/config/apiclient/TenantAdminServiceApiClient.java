@@ -4,11 +4,9 @@ import java.util.Collection;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-/**
- * Extension of the generated UserService API client to adapt the handling of parameter values.
- */
-public class TenantAdminServiceApiClient extends
-    de.caritas.cob.userservice.tenantadminservice.generated.ApiClient {
+/** Extension of the generated UserService API client to adapt the handling of parameter values. */
+public class TenantAdminServiceApiClient
+    extends de.caritas.cob.userservice.tenantadminservice.generated.ApiClient {
 
   public TenantAdminServiceApiClient(RestTemplate restTemplate) {
     super(restTemplate);
@@ -19,8 +17,8 @@ public class TenantAdminServiceApiClient extends
    * which are not {@link Collection} for filter query params.
    *
    * @param collectionFormat The format to convert to
-   * @param name             The name of the parameter
-   * @param value            The parameter's value
+   * @param name The name of the parameter
+   * @param value The parameter's value
    * @return a Map containing non-null String value(s) of the input parameter
    */
   @Override
@@ -33,5 +31,4 @@ public class TenantAdminServiceApiClient extends
 
     return TenantServiceHelper.obtainQueryParameters(value);
   }
-
 }

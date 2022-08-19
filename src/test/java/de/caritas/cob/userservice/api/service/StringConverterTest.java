@@ -15,8 +15,7 @@ class StringConverterTest {
 
   private static final EasyRandom easyRandom = new EasyRandom();
 
-  @InjectMocks
-  private StringConverter underTest;
+  @InjectMocks private StringConverter underTest;
 
   @Test
   void generateMasterKeyShouldFollowFrontendImplementation() {
@@ -29,7 +28,8 @@ class StringConverterTest {
   @Test
   void aesDecryptShouldFollowFrontendImplementationShort() {
     var secret = "fnwebFEBK3BFE";
-    var encryptedText = "U2FsdGVkX18TwcLautoyvh0UfVXqu1nh1KF2VtWbP6XsWxjkjS22oHXIIpJnQgqtsLLuJ7dwlhei8ICjRK3TJw==";
+    var encryptedText =
+        "U2FsdGVkX18TwcLautoyvh0UfVXqu1nh1KF2VtWbP6XsWxjkjS22oHXIIpJnQgqtsLLuJ7dwlhei8ICjRK3TJw==";
     var decryptedText = underTest.aesDecrypt(encryptedText, secret);
 
     assertEquals("The quick brown fox jumps over the lazy dog.", decryptedText);
@@ -38,23 +38,27 @@ class StringConverterTest {
   @Test
   void aesDecryptShouldFollowFrontendImplementationLong() {
     var secret = "the quick brown fox jumps over the lazy dog";
-    var encryptedText = "U2FsdGVkX1/p2D62+iqhS6Irmgg+zIcKSV2dXqmT25dwPNOv8UpSmA3UepiFl131FwSktDHds"
-        + "6YqqKEK8+MRXc2E4NPblSxLg8uphJSl9UOCLzj7qTNoaLw15w9oBaX/kr64Wv6vx83GIqcdCQrNF5s6kIeY69op"
-        + "iHSTQvs4ODdMvhqKMXGE0jzP+mpYR0Zp34rn3lLKxr1E8F/i7IBHfWiCo4UMNiux2v++DS5CIcI976iyuF6F8W0"
-        + "X5Iew08o4cKdQqJtApIfevYSi4eshjYEDfNjUmcwm4EcP7Q16lNyqoKFWkvp8nivV74xLhNMQ";
+    var encryptedText =
+        "U2FsdGVkX1/p2D62+iqhS6Irmgg+zIcKSV2dXqmT25dwPNOv8UpSmA3UepiFl131FwSktDHds"
+            + "6YqqKEK8+MRXc2E4NPblSxLg8uphJSl9UOCLzj7qTNoaLw15w9oBaX/kr64Wv6vx83GIqcdCQrNF5s6kIeY69op"
+            + "iHSTQvs4ODdMvhqKMXGE0jzP+mpYR0Zp34rn3lLKxr1E8F/i7IBHfWiCo4UMNiux2v++DS5CIcI976iyuF6F8W0"
+            + "X5Iew08o4cKdQqJtApIfevYSi4eshjYEDfNjUmcwm4EcP7Q16lNyqoKFWkvp8nivV74xLhNMQ";
     var decryptedText = underTest.aesDecrypt(encryptedText, secret);
 
-    assertEquals("Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy"
-        + " eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At "
-        + "vero eos et accusam et justo duo dolores et ea rebum.", decryptedText);
+    assertEquals(
+        "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy"
+            + " eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At "
+            + "vero eos et accusam et justo duo dolores et ea rebum.",
+        decryptedText);
   }
 
   @Test
   void rsaEncryptShouldFollowFrontendImplementation() {
-    var n = "l43bSozKXGPm5Fjm6bv-gO6LbPruG4fPABMfoD-IkFTgorlTTK7u1qD9RPKjlJZt41t8Z6rCfXQGwd4aJ1sIt"
-        + "7A93anv1Ai5LO90ciu7jNjTbieKtAOojcGgFwQSOn1WK_8xfakaXp9SVo3vvqB8Nk-k92EANRR4JqNmepSC5Sci"
-        + "Hr2h94c7ghaa8cazLJN1XQfgeOPa0xOqzCI_tMVhFwt3TGdZcA3bZ2UFxhdwy8W7b0942nG2PC6eXQDbbVyhJwR"
-        + "OAgM61q_DwNtOz6lOzzSC2RTiFbdGP0sHtJqAYWTAmeC8M69rufCwpzt4AV3V2H7_2h-XTRIjuVZ-pZ1xjw";
+    var n =
+        "l43bSozKXGPm5Fjm6bv-gO6LbPruG4fPABMfoD-IkFTgorlTTK7u1qD9RPKjlJZt41t8Z6rCfXQGwd4aJ1sIt"
+            + "7A93anv1Ai5LO90ciu7jNjTbieKtAOojcGgFwQSOn1WK_8xfakaXp9SVo3vvqB8Nk-k92EANRR4JqNmepSC5Sci"
+            + "Hr2h94c7ghaa8cazLJN1XQfgeOPa0xOqzCI_tMVhFwt3TGdZcA3bZ2UFxhdwy8W7b0942nG2PC6eXQDbbVyhJwR"
+            + "OAgM61q_DwNtOz6lOzzSC2RTiFbdGP0sHtJqAYWTAmeC8M69rufCwpzt4AV3V2H7_2h-XTRIjuVZ-pZ1xjw";
     var encryptedBytes = underTest.rsaEncrypt("MeinRoomKey", n);
 
     var intArray = underTest.int8Array(encryptedBytes);

@@ -9,19 +9,18 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.stereotype.Component;
 
-/**
- * Own implementation of the Spring GrantedAuthoritiesMapper.
- */
+/** Own implementation of the Spring GrantedAuthoritiesMapper. */
 @Component
 public class RoleAuthorizationAuthorityMapper implements GrantedAuthoritiesMapper {
 
   @Override
   public Collection<? extends GrantedAuthority> mapAuthorities(
       Collection<? extends GrantedAuthority> authorities) {
-    Set<String> roleNames = authorities.stream()
-        .map(GrantedAuthority::getAuthority)
-        .map(String::toLowerCase)
-        .collect(Collectors.toSet());
+    Set<String> roleNames =
+        authorities.stream()
+            .map(GrantedAuthority::getAuthority)
+            .map(String::toLowerCase)
+            .collect(Collectors.toSet());
 
     return mapAuthorities(roleNames);
   }
@@ -36,5 +35,4 @@ public class RoleAuthorizationAuthorityMapper implements GrantedAuthoritiesMappe
         .map(SimpleGrantedAuthority::new)
         .collect(Collectors.toSet());
   }
-
 }

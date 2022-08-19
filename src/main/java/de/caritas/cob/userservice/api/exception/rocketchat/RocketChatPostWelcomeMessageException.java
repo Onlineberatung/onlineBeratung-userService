@@ -10,11 +10,11 @@ public class RocketChatPostWelcomeMessageException extends CreateEnquiryExceptio
   /**
    * Exception when posting the welcome message to a Rocket.Chat group fails
    *
-   * @param message   Message
+   * @param message Message
    * @param exception Exception
    */
-  public RocketChatPostWelcomeMessageException(String message, Exception exception,
-      CreateEnquiryExceptionInformation exceptionInformation) {
+  public RocketChatPostWelcomeMessageException(
+      String message, Exception exception, CreateEnquiryExceptionInformation exceptionInformation) {
     super(message, exception, exceptionInformation);
   }
 }

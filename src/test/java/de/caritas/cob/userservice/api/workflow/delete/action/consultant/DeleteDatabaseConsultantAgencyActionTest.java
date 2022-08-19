@@ -14,10 +14,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
-import de.caritas.cob.userservice.api.workflow.delete.model.ConsultantDeletionWorkflowDTO;
-import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.workflow.delete.model.ConsultantDeletionWorkflowDTO;
+import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
@@ -31,14 +31,11 @@ import org.slf4j.Logger;
 @RunWith(MockitoJUnitRunner.class)
 public class DeleteDatabaseConsultantAgencyActionTest {
 
-  @InjectMocks
-  private DeleteDatabaseConsultantAgencyAction deleteDatabaseConsultantAgencyAction;
+  @InjectMocks private DeleteDatabaseConsultantAgencyAction deleteDatabaseConsultantAgencyAction;
 
-  @Mock
-  private ConsultantAgencyRepository consultantAgencyRepository;
+  @Mock private ConsultantAgencyRepository consultantAgencyRepository;
 
-  @Mock
-  private Logger logger;
+  @Mock private Logger logger;
 
   @Before
   public void setup() {
@@ -47,8 +44,8 @@ public class DeleteDatabaseConsultantAgencyActionTest {
 
   @Test
   public void execute_Should_returnEmptyListAndPerformDeletion_When_consultantAgencyCanBeDeleted() {
-    ConsultantDeletionWorkflowDTO workflowDTO = new ConsultantDeletionWorkflowDTO(new Consultant(),
-        emptyList());
+    ConsultantDeletionWorkflowDTO workflowDTO =
+        new ConsultantDeletionWorkflowDTO(new Consultant(), emptyList());
 
     this.deleteDatabaseConsultantAgencyAction.execute(workflowDTO);
 
@@ -60,8 +57,8 @@ public class DeleteDatabaseConsultantAgencyActionTest {
   public void execute_Should_returnExpectedWorkflowErrorAndLogError_When_deletionFails() {
     Consultant consultant = new Consultant();
     consultant.setId("consultantId");
-    ConsultantDeletionWorkflowDTO workflowDTO = new ConsultantDeletionWorkflowDTO(consultant,
-        new ArrayList<>());
+    ConsultantDeletionWorkflowDTO workflowDTO =
+        new ConsultantDeletionWorkflowDTO(consultant, new ArrayList<>());
     doThrow(new RuntimeException()).when(this.consultantAgencyRepository).deleteAll(any());
 
     this.deleteDatabaseConsultantAgencyAction.execute(workflowDTO);
@@ -71,10 +68,9 @@ public class DeleteDatabaseConsultantAgencyActionTest {
     assertThat(workflowErrors.get(0).getDeletionSourceType(), is(CONSULTANT));
     assertThat(workflowErrors.get(0).getDeletionTargetType(), is(DATABASE));
     assertThat(workflowErrors.get(0).getIdentifier(), is("consultantId"));
-    assertThat(workflowErrors.get(0).getReason(),
-        is("Could not delete consultant agency relations"));
+    assertThat(
+        workflowErrors.get(0).getReason(), is("Could not delete consultant agency relations"));
     assertThat(workflowErrors.get(0).getTimestamp(), notNullValue());
     verify(logger).error(anyString(), any(RuntimeException.class));
   }
-
 }

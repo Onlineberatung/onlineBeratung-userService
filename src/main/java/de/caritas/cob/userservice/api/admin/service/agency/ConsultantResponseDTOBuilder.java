@@ -4,26 +4,25 @@ import static java.util.Collections.emptyList;
 import static java.util.Objects.nonNull;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-import de.caritas.cob.userservice.api.admin.hallink.HalLinkBuilder;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyAdminFullResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyAdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAgencyLinks;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAgencyResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.HalLink.MethodEnum;
+import de.caritas.cob.userservice.api.admin.hallink.HalLinkBuilder;
 import de.caritas.cob.userservice.generated.api.adapters.web.controller.UseradminApi;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Builder to create a list of{@link AgencyAdminFullResponseDTO}.
- */
+/** Builder to create a list of{@link AgencyAdminFullResponseDTO}. */
 public class ConsultantResponseDTOBuilder implements HalLinkBuilder {
 
-  private List<de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO> agencyList;
+  private List<
+          de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO>
+      agencyList;
   private String consultantId;
 
-  private ConsultantResponseDTOBuilder() {
-  }
+  private ConsultantResponseDTOBuilder() {}
 
   /**
    * Creates an {@link ConsultantResponseDTOBuilder} instance.
@@ -41,7 +40,8 @@ public class ConsultantResponseDTOBuilder implements HalLinkBuilder {
    * @return the current {@link ConsultantResponseDTOBuilder}
    */
   public ConsultantResponseDTOBuilder withResult(
-      List<de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO> agencyList) {
+      List<de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO>
+          agencyList) {
     this.agencyList = agencyList;
     return this;
   }
@@ -64,9 +64,8 @@ public class ConsultantResponseDTOBuilder implements HalLinkBuilder {
    * @return the generated {@link ConsultantAgencyResponseDTO}
    */
   public ConsultantAgencyResponseDTO build() {
-    var agencies = nonNullConsultantAgencies().stream()
-        .map(this::fromAgency)
-        .collect(Collectors.toList());
+    var agencies =
+        nonNullConsultantAgencies().stream().map(this::fromAgency).collect(Collectors.toList());
     return new ConsultantAgencyResponseDTO()
         .total(agencies.size())
         .embedded(agencies)
@@ -75,33 +74,37 @@ public class ConsultantResponseDTOBuilder implements HalLinkBuilder {
 
   private ConsultantAgencyLinks buildConsultantAgencyLinks() {
     return new ConsultantAgencyLinks()
-        .self(buildHalLink(methodOn(UseradminApi.class).getConsultantAgencies(this.consultantId),
-            MethodEnum.GET));
+        .self(
+            buildHalLink(
+                methodOn(UseradminApi.class).getConsultantAgencies(this.consultantId),
+                MethodEnum.GET));
   }
 
-  private List<de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO> nonNullConsultantAgencies() {
+  private List<
+          de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO>
+      nonNullConsultantAgencies() {
     return nonNull(this.agencyList) ? this.agencyList : emptyList();
   }
 
   private AgencyAdminFullResponseDTO fromAgency(
-      de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO agency) {
+      de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO
+          agency) {
     return new AgencyAdminFullResponseDTO()
-        .embedded(new AgencyAdminResponseDTO()
-            .id(agency.getId())
-            .name(agency.getName())
-            .dioceseId(agency.getDioceseId())
-            .teamAgency(agency.getTeamAgency())
-            .offline(agency.getOffline())
-            .postcode(agency.getPostcode())
-            .description(agency.getDescription())
-            .external(agency.getExternal())
-            .consultingType(agency.getConsultingType())
-            .city(agency.getCity())
-            .url(agency.getUrl())
-            .createDate(agency.getCreateDate())
-            .updateDate(agency.getUpdateDate())
-            .deleteDate(agency.getDeleteDate())
-        );
+        .embedded(
+            new AgencyAdminResponseDTO()
+                .id(agency.getId())
+                .name(agency.getName())
+                .dioceseId(agency.getDioceseId())
+                .teamAgency(agency.getTeamAgency())
+                .offline(agency.getOffline())
+                .postcode(agency.getPostcode())
+                .description(agency.getDescription())
+                .external(agency.getExternal())
+                .consultingType(agency.getConsultingType())
+                .city(agency.getCity())
+                .url(agency.getUrl())
+                .createDate(agency.getCreateDate())
+                .updateDate(agency.getUpdateDate())
+                .deleteDate(agency.getDeleteDate()));
   }
-
 }

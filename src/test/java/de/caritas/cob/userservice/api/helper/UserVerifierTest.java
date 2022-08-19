@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,15 +26,14 @@ class UserVerifierTest {
 
   private static final String VALID_AGE = "20";
 
-  @InjectMocks
-  private UserVerifier userVerifier;
-  @Mock
-  private KeycloakService keycloakService;
+  @InjectMocks private UserVerifier userVerifier;
+  @Mock private KeycloakService keycloakService;
 
   EasyRandom easyRandom = new EasyRandom();
 
   @Test
-  void checkIfUsernameIsAvailable_Should_ThrowCustomValidationHttpStatusException_When_UsernameIsNotAvailable() {
+  void
+      checkIfUsernameIsAvailable_Should_ThrowCustomValidationHttpStatusException_When_UsernameIsNotAvailable() {
     UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
     when(keycloakService.isUsernameAvailable(userDTO.getUsername())).thenReturn(false);
 
@@ -56,9 +54,9 @@ class UserVerifierTest {
   }
 
   @Test
-  void checkIfAllRequiredAttributesAreCorrectlyFilled_Should_ThrowCustomValidationHttpStatusException_When_DemographicsFeatureOnAndGenderNotSet() {
-    ReflectionTestUtils
-        .setField(userVerifier, "demographicsFeatureEnabled", true);
+  void
+      checkIfAllRequiredAttributesAreCorrectlyFilled_Should_ThrowCustomValidationHttpStatusException_When_DemographicsFeatureOnAndGenderNotSet() {
+    ReflectionTestUtils.setField(userVerifier, "demographicsFeatureEnabled", true);
     UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
     userDTO.setAge(VALID_AGE);
     userDTO.setUserGender(null);
@@ -73,9 +71,10 @@ class UserVerifierTest {
 
   @ParameterizedTest
   @ValueSource(strings = {"", "testAge", "-1", "101"})
-  void checkIfAllRequiredAttributesAreCorrectlyFilled_Should_ThrowCustomValidationHttpStatusException_When_DemographicsFeatureOnAndAgeNotValid(String age) {
-    ReflectionTestUtils
-        .setField(userVerifier, "demographicsFeatureEnabled", true);
+  void
+      checkIfAllRequiredAttributesAreCorrectlyFilled_Should_ThrowCustomValidationHttpStatusException_When_DemographicsFeatureOnAndAgeNotValid(
+          String age) {
+    ReflectionTestUtils.setField(userVerifier, "demographicsFeatureEnabled", true);
     UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
     userDTO.setUserGender("MALE");
     userDTO.setAge(age);
@@ -89,9 +88,9 @@ class UserVerifierTest {
   }
 
   @Test
-  void checkIfAllRequiredAttributesAreCorrectlyFilled_Should_PassValidation_When_DemographicsFeatureOnAndAgeAndGenderInValidFormat() {
-    ReflectionTestUtils
-        .setField(userVerifier, "demographicsFeatureEnabled", true);
+  void
+      checkIfAllRequiredAttributesAreCorrectlyFilled_Should_PassValidation_When_DemographicsFeatureOnAndAgeAndGenderInValidFormat() {
+    ReflectionTestUtils.setField(userVerifier, "demographicsFeatureEnabled", true);
     UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
     userDTO.setUserGender("MALE");
     userDTO.setAge("20");
@@ -106,7 +105,6 @@ class UserVerifierTest {
 
   @AfterEach
   public void tearDown() {
-    ReflectionTestUtils
-        .setField(userVerifier, "demographicsFeatureEnabled", false);
+    ReflectionTestUtils.setField(userVerifier, "demographicsFeatureEnabled", false);
   }
 }

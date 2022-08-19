@@ -3,8 +3,8 @@ package de.caritas.cob.userservice.api.config.apiclient;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
-import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.AdminAgencyControllerApi;
+import de.caritas.cob.userservice.api.UserServiceApplication;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +21,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 public class AgencyAdminServiceApiClientConfigIT {
 
-  @Autowired
-  private AdminAgencyControllerApi adminAgencyControllerApi;
+  @Autowired private AdminAgencyControllerApi adminAgencyControllerApi;
 
   @Value("${agency.admin.service.api.url}")
   private String adminAgencyApiBaseUrl;
@@ -33,5 +32,4 @@ public class AgencyAdminServiceApiClientConfigIT {
 
     assertThat(apiClientUrl, is(this.adminAgencyApiBaseUrl));
   }
-
 }

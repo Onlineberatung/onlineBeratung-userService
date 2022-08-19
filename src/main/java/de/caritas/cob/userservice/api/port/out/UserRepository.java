@@ -53,7 +53,6 @@ public interface UserRepository extends CrudRepository<User, String> {
               + "    AND s3.enquiryMessageDate IS NULL "
               + "    AND s3.groupId IS NULL "
               + "    AND s3.createDate >= ?1"
-              + ")"
-  )
+              + ")")
   List<User> findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThan(LocalDateTime date);
 }

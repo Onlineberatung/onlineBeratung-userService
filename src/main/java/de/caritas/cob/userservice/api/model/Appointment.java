@@ -48,8 +48,7 @@ public class Appointment {
       columnDefinition = "varchar(36)",
       name = "consultant_id",
       nullable = false,
-      foreignKey = @ForeignKey(name = "appointment_consultant_constraint")
-  )
+      foreignKey = @ForeignKey(name = "appointment_consultant_constraint"))
   @ToString.Exclude
   private Consultant consultant;
 

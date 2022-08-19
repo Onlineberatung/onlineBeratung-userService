@@ -5,6 +5,7 @@ import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAM
 import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_VALUE_EMAIL_DUMMY_SUFFIX;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_LINK_SUCHT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_LINK_SUCHT_V2;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SUCHT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.HOST_BASE_URL;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME_CONSULTANT_DECODED;
@@ -36,16 +37,14 @@ public class UserHelperTest {
 
   private static final EasyRandom easyRandom = new EasyRandom();
 
-  @InjectMocks
-  private UserHelper userHelper;
+  @InjectMocks private UserHelper userHelper;
 
-  @Mock
-  private ConsultingTypeManager consultingTypeManager;
+  @Mock private ConsultingTypeManager consultingTypeManager;
 
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
-    ReflectionTestUtils.setField(userHelper, FIELD_NAME_EMAIL_DUMMY_SUFFIX,
-        FIELD_VALUE_EMAIL_DUMMY_SUFFIX);
+    ReflectionTestUtils.setField(
+        userHelper, FIELD_NAME_EMAIL_DUMMY_SUFFIX, FIELD_VALUE_EMAIL_DUMMY_SUFFIX);
     ReflectionTestUtils.setField(userHelper, FIELD_NAME_HOST_BASE_URL, HOST_BASE_URL);
   }
 
@@ -95,6 +94,11 @@ public class UserHelperTest {
   }
 
   @Test
+  public void generateChatUrl_Should_ReturnChatLinkWithEncodedChatId_When_NoConsutingType() {
+    assertEquals(CHAT_LINK_SUCHT_V2, userHelper.generateChatUrl(CHAT_ID));
+  }
+
+  @Test
   public void doUsernamesMatch_Should_ReturnFalse_WhenDecodedUsernamesDontMatch() {
     assertFalse(userHelper.doUsernamesMatch(USERNAME_CONSULTANT_DECODED, USERNAME_DECODED));
   }
@@ -125,15 +129,22 @@ public class UserHelperTest {
   }
 
   private String givenARandomEmail() {
-    return randomAlphabetic(16) + "@" + randomAlphabetic(8)
-        + "." + (easyRandom.nextBoolean() ? "de" : "com");
+    return randomAlphabetic(16)
+        + "@"
+        + randomAlphabetic(8)
+        + "."
+        + (easyRandom.nextBoolean() ? "de" : "com");
   }
 
   private String givenARandomEmailWithAnUmlaut() {
     var umlauts = List.of("ä", "ö", "ü");
 
     return randomAlphabetic(8)
-        + umlauts.get(easyRandom.nextInt(umlauts.size())) + randomAlphabetic(8) + "@"
-        + randomAlphabetic(8) + "." + (easyRandom.nextBoolean() ? "de" : "com");
+        + umlauts.get(easyRandom.nextInt(umlauts.size()))
+        + randomAlphabetic(8)
+        + "@"
+        + randomAlphabetic(8)
+        + "."
+        + (easyRandom.nextBoolean() ? "de" : "com");
   }
 }

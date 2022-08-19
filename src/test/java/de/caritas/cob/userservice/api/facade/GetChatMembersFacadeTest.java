@@ -14,6 +14,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.web.dto.ChatMembersResponseDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
@@ -25,7 +26,6 @@ import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.ChatService;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,23 +36,17 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 public class GetChatMembersFacadeTest {
 
-  @InjectMocks
-  private GetChatMembersFacade getChatMembersFacade;
+  @InjectMocks private GetChatMembersFacade getChatMembersFacade;
 
-  @Mock
-  private ChatService chatService;
+  @Mock private ChatService chatService;
 
-  @Mock
-  private ChatPermissionVerifier chatPermissionVerifier;
+  @Mock private ChatPermissionVerifier chatPermissionVerifier;
 
-  @Mock
-  private User user;
+  @Mock private User user;
 
-  @Mock
-  private RocketChatService rocketChatService;
+  @Mock private RocketChatService rocketChatService;
 
-  @Mock
-  private UserHelper userHelper;
+  @Mock private UserHelper userHelper;
 
   @Test
   public void getChatMembers_Should_ThrowNotFoundException_WhenChatDoesNotExist() {
@@ -85,9 +79,11 @@ public class GetChatMembersFacadeTest {
   }
 
   @Test
-  public void getChatMembers_Should_ThrowRequestForbiddenException_WhenUserHasNoPermissionForChat() {
+  public void
+      getChatMembers_Should_ThrowRequestForbiddenException_WhenUserHasNoPermissionForChat() {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
-    doThrow(new ForbiddenException("")).when(chatPermissionVerifier)
+    doThrow(new ForbiddenException(""))
+        .when(chatPermissionVerifier)
         .verifyPermissionForChat(ACTIVE_CHAT);
 
     try {
@@ -102,9 +98,11 @@ public class GetChatMembersFacadeTest {
   }
 
   @Test
-  public void getChatMembers_Should_ThrowRequestForbiddenException_WhenConsultantHasNoPermissionForChat() {
+  public void
+      getChatMembers_Should_ThrowRequestForbiddenException_WhenConsultantHasNoPermissionForChat() {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
-    doThrow(new ForbiddenException("")).when(chatPermissionVerifier)
+    doThrow(new ForbiddenException(""))
+        .when(chatPermissionVerifier)
         .verifyPermissionForChat(ACTIVE_CHAT);
 
     try {
@@ -119,13 +117,13 @@ public class GetChatMembersFacadeTest {
   }
 
   @Test
-  public void getChatMembers_Should_ReturnValidChatMembersResponseDTOForUser()
-      throws Exception {
+  public void getChatMembers_Should_ReturnValidChatMembersResponseDTOForUser() throws Exception {
     when(chatService.getChat(ACTIVE_CHAT.getId())).thenReturn(Optional.of(ACTIVE_CHAT));
     when(rocketChatService.getStandardMembersOfGroup(ACTIVE_CHAT.getGroupId()))
         .thenReturn(GROUP_MEMBER_DTO_LIST);
 
-    assertThat(getChatMembersFacade.getChatMembers(ACTIVE_CHAT.getId()),
+    assertThat(
+        getChatMembersFacade.getChatMembers(ACTIVE_CHAT.getId()),
         instanceOf(ChatMembersResponseDTO.class));
 
     verify(rocketChatService, times(1)).getStandardMembersOfGroup(ACTIVE_CHAT.getGroupId());
@@ -137,12 +135,12 @@ public class GetChatMembersFacadeTest {
   public void getChatMembers_Should_ReturnValidChatMembersResponseDTOForConsultant()
       throws Exception {
     when(chatService.getChat(ACTIVE_CHAT.getId())).thenReturn(Optional.of(ACTIVE_CHAT));
-    when(chatPermissionVerifier.hasSameAgencyAssigned(ACTIVE_CHAT, CONSULTANT))
-        .thenReturn(true);
+    when(chatPermissionVerifier.hasSameAgencyAssigned(ACTIVE_CHAT, CONSULTANT)).thenReturn(true);
     when(rocketChatService.getStandardMembersOfGroup(ACTIVE_CHAT.getGroupId()))
         .thenReturn(GROUP_MEMBER_DTO_LIST);
 
-    assertThat(getChatMembersFacade.getChatMembers(ACTIVE_CHAT.getId()),
+    assertThat(
+        getChatMembersFacade.getChatMembers(ACTIVE_CHAT.getId()),
         instanceOf(ChatMembersResponseDTO.class));
 
     verify(rocketChatService, times(1)).getStandardMembersOfGroup(ACTIVE_CHAT.getGroupId());

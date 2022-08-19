@@ -33,9 +33,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * Supplier to provide mails to be sent when a new message has been written.
- */
+/** Supplier to provide mails to be sent when a new message has been written. */
 @Slf4j
 @AllArgsConstructor
 @Builder
@@ -82,13 +80,15 @@ public class NewMessageEmailSupplier implements EmailSupplier {
           "EmailNotificationFacade error: No currently running (SessionStatus = IN_PROGRESS) "
               + "session found for Rocket.Chat group id {} and user id {} or the session does not "
               + "belong to the user.",
-          rcGroupId, userId);
+          rcGroupId,
+          userId);
     }
     return emptyList();
   }
 
   private boolean isSessionActiveAndBelongToAsker() {
-    return nonNull(session) && session.getUser().getUserId().equals(userId)
+    return nonNull(session)
+        && session.getUser().getUserId().equals(userId)
         && session.getStatus().equals(SessionStatus.IN_PROGRESS);
   }
 
@@ -113,23 +113,26 @@ public class NewMessageEmailSupplier implements EmailSupplier {
       return consultantAgencyService.findConsultantsByAgencyId(session.getAgencyId());
     } else {
       if (isNotBlank(session.getConsultant().getEmail())) {
-        return singletonList(new ConsultantAgency(null, session.getConsultant(), null,
-            nowInUtc(), nowInUtc(), null, null, null));
+        return singletonList(
+            new ConsultantAgency(
+                null, session.getConsultant(), null, nowInUtc(), nowInUtc(), null, null, null));
       }
     }
     return emptyList();
   }
 
   private boolean shouldInformAllConsultantsOfTeamSession() {
-    var extendedConsultingTypeResponseDTO = consultingTypeManager
-        .getConsultingTypeSettings(session.getConsultingTypeId());
-    return session.isTeamSession() && retrieveCheckedAllTeamConsultantsProperty(
-        extendedConsultingTypeResponseDTO.getNotifications());
+    var extendedConsultingTypeResponseDTO =
+        consultingTypeManager.getConsultingTypeSettings(session.getConsultingTypeId());
+    return session.isTeamSession()
+        && retrieveCheckedAllTeamConsultantsProperty(
+            extendedConsultingTypeResponseDTO.getNotifications());
   }
 
   private boolean retrieveCheckedAllTeamConsultantsProperty(NotificationsDTO notificationsDTO) {
-    if (isNull(notificationsDTO) || isNull(notificationsDTO.getTeamSessions()) || isNull(
-        notificationsDTO.getTeamSessions().getNewMessage())) {
+    if (isNull(notificationsDTO)
+        || isNull(notificationsDTO.getTeamSessions())
+        || isNull(notificationsDTO.getTeamSessions().getNewMessage())) {
       return false;
     }
     return isTrue(notificationsDTO.getTeamSessions().getNewMessage().getAllTeamConsultants());
@@ -137,12 +140,11 @@ public class NewMessageEmailSupplier implements EmailSupplier {
 
   private MailDTO toNewConsultantMessageMailDTO(ConsultantAgency agency) {
     return buildMailDtoForNewMessageNotificationConsultant(
-        agency.getConsultant(), session.getPostcode()
-    );
+        agency.getConsultant(), session.getPostcode());
   }
 
-  private MailDTO buildMailDtoForNewMessageNotificationConsultant(Consultant recipient,
-      String postCode) {
+  private MailDTO buildMailDtoForNewMessageNotificationConsultant(
+      Consultant recipient, String postCode) {
     var templateAttributes = new ArrayList<TemplateDataDTO>();
     templateAttributes.add(new TemplateDataDTO().key("name").value(recipient.getFullName()));
     templateAttributes.add(new TemplateDataDTO().key("plz").value(postCode));
@@ -166,29 +168,28 @@ public class NewMessageEmailSupplier implements EmailSupplier {
       log.error(
           "EmailNotificationFacade error: No currently running (SessionStatus = IN_PROGRESS) "
               + "session found for Rocket.Chat group id {} and user id {} or asker has not provided"
-              + " a e-mail address.", rcGroupId, userId
-      );
+              + " a e-mail address.",
+          rcGroupId,
+          userId);
     }
 
     return emptyList();
   }
 
   private boolean isSessionAndUserValid() {
-    return nonNull(session)
-        && hasAskerMailAddress()
-        && isNotADummyMail();
+    return nonNull(session) && hasAskerMailAddress() && isNotADummyMail();
   }
 
   private List<MailDTO> buildMailForAskerList() {
     var usernameTranscoder = new UsernameTranscoder();
     var consultantUsername = obtainConsultantUsername();
     var asker = session.getUser();
-    var mailDTO = buildMailDtoForNewMessageNotificationAsker(
-        asker.getEmail(),
-        asker.getLanguageCode(),
-        usernameTranscoder.decodeUsername(consultantUsername),
-        usernameTranscoder.decodeUsername(asker.getUsername())
-    );
+    var mailDTO =
+        buildMailDtoForNewMessageNotificationAsker(
+            asker.getEmail(),
+            asker.getLanguageCode(),
+            usernameTranscoder.decodeUsername(consultantUsername),
+            usernameTranscoder.decodeUsername(asker.getUsername()));
 
     return singletonList(mailDTO);
   }
@@ -199,15 +200,16 @@ public class NewMessageEmailSupplier implements EmailSupplier {
     } else {
       return consultantService
           .getConsultant(userId)
-          .orElseThrow(() -> new InternalServerErrorException(
-              String.format("Consultant with id %s not found.", userId)))
+          .orElseThrow(
+              () ->
+                  new InternalServerErrorException(
+                      String.format("Consultant with id %s not found.", userId)))
           .getUsername();
     }
   }
 
   private boolean isSessionBelongsToConsultant() {
-    return nonNull(session.getConsultant())
-        && session.getConsultant().getId().equals(userId);
+    return nonNull(session.getConsultant()) && session.getConsultant().getId().equals(userId);
   }
 
   private boolean hasAskerMailAddress() {
@@ -218,8 +220,8 @@ public class NewMessageEmailSupplier implements EmailSupplier {
     return !session.getUser().getEmail().contains(emailDummySuffix);
   }
 
-  private MailDTO buildMailDtoForNewMessageNotificationAsker(String email,
-      LanguageCode languageCode, String consultantName, String askerName) {
+  private MailDTO buildMailDtoForNewMessageNotificationAsker(
+      String email, LanguageCode languageCode, String consultantName, String askerName) {
     var templateAttributes = new ArrayList<TemplateDataDTO>();
     templateAttributes.add(new TemplateDataDTO().key("consultantName").value(consultantName));
     templateAttributes.add(new TemplateDataDTO().key("askerName").value(askerName));
@@ -240,8 +242,6 @@ public class NewMessageEmailSupplier implements EmailSupplier {
   private static de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode languageOf(
       LanguageCode languageCode) {
     return de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.fromValue(
-        languageCode.toString()
-    );
+        languageCode.toString());
   }
-
 }

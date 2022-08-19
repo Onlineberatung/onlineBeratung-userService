@@ -29,5 +29,4 @@ public class TenantAdminService {
     HttpHeaders headers = this.securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders();
     headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
   }
-
 }

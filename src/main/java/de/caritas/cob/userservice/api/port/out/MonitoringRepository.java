@@ -1,9 +1,9 @@
 package de.caritas.cob.userservice.api.port.out;
 
 import de.caritas.cob.userservice.api.model.Monitoring;
+import de.caritas.cob.userservice.api.model.Session;
 import java.util.List;
 import org.springframework.data.repository.CrudRepository;
-import de.caritas.cob.userservice.api.model.Session;
 
 public interface MonitoringRepository extends CrudRepository<Monitoring, Long> {
 

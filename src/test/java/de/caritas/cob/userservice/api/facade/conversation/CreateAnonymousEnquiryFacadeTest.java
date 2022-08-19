@@ -8,16 +8,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.conversation.facade.CreateAnonymousEnquiryFacade;
-import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
-import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAnonymousEnquiryDTO;
+import de.caritas.cob.userservice.api.conversation.facade.CreateAnonymousEnquiryFacade;
 import de.caritas.cob.userservice.api.conversation.model.AnonymousUserCredentials;
-import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.conversation.service.AnonymousConversationCreatorService;
 import de.caritas.cob.userservice.api.conversation.service.user.anonymous.AnonymousUserCreatorService;
 import de.caritas.cob.userservice.api.conversation.service.user.anonymous.AnonymousUsernameRegistry;
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
+import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
@@ -29,28 +29,22 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 public class CreateAnonymousEnquiryFacadeTest {
 
-  @InjectMocks
-  private CreateAnonymousEnquiryFacade createAnonymousEnquiryFacade;
-  @Mock
-  private AnonymousUserCreatorService anonymousUserCreatorService;
-  @Mock
-  private AnonymousConversationCreatorService anonymousConversationCreatorService;
-  @Mock
-  private AnonymousUsernameRegistry usernameRegistry;
-  @Mock
-  private UserHelper userHelper;
-  @Mock
-  private ConsultingTypeManager consultingTypeManager;
+  @InjectMocks private CreateAnonymousEnquiryFacade createAnonymousEnquiryFacade;
+  @Mock private AnonymousUserCreatorService anonymousUserCreatorService;
+  @Mock private AnonymousConversationCreatorService anonymousConversationCreatorService;
+  @Mock private AnonymousUsernameRegistry usernameRegistry;
+  @Mock private UserHelper userHelper;
+  @Mock private ConsultingTypeManager consultingTypeManager;
 
   EasyRandom easyRandom = new EasyRandom();
 
   @Test(expected = BadRequestException.class)
-  public void createAnonymousEnquiry_Should_ThrowBadRequestException_When_GivenConsultingTypeDoesNotSupportAnonymousConversations() {
+  public void
+      createAnonymousEnquiry_Should_ThrowBadRequestException_When_GivenConsultingTypeDoesNotSupportAnonymousConversations() {
     CreateAnonymousEnquiryDTO anonymousEnquiryDTO =
         easyRandom.nextObject(CreateAnonymousEnquiryDTO.class);
     anonymousEnquiryDTO.setConsultingType(CONSULTING_TYPE_ID_KREUZBUND);
-    var consultingTypeResponseDTO = easyRandom
-        .nextObject(ExtendedConsultingTypeResponseDTO.class);
+    var consultingTypeResponseDTO = easyRandom.nextObject(ExtendedConsultingTypeResponseDTO.class);
     consultingTypeResponseDTO.setIsAnonymousConversationAllowed(false);
     when(consultingTypeManager.getConsultingTypeSettings(anonymousEnquiryDTO.getConsultingType()))
         .thenReturn(consultingTypeResponseDTO);
@@ -73,8 +67,7 @@ public class CreateAnonymousEnquiryFacadeTest {
     Session session = easyRandom.nextObject(Session.class);
     when(anonymousConversationCreatorService.createAnonymousConversation(any(), any()))
         .thenReturn(session);
-    var consultingTypeResponseDTO = easyRandom
-        .nextObject(ExtendedConsultingTypeResponseDTO.class);
+    var consultingTypeResponseDTO = easyRandom.nextObject(ExtendedConsultingTypeResponseDTO.class);
     consultingTypeResponseDTO.setIsAnonymousConversationAllowed(true);
     when(consultingTypeManager.getConsultingTypeSettings(anonymousEnquiryDTO.getConsultingType()))
         .thenReturn(consultingTypeResponseDTO);

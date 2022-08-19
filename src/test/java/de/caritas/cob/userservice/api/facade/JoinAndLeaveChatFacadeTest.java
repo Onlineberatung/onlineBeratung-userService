@@ -48,32 +48,23 @@ public class JoinAndLeaveChatFacadeTest {
 
   private static final EasyRandom easyRandom = new EasyRandom();
 
-  @InjectMocks
-  private JoinAndLeaveChatFacade joinAndLeaveChatFacade;
+  @InjectMocks private JoinAndLeaveChatFacade joinAndLeaveChatFacade;
 
-  @Mock
-  private ChatService chatService;
+  @Mock private ChatService chatService;
 
-  @Mock
-  private AuthenticatedUser authenticatedUser;
+  @Mock private AuthenticatedUser authenticatedUser;
 
-  @Mock
-  private ChatPermissionVerifier chatPermissionVerifier;
+  @Mock private ChatPermissionVerifier chatPermissionVerifier;
 
-  @Mock
-  private ConsultantService consultantService;
+  @Mock private ConsultantService consultantService;
 
-  @Mock
-  private UserService userService;
+  @Mock private UserService userService;
 
-  @Mock
-  private User user;
+  @Mock private User user;
 
-  @Mock
-  private Consultant consultant;
+  @Mock private Consultant consultant;
 
-  @Mock
-  private RocketChatService rocketChatService;
+  @Mock private RocketChatService rocketChatService;
 
   @Test
   public void joinChat_Should_ThrowNotFoundException_WhenChatDoesNotExist() {
@@ -88,7 +79,6 @@ public class JoinAndLeaveChatFacadeTest {
 
     verify(chatService, times(1)).getChat(CHAT_ID);
   }
-
 
   @Test
   public void joinChat_Should_ThrowConflictException_WhenChatIsNotActive() {
@@ -107,11 +97,12 @@ public class JoinAndLeaveChatFacadeTest {
     verify(chatService, times(1)).getChat(CHAT_ID);
   }
 
-
   @Test
-  public void joinChat_Should_ThrowRequestForbiddenException_WhenConsultantHasNoPermissionForChat() {
+  public void
+      joinChat_Should_ThrowRequestForbiddenException_WhenConsultantHasNoPermissionForChat() {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
-    doThrow(new ForbiddenException("")).when(chatPermissionVerifier)
+    doThrow(new ForbiddenException(""))
+        .when(chatPermissionVerifier)
         .verifyPermissionForChat(ACTIVE_CHAT);
 
     try {
@@ -128,7 +119,8 @@ public class JoinAndLeaveChatFacadeTest {
   @Test
   public void joinChat_Should_ThrowRequestForbiddenException_WhenUserHasNoPermissionForChat() {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
-    doThrow(new ForbiddenException("")).when(chatPermissionVerifier)
+    doThrow(new ForbiddenException(""))
+        .when(chatPermissionVerifier)
         .verifyPermissionForChat(ACTIVE_CHAT);
 
     try {
@@ -189,9 +181,8 @@ public class JoinAndLeaveChatFacadeTest {
 
     joinAndLeaveChatFacade.joinChat(ACTIVE_CHAT.getId(), authenticatedUser);
 
-    verify(rocketChatService, times(1)).addUserToGroup(CONSULTANT.getRocketChatId(),
-        ACTIVE_CHAT.getGroupId());
-
+    verify(rocketChatService, times(1))
+        .addUserToGroup(CONSULTANT.getRocketChatId(), ACTIVE_CHAT.getGroupId());
   }
 
   @Test
@@ -219,7 +210,6 @@ public class JoinAndLeaveChatFacadeTest {
     verify(chatService, times(1)).getChat(CHAT_ID);
   }
 
-
   @Test
   public void leaveChat_Should_ThrowConflictException_WhenChatIsNotActive() {
     Chat inactiveChat = mock(Chat.class);
@@ -237,11 +227,12 @@ public class JoinAndLeaveChatFacadeTest {
     verify(chatService, times(1)).getChat(CHAT_ID);
   }
 
-
   @Test
-  public void leaveChat_Should_ThrowRequestForbiddenException_WhenConsultantHasNoPermissionForChat() {
+  public void
+      leaveChat_Should_ThrowRequestForbiddenException_WhenConsultantHasNoPermissionForChat() {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
-    doThrow(new ForbiddenException("")).when(chatPermissionVerifier)
+    doThrow(new ForbiddenException(""))
+        .when(chatPermissionVerifier)
         .verifyPermissionForChat(ACTIVE_CHAT);
 
     try {
@@ -258,7 +249,8 @@ public class JoinAndLeaveChatFacadeTest {
   @Test
   public void leaveChat_Should_ThrowRequestForbiddenException_WhenUserHasNoPermissionForChat() {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
-    doThrow(new ForbiddenException("")).when(chatPermissionVerifier)
+    doThrow(new ForbiddenException(""))
+        .when(chatPermissionVerifier)
         .verifyPermissionForChat(ACTIVE_CHAT);
 
     try {
@@ -312,7 +304,8 @@ public class JoinAndLeaveChatFacadeTest {
 
   @Test
   public void leaveChat_Should_RemoveConsultantFromRocketChatGroup()
-      throws RocketChatRemoveUserFromGroupException, RocketChatUserNotInitializedException, RocketChatGetGroupMembersException {
+      throws RocketChatRemoveUserFromGroupException, RocketChatUserNotInitializedException,
+          RocketChatGetGroupMembersException {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
     when(consultantService.getConsultantViaAuthenticatedUser(authenticatedUser))
         .thenReturn(Optional.of(CONSULTANT));
@@ -321,17 +314,19 @@ public class JoinAndLeaveChatFacadeTest {
 
     joinAndLeaveChatFacade.leaveChat(ACTIVE_CHAT.getId(), authenticatedUser);
 
-    verify(rocketChatService, times(1)).removeUserFromGroup(CONSULTANT.getRocketChatId(),
-        ACTIVE_CHAT.getGroupId());
+    verify(rocketChatService, times(1))
+        .removeUserFromGroup(CONSULTANT.getRocketChatId(), ACTIVE_CHAT.getGroupId());
   }
 
   @Test(expected = InternalServerErrorException.class)
-  public void leaveChat_Should_throwInternalServerErrorException_When_rocketChatUserCanNotBeRemoved()
-      throws RocketChatRemoveUserFromGroupException {
+  public void
+      leaveChat_Should_throwInternalServerErrorException_When_rocketChatUserCanNotBeRemoved()
+          throws RocketChatRemoveUserFromGroupException {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
     when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(Optional.of(user));
     when(user.getRcUserId()).thenReturn(RC_USER_ID);
-    doThrow(new RocketChatRemoveUserFromGroupException("")).when(rocketChatService)
+    doThrow(new RocketChatRemoveUserFromGroupException(""))
+        .when(rocketChatService)
         .removeUserFromGroup(any(), any());
 
     joinAndLeaveChatFacade.leaveChat(ACTIVE_CHAT.getId(), authenticatedUser);

@@ -12,5 +12,4 @@ public class CustomCryptoException extends Exception {
   public CustomCryptoException(Exception ex) {
     super(ex);
   }
-
 }

@@ -15,9 +15,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Represents the relation between a {@link Chat} and an agency
- */
+/** Represents the relation between a {@link Chat} and an agency */
 @Entity
 @Table(name = "chat_agency")
 @AllArgsConstructor
@@ -38,7 +36,6 @@ public class ChatAgency {
 
   @Column(name = "agency_id", nullable = false)
   private Long agencyId;
-
 
   public ChatAgency(Chat chat, Long agencyId) {
     this.chat = chat;

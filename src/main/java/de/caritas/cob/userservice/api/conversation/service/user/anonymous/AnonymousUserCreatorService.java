@@ -2,9 +2,11 @@ package de.caritas.cob.userservice.api.conversation.service.user.anonymous;
 
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
 import de.caritas.cob.userservice.api.conversation.model.AnonymousUserCredentials;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -14,17 +16,13 @@ import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackUserAccountInformation;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-/**
- * Service to create anonymous user accounts.
- */
+/** Service to create anonymous user accounts. */
 @Service
 @RequiredArgsConstructor
 public class AnonymousUserCreatorService {
@@ -44,8 +42,8 @@ public class AnonymousUserCreatorService {
   public AnonymousUserCredentials createAnonymousUser(UserDTO userDto) {
 
     KeycloakCreateUserResponseDTO response = identityClient.createKeycloakUser(userDto);
-    createUserFacade.updateKeycloakAccountAndCreateDatabaseUserAccount(response.getUserId(),
-        userDto, UserRole.ANONYMOUS);
+    createUserFacade.updateKeycloakAccountAndCreateDatabaseUserAccount(
+        response.getUserId(), userDto, UserRole.ANONYMOUS);
 
     KeycloakLoginResponseDTO kcLoginResponseDTO;
     ResponseEntity<LoginResponseDTO> rcLoginResponseDto;
@@ -58,14 +56,15 @@ public class AnonymousUserCreatorService {
       throw new InternalServerErrorException(e.getMessage(), LogService::logInternalServerError);
     }
 
-    var anonymousUserCredentials = AnonymousUserCredentials.builder()
-        .userId(response.getUserId())
-        .accessToken(kcLoginResponseDTO.getAccessToken())
-        .expiresIn(kcLoginResponseDTO.getExpiresIn())
-        .refreshToken(kcLoginResponseDTO.getRefreshToken())
-        .refreshExpiresIn(kcLoginResponseDTO.getRefreshExpiresIn())
-        .rocketChatCredentials(obtainRocketChatCredentials(rcLoginResponseDto))
-        .build();
+    var anonymousUserCredentials =
+        AnonymousUserCredentials.builder()
+            .userId(response.getUserId())
+            .accessToken(kcLoginResponseDTO.getAccessToken())
+            .expiresIn(kcLoginResponseDTO.getExpiresIn())
+            .refreshToken(kcLoginResponseDTO.getRefreshToken())
+            .refreshExpiresIn(kcLoginResponseDTO.getRefreshExpiresIn())
+            .rocketChatCredentials(obtainRocketChatCredentials(rcLoginResponseDto))
+            .build();
 
     updateRocketChatUserIdInDatabase(anonymousUserCredentials);
 
@@ -73,10 +72,8 @@ public class AnonymousUserCreatorService {
   }
 
   private void rollBackAnonymousUserAccount(String userId) {
-    rollbackFacade.rollBackUserAccount(RollbackUserAccountInformation.builder()
-        .userId(userId)
-        .rollBackUserAccount(true)
-        .build());
+    rollbackFacade.rollBackUserAccount(
+        RollbackUserAccountInformation.builder().userId(userId).rollBackUserAccount(true).build());
   }
 
   private RocketChatCredentials obtainRocketChatCredentials(
@@ -88,11 +85,16 @@ public class AnonymousUserCreatorService {
   }
 
   private void updateRocketChatUserIdInDatabase(AnonymousUserCredentials anonymousUserCredentials) {
-    var user = userService.getUser(anonymousUserCredentials.getUserId())
-        .orElseThrow(() -> new InternalServerErrorException(String.format(
-            "Could not get user %s to update the rocket chat user id.",
-            anonymousUserCredentials.getUserId())));
-    userService.updateRocketChatIdInDatabase(user,
-        anonymousUserCredentials.getRocketChatCredentials().getRocketChatUserId());
+    var user =
+        userService
+            .getUser(anonymousUserCredentials.getUserId())
+            .orElseThrow(
+                () ->
+                    new InternalServerErrorException(
+                        String.format(
+                            "Could not get user %s to update the rocket chat user id.",
+                            anonymousUserCredentials.getUserId())));
+    userService.updateRocketChatIdInDatabase(
+        user, anonymousUserCredentials.getRocketChatCredentials().getRocketChatUserId());
   }
 }

@@ -13,13 +13,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,29 +34,23 @@ public class RocketChatRemoveFromGroupOperationServiceTest {
 
   private RocketChatRemoveFromGroupOperationService removeService;
 
-  @Mock
-  private RocketChatFacade rocketChatFacade;
+  @Mock private RocketChatFacade rocketChatFacade;
 
-  @Mock
-  private KeycloakService keycloakService;
+  @Mock private KeycloakService keycloakService;
 
-  @Mock
-  private Session session;
+  @Mock private Session session;
 
-  @Mock
-  private Consultant consultant;
+  @Mock private Consultant consultant;
 
-  @Mock
-  private ConsultingTypeManager consultingTypeManager;
+  @Mock private ConsultingTypeManager consultingTypeManager;
 
   @Before
   public void setup() {
     Map<Session, List<Consultant>> sessionConsultants = new HashMap<>();
     sessionConsultants.put(session, singletonList(consultant));
     this.removeService =
-        RocketChatRemoveFromGroupOperationService
-            .getInstance(this.rocketChatFacade, this.keycloakService,
-                consultingTypeManager)
+        RocketChatRemoveFromGroupOperationService.getInstance(
+                this.rocketChatFacade, this.keycloakService, consultingTypeManager)
             .onSessionConsultants(sessionConsultants);
   }
 
@@ -84,7 +78,8 @@ public class RocketChatRemoveFromGroupOperationServiceTest {
   }
 
   @Test
-  public void removeFromGroupsOrRollbackOnFailure_Should_throwInternalServerError_When_rollbackFails() {
+  public void
+      removeFromGroupsOrRollbackOnFailure_Should_throwInternalServerError_When_rollbackFails() {
     when(this.session.getGroupId()).thenReturn("group");
     when(this.session.getStatus()).thenReturn(SessionStatus.NEW);
     when(this.consultant.getRocketChatId()).thenReturn("rcId");
@@ -92,9 +87,11 @@ public class RocketChatRemoveFromGroupOperationServiceTest {
     groupMemberDTO.set_id(this.consultant.getRocketChatId());
     when(this.rocketChatFacade.retrieveRocketChatMembers(anyString()))
         .thenReturn(singletonList(groupMemberDTO));
-    doThrow(new RuntimeException("")).when(this.rocketChatFacade)
+    doThrow(new RuntimeException(""))
+        .when(this.rocketChatFacade)
         .removeUserFromGroup(anyString(), anyString());
-    doThrow(new RuntimeException("")).when(this.rocketChatFacade)
+    doThrow(new RuntimeException(""))
+        .when(this.rocketChatFacade)
         .addUserToRocketChatGroup(anyString(), anyString());
 
     try {
@@ -106,7 +103,8 @@ public class RocketChatRemoveFromGroupOperationServiceTest {
   }
 
   @Test
-  public void removeFromGroupsOrRollbackOnFailure_Should_throwInternalServerErrorAndPerformRollback_When_error() {
+  public void
+      removeFromGroupsOrRollbackOnFailure_Should_throwInternalServerErrorAndPerformRollback_When_error() {
     when(this.session.getGroupId()).thenReturn("group");
     when(this.session.getStatus()).thenReturn(SessionStatus.NEW);
     when(this.consultant.getRocketChatId()).thenReturn("rcId");
@@ -140,7 +138,8 @@ public class RocketChatRemoveFromGroupOperationServiceTest {
   }
 
   @Test
-  public void removeFromGroupOrRollbackOnFailure_Should_throwInternalServerError_When_rollbackFails() {
+  public void
+      removeFromGroupOrRollbackOnFailure_Should_throwInternalServerError_When_rollbackFails() {
     when(this.session.getGroupId()).thenReturn("group");
     when(this.session.getStatus()).thenReturn(SessionStatus.NEW);
     when(this.consultant.getRocketChatId()).thenReturn("rcId");
@@ -148,9 +147,11 @@ public class RocketChatRemoveFromGroupOperationServiceTest {
     groupMemberDTO.set_id(this.consultant.getRocketChatId());
     when(this.rocketChatFacade.retrieveRocketChatMembers(anyString()))
         .thenReturn(singletonList(groupMemberDTO));
-    doThrow(new RuntimeException("")).when(this.rocketChatFacade)
+    doThrow(new RuntimeException(""))
+        .when(this.rocketChatFacade)
         .removeUserFromGroup(anyString(), anyString());
-    doThrow(new RuntimeException("")).when(this.rocketChatFacade)
+    doThrow(new RuntimeException(""))
+        .when(this.rocketChatFacade)
         .addUserToRocketChatGroup(anyString(), anyString());
 
     try {
@@ -162,7 +163,8 @@ public class RocketChatRemoveFromGroupOperationServiceTest {
   }
 
   @Test
-  public void removeFromGroupOrRollbackOnFailure_Should_throwInternalServerErrorAndPerformRollback_When_error() {
+  public void
+      removeFromGroupOrRollbackOnFailure_Should_throwInternalServerErrorAndPerformRollback_When_error() {
     when(this.session.getGroupId()).thenReturn("group");
     when(this.session.getStatus()).thenReturn(SessionStatus.NEW);
     when(this.consultant.getRocketChatId()).thenReturn("rcId");
@@ -196,7 +198,8 @@ public class RocketChatRemoveFromGroupOperationServiceTest {
   }
 
   @Test
-  public void removeFromFeedbackGroupOrRollbackOnFailure_Should_throwInternalServerError_When_rollbackFails() {
+  public void
+      removeFromFeedbackGroupOrRollbackOnFailure_Should_throwInternalServerError_When_rollbackFails() {
     when(this.session.getFeedbackGroupId()).thenReturn("feedback");
     when(this.session.getStatus()).thenReturn(SessionStatus.NEW);
     when(this.consultant.getRocketChatId()).thenReturn("rcId");
@@ -204,9 +207,11 @@ public class RocketChatRemoveFromGroupOperationServiceTest {
     groupMemberDTO.set_id(this.consultant.getRocketChatId());
     when(this.rocketChatFacade.retrieveRocketChatMembers(anyString()))
         .thenReturn(singletonList(groupMemberDTO));
-    doThrow(new RuntimeException("")).when(this.rocketChatFacade)
+    doThrow(new RuntimeException(""))
+        .when(this.rocketChatFacade)
         .removeUserFromGroup(anyString(), anyString());
-    doThrow(new RuntimeException("")).when(this.rocketChatFacade)
+    doThrow(new RuntimeException(""))
+        .when(this.rocketChatFacade)
         .addUserToRocketChatGroup(anyString(), anyString());
 
     try {
@@ -218,7 +223,8 @@ public class RocketChatRemoveFromGroupOperationServiceTest {
   }
 
   @Test
-  public void removeFromFeedbackGroupOrRollbackOnFailure_Should_throwInternalServerErrorAndPerformRollback_When_error() {
+  public void
+      removeFromFeedbackGroupOrRollbackOnFailure_Should_throwInternalServerErrorAndPerformRollback_When_error() {
     when(this.session.getFeedbackGroupId()).thenReturn("feedback");
     when(this.session.getStatus()).thenReturn(SessionStatus.NEW);
     when(this.consultant.getRocketChatId()).thenReturn("rcId");

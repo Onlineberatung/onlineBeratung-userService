@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.tenant;
 import static de.caritas.cob.userservice.api.tenant.TenantResolver.TECHNICAL_TENANT_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +17,8 @@ class TenantContextProviderTest {
   }
 
   @Test
-  void setTechnicalContextIfMultiTenancyIsEnabled_Should_setTechnicalTenantContext_When_multiTenancyIsEnabled() {
+  void
+      setTechnicalContextIfMultiTenancyIsEnabled_Should_setTechnicalTenantContext_When_multiTenancyIsEnabled() {
     // given
     setField(tenantContextProvider, "multiTenancyEnabled", true);
 
@@ -28,7 +30,8 @@ class TenantContextProviderTest {
   }
 
   @Test
-  void setTechnicalContextIfMultiTenancyIsEnabled_Should_notSetTechnicalTenantContext_When_multiTenancyIsDisabled() {
+  void
+      setTechnicalContextIfMultiTenancyIsEnabled_Should_notSetTechnicalTenantContext_When_multiTenancyIsDisabled() {
     // given
     setField(tenantContextProvider, "multiTenancyEnabled", false);
 

@@ -17,10 +17,10 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.CREATED;
 
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.exception.MissingConsultingTypeException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import org.jeasy.random.EasyRandom;
@@ -33,73 +33,73 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class CreateNewConsultingTypeFacadeTest {
 
-  @InjectMocks
-  private CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
-  @Mock
-  private ConsultingTypeManager consultingTypeManager;
-  @Mock
-  private CreateUserChatRelationFacade createUserChatRelationFacade;
-  @Mock
-  private CreateSessionFacade createSessionFacade;
+  @InjectMocks private CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
+  @Mock private ConsultingTypeManager consultingTypeManager;
+  @Mock private CreateUserChatRelationFacade createUserChatRelationFacade;
+  @Mock private CreateSessionFacade createSessionFacade;
 
   @Test
-  public void initializeNewConsultingType_Should_RegisterNewSession_When_ProvidedWithSessionConsultingType_For_NewAccountRegistrations() {
+  public void
+      initializeNewConsultingType_Should_RegisterNewSession_When_ProvidedWithSessionConsultingType_For_NewAccountRegistrations() {
     EasyRandom easyRandom = new EasyRandom();
     UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
     userDTO.setConsultingType(String.valueOf(0));
     userDTO.setConsultantId(null);
     User user = easyRandom.nextObject(User.class);
-    ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO = easyRandom
-        .nextObject(ExtendedConsultingTypeResponseDTO.class);
+    ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO =
+        easyRandom.nextObject(ExtendedConsultingTypeResponseDTO.class);
     extendedConsultingTypeResponseDTO.setId(0);
 
-    createNewConsultingTypeFacade
-        .initializeNewConsultingType(userDTO, user, extendedConsultingTypeResponseDTO);
+    createNewConsultingTypeFacade.initializeNewConsultingType(
+        userDTO, user, extendedConsultingTypeResponseDTO);
     if (!extendedConsultingTypeResponseDTO.getGroupChat().getIsGroupChat()) {
       verify(createSessionFacade, times(1)).createUserSession(any(), any(), any());
     } else {
       verify(createUserChatRelationFacade, times(1))
           .initializeUserChatAgencyRelation(any(), any(), any());
     }
-
   }
 
   @Test
-  public void initializeNewConsultingType_Should_RegisterNewSessionAndReturnSessionId_When_ProvidedWithSessionConsultingType_For_NewConsultingTypeRegistrations() {
+  public void
+      initializeNewConsultingType_Should_RegisterNewSessionAndReturnSessionId_When_ProvidedWithSessionConsultingType_For_NewConsultingTypeRegistrations() {
     EasyRandom easyRandom = new EasyRandom();
     UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
     userDTO.setConsultingType(String.valueOf(CONSULTING_TYPE_ID_SUCHT));
     userDTO.setConsultantId(null);
     User user = easyRandom.nextObject(User.class);
-    RocketChatCredentials rocketChatCredentials = easyRandom
-        .nextObject(RocketChatCredentials.class);
+    RocketChatCredentials rocketChatCredentials =
+        easyRandom.nextObject(RocketChatCredentials.class);
 
     when(createSessionFacade.createUserSession(any(), any(), any())).thenReturn(1L);
     when(consultingTypeManager.getConsultingTypeSettings("0"))
         .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT);
 
-    var responseDto = createNewConsultingTypeFacade
-        .initializeNewConsultingType(userDTO, user, rocketChatCredentials);
+    var responseDto =
+        createNewConsultingTypeFacade.initializeNewConsultingType(
+            userDTO, user, rocketChatCredentials);
 
     assertEquals(responseDto.getSessionId().longValue(), 1L);
     verify(createSessionFacade, times(1)).createUserSession(any(), any(), any());
   }
 
   @Test
-  public void initializeNewConsultingType_Should_RegisterNewUserChatRelationAndReturnNull_When_ProvidedWithGroupChatConsultingType_For_NewConsultingTypeRegistrations() {
+  public void
+      initializeNewConsultingType_Should_RegisterNewUserChatRelationAndReturnNull_When_ProvidedWithGroupChatConsultingType_For_NewConsultingTypeRegistrations() {
     EasyRandom easyRandom = new EasyRandom();
     UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
     userDTO.setConsultingType(String.valueOf(CONSULTING_TYPE_ID_KREUZBUND));
     userDTO.setConsultantId(null);
     User user = easyRandom.nextObject(User.class);
-    RocketChatCredentials rocketChatCredentials = easyRandom
-        .nextObject(RocketChatCredentials.class);
+    RocketChatCredentials rocketChatCredentials =
+        easyRandom.nextObject(RocketChatCredentials.class);
 
     when(consultingTypeManager.getConsultingTypeSettings("15"))
         .thenReturn(CONSULTING_TYPE_SETTINGS_KREUZBUND);
 
-    var responseDto = createNewConsultingTypeFacade
-        .initializeNewConsultingType(userDTO, user, rocketChatCredentials);
+    var responseDto =
+        createNewConsultingTypeFacade.initializeNewConsultingType(
+            userDTO, user, rocketChatCredentials);
 
     assertNull(responseDto.getSessionId());
     assertThat(responseDto.getStatus(), is(CREATED));
@@ -108,13 +108,14 @@ public class CreateNewConsultingTypeFacadeTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void initializeNewConsultingType_Should_ThrowBadRequestException_When_ProvidedWithInvalidConsultingType_For_NewConsultingTypeRegistrations() {
+  public void
+      initializeNewConsultingType_Should_ThrowBadRequestException_When_ProvidedWithInvalidConsultingType_For_NewConsultingTypeRegistrations() {
     EasyRandom easyRandom = new EasyRandom();
     UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
     userDTO.setConsultingType(INVALID_CONSULTING_TYPE_ID);
     User user = easyRandom.nextObject(User.class);
-    RocketChatCredentials rocketChatCredentials = easyRandom
-        .nextObject(RocketChatCredentials.class);
+    RocketChatCredentials rocketChatCredentials =
+        easyRandom.nextObject(RocketChatCredentials.class);
     when(consultingTypeManager.getConsultingTypeSettings(INVALID_CONSULTING_TYPE_ID))
         .thenThrow(new NumberFormatException(""));
     createNewConsultingTypeFacade.initializeNewConsultingType(userDTO, user, rocketChatCredentials);
@@ -124,15 +125,16 @@ public class CreateNewConsultingTypeFacadeTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void initializeNewConsultingType_Should_ThrowBadRequestException_When_ProvidedWithUnknownConsultingType_For_NewConsultingTypeRegistrations() {
+  public void
+      initializeNewConsultingType_Should_ThrowBadRequestException_When_ProvidedWithUnknownConsultingType_For_NewConsultingTypeRegistrations() {
     EasyRandom easyRandom = new EasyRandom();
     UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
     userDTO.setConsultingType(UNKNOWN_CONSULTING_TYPE_ID);
     User user = easyRandom.nextObject(User.class);
-    RocketChatCredentials rocketChatCredentials = easyRandom
-        .nextObject(RocketChatCredentials.class);
-    when(consultingTypeManager.getConsultingTypeSettings(UNKNOWN_CONSULTING_TYPE_ID)).thenThrow(
-        new MissingConsultingTypeException(""));
+    RocketChatCredentials rocketChatCredentials =
+        easyRandom.nextObject(RocketChatCredentials.class);
+    when(consultingTypeManager.getConsultingTypeSettings(UNKNOWN_CONSULTING_TYPE_ID))
+        .thenThrow(new MissingConsultingTypeException(""));
     createNewConsultingTypeFacade.initializeNewConsultingType(userDTO, user, rocketChatCredentials);
 
     verify(createUserChatRelationFacade, times(0))
@@ -140,7 +142,8 @@ public class CreateNewConsultingTypeFacadeTest {
   }
 
   @Test
-  public void initializeNewConsultingType_Should_callCreateDirectSession_When_ProvidedWithExitsingConsultantId() {
+  public void
+      initializeNewConsultingType_Should_callCreateDirectSession_When_ProvidedWithExitsingConsultantId() {
     EasyRandom easyRandom = new EasyRandom();
     var userDTO = new UserDTO();
     userDTO.setConsultantId("consultantId");
@@ -156,5 +159,4 @@ public class CreateNewConsultingTypeFacadeTest {
     verify(createSessionFacade)
         .createDirectUserSession("consultantId", userDTO, user, CONSULTING_TYPE_SETTINGS_KREUZBUND);
   }
-
 }

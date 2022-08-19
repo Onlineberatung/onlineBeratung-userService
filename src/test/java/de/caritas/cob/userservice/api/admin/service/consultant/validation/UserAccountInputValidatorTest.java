@@ -11,10 +11,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
-import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
-import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
 import javax.validation.Path;
 import javax.validation.Validator;
 import org.hibernate.validator.internal.engine.ConstraintViolationImpl;
@@ -27,17 +27,14 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class UserAccountInputValidatorTest {
 
-  @InjectMocks
-  private UserAccountInputValidator userAccountInputValidator;
+  @InjectMocks private UserAccountInputValidator userAccountInputValidator;
 
-  @Mock
-  private Validator validator;
+  @Mock private Validator validator;
 
   @Test
   public void validateCreateConsultantDTO_ShouldNot_throwException_When_consultantIsNotAbsent() {
-    AbsenceInputValidation createConsultantDTO = new
-        CreateConsultantDTOAbsenceInputAdapter(new CreateConsultantDTO()
-        .absent(false));
+    AbsenceInputValidation createConsultantDTO =
+        new CreateConsultantDTOAbsenceInputAdapter(new CreateConsultantDTO().absent(false));
 
     try {
       this.userAccountInputValidator.validateAbsence(createConsultantDTO);
@@ -47,11 +44,11 @@ public class UserAccountInputValidatorTest {
   }
 
   @Test
-  public void validateCreateConsultantDTO_ShouldNot_throwException_When_consultantIsAbsentAndAbsenceMessageIsSet() {
-    AbsenceInputValidation createConsultantDTO = new
-        CreateConsultantDTOAbsenceInputAdapter(new CreateConsultantDTO()
-        .absent(true)
-        .absenceMessage("Absent"));
+  public void
+      validateCreateConsultantDTO_ShouldNot_throwException_When_consultantIsAbsentAndAbsenceMessageIsSet() {
+    AbsenceInputValidation createConsultantDTO =
+        new CreateConsultantDTOAbsenceInputAdapter(
+            new CreateConsultantDTO().absent(true).absenceMessage("Absent"));
 
     try {
       this.userAccountInputValidator.validateAbsence(createConsultantDTO);
@@ -61,18 +58,19 @@ public class UserAccountInputValidatorTest {
   }
 
   @Test
-  public void validateCreateConsultantDTO_Should_throwExpectedException_When_consultantIsAbsentAndAbsenceMessageIsEmpty() {
-    AbsenceInputValidation createConsultantDTO = new
-        CreateConsultantDTOAbsenceInputAdapter(new CreateConsultantDTO()
-        .absent(true)
-        .absenceMessage(null));
+  public void
+      validateCreateConsultantDTO_Should_throwExpectedException_When_consultantIsAbsentAndAbsenceMessageIsEmpty() {
+    AbsenceInputValidation createConsultantDTO =
+        new CreateConsultantDTOAbsenceInputAdapter(
+            new CreateConsultantDTO().absent(true).absenceMessage(null));
 
     try {
       this.userAccountInputValidator.validateAbsence(createConsultantDTO);
       fail("Exception should be thrown");
     } catch (CustomValidationHttpStatusException e) {
       assertThat(e.getCustomHttpHeader(), notNullValue());
-      assertThat(e.getCustomHttpHeader().get("X-Reason").get(0),
+      assertThat(
+          e.getCustomHttpHeader().get("X-Reason").get(0),
           is(MISSING_ABSENCE_MESSAGE_FOR_ABSENT_USER.name()));
     }
   }
@@ -109,9 +107,7 @@ public class UserAccountInputValidatorTest {
       fail("Exception should be thrown");
     } catch (CustomValidationHttpStatusException e) {
       assertThat(e.getCustomHttpHeader(), notNullValue());
-      assertThat(e.getCustomHttpHeader().get("X-Reason").get(0),
-          is(EMAIL_NOT_VALID.name()));
+      assertThat(e.getCustomHttpHeader().get("X-Reason").get(0), is(EMAIL_NOT_VALID.name()));
     }
   }
-
 }

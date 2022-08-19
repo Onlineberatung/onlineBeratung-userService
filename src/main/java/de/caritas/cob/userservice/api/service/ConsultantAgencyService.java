@@ -9,11 +9,11 @@ import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.mapping.UserDtoMapper;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.Language;
 import de.caritas.cob.userservice.api.port.in.AccountManaging;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
-import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.api.model.Language;
-import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.Collection;
 import java.util.List;
@@ -128,15 +128,17 @@ public class ConsultantAgencyService {
     var consultant = agency.getConsultant();
     var id = consultant.getId();
 
-    var consultantDto = new ConsultantResponseDTO()
-        .consultantId(id)
-        .firstName(consultant.getFirstName())
-        .lastName(consultant.getLastName())
-        .username(consultant.getUsername());
+    var consultantDto =
+        new ConsultantResponseDTO()
+            .consultantId(id)
+            .firstName(consultant.getFirstName())
+            .lastName(consultant.getLastName())
+            .username(consultant.getUsername());
 
-    accountManager.findConsultant(id).ifPresent(consultantMap ->
-        consultantDto.displayName(userDtoMapper.displayNameOf(consultantMap))
-    );
+    accountManager
+        .findConsultant(id)
+        .ifPresent(
+            consultantMap -> consultantDto.displayName(userDtoMapper.displayNameOf(consultantMap)));
 
     return consultantDto;
   }
@@ -148,9 +150,10 @@ public class ConsultantAgencyService {
    * @return the related agencies
    */
   public List<AgencyDTO> getAgenciesOfConsultant(String consultantId) {
-    var agencyIds = consultantAgencyRepository.findByConsultantId(consultantId).stream()
-        .map(ConsultantAgency::getAgencyId)
-        .collect(Collectors.toList());
+    var agencyIds =
+        consultantAgencyRepository.findByConsultantId(consultantId).stream()
+            .map(ConsultantAgency::getAgencyId)
+            .collect(Collectors.toList());
 
     return agencyService.getAgencies(agencyIds);
   }

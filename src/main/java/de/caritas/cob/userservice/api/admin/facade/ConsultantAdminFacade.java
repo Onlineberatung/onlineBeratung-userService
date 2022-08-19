@@ -4,20 +4,20 @@ import static de.caritas.cob.userservice.api.adapters.web.dto.AgencyTypeDTO.Agen
 import static de.caritas.cob.userservice.api.adapters.web.dto.AgencyTypeDTO.AgencyTypeEnum.TEAM_AGENCY;
 import static java.util.Objects.nonNull;
 
-import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.Sort.FieldEnum;
-import de.caritas.cob.userservice.api.adapters.web.dto.Sort.OrderEnum;
-import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyConsultantResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyTypeDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAgencyResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantFilter;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.Sort;
+import de.caritas.cob.userservice.api.adapters.web.dto.Sort.FieldEnum;
+import de.caritas.cob.userservice.api.adapters.web.dto.Sort.OrderEnum;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.admin.service.agency.ConsultantAgencyAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFilterService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminService;
@@ -34,9 +34,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-/**
- * Facade to encapsulate admin functions for consultants.
- */
+/** Facade to encapsulate admin functions for consultants. */
 @Service
 @RequiredArgsConstructor
 public class ConsultantAdminFacade {
@@ -44,7 +42,8 @@ public class ConsultantAdminFacade {
   private final @NonNull ConsultantAdminService consultantAdminService;
   private final @NonNull ConsultantAdminFilterService consultantAdminFilterService;
   private final @NonNull ConsultantAgencyAdminService consultantAgencyAdminService;
-  private final @NonNull ConsultantAgencyRelationCreatorService consultantAgencyRelationCreatorService;
+  private final @NonNull ConsultantAgencyRelationCreatorService
+      consultantAgencyRelationCreatorService;
 
   /**
    * Finds a consultant by given consultant id.
@@ -61,23 +60,24 @@ public class ConsultantAdminFacade {
    * generates a {@link ConsultantSearchResultDTO} containing hal links.
    *
    * @param consultantFilter the filter object containing filter values
-   * @param page             the current requested page
-   * @param perPage          the amount of items in one page
+   * @param page the current requested page
+   * @param perPage the amount of items in one page
    * @return the result list
    */
-  public ConsultantSearchResultDTO findFilteredConsultants(Integer page, Integer perPage,
-      ConsultantFilter consultantFilter, Sort sort) {
+  public ConsultantSearchResultDTO findFilteredConsultants(
+      Integer page, Integer perPage, ConsultantFilter consultantFilter, Sort sort) {
     sort = getValidSorter(sort);
-    var filteredConsultants = this.consultantAdminFilterService
-        .findFilteredConsultants(page, perPage, consultantFilter, sort);
+    var filteredConsultants =
+        this.consultantAdminFilterService.findFilteredConsultants(
+            page, perPage, consultantFilter, sort);
     retrieveAndMergeAgenciesToConsultants(filteredConsultants);
 
     return filteredConsultants;
   }
 
   private Sort getValidSorter(Sort sort) {
-    if (sort == null || Stream.of(FieldEnum.values())
-        .noneMatch(providedSortFieldIgnoringCase(sort))) {
+    if (sort == null
+        || Stream.of(FieldEnum.values()).noneMatch(providedSortFieldIgnoringCase(sort))) {
       sort = new Sort();
       sort.setField(FieldEnum.LASTNAME);
       sort.setOrder(OrderEnum.ASC);
@@ -97,9 +97,10 @@ public class ConsultantAdminFacade {
   private void retrieveAndMergeAgenciesToConsultants(
       ConsultantSearchResultDTO filteredConsultants) {
     if (nonNull(filteredConsultants)) {
-      var consultants = filteredConsultants.getEmbedded().stream()
-          .map(ConsultantAdminResponseDTO::getEmbedded)
-          .collect(Collectors.toSet());
+      var consultants =
+          filteredConsultants.getEmbedded().stream()
+              .map(ConsultantAdminResponseDTO::getEmbedded)
+              .collect(Collectors.toSet());
       consultantAgencyAdminService.appendAgenciesForConsultants(consultants);
     }
   }
@@ -109,7 +110,7 @@ public class ConsultantAdminFacade {
    *
    * @param createConsultantDTO the input data used for {@link Consultant} creation
    * @return the generated and persisted {@link Consultant} representation as {@link
-   * ConsultantAdminResponseDTO}
+   *     ConsultantAdminResponseDTO}
    */
   public ConsultantAdminResponseDTO createNewConsultant(CreateConsultantDTO createConsultantDTO) {
     return this.consultantAdminService.createNewConsultant(createConsultantDTO);
@@ -118,13 +119,13 @@ public class ConsultantAdminFacade {
   /**
    * Updates a {@link Consultant} based on the {@link UpdateConsultantDTO} input.
    *
-   * @param consultantId        the id of the consultant to update
+   * @param consultantId the id of the consultant to update
    * @param updateConsultantDTO the input data used for {@link Consultant} update
    * @return the generated and persisted {@link Consultant} representation as {@link
-   * ConsultantAdminResponseDTO}
+   *     ConsultantAdminResponseDTO}
    */
-  public ConsultantAdminResponseDTO updateConsultant(String consultantId,
-      UpdateAdminConsultantDTO updateConsultantDTO) {
+  public ConsultantAdminResponseDTO updateConsultant(
+      String consultantId, UpdateAdminConsultantDTO updateConsultantDTO) {
     return this.consultantAdminService.updateConsultant(consultantId, updateConsultantDTO);
   }
 
@@ -142,19 +143,19 @@ public class ConsultantAdminFacade {
    * Creates a new {@link ConsultantAgency} based on the consultantId and {@link
    * CreateConsultantAgencyDTO} input.
    *
-   * @param consultantId              the consultant to use
+   * @param consultantId the consultant to use
    * @param createConsultantAgencyDTO the agencyId and role {@link CreateConsultantAgencyDTO}
    */
-  public void createNewConsultantAgency(String consultantId,
-      CreateConsultantAgencyDTO createConsultantAgencyDTO) {
-    consultantAgencyRelationCreatorService
-        .createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
+  public void createNewConsultantAgency(
+      String consultantId, CreateConsultantAgencyDTO createConsultantAgencyDTO) {
+    consultantAgencyRelationCreatorService.createNewConsultantAgency(
+        consultantId, createConsultantAgencyDTO);
   }
 
   /**
    * Changes the consultant flag is_team_consultant and assignments for agency type changes.
    *
-   * @param agencyId      the id of the changed agency
+   * @param agencyId the id of the changed agency
    * @param agencyTypeDTO the request object containing the target type
    */
   public void changeAgencyType(Long agencyId, AgencyTypeDTO agencyTypeDTO) {
@@ -170,7 +171,7 @@ public class ConsultantAdminFacade {
    * Marks the {@link ConsultantAgency} as deleted.
    *
    * @param consultantId the consultant id
-   * @param agencyId     the agency id
+   * @param agencyId the agency id
    */
   public void markConsultantAgencyForDeletion(String consultantId, Long agencyId) {
     this.consultantAgencyAdminService.markConsultantAgencyForDeletion(consultantId, agencyId);
@@ -180,7 +181,7 @@ public class ConsultantAdminFacade {
    * Marks given list of agencies assigned to given consultant for deletion.
    *
    * @param consultantId given consultant id
-   * @param agencyIds    agencies that need to be removed from consultant
+   * @param agencyIds agencies that need to be removed from consultant
    */
   public void markConsultantAgenciesForDeletion(String consultantId, List<Long> agencyIds) {
     consultantAgencyAdminService.markConsultantAgenciesForDeletion(consultantId, agencyIds);
@@ -211,13 +212,14 @@ public class ConsultantAdminFacade {
    * IN_PROGRESS.
    *
    * @param consultantId given consultant
-   * @param agencies     list of agencies
+   * @param agencies list of agencies
    */
-  public void prepareConsultantAgencyRelation(String consultantId,
-      List<CreateConsultantAgencyDTO> agencies) {
-    agencies.forEach(agency -> this.consultantAgencyRelationCreatorService
-        .prepareConsultantAgencyRelation(
-            new CreateConsultantAgencyDTOInputAdapter(consultantId, agency)));
+  public void prepareConsultantAgencyRelation(
+      String consultantId, List<CreateConsultantAgencyDTO> agencies) {
+    agencies.forEach(
+        agency ->
+            this.consultantAgencyRelationCreatorService.prepareConsultantAgencyRelation(
+                new CreateConsultantAgencyDTOInputAdapter(consultantId, agency)));
   }
 
   /**
@@ -227,51 +229,52 @@ public class ConsultantAdminFacade {
    * @param consultantId
    * @param agencies
    */
-  public void completeConsultantAgencyAssigment(String consultantId,
-      List<CreateConsultantAgencyDTO> agencies) {
-    agencies.forEach(agency -> this.consultantAgencyRelationCreatorService
-        .completeConsultantAgencyAssigment(
-            new CreateConsultantAgencyDTOInputAdapter(consultantId, agency), LogService::logInfo));
+  public void completeConsultantAgencyAssigment(
+      String consultantId, List<CreateConsultantAgencyDTO> agencies) {
+    agencies.forEach(
+        agency ->
+            this.consultantAgencyRelationCreatorService.completeConsultantAgencyAssigment(
+                new CreateConsultantAgencyDTOInputAdapter(consultantId, agency),
+                LogService::logInfo));
   }
 
   /**
    * Determines which agencies should be set for deletion process.
    *
    * @param consultantId given consultant
-   * @param newList      new list agencies that consultant belongs to
+   * @param newList new list agencies that consultant belongs to
    * @return filtered list of existing @{@link ConsultantAgency} ready for deletion
    */
-  public List<Long> filterAgencyListForDeletion(String consultantId,
-      List<CreateConsultantAgencyDTO> newList) {
-    var newListIds = newList.stream().map(CreateConsultantAgencyDTO::getAgencyId)
-        .collect(Collectors.toList());
-    var persistedAgencyIds = consultantAgencyAdminService
-        .findConsultantAgencies(consultantId).getEmbedded().stream()
-        .map(agencyAdminResponse -> agencyAdminResponse.getEmbedded().getId())
-        .collect(Collectors.toList());
+  public List<Long> filterAgencyListForDeletion(
+      String consultantId, List<CreateConsultantAgencyDTO> newList) {
+    var newListIds =
+        newList.stream().map(CreateConsultantAgencyDTO::getAgencyId).collect(Collectors.toList());
+    var persistedAgencyIds =
+        consultantAgencyAdminService.findConsultantAgencies(consultantId).getEmbedded().stream()
+            .map(agencyAdminResponse -> agencyAdminResponse.getEmbedded().getId())
+            .collect(Collectors.toList());
     return persistedAgencyIds.stream()
         .filter(persistedAgencyId -> !newListIds.contains(persistedAgencyId))
         .collect(Collectors.toList());
-
   }
 
   /**
    * Determines which from new agencies should be created.
    *
    * @param consultantId given consultant
-   * @param newList      new list of agencies that consultant belongs to
+   * @param newList new list of agencies that consultant belongs to
    */
-  public void filterAgencyListForCreation(String consultantId,
-      List<CreateConsultantAgencyDTO> newList) {
-    var persistedAgencyIds = consultantAgencyAdminService
-        .findConsultantAgencies(consultantId).getEmbedded().stream()
-        .map(agencyAdminFullResponse -> agencyAdminFullResponse.getEmbedded().getId())
-        .collect(Collectors.toList());
-    var filteredList = newList.stream()
-        .filter(agency -> !persistedAgencyIds.contains(agency.getAgencyId()))
-        .collect(Collectors.toList());
+  public void filterAgencyListForCreation(
+      String consultantId, List<CreateConsultantAgencyDTO> newList) {
+    var persistedAgencyIds =
+        consultantAgencyAdminService.findConsultantAgencies(consultantId).getEmbedded().stream()
+            .map(agencyAdminFullResponse -> agencyAdminFullResponse.getEmbedded().getId())
+            .collect(Collectors.toList());
+    var filteredList =
+        newList.stream()
+            .filter(agency -> !persistedAgencyIds.contains(agency.getAgencyId()))
+            .collect(Collectors.toList());
     newList.clear();
     newList.addAll(filteredList);
   }
-
 }

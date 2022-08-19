@@ -5,6 +5,9 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.NewRegistrationResponseDto;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.exception.CreateMonitoringException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
@@ -12,9 +15,6 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackUserAccountInformation;
 import de.caritas.cob.userservice.api.helper.AgencyVerifier;
-import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.NewRegistrationResponseDto;
-import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.User;
@@ -30,9 +30,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-/**
- * Facade to encapsulate the steps to initialize a new session.
- */
+/** Facade to encapsulate the steps to initialize a new session. */
 @Service
 @RequiredArgsConstructor
 public class CreateSessionFacade {
@@ -47,11 +45,13 @@ public class CreateSessionFacade {
   /**
    * Creates a new session for the provided user.
    *
-   * @param userDTO                           {@link UserDTO}
-   * @param user                              {@link User}
+   * @param userDTO {@link UserDTO}
+   * @param user {@link User}
    * @param extendedConsultingTypeResponseDTO {@link ExtendedConsultingTypeResponseDTO}
    */
-  public Long createUserSession(UserDTO userDTO, User user,
+  public Long createUserSession(
+      UserDTO userDTO,
+      User user,
       ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO) {
 
     checkIfAlreadyRegisteredToConsultingType(user, extendedConsultingTypeResponseDTO.getId());
@@ -65,17 +65,20 @@ public class CreateSessionFacade {
   /**
    * Creates a new session for the provided user and assignes it to given consultant.
    *
-   * @param userDTO                           {@link UserDTO}
-   * @param user                              {@link User}
+   * @param userDTO {@link UserDTO}
+   * @param user {@link User}
    * @param extendedConsultingTypeResponseDTO {@link ExtendedConsultingTypeResponseDTO}
    */
-  public NewRegistrationResponseDto createDirectUserSession(String consultantId, UserDTO userDTO,
-      User user, ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO) {
+  public NewRegistrationResponseDto createDirectUserSession(
+      String consultantId,
+      UserDTO userDTO,
+      User user,
+      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO) {
     var consultant = userAccountProvider.retrieveValidatedConsultantById(consultantId);
 
-    var existingSession = sessionService
-        .findSessionByConsultantAndUserAndConsultingType(consultant, user,
-            extendedConsultingTypeResponseDTO.getId());
+    var existingSession =
+        sessionService.findSessionByConsultantAndUserAndConsultingType(
+            consultant, user, extendedConsultingTypeResponseDTO.getId());
     if (existingSession.isPresent()) {
       var session = existingSession.get();
       return new NewRegistrationResponseDto()
@@ -87,67 +90,77 @@ public class CreateSessionFacade {
     return initializeNewDirectSession(userDTO, user, extendedConsultingTypeResponseDTO, consultant);
   }
 
-  private NewRegistrationResponseDto initializeNewDirectSession(UserDTO userDTO, User user,
-      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO, Consultant consultant) {
+  private NewRegistrationResponseDto initializeNewDirectSession(
+      UserDTO userDTO,
+      User user,
+      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO,
+      Consultant consultant) {
     var agencyDTO = obtainVerifiedAgency(userDTO, extendedConsultingTypeResponseDTO);
-    var session = sessionService
-        .initializeDirectSession(consultant, user, userDTO, agencyDTO.getTeamAgency());
+    var session =
+        sessionService.initializeDirectSession(
+            consultant, user, userDTO, agencyDTO.getTeamAgency());
     sessionDataService.saveSessionData(session, fromUserDTO(userDTO));
     initializeMonitoring(userDTO, user, extendedConsultingTypeResponseDTO, session);
     session.setConsultant(consultant);
     sessionService.saveSession(session);
 
-    return new NewRegistrationResponseDto()
-        .sessionId(session.getId())
-        .status(HttpStatus.CREATED);
+    return new NewRegistrationResponseDto().sessionId(session.getId()).status(HttpStatus.CREATED);
   }
 
-  private void initializeMonitoring(UserDTO userDTO, User user,
-      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO, Session session) {
+  private void initializeMonitoring(
+      UserDTO userDTO,
+      User user,
+      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO,
+      Session session) {
     try {
       monitoringService.createMonitoringIfConfigured(session, extendedConsultingTypeResponseDTO);
     } catch (CreateMonitoringException exception) {
-      rollbackFacade.rollBackUserAccount(RollbackUserAccountInformation.builder()
-          .userId(user.getUserId())
-          .user(user)
-          .rollBackUserAccount(Boolean.parseBoolean(userDTO.getTermsAccepted()))
-          .build());
+      rollbackFacade.rollBackUserAccount(
+          RollbackUserAccountInformation.builder()
+              .userId(user.getUserId())
+              .user(user)
+              .rollBackUserAccount(Boolean.parseBoolean(userDTO.getTermsAccepted()))
+              .build());
 
-      throw new InternalServerErrorException(String.format(
-          "Could not create monitoring for session with id %s. %s",
-          session.getId(), exception.getMessage()));
+      throw new InternalServerErrorException(
+          String.format(
+              "Could not create monitoring for session with id %s. %s",
+              session.getId(), exception.getMessage()));
     }
   }
 
   private Session initializeSession(UserDTO userDTO, User user, AgencyDTO agencyDTO) {
 
     try {
-      var session = sessionService
-          .initializeSession(user, userDTO, isTrue(agencyDTO.getTeamAgency()));
+      var session =
+          sessionService.initializeSession(user, userDTO, isTrue(agencyDTO.getTeamAgency()));
       sessionDataService.saveSessionData(session, fromUserDTO(userDTO));
 
       return session;
     } catch (Exception ex) {
-      rollbackFacade.rollBackUserAccount(RollbackUserAccountInformation.builder()
-          .userId(user.getUserId())
-          .user(user)
-          .rollBackUserAccount(Boolean.parseBoolean(userDTO.getTermsAccepted()))
-          .build());
+      rollbackFacade.rollBackUserAccount(
+          RollbackUserAccountInformation.builder()
+              .userId(user.getUserId())
+              .user(user)
+              .rollBackUserAccount(Boolean.parseBoolean(userDTO.getTermsAccepted()))
+              .build());
 
       throw new InternalServerErrorException(
-          String.format("Could not create session for user %s. %s", user.getUsername(),
-              ex.getMessage()));
+          String.format(
+              "Could not create session for user %s. %s", user.getUsername(), ex.getMessage()));
     }
   }
 
-  private AgencyDTO obtainVerifiedAgency(UserDTO userDTO,
-      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO) {
-    var agencyDTO = agencyVerifier.getVerifiedAgency(userDTO.getAgencyId(),
-        requireNonNull(extendedConsultingTypeResponseDTO.getId()));
+  private AgencyDTO obtainVerifiedAgency(
+      UserDTO userDTO, ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO) {
+    var agencyDTO =
+        agencyVerifier.getVerifiedAgency(
+            userDTO.getAgencyId(), requireNonNull(extendedConsultingTypeResponseDTO.getId()));
 
     if (isNull(agencyDTO)) {
       throw new BadRequestException(
-          String.format("Agency %s is not assigned to given consulting type %d",
+          String.format(
+              "Agency %s is not assigned to given consulting type %d",
               userDTO.getAgencyId(), extendedConsultingTypeResponseDTO.getId()));
     }
 
@@ -160,8 +173,9 @@ public class CreateSessionFacade {
 
     if (CollectionUtils.isNotEmpty(sessions)) {
       throw new ConflictException(
-          String.format("User %s is already registered to consulting type %d", user.getUserId(),
-              consultingTypeId));
+          String.format(
+              "User %s is already registered to consulting type %d",
+              user.getUserId(), consultingTypeId));
     }
   }
 }

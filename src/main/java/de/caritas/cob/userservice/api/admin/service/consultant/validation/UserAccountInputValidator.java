@@ -6,20 +6,18 @@ import static de.caritas.cob.userservice.api.exception.httpresponses.customheade
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason;
 import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
-import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
-import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import javax.validation.Validator;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-/**
- * Validation class for data transferred within consultant creation process.
- */
+/** Validation class for data transferred within consultant creation process. */
 @Component
 @RequiredArgsConstructor
 public class UserAccountInputValidator {
@@ -62,14 +60,15 @@ public class UserAccountInputValidator {
     validateField(userDTO, USERNAME_FIELD, USERNAME_NOT_VALID);
   }
 
-  private void validateField(UserDTO userDTO, String fieldName,
-      HttpStatusExceptionReason failReason) {
+  private void validateField(
+      UserDTO userDTO, String fieldName, HttpStatusExceptionReason failReason) {
     this.validator.validate(userDTO).stream()
         .filter(violation -> violation.getPropertyPath().toString().equals(fieldName))
         .findFirst()
-        .ifPresent(violation -> {
-          throw new CustomValidationHttpStatusException(failReason);
-        });
+        .ifPresent(
+            violation -> {
+              throw new CustomValidationHttpStatusException(failReason);
+            });
   }
 
   /**
@@ -82,5 +81,4 @@ public class UserAccountInputValidator {
       throw new KeycloakException("ERROR: Keycloak user id is missing");
     }
   }
-
 }

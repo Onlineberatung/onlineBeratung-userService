@@ -13,9 +13,7 @@ import de.caritas.cob.userservice.api.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-/**
- * Action to perform all necessary steps to stop an active group chat.
- */
+/** Action to perform all necessary steps to stop an active group chat. */
 @Component
 @RequiredArgsConstructor
 public class StopChatActionCommand implements ActionCommand<Chat> {

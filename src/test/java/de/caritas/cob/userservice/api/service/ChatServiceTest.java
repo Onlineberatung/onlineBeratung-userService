@@ -6,6 +6,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.AUTHENTICA
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AUTHENTICATED_USER_CONSULTANT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_DTO;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_V2;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.INACTIVE_CHAT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID;
@@ -56,30 +57,41 @@ import org.slf4j.Logger;
 @RunWith(MockitoJUnitRunner.class)
 public class ChatServiceTest {
 
-  @InjectMocks
-  private ChatService chatService;
+  @InjectMocks private ChatService chatService;
 
-  @Mock
-  private ChatRepository chatRepository;
+  @Mock private ChatRepository chatRepository;
 
-  @Mock
-  private ChatAgencyRepository chatAgencyRepository;
+  @Mock private ChatAgencyRepository chatAgencyRepository;
 
-  @Mock
-  private UserChatRepository chatUserRepository;
+  @Mock private UserChatRepository chatUserRepository;
 
-  @Mock
-  private Logger logger;
+  @Mock private Logger logger;
 
-  @Mock
-  private UserHelper userHelper;
+  @Mock private UserHelper userHelper;
 
-  @Mock
-  private ConsultantService consultantService;
+  @Mock private ConsultantService consultantService;
 
   @Before
   public void setup() {
     setInternalState(LogService.class, "LOGGER", logger);
+  }
+
+  @Test
+  public void getChatsForUserId_Should_CallFindByUserIdAndFindAssignedByUserIdOnChatRepository() {
+    chatService.getChatsForUserId(USER_ID);
+
+    verify(chatRepository).findByUserId(USER_ID);
+    verify(chatRepository).findAssignedByUserId(USER_ID);
+  }
+
+  @Test
+  public void getChatsForUserId_Should_ConcatChatsAndAssignedChats() {
+    when(chatRepository.findByUserId(USER_ID)).thenReturn(singletonList(ACTIVE_CHAT));
+    when(chatRepository.findAssignedByUserId(USER_ID)).thenReturn(singletonList(CHAT_V2));
+
+    List<UserSessionResponseDTO> resultList = chatService.getChatsForUserId(USER_ID);
+
+    assertEquals(2, resultList.size());
   }
 
   @Test
@@ -94,20 +106,56 @@ public class ChatServiceTest {
     assertNotNull(resultList.get(0).getChat());
     assertEquals(ACTIVE_CHAT.getId(), resultList.get(0).getChat().getId());
     assertEquals(ACTIVE_CHAT.getTopic(), resultList.get(0).getChat().getTopic());
-    assertThat(ACTIVE_CHAT.getConsultingTypeId(),
-        is(resultList.get(0).getChat().getConsultingType()));
+    assertThat(
+        ACTIVE_CHAT.getConsultingTypeId(), is(resultList.get(0).getChat().getConsultingType()));
     assertEquals(
-        LocalDate.of(ACTIVE_CHAT.getStartDate().getYear(), ACTIVE_CHAT.getStartDate().getMonth(),
+        LocalDate.of(
+            ACTIVE_CHAT.getStartDate().getYear(),
+            ACTIVE_CHAT.getStartDate().getMonth(),
             ACTIVE_CHAT.getStartDate().getDayOfMonth()),
         resultList.get(0).getChat().getStartDate());
     assertEquals(
-        LocalTime.of(ACTIVE_CHAT.getInitialStartDate().getHour(),
+        LocalTime.of(
+            ACTIVE_CHAT.getInitialStartDate().getHour(),
             ACTIVE_CHAT.getInitialStartDate().getMinute()),
         resultList.get(0).getChat().getStartTime());
     assertEquals(ACTIVE_CHAT.getDuration(), resultList.get(0).getChat().getDuration());
     assertEquals(ACTIVE_CHAT.isRepetitive(), resultList.get(0).getChat().isRepetitive());
     assertEquals(ACTIVE_CHAT.isActive(), resultList.get(0).getChat().isActive());
     assertEquals(ACTIVE_CHAT.getGroupId(), resultList.get(0).getChat().getGroupId());
+    assertNotNull(resultList.get(0).getChat().getModerators());
+    assertEquals(1, resultList.get(0).getChat().getModerators().length);
+    assertEquals(CONSULTANT.getRocketChatId(), resultList.get(0).getChat().getModerators()[0]);
+  }
+
+  @Test
+  public void
+      getChatsForUserId_Should_ReturnListOfUserSessionResponseDTOWithChats_When_AssignedChatIsFound() {
+    when(chatRepository.findAssignedByUserId(USER_ID)).thenReturn(singletonList(CHAT_V2));
+    when(consultantService.findConsultantsByAgencyIds(Mockito.any()))
+        .thenReturn(singletonList(CONSULTANT));
+
+    List<UserSessionResponseDTO> resultList = chatService.getChatsForUserId(USER_ID);
+
+    assertNull(resultList.get(0).getSession());
+    assertNotNull(resultList.get(0).getChat());
+    assertEquals(CHAT_V2.getId(), resultList.get(0).getChat().getId());
+    assertEquals(CHAT_V2.getTopic(), resultList.get(0).getChat().getTopic());
+    assertThat(CHAT_V2.getConsultingTypeId(), is(resultList.get(0).getChat().getConsultingType()));
+    assertEquals(
+        LocalDate.of(
+            CHAT_V2.getStartDate().getYear(),
+            CHAT_V2.getStartDate().getMonth(),
+            CHAT_V2.getStartDate().getDayOfMonth()),
+        resultList.get(0).getChat().getStartDate());
+    assertEquals(
+        LocalTime.of(
+            CHAT_V2.getInitialStartDate().getHour(), CHAT_V2.getInitialStartDate().getMinute()),
+        resultList.get(0).getChat().getStartTime());
+    assertEquals(CHAT_V2.getDuration(), resultList.get(0).getChat().getDuration());
+    assertEquals(CHAT_V2.isRepetitive(), resultList.get(0).getChat().isRepetitive());
+    assertEquals(CHAT_V2.isActive(), resultList.get(0).getChat().isActive());
+    assertEquals(CHAT_V2.getGroupId(), resultList.get(0).getChat().getGroupId());
     assertNotNull(resultList.get(0).getChat().getModerators());
     assertEquals(1, resultList.get(0).getChat().getModerators().length);
     assertEquals(CONSULTANT.getRocketChatId(), resultList.get(0).getChat().getModerators()[0]);
@@ -127,14 +175,17 @@ public class ChatServiceTest {
     assertNotNull(resultList.get(0).getChat());
     assertEquals(ACTIVE_CHAT.getId(), resultList.get(0).getChat().getId());
     assertEquals(ACTIVE_CHAT.getTopic(), resultList.get(0).getChat().getTopic());
-    assertThat(ACTIVE_CHAT.getConsultingTypeId(),
-        is(resultList.get(0).getChat().getConsultingType()));
+    assertThat(
+        ACTIVE_CHAT.getConsultingTypeId(), is(resultList.get(0).getChat().getConsultingType()));
     assertEquals(
-        LocalDate.of(ACTIVE_CHAT.getStartDate().getYear(), ACTIVE_CHAT.getStartDate().getMonth(),
+        LocalDate.of(
+            ACTIVE_CHAT.getStartDate().getYear(),
+            ACTIVE_CHAT.getStartDate().getMonth(),
             ACTIVE_CHAT.getStartDate().getDayOfMonth()),
         resultList.get(0).getChat().getStartDate());
     assertEquals(
-        LocalTime.of(ACTIVE_CHAT.getInitialStartDate().getHour(),
+        LocalTime.of(
+            ACTIVE_CHAT.getInitialStartDate().getHour(),
             ACTIVE_CHAT.getInitialStartDate().getMinute()),
         resultList.get(0).getChat().getStartTime());
     assertEquals(ACTIVE_CHAT.getDuration(), resultList.get(0).getChat().getDuration());
@@ -250,7 +301,6 @@ public class ChatServiceTest {
     chatService.saveUserChatRelation(chatUser);
 
     verify(chatUserRepository).save(chatUser);
-
   }
 
   @Test
@@ -261,5 +311,4 @@ public class ChatServiceTest {
 
     verify(chatRepository).delete(chat);
   }
-
 }

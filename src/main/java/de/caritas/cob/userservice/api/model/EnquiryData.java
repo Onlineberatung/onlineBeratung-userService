@@ -24,5 +24,4 @@ public class EnquiryData {
   private String type;
   private String org;
   private AppointmentData appointmentData;
-
 }

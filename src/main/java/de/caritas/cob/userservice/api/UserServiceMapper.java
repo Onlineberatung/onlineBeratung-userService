@@ -67,9 +67,11 @@ public class UserServiceMapper {
     map.put("email", consultant.getEmail());
     map.put("encourage2fa", consultant.getEncourage2fa());
     map.put("notifyEnquiriesRepeating", consultant.getNotifyEnquiriesRepeating());
-    map.put("notifyNewChatMessageFromAdviceSeeker",
+    map.put(
+        "notifyNewChatMessageFromAdviceSeeker",
         consultant.getNotifyNewChatMessageFromAdviceSeeker());
-    map.put("notifyNewFeedbackMessageFromAdviceSeeker",
+    map.put(
+        "notifyNewFeedbackMessageFromAdviceSeeker",
         consultant.getNotifyNewFeedbackMessageFromAdviceSeeker());
     map.put("walkThroughEnabled", consultant.getWalkThroughEnabled());
     map.put("chatUserId", consultant.getRocketChatId());
@@ -83,51 +85,63 @@ public class UserServiceMapper {
     return map;
   }
 
-  public Map<String, Object> mapOf(Page<ConsultantBase> consultantPage,
-      List<Consultant> fullConsultants, List<AgencyDTO> agencyDTOS,
+  public Map<String, Object> mapOf(
+      Page<ConsultantBase> consultantPage,
+      List<Consultant> fullConsultants,
+      List<AgencyDTO> agencyDTOS,
       List<ConsultantAgencyBase> consultantAgencies) {
 
-    var agencyLookupMap = agencyDTOS.stream()
-        .collect(Collectors.toMap(AgencyDTO::getId, Function.identity()));
+    var agencyLookupMap =
+        agencyDTOS.stream().collect(Collectors.toMap(AgencyDTO::getId, Function.identity()));
 
-    var fullConsultantLookupMap = fullConsultants.stream()
-        .collect(Collectors.toMap(Consultant::getId, Function.identity()));
+    var fullConsultantLookupMap =
+        fullConsultants.stream().collect(Collectors.toMap(Consultant::getId, Function.identity()));
 
-    var consultantAgencyLookupMap = consultantAgencies.stream()
-        .collect(Collectors.groupingBy(ConsultantAgencyBase::getConsultantId));
+    var consultantAgencyLookupMap =
+        consultantAgencies.stream()
+            .collect(Collectors.groupingBy(ConsultantAgencyBase::getConsultantId));
 
     var consultants = new ArrayList<Map<String, Object>>();
-    consultantPage.forEach(consultantBase -> {
-      var fullConsultant = fullConsultantLookupMap.get(consultantBase.getId());
-      var agencies = mapOf(fullConsultant, agencyLookupMap, consultantAgencyLookupMap);
-      var consultantMap = mapOf(consultantBase, fullConsultant, agencies);
-      consultants.add(consultantMap);
-    });
+    consultantPage.forEach(
+        consultantBase -> {
+          var fullConsultant = fullConsultantLookupMap.get(consultantBase.getId());
+          var agencies = mapOf(fullConsultant, agencyLookupMap, consultantAgencyLookupMap);
+          var consultantMap = mapOf(consultantBase, fullConsultant, agencies);
+          consultants.add(consultantMap);
+        });
 
     return Map.of(
-        "totalElements", (int) consultantPage.getTotalElements(),
-        "isFirstPage", consultantPage.isFirst(),
-        "isLastPage", consultantPage.isLast(),
-        "consultants", consultants
-    );
+        "totalElements",
+        (int) consultantPage.getTotalElements(),
+        "isFirstPage",
+        consultantPage.isFirst(),
+        "isLastPage",
+        consultantPage.isLast(),
+        "consultants",
+        consultants);
   }
 
-  private List<Map<String, Object>> mapOf(Consultant consultant,
-      Map<Long, AgencyDTO> agencyLookupMap, Map<String, List<ConsultantAgencyBase>> caLookupMap) {
+  private List<Map<String, Object>> mapOf(
+      Consultant consultant,
+      Map<Long, AgencyDTO> agencyLookupMap,
+      Map<String, List<ConsultantAgencyBase>> caLookupMap) {
     var agencies = new ArrayList<Map<String, Object>>();
     var agencyIdsAdded = new HashSet<Long>();
 
     if (caLookupMap.containsKey(consultant.getId())) {
-      caLookupMap.get(consultant.getId()).forEach(coAgency -> {
-        var agencyId = coAgency.getAgencyId();
-        if (agencyLookupMap.containsKey(agencyId)
-            && isDeletionConsistent(consultant, coAgency)
-            && isAgencyUnique(agencyIdsAdded, agencyId)) {
-          var agencyDTO = agencyLookupMap.get(agencyId);
-          agencies.add(mapOf(agencyDTO));
-          agencyIdsAdded.add(agencyId);
-        }
-      });
+      caLookupMap
+          .get(consultant.getId())
+          .forEach(
+              coAgency -> {
+                var agencyId = coAgency.getAgencyId();
+                if (agencyLookupMap.containsKey(agencyId)
+                    && isDeletionConsistent(consultant, coAgency)
+                    && isAgencyUnique(agencyIdsAdded, agencyId)) {
+                  var agencyDTO = agencyLookupMap.get(agencyId);
+                  agencies.add(mapOf(agencyDTO));
+                  agencyIdsAdded.add(agencyId);
+                }
+              });
     }
 
     return agencies;
@@ -147,11 +161,14 @@ public class UserServiceMapper {
     return agencyMap;
   }
 
-  public Map<String, Object> mapOf(ConsultantBase consultantBase, Consultant fullConsultant,
+  public Map<String, Object> mapOf(
+      ConsultantBase consultantBase,
+      Consultant fullConsultant,
       List<Map<String, Object>> agencies) {
-    var status = isNull(fullConsultant.getStatus())
-        ? ConsultantStatus.ERROR.toString()
-        : fullConsultant.getStatus().toString();
+    var status =
+        isNull(fullConsultant.getStatus())
+            ? ConsultantStatus.ERROR.toString()
+            : fullConsultant.getStatus().toString();
 
     Map<String, Object> map = new HashMap<>();
     map.put("id", consultantBase.getId());
@@ -164,11 +181,14 @@ public class UserServiceMapper {
     map.put("isAbsent", fullConsultant.isAbsent());
     map.put("isLanguageFormal", fullConsultant.isLanguageFormal());
     map.put("isTeamConsultant", fullConsultant.isTeamConsultant());
-    map.put("createdAt",
+    map.put(
+        "createdAt",
         nonNull(fullConsultant.getCreateDate()) ? fullConsultant.getCreateDate().toString() : null);
-    map.put("updatedAt",
+    map.put(
+        "updatedAt",
         nonNull(fullConsultant.getUpdateDate()) ? fullConsultant.getUpdateDate().toString() : null);
-    map.put("deletedAt",
+    map.put(
+        "deletedAt",
         nonNull(fullConsultant.getDeleteDate()) ? fullConsultant.getDeleteDate().toString() : null);
     map.put("agencies", agencies);
 
@@ -193,8 +213,8 @@ public class UserServiceMapper {
     return !agencyIdsAdded.contains(agencyId);
   }
 
-  private boolean isDeletionConsistent(Consultant consultant,
-      ConsultantAgencyBase consultantAgency) {
+  private boolean isDeletionConsistent(
+      Consultant consultant, ConsultantAgencyBase consultantAgency) {
     return !(isNull(consultant.getDeleteDate()) && nonNull(consultantAgency.getDeleteDate()));
   }
 
@@ -306,8 +326,6 @@ public class UserServiceMapper {
   }
 
   public List<String> chatUserIdOf(List<Map<String, String>> groupMembers) {
-    return groupMembers.stream()
-        .map(map -> map.get("chatUserId"))
-        .collect(Collectors.toList());
+    return groupMembers.stream().map(map -> map.get("chatUserId")).collect(Collectors.toList());
   }
 }

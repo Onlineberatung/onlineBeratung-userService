@@ -10,9 +10,9 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.actions.ActionCommandMockProvider;
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
+import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.workflow.delete.action.asker.DeleteSingleRoomAndSessionAction;
 import de.caritas.cob.userservice.api.workflow.delete.model.SessionDeletionWorkflowDTO;
-import de.caritas.cob.userservice.api.model.Session;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -22,11 +22,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class DeleteSessionServiceTest {
 
-  @InjectMocks
-  private DeleteSessionService deleteSessionService;
+  @InjectMocks private DeleteSessionService deleteSessionService;
 
-  @Mock
-  private ActionsRegistry actionsRegistry;
+  @Mock private ActionsRegistry actionsRegistry;
 
   private final ActionCommandMockProvider commandMockProvider = new ActionCommandMockProvider();
 

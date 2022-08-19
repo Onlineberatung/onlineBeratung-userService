@@ -10,9 +10,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
-/**
- * Provider for consultant information.
- */
+/** Provider for consultant information. */
 @Component
 @RequiredArgsConstructor
 public class KeycloakUserDataProvider {
@@ -27,7 +25,8 @@ public class KeycloakUserDataProvider {
   }
 
   private void assertCalledInAuthenticatedUserContext() {
-    Assert.isTrue(!authenticatedUser.isAnonymous(), "Cannot retrieve keycloak data for anonymous users");
+    Assert.isTrue(
+        !authenticatedUser.isAnonymous(), "Cannot retrieve keycloak data for anonymous users");
   }
 
   private UserDataResponseDTO userDataResponseDtoOf(UserRepresentation keycloakUser) {

@@ -26,9 +26,9 @@ import static org.springframework.test.util.ReflectionTestUtils.setField;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.User;
-import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.model.UserMobileToken;
 import de.caritas.cob.userservice.api.port.out.UserMobileTokenRepository;
+import de.caritas.cob.userservice.api.port.out.UserRepository;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.Test;
@@ -45,17 +45,13 @@ import org.springframework.data.auditing.AuditingHandler;
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
-  @InjectMocks
-  private UserService userService;
+  @InjectMocks private UserService userService;
 
-  @Mock
-  private UserRepository userRepository;
+  @Mock private UserRepository userRepository;
 
-  @Mock
-  private UserMobileTokenRepository userMobileTokenRepository;
+  @Mock private UserMobileTokenRepository userMobileTokenRepository;
 
-  @Mock
-  private UsernameTranscoder usernameTranscoder;
+  @Mock private UsernameTranscoder usernameTranscoder;
 
   @Mock
   @SuppressWarnings("unused")
@@ -84,8 +80,7 @@ class UserServiceTest {
 
   @Test
   void getUserViaAuthenticatedUser_Should_returnOptionalEmpty_When_UserWasNotFound() {
-    var viaAuthenticatedUser = userService
-        .getUserViaAuthenticatedUser(AUTHENTICATED_USER);
+    var viaAuthenticatedUser = userService.getUserViaAuthenticatedUser(AUTHENTICATED_USER);
 
     assertThat(viaAuthenticatedUser, is(Optional.empty()));
   }
@@ -187,8 +182,7 @@ class UserServiceTest {
   void addMobileAppToken_Should_addMobileTokenToConsultant_When_consultantExists() {
     var user = new EasyRandom().nextObject(User.class);
     user.getUserMobileTokens().clear();
-    when(this.userRepository.findByUserIdAndDeleteDateIsNull(any()))
-        .thenReturn(Optional.of(user));
+    when(this.userRepository.findByUserIdAndDeleteDateIsNull(any())).thenReturn(Optional.of(user));
 
     this.userService.addMobileAppToken("id", "token");
 
@@ -200,12 +194,10 @@ class UserServiceTest {
   @Test
   void addMobileAppToken_Should_throwConflictException_When_tokenAlreadyExists() {
     var user = new EasyRandom().nextObject(User.class);
-    when(this.userRepository.findByUserIdAndDeleteDateIsNull(any()))
-        .thenReturn(Optional.of(user));
+    when(this.userRepository.findByUserIdAndDeleteDateIsNull(any())).thenReturn(Optional.of(user));
     when(this.userMobileTokenRepository.findByMobileAppToken(any()))
         .thenReturn(Optional.of(new UserMobileToken()));
 
-    assertThrows(ConflictException.class, () ->
-        this.userService.addMobileAppToken("id", "token"));
+    assertThrows(ConflictException.class, () -> this.userService.addMobileAppToken("id", "token"));
   }
 }

@@ -10,13 +10,13 @@ import static de.caritas.cob.userservice.api.conversation.model.ConversationList
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.REGISTERED_ENQUIRY;
 
 import de.caritas.cob.userservice.api.adapters.web.controller.validation.MinValue;
-import de.caritas.cob.userservice.api.conversation.facade.AcceptAnonymousEnquiryFacade;
-import de.caritas.cob.userservice.api.conversation.facade.FinishAnonymousConversationFacade;
-import de.caritas.cob.userservice.api.conversation.service.ConversationListResolver;
-import de.caritas.cob.userservice.api.conversation.facade.CreateAnonymousEnquiryFacade;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAnonymousEnquiryDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAnonymousEnquiryResponseDTO;
+import de.caritas.cob.userservice.api.conversation.facade.AcceptAnonymousEnquiryFacade;
+import de.caritas.cob.userservice.api.conversation.facade.CreateAnonymousEnquiryFacade;
+import de.caritas.cob.userservice.api.conversation.facade.FinishAnonymousConversationFacade;
+import de.caritas.cob.userservice.api.conversation.service.ConversationListResolver;
 import de.caritas.cob.userservice.generated.api.conversation.controller.ConversationsApi;
 import io.swagger.annotations.Api;
 import javax.validation.Valid;
@@ -28,9 +28,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Controller for conversation API requests.
- */
+/** Controller for conversation API requests. */
 @RestController
 @RequiredArgsConstructor
 @Api(tags = "conversation-controller")
@@ -45,7 +43,7 @@ public class ConversationController implements ConversationsApi {
    * Entry point to retrieve all anonymous enquiries for current authenticated consultant.
    *
    * @param offset Number of items where to start in the query (0 = first item) (required)
-   * @param count  Number of items which are being returned (required)
+   * @param count Number of items which are being returned (required)
    * @return the {@link ConsultantSessionListResponseDTO}
    */
   @Override
@@ -55,8 +53,8 @@ public class ConversationController implements ConversationsApi {
       @RequestHeader String rcToken) {
 
     ConsultantSessionListResponseDTO anonymousEnquirySessions =
-        this.conversationListResolver
-            .resolveConversations(offset, count, ANONYMOUS_ENQUIRY, rcToken);
+        this.conversationListResolver.resolveConversations(
+            offset, count, ANONYMOUS_ENQUIRY, rcToken);
 
     return ResponseEntity.ok(anonymousEnquirySessions);
   }
@@ -65,7 +63,7 @@ public class ConversationController implements ConversationsApi {
    * Entry point to retrieve all registered enquiries for current authenticated consultant.
    *
    * @param offset Number of items where to start in the query (0 = first item) (required)
-   * @param count  Number of items which are being returned (required)
+   * @param count Number of items which are being returned (required)
    * @return the {@link ConsultantSessionListResponseDTO}
    */
   @Override
@@ -75,8 +73,8 @@ public class ConversationController implements ConversationsApi {
       @RequestHeader String rcToken) {
 
     ConsultantSessionListResponseDTO registeredEnquirySessions =
-        this.conversationListResolver
-            .resolveConversations(offset, count, REGISTERED_ENQUIRY, rcToken);
+        this.conversationListResolver.resolveConversations(
+            offset, count, REGISTERED_ENQUIRY, rcToken);
 
     return ResponseEntity.ok(registeredEnquirySessions);
   }
@@ -85,7 +83,7 @@ public class ConversationController implements ConversationsApi {
    * Entry point to retrieve all archived sessions for current authenticated consultant.
    *
    * @param offset Number of items where to start in the query (0 = first item) (required)
-   * @param count  Number of items which are being returned (required)
+   * @param count Number of items which are being returned (required)
    * @return the {@link ConsultantSessionListResponseDTO}
    */
   @Override
@@ -95,8 +93,8 @@ public class ConversationController implements ConversationsApi {
       @RequestHeader String rcToken) {
 
     ConsultantSessionListResponseDTO archivedSessions =
-        this.conversationListResolver
-            .resolveConversations(offset, count, ARCHIVED_SESSION, rcToken);
+        this.conversationListResolver.resolveConversations(
+            offset, count, ARCHIVED_SESSION, rcToken);
 
     return ResponseEntity.ok(archivedSessions);
   }
@@ -105,7 +103,7 @@ public class ConversationController implements ConversationsApi {
    * Entry point to retrieve all archived team sessions for current authenticated consultant.
    *
    * @param offset Number of items where to start in the query (0 = first item) (required)
-   * @param count  Number of items which are being returned (required)
+   * @param count Number of items which are being returned (required)
    * @return the {@link ConsultantSessionListResponseDTO}
    */
   @Override
@@ -115,8 +113,8 @@ public class ConversationController implements ConversationsApi {
       @RequestHeader String rcToken) {
 
     ConsultantSessionListResponseDTO archivedTeamSessions =
-        this.conversationListResolver
-            .resolveConversations(offset, count, ARCHIVED_TEAM_SESSION, rcToken);
+        this.conversationListResolver.resolveConversations(
+            offset, count, ARCHIVED_TEAM_SESSION, rcToken);
 
     return ResponseEntity.ok(archivedTeamSessions);
   }
@@ -144,8 +142,8 @@ public class ConversationController implements ConversationsApi {
   public ResponseEntity<CreateAnonymousEnquiryResponseDTO> createAnonymousEnquiry(
       @Valid @RequestBody CreateAnonymousEnquiryDTO createAnonymousEnquiryDTO) {
 
-    var createAnonymousEnquiryResponseDTO = createAnonymousEnquiryFacade
-        .createAnonymousEnquiry(createAnonymousEnquiryDTO);
+    var createAnonymousEnquiryResponseDTO =
+        createAnonymousEnquiryFacade.createAnonymousEnquiry(createAnonymousEnquiryDTO);
 
     return new ResponseEntity<>(createAnonymousEnquiryResponseDTO, HttpStatus.CREATED);
   }

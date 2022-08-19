@@ -73,7 +73,8 @@ public class MonitoringOptionTest {
   }
 
   @Test
-  public void equals_Should_returnTrue_When_sessionIdAndMonitoringTypeAndKeyAndMonitoringKeyIsEqual() {
+  public void
+      equals_Should_returnTrue_When_sessionIdAndMonitoringTypeAndKeyAndMonitoringKeyIsEqual() {
     MonitoringOption monitoring = new EasyRandom().nextObject(MonitoringOption.class);
     MonitoringOption otherMonitoring = new EasyRandom().nextObject(MonitoringOption.class);
     otherMonitoring.setSessionId(monitoring.getSessionId());
@@ -85,5 +86,4 @@ public class MonitoringOptionTest {
 
     assertThat(equals, is(true));
   }
-
 }

@@ -47,5 +47,4 @@ class UserMobileTokenTest {
 
     assertThat(equals, is(true));
   }
-
 }

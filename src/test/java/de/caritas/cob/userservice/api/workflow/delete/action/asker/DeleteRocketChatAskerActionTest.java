@@ -15,11 +15,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
-import de.caritas.cob.userservice.api.workflow.delete.model.AskerDeletionWorkflowDTO;
-import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteUserException;
 import de.caritas.cob.userservice.api.model.User;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.workflow.delete.model.AskerDeletionWorkflowDTO;
+import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
@@ -33,14 +33,11 @@ import org.slf4j.Logger;
 @RunWith(MockitoJUnitRunner.class)
 public class DeleteRocketChatAskerActionTest {
 
-  @InjectMocks
-  private DeleteRocketChatAskerAction deleteRocketChatAskerAction;
+  @InjectMocks private DeleteRocketChatAskerAction deleteRocketChatAskerAction;
 
-  @Mock
-  private RocketChatService rocketChatService;
+  @Mock private RocketChatService rocketChatService;
 
-  @Mock
-  private Logger logger;
+  @Mock private Logger logger;
 
   @Before
   public void setup() {
@@ -91,5 +88,4 @@ public class DeleteRocketChatAskerActionTest {
     assertThat(workflowErrors.get(0).getTimestamp(), notNullValue());
     verify(logger).error(anyString(), any(RuntimeException.class));
   }
-
 }

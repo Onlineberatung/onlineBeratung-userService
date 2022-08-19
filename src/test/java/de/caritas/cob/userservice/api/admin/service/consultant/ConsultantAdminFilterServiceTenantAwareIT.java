@@ -1,7 +1,6 @@
 package de.caritas.cob.userservice.api.admin.service.consultant;
 
 import de.caritas.cob.userservice.api.UserServiceApplication;
-import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import org.junit.After;
@@ -21,12 +20,13 @@ import org.springframework.transaction.annotation.Transactional;
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 @TestPropertySource(properties = "multitenancy.enabled=true")
-@TestPropertySource(properties = "spring.datasource.data=classpath*:database/UserServiceDatabase.sql,classpath*:database/transformDataForTenants.sql")
+@TestPropertySource(
+    properties =
+        "spring.datasource.data=classpath*:database/UserServiceDatabase.sql,classpath*:database/transformDataForTenants.sql")
 @Transactional
 public class ConsultantAdminFilterServiceTenantAwareIT extends ConsultantAdminFilterServiceBase {
 
-  @Autowired
-  ConsultantRepository consultantRepository;
+  @Autowired ConsultantRepository consultantRepository;
 
   @Before
   public void beforeTests() {
@@ -99,15 +99,16 @@ public class ConsultantAdminFilterServiceTenantAwareIT extends ConsultantAdminFi
   }
 
   @Test
-  public void findFilteredConsultants_Should_returnResultWithoutExpectedNextLink_When_pageIsNotTheLast() {
+  public void
+      findFilteredConsultants_Should_returnResultWithoutExpectedNextLink_When_pageIsNotTheLast() {
     super
         .findFilteredConsultants_Should_returnResultWithoutExpectedNextLink_When_pageIsNotTheLast();
   }
 
   @Test
-  public void findFilteredConsultants_Should_returnResultWithoutExpectedPreviousLink_When_pageIsNotTheFirst() {
+  public void
+      findFilteredConsultants_Should_returnResultWithoutExpectedPreviousLink_When_pageIsNotTheFirst() {
     super
         .findFilteredConsultants_Should_returnResultWithoutExpectedPreviousLink_When_pageIsNotTheFirst();
   }
-
 }

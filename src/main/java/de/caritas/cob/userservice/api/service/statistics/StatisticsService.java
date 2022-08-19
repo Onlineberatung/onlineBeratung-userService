@@ -12,9 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-/**
- * Service class for the processing of statistical events.
- */
+/** Service class for the processing of statistical events. */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -50,9 +48,7 @@ public class StatisticsService {
               () ->
                   log.warn(
                       "StatisticsEventProcessing warning: Empty statistics event message payload for type {} received",
-                      statisticsEvent.getClass().getSimpleName()
-                  )
-          );
+                      statisticsEvent.getClass().getSimpleName()));
     }
   }
 }

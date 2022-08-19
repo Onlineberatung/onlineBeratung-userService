@@ -26,10 +26,9 @@ public class RocketChatGetUserIdException extends Exception {
    * Exception, when a Rocket.Chat API call to get all groups fails.
    *
    * @param message an additional message
-   * @param ex      the caused exception
+   * @param ex the caused exception
    */
   public RocketChatGetUserIdException(String message, Exception ex) {
     super(message, ex);
   }
-
 }

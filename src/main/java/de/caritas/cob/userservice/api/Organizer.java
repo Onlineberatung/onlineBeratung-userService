@@ -47,9 +47,9 @@ public class Organizer implements Organizing {
   @Override
   public Optional<Map<String, Object>> findAppointment(String id) {
     var appointmentMap = new HashMap<String, Object>();
-    appointmentRepository.findById(UUID.fromString(id)).ifPresent(appointment ->
-        appointmentMap.putAll(mapper.mapOf(appointment))
-    );
+    appointmentRepository
+        .findById(UUID.fromString(id))
+        .ifPresent(appointment -> appointmentMap.putAll(mapper.mapOf(appointment)));
 
     return appointmentMap.isEmpty() ? Optional.empty() : Optional.of(appointmentMap);
   }
@@ -59,9 +59,7 @@ public class Organizer implements Organizing {
     var startOfDay = clock.instant().truncatedTo(ChronoUnit.DAYS);
     var futureAppointments = appointmentRepository.findAllOrderByDatetimeAfter(startOfDay, userId);
 
-    return futureAppointments.stream()
-        .map(mapper::mapOf)
-        .collect(Collectors.toList());
+    return futureAppointments.stream().map(mapper::mapOf).collect(Collectors.toList());
   }
 
   @Override

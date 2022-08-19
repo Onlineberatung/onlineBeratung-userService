@@ -29,14 +29,11 @@ class DeactivateGroupChatServiceTest {
 
   private static final int DEACTIVATE_PERIOD_MINUTES = 180;
 
-  @InjectMocks
-  private DeactivateGroupChatService deactivateGroupChatService;
+  @InjectMocks private DeactivateGroupChatService deactivateGroupChatService;
 
-  @Mock
-  private ChatRepository chatRepository;
+  @Mock private ChatRepository chatRepository;
 
-  @Mock
-  private ActionsRegistry actionsRegistry;
+  @Mock private ActionsRegistry actionsRegistry;
 
   private final ActionCommandMockProvider commandMockProvider = new ActionCommandMockProvider();
 
@@ -63,8 +60,9 @@ class DeactivateGroupChatServiceTest {
 
   @ParameterizedTest
   @MethodSource("createUpdateDatesWithinDeactivationPeriod")
-  void deactivateStaleGroupChats_Should_notPerformAnyDeactivation_When_chatsAreActiveWithinDeactivatePeriod(
-      LocalDateTime updateDate) {
+  void
+      deactivateStaleGroupChats_Should_notPerformAnyDeactivation_When_chatsAreActiveWithinDeactivatePeriod(
+          LocalDateTime updateDate) {
     var chat = new Chat();
     chat.setDuration(120);
     chat.setActive(true);
@@ -73,15 +71,14 @@ class DeactivateGroupChatServiceTest {
 
     this.deactivateGroupChatService.deactivateStaleGroupChats();
 
-    verifyNoMoreInteractions(this.actionsRegistry,
-        this.commandMockProvider.getActionMock(StopChatActionCommand.class));
+    verifyNoMoreInteractions(
+        this.actionsRegistry, this.commandMockProvider.getActionMock(StopChatActionCommand.class));
   }
 
   private static List<LocalDateTime> createUpdateDatesWithinDeactivationPeriod() {
     LocalDateTime now = LocalDateTime.now();
-    LocalDateTime oneSecondWithinDeletionPeriod = now
-        .minusMinutes(DEACTIVATE_PERIOD_MINUTES)
-        .plusSeconds(10);
+    LocalDateTime oneSecondWithinDeletionPeriod =
+        now.minusMinutes(DEACTIVATE_PERIOD_MINUTES).plusSeconds(10);
     LocalDateTime timeInTheFuture = now.plusSeconds(20);
 
     return List.of(now, oneSecondWithinDeletionPeriod, timeInTheFuture);
@@ -108,11 +105,10 @@ class DeactivateGroupChatServiceTest {
 
   private static List<LocalDateTime> createOverdueUpdateDates() {
     LocalDateTime now = LocalDateTime.now();
-    LocalDateTime oneDeletionPeriodAgo = now
-        .minusMinutes(DEACTIVATE_PERIOD_MINUTES).minusMinutes(120);
+    LocalDateTime oneDeletionPeriodAgo =
+        now.minusMinutes(DEACTIVATE_PERIOD_MINUTES).minusMinutes(120);
     LocalDateTime timeLongInThePast = oneDeletionPeriodAgo.minusMinutes(10);
 
     return List.of(oneDeletionPeriodAgo, timeLongInThePast);
   }
-
 }

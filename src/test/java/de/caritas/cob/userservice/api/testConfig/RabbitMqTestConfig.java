@@ -18,7 +18,8 @@ public class RabbitMqTestConfig {
   private static final String QUEUE_PREFIX = "statistics.";
   public static final String QUEUE_NAME_ASSIGN_SESSION = QUEUE_PREFIX + EventType.ASSIGN_SESSION;
 
-  @Bean ConnectionFactory connectionFactory() {
+  @Bean
+  ConnectionFactory connectionFactory() {
     return new CachingConnectionFactory(new MockConnectionFactory());
   }
 
@@ -31,9 +32,10 @@ public class RabbitMqTestConfig {
     return new Declarables(
         assignSessionStatisticEventQueue,
         topicExchange,
-        BindingBuilder
-            .bind(assignSessionStatisticEventQueue)
-            .to(topicExchange).with(
-                de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType.ASSIGN_SESSION));
+        BindingBuilder.bind(assignSessionStatisticEventQueue)
+            .to(topicExchange)
+            .with(
+                de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType
+                    .ASSIGN_SESSION));
   }
 }

@@ -7,7 +7,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import de.caritas.cob.userservice.api.adapters.web.controller.LiveProxyController;
 import de.caritas.cob.userservice.api.config.auth.RoleAuthorizationAuthorityMapper;
 import de.caritas.cob.userservice.api.service.liveevents.LiveEventNotificationService;
 import org.junit.Test;
@@ -29,22 +28,17 @@ public class LiveProxyControllerIT {
 
   private static final String LIVE_EVENT_PATH = "/liveproxy/send";
 
-  @Autowired
-  private MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
 
-  @MockBean
-  private LiveEventNotificationService liveEventNotificationService;
+  @MockBean private LiveEventNotificationService liveEventNotificationService;
 
-  @MockBean
-  private RoleAuthorizationAuthorityMapper roleAuthorizationAuthorityMapper;
+  @MockBean private RoleAuthorizationAuthorityMapper roleAuthorizationAuthorityMapper;
 
-  @MockBean
-  private LinkDiscoverers linkDiscoverers;
+  @MockBean private LinkDiscoverers linkDiscoverers;
 
   @Test
   public void sendLiveEvent_Should_returnBadRequest_When_rcGroupIdIsNotProvided() throws Exception {
-    this.mockMvc.perform(post(LIVE_EVENT_PATH))
-        .andExpect(status().isBadRequest());
+    this.mockMvc.perform(post(LIVE_EVENT_PATH)).andExpect(status().isBadRequest());
 
     verifyNoInteractions(liveEventNotificationService);
   }
@@ -52,10 +46,8 @@ public class LiveProxyControllerIT {
   @Test
   public void sendLiveEvent_Should_returnStatusOkAndUseMock_When_rcGroupIdIsProvided()
       throws Exception {
-    this.mockMvc.perform(post(LIVE_EVENT_PATH).param("rcGroupId", "id"))
-        .andExpect(status().isOk());
+    this.mockMvc.perform(post(LIVE_EVENT_PATH).param("rcGroupId", "id")).andExpect(status().isOk());
 
     verify(liveEventNotificationService, times(1)).sendLiveDirectMessageEventToUsers(eq("id"));
   }
-
 }

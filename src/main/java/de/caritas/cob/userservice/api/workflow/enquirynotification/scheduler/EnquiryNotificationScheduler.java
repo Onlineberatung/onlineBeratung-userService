@@ -9,9 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-/**
- * Scheduler email notifications of open enquiries.
- */
+/** Scheduler email notifications of open enquiries. */
 @Component
 @RequiredArgsConstructor
 public class EnquiryNotificationScheduler {
@@ -21,14 +19,11 @@ public class EnquiryNotificationScheduler {
   @Value("${enquiry.open.notification.enabled}")
   private Boolean enquiryNotificationsEnabled;
 
-  /**
-   * Entry method to build and send email notifications.
-   */
+  /** Entry method to build and send email notifications. */
   @Scheduled(cron = "${enquiry.open.notification.cron}")
   public void sendEmailNotificationsForOpenEnquiries() {
     if (isTrue(enquiryNotificationsEnabled)) {
       enquiryNotificationService.sendEmailNotificationsForOpenEnquiries();
     }
   }
-
 }

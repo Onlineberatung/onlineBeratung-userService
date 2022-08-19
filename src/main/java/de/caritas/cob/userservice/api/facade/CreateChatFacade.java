@@ -22,12 +22,9 @@ import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.function.BiFunction;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-/**
- * Facade to encapsulate the steps for creating a chat.
- */
+/** Facade to encapsulate the steps for creating a chat. */
 @Service
 @RequiredArgsConstructor
 public class CreateChatFacade {
@@ -42,7 +39,7 @@ public class CreateChatFacade {
   /**
    * Creates a chat in MariaDB, it's relation to the agency and Rocket.Chat-room.
    *
-   * @param chatDTO    {@link ChatDTO}
+   * @param chatDTO {@link ChatDTO}
    * @param consultant {@link Consultant}
    * @return the generated chat link URL (String)
    */
@@ -53,7 +50,7 @@ public class CreateChatFacade {
   /**
    * Creates a chat in MariaDB and Rocket.Chat-room and do not save any chat_agency relation.
    *
-   * @param chatDTO    {@link ChatDTO}
+   * @param chatDTO {@link ChatDTO}
    * @param consultant {@link Consultant}
    * @return the generated chat link URL (String)
    */
@@ -61,8 +58,8 @@ public class CreateChatFacade {
     return createChat(chatDTO, consultant, this::saveChatV2);
   }
 
-  private CreateChatResponseDTO createChat(ChatDTO chatDTO, Consultant consultant,
-      BiFunction<Consultant, ChatDTO, Chat> saveChat) {
+  private CreateChatResponseDTO createChat(
+      ChatDTO chatDTO, Consultant consultant, BiFunction<Consultant, ChatDTO, Chat> saveChat) {
     Chat chat = null;
     String rcGroupId = null;
 
@@ -71,9 +68,7 @@ public class CreateChatFacade {
       rcGroupId = createRocketChatGroupWithTechnicalUser(chatDTO, chat);
       chat.setGroupId(rcGroupId);
       chatService.saveChat(chat);
-      return new CreateChatResponseDTO()
-          .groupId(rcGroupId)
-          .chatLink(generateChatUrl(chat));
+      return new CreateChatResponseDTO().groupId(rcGroupId).chatLink(generateChatUrl(chat));
     } catch (InternalServerErrorException e) {
       doRollback(chat, rcGroupId);
       throw e;
@@ -81,14 +76,15 @@ public class CreateChatFacade {
   }
 
   private String generateChatUrl(Chat chat) {
-    return chat.getConsultingTypeId() != null ? userHelper.generateChatUrl(chat.getId(),
-        chat.getConsultingTypeId()) : StringUtils.EMPTY;
+    return chat.getConsultingTypeId() != null
+        ? userHelper.generateChatUrl(chat.getId(), chat.getConsultingTypeId())
+        : userHelper.generateChatUrl(chat.getId());
   }
 
   private Chat saveChatV1(Consultant consultant, ChatDTO chatDTO) {
     if (isEmpty(consultant.getConsultantAgencies())) {
-      throw new InternalServerErrorException(String
-          .format("Consultant with id %s is not assigned to any agency", consultant.getId()));
+      throw new InternalServerErrorException(
+          String.format("Consultant with id %s is not assigned to any agency", consultant.getId()));
     }
     Long agencyId = consultant.getConsultantAgencies().iterator().next().getAgencyId();
     AgencyDTO agency = this.agencyService.getAgency(agencyId);
@@ -100,9 +96,10 @@ public class CreateChatFacade {
 
   private Chat saveChatV2(Consultant consultant, ChatDTO chatDTO) {
     Chat chat = chatService.saveChat(chatConverter.convertToEntity(chatDTO, consultant));
-    consultant.getConsultantAgencies().forEach(
-        consultantAgency -> createChatAgencyRelation(chat, consultantAgency.getAgencyId())
-    );
+    consultant
+        .getConsultantAgencies()
+        .forEach(
+            consultantAgency -> createChatAgencyRelation(chat, consultantAgency.getAgencyId()));
     return chat;
   }
 
@@ -121,8 +118,8 @@ public class CreateChatFacade {
       rocketChatService.addTechnicalUserToGroup(rcGroupId);
     } catch (RocketChatAddUserToGroupException e) {
       doRollback(chat, rcGroupId);
-      throw new InternalServerErrorException("Technical user could not be added to group chat "
-          + "room");
+      throw new InternalServerErrorException(
+          "Technical user could not be added to group chat " + "room");
     } catch (RocketChatUserNotInitializedException e) {
       doRollback(chat, rcGroupId);
       throw new InternalServerErrorException("Rocket chat user is not initialized");
@@ -131,17 +128,20 @@ public class CreateChatFacade {
 
   private String createRocketChatGroup(ChatDTO chatDTO, Chat chat) {
     try {
-      GroupResponseDTO rcGroupDTO = rocketChatService
-          .createPrivateGroupWithSystemUser(
-              new RocketChatRoomNameGenerator().generateGroupChatName(chat))
-          .orElseThrow(() -> new RocketChatCreateGroupException(
-              "RocketChat group is not present while creating chat: " + chatDTO));
+      GroupResponseDTO rcGroupDTO =
+          rocketChatService
+              .createPrivateGroupWithSystemUser(
+                  new RocketChatRoomNameGenerator().generateGroupChatName(chat))
+              .orElseThrow(
+                  () ->
+                      new RocketChatCreateGroupException(
+                          "RocketChat group is not present while creating chat: " + chatDTO));
       return rcGroupDTO.getGroup().getId();
     } catch (RocketChatCreateGroupException e) {
       doRollback(chat, null);
       throw new InternalServerErrorException(
-          "Error while creating private group in Rocket.Chat for group chat: " + chatDTO
-              .toString());
+          "Error while creating private group in Rocket.Chat for group chat: "
+              + chatDTO.toString());
     }
   }
 
@@ -153,5 +153,4 @@ public class CreateChatFacade {
       rocketChatService.deleteGroupAsSystemUser(rcGroupId);
     }
   }
-
 }

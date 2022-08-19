@@ -1,9 +1,9 @@
 package de.caritas.cob.userservice.api.adapters.web.dto;
 
-import java.util.LinkedHashMap;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import io.swagger.annotations.ApiModel;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

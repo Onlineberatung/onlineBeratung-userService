@@ -17,12 +17,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class DecodeUsernameJsonSerializerTest {
 
-  @InjectMocks
-  private DecodeUsernameJsonSerializer serializer;
-  @Mock
-  private JsonGenerator jsonGenerator;
-  @Mock
-  private UserHelper userHelper;
+  @InjectMocks private DecodeUsernameJsonSerializer serializer;
+  @Mock private JsonGenerator jsonGenerator;
+  @Mock private UserHelper userHelper;
 
   @Test
   public void serialize_Schould_DecodeEncodedUsername() throws IOException {

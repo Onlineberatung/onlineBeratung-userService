@@ -9,8 +9,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
-import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import de.caritas.cob.userservice.messageservice.generated.web.MessageControllerApi;
@@ -29,20 +29,15 @@ import org.springframework.http.HttpHeaders;
 @ExtendWith(MockitoExtension.class)
 class PostConversationFinishedAliasMessageActionCommandTest {
 
-  @InjectMocks
-  private PostConversationFinishedAliasMessageActionCommand actionCommand;
+  @InjectMocks private PostConversationFinishedAliasMessageActionCommand actionCommand;
 
-  @Mock
-  private MessageControllerApi messageControllerApi;
+  @Mock private MessageControllerApi messageControllerApi;
 
-  @Mock
-  private SecurityHeaderSupplier securityHeaderSupplier;
+  @Mock private SecurityHeaderSupplier securityHeaderSupplier;
 
-  @Mock
-  private TenantHeaderSupplier tenantHeaderSupplier;
+  @Mock private TenantHeaderSupplier tenantHeaderSupplier;
 
-  @Mock
-  private IdentityClient identityClient;
+  @Mock private IdentityClient identityClient;
 
   @ParameterizedTest
   @MethodSource("sessionsWithoutInteractionsExpected")
@@ -65,8 +60,8 @@ class PostConversationFinishedAliasMessageActionCommandTest {
     var keycloakLoginResponseDTO = new KeycloakLoginResponseDTO();
     keycloakLoginResponseDTO.setAccessToken("token");
     when(this.identityClient.loginUser(any(), any())).thenReturn(keycloakLoginResponseDTO);
-    when(this.securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders(any())).thenReturn(
-        new HttpHeaders());
+    when(this.securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders(any()))
+        .thenReturn(new HttpHeaders());
     var session = new EasyRandom().nextObject(Session.class);
 
     this.actionCommand.execute(session);
@@ -77,5 +72,4 @@ class PostConversationFinishedAliasMessageActionCommandTest {
     verify(this.messageControllerApi, times(1))
         .saveAliasOnlyMessage(session.getGroupId(), expectedMessageType);
   }
-
 }

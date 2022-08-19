@@ -18,28 +18,23 @@ import org.springframework.test.util.ReflectionTestUtils;
 @RunWith(MockitoJUnitRunner.class)
 public class AgencyAdminServiceTest {
 
-  @InjectMocks
-  private AgencyAdminService agencyAdminService;
+  @InjectMocks private AgencyAdminService agencyAdminService;
 
-  @Mock
-  private SecurityHeaderSupplier securityHeaderSupplier;
+  @Mock private SecurityHeaderSupplier securityHeaderSupplier;
 
-  @Mock
-  private TenantHeaderSupplier tenantHeaderSupplier;
+  @Mock private TenantHeaderSupplier tenantHeaderSupplier;
 
   @Test
   public void agencyAdminControllerShouldHaveCorrectHeaders() {
-    ReflectionTestUtils
-        .setField(agencyAdminService, "agencyAdminServiceApiUrl", "http://onlineberatung.net");
+    ReflectionTestUtils.setField(
+        agencyAdminService, "agencyAdminServiceApiUrl", "http://onlineberatung.net");
     var headers = new HttpHeaders();
     headers.add("header1", "header1");
     when(securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders()).thenReturn(headers);
     AdminAgencyControllerApi controllerApi = this.agencyAdminService.createControllerApi();
 
-    HttpHeaders defaultHeaders = (HttpHeaders) ReflectionTestUtils
-        .getField(controllerApi.getApiClient(), "defaultHeaders");
+    HttpHeaders defaultHeaders =
+        (HttpHeaders) ReflectionTestUtils.getField(controllerApi.getApiClient(), "defaultHeaders");
     assertEquals(defaultHeaders.get("header1").get(0), "header1");
-
   }
-
 }

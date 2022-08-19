@@ -23,9 +23,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-/**
- * Provides consultants of Rocket.Chat group that don't have the authorization for it.
- */
+/** Provides consultants of Rocket.Chat group that don't have the authorization for it. */
 @Service
 @RequiredArgsConstructor
 public class UnauthorizedMembersProvider {
@@ -41,15 +39,19 @@ public class UnauthorizedMembersProvider {
    * Obtains a list of {@link Consultant}s which are not authorized to view the given Rocket.Chat
    * group and therefore should be removed.
    *
-   * @param rcGroupId  the Rocket.Chat group ID
-   * @param session    {@link Session}
+   * @param rcGroupId the Rocket.Chat group ID
+   * @param session {@link Session}
    * @param consultant {@link Consultant}
    * @param memberList list of {@link GroupMemberDTO} containing the current members of the group
    * @return list of {@link Consultant}s to be removed
    */
   @Transactional
-  public List<Consultant> obtainConsultantsToRemove(String rcGroupId, Session session,
-      Consultant consultant, List<GroupMemberDTO> memberList, Consultant consultantToKeep) {
+  public List<Consultant> obtainConsultantsToRemove(
+      String rcGroupId,
+      Session session,
+      Consultant consultant,
+      List<GroupMemberDTO> memberList,
+      Consultant consultantToKeep) {
     var authorizedMembers = obtainAuthorizedMembers(rcGroupId, session, consultant);
     if (nonNull(consultantToKeep)) {
       authorizedMembers.add(consultantToKeep.getRocketChatId());
@@ -65,14 +67,14 @@ public class UnauthorizedMembersProvider {
   }
 
   @Transactional
-  public List<Consultant> obtainConsultantsToRemove(String rcGroupId, Session session,
-      Consultant consultant, List<GroupMemberDTO> memberList) {
+  public List<Consultant> obtainConsultantsToRemove(
+      String rcGroupId, Session session, Consultant consultant, List<GroupMemberDTO> memberList) {
 
     return obtainConsultantsToRemove(rcGroupId, session, consultant, memberList, null);
   }
 
-  private List<String> obtainAuthorizedMembers(String rcGroupId, Session session,
-      Consultant consultant) {
+  private List<String> obtainAuthorizedMembers(
+      String rcGroupId, Session session, Consultant consultant) {
     List<String> authorizedMembers = new ArrayList<>();
     addConsultantAndAskerOfSession(session, consultant, authorizedMembers);
     addTechnicalUsers(authorizedMembers);
@@ -81,8 +83,8 @@ public class UnauthorizedMembersProvider {
     return authorizedMembers;
   }
 
-  private void addConsultantAndAskerOfSession(Session session, Consultant consultant,
-      List<String> authorizedMembers) {
+  private void addConsultantAndAskerOfSession(
+      Session session, Consultant consultant, List<String> authorizedMembers) {
     authorizedMembers.add(session.getUser().getRcUserId());
     authorizedMembers.add(consultant.getRocketChatId());
   }
@@ -96,37 +98,41 @@ public class UnauthorizedMembersProvider {
     authorizedMembers.add(rocketChatSystemUserId);
   }
 
-  private void addTeamConsultantsIfNecessary(String rcGroupId, Session session,
-      List<String> authorizedMembers) {
+  private void addTeamConsultantsIfNecessary(
+      String rcGroupId, Session session, List<String> authorizedMembers) {
     List<Consultant> consultantsOfAgency =
         consultantService.findConsultantsByAgencyId(session.getAgencyId());
     addTeamConsultantsIfTeamSession(session, authorizedMembers, consultantsOfAgency);
-    addMainConsultantsIfFeedbackTeamSession(rcGroupId, session, authorizedMembers,
-        consultantsOfAgency);
+    addMainConsultantsIfFeedbackTeamSession(
+        rcGroupId, session, authorizedMembers, consultantsOfAgency);
   }
 
-  private void addTeamConsultantsIfTeamSession(Session session, List<String> authorizedMembers,
-      List<Consultant> consultantsOfAgency) {
+  private void addTeamConsultantsIfTeamSession(
+      Session session, List<String> authorizedMembers, List<Consultant> consultantsOfAgency) {
     if (session.isTeamSession() && !session.hasFeedbackChat()) {
       consultantsOfAgency.stream()
           .filter(Consultant::isTeamConsultant)
           .map(Consultant::getRocketChatId)
-          .filter(rocketChatId -> !rocketChatId.equalsIgnoreCase(
-              session.getConsultant().getRocketChatId()))
+          .filter(
+              rocketChatId ->
+                  !rocketChatId.equalsIgnoreCase(session.getConsultant().getRocketChatId()))
           .forEach(authorizedMembers::add);
     }
   }
 
-  private void addMainConsultantsIfFeedbackTeamSession(String rcGroupId, Session session,
-      List<String> authorizedMembers, List<Consultant> consultantsOfAgency) {
+  private void addMainConsultantsIfFeedbackTeamSession(
+      String rcGroupId,
+      Session session,
+      List<String> authorizedMembers,
+      List<Consultant> consultantsOfAgency) {
     if (isTeamSessionWithFeedbackChat(session)) {
       if (rcGroupId.equalsIgnoreCase(session.getGroupId())) {
-        obtainMainConsultantsOfGroup(authorizedMembers, consultantsOfAgency,
-            this::hasAuthorityToViewPeerGroups);
+        obtainMainConsultantsOfGroup(
+            authorizedMembers, consultantsOfAgency, this::hasAuthorityToViewPeerGroups);
       }
       if (rcGroupId.equalsIgnoreCase(session.getFeedbackGroupId())) {
-        obtainMainConsultantsOfGroup(authorizedMembers, consultantsOfAgency,
-            this::hasAuthorityToViewFeedbackGroups);
+        obtainMainConsultantsOfGroup(
+            authorizedMembers, consultantsOfAgency, this::hasAuthorityToViewFeedbackGroups);
       }
     }
   }
@@ -135,8 +141,10 @@ public class UnauthorizedMembersProvider {
     return session.isTeamSession() && session.hasFeedbackChat();
   }
 
-  private void obtainMainConsultantsOfGroup(List<String> authorizedMembers,
-      List<Consultant> consultantsOfAgency, Predicate<Consultant> authorityMethod) {
+  private void obtainMainConsultantsOfGroup(
+      List<String> authorizedMembers,
+      List<Consultant> consultantsOfAgency,
+      Predicate<Consultant> authorityMethod) {
     consultantsOfAgency.stream()
         .filter(authorityMethod)
         .map(Consultant::getRocketChatId)
@@ -148,7 +156,6 @@ public class UnauthorizedMembersProvider {
   }
 
   private boolean hasAuthorityToViewFeedbackGroups(Consultant consultant) {
-    return identityClient.userHasAuthority(consultant.getId(),
-        VIEW_ALL_FEEDBACK_SESSIONS);
+    return identityClient.userHasAuthority(consultant.getId(), VIEW_ALL_FEEDBACK_SESSIONS);
   }
 }

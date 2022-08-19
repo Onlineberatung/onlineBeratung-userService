@@ -7,11 +7,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
 import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
+import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,22 +34,18 @@ class DeleteUserAnonymousServiceTest {
 
   private static final int DELETION_PERIOD_MINUTES = 1200;
 
-  @InjectMocks
-  private DeleteUserAnonymousService deleteUserAnonymousService;
+  @InjectMocks private DeleteUserAnonymousService deleteUserAnonymousService;
 
-  @Mock
-  private SessionRepository sessionRepository;
+  @Mock private SessionRepository sessionRepository;
 
-  @Mock
-  private DeleteUserAccountService deleteUserAccountService;
+  @Mock private DeleteUserAccountService deleteUserAccountService;
 
-  @Mock
-  private WorkflowErrorMailService workflowErrorMailService;
+  @Mock private WorkflowErrorMailService workflowErrorMailService;
 
   @BeforeEach
   public void setUp() {
-    ReflectionTestUtils.setField(deleteUserAnonymousService, "deletionPeriodMinutes",
-        DELETION_PERIOD_MINUTES);
+    ReflectionTestUtils.setField(
+        deleteUserAnonymousService, "deletionPeriodMinutes", DELETION_PERIOD_MINUTES);
   }
 
   @Test
@@ -80,9 +76,10 @@ class DeleteUserAnonymousServiceTest {
   private void whenSessionRepositoryFindByStatus_ThenReturnUserSessionsWithStatus(
       SessionStatus... sessionStatus) {
     User user = new User();
-    Set<Session> userSessions = Stream.of(sessionStatus)
-        .map(createSessionForUserWithUpdateDateNow(user))
-        .collect(Collectors.toSet());
+    Set<Session> userSessions =
+        Stream.of(sessionStatus)
+            .map(createSessionForUserWithUpdateDateNow(user))
+            .collect(Collectors.toSet());
     user.setSessions(userSessions);
 
     when(this.sessionRepository.findByStatus(any())).thenReturn(new ArrayList<>(userSessions));
@@ -92,13 +89,13 @@ class DeleteUserAnonymousServiceTest {
     return createSessionForUserWithUpdateDate(user, LocalDateTime.now());
   }
 
-  private Function<SessionStatus, Session> createSessionForUserWithUpdateDate(User user,
-      LocalDateTime sessionUpdateDate) {
+  private Function<SessionStatus, Session> createSessionForUserWithUpdateDate(
+      User user, LocalDateTime sessionUpdateDate) {
     return (sessionStatus) -> createSessionForUser(user, sessionUpdateDate, sessionStatus);
   }
 
-  private Session createSessionForUser(User user, LocalDateTime updateDate,
-      SessionStatus sessionStatus) {
+  private Session createSessionForUser(
+      User user, LocalDateTime updateDate, SessionStatus sessionStatus) {
     Session session = new Session();
     session.setId((long) sessionStatus.getValue());
     session.setUpdateDate(updateDate);
@@ -120,8 +117,9 @@ class DeleteUserAnonymousServiceTest {
 
   @ParameterizedTest
   @MethodSource("createUpdateDatesWithinDeletionPeriod")
-  void deleteInactiveAnonymousUsers_Should_notPerformAnyDeletion_When_sessionsAreDoneWithinDeletionPeriod(
-      LocalDateTime updateDate) {
+  void
+      deleteInactiveAnonymousUsers_Should_notPerformAnyDeletion_When_sessionsAreDoneWithinDeletionPeriod(
+          LocalDateTime updateDate) {
     User user = new User();
     Set<Session> userSessions = Set.of(createSessionForUser(user, updateDate, SessionStatus.DONE));
     user.setSessions(userSessions);
@@ -136,9 +134,8 @@ class DeleteUserAnonymousServiceTest {
 
   private static List<LocalDateTime> createUpdateDatesWithinDeletionPeriod() {
     LocalDateTime now = LocalDateTime.now();
-    LocalDateTime oneSecondWithinDeletionPeriod = now
-        .minusMinutes(DELETION_PERIOD_MINUTES)
-        .plusSeconds(1);
+    LocalDateTime oneSecondWithinDeletionPeriod =
+        now.minusMinutes(DELETION_PERIOD_MINUTES).plusSeconds(1);
     LocalDateTime timeInTheFuture = now.plusSeconds(20);
 
     return List.of(now, oneSecondWithinDeletionPeriod, timeInTheFuture);
@@ -149,8 +146,8 @@ class DeleteUserAnonymousServiceTest {
   void deleteInactiveAnonymousUsers_Should_performAskerDeletion_When_userSessionsAreDoneAndOverdue(
       LocalDateTime overdueUpdateDate) {
     User user = new User();
-    Set<Session> userSessions = Set.of(createSessionForUser(user, overdueUpdateDate,
-        SessionStatus.DONE));
+    Set<Session> userSessions =
+        Set.of(createSessionForUser(user, overdueUpdateDate, SessionStatus.DONE));
     user.setSessions(userSessions);
 
     when(this.sessionRepository.findByStatus(any())).thenReturn(new ArrayList<>(userSessions));
@@ -163,8 +160,7 @@ class DeleteUserAnonymousServiceTest {
 
   private static List<LocalDateTime> createOverdueUpdateDates() {
     LocalDateTime now = LocalDateTime.now();
-    LocalDateTime oneDeletionPeriodAgo = now
-        .minusMinutes(DELETION_PERIOD_MINUTES);
+    LocalDateTime oneDeletionPeriodAgo = now.minusMinutes(DELETION_PERIOD_MINUTES);
     LocalDateTime timeLongInThePast = oneDeletionPeriodAgo.minusMinutes(10);
 
     return List.of(oneDeletionPeriodAgo, timeLongInThePast);
@@ -173,8 +169,8 @@ class DeleteUserAnonymousServiceTest {
   @Test
   void deleteInactiveAnonymousUsers_Should_sendErrorMails_When_someActionsFail() {
     User user = new User();
-    Set<Session> userSessions = Set.of(
-        createSessionForUser(user, createOverdueUpdateDates().get(0), SessionStatus.DONE));
+    Set<Session> userSessions =
+        Set.of(createSessionForUser(user, createOverdueUpdateDates().get(0), SessionStatus.DONE));
     user.setSessions(userSessions);
 
     when(this.sessionRepository.findByStatus(any())).thenReturn(new ArrayList<>(userSessions));

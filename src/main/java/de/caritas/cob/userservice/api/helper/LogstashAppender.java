@@ -21,8 +21,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 
-public class LogstashAppender<T extends DeferredProcessingAware> extends
-    AppenderBase<ILoggingEvent> {
+public class LogstashAppender<T extends DeferredProcessingAware>
+    extends AppenderBase<ILoggingEvent> {
 
   private int connectionTimeoutMillis = 300; // default value
   private int logBufferSize = 20; // default value
@@ -46,7 +46,8 @@ public class LogstashAppender<T extends DeferredProcessingAware> extends
   private boolean isLogstashEnvVariableSet() {
     this.logstashHost = getLogstashHost();
     if (logstashHost == null) {
-      logToStandardError("Logstash env variable (LOGSTASH_HOST) not set, skipping logging to logstash");
+      logToStandardError(
+          "Logstash env variable (LOGSTASH_HOST) not set, skipping logging to logstash");
       return false;
     }
     return true;
@@ -79,10 +80,12 @@ public class LogstashAppender<T extends DeferredProcessingAware> extends
   }
 
   CloseableHttpClient getHttpClient() {
-    RequestConfig config = RequestConfig.custom()
-        .setConnectTimeout(connectionTimeoutMillis)
-        .setConnectionRequestTimeout(connectionTimeoutMillis)
-        .setSocketTimeout(connectionTimeoutMillis).build();
+    RequestConfig config =
+        RequestConfig.custom()
+            .setConnectTimeout(connectionTimeoutMillis)
+            .setConnectionRequestTimeout(connectionTimeoutMillis)
+            .setSocketTimeout(connectionTimeoutMillis)
+            .build();
     return HttpClientBuilder.create().setDefaultRequestConfig(config).build();
   }
 

@@ -34,9 +34,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Controller to handle all session admin requests.
- */
+/** Controller to handle all session admin requests. */
 @RestController
 @RequiredArgsConstructor
 @Api(tags = "admin-user-controller")
@@ -47,7 +45,6 @@ public class UserAdminController implements UseradminApi {
   private final @NonNull ConsultantAdminFacade consultantAdminFacade;
   private final @NonNull UserAdminFacade userAdminFacade;
   private final @NonNull AppointmentService appointmentService;
-
 
   /**
    * Creates the root hal based navigation entity.
@@ -63,16 +60,18 @@ public class UserAdminController implements UseradminApi {
   /**
    * Entry point to retrieve sessions.
    *
-   * @param page          Number of page where to start in the query (1 = first page) (required)
-   * @param perPage       Number of items which are being returned (required)
+   * @param page Number of page where to start in the query (1 = first page) (required)
+   * @param perPage Number of items which are being returned (required)
    * @param sessionFilter The filters to restrict results (optional)
    * @return an entity containing the filtered sessions
    */
   @Override
-  public ResponseEntity<SessionAdminResultDTO> getSessions(@NotNull @Valid Integer page,
-      @NotNull @Valid Integer perPage, @Valid SessionFilter sessionFilter) {
-    SessionAdminResultDTO sessionAdminResultDTO = this.sessionAdminService
-        .findSessions(page, perPage, sessionFilter);
+  public ResponseEntity<SessionAdminResultDTO> getSessions(
+      @NotNull @Valid Integer page,
+      @NotNull @Valid Integer perPage,
+      @Valid SessionFilter sessionFilter) {
+    SessionAdminResultDTO sessionAdminResultDTO =
+        this.sessionAdminService.findSessions(page, perPage, sessionFilter);
     return ResponseEntity.ok(sessionAdminResultDTO);
   }
 
@@ -102,22 +101,24 @@ public class UserAdminController implements UseradminApi {
   /**
    * Entry point to create a new consultant [Authorization: Role: user-admin].
    *
-   * @param consultantId              Consultant Id (required)
+   * @param consultantId Consultant Id (required)
    * @param createConsultantAgencyDTO (required)
    */
   @Override
-  public ResponseEntity<Void> createConsultantAgency(@PathVariable String consultantId,
+  public ResponseEntity<Void> createConsultantAgency(
+      @PathVariable String consultantId,
       @Valid CreateConsultantAgencyDTO createConsultantAgencyDTO) {
     this.consultantAdminFacade.createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
     return new ResponseEntity<>(HttpStatus.CREATED);
   }
 
   @Override
-  public ResponseEntity<Void> setConsultantAgencies(String consultantId,
-      List<CreateConsultantAgencyDTO> agencyList) {
+  public ResponseEntity<Void> setConsultantAgencies(
+      String consultantId, List<CreateConsultantAgencyDTO> agencyList) {
     var notFilteredAgencyList = new ArrayList<>(agencyList);
     appointmentService.syncAgencies(consultantId, notFilteredAgencyList);
-    var agencyIdsForDeletions = consultantAdminFacade.filterAgencyListForDeletion(consultantId, agencyList);
+    var agencyIdsForDeletions =
+        consultantAdminFacade.filterAgencyListForDeletion(consultantId, agencyList);
     consultantAdminFacade.markConsultantAgenciesForDeletion(consultantId, agencyIdsForDeletions);
     consultantAdminFacade.filterAgencyListForCreation(consultantId, agencyList);
     consultantAdminFacade.prepareConsultantAgencyRelation(consultantId, agencyList);
@@ -129,7 +130,7 @@ public class UserAdminController implements UseradminApi {
    * Entry point to delete a consultant agency relation.
    *
    * @param consultantId Consultant Id (required)
-   * @param agencyId     Agency Id (required)
+   * @param agencyId Agency Id (required)
    */
   @Override
   public ResponseEntity<Void> deleteConsultantAgency(String consultantId, Long agencyId) {
@@ -151,15 +152,15 @@ public class UserAdminController implements UseradminApi {
   /**
    * Entry point to update a consultant.
    *
-   * @param consultantId        consultant id (required)
+   * @param consultantId consultant id (required)
    * @param updateConsultantDTO (required)
    * @return {@link ConsultantAdminResponseDTO}
    */
   @Override
   public ResponseEntity<ConsultantAdminResponseDTO> updateConsultant(
       @PathVariable String consultantId, @Valid UpdateAdminConsultantDTO updateConsultantDTO) {
-    return ResponseEntity
-        .ok(this.consultantAdminFacade.updateConsultant(consultantId, updateConsultantDTO));
+    return ResponseEntity.ok(
+        this.consultantAdminFacade.updateConsultant(consultantId, updateConsultantDTO));
   }
 
   /**
@@ -171,24 +172,26 @@ public class UserAdminController implements UseradminApi {
   @Override
   public ResponseEntity<ConsultantAdminResponseDTO> getConsultant(
       @PathVariable String consultantId) {
-    ConsultantAdminResponseDTO responseDTO = this.consultantAdminFacade
-        .findConsultant(consultantId);
+    ConsultantAdminResponseDTO responseDTO =
+        this.consultantAdminFacade.findConsultant(consultantId);
     return ResponseEntity.ok(responseDTO);
   }
 
   /**
    * Entry point to retrieve consultants.
    *
-   * @param page             Number of page where to start in the query (1 &#x3D; first page)
-   *                         (required)
-   * @param perPage          Number of items which are being returned per page (required)
+   * @param page Number of page where to start in the query (1 &#x3D; first page) (required)
+   * @param perPage Number of items which are being returned per page (required)
    * @param consultantFilter The filter parameters to search for. If no filter is set all consultant
-   *                         are being returned. (optional)
+   *     are being returned. (optional)
    * @return an entity containing the filtered sessions
    */
   @Override
-  public ResponseEntity<ConsultantSearchResultDTO> getConsultants(@NotNull @Valid Integer page,
-      @NotNull @Valid Integer perPage, @Valid ConsultantFilter consultantFilter, @Valid Sort sort) {
+  public ResponseEntity<ConsultantSearchResultDTO> getConsultants(
+      @NotNull @Valid Integer page,
+      @NotNull @Valid Integer perPage,
+      @Valid ConsultantFilter consultantFilter,
+      @Valid Sort sort) {
     var resultDTO =
         this.consultantAdminFacade.findFilteredConsultants(page, perPage, consultantFilter, sort);
     return ResponseEntity.ok(resultDTO);
@@ -216,15 +219,14 @@ public class UserAdminController implements UseradminApi {
   @Override
   public ResponseEntity<ConsultantAgencyResponseDTO> getConsultantAgencies(
       @PathVariable String consultantId) {
-    var consultantAgencies = this.consultantAdminFacade
-        .findConsultantAgencies(consultantId);
+    var consultantAgencies = this.consultantAdminFacade.findConsultantAgencies(consultantId);
     return ResponseEntity.ok(consultantAgencies);
   }
 
   /**
    * Entry point to handle consultant data when agency type changes.
    *
-   * @param agencyId      the id of the changed agency
+   * @param agencyId the id of the changed agency
    * @param agencyTypeDTO contains the target type
    */
   @Override

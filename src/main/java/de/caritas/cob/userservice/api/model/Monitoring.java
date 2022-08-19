@@ -40,8 +40,11 @@ public class Monitoring {
     private final int consultingTypeId;
   }
 
-  public Monitoring(@NonNull Long sessionId, @NonNull MonitoringType monitoringType,
-      @Size(max = 255) @NonNull String key, Boolean value) {
+  public Monitoring(
+      @NonNull Long sessionId,
+      @NonNull MonitoringType monitoringType,
+      @Size(max = 255) @NonNull String key,
+      Boolean value) {
     this.sessionId = sessionId;
     this.monitoringType = monitoringType;
     this.key = key;
@@ -59,7 +62,11 @@ public class Monitoring {
    * entity because multiple keys can have the same identifier.
    */
   @Id
-  @Column(name = "type", updatable = false, nullable = false, columnDefinition = "tinyint(4) unsigned")
+  @Column(
+      name = "type",
+      updatable = false,
+      nullable = false,
+      columnDefinition = "tinyint(4) unsigned")
   @NonNull
   private MonitoringType monitoringType;
 

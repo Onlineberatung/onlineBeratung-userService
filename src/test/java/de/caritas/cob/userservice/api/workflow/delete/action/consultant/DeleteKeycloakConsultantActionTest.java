@@ -31,14 +31,11 @@ import org.slf4j.Logger;
 @RunWith(MockitoJUnitRunner.class)
 public class DeleteKeycloakConsultantActionTest {
 
-  @InjectMocks
-  private DeleteKeycloakConsultantAction deleteKeycloakConsultantAction;
+  @InjectMocks private DeleteKeycloakConsultantAction deleteKeycloakConsultantAction;
 
-  @Mock
-  private KeycloakService keycloakService;
+  @Mock private KeycloakService keycloakService;
 
-  @Mock
-  private Logger logger;
+  @Mock private Logger logger;
 
   @Before
   public void setup() {
@@ -46,7 +43,8 @@ public class DeleteKeycloakConsultantActionTest {
   }
 
   @Test
-  public void execute_Should_deleteKeycloakUserAndReturnEmptyList_When_consultantDeletionIsSuccessful() {
+  public void
+      execute_Should_deleteKeycloakUserAndReturnEmptyList_When_consultantDeletionIsSuccessful() {
     ConsultantDeletionWorkflowDTO workflowDTO =
         new ConsultantDeletionWorkflowDTO(new Consultant(), emptyList());
 
@@ -58,7 +56,8 @@ public class DeleteKeycloakConsultantActionTest {
   }
 
   @Test
-  public void execute_Should_returnExpectedWorkflowErrorAndLogError_When_consultantDeletionFailes() {
+  public void
+      execute_Should_returnExpectedWorkflowErrorAndLogError_When_consultantDeletionFailes() {
     Consultant consultant = new Consultant();
     consultant.setId("consultantId");
     doThrow(new RuntimeException()).when(this.keycloakService).deleteUser(any());
@@ -76,5 +75,4 @@ public class DeleteKeycloakConsultantActionTest {
     assertThat(workflowErrors.get(0).getTimestamp(), notNullValue());
     verify(logger).error(anyString(), any(RuntimeException.class));
   }
-
 }

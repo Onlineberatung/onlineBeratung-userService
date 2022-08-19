@@ -23,20 +23,15 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class AcceptAnonymousEnquiryFacadeTest {
 
-  @InjectMocks
-  private AcceptAnonymousEnquiryFacade acceptAnonymousEnquiryFacade;
+  @InjectMocks private AcceptAnonymousEnquiryFacade acceptAnonymousEnquiryFacade;
 
-  @Mock
-  private AssignEnquiryFacade assignEnquiryFacade;
+  @Mock private AssignEnquiryFacade assignEnquiryFacade;
 
-  @Mock
-  private LiveEventNotificationService liveEventNotificationService;
+  @Mock private LiveEventNotificationService liveEventNotificationService;
 
-  @Mock
-  private SessionService sessionService;
+  @Mock private SessionService sessionService;
 
-  @Mock
-  private ValidatedUserAccountProvider validatedUserAccountProvider;
+  @Mock private ValidatedUserAccountProvider validatedUserAccountProvider;
 
   @Test
   public void acceptAnonymousEnquiry_Should_useServicesCorrectly_When_sessionExists() {
@@ -55,5 +50,4 @@ public class AcceptAnonymousEnquiryFacadeTest {
   public void acceptAnonymousEnquiry_Should_throwNotFoundException_When_sessionDoesNotExist() {
     this.acceptAnonymousEnquiryFacade.acceptAnonymousEnquiry(1L);
   }
-
 }

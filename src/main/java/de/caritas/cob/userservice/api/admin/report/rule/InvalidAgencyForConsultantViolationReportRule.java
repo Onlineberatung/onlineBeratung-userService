@@ -1,9 +1,9 @@
 package de.caritas.cob.userservice.api.admin.report.rule;
 
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ViolationDTO;
 import de.caritas.cob.userservice.api.admin.report.builder.ViolationByConsultantBuilder;
 import de.caritas.cob.userservice.api.admin.report.model.AgencyDependedViolationReportRule;
-import de.caritas.cob.userservice.api.adapters.web.dto.ViolationDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
@@ -14,13 +14,11 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-/**
- * Violation rule to find consultants with deleted agency relation.
- */
+/** Violation rule to find consultants with deleted agency relation. */
 @Component
 @RequiredArgsConstructor
-public class InvalidAgencyForConsultantViolationReportRule extends
-    AgencyDependedViolationReportRule {
+public class InvalidAgencyForConsultantViolationReportRule
+    extends AgencyDependedViolationReportRule {
 
   private final @NonNull ConsultantAgencyRepository consultantAgencyRepository;
 
@@ -52,5 +50,4 @@ public class InvalidAgencyForConsultantViolationReportRule extends
         .withReason("Assigned agency with id " + agencyId + " has been deleted")
         .build();
   }
-
 }

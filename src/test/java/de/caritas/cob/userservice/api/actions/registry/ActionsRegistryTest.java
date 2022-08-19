@@ -21,11 +21,9 @@ import org.springframework.context.ApplicationContext;
 @ExtendWith(MockitoExtension.class)
 class ActionsRegistryTest {
 
-  @InjectMocks
-  private ActionsRegistry actionsRegistry;
+  @InjectMocks private ActionsRegistry actionsRegistry;
 
-  @Mock
-  private ApplicationContext applicationContext;
+  @Mock private ApplicationContext applicationContext;
 
   @Test
   void buildContainerForType_Should_useApplicationContextForActionCommand_When_typeIsUser() {
@@ -44,15 +42,15 @@ class ActionsRegistryTest {
   @Test
   void buildContainerForType_Should_executeActionOnContainer_When_actionIsAvailableInContainer() {
     ActionCommand<Session> sessionActionCommand = mock(DeactivateSessionActionCommand.class);
-    when(this.applicationContext.getBeansOfType(any())).thenReturn(Map.of("",
-        sessionActionCommand));
+    when(this.applicationContext.getBeansOfType(any()))
+        .thenReturn(Map.of("", sessionActionCommand));
     Session session = mock(Session.class);
 
-    this.actionsRegistry.buildContainerForType(Session.class)
+    this.actionsRegistry
+        .buildContainerForType(Session.class)
         .addActionToExecute(DeactivateSessionActionCommand.class)
         .executeActions(session);
 
     verify(sessionActionCommand, times(1)).execute(session);
   }
-
 }

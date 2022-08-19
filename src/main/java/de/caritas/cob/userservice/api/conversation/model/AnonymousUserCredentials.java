@@ -4,9 +4,7 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * Representation of Keycloak and Rocket.Chat credentials for an anonymous user.
- */
+/** Representation of Keycloak and Rocket.Chat credentials for an anonymous user. */
 @Data
 @Builder
 public class AnonymousUserCredentials {

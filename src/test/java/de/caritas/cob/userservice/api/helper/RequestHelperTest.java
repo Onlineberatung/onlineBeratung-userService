@@ -16,7 +16,8 @@ public class RequestHelperTest {
   private static final String BEARER_TOKEN = "token";
 
   @Test
-  public void getFormHttpHeaders_Should_Return_HttpHeaders_With_ContentType_ApplicationFormUrlencoded() {
+  public void
+      getFormHttpHeaders_Should_Return_HttpHeaders_With_ContentType_ApplicationFormUrlencoded() {
     var httpHeaders = RequestHelper.getFormHttpHeaders();
     var controlHttpHeaders = new HttpHeaders();
     controlHttpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -26,12 +27,11 @@ public class RequestHelperTest {
 
   @Test
   public void getAuthorizedFormHttpHeaders_Should_Return_HttpHeader_With_BearerToken() {
-    var httpHeaders = RequestHelper.getAuthorizedHttpHeaders(BEARER_TOKEN,
-        MediaType.APPLICATION_FORM_URLENCODED);
+    var httpHeaders =
+        RequestHelper.getAuthorizedHttpHeaders(BEARER_TOKEN, MediaType.APPLICATION_FORM_URLENCODED);
 
     Assertions.assertTrue(httpHeaders.containsKey(HEADER_AUTHORIZATION_KEY));
     Assertions.assertTrue(httpHeaders.containsValue(List.of(HEADER_BEARER_KEY + BEARER_TOKEN)));
     Assertions.assertEquals(MediaType.APPLICATION_FORM_URLENCODED, httpHeaders.getContentType());
   }
-
 }

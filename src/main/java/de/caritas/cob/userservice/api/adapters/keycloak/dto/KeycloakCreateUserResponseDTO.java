@@ -6,10 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.http.HttpStatus;
 
-/**
- * Response DTO containing the HttpStatus and possible errors.
- */
-
+/** Response DTO containing the HttpStatus and possible errors. */
 @Getter
 @Setter
 @AllArgsConstructor

@@ -27,9 +27,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-/**
- * Creator class to generate new {@link ConsultantAgency} instances.
- */
+/** Creator class to generate new {@link ConsultantAgency} instances. */
 @Service
 @RequiredArgsConstructor
 public class ConsultantAgencyRelationCreatorService {
@@ -45,12 +43,12 @@ public class ConsultantAgencyRelationCreatorService {
    * Creates a new {@link ConsultantAgency} based on the {@link ImportRecord} and agency ids.
    *
    * @param consultantId the consultant id
-   * @param agencyIds    the agency ids to be added
-   * @param roles        the roles
-   * @param logMethod    the methode used for logging
+   * @param agencyIds the agency ids to be added
+   * @param roles the roles
+   * @param logMethod the methode used for logging
    */
-  public void createConsultantAgencyRelations(String consultantId, Set<Long> agencyIds,
-      Set<String> roles, Consumer<String> logMethod) {
+  public void createConsultantAgencyRelations(
+      String consultantId, Set<Long> agencyIds, Set<String> roles, Consumer<String> logMethod) {
     checkConsultantHasRoleSet(roles, consultantId);
     agencyIds.stream()
         .map(agencyId -> new ImportRecordAgencyCreationInputAdapter(consultantId, agencyId, roles))
@@ -61,18 +59,18 @@ public class ConsultantAgencyRelationCreatorService {
    * Creates a new {@link ConsultantAgency} based on the consultantId and {@link
    * CreateConsultantAgencyDTO} input.
    *
-   * @param consultantId              the consultant to use
+   * @param consultantId the consultant to use
    * @param createConsultantAgencyDTO the agencyId and role ConsultantAgencyAdminResultDTO}
    */
-  public void createNewConsultantAgency(String consultantId,
-      CreateConsultantAgencyDTO createConsultantAgencyDTO) {
-    var adapter = new CreateConsultantAgencyDTOInputAdapter(consultantId,
-        createConsultantAgencyDTO);
+  public void createNewConsultantAgency(
+      String consultantId, CreateConsultantAgencyDTO createConsultantAgencyDTO) {
+    var adapter =
+        new CreateConsultantAgencyDTOInputAdapter(consultantId, createConsultantAgencyDTO);
     createNewConsultantAgency(adapter, LogService::logInfo);
   }
 
-  private void createNewConsultantAgency(ConsultantAgencyCreationInput input,
-      Consumer<String> logMethod) {
+  private void createNewConsultantAgency(
+      ConsultantAgencyCreationInput input, Consumer<String> logMethod) {
     prepareConsultantAgencyRelation(input);
     completeConsultantAgencyAssigment(input, logMethod);
   }
@@ -87,11 +85,10 @@ public class ConsultantAgencyRelationCreatorService {
 
     ensureConsultingTypeRoles(input, agency);
     consultantAgencyService.saveConsultantAgency(buildConsultantAgency(consultant, agency.getId()));
-
   }
 
-  public void completeConsultantAgencyAssigment(ConsultantAgencyCreationInput input,
-      Consumer<String> logMethod) {
+  public void completeConsultantAgencyAssigment(
+      ConsultantAgencyCreationInput input, Consumer<String> logMethod) {
 
     var consultant = this.retrieveConsultant(input.getConsultantId());
     var agency = retrieveAgency(input.getAgencyId());
@@ -101,8 +98,8 @@ public class ConsultantAgencyRelationCreatorService {
       consultantRepository.save(consultant);
     }
 
-    rocketChatAsyncHelper
-        .addConsultantToSessions(consultant, agency, logMethod, TenantContext.getCurrentTenant());
+    rocketChatAsyncHelper.addConsultantToSessions(
+        consultant, agency, logMethod, TenantContext.getCurrentTenant());
 
     if (isTeamAgencyButNotTeamConsultant(agency, consultant)) {
       consultant.setTeamConsultant(true);
@@ -111,65 +108,72 @@ public class ConsultantAgencyRelationCreatorService {
   }
 
   private void ensureConsultingTypeRoles(ConsultantAgencyCreationInput input, AgencyDTO agency) {
-    var roles = consultingTypeManager
-        .getConsultingTypeSettings(agency.getConsultingType())
-        .getRoles();
+    var roles =
+        consultingTypeManager.getConsultingTypeSettings(agency.getConsultingType()).getRoles();
     if (nonNull(roles) && nonNull(roles.getConsultant())) {
       var roleSets = roles.getConsultant().getRoleSets();
       for (var roleSetName : input.getRoleSetNames()) {
-        roleSets.getOrDefault(roleSetName, Collections.emptyList()).forEach(
-            roleName -> identityClient.ensureRole(input.getConsultantId(), roleName));
+        roleSets
+            .getOrDefault(roleSetName, Collections.emptyList())
+            .forEach(roleName -> identityClient.ensureRole(input.getConsultantId(), roleName));
       }
     }
   }
 
   private Consultant retrieveConsultant(String consultantId) {
-    return this.consultantRepository.findByIdAndDeleteDateIsNull(consultantId)
-        .orElseThrow(() -> new BadRequestException(
-            String.format("Consultant with id %s does not exist", consultantId)));
+    return this.consultantRepository
+        .findByIdAndDeleteDateIsNull(consultantId)
+        .orElseThrow(
+            () ->
+                new BadRequestException(
+                    String.format("Consultant with id %s does not exist", consultantId)));
   }
 
   private void checkConsultantHasRoleSet(Set<String> roles, String consultantId) {
     roles.stream()
         .filter(role -> identityClient.userHasRole(consultantId, role))
         .findAny()
-        .orElseThrow(() -> new BadRequestException(
-            String
-                .format("Consultant with id %s does not have the role set %s", consultantId,
-                    roles)));
+        .orElseThrow(
+            () ->
+                new BadRequestException(
+                    String.format(
+                        "Consultant with id %s does not have the role set %s",
+                        consultantId, roles)));
   }
 
   private AgencyDTO retrieveAgency(Long agencyId) {
     var agencyDto = this.agencyService.getAgencyWithoutCaching(agencyId);
     return Optional.ofNullable(agencyDto)
-        .orElseThrow(() -> new BadRequestException(
-            String.format("AgencyId %s is not a valid agency", agencyId)));
+        .orElseThrow(
+            () ->
+                new BadRequestException(
+                    String.format("AgencyId %s is not a valid agency", agencyId)));
   }
 
-  private void verifyAllAssignedAgenciesHaveSameConsultingType(int consultingTypeId,
-      Consultant consultant) {
+  private void verifyAllAssignedAgenciesHaveSameConsultingType(
+      int consultingTypeId, Consultant consultant) {
     if (nonNull(consultant.getConsultantAgencies())) {
       consultant.getConsultantAgencies().stream()
           .map(ConsultantAgency::getAgencyId)
           .map(this::retrieveAgency)
           .filter(agency -> agency.getConsultingType() != consultingTypeId)
           .findFirst()
-          .ifPresent(agency -> {
-            throw new BadRequestException(String
-                .format("ERROR: different consulting types found than %d for consultant with id %s",
-                    consultingTypeId, consultant.getId()));
-          });
+          .ifPresent(
+              agency -> {
+                throw new BadRequestException(
+                    String.format(
+                        "ERROR: different consulting types found than %d for consultant with id %s",
+                        consultingTypeId, consultant.getId()));
+              });
     }
   }
 
-  private boolean isTeamAgencyButNotTeamConsultant(AgencyDTO agency,
-      Consultant consultant) {
+  private boolean isTeamAgencyButNotTeamConsultant(AgencyDTO agency, Consultant consultant) {
     return isTrue(agency.getTeamAgency()) && !consultant.isTeamConsultant();
   }
 
   private ConsultantAgency buildConsultantAgency(Consultant consultant, Long agencyId) {
-    return ConsultantAgency
-        .builder()
+    return ConsultantAgency.builder()
         .consultant(consultant)
         .agencyId(agencyId)
         .createDate(nowInUtc())
@@ -178,5 +182,4 @@ public class ConsultantAgencyRelationCreatorService {
         .status(ConsultantAgencyStatus.IN_PROGRESS)
         .build();
   }
-
 }

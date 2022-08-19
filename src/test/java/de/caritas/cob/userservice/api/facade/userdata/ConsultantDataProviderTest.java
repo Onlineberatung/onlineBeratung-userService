@@ -16,12 +16,12 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import com.neovisionaries.i18n.LanguageCode;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Language;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
@@ -44,21 +44,15 @@ public class ConsultantDataProviderTest {
 
   private final EasyRandom easyRandom = new EasyRandom();
 
-  @InjectMocks
-  private ConsultantDataProvider underTest;
+  @InjectMocks private ConsultantDataProvider underTest;
 
-  @Mock
-  private AgencyService agencyService;
+  @Mock private AgencyService agencyService;
 
-  @Mock
-  private AuthenticatedUser authenticatedUser;
+  @Mock private AuthenticatedUser authenticatedUser;
 
-  @Mock
-  private ConsultingTypeManager consultingTypeManager;
+  @Mock private ConsultingTypeManager consultingTypeManager;
 
-  @Mock
-  private SessionRepository sessionRepository;
-
+  @Mock private SessionRepository sessionRepository;
 
   @Test(expected = InternalServerErrorException.class)
   public void retrieveData_Should_ThrowInternalServerErrorException_When_NoAgenciesFound() {
@@ -69,12 +63,12 @@ public class ConsultantDataProviderTest {
   }
 
   @Test
-  public void retrieveData_Should_ReturnUserDataResponseDTOWithAgencyDTO_When_ProvidedWithCorrectConsultant() {
+  public void
+      retrieveData_Should_ReturnUserDataResponseDTOWithAgencyDTO_When_ProvidedWithCorrectConsultant() {
     when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.CONSULTANT.getValue()));
     when(agencyService.getAgencies(any())).thenReturn(List.of(AGENCY_DTO_SUCHT));
 
-    List<AgencyDTO> result = underTest.retrieveData(CONSULTANT_WITH_AGENCY)
-        .getAgencies();
+    List<AgencyDTO> result = underTest.retrieveData(CONSULTANT_WITH_AGENCY).getAgencies();
 
     assertNotNull(result);
     assertEquals(AGENCY_DTO_SUCHT, result.get(0));
@@ -87,8 +81,8 @@ public class ConsultantDataProviderTest {
     when(authenticatedUser.getGrantedAuthorities())
         .thenReturn(asSet(GRANTED_AUTHORIZATION_CONSULTANT_DEFAULT));
     when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.CONSULTANT.toString()));
-    when(sessionRepository.countByConsultantAndStatusInAndRegistrationType(any(), any(),
-        any())).thenReturn(5L);
+    when(sessionRepository.countByConsultantAndStatusInAndRegistrationType(any(), any(), any()))
+        .thenReturn(5L);
 
     UserDataResponseDTO result = underTest.retrieveData(CONSULTANT_WITH_AGENCY);
 
@@ -101,20 +95,21 @@ public class ConsultantDataProviderTest {
     assertEquals(CONSULTANT_WITH_AGENCY.isLanguageFormal(), result.isFormalLanguage());
     assertEquals(
         Set.of(CONSULTANT_WITH_AGENCY.getLanguages().iterator().next().getLanguageCode().name()),
-        result.getLanguages()
-    );
+        result.getLanguages());
     assertEquals(CONSULTANT_WITH_AGENCY.isAbsent(), result.isAbsent());
     assertEquals(CONSULTANT_WITH_AGENCY.isTeamConsultant(), result.isInTeamAgency());
-    assertEquals(GRANTED_AUTHORIZATION_CONSULTANT_DEFAULT,
+    assertEquals(
+        GRANTED_AUTHORIZATION_CONSULTANT_DEFAULT,
         result.getGrantedAuthorities().stream().findFirst().orElse(null));
-    assertEquals(UserRole.CONSULTANT.toString(),
-        result.getUserRoles().stream().findFirst().orElse(null));
+    assertEquals(
+        UserRole.CONSULTANT.toString(), result.getUserRoles().stream().findFirst().orElse(null));
     assertEquals(AGENCY_DTO_SUCHT, result.getAgencies().get(0));
     assertTrue(result.isHasArchive());
   }
 
   @Test
-  public void retrieveData_Should_returnDataWithAnonymousConversationsTrue_When_consultantHasAtLeastOneConsultingTypeWithAnonymousConversationsAllowed() {
+  public void
+      retrieveData_Should_returnDataWithAnonymousConversationsTrue_When_consultantHasAtLeastOneConsultingTypeWithAnonymousConversationsAllowed() {
     Consultant consultant = new EasyRandom().nextObject(Consultant.class);
     when(this.agencyService.getAgencies(any()))
         .thenReturn(List.of(new AgencyDTO().consultingType(1)));
@@ -127,7 +122,8 @@ public class ConsultantDataProviderTest {
   }
 
   @Test
-  public void retrieveData_Should_returnDataWithAnonymousConversationsFalse_When_allConsultingTypesHaveAnonymousConversationsDisabled() {
+  public void
+      retrieveData_Should_returnDataWithAnonymousConversationsFalse_When_allConsultingTypesHaveAnonymousConversationsDisabled() {
     Consultant consultant = new EasyRandom().nextObject(Consultant.class);
     when(this.agencyService.getAgencies(any()))
         .thenReturn(List.of(new AgencyDTO().consultingType(1)));
@@ -140,15 +136,16 @@ public class ConsultantDataProviderTest {
   }
 
   @Test
-  public void retrieveData_Should_returnDataWithHasArchiveTrue_When_ConsultantHasRegisteredSessions() {
+  public void
+      retrieveData_Should_returnDataWithHasArchiveTrue_When_ConsultantHasRegisteredSessions() {
     Consultant consultant = new EasyRandom().nextObject(Consultant.class);
     consultant.setTeamConsultant(false);
     when(this.agencyService.getAgencies(any()))
         .thenReturn(List.of(new AgencyDTO().consultingType(1)));
     when(this.consultingTypeManager.getConsultingTypeSettings(anyInt()))
         .thenReturn(new ExtendedConsultingTypeResponseDTO().isAnonymousConversationAllowed(false));
-    when(sessionRepository.countByConsultantAndStatusInAndRegistrationType(any(), any(),
-        any())).thenReturn(5L);
+    when(sessionRepository.countByConsultantAndStatusInAndRegistrationType(any(), any(), any()))
+        .thenReturn(5L);
 
     var result = underTest.retrieveData(consultant);
 
@@ -156,15 +153,16 @@ public class ConsultantDataProviderTest {
   }
 
   @Test
-  public void retrieveData_Should_returnDataWithHasArchiveFalse_When_ConsultantHasNoRegisteredSessions() {
+  public void
+      retrieveData_Should_returnDataWithHasArchiveFalse_When_ConsultantHasNoRegisteredSessions() {
     Consultant consultant = new EasyRandom().nextObject(Consultant.class);
     consultant.setTeamConsultant(false);
     when(this.agencyService.getAgencies(any()))
         .thenReturn(List.of(new AgencyDTO().consultingType(1)));
     when(this.consultingTypeManager.getConsultingTypeSettings(anyInt()))
         .thenReturn(new ExtendedConsultingTypeResponseDTO().isAnonymousConversationAllowed(false));
-    when(sessionRepository.countByConsultantAndStatusInAndRegistrationType(any(), any(),
-        any())).thenReturn(0L);
+    when(sessionRepository.countByConsultantAndStatusInAndRegistrationType(any(), any(), any()))
+        .thenReturn(0L);
 
     var result = underTest.retrieveData(consultant);
 
@@ -172,15 +170,16 @@ public class ConsultantDataProviderTest {
   }
 
   @Test
-  public void retrieveData_Should_returnDataWithHasArchiveTrue_When_ConsultantHasNoRegisteredSessionsButIsTeamConsultant() {
+  public void
+      retrieveData_Should_returnDataWithHasArchiveTrue_When_ConsultantHasNoRegisteredSessionsButIsTeamConsultant() {
     Consultant consultant = easyRandom.nextObject(Consultant.class);
     consultant.setTeamConsultant(true);
     when(this.agencyService.getAgencies(any()))
         .thenReturn(List.of(new AgencyDTO().consultingType(1)));
     when(this.consultingTypeManager.getConsultingTypeSettings(anyInt()))
         .thenReturn(new ExtendedConsultingTypeResponseDTO().isAnonymousConversationAllowed(false));
-    when(sessionRepository.countByConsultantAndStatusInAndRegistrationType(any(), any(),
-        any())).thenReturn(5L);
+    when(sessionRepository.countByConsultantAndStatusInAndRegistrationType(any(), any(), any()))
+        .thenReturn(5L);
 
     var result = underTest.retrieveData(consultant);
 
@@ -190,10 +189,11 @@ public class ConsultantDataProviderTest {
   @Test
   public void retrieveDataShouldReturnConsultantLanguages() {
     var consultant = easyRandom.nextObject(Consultant.class);
-    var languages = consultant.getLanguages().stream()
-        .map(Language::getLanguageCode)
-        .map(LanguageCode::name)
-        .collect(Collectors.toSet());
+    var languages =
+        consultant.getLanguages().stream()
+            .map(Language::getLanguageCode)
+            .map(LanguageCode::name)
+            .collect(Collectors.toSet());
 
     var result = underTest.retrieveData(consultant);
 

@@ -41,8 +41,7 @@ public class EncodeUsernameJsonDeserializerTest {
   }
 
   @Test
-  public void deserialize_ShouldNot_ReencodeEncodedUsername()
-      throws IOException {
+  public void deserialize_ShouldNot_ReencodeEncodedUsername() throws IOException {
     String json = "{\"username:\":\"" + USERNAME_ENCODED + "\"}";
     String result = deserializeUsername(json);
     assertEquals(USERNAME_ENCODED, result);
@@ -85,5 +84,4 @@ public class EncodeUsernameJsonDeserializerTest {
     DeserializationContext deserializationContext = objectMapper.getDeserializationContext();
     return encodeUsernameJsonDeserializer.deserialize(jsonParser, deserializationContext);
   }
-
 }

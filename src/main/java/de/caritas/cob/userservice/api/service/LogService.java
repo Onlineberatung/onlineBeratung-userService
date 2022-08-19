@@ -6,9 +6,7 @@ import static org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Service for logging
- */
+/** Service for logging */
 public class LogService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(LogService.class);
@@ -19,8 +17,7 @@ public class LogService {
   public static final String ASSIGN_SESSION_FACADE_WARNING_TEXT = "AssignSessionFacade warning: ";
   public static final String ASSIGN_SESSION_FACADE_ERROR_TEXT = "AssignSessionFacade error: ";
 
-  private LogService() {
-  }
+  private LogService() {}
 
   /**
    * Logs a database error.

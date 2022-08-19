@@ -131,47 +131,33 @@ class UserControllerSessionE2EIT {
   private static final String CSRF_VALUE = "test";
   private static final Cookie CSRF_COOKIE = new Cookie("csrfCookie", CSRF_VALUE);
 
-  @Autowired
-  private MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
 
-  @Autowired
-  private ObjectMapper objectMapper;
+  @Autowired private ObjectMapper objectMapper;
 
-  @Autowired
-  private UsernameTranscoder usernameTranscoder;
+  @Autowired private UsernameTranscoder usernameTranscoder;
 
-  @Autowired
-  private ConsultantRepository consultantRepository;
+  @Autowired private ConsultantRepository consultantRepository;
 
-  @Autowired
-  private ConsultantAgencyRepository consultantAgencyRepository;
+  @Autowired private ConsultantAgencyRepository consultantAgencyRepository;
 
-  @Autowired
-  private UserRepository userRepository;
+  @Autowired private UserRepository userRepository;
 
-  @Autowired
-  private SessionRepository sessionRepository;
+  @Autowired private SessionRepository sessionRepository;
 
-  @Autowired
-  private ChatRepository chatRepository;
+  @Autowired private ChatRepository chatRepository;
 
-  @Autowired
-  private ChatAgencyRepository chatAgencyRepository;
+  @Autowired private ChatAgencyRepository chatAgencyRepository;
 
-  @Autowired
-  private UserAgencyRepository userAgencyRepository;
+  @Autowired private UserAgencyRepository userAgencyRepository;
 
-  @Autowired
-  private VideoChatConfig videoChatConfig;
+  @Autowired private VideoChatConfig videoChatConfig;
 
-  @Autowired
-  private IdentityConfig identityConfig;
+  @Autowired private IdentityConfig identityConfig;
 
-  @MockBean
-  private AuthenticatedUser authenticatedUser;
+  @MockBean private AuthenticatedUser authenticatedUser;
 
-  @MockBean
-  private RocketChatCredentialsProvider rocketChatCredentialsProvider;
+  @MockBean private RocketChatCredentialsProvider rocketChatCredentialsProvider;
 
   @MockBean
   @Qualifier("restTemplate")
@@ -181,11 +167,9 @@ class UserControllerSessionE2EIT {
   @Qualifier("rocketChatRestTemplate")
   private RestTemplate rocketChatRestTemplate;
 
-  @MockBean
-  private Keycloak keycloak;
+  @MockBean private Keycloak keycloak;
 
-  @Captor
-  private ArgumentCaptor<RequestEntity<Object>> requestCaptor;
+  @Captor private ArgumentCaptor<RequestEntity<Object>> requestCaptor;
 
   private User user;
   private Consultant consultant;
@@ -244,15 +228,15 @@ class UserControllerSessionE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
-  void createEnquiryMessageWithLanguageShouldSaveLanguageAndRespondWithCreated()
-      throws Exception {
+  void createEnquiryMessageWithLanguageShouldSaveLanguageAndRespondWithCreated() throws Exception {
     givenAUserWithASessionNotEnquired();
     givenValidRocketChatTechUserResponse();
     givenValidRocketChatCreationResponse();
     givenAnEnquiryMessageDto(true);
     givenASuccessfulMessageResponse(null);
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             post("/users/sessions/{sessionId}/enquiry/new", session.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
@@ -260,8 +244,7 @@ class UserControllerSessionE2EIT {
                 .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(enquiryMessageDTO))
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("sessionId", is(session.getId().intValue())))
         .andExpect(jsonPath("rcGroupId", is("rcGroupId")))
@@ -271,8 +254,7 @@ class UserControllerSessionE2EIT {
     assertTrue(savedSession.isPresent());
     assertEquals(
         LanguageCode.getByCode(enquiryMessageDTO.getLanguage().getValue()),
-        savedSession.get().getLanguageCode()
-    );
+        savedSession.get().getLanguageCode());
 
     restoreSession();
   }
@@ -287,7 +269,8 @@ class UserControllerSessionE2EIT {
     givenAnEnquiryMessageDto(false);
     givenASuccessfulMessageResponse(null);
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             post("/users/sessions/{sessionId}/enquiry/new", session.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
@@ -295,8 +278,7 @@ class UserControllerSessionE2EIT {
                 .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(enquiryMessageDTO))
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("sessionId", is(session.getId().intValue())))
         .andExpect(jsonPath("rcGroupId", is("rcGroupId")))
@@ -318,7 +300,8 @@ class UserControllerSessionE2EIT {
     givenAnEnquiryMessageDto(false);
     givenASuccessfulMessageResponse("e2e");
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             post("/users/sessions/{sessionId}/enquiry/new", session.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
@@ -326,8 +309,7 @@ class UserControllerSessionE2EIT {
                 .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(enquiryMessageDTO))
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("sessionId", is(session.getId().intValue())))
         .andExpect(jsonPath("rcGroupId", is("rcGroupId")))
@@ -346,7 +328,8 @@ class UserControllerSessionE2EIT {
     enquiryMessageDTO.setOrg("this is the original message");
     givenASuccessfulMessageResponse("e2e");
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             post("/users/sessions/{sessionId}/enquiry/new", session.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
@@ -354,19 +337,22 @@ class UserControllerSessionE2EIT {
                 .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(enquiryMessageDTO))
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("sessionId", is(session.getId().intValue())))
         .andExpect(jsonPath("rcGroupId", is("rcGroupId")))
         .andExpect(jsonPath("t", is("e2e")));
 
-    var requestMessage = requestCaptor.getAllValues().stream()
-        .map(HttpEntity::getBody)
-        .filter(
-            m -> m instanceof de.caritas.cob.userservice.messageservice.generated.web.model.MessageDTO)
-        .map(m -> (de.caritas.cob.userservice.messageservice.generated.web.model.MessageDTO) m)
-        .findFirst();
+    var requestMessage =
+        requestCaptor.getAllValues().stream()
+            .map(HttpEntity::getBody)
+            .filter(
+                m ->
+                    m
+                        instanceof
+                        de.caritas.cob.userservice.messageservice.generated.web.model.MessageDTO)
+            .map(m -> (de.caritas.cob.userservice.messageservice.generated.web.model.MessageDTO) m)
+            .findFirst();
     assertTrue(requestMessage.isPresent());
     assertEquals("this is the original message", requestMessage.get().getOrg());
     restoreSession();
@@ -381,7 +367,8 @@ class UserControllerSessionE2EIT {
     givenAnEmptyRocketChatGetSubscriptionsResponse();
     givenAValidRocketChatGetRoomsResponse(null, null, "A message");
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             get("/users/sessions/consultants")
                 .queryParam("status", "2")
                 .queryParam("count", "15")
@@ -390,8 +377,7 @@ class UserControllerSessionE2EIT {
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("total", is(1)))
         .andExpect(jsonPath("sessions", hasSize(1)))
@@ -409,7 +395,8 @@ class UserControllerSessionE2EIT {
     givenAValidRocketChatGetRoomsResponse(session.getGroupId(), MessageType.E2EE_ACTIVATED, null);
     givenAnEmptyRocketChatGetSubscriptionsResponse();
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             get("/users/sessions/consultants")
                 .queryParam("status", "2")
                 .queryParam("count", "15")
@@ -418,8 +405,7 @@ class UserControllerSessionE2EIT {
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("total", is(1)))
         .andExpect(jsonPath("sessions", hasSize(1)))
@@ -435,11 +421,12 @@ class UserControllerSessionE2EIT {
     givenAValidUser();
     givenAValidConsultant(true);
     givenASessionInProgress();
-    givenAValidRocketChatGetRoomsResponse(session.getGroupId(), MessageType.FURTHER_STEPS,
-        "A message");
+    givenAValidRocketChatGetRoomsResponse(
+        session.getGroupId(), MessageType.FURTHER_STEPS, "A message");
     givenAnEmptyRocketChatGetSubscriptionsResponse();
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             get("/users/sessions/consultants")
                 .queryParam("status", "2")
                 .queryParam("count", "15")
@@ -448,8 +435,7 @@ class UserControllerSessionE2EIT {
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("total", is(1)))
         .andExpect(jsonPath("sessions", hasSize(1)))
@@ -467,17 +453,18 @@ class UserControllerSessionE2EIT {
     givenAnEmptyRocketChatGetSubscriptionsResponse();
     givenAValidRocketChatGetRoomsResponse(null, null, "A message");
 
-    mockMvc.perform(
-        get("/users/sessions/consultants")
-            .queryParam("status", "2")
-            .queryParam("count", "15")
-            .queryParam("filter", "all")
-            .queryParam("offset", "0")
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-            .accept(MediaType.APPLICATION_JSON)
-    ).andExpect(status().isNoContent());
+    mockMvc
+        .perform(
+            get("/users/sessions/consultants")
+                .queryParam("status", "2")
+                .queryParam("count", "15")
+                .queryParam("filter", "all")
+                .queryParam("offset", "0")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
   }
 
   @Test
@@ -490,21 +477,22 @@ class UserControllerSessionE2EIT {
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatGetRoomsResponse(session.getGroupId(), MessageType.E2EE_ACTIVATED, null);
     givenAnEmptyRocketChatGetSubscriptionsResponse();
-    user.getSessions().forEach(session ->
-        givenAValidRocketChatInfoUserResponse(session.getConsultant())
-    );
+    user.getSessions()
+        .forEach(session -> givenAValidRocketChatInfoUserResponse(session.getConsultant()));
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             get("/users/sessions/askers")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("sessions", hasSize(2)))
-        .andExpect(jsonPath("sessions[*].session.lastMessageType",
-            containsInAnyOrder("E2EE_ACTIVATED", "FURTHER_STEPS")))
+        .andExpect(
+            jsonPath(
+                "sessions[*].session.lastMessageType",
+                containsInAnyOrder("E2EE_ACTIVATED", "FURTHER_STEPS")))
         .andExpect(jsonPath("sessions[0].chat", is(nullValue())))
         .andExpect(jsonPath("sessions[1].chat", is(nullValue())));
   }
@@ -517,24 +505,25 @@ class UserControllerSessionE2EIT {
     givenAValidConsultant();
     givenASessionInProgress();
     givenAValidRocketChatSystemUser();
-    givenAValidRocketChatGetRoomsResponse(session.getGroupId(),
-        MessageType.REASSIGN_CONSULTANT_RESET_LAST_MESSAGE, null);
+    givenAValidRocketChatGetRoomsResponse(
+        session.getGroupId(), MessageType.REASSIGN_CONSULTANT_RESET_LAST_MESSAGE, null);
     givenAnEmptyRocketChatGetSubscriptionsResponse();
-    user.getSessions().forEach(session ->
-        givenAValidRocketChatInfoUserResponse(session.getConsultant())
-    );
+    user.getSessions()
+        .forEach(session -> givenAValidRocketChatInfoUserResponse(session.getConsultant()));
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             get("/users/sessions/askers")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("sessions", hasSize(2)))
-        .andExpect(jsonPath("sessions[*].session.lastMessageType",
-            containsInAnyOrder("REASSIGN_CONSULTANT_RESET_LAST_MESSAGE", "FURTHER_STEPS")))
+        .andExpect(
+            jsonPath(
+                "sessions[*].session.lastMessageType",
+                containsInAnyOrder("REASSIGN_CONSULTANT_RESET_LAST_MESSAGE", "FURTHER_STEPS")))
         .andExpect(jsonPath("sessions[0].chat", is(nullValue())))
         .andExpect(jsonPath("sessions[1].chat", is(nullValue())));
   }
@@ -547,24 +536,25 @@ class UserControllerSessionE2EIT {
     givenAValidConsultant();
     givenASessionInProgress();
     givenAValidRocketChatSystemUser();
-    givenAValidRocketChatGetRoomsResponse(session.getGroupId(), MessageType.REASSIGN_CONSULTANT,
-        "a message");
+    givenAValidRocketChatGetRoomsResponse(
+        session.getGroupId(), MessageType.REASSIGN_CONSULTANT, "a message");
     givenAnEmptyRocketChatGetSubscriptionsResponse();
-    user.getSessions().forEach(session ->
-        givenAValidRocketChatInfoUserResponse(session.getConsultant())
-    );
+    user.getSessions()
+        .forEach(session -> givenAValidRocketChatInfoUserResponse(session.getConsultant()));
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             get("/users/sessions/askers")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("sessions", hasSize(2)))
-        .andExpect(jsonPath("sessions[*].session.lastMessageType",
-            containsInAnyOrder("REASSIGN_CONSULTANT", "FURTHER_STEPS")))
+        .andExpect(
+            jsonPath(
+                "sessions[*].session.lastMessageType",
+                containsInAnyOrder("REASSIGN_CONSULTANT", "FURTHER_STEPS")))
         .andExpect(jsonPath("sessions[0].chat", is(nullValue())))
         .andExpect(jsonPath("sessions[1].chat", is(nullValue())));
   }
@@ -577,13 +567,13 @@ class UserControllerSessionE2EIT {
     givenNoRocketChatSubscriptionUpdates();
     givenNoRocketChatRoomUpdates();
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             get("/users/sessions/room?rcGroupIds=mzAdWzQEobJ2PkoxP,9faSTWZ5gurHLXy4R")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("sessions[0].session.feedbackGroupId", is("9faSTWZ5gurHLXy4R")))
         .andExpect(jsonPath("sessions[1].session.groupId", is("mzAdWzQEobJ2PkoxP")))
@@ -598,13 +588,13 @@ class UserControllerSessionE2EIT {
     givenNoRocketChatSubscriptionUpdates();
     givenNoRocketChatRoomUpdates();
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             get("/users/sessions/room?rcGroupIds=YWKxhFX5K2HPpsFbs,4SPkApB8So88c7tQ3")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("sessions[0].session.groupId", is("YWKxhFX5K2HPpsFbs")))
         .andExpect(jsonPath("sessions[0].session.feedbackRead", is(true)))
@@ -632,13 +622,13 @@ class UserControllerSessionE2EIT {
     givenNoRocketChatSubscriptionUpdates();
     givenNoRocketChatRoomUpdates();
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             get("/users/sessions/room?rcGroupIds=mzAdWzQEobJ2PkoxP")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("sessions[0].session.groupId", is("mzAdWzQEobJ2PkoxP")))
         .andExpect(jsonPath("sessions[0].agency", is(notNullValue())))
@@ -653,13 +643,13 @@ class UserControllerSessionE2EIT {
     givenNoRocketChatSubscriptionUpdates();
     givenNoRocketChatRoomUpdates();
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             get("/users/sessions/room?rcGroupIds=YWKxhFX5K2HPpsFbs")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("sessions[0].session.groupId", is("YWKxhFX5K2HPpsFbs")))
         .andExpect(jsonPath("sessions[0].consultant.username", is("u25main")))
@@ -679,31 +669,32 @@ class UserControllerSessionE2EIT {
     givenNoRocketChatSubscriptionUpdates();
     givenNoRocketChatRoomUpdates();
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             get("/users/sessions/room?rcGroupIds=4SPkApB8So88c7tQ3")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
   }
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  void getSessionsForGroupOrFeedbackGroupIdsShouldBeForbiddenIfConsultantDoesNotParticipateInSession()
-      throws Exception {
+  void
+      getSessionsForGroupOrFeedbackGroupIdsShouldBeForbiddenIfConsultantDoesNotParticipateInSession()
+          throws Exception {
     givenAConsultantWithSessions();
     givenNoRocketChatSubscriptionUpdates();
     givenNoRocketChatRoomUpdates();
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             get("/users/sessions/room?rcGroupIds=QBv2xym9qQ2DoAxkR")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
   }
 
@@ -715,31 +706,32 @@ class UserControllerSessionE2EIT {
     givenNoRocketChatSubscriptionUpdates();
     givenNoRocketChatRoomUpdates();
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             get("/users/sessions/room?rcGroupIds=doesNotExist")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
   }
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  void getSessionsForGroupOrFeedbackGroupIdsShouldReturnSessionsForNewEnquiriesOfConsultantInAgency()
-      throws Exception {
+  void
+      getSessionsForGroupOrFeedbackGroupIdsShouldReturnSessionsForNewEnquiriesOfConsultantInAgency()
+          throws Exception {
     givenAConsultantWithSessionsOfNewEnquiries();
     givenNoRocketChatSubscriptionUpdates();
     givenNoRocketChatRoomUpdates();
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             get("/users/sessions/room?rcGroupIds=XJrRTzFg8Ac5BwE86")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("sessions[0].session.groupId", is("XJrRTzFg8Ac5BwE86")))
         .andExpect(jsonPath("sessions", hasSize(1)));
@@ -747,37 +739,37 @@ class UserControllerSessionE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  void getSessionsForGroupOrFeedbackGroupIdsShouldReturnForbiddenForNewEnquiriesForConsultantsNotInAgency()
-      throws Exception {
+  void
+      getSessionsForGroupOrFeedbackGroupIdsShouldReturnForbiddenForNewEnquiriesForConsultantsNotInAgency()
+          throws Exception {
     givenAConsultantWithSessions();
     givenNoRocketChatSubscriptionUpdates();
     givenNoRocketChatRoomUpdates();
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             get("/users/sessions/room?rcGroupIds=mzAdWzQEobJ2PkoxP")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
   }
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
-  void getSessionForIdShouldFindSessionsBySessionId()
-      throws Exception {
+  void getSessionForIdShouldFindSessionsBySessionId() throws Exception {
     givenAUserWithSessions();
     givenNoRocketChatSubscriptionUpdates();
     givenNoRocketChatRoomUpdates();
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             get("/users/sessions/room/900")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("sessions[0].session.id", is(900)))
         .andExpect(jsonPath("sessions[0].session.groupId", is("YWKxhFX5K2HPpsFbs")))
@@ -792,19 +784,18 @@ class UserControllerSessionE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  void getSessionForIdShouldFindSessionsBySessionIdForConsultant()
-      throws Exception {
+  void getSessionForIdShouldFindSessionsBySessionIdForConsultant() throws Exception {
     givenAConsultantWithSessions();
     givenNoRocketChatSubscriptionUpdates();
     givenNoRocketChatRoomUpdates();
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             get("/users/sessions/room/900")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("sessions[0].session.groupId", is("YWKxhFX5K2HPpsFbs")))
         .andExpect(jsonPath("sessions[0].session.feedbackRead", is(true)))
@@ -823,9 +814,12 @@ class UserControllerSessionE2EIT {
     givenAValidConsultant(true);
     var sessionId = RandomStringUtils.randomAlphabetic(8);
 
-    mockMvc.perform(
-            delete("/users/sessions/{sessionId}/consultant/{consultantId}", sessionId,
-                consultant.getId())
+    mockMvc
+        .perform(
+            delete(
+                    "/users/sessions/{sessionId}/consultant/{consultantId}",
+                    sessionId,
+                    consultant.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -838,7 +832,8 @@ class UserControllerSessionE2EIT {
   void removeFromSessionShouldReturnBadRequestIfConsultantIdFormatIsInvalid() throws Exception {
     var consultantId = RandomStringUtils.randomAlphanumeric(8);
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             delete("/users/sessions/1/consultant/{consultantId}", consultantId)
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
@@ -852,9 +847,12 @@ class UserControllerSessionE2EIT {
   void removeFromSessionShouldReturnNotFoundIfConsultantDoesNotExist() throws Exception {
     givenAValidSession();
 
-    mockMvc.perform(
-            delete("/users/sessions/{sessionId}/consultant/{consultantId}",
-                session.getId(), UUID.randomUUID().toString())
+    mockMvc
+        .perform(
+            delete(
+                    "/users/sessions/{sessionId}/consultant/{consultantId}",
+                    session.getId(),
+                    UUID.randomUUID().toString())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -869,9 +867,12 @@ class UserControllerSessionE2EIT {
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
 
-    mockMvc.perform(
-            delete("/users/sessions/{sessionId}/consultant/{consultantId}",
-                RandomStringUtils.randomNumeric(5, 6), consultant.getId())
+    mockMvc
+        .perform(
+            delete(
+                    "/users/sessions/{sessionId}/consultant/{consultantId}",
+                    RandomStringUtils.randomNumeric(5, 6),
+                    consultant.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -891,22 +892,25 @@ class UserControllerSessionE2EIT {
     givenAnEmptyRocketChatGroupMemberResponse(session.getFeedbackGroupId());
     givenKeycloakUserRoles(consultant.getId(), "consultant");
 
-    mockMvc.perform(
-            delete("/users/sessions/{sessionId}/consultant/{consultantId}", session.getId(),
-                consultant.getId())
+    mockMvc
+        .perform(
+            delete(
+                    "/users/sessions/{sessionId}/consultant/{consultantId}",
+                    session.getId(),
+                    consultant.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
     verifyRocketChatTechUserAddedToGroup(logOutput, session.getGroupId(), 0);
-    verifyRocketChatUserRemovedFromGroup(logOutput, session.getGroupId(),
-        session.getConsultant().getRocketChatId(), 0);
+    verifyRocketChatUserRemovedFromGroup(
+        logOutput, session.getGroupId(), session.getConsultant().getRocketChatId(), 0);
     verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getGroupId(), 0);
 
     verifyRocketChatTechUserAddedToGroup(logOutput, session.getFeedbackGroupId(), 0);
-    verifyRocketChatUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(),
-        consultant.getRocketChatId(), 0);
+    verifyRocketChatUserRemovedFromGroup(
+        logOutput, session.getFeedbackGroupId(), consultant.getRocketChatId(), 0);
     verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(), 0);
   }
 
@@ -922,22 +926,25 @@ class UserControllerSessionE2EIT {
     givenAnEmptyRocketChatGroupMemberResponse(session.getFeedbackGroupId());
     givenKeycloakUserRoles(consultant.getId(), "consultant");
 
-    mockMvc.perform(
-            delete("/users/sessions/{sessionId}/consultant/{consultantId}", session.getId(),
-                consultant.getId())
+    mockMvc
+        .perform(
+            delete(
+                    "/users/sessions/{sessionId}/consultant/{consultantId}",
+                    session.getId(),
+                    consultant.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
     verifyRocketChatTechUserAddedToGroup(logOutput, session.getGroupId(), 0);
-    verifyRocketChatUserRemovedFromGroup(logOutput, session.getGroupId(),
-        session.getConsultant().getRocketChatId(), 0);
+    verifyRocketChatUserRemovedFromGroup(
+        logOutput, session.getGroupId(), session.getConsultant().getRocketChatId(), 0);
     verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getGroupId(), 0);
 
     verifyRocketChatTechUserAddedToGroup(logOutput, session.getFeedbackGroupId(), 0);
-    verifyRocketChatUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(),
-        consultant.getRocketChatId(), 0);
+    verifyRocketChatUserRemovedFromGroup(
+        logOutput, session.getFeedbackGroupId(), consultant.getRocketChatId(), 0);
     verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(), 0);
   }
 
@@ -953,22 +960,25 @@ class UserControllerSessionE2EIT {
     givenAnEmptyRocketChatGroupMemberResponse(session.getFeedbackGroupId());
     givenKeycloakUserRoles(consultant.getId(), "consultant");
 
-    mockMvc.perform(
-            delete("/users/sessions/{sessionId}/consultant/{consultantId}", session.getId(),
-                consultant.getId())
+    mockMvc
+        .perform(
+            delete(
+                    "/users/sessions/{sessionId}/consultant/{consultantId}",
+                    session.getId(),
+                    consultant.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
     verifyRocketChatTechUserAddedToGroup(logOutput, session.getGroupId(), 1);
-    verifyRocketChatUserRemovedFromGroup(logOutput, session.getGroupId(),
-        consultant.getRocketChatId(), 1);
+    verifyRocketChatUserRemovedFromGroup(
+        logOutput, session.getGroupId(), consultant.getRocketChatId(), 1);
     verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getGroupId(), 1);
 
     verifyRocketChatTechUserAddedToGroup(logOutput, session.getFeedbackGroupId(), 0);
-    verifyRocketChatUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(),
-        consultant.getRocketChatId(), 0);
+    verifyRocketChatUserRemovedFromGroup(
+        logOutput, session.getFeedbackGroupId(), consultant.getRocketChatId(), 0);
     verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(), 0);
   }
 
@@ -981,26 +991,29 @@ class UserControllerSessionE2EIT {
     givenAValidRocketChatInfoUserResponse();
     givenAValidSession();
     givenAPositiveRocketChatGroupMemberResponse(session.getGroupId(), consultant.getRocketChatId());
-    givenAPositiveRocketChatGroupMemberResponse(session.getFeedbackGroupId(),
-        consultant.getRocketChatId());
+    givenAPositiveRocketChatGroupMemberResponse(
+        session.getFeedbackGroupId(), consultant.getRocketChatId());
     givenKeycloakUserRoles(consultant.getId(), "consultant");
 
-    mockMvc.perform(
-            delete("/users/sessions/{sessionId}/consultant/{consultantId}", session.getId(),
-                consultant.getId())
+    mockMvc
+        .perform(
+            delete(
+                    "/users/sessions/{sessionId}/consultant/{consultantId}",
+                    session.getId(),
+                    consultant.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
     verifyRocketChatTechUserAddedToGroup(logOutput, session.getGroupId(), 1);
-    verifyRocketChatUserRemovedFromGroup(logOutput, session.getGroupId(),
-        consultant.getRocketChatId(), 1);
+    verifyRocketChatUserRemovedFromGroup(
+        logOutput, session.getGroupId(), consultant.getRocketChatId(), 1);
     verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getGroupId(), 1);
 
     verifyRocketChatTechUserAddedToGroup(logOutput, session.getFeedbackGroupId(), 1);
-    verifyRocketChatUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(),
-        consultant.getRocketChatId(), 1);
+    verifyRocketChatUserRemovedFromGroup(
+        logOutput, session.getFeedbackGroupId(), consultant.getRocketChatId(), 1);
     verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(), 1);
   }
 
@@ -1014,22 +1027,25 @@ class UserControllerSessionE2EIT {
     givenAValidRocketChatInfoUserResponse(session.getConsultant());
     givenKeycloakUserRoles(session.getConsultant().getId(), "consultant");
 
-    mockMvc.perform(
-            delete("/users/sessions/{sessionId}/consultant/{consultantId}", session.getId(),
-                session.getConsultant().getId())
+    mockMvc
+        .perform(
+            delete(
+                    "/users/sessions/{sessionId}/consultant/{consultantId}",
+                    session.getId(),
+                    session.getConsultant().getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
     verifyRocketChatTechUserAddedToGroup(logOutput, session.getGroupId(), 0);
-    verifyRocketChatUserRemovedFromGroup(logOutput, session.getGroupId(),
-        session.getConsultant().getRocketChatId(), 0);
+    verifyRocketChatUserRemovedFromGroup(
+        logOutput, session.getGroupId(), session.getConsultant().getRocketChatId(), 0);
     verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getGroupId(), 0);
 
     verifyRocketChatTechUserAddedToGroup(logOutput, session.getFeedbackGroupId(), 0);
-    verifyRocketChatUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(),
-        consultant.getRocketChatId(), 0);
+    verifyRocketChatUserRemovedFromGroup(
+        logOutput, session.getFeedbackGroupId(), consultant.getRocketChatId(), 0);
     verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(), 0);
   }
 
@@ -1039,7 +1055,8 @@ class UserControllerSessionE2EIT {
     givenAValidConsultant(true);
     givenAValidMonitoringDto();
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             put("/users/sessions/monitoring/{sessionId}", 2000)
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
@@ -1064,13 +1081,15 @@ class UserControllerSessionE2EIT {
     var previousConsultant = session.getConsultant();
     assertNotEquals(consultantToAssign, previousConsultant);
 
-    mockMvc.perform(
-            put("/users/sessions/{sessionId}/consultant/{consultantId}", session.getId(),
-                consultantToAssign.getId())
+    mockMvc
+        .perform(
+            put(
+                    "/users/sessions/{sessionId}/consultant/{consultantId}",
+                    session.getId(),
+                    consultantToAssign.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     var updatedSession = sessionRepository.findById(session.getId()).orElseThrow();
@@ -1081,8 +1100,8 @@ class UserControllerSessionE2EIT {
     var out = logOutput.getOut();
     assertTrue(out.contains("Sending 1 emails"));
 
-    var firstEmailLog = "Sending assign-enquiry-notification email to "
-        + consultantToAssign.getEmail();
+    var firstEmailLog =
+        "Sending assign-enquiry-notification email to " + consultantToAssign.getEmail();
     int numFirstEmail = StringUtils.countOccurrencesOf(out, firstEmailLog);
     assertEquals(1, numFirstEmail);
   }
@@ -1102,13 +1121,15 @@ class UserControllerSessionE2EIT {
     var previousConsultant = session.getConsultant();
     assertNotEquals(consultant, previousConsultant);
 
-    mockMvc.perform(
-            put("/users/sessions/{sessionId}/consultant/{consultantId}", session.getId(),
-                consultant.getId())
+    mockMvc
+        .perform(
+            put(
+                    "/users/sessions/{sessionId}/consultant/{consultantId}",
+                    session.getId(),
+                    consultant.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
     var updatedSession = sessionRepository.findById(session.getId()).orElseThrow();
@@ -1122,13 +1143,13 @@ class UserControllerSessionE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  void updateMonitoringShouldRespondWithUnauthorizedIfNotAdvisedByConsultant()
-      throws Exception {
+  void updateMonitoringShouldRespondWithUnauthorizedIfNotAdvisedByConsultant() throws Exception {
     givenAValidConsultant(true);
     givenAValidSession();
     givenAValidMonitoringDto();
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             put("/users/sessions/monitoring/{sessionId}", session.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
@@ -1144,9 +1165,10 @@ class UserControllerSessionE2EIT {
     var userResource = mock(UserResource.class);
     var roleMappingResource = mock(RoleMappingResource.class);
     var roleScopeResource = mock(RoleScopeResource.class);
-    var roleRepresentationList = Arrays.stream(roles)
-        .map(role -> new RoleRepresentation(role, "", false))
-        .collect(Collectors.toList());
+    var roleRepresentationList =
+        Arrays.stream(roles)
+            .map(role -> new RoleRepresentation(role, "", false))
+            .collect(Collectors.toList());
     when(roleScopeResource.listAll()).thenReturn(roleRepresentationList);
     when(roleMappingResource.realmLevel()).thenReturn(roleScopeResource);
     when(userResource.roles()).thenReturn(roleMappingResource);
@@ -1171,9 +1193,9 @@ class UserControllerSessionE2EIT {
 
     var urlSuffix = "/api/v1/users.info?userId=" + consultant.getRocketChatId();
     when(rocketChatRestTemplate.exchange(
-        endsWith(urlSuffix), eq(HttpMethod.GET),
-        any(HttpEntity.class), eq(UserInfoResponseDTO.class))
-    ).thenReturn(ResponseEntity.ok(userInfoResponse));
+            endsWith(urlSuffix), eq(HttpMethod.GET),
+            any(HttpEntity.class), eq(UserInfoResponseDTO.class)))
+        .thenReturn(ResponseEntity.ok(userInfoResponse));
   }
 
   private void givenAPositiveRocketChatGroupMemberResponse(String chatId, String chatUserId) {
@@ -1189,9 +1211,9 @@ class UserControllerSessionE2EIT {
 
     var urlSuffix = "/api/v1/groups.members?roomId=" + chatId + "&count=0";
     when(restTemplate.exchange(
-        endsWith(urlSuffix), eq(HttpMethod.GET),
-        any(HttpEntity.class), eq(GroupMemberResponseDTO.class))
-    ).thenReturn(ResponseEntity.ok(groupMemberResponseDTO));
+            endsWith(urlSuffix), eq(HttpMethod.GET),
+            any(HttpEntity.class), eq(GroupMemberResponseDTO.class)))
+        .thenReturn(ResponseEntity.ok(groupMemberResponseDTO));
   }
 
   private void givenAnEmptyRocketChatGroupMemberResponse(String chatId) {
@@ -1202,9 +1224,9 @@ class UserControllerSessionE2EIT {
 
     var urlSuffix = "/api/v1/groups.members?roomId=" + chatId + "&count=0";
     when(restTemplate.exchange(
-        endsWith(urlSuffix), eq(HttpMethod.GET),
-        any(HttpEntity.class), eq(GroupMemberResponseDTO.class))
-    ).thenReturn(ResponseEntity.ok(groupMemberResponseDTO));
+            endsWith(urlSuffix), eq(HttpMethod.GET),
+            any(HttpEntity.class), eq(GroupMemberResponseDTO.class)))
+        .thenReturn(ResponseEntity.ok(groupMemberResponseDTO));
   }
 
   private void givenOnlyEmptyRocketChatGroupMemberResponses() {
@@ -1215,9 +1237,9 @@ class UserControllerSessionE2EIT {
 
     var urlInfix = "/api/v1/groups.members?roomId=";
     when(restTemplate.exchange(
-        contains(urlInfix), eq(HttpMethod.GET),
-        any(HttpEntity.class), eq(GroupMemberResponseDTO.class))
-    ).thenReturn(ResponseEntity.ok(groupMemberResponseDTO));
+            contains(urlInfix), eq(HttpMethod.GET),
+            any(HttpEntity.class), eq(GroupMemberResponseDTO.class)))
+        .thenReturn(ResponseEntity.ok(groupMemberResponseDTO));
   }
 
   private void givenAnEmptyRocketChatGetSubscriptionsResponse() {
@@ -1228,9 +1250,9 @@ class UserControllerSessionE2EIT {
 
     var urlSuffix = "/api/v1/subscriptions.get";
     when(restTemplate.exchange(
-        endsWith(urlSuffix), eq(HttpMethod.GET),
-        any(HttpEntity.class), eq(SubscriptionsGetDTO.class))
-    ).thenReturn(ResponseEntity.ok(subscriptionsGetResponse));
+            endsWith(urlSuffix), eq(HttpMethod.GET),
+            any(HttpEntity.class), eq(SubscriptionsGetDTO.class)))
+        .thenReturn(ResponseEntity.ok(subscriptionsGetResponse));
   }
 
   private void givenAValidMonitoringDto() {
@@ -1313,12 +1335,13 @@ class UserControllerSessionE2EIT {
     var userInfoResponseDTO = ResponseEntity.ok(body);
     when(restTemplate.exchange(anyString(), any(), any(), eq(UserInfoResponseDTO.class)))
         .thenReturn(userInfoResponseDTO);
-    when(restTemplate.exchange(anyString(), any(), any(), eq(UserInfoResponseDTO.class),
-        anyString())).thenReturn(userInfoResponseDTO);
+    when(restTemplate.exchange(
+            anyString(), any(), any(), eq(UserInfoResponseDTO.class), anyString()))
+        .thenReturn(userInfoResponseDTO);
   }
 
-  private void givenAValidRocketChatGetRoomsResponse(String groupId, MessageType messageType,
-      String message) {
+  private void givenAValidRocketChatGetRoomsResponse(
+      String groupId, MessageType messageType, String message) {
     var updateUserResponse = easyRandom.nextObject(RoomsGetDTO.class);
     var roomsUpdateDTO = Arrays.stream(updateUserResponse.getUpdate()).findFirst().orElseThrow();
     roomsUpdateDTO.getLastMessage().setMessage(message);
@@ -1335,8 +1358,8 @@ class UserControllerSessionE2EIT {
 
     final var urlSuffix = "/api/v1/rooms.get";
     when(restTemplate.exchange(
-        endsWith(urlSuffix), eq(HttpMethod.GET), any(HttpEntity.class), eq(RoomsGetDTO.class)
-    )).thenReturn(ResponseEntity.ok(updateUserResponse));
+            endsWith(urlSuffix), eq(HttpMethod.GET), any(HttpEntity.class), eq(RoomsGetDTO.class)))
+        .thenReturn(ResponseEntity.ok(updateUserResponse));
   }
 
   @SuppressWarnings("unchecked")
@@ -1353,45 +1376,55 @@ class UserControllerSessionE2EIT {
     var response = new RoomsGetDTO();
     var roomsUpdate = new RoomsUpdateDTO[0];
     response.setUpdate(roomsUpdate);
-    when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(HttpEntity.class),
-        eq(RoomsGetDTO.class))).thenReturn(ResponseEntity.ok(response));
+    when(restTemplate.exchange(
+            anyString(), eq(HttpMethod.GET), any(HttpEntity.class), eq(RoomsGetDTO.class)))
+        .thenReturn(ResponseEntity.ok(response));
   }
 
   private void givenASuccessfulMessageResponse(String messageType) {
-    de.caritas.cob.userservice.messageservice.generated.web.model.MessageResponseDTO messageResponseDTO = easyRandom.nextObject(
-        de.caritas.cob.userservice.messageservice.generated.web.model.MessageResponseDTO.class);
+    de.caritas.cob.userservice.messageservice.generated.web.model.MessageResponseDTO
+        messageResponseDTO =
+            easyRandom.nextObject(
+                de.caritas.cob.userservice.messageservice.generated.web.model.MessageResponseDTO
+                    .class);
     messageResponseDTO.setT(messageType);
     ResponseEntity<Object> response = ResponseEntity.status(CREATED).body(messageResponseDTO);
-    when(restTemplate.exchange(requestCaptor.capture(), eq(ParameterizedTypeReference.forType(
-        de.caritas.cob.userservice.messageservice.generated.web.model.MessageResponseDTO.class)))).thenReturn(
-        response);
+    when(restTemplate.exchange(
+            requestCaptor.capture(),
+            eq(
+                ParameterizedTypeReference.forType(
+                    de.caritas.cob.userservice.messageservice.generated.web.model.MessageResponseDTO
+                        .class))))
+        .thenReturn(response);
   }
 
   private void givenNoRocketChatSubscriptionUpdates() {
     var response = new SubscriptionsGetDTO();
     var subscriptionsUpdate = new SubscriptionsUpdateDTO[0];
     response.setUpdate(subscriptionsUpdate);
-    when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(HttpEntity.class),
-        eq(SubscriptionsGetDTO.class))).thenReturn(ResponseEntity.ok(response));
+    when(restTemplate.exchange(
+            anyString(), eq(HttpMethod.GET), any(HttpEntity.class), eq(SubscriptionsGetDTO.class)))
+        .thenReturn(ResponseEntity.ok(response));
   }
 
   private void givenAUserWithASessionNotEnquired() {
     user = userRepository.findById("552d3f10-1b6d-47ee-aec5-b88fbf988f9e").orElseThrow();
     when(authenticatedUser.getUserId()).thenReturn(user.getUserId());
-    session = user.getSessions().stream()
-        .filter(s -> isNull(s.getEnquiryMessageDate()))
-        .findFirst()
-        .orElseThrow();
+    session =
+        user.getSessions().stream()
+            .filter(s -> isNull(s.getEnquiryMessageDate()))
+            .findFirst()
+            .orElseThrow();
   }
 
   private void givenATeamSessionOfAColleagueInProgress() {
     session = new Session();
     session.setUser(user);
-    session.setConsultant(StreamSupport
-        .stream(consultantRepository.findAll().spliterator(), false)
-        .filter(c -> !c.getId().equals(consultant.getId()))
-        .findFirst()
-        .orElseThrow());
+    session.setConsultant(
+        StreamSupport.stream(consultantRepository.findAll().spliterator(), false)
+            .filter(c -> !c.getId().equals(consultant.getId()))
+            .findFirst()
+            .orElseThrow());
     session.setConsultingTypeId(1);
     session.setRegistrationType(RegistrationType.REGISTERED);
     session.setLanguageCode(LanguageCode.de);
@@ -1433,27 +1466,26 @@ class UserControllerSessionE2EIT {
   }
 
   private void givenAConsultantOfSameAgencyToAssignTo() {
-    consultantToAssign = StreamSupport.stream(
-            consultantRepository.findAll().spliterator(), true
-        )
-        .filter(c -> !c.getId().equals(consultant.getId()))
-        .filter(c -> !c.getId().equals(session.getConsultant().getId()))
-        .filter(c -> c.isInAgency(session.getAgencyId()))
-        .findFirst()
-        .orElseThrow();
+    consultantToAssign =
+        StreamSupport.stream(consultantRepository.findAll().spliterator(), true)
+            .filter(c -> !c.getId().equals(consultant.getId()))
+            .filter(c -> !c.getId().equals(session.getConsultant().getId()))
+            .filter(c -> c.isInAgency(session.getAgencyId()))
+            .findFirst()
+            .orElseThrow();
   }
 
   private void givenAConsultantWithSessions() {
-    consultant = consultantRepository.findById("bad14912-cf9f-4c16-9d0e-fe8ede9b60dc")
-        .orElseThrow();
+    consultant =
+        consultantRepository.findById("bad14912-cf9f-4c16-9d0e-fe8ede9b60dc").orElseThrow();
     when(authenticatedUser.isConsultant()).thenReturn(true);
     when(authenticatedUser.getUserId()).thenReturn(consultant.getId());
     when(authenticatedUser.getRoles()).thenReturn(Set.of("consultant"));
   }
 
   private void givenAConsultantWithSessionsOfNewEnquiries() {
-    consultant = consultantRepository.findById("94c3e0b1-0677-4fd2-a7ea-56a71aefd0e8")
-        .orElseThrow();
+    consultant =
+        consultantRepository.findById("94c3e0b1-0677-4fd2-a7ea-56a71aefd0e8").orElseThrow();
     when(authenticatedUser.isConsultant()).thenReturn(true);
     when(authenticatedUser.getUserId()).thenReturn(consultant.getId());
     when(authenticatedUser.getRoles()).thenReturn(Set.of("consultant"));
@@ -1471,24 +1503,30 @@ class UserControllerSessionE2EIT {
     sessionRepository.save(session);
   }
 
-  private void verifyRocketChatTechUserAddedToGroup(CapturedOutput logOutput, String groupId,
-      int count) {
-    int occurrencesOfAddTech = StringUtils.countOccurrencesOf(logOutput.getOut(),
-        "RocketChatTestConfig.addTechnicalUserToGroup(" + groupId + ") called");
+  private void verifyRocketChatTechUserAddedToGroup(
+      CapturedOutput logOutput, String groupId, int count) {
+    int occurrencesOfAddTech =
+        StringUtils.countOccurrencesOf(
+            logOutput.getOut(),
+            "RocketChatTestConfig.addTechnicalUserToGroup(" + groupId + ") called");
     assertEquals(count, occurrencesOfAddTech);
   }
 
-  private void verifyRocketChatTechUserRemovedFromGroup(CapturedOutput logOutput, String groupId,
-      int count) {
-    int occurrencesOfRemoveTech = StringUtils.countOccurrencesOf(logOutput.getOut(),
-        "RocketChatTestConfig.removeTechnicalUserFromGroup(" + groupId + ") called");
+  private void verifyRocketChatTechUserRemovedFromGroup(
+      CapturedOutput logOutput, String groupId, int count) {
+    int occurrencesOfRemoveTech =
+        StringUtils.countOccurrencesOf(
+            logOutput.getOut(),
+            "RocketChatTestConfig.removeTechnicalUserFromGroup(" + groupId + ") called");
     assertEquals(count, occurrencesOfRemoveTech);
   }
 
-  private void verifyRocketChatUserRemovedFromGroup(CapturedOutput logOutput, String groupId,
-      String chatUserId, int count) {
-    int occurrencesOfRemoval = StringUtils.countOccurrencesOf(logOutput.getOut(),
-        "RocketChatTestConfig.removeUserFromGroup(" + chatUserId + "," + groupId + ") called");
+  private void verifyRocketChatUserRemovedFromGroup(
+      CapturedOutput logOutput, String groupId, String chatUserId, int count) {
+    int occurrencesOfRemoval =
+        StringUtils.countOccurrencesOf(
+            logOutput.getOut(),
+            "RocketChatTestConfig.removeUserFromGroup(" + chatUserId + "," + groupId + ") called");
     assertEquals(count, occurrencesOfRemoval);
   }
 }

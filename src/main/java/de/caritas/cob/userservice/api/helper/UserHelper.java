@@ -19,9 +19,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserHelper {
 
-  private static final Pattern EMAIL_PATTERN = Pattern.compile(
-      "^(?=.{1,64}@)[\\p{L}0-9_-]+(\\.[\\p{L}0-9_-]+)*@"
-          + "[^-][\\p{L}0-9-]+(\\.[\\p{L}0-9-]+)*(\\.[\\p{L}]{2,})$");
+  private static final Pattern EMAIL_PATTERN =
+      Pattern.compile(
+          "^(?=.{1,64}@)[\\p{L}0-9_-]+(\\.[\\p{L}0-9_-]+)*@"
+              + "[^-][\\p{L}0-9-]+(\\.[\\p{L}0-9-]+)*(\\.[\\p{L}]{2,})$");
 
   @Value("${keycloakService.user.dummySuffix}")
   private String emailDummySuffix;
@@ -29,8 +30,7 @@ public class UserHelper {
   @Value("${app.base.url}")
   private String hostBaseUrl;
 
-  @Autowired
-  private ConsultingTypeManager consultingTypeManager;
+  @Autowired private ConsultingTypeManager consultingTypeManager;
 
   public static final int USERNAME_MIN_LENGTH = 5;
   public static final int USERNAME_MAX_LENGTH = 30;
@@ -55,25 +55,28 @@ public class UserHelper {
    * @return a random generated password
    */
   public String getRandomPassword() {
-    List<CharacterRule> rules = Arrays.asList(
-        // at least one upper-case character
-        new CharacterRule(EnglishCharacterData.UpperCase, 1),
-        // at least one lower-case character
-        new CharacterRule(EnglishCharacterData.LowerCase, 1),
-        // at least one digit character
-        new CharacterRule(EnglishCharacterData.Digit, 1),
-        // at least one special character
-        new CharacterRule(new CharacterData() {
-          @Override
-          public String getErrorCode() {
-            return "ERR_SPECIAL";
-          }
+    List<CharacterRule> rules =
+        Arrays.asList(
+            // at least one upper-case character
+            new CharacterRule(EnglishCharacterData.UpperCase, 1),
+            // at least one lower-case character
+            new CharacterRule(EnglishCharacterData.LowerCase, 1),
+            // at least one digit character
+            new CharacterRule(EnglishCharacterData.Digit, 1),
+            // at least one special character
+            new CharacterRule(
+                new CharacterData() {
+                  @Override
+                  public String getErrorCode() {
+                    return "ERR_SPECIAL";
+                  }
 
-          @Override
-          public String getCharacters() {
-            return "!()$%&";
-          }
-        }, 1));
+                  @Override
+                  public String getCharacters() {
+                    return "!()$%&";
+                  }
+                },
+                1));
     var generator = new PasswordGenerator();
     // Generated password is 8 characters long, which complies with policy
     return generator.generatePassword(10, rules);
@@ -107,26 +110,42 @@ public class UserHelper {
   /**
    * Returns true if the given usernames match.
    *
-   * @param firstUsername  encoded or decoded first username to compare
+   * @param firstUsername encoded or decoded first username to compare
    * @param secondUsername encoded or decoded second username to compare
    * @return true if usernames matches
    */
   public boolean doUsernamesMatch(String firstUsername, String secondUsername) {
-    return StringUtils.equals(this.usernameTranscoder.encodeUsername(firstUsername).toLowerCase(),
+    return StringUtils.equals(
+        this.usernameTranscoder.encodeUsername(firstUsername).toLowerCase(),
         this.usernameTranscoder.encodeUsername(secondUsername).toLowerCase());
   }
 
   /**
    * Generates the URL for a chat with the given {@link Chat} id and consultingType ID.
    *
-   * @param chatId           the {@link Chat}'s id
+   * @param chatId the {@link Chat}'s id
    * @param consultingTypeId the chat's consultingType ID
    * @return URL (String)
    */
   public String generateChatUrl(Long chatId, int consultingTypeId) {
-    return hostBaseUrl + "/" + consultingTypeManager.getConsultingTypeSettings(consultingTypeId)
-        .getSlug() + "/"
-        + this.usernameTranscoder.base32EncodeAndReplacePlaceholder(Long.toString(chatId),
-        BASE32_PLACEHOLDER_CHAT_ID_REPLACE_STRING);
+    return hostBaseUrl
+        + "/"
+        + consultingTypeManager.getConsultingTypeSettings(consultingTypeId).getSlug()
+        + "/"
+        + this.usernameTranscoder.base32EncodeAndReplacePlaceholder(
+            Long.toString(chatId), BASE32_PLACEHOLDER_CHAT_ID_REPLACE_STRING);
+  }
+
+  /**
+   * Generates the URL for a chat with the given {@link Chat} id.
+   *
+   * @param chatId the {@link Chat}'s id
+   * @return URL (String)
+   */
+  public String generateChatUrl(Long chatId) {
+    return hostBaseUrl
+        + "/"
+        + this.usernameTranscoder.base32EncodeAndReplacePlaceholder(
+            Long.toString(chatId), BASE32_PLACEHOLDER_CHAT_ID_REPLACE_STRING);
   }
 }

@@ -2,6 +2,9 @@ package de.caritas.cob.userservice.api.service.user;
 
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserUpdateDataDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserUpdateRequestDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
@@ -10,17 +13,12 @@ import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserUpdateDataDTO;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserUpdateRequestDTO;
 import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-/**
- * Service class to provide methods to access and modify the currently validated user account.
- */
+/** Service class to provide methods to access and modify the currently validated user account. */
 @Service
 @RequiredArgsConstructor
 public class ValidatedUserAccountProvider {
@@ -39,9 +37,12 @@ public class ValidatedUserAccountProvider {
    * @return the validated {@link User}
    */
   public User retrieveValidatedUser() {
-    return this.userService.getUser(this.authenticatedUser.getUserId())
-        .orElseThrow(() -> new InternalServerErrorException(
-            String.format("User with id %s not found", authenticatedUser.getUserId())));
+    return this.userService
+        .getUser(this.authenticatedUser.getUserId())
+        .orElseThrow(
+            () ->
+                new InternalServerErrorException(
+                    String.format("User with id %s not found", authenticatedUser.getUserId())));
   }
 
   /**
@@ -62,9 +63,12 @@ public class ValidatedUserAccountProvider {
    * @return the validated {@link Consultant}
    */
   public Consultant retrieveValidatedConsultantById(String consultantId) {
-    return this.consultantService.getConsultant(consultantId)
-        .orElseThrow(() -> new InternalServerErrorException(
-            String.format("Consultant with id %s not found", consultantId)));
+    return this.consultantService
+        .getConsultant(consultantId)
+        .orElseThrow(
+            () ->
+                new InternalServerErrorException(
+                    String.format("Consultant with id %s not found", consultantId)));
   }
 
   /**
@@ -78,10 +82,11 @@ public class ValidatedUserAccountProvider {
     if (consultant.isTeamConsultant()) {
       return consultant;
     }
-    throw new ForbiddenException(String.format(
-        "Consultant with id %s is no team consultant and therefore not allowed to get team "
-            + "sessions.",
-        authenticatedUser.getUserId()));
+    throw new ForbiddenException(
+        String.format(
+            "Consultant with id %s is no team consultant and therefore not allowed to get team "
+                + "sessions.",
+            authenticatedUser.getUserId()));
   }
 
   /**
@@ -91,24 +96,20 @@ public class ValidatedUserAccountProvider {
    */
   public void changeUserAccountEmailAddress(Optional<String> optionalEmail) {
     optionalEmail.ifPresentOrElse(
-        identityClient::changeEmailAddress,
-        identityClient::deleteEmailAddress
-    );
+        identityClient::changeEmailAddress, identityClient::deleteEmailAddress);
 
     var userId = authenticatedUser.getUserId();
     var email = optionalEmail.orElseGet(() -> userHelper.getDummyEmail(userId));
-    consultantService.getConsultant(userId).ifPresent(consultant ->
-        updateConsultantEmail(consultant, email)
-    );
-    userService.getUser(userId).ifPresent(user ->
-        updateUserEmail(user, email)
-    );
+    consultantService
+        .getConsultant(userId)
+        .ifPresent(consultant -> updateConsultantEmail(consultant, email));
+    userService.getUser(userId).ifPresent(user -> updateUserEmail(user, email));
   }
 
   private void updateConsultantEmail(Consultant consultant, String email) {
     UserUpdateDataDTO userUpdateDataDTO = new UserUpdateDataDTO(email);
-    UserUpdateRequestDTO requestDTO = new UserUpdateRequestDTO(consultant.getRocketChatId(),
-        userUpdateDataDTO);
+    UserUpdateRequestDTO requestDTO =
+        new UserUpdateRequestDTO(consultant.getRocketChatId(), userUpdateDataDTO);
     this.rocketChatService.updateUser(requestDTO);
 
     consultant.setEmail(email);
@@ -117,8 +118,8 @@ public class ValidatedUserAccountProvider {
 
   private void updateUserEmail(User user, String email) {
     UserUpdateDataDTO userUpdateDataDTO = new UserUpdateDataDTO(email);
-    UserUpdateRequestDTO requestDTO = new UserUpdateRequestDTO(user.getRcUserId(),
-        userUpdateDataDTO);
+    UserUpdateRequestDTO requestDTO =
+        new UserUpdateRequestDTO(user.getRcUserId(), userUpdateDataDTO);
     this.rocketChatService.updateUser(requestDTO);
 
     user.setEmail(email);
@@ -142,7 +143,8 @@ public class ValidatedUserAccountProvider {
    * @param mobileToken the new mobile device identifier token
    */
   public void updateUserMobileToken(String mobileToken) {
-    this.userService.getUser(this.authenticatedUser.getUserId())
+    this.userService
+        .getUser(this.authenticatedUser.getUserId())
         .ifPresent(user -> updateMobileToken(user, mobileToken));
   }
 
@@ -160,5 +162,4 @@ public class ValidatedUserAccountProvider {
     this.userService.addMobileAppToken(this.authenticatedUser.getUserId(), mobileToken);
     this.consultantService.addMobileAppToken(this.authenticatedUser.getUserId(), mobileToken);
   }
-
 }

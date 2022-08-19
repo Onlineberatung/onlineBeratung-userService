@@ -5,14 +5,14 @@ import static de.caritas.cob.userservice.api.model.Session.SessionStatus.NEW;
 import static java.util.Objects.nonNull;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.admin.service.rocketchat.RocketChatRemoveFromGroupOperationService;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.port.out.IdentityClient;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
@@ -52,7 +52,7 @@ public class AssignEnquiryFacade {
    * <p>If the statistics function is enabled, the assignment of the enquired is processed as
    * statistical event.
    *
-   * @param session    the session to assign the consultant
+   * @param session the session to assign the consultant
    * @param consultant the consultant to assign
    */
   public void assignRegisteredEnquiry(Session session, Consultant consultant) {
@@ -66,7 +66,7 @@ public class AssignEnquiryFacade {
    * Assigns the given {@link Session} session to the given {@link Consultant}. Add the given {@link
    * Consultant} to the Rocket.Chat group.
    *
-   * @param session    the session to assign the consultant
+   * @param session the session to assign the consultant
    * @param consultant the consultant to assign
    */
   public void assignAnonymousEnquiry(Session session, Consultant consultant) {
@@ -93,7 +93,8 @@ public class AssignEnquiryFacade {
     sessionService.updateConsultantAndStatusForSession(session, consultant, IN_PROGRESS);
   }
 
-  private Supplier<Object> updateRocketChatRooms(Session session, Consultant consultant, Long currentTenantId) {
+  private Supplier<Object> updateRocketChatRooms(
+      Session session, Consultant consultant, Long currentTenantId) {
     return () -> {
       tenantContextProvider.setCurrentTenantContextIfMissing(currentTenantId);
       updateRocketChatRooms(session.getGroupId(), session, consultant);
@@ -119,15 +120,16 @@ public class AssignEnquiryFacade {
     }
   }
 
+  private void removeUnauthorizedMembers(
+      String rcGroupId, Session session, Consultant consultant, List<GroupMemberDTO> memberList) {
+    var consultantsToRemoveFromRocketChat =
+        unauthorizedMembersProvider.obtainConsultantsToRemove(
+            rcGroupId, session, consultant, memberList);
 
-  private void removeUnauthorizedMembers(String rcGroupId, Session session, Consultant consultant,
-      List<GroupMemberDTO> memberList) {
-    var consultantsToRemoveFromRocketChat = unauthorizedMembersProvider
-        .obtainConsultantsToRemove(rcGroupId, session, consultant, memberList);
-
-    var rocketChatRemoveFromGroupOperationService = RocketChatRemoveFromGroupOperationService
-        .getInstance(this.rocketChatFacade, this.identityClient, this.consultingTypeManager)
-        .onSessionConsultants(Map.of(session, consultantsToRemoveFromRocketChat));
+    var rocketChatRemoveFromGroupOperationService =
+        RocketChatRemoveFromGroupOperationService.getInstance(
+                this.rocketChatFacade, this.identityClient, this.consultingTypeManager)
+            .onSessionConsultants(Map.of(session, consultantsToRemoveFromRocketChat));
 
     if (rcGroupId.equalsIgnoreCase(session.getGroupId())) {
       rocketChatRemoveFromGroupOperationService.removeFromGroup();

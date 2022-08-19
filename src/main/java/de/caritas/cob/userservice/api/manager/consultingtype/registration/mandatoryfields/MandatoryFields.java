@@ -19,8 +19,8 @@ public class MandatoryFields {
 
   public static MandatoryFields convertMandatoryFieldsDTOtoMandatoryFields(
       RegistrationMandatoryFieldsDTO registrationMandatoryFieldsDTO) {
-    return new MandatoryFields(isTrue(registrationMandatoryFieldsDTO.getAge()),
+    return new MandatoryFields(
+        isTrue(registrationMandatoryFieldsDTO.getAge()),
         isTrue(registrationMandatoryFieldsDTO.getState()));
   }
-
 }

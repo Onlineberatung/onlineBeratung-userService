@@ -28,21 +28,23 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class SessionArchiveServiceTest {
 
-  @InjectMocks
-  SessionArchiveService sessionArchiveService;
-  @Mock
-  SessionRepository sessionRepository;
+  @InjectMocks SessionArchiveService sessionArchiveService;
+  @Mock SessionRepository sessionRepository;
+
   @Mock
   @SuppressWarnings("unused")
   AuthenticatedUser authenticatedUser;
-  @Mock
-  SessionArchiveValidator sessionArchiveValidator;
+
+  @Mock SessionArchiveValidator sessionArchiveValidator;
+
   @Mock
   @SuppressWarnings("unused")
   RocketChatService rocketChatService;
+
   @Mock
   @SuppressWarnings("unused")
   ConsultantAgencyService consultantAgencyService;
+
   @Mock
   @SuppressWarnings("unused")
   AccountManager accountManager;
@@ -56,7 +58,8 @@ public class SessionArchiveServiceTest {
   }
 
   @Test(expected = ConflictException.class)
-  public void archiveSession_Should_ThrowConflictException_WhenSessionShouldBeArchivedAndIsNotInProgress() {
+  public void
+      archiveSession_Should_ThrowConflictException_WhenSessionShouldBeArchivedAndIsNotInProgress() {
 
     Session session = Mockito.mock(Session.class);
     when(session.isAdvised(any())).thenReturn(true);
@@ -70,7 +73,8 @@ public class SessionArchiveServiceTest {
   }
 
   @Test(expected = ForbiddenException.class)
-  public void archiveSession_Should_ThrowForbiddenException_WhenConsultantHasaNoAuthorizationForTheSession() {
+  public void
+      archiveSession_Should_ThrowForbiddenException_WhenConsultantHasaNoAuthorizationForTheSession() {
 
     Session session = Mockito.mock(Session.class);
     when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
@@ -93,7 +97,8 @@ public class SessionArchiveServiceTest {
   }
 
   @Test(expected = ForbiddenException.class)
-  public void archiveSession_Should_ThrowForbiddenException_WhenUserHasNoAuthorizationForTheSession() {
+  public void
+      archiveSession_Should_ThrowForbiddenException_WhenUserHasNoAuthorizationForTheSession() {
 
     Session session = Mockito.mock(Session.class);
     when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
@@ -122,7 +127,8 @@ public class SessionArchiveServiceTest {
   }
 
   @Test(expected = ConflictException.class)
-  public void dearchiveSession_Should_ThrowConflictException_WhenSessionShouldBeReactivatedAndIsAlreadyInProgress() {
+  public void
+      dearchiveSession_Should_ThrowConflictException_WhenSessionShouldBeReactivatedAndIsAlreadyInProgress() {
 
     Session session = Mockito.mock(Session.class);
     when(session.isAdvised(any())).thenReturn(true);
@@ -137,7 +143,8 @@ public class SessionArchiveServiceTest {
   }
 
   @Test(expected = ForbiddenException.class)
-  public void dearchiveSession_Should_ThrowForbiddenException_WhenConsultantHasNoAuthorizationForTheSession() {
+  public void
+      dearchiveSession_Should_ThrowForbiddenException_WhenConsultantHasNoAuthorizationForTheSession() {
 
     Session session = Mockito.mock(Session.class);
     when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
@@ -148,7 +155,8 @@ public class SessionArchiveServiceTest {
   }
 
   @Test(expected = ForbiddenException.class)
-  public void dearchiveSession_Should_ThrowForbiddenException_WhenSessionIsNotTeamSessionAndConsultantNotAssigned() {
+  public void
+      dearchiveSession_Should_ThrowForbiddenException_WhenSessionIsNotTeamSessionAndConsultantNotAssigned() {
 
     Session session = Mockito.mock(Session.class);
     when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
@@ -181,7 +189,8 @@ public class SessionArchiveServiceTest {
   }
 
   @Test(expected = ForbiddenException.class)
-  public void dearchiveSession_Should_ThrowForbiddenException_WhenUserHasNoAuthorizationForTheSession() {
+  public void
+      dearchiveSession_Should_ThrowForbiddenException_WhenUserHasNoAuthorizationForTheSession() {
 
     Session session = Mockito.mock(Session.class);
     when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
@@ -202,5 +211,4 @@ public class SessionArchiveServiceTest {
 
     verify(session, times(1)).setStatus(SessionStatus.IN_PROGRESS);
   }
-
 }

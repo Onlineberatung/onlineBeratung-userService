@@ -29,15 +29,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-/**
- * Chat service class
- */
-
+/** Chat service class */
 @Service
 @RequiredArgsConstructor
 public class ChatService {
@@ -54,9 +52,10 @@ public class ChatService {
    * @return list of chats as {@link ConsultantSessionResponseDTO}
    */
   public List<ConsultantSessionResponseDTO> getChatsForConsultant(Consultant consultant) {
-    Set<Long> agencyIds = consultant.getConsultantAgencies().stream()
-        .map(ConsultantAgency::getAgencyId)
-        .collect(Collectors.toSet());
+    Set<Long> agencyIds =
+        consultant.getConsultantAgencies().stream()
+            .map(ConsultantAgency::getAgencyId)
+            .collect(Collectors.toSet());
     return chatRepository.findByAgencyIds(agencyIds).stream()
         .map(this::convertChatToConsultantSessionResponseDTO)
         .collect(Collectors.toList());
@@ -65,10 +64,11 @@ public class ChatService {
   private ConsultantSessionResponseDTO convertChatToConsultantSessionResponseDTO(Chat chat) {
     return new ConsultantSessionResponseDTO()
         .chat(createUserChat(chat))
-        .consultant(new SessionConsultantForConsultantDTO()
-            .id(chat.getChatOwner().getId())
-            .firstName(chat.getChatOwner().getFirstName())
-            .lastName(chat.getChatOwner().getLastName()));
+        .consultant(
+            new SessionConsultantForConsultantDTO()
+                .id(chat.getChatOwner().getId())
+                .firstName(chat.getChatOwner().getFirstName())
+                .lastName(chat.getChatOwner().getLastName()));
   }
 
   private String[] getChatModerators(Set<ChatAgency> chatAgencies) {
@@ -108,14 +108,17 @@ public class ChatService {
   }
 
   /**
-   * Returns the list of current chats for the provided user (Id).
+   * Returns the list of current chats for the provided userId.
+   *
+   * <p>The chats are collected from the user_agency relation (V1) and the user_chat relation (V2).
    *
    * @param userId the id of the user
    * @return list of user chats as {@link UserSessionResponseDTO}
    */
   public List<UserSessionResponseDTO> getChatsForUserId(String userId) {
     List<Chat> chats = chatRepository.findByUserId(userId);
-    return chats.stream()
+    List<Chat> assignedChats = chatRepository.findAssignedByUserId(userId);
+    return Stream.concat(chats.stream(), assignedChats.stream())
         .map(this::convertChatToUserSessionResponseDTO)
         .collect(Collectors.toList());
   }
@@ -131,14 +134,30 @@ public class ChatService {
   }
 
   private UserChatDTO createUserChat(Chat chat) {
-    return new UserChatDTO(chat.getId(), chat.getTopic(),
-        LocalDate.of(chat.getStartDate().getYear(), chat.getStartDate().getMonth(),
+    return new UserChatDTO(
+        chat.getId(),
+        chat.getTopic(),
+        LocalDate.of(
+            chat.getStartDate().getYear(),
+            chat.getStartDate().getMonth(),
             chat.getStartDate().getDayOfMonth()),
-        LocalTime.of(chat.getStartDate().getHour(), chat.getStartDate().getMinute(),
+        LocalTime.of(
+            chat.getStartDate().getHour(),
+            chat.getStartDate().getMinute(),
             chat.getStartDate().getSecond()),
-        chat.getDuration(), isTrue(chat.isRepetitive()), isTrue(chat.isActive()),
-        chat.getConsultingTypeId(), null, null, false, chat.getGroupId(), null, false,
-        getChatModerators(chat.getChatAgencies()), chat.getStartDate(), null);
+        chat.getDuration(),
+        isTrue(chat.isRepetitive()),
+        isTrue(chat.isActive()),
+        chat.getConsultingTypeId(),
+        null,
+        null,
+        false,
+        chat.getGroupId(),
+        null,
+        false,
+        getChatModerators(chat.getChatAgencies()),
+        chat.getStartDate(),
+        null);
   }
 
   /**
@@ -188,24 +207,29 @@ public class ChatService {
   /**
    * Updates topic, duration, repetitive and start date of the provided {@link Chat}.
    *
-   * @param chatId            chat ID
-   * @param chatDTO           {@link ChatDTO}
+   * @param chatId chat ID
+   * @param chatDTO {@link ChatDTO}
    * @param authenticatedUser {@link AuthenticatedUser}
    * @return {@link UpdateChatResponseDTO}
    */
-  public UpdateChatResponseDTO updateChat(Long chatId, ChatDTO chatDTO,
-      AuthenticatedUser authenticatedUser) {
+  public UpdateChatResponseDTO updateChat(
+      Long chatId, ChatDTO chatDTO, AuthenticatedUser authenticatedUser) {
 
-    Chat chat = getChat(chatId).orElseThrow(
-        () -> new BadRequestException(String.format("Chat with id %s does not exist", chatId)));
+    Chat chat =
+        getChat(chatId)
+            .orElseThrow(
+                () ->
+                    new BadRequestException(
+                        String.format("Chat with id %s does not exist", chatId)));
 
     if (!authenticatedUser.getUserId().equals(chat.getChatOwner().getId())) {
       throw new ForbiddenException("Only the chat owner is allowed to change chat settings");
     }
     if (isTrue(chat.isActive())) {
-      throw new ConflictException(String.format(
-          "Chat with id %s is active. Therefore changing the chat settings is not supported.",
-          chatId));
+      throw new ConflictException(
+          String.format(
+              "Chat with id %s is active. Therefore changing the chat settings is not supported.",
+              chatId));
     }
 
     LocalDateTime startDate = LocalDateTime.of(chatDTO.getStartDate(), chatDTO.getStartTime());
@@ -222,5 +246,4 @@ public class ChatService {
         .groupId(chat.getGroupId())
         .chatLink(userHelper.generateChatUrl(chat.getId(), chat.getConsultingTypeId()));
   }
-
 }

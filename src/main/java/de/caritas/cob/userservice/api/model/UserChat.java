@@ -17,13 +17,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Represents the relation between an {@link User} and a {@link Chat}
- */
+/** Represents the relation between an {@link User} and a {@link Chat} */
 @Entity
-@Table(name = "user_chat", uniqueConstraints = {
-    @UniqueConstraint(name = "UniqueUserAndChat", columnNames = {"user_id", "chat_id"})
-})
+@Table(
+    name = "user_chat",
+    uniqueConstraints = {
+      @UniqueConstraint(
+          name = "UniqueUserAndChat",
+          columnNames = {"user_id", "chat_id"})
+    })
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

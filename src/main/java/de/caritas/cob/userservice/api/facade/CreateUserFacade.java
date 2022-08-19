@@ -21,9 +21,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-/**
- * Facade to encapsulate the steps to initialize a user account.
- */
+/** Facade to encapsulate the steps to initialize a user account. */
 @Service
 @RequiredArgsConstructor
 public class CreateUserFacade {
@@ -49,31 +47,35 @@ public class CreateUserFacade {
     agencyVerifier.checkIfConsultingTypeMatchesToAgency(userDTO);
 
     KeycloakCreateUserResponseDTO response = identityClient.createKeycloakUser(userDTO);
-    var user = updateKeycloakAccountAndCreateDatabaseUserAccount(response.getUserId(), userDTO,
-        UserRole.USER);
-    createNewConsultingTypeFacade
-        .initializeNewConsultingType(userDTO, user, obtainConsultingTypeSettings(userDTO));
+    var user =
+        updateKeycloakAccountAndCreateDatabaseUserAccount(
+            response.getUserId(), userDTO, UserRole.USER);
+    createNewConsultingTypeFacade.initializeNewConsultingType(
+        userDTO, user, obtainConsultingTypeSettings(userDTO));
   }
 
   /**
    * Updates Keycloak role and password and creates a user account in MariaDB.
    *
-   * @param userId  Keycloak user ID
+   * @param userId Keycloak user ID
    * @param userDTO {@link UserDTO}
    * @return {@link User}
    */
-  public User updateKeycloakAccountAndCreateDatabaseUserAccount(String userId, UserDTO userDTO,
-      UserRole role) {
+  public User updateKeycloakAccountAndCreateDatabaseUserAccount(
+      String userId, UserDTO userDTO, UserRole role) {
 
     User user = null;
     try {
       updateKeycloakRoleAndPassword(userId, userDTO, role);
 
-      var extendedConsultingTypeResponseDTO = consultingTypeManager
-          .getConsultingTypeSettings(userDTO.getConsultingType());
+      var extendedConsultingTypeResponseDTO =
+          consultingTypeManager.getConsultingTypeSettings(userDTO.getConsultingType());
 
-      user = userService
-          .createUser(userId, userDTO.getUsername(), returnDummyEmailIfNoneGiven(userDTO, userId),
+      user =
+          userService.createUser(
+              userId,
+              userDTO.getUsername(),
+              returnDummyEmailIfNoneGiven(userDTO, userId),
               isTrue(extendedConsultingTypeResponseDTO.getLanguageFormal()));
 
     } catch (Exception ex) {
@@ -109,9 +111,11 @@ public class CreateUserFacade {
   }
 
   private void rollBackAccountInitialization(String userId, UserDTO userDTO) {
-    rollbackFacade
-        .rollBackUserAccount(RollbackUserAccountInformation.builder().userId(userId)
-            .rollBackUserAccount(Boolean.parseBoolean(userDTO.getTermsAccepted())).build());
+    rollbackFacade.rollBackUserAccount(
+        RollbackUserAccountInformation.builder()
+            .userId(userId)
+            .rollBackUserAccount(Boolean.parseBoolean(userDTO.getTermsAccepted()))
+            .build());
     throw new InternalServerErrorException(
         String.format("Could not update account data on registration for: %s", userDTO));
   }

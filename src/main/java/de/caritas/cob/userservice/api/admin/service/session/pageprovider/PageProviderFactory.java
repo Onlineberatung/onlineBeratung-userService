@@ -17,19 +17,19 @@ public class PageProviderFactory {
   private final SessionPageProvider allSessionsPageProvider;
 
   private PageProviderFactory(SessionRepository sessionRepository, SessionFilter sessionFilter) {
-    this.pageProviderRegistry = asList(
-        new AgencySessionPageProvider(sessionRepository, sessionFilter),
-        new AskerSessionPageProvider(sessionRepository, sessionFilter),
-        new ConsultantSessionPageProvider(sessionRepository, sessionFilter),
-        new ConsultingTypeSessionPageProvider(sessionRepository, sessionFilter)
-    );
+    this.pageProviderRegistry =
+        asList(
+            new AgencySessionPageProvider(sessionRepository, sessionFilter),
+            new AskerSessionPageProvider(sessionRepository, sessionFilter),
+            new ConsultantSessionPageProvider(sessionRepository, sessionFilter),
+            new ConsultingTypeSessionPageProvider(sessionRepository, sessionFilter));
     this.allSessionsPageProvider = new AllSessionPageProvider(sessionRepository);
   }
 
-  public static PageProviderFactory getInstance(SessionRepository sessionRepository,
-      SessionFilter sessionFilter) {
-    return new PageProviderFactory(requireNonNull(sessionRepository),
-        requireNonNull(sessionFilter));
+  public static PageProviderFactory getInstance(
+      SessionRepository sessionRepository, SessionFilter sessionFilter) {
+    return new PageProviderFactory(
+        requireNonNull(sessionRepository), requireNonNull(sessionFilter));
   }
 
   /**
@@ -44,5 +44,4 @@ public class PageProviderFactory {
         .findFirst()
         .orElse(this.allSessionsPageProvider);
   }
-
 }

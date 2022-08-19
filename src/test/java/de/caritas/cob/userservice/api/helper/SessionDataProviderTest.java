@@ -63,23 +63,48 @@ public class SessionDataProviderTest {
 
   private final EasyRandom easyRandom = new EasyRandom();
   private final User USER = new User(USER_ID, null, USERNAME, EMAIL, false);
-  private final Consultant CONSULTANT = new Consultant(CONSULTANT_ID, USERNAME, ROCKETCHAT_ID,
-      "first name", "last name", "consultant@cob.de", false, false, null, false, null,
-      null, null, null, null, null, null, null, true, true, true, true, null, null,
-      ConsultantStatus.CREATED, false, LanguageCode.de);
+  private final Consultant CONSULTANT =
+      new Consultant(
+          CONSULTANT_ID,
+          USERNAME,
+          ROCKETCHAT_ID,
+          "first name",
+          "last name",
+          "consultant@cob.de",
+          false,
+          false,
+          null,
+          false,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          true,
+          true,
+          true,
+          true,
+          null,
+          null,
+          ConsultantStatus.CREATED,
+          false,
+          LanguageCode.de);
   private final Session INITIALIZED_SESSION_SUCHT =
       Session.builder()
           .id(1L)
           .user(USER)
           .consultant(CONSULTANT)
           .consultingTypeId(CONSULTING_TYPE_ID_SUCHT)
-          .registrationType(
-              REGISTERED)
+          .registrationType(REGISTERED)
           .postcode("99999")
           .agencyId(0L)
           .status(SessionStatus.INITIAL)
           .enquiryMessageDate(nowInUtc())
-          .createDate(nowInUtc()).build();
+          .createDate(nowInUtc())
+          .build();
 
   private final Session INITIALIZED_SESSION_U25 =
       Session.builder()
@@ -87,20 +112,32 @@ public class SessionDataProviderTest {
           .user(USER)
           .consultant(CONSULTANT)
           .consultingTypeId(CONSULTING_TYPE_ID_U25)
-          .registrationType(
-              REGISTERED)
+          .registrationType(REGISTERED)
           .postcode("99999")
           .agencyId(0L)
           .status(SessionStatus.INITIAL)
           .enquiryMessageDate(nowInUtc())
-          .createDate(nowInUtc()).build();
+          .createDate(nowInUtc())
+          .build();
 
-  private final SessionData SESSION_DATA_ADDICTIVE_DRUGS = new SessionData(new Session(),
-      SessionDataType.REGISTRATION, SessionDataKeyRegistration.ADDICTIVE_DRUGS.getValue(), "1");
-  private final SessionData SESSION_DATA_AGE = new SessionData(new Session(),
-      SessionDataType.REGISTRATION, SessionDataKeyRegistration.AGE.getValue(), "2");
-  private final SessionData SESSION_DATA_GENDER = new SessionData(new Session(),
-      SessionDataType.REGISTRATION, SessionDataKeyRegistration.GENDER.getValue(), "3");
+  private final SessionData SESSION_DATA_ADDICTIVE_DRUGS =
+      new SessionData(
+          new Session(),
+          SessionDataType.REGISTRATION,
+          SessionDataKeyRegistration.ADDICTIVE_DRUGS.getValue(),
+          "1");
+  private final SessionData SESSION_DATA_AGE =
+      new SessionData(
+          new Session(),
+          SessionDataType.REGISTRATION,
+          SessionDataKeyRegistration.AGE.getValue(),
+          "2");
+  private final SessionData SESSION_DATA_GENDER =
+      new SessionData(
+          new Session(),
+          SessionDataType.REGISTRATION,
+          SessionDataKeyRegistration.GENDER.getValue(),
+          "3");
   private final List<SessionData> SESSION_DATA =
       Arrays.asList(SESSION_DATA_ADDICTIVE_DRUGS, SESSION_DATA_AGE, SESSION_DATA_GENDER);
   private final Session INITIALIZED_SESSION_WITH_SESSION_DATA =
@@ -109,8 +146,7 @@ public class SessionDataProviderTest {
           .user(USER)
           .consultant(CONSULTANT)
           .consultingTypeId(CONSULTING_TYPE_ID_U25)
-          .registrationType(
-              REGISTERED)
+          .registrationType(REGISTERED)
           .postcode("99999")
           .agencyId(1L)
           .status(SessionStatus.IN_PROGRESS)
@@ -118,48 +154,79 @@ public class SessionDataProviderTest {
           .sessionData(SESSION_DATA)
           .teamSession(IS_TEAM_SESSION)
           .monitoring(IS_MONITORING)
-          .createDate(nowInUtc()).build();
+          .createDate(nowInUtc())
+          .build();
 
-  private final SessionDataDTO SESSION_DATA_DTO = new SessionDataDTO()
-      .addictiveDrugs(ADDICTIVE_DRUGS_VALUE).relation(RELATION_VALUE).gender(GENDER_VALUE)
-      .age(AGE_VALUE).state(STATE_VALUE);
+  private final SessionDataDTO SESSION_DATA_DTO =
+      new SessionDataDTO()
+          .addictiveDrugs(ADDICTIVE_DRUGS_VALUE)
+          .relation(RELATION_VALUE)
+          .gender(GENDER_VALUE)
+          .age(AGE_VALUE)
+          .state(STATE_VALUE);
   private final SessionDataDTO SESSION_DATA_DTO_WITH_NO_AGE_VALUE =
       new SessionDataDTO()
-          .addictiveDrugs(ADDICTIVE_DRUGS_VALUE).relation(RELATION_VALUE).gender(GENDER_VALUE)
+          .addictiveDrugs(ADDICTIVE_DRUGS_VALUE)
+          .relation(RELATION_VALUE)
+          .gender(GENDER_VALUE)
           .state(STATE_VALUE);
-  private final SessionDataDTO EMPTY_SESSION_DATA_DTO =
-      new SessionDataDTO();
+  private final SessionDataDTO EMPTY_SESSION_DATA_DTO = new SessionDataDTO();
   private final SessionDataInitializingDTO SESSION_DATA_INITIALIZING_WITH_ALL_SESSION_DATA_ITEMS =
-      new SessionDataInitializingDTO().addictiveDrugs(true).age(true).gender(true).relation(true)
-          .relation(true).state(true);
-  private final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS =
-      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_SUCHT).slug(null)
-          .excludeNonMainConsultantsFromTeamSessions(false)
-          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
-          .welcomeMessage(
-              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
-          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
-          .sessionDataInitializing(SESSION_DATA_INITIALIZING_WITH_ALL_SESSION_DATA_ITEMS)
-          .monitoring(new MonitoringDTO().initializeMonitoring(true)
-              .monitoringTemplateFile(null))
-          .initializeFeedbackChat(false).notifications(null)
-          .languageFormal(false).roles(null).registration(null);
+      new SessionDataInitializingDTO()
+          .addictiveDrugs(true)
+          .age(true)
+          .gender(true)
+          .relation(true)
+          .relation(true)
+          .state(true);
+  private final ExtendedConsultingTypeResponseDTO
+      CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS =
+          new ExtendedConsultingTypeResponseDTO()
+              .id(CONSULTING_TYPE_ID_SUCHT)
+              .slug(null)
+              .excludeNonMainConsultantsFromTeamSessions(false)
+              .groupChat(new GroupChatDTO().isGroupChat(false))
+              .consultantBoundedToConsultingType(false)
+              .welcomeMessage(
+                  new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+              .sendFurtherStepsMessage(false)
+              .sendSaveSessionDataMessage(false)
+              .sessionDataInitializing(SESSION_DATA_INITIALIZING_WITH_ALL_SESSION_DATA_ITEMS)
+              .monitoring(
+                  new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
+              .initializeFeedbackChat(false)
+              .notifications(null)
+              .languageFormal(false)
+              .roles(null)
+              .registration(null);
   private final SessionDataInitializingDTO SESSION_DATA_INITIALIZING_WITH_NO_SESSION_DATA_ITEMS =
-      new SessionDataInitializingDTO().addictiveDrugs(false).age(false).gender(false)
+      new SessionDataInitializingDTO()
+          .addictiveDrugs(false)
+          .age(false)
+          .gender(false)
           .relation(false)
-          .relation(false).state(false);
-  private final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITH_NO_SESSION_DATA_ITEMS =
-      new ExtendedConsultingTypeResponseDTO().id(CONSULTING_TYPE_ID_U25).slug(null)
-          .excludeNonMainConsultantsFromTeamSessions(false)
-          .groupChat(new GroupChatDTO().isGroupChat(false)).consultantBoundedToConsultingType(false)
-          .welcomeMessage(
-              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
-          .sendFurtherStepsMessage(false).sendSaveSessionDataMessage(false)
-          .sessionDataInitializing(SESSION_DATA_INITIALIZING_WITH_NO_SESSION_DATA_ITEMS)
-          .monitoring(new MonitoringDTO().initializeMonitoring(true)
-              .monitoringTemplateFile(null))
-          .initializeFeedbackChat(false).notifications(null)
-          .languageFormal(false).roles(null).registration(null);
+          .relation(false)
+          .state(false);
+  private final ExtendedConsultingTypeResponseDTO
+      CONSULTING_TYPE_SETTINGS_WITH_NO_SESSION_DATA_ITEMS =
+          new ExtendedConsultingTypeResponseDTO()
+              .id(CONSULTING_TYPE_ID_U25)
+              .slug(null)
+              .excludeNonMainConsultantsFromTeamSessions(false)
+              .groupChat(new GroupChatDTO().isGroupChat(false))
+              .consultantBoundedToConsultingType(false)
+              .welcomeMessage(
+                  new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
+              .sendFurtherStepsMessage(false)
+              .sendSaveSessionDataMessage(false)
+              .sessionDataInitializing(SESSION_DATA_INITIALIZING_WITH_NO_SESSION_DATA_ITEMS)
+              .monitoring(
+                  new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
+              .initializeFeedbackChat(false)
+              .notifications(null)
+              .languageFormal(false)
+              .roles(null)
+              .registration(null);
 
   @Before
   public void setup() {
@@ -184,8 +251,9 @@ public class SessionDataProviderTest {
     when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_ID_SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
-    List<SessionData> result = sessionDataProvider
-        .createSessionDataList(sessionWithInitializedItem, SESSION_DATA_DTO_WITH_NO_AGE_VALUE);
+    List<SessionData> result =
+        sessionDataProvider.createSessionDataList(
+            sessionWithInitializedItem, SESSION_DATA_DTO_WITH_NO_AGE_VALUE);
 
     assertEquals(5, result.size());
 
@@ -216,7 +284,6 @@ public class SessionDataProviderTest {
           break;
       }
     }
-
   }
 
   @Test
@@ -225,21 +292,20 @@ public class SessionDataProviderTest {
     when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_ID_U25))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_NO_SESSION_DATA_ITEMS);
 
-    List<SessionData> result = sessionDataProvider
-        .createSessionDataList(INITIALIZED_SESSION_U25, SESSION_DATA_DTO);
+    List<SessionData> result =
+        sessionDataProvider.createSessionDataList(INITIALIZED_SESSION_U25, SESSION_DATA_DTO);
 
     assertEquals(0, result.size());
-
   }
 
   @Test
-  public void createSessionDataList_Should_ReturnCorrectListOfSessionDataItems_WhenSessionDataValuesAreNull() {
+  public void
+      createSessionDataList_Should_ReturnCorrectListOfSessionDataItems_WhenSessionDataValuesAreNull() {
     when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_ID_SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
-    List<SessionData> result = sessionDataProvider
-        .createSessionDataList(INITIALIZED_SESSION_SUCHT,
-            new SessionDataDTO());
+    List<SessionData> result =
+        sessionDataProvider.createSessionDataList(INITIALIZED_SESSION_SUCHT, new SessionDataDTO());
 
     for (SessionData sessionData : result) {
       assertThat(sessionData.getValue(), is(nullValue()));
@@ -247,17 +313,18 @@ public class SessionDataProviderTest {
   }
 
   @Test
-  public void createSessionDataList_Should_ReturnCorrectListOfSessionDataItems_WhenSessionDataValuesAreEmpty() {
+  public void
+      createSessionDataList_Should_ReturnCorrectListOfSessionDataItems_WhenSessionDataValuesAreEmpty() {
     when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_ID_SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
-    List<SessionData> result = sessionDataProvider.createSessionDataList(
-        INITIALIZED_SESSION_SUCHT, EMPTY_SESSION_DATA_DTO);
+    List<SessionData> result =
+        sessionDataProvider.createSessionDataList(
+            INITIALIZED_SESSION_SUCHT, EMPTY_SESSION_DATA_DTO);
 
     for (SessionData sessionData : result) {
       assertThat(sessionData.getValue(), is(nullValue()));
     }
-
   }
 
   @Test
@@ -266,8 +333,8 @@ public class SessionDataProviderTest {
     when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_ID_SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
-    List<SessionData> dataList = sessionDataProvider
-        .createSessionDataList(INITIALIZED_SESSION_SUCHT, SESSION_DATA_DTO);
+    List<SessionData> dataList =
+        sessionDataProvider.createSessionDataList(INITIALIZED_SESSION_SUCHT, SESSION_DATA_DTO);
 
     assertEquals(AGE_VALUE, getValueOfKey(dataList, AGE));
   }
@@ -278,9 +345,8 @@ public class SessionDataProviderTest {
     when(consultingTypeManager.getConsultingTypeSettings(CONSULTING_TYPE_ID_SUCHT))
         .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS);
 
-    List<SessionData> dataList = sessionDataProvider
-        .createSessionDataList(INITIALIZED_SESSION_SUCHT,
-            new SessionDataDTO());
+    List<SessionData> dataList =
+        sessionDataProvider.createSessionDataList(INITIALIZED_SESSION_SUCHT, new SessionDataDTO());
 
     assertNull(getValueOfKey(dataList, AGE));
   }
@@ -297,10 +363,10 @@ public class SessionDataProviderTest {
     Map<String, Object> result =
         sessionDataProvider.getSessionDataMapFromSession(INITIALIZED_SESSION_WITH_SESSION_DATA);
 
-    assertEquals(result.get(SESSION_DATA_ADDICTIVE_DRUGS.getKey()),
-        SESSION_DATA_ADDICTIVE_DRUGS.getValue());
-    assertEquals(result.get(SESSION_DATA_ADDICTIVE_DRUGS.getKey()),
-        SESSION_DATA_ADDICTIVE_DRUGS.getValue());
+    assertEquals(
+        result.get(SESSION_DATA_ADDICTIVE_DRUGS.getKey()), SESSION_DATA_ADDICTIVE_DRUGS.getValue());
+    assertEquals(
+        result.get(SESSION_DATA_ADDICTIVE_DRUGS.getKey()), SESSION_DATA_ADDICTIVE_DRUGS.getValue());
     assertEquals(result.get(SESSION_DATA_GENDER.getKey()), SESSION_DATA_GENDER.getValue());
     assertEquals(result.get(SESSION_DATA_AGE.getKey()), SESSION_DATA_AGE.getValue());
     assertTrue(result.containsKey(SessionDataKeyRegistration.ADDICTIVE_DRUGS.getValue()));
@@ -308,16 +374,13 @@ public class SessionDataProviderTest {
     assertTrue(result.containsKey(SessionDataKeyRegistration.AGE.getValue()));
     assertFalse(result.containsKey(SessionDataKeyRegistration.RELATION.getValue()));
     assertFalse(result.containsKey(SessionDataKeyRegistration.STATE.getValue()));
-
   }
 
   private String getValueOfKey(List<SessionData> sessionDataList, String key) {
 
     if (nonNull(sessionDataList)) {
-      SessionData sessionData = sessionDataList.stream()
-          .filter(data -> key.equals(data.getKey()))
-          .findAny()
-          .orElse(null);
+      SessionData sessionData =
+          sessionDataList.stream().filter(data -> key.equals(data.getKey())).findAny().orElse(null);
 
       if (nonNull(sessionData)) {
         return sessionData.getValue();
@@ -326,5 +389,4 @@ public class SessionDataProviderTest {
 
     return null;
   }
-
 }

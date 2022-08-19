@@ -7,8 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
-import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.port.out.UserMobileTokenRepository;
+import de.caritas.cob.userservice.api.port.out.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -25,14 +25,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 class UserServiceIT {
 
-  @Autowired
-  private UserService userService;
+  @Autowired private UserService userService;
 
-  @Autowired
-  private UserRepository userRepository;
+  @Autowired private UserRepository userRepository;
 
-  @Autowired
-  private UserMobileTokenRepository userMobileTokenRepository;
+  @Autowired private UserMobileTokenRepository userMobileTokenRepository;
 
   @BeforeEach
   void clearTokens() {
@@ -59,8 +56,7 @@ class UserServiceIT {
 
     this.userService.addMobileAppToken(userId, "token");
 
-    assertThrows(ConflictException.class,
-        () -> this.userService.addMobileAppToken(userId, "token"));
+    assertThrows(
+        ConflictException.class, () -> this.userService.addMobileAppToken(userId, "token"));
   }
-
 }

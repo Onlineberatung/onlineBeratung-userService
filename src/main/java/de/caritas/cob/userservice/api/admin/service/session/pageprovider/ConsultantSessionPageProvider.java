@@ -10,9 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-/**
- * Page provider for {@link Session} filtered by consultant.
- */
+/** Page provider for {@link Session} filtered by consultant. */
 @RequiredArgsConstructor
 public class ConsultantSessionPageProvider implements SessionPageProvider {
 

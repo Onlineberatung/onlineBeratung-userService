@@ -58,8 +58,7 @@ public class TenantTemplateSupplier {
     return new TemplateDataDTO().key("tenant_urldatenschutz").value(tenantUrl + "/datenschutz");
   }
 
-  private String getTenantBaseUrl(
-      String subdomain) {
+  private String getTenantBaseUrl(String subdomain) {
     String hostName = "";
     try {
       hostName = new URI(applicationBaseUrl).getHost();
@@ -77,5 +76,4 @@ public class TenantTemplateSupplier {
   private TemplateDataDTO getTenantName(RestrictedTenantDTO tenantData) {
     return new TemplateDataDTO().key("tenant_name").value(tenantData.getName());
   }
-
 }

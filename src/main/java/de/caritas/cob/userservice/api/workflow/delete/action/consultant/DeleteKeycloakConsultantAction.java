@@ -13,13 +13,11 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-/**
- * Action to delete a user account in keycloak.
- */
+/** Action to delete a user account in keycloak. */
 @Slf4j
 @Component
-public class DeleteKeycloakConsultantAction extends DeleteKeycloakUserAction implements
-    ActionCommand<ConsultantDeletionWorkflowDTO> {
+public class DeleteKeycloakConsultantAction extends DeleteKeycloakUserAction
+    implements ActionCommand<ConsultantDeletionWorkflowDTO> {
 
   public DeleteKeycloakConsultantAction(@NonNull IdentityClient identityClient) {
     super(identityClient);
@@ -36,15 +34,16 @@ public class DeleteKeycloakConsultantAction extends DeleteKeycloakUserAction imp
       this.deleteUserWithId(actionTarget.getConsultant().getId());
     } catch (Exception e) {
       log.error("UserService delete workflow error: ", e);
-      actionTarget.getDeletionWorkflowErrors().add(
-          DeletionWorkflowError.builder()
-              .deletionSourceType(CONSULTANT)
-              .deletionTargetType(DeletionTargetType.KEYCLOAK)
-              .identifier(actionTarget.getConsultant().getId())
-              .reason(ERROR_REASON)
-              .timestamp(nowInUtc())
-              .build()
-      );
+      actionTarget
+          .getDeletionWorkflowErrors()
+          .add(
+              DeletionWorkflowError.builder()
+                  .deletionSourceType(CONSULTANT)
+                  .deletionTargetType(DeletionTargetType.KEYCLOAK)
+                  .identifier(actionTarget.getConsultant().getId())
+                  .reason(ERROR_REASON)
+                  .timestamp(nowInUtc())
+                  .build());
     }
   }
 }

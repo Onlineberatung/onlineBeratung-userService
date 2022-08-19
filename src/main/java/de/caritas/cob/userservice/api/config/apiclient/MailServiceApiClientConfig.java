@@ -24,5 +24,4 @@ public class MailServiceApiClientConfig {
   public ApiClient mailServiceApiClient(RestTemplate restTemplate) {
     return new ApiClient(restTemplate).setBasePath(this.mailServiceApiUrl);
   }
-
 }

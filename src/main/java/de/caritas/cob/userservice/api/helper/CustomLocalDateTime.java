@@ -7,15 +7,12 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
-/**
- * Local date time class providing now and epoch seconds with zone offset utc.
- */
+/** Local date time class providing now and epoch seconds with zone offset utc. */
 public class CustomLocalDateTime {
 
   private static final String ISO_DATE_FORMAT = "uuuu-MM-dd'T'HH:mm:ssX";
 
-  private CustomLocalDateTime() {
-  }
+  private CustomLocalDateTime() {}
 
   /**
    * Creates a current {@link LocalDateTime} instance with {@link ZoneOffset} utc.
@@ -33,7 +30,8 @@ public class CustomLocalDateTime {
    * @return unix time
    */
   public static long toUnixTime(LocalDateTime localDateTime) {
-    return nonNull(localDateTime) ? LocalDateTime.now(ZoneOffset.UTC).toEpochSecond(ZoneOffset.UTC)
+    return nonNull(localDateTime)
+        ? LocalDateTime.now(ZoneOffset.UTC).toEpochSecond(ZoneOffset.UTC)
         : 0;
   }
 
@@ -56,9 +54,7 @@ public class CustomLocalDateTime {
    * @return converted time in {@link Date}
    */
   public static Date toDate(String localDateTime) {
-    return Date.from(LocalDateTime.parse(localDateTime.replace("Z", ""))
-        .atOffset(ZoneOffset.UTC)
-        .toInstant());
+    return Date.from(
+        LocalDateTime.parse(localDateTime.replace("Z", "")).atOffset(ZoneOffset.UTC).toInstant());
   }
-
 }

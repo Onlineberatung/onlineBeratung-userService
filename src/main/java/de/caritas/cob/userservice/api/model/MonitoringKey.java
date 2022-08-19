@@ -6,10 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Composite key for {@link Monitoring}
- */
-
+/** Composite key for {@link Monitoring} */
 @Getter
 @Setter
 @AllArgsConstructor

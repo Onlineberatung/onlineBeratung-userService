@@ -28,14 +28,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 public class GetChatFacadeTest {
 
-  @InjectMocks
-  private GetChatFacade getChatFacade;
+  @InjectMocks private GetChatFacade getChatFacade;
 
-  @Mock
-  private ChatService chatService;
+  @Mock private ChatService chatService;
 
-  @Mock
-  private ChatPermissionVerifier chatPermissionVerifier;
+  @Mock private ChatPermissionVerifier chatPermissionVerifier;
 
   @Test
   public void getChat_Should_ThrowNotFoundException_WhenChatDoesNotExist() {
@@ -54,7 +51,8 @@ public class GetChatFacadeTest {
   @Test
   public void getChat_Should_ThrowRequestForbiddenException_WhenConsultantHasNoPermissionForChat() {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
-    doThrow(new ForbiddenException("")).when(chatPermissionVerifier)
+    doThrow(new ForbiddenException(""))
+        .when(chatPermissionVerifier)
         .verifyPermissionForChat(ACTIVE_CHAT);
 
     try {
@@ -71,7 +69,8 @@ public class GetChatFacadeTest {
   @Test
   public void getChat_Should_ThrowRequestForbiddenException_WhenUserHasNoPermissionForChat() {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
-    doThrow(new ForbiddenException("")).when(chatPermissionVerifier)
+    doThrow(new ForbiddenException(""))
+        .when(chatPermissionVerifier)
         .verifyPermissionForChat(ACTIVE_CHAT);
 
     try {
@@ -103,8 +102,7 @@ public class GetChatFacadeTest {
   @Test
   public void getChat_Should_ReturnValidChatInfoResponseDTOForConsultant() {
     when(chatService.getChat(ACTIVE_CHAT.getId())).thenReturn(Optional.of(ACTIVE_CHAT));
-    when(chatPermissionVerifier.hasSameAgencyAssigned(ACTIVE_CHAT, CONSULTANT))
-        .thenReturn(true);
+    when(chatPermissionVerifier.hasSameAgencyAssigned(ACTIVE_CHAT, CONSULTANT)).thenReturn(true);
 
     ChatInfoResponseDTO result = getChatFacade.getChat(ACTIVE_CHAT.getId());
 
@@ -114,8 +112,6 @@ public class GetChatFacadeTest {
     assertEquals(true, result.getActive());
 
     verify(chatService, times(1)).getChat(ACTIVE_CHAT.getId());
-    verify(chatPermissionVerifier, times(1))
-        .verifyPermissionForChat(ACTIVE_CHAT);
+    verify(chatPermissionVerifier, times(1)).verifyPermissionForChat(ACTIVE_CHAT);
   }
-
 }

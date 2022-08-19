@@ -22,8 +22,7 @@ public class HelperTest {
   private static String TEXT_WITH_HTML = "<strong>Lorem Ipsum</strong>";
   private static String TEXT_WITH_JS = "Lorem Ipsum<script>alert('1');</script>";
 
-  @InjectMocks
-  private Helper helper;
+  @InjectMocks private Helper helper;
 
   @Test
   public void getUnixTimestampFromDate_Should_ReturnNullIfNoParameterProvided() {
@@ -51,7 +50,8 @@ public class HelperTest {
   }
 
   @Test
-  public void removeHTMLFromText_Should_RemoveHtmlAndJavascriptFromText_And_ShouldNot_RemoveNewslines() {
+  public void
+      removeHTMLFromText_Should_RemoveHtmlAndJavascriptFromText_And_ShouldNot_RemoveNewslines() {
     assertEquals(TEXT_WITH_NEWLINE, Helper.removeHTMLFromText(TEXT_WITH_NEWLINE_AND_HTML_AND_JS));
   }
 }

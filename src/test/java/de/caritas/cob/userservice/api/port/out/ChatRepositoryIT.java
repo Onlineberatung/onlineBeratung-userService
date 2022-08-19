@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.port.out;
 
+import static java.util.Objects.nonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -15,6 +16,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
 @TestPropertySource(properties = "spring.profiles.active=testing")
@@ -23,11 +25,9 @@ class ChatRepositoryIT {
 
   private static final EasyRandom easyRandom = new EasyRandom();
 
-  @Autowired
-  private ChatRepository underTest;
+  @Autowired private ChatRepository underTest;
 
-  @Autowired
-  private ConsultantRepository consultantRepository;
+  @Autowired private ConsultantRepository consultantRepository;
 
   private Consultant consultant;
 
@@ -35,9 +35,34 @@ class ChatRepositoryIT {
 
   @AfterEach
   public void restore() {
-    underTest.deleteById(chat.getId());
-    chat = null;
-    consultant = null;
+    if (nonNull(chat)) {
+      underTest.deleteById(chat.getId());
+      chat = null;
+      consultant = null;
+    }
+  }
+
+  @Test
+  @Sql(value = "/database/chatAndRelationData.sql")
+  void findAssignedByUserId_Should_FindAllDirectAssignedChats() {
+    String userId = "015d013d-95e7-4e91-85b5-12cdb3d317f3";
+
+    var assignedChats = underTest.findAssignedByUserId(userId);
+
+    assertEquals(2, assignedChats.size());
+    assertEquals(0, assignedChats.get(0).getId());
+    assertEquals(1, assignedChats.get(1).getId());
+  }
+
+  @Test
+  @Sql(value = "/database/chatAndRelationData.sql")
+  void findByUserId_Should_FindAllChatWithChatAgencyRelation() {
+    String userId = "017cac2a-2086-47eb-9f8e-40547dfa2fd5";
+
+    var chats = underTest.findByUserId(userId);
+
+    assertEquals(1, chats.size());
+    assertEquals(2, chats.get(0).getId());
   }
 
   @Test

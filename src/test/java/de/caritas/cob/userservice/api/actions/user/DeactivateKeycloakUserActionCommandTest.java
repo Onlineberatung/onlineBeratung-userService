@@ -16,11 +16,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class DeactivateKeycloakUserActionCommandTest {
 
-  @InjectMocks
-  private DeactivateKeycloakUserActionCommand deactivateKeycloakUserActionCommand;
+  @InjectMocks private DeactivateKeycloakUserActionCommand deactivateKeycloakUserActionCommand;
 
-  @Mock
-  private KeycloakService keycloakService;
+  @Mock private KeycloakService keycloakService;
 
   @Test
   void execute_Should_deactivateUserInKeycloak() {
@@ -31,5 +29,4 @@ class DeactivateKeycloakUserActionCommandTest {
 
     verify(this.keycloakService, times(1)).deactivateUser("user id");
   }
-
 }

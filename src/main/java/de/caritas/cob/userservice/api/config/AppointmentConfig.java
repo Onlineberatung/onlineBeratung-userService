@@ -12,12 +12,7 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "appointments")
 public class AppointmentConfig {
 
-  @NotNull
-  @Positive
-  private Integer lifespanInHours;
-  @NotNull
-  private Boolean deleteJobEnabled;
-  @NotBlank
-  private String deleteJobCron;
-
+  @NotNull @Positive private Integer lifespanInHours;
+  @NotNull private Boolean deleteJobEnabled;
+  @NotBlank private String deleteJobCron;
 }

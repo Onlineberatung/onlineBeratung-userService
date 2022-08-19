@@ -28,9 +28,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-/**
- * Represents a user
- */
+/** Represents a user */
 @Entity
 @Table(name = "user")
 @AllArgsConstructor
@@ -39,7 +37,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Setter
 @ToString
 @EntityListeners(AuditingEntityListener.class)
-@FilterDef(name = "tenantFilter", parameters = {@ParamDef(name = "tenantId", type = "long")})
+@FilterDef(
+    name = "tenantFilter",
+    parameters = {@ParamDef(name = "tenantId", type = "long")})
 @Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
 public class User implements TenantAware {
 
@@ -105,8 +105,11 @@ public class User implements TenantAware {
   @Column(length = 2, nullable = false, columnDefinition = "varchar(2) default 'de'")
   private LanguageCode languageCode;
 
-  public User(@Size(max = 36) @NonNull String userId, Long oldId,
-      @Size(max = 255) @NonNull String username, @Size(max = 255) @NonNull String email,
+  public User(
+      @Size(max = 36) @NonNull String userId,
+      Long oldId,
+      @Size(max = 255) @NonNull String username,
+      @Size(max = 255) @NonNull String email,
       boolean languageFormal) {
     this.userId = userId;
     this.oldId = oldId;
