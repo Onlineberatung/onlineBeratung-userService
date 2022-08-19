@@ -22,7 +22,6 @@ import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.function.BiFunction;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 /** Facade to encapsulate the steps for creating a chat. */
@@ -79,7 +78,7 @@ public class CreateChatFacade {
   private String generateChatUrl(Chat chat) {
     return chat.getConsultingTypeId() != null
         ? userHelper.generateChatUrl(chat.getId(), chat.getConsultingTypeId())
-        : StringUtils.EMPTY;
+        : userHelper.generateChatUrl(chat.getId());
   }
 
   private Chat saveChatV1(Consultant consultant, ChatDTO chatDTO) {

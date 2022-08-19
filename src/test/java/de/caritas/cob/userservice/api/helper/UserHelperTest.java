@@ -5,6 +5,7 @@ import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAM
 import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_VALUE_EMAIL_DUMMY_SUFFIX;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_LINK_SUCHT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_LINK_SUCHT_V2;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_SUCHT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.HOST_BASE_URL;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME_CONSULTANT_DECODED;
@@ -90,6 +91,11 @@ public class UserHelperTest {
     when(consultingTypeManager.getConsultingTypeSettings(0))
         .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT);
     assertEquals(CHAT_LINK_SUCHT, userHelper.generateChatUrl(CHAT_ID, 0));
+  }
+
+  @Test
+  public void generateChatUrl_Should_ReturnChatLinkWithEncodedChatId_When_NoConsutingType() {
+    assertEquals(CHAT_LINK_SUCHT_V2, userHelper.generateChatUrl(CHAT_ID));
   }
 
   @Test
