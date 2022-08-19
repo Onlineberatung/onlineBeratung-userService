@@ -43,7 +43,7 @@ public class UserChatDTO {
   private boolean active;
 
   @ApiModelProperty(required = true, example = "0", position = 7)
-  private int consultingType;
+  private Integer consultingType;
 
   @ApiModelProperty(example = "Thanks for the answer", position = 8)
   private String lastMessage;
