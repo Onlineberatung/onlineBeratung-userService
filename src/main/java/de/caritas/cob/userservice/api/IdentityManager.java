@@ -15,7 +15,8 @@ import org.springframework.stereotype.Service;
 public class IdentityManager implements IdentityManaging {
 
   private static final String VIEW_ALL_PEER_SESSIONS = "AUTHORIZATION_VIEW_ALL_PEER_SESSIONS";
-  private static final String VIEW_ALL_FEEDBACK_SESSIONS = "AUTHORIZATION_VIEW_ALL_FEEDBACK_SESSIONS";
+  private static final String VIEW_ALL_FEEDBACK_SESSIONS =
+      "AUTHORIZATION_VIEW_ALL_FEEDBACK_SESSIONS";
 
   private final IdentityClient identityClient;
 
@@ -48,6 +49,11 @@ public class IdentityManager implements IdentityManaging {
   @Override
   public boolean changePassword(String userId, String password) {
     return identityClient.changePassword(userId, password);
+  }
+
+  @Override
+  public void changeLanguage(String userId, String language) {
+    identityClient.changeLanguage(userId, language);
   }
 
   @Override

@@ -31,10 +31,8 @@ class SessionToConsultantConditionProviderTest {
   private Session session;
   private Consultant consultant;
 
-  @InjectMocks
-  private SessionToConsultantConditionProvider sessionToConsultantConditionProvider;
-  @Mock
-  private AgencyService agencyService;
+  @InjectMocks private SessionToConsultantConditionProvider sessionToConsultantConditionProvider;
+  @Mock private AgencyService agencyService;
 
   @BeforeEach
   public void setup() {
@@ -117,11 +115,13 @@ class SessionToConsultantConditionProviderTest {
   }
 
   @Test
-  void isSessionAlreadyAssignedToConsultant_Should_returnTrue_When_SessionIsInProgressAndHasConsultant() {
+  void
+      isSessionAlreadyAssignedToConsultant_Should_returnTrue_When_SessionIsInProgressAndHasConsultant() {
     this.session.setStatus(SessionStatus.IN_PROGRESS);
     this.session.setConsultant(this.consultant);
-    boolean result = sessionToConsultantConditionProvider
-        .isSessionAlreadyAssignedToConsultant(consultant, session);
+    boolean result =
+        sessionToConsultantConditionProvider.isSessionAlreadyAssignedToConsultant(
+            consultant, session);
 
     assertThat(result, is(true));
   }
@@ -129,20 +129,23 @@ class SessionToConsultantConditionProviderTest {
   @Test
   void isSessionAlreadyAssignedToConsultant_Should_returnFalse_When_SessionIsNotInProgress() {
     this.session.setConsultant(this.consultant);
-    boolean result = sessionToConsultantConditionProvider
-        .isSessionAlreadyAssignedToConsultant(consultant, session);
+    boolean result =
+        sessionToConsultantConditionProvider.isSessionAlreadyAssignedToConsultant(
+            consultant, session);
 
     assertThat(result, is(false));
   }
 
   @Test
-  void isSessionAlreadyAssignedToConsultant_Should_returnFalse_When_SessionIsInProgressAndHasOtherConsultant() {
+  void
+      isSessionAlreadyAssignedToConsultant_Should_returnFalse_When_SessionIsInProgressAndHasOtherConsultant() {
     this.session.setStatus(SessionStatus.IN_PROGRESS);
     Consultant consultant = new Consultant();
     consultant.setId("other");
     this.session.setConsultant(consultant);
-    boolean result = sessionToConsultantConditionProvider
-        .isSessionAlreadyAssignedToConsultant(this.consultant, session);
+    boolean result =
+        sessionToConsultantConditionProvider.isSessionAlreadyAssignedToConsultant(
+            this.consultant, session);
 
     assertThat(result, is(false));
   }
@@ -189,51 +192,66 @@ class SessionToConsultantConditionProviderTest {
   }
 
   @Test
-  void isSessionsAgencyNotAvailableInConsultantAgencies_Should_returnTrue_When_ConsultantHasNoAgencies() {
-    boolean result = sessionToConsultantConditionProvider
-        .isSessionsAgencyNotAvailableInConsultantAgencies(consultant, session);
+  void
+      isSessionsAgencyNotAvailableInConsultantAgencies_Should_returnTrue_When_ConsultantHasNoAgencies() {
+    boolean result =
+        sessionToConsultantConditionProvider.isSessionsAgencyNotAvailableInConsultantAgencies(
+            consultant, session);
 
     assertThat(result, is(true));
   }
 
   @Test
-  void isSessionsAgencyNotAvailableInConsultantAgencies_Should_returnTrue_When_ConsultantAgenciesDoesNotContainSessionAgencyId() {
+  void
+      isSessionsAgencyNotAvailableInConsultantAgencies_Should_returnTrue_When_ConsultantAgenciesDoesNotContainSessionAgencyId() {
     session.setAgencyId(99L);
-    consultant.setConsultantAgencies(asSet(
-        new ConsultantAgency(1L, consultant, 1L, nowInUtc(), nowInUtc(), nowInUtc(), null, null),
-        new ConsultantAgency(2L, consultant, 2L, nowInUtc(), nowInUtc(), nowInUtc(), null, null),
-        new ConsultantAgency(3L, consultant, 3L, nowInUtc(), nowInUtc(), nowInUtc(), null, null)
-    ));
-    boolean result = sessionToConsultantConditionProvider
-        .isSessionsAgencyNotAvailableInConsultantAgencies(consultant, session);
+    consultant.setConsultantAgencies(
+        asSet(
+            new ConsultantAgency(
+                1L, consultant, 1L, nowInUtc(), nowInUtc(), nowInUtc(), null, null),
+            new ConsultantAgency(
+                2L, consultant, 2L, nowInUtc(), nowInUtc(), nowInUtc(), null, null),
+            new ConsultantAgency(
+                3L, consultant, 3L, nowInUtc(), nowInUtc(), nowInUtc(), null, null)));
+    boolean result =
+        sessionToConsultantConditionProvider.isSessionsAgencyNotAvailableInConsultantAgencies(
+            consultant, session);
 
     assertThat(result, is(true));
   }
 
   @Test
-  void isSessionsAgencyNotAvailableInConsultantAgencies_Should_returnFalse_When_ConsultantAgenciesContainSessionAgencyId() {
+  void
+      isSessionsAgencyNotAvailableInConsultantAgencies_Should_returnFalse_When_ConsultantAgenciesContainSessionAgencyId() {
     session.setAgencyId(99L);
-    consultant.setConsultantAgencies(asSet(
-        new ConsultantAgency(1L, consultant, 1L, nowInUtc(), nowInUtc(), nowInUtc(), null, null),
-        new ConsultantAgency(2L, consultant, 99L, nowInUtc(), nowInUtc(), nowInUtc(), null, null),
-        new ConsultantAgency(3L, consultant, 3L, nowInUtc(), nowInUtc(), nowInUtc(), null, null)
-    ));
-    boolean result = sessionToConsultantConditionProvider
-        .isSessionsAgencyNotAvailableInConsultantAgencies(consultant, session);
+    consultant.setConsultantAgencies(
+        asSet(
+            new ConsultantAgency(
+                1L, consultant, 1L, nowInUtc(), nowInUtc(), nowInUtc(), null, null),
+            new ConsultantAgency(
+                2L, consultant, 99L, nowInUtc(), nowInUtc(), nowInUtc(), null, null),
+            new ConsultantAgency(
+                3L, consultant, 3L, nowInUtc(), nowInUtc(), nowInUtc(), null, null)));
+    boolean result =
+        sessionToConsultantConditionProvider.isSessionsAgencyNotAvailableInConsultantAgencies(
+            consultant, session);
 
     assertThat(result, is(false));
   }
 
   @Test
-  void isSessionsConsultingTypeNotAvailableForConsultant_Should_returnTrue_When_ConsultantHasNoAgencies() {
-    boolean result = sessionToConsultantConditionProvider
-        .isSessionsConsultingTypeNotAvailableForConsultant(consultant, session);
+  void
+      isSessionsConsultingTypeNotAvailableForConsultant_Should_returnTrue_When_ConsultantHasNoAgencies() {
+    boolean result =
+        sessionToConsultantConditionProvider.isSessionsConsultingTypeNotAvailableForConsultant(
+            consultant, session);
 
     assertThat(result, is(true));
   }
 
   @Test
-  void isSessionsConsultingTypeNotAvailableForConsultant_Should_returnTrue_When_ConsultantAgenciesDoesNotContainSessionConsultingType() {
+  void
+      isSessionsConsultingTypeNotAvailableForConsultant_Should_returnTrue_When_ConsultantAgenciesDoesNotContainSessionConsultingType() {
     session.setConsultingTypeId(CONSULTING_TYPE_ID_U25);
     AgencyDTO differentAgencyDTO = new AgencyDTO().consultingType(CONSULTING_TYPE_ID_SUCHT);
     ConsultantAgency differentConsultantAgency = mock(ConsultantAgency.class);
@@ -243,28 +261,31 @@ class SessionToConsultantConditionProviderTest {
     whenAgencyServiceReturnsDTOForId(otherConsultantAgency, 2L, otherAgencyDTO);
     consultant.setConsultantAgencies(asSet(differentConsultantAgency, otherConsultantAgency));
 
-    boolean result = sessionToConsultantConditionProvider
-        .isSessionsConsultingTypeNotAvailableForConsultant(consultant, session);
+    boolean result =
+        sessionToConsultantConditionProvider.isSessionsConsultingTypeNotAvailableForConsultant(
+            consultant, session);
 
     assertThat(result, is(true));
   }
 
   @Test
-  void isSessionsConsultingTypeNotAvailableForConsultant_Should_returnFalse_When_ConsultantAgenciesContainSessionConsultingType() {
+  void
+      isSessionsConsultingTypeNotAvailableForConsultant_Should_returnFalse_When_ConsultantAgenciesContainSessionConsultingType() {
     session.setConsultingTypeId(CONSULTING_TYPE_ID_U25);
     AgencyDTO u25AgencyDTO = new AgencyDTO().consultingType(CONSULTING_TYPE_ID_U25);
     ConsultantAgency u25ConsultantAgency = mock(ConsultantAgency.class);
     when(agencyService.getAgency(any())).thenReturn(u25AgencyDTO);
     consultant.setConsultantAgencies(asSet(u25ConsultantAgency));
 
-    boolean result = sessionToConsultantConditionProvider
-        .isSessionsConsultingTypeNotAvailableForConsultant(consultant, session);
+    boolean result =
+        sessionToConsultantConditionProvider.isSessionsConsultingTypeNotAvailableForConsultant(
+            consultant, session);
 
     assertThat(result, is(false));
   }
 
-  private void whenAgencyServiceReturnsDTOForId(ConsultantAgency consultantAgency,
-      long agencyId, AgencyDTO agencyDTO) {
+  private void whenAgencyServiceReturnsDTOForId(
+      ConsultantAgency consultantAgency, long agencyId, AgencyDTO agencyDTO) {
     when(consultantAgency.getAgencyId()).thenReturn(agencyId);
     when(agencyService.getAgency(agencyId)).thenReturn(agencyDTO);
   }

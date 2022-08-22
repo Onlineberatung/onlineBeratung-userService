@@ -15,9 +15,9 @@ import static org.mockito.Mockito.verify;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
+import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.workflow.delete.model.AskerDeletionWorkflowDTO;
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
-import de.caritas.cob.userservice.api.model.User;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
@@ -31,14 +31,11 @@ import org.slf4j.Logger;
 @RunWith(MockitoJUnitRunner.class)
 public class DeleteKeycloakAskerActionTest {
 
-  @InjectMocks
-  private DeleteKeycloakAskerAction deleteKeycloakAskerAction;
+  @InjectMocks private DeleteKeycloakAskerAction deleteKeycloakAskerAction;
 
-  @Mock
-  private KeycloakService keycloakService;
+  @Mock private KeycloakService keycloakService;
 
-  @Mock
-  private Logger logger;
+  @Mock private Logger logger;
 
   @Before
   public void setup() {
@@ -74,5 +71,4 @@ public class DeleteKeycloakAskerActionTest {
     assertThat(workflowErrors.get(0).getTimestamp(), notNullValue());
     verify(logger).error(anyString(), any(RuntimeException.class));
   }
-
 }

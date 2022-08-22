@@ -26,15 +26,15 @@ public class ConsultingTypeManagerTestConfig {
       }
 
       private ExtendedConsultingTypeResponseDTO createDummy(Integer consultingTypeId) {
-        var extendedConsultingTypeResponseDTO = new EasyRandom()
-            .nextObject(ExtendedConsultingTypeResponseDTO.class);
+        var extendedConsultingTypeResponseDTO =
+            new EasyRandom().nextObject(ExtendedConsultingTypeResponseDTO.class);
         extendedConsultingTypeResponseDTO.getMonitoring().setInitializeMonitoring(true);
-        extendedConsultingTypeResponseDTO.getMonitoring()
+        extendedConsultingTypeResponseDTO
+            .getMonitoring()
             .setMonitoringTemplateFile("/monitoring.dto");
         extendedConsultingTypeResponseDTO.setId((int) consultingTypeId);
         return extendedConsultingTypeResponseDTO;
       }
     };
   }
-
 }

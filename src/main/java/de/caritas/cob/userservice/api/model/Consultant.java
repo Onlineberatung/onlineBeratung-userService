@@ -43,32 +43,31 @@ import org.hibernate.search.annotations.TokenFilterDef;
 import org.hibernate.search.annotations.TokenizerDef;
 import org.springframework.lang.Nullable;
 
-/**
- * Represents a consultant
- */
+/** Represents a consultant */
 @Entity
 @Table(
     name = "consultant",
     indexes = {
-        @Index(
-            columnList = "first_name, last_name, email, delete_date",
-            name = "idx_first_name_last_name_email_delete_date",
-            unique = true
-        ),
-    }
-)
+      @Index(
+          columnList = "first_name, last_name, email, delete_date",
+          name = "idx_first_name_last_name_email_delete_date",
+          unique = true),
+    })
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @Builder
 @Indexed
-@AnalyzerDef(name = EMAIL_ANALYZER,
+@AnalyzerDef(
+    name = EMAIL_ANALYZER,
     tokenizer = @TokenizerDef(factory = ClassicTokenizerFactory.class),
     filters = {
-        @TokenFilterDef(factory = LowerCaseFilterFactory.class),
+      @TokenFilterDef(factory = LowerCaseFilterFactory.class),
     })
-@FilterDef(name = "tenantFilter", parameters = {@ParamDef(name = "tenantId", type = "long")})
+@FilterDef(
+    name = "tenantFilter",
+    parameters = {@ParamDef(name = "tenantId", type = "long")})
 @Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
 public class Consultant implements TenantAware {
 
@@ -158,13 +157,22 @@ public class Consultant implements TenantAware {
   @Column(name = "encourage_2fa", nullable = false, columnDefinition = "bit default true")
   private Boolean encourage2fa;
 
-  @Column(name = "notify_enquiries_repeating", nullable = false, columnDefinition = "bit default true")
+  @Column(
+      name = "notify_enquiries_repeating",
+      nullable = false,
+      columnDefinition = "bit default true")
   private Boolean notifyEnquiriesRepeating;
 
-  @Column(name = "notify_new_chat_message_from_advice_seeker", nullable = false, columnDefinition = "bit default true")
+  @Column(
+      name = "notify_new_chat_message_from_advice_seeker",
+      nullable = false,
+      columnDefinition = "bit default true")
   private Boolean notifyNewChatMessageFromAdviceSeeker;
 
-  @Column(name = "notify_new_feedback_message_from_advice_seeker", nullable = false, columnDefinition = "bit default true")
+  @Column(
+      name = "notify_new_feedback_message_from_advice_seeker",
+      nullable = false,
+      columnDefinition = "bit default true")
   private Boolean notifyNewFeedbackMessageFromAdviceSeeker;
 
   @Column(name = "tenant_id")
@@ -181,6 +189,10 @@ public class Consultant implements TenantAware {
 
   @Column(name = "walk_through_enabled", columnDefinition = "tinyint", nullable = false)
   private Boolean walkThroughEnabled;
+
+  @Enumerated(EnumType.STRING)
+  @Column(length = 2, nullable = false, columnDefinition = "varchar(2) default 'de'")
+  private LanguageCode languageCode;
 
   @JsonIgnore
   public String getFullName() {
@@ -247,7 +259,12 @@ public class Consultant implements TenantAware {
 
   @Override
   public String toString() {
-    return "Consultant [id=" + id + ", rocketChatId=" + rocketChatId + ", username=" + username
+    return "Consultant [id="
+        + id
+        + ", rocketChatId="
+        + rocketChatId
+        + ", username="
+        + username
         + "]";
   }
 

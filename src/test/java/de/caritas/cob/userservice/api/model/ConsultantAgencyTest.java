@@ -47,5 +47,4 @@ public class ConsultantAgencyTest {
 
     assertThat(equals, is(true));
   }
-
 }

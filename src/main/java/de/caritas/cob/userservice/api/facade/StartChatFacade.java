@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.facade;
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -12,14 +13,11 @@ import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-/**
- * Facade for capsuling starting a chat.
- */
+/** Facade for capsuling starting a chat. */
 @Service
 @RequiredArgsConstructor
 public class StartChatFacade {
@@ -31,7 +29,7 @@ public class StartChatFacade {
   /**
    * Starts the given {@link Chat}.
    *
-   * @param chat       the {@link Chat} to be started
+   * @param chat the {@link Chat} to be started
    * @param consultant the {@link Consultant}
    */
   public void startChat(Chat chat, Consultant consultant) {
@@ -52,7 +50,8 @@ public class StartChatFacade {
   private void checkConsultantsPermission(Chat chat, Consultant consultant) {
     if (!chatPermissionVerifier.hasSameAgencyAssigned(chat, consultant)) {
       throw new ForbiddenException(
-          String.format("Consultant with id %s has no permission to start chat with id %s",
+          String.format(
+              "Consultant with id %s has no permission to start chat with id %s",
               consultant.getId(), chat.getId()));
     }
   }
@@ -70,5 +69,4 @@ public class StartChatFacade {
           String.format("Chat with id %s has no Rocket.Chat group id", chat.getId()));
     }
   }
-
 }

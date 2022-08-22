@@ -132,5 +132,4 @@ public class CacheManagerConfig {
     topicCacheConfiguration.setTimeToLiveSeconds(topicTimeToLiveSeconds);
     return topicCacheConfiguration;
   }
-
 }

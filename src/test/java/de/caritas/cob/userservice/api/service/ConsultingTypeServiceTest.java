@@ -26,34 +26,27 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @RunWith(SpringRunner.class)
 public class ConsultingTypeServiceTest {
 
-  @InjectMocks
-  private ConsultingTypeService consultingTypeService;
+  @InjectMocks private ConsultingTypeService consultingTypeService;
 
-  @Mock
-  private ConsultingTypeControllerApi consultingTypeControllerApi;
+  @Mock private ConsultingTypeControllerApi consultingTypeControllerApi;
 
-  @Mock
-  private SecurityHeaderSupplier securityHeaderSupplier;
+  @Mock private SecurityHeaderSupplier securityHeaderSupplier;
 
-  @Mock
-  private ServletRequestAttributes requestAttributes;
+  @Mock private ServletRequestAttributes requestAttributes;
 
-  @Mock
-  private HttpServletRequest httpServletRequest;
+  @Mock private HttpServletRequest httpServletRequest;
 
-  @Mock
-  private Enumeration<String> headers;
+  @Mock private Enumeration<String> headers;
 
-  @Mock
-  private TenantHeaderSupplier tenantHeaderSupplier;
-
+  @Mock private TenantHeaderSupplier tenantHeaderSupplier;
 
   @Test
-  public void ConsultingTypeService_Should_Return_expectedIdList_From_BasicConsultingTypeResponseDTO() {
+  public void
+      ConsultingTypeService_Should_Return_expectedIdList_From_BasicConsultingTypeResponseDTO() {
     givenRequestContextIsSet();
     int size = 15;
-    var randomBasicConsultingTypeResponseDTOList = generateRandomExtendedConsultingTypeResponseDTOList(
-        size);
+    var randomBasicConsultingTypeResponseDTOList =
+        generateRandomExtendedConsultingTypeResponseDTOList(size);
     when(consultingTypeControllerApi.getBasicConsultingTypeList())
         .thenReturn(randomBasicConsultingTypeResponseDTOList);
     when(securityHeaderSupplier.getCsrfHttpHeaders()).thenReturn(new HttpHeaders());
@@ -61,9 +54,11 @@ public class ConsultingTypeServiceTest {
     List<Integer> consultingTypeIds = consultingTypeService.getAllConsultingTypeIds(null);
 
     assertEquals(consultingTypeIds.size(), size);
-    assertEquals(randomBasicConsultingTypeResponseDTOList.stream().map(
-            BasicConsultingTypeResponseDTO::getId)
-        .collect(Collectors.toList()), consultingTypeIds);
+    assertEquals(
+        randomBasicConsultingTypeResponseDTOList.stream()
+            .map(BasicConsultingTypeResponseDTO::getId)
+            .collect(Collectors.toList()),
+        consultingTypeIds);
     resetRequestAttributes();
   }
 
@@ -73,13 +68,15 @@ public class ConsultingTypeServiceTest {
 
   private List<BasicConsultingTypeResponseDTO> generateRandomExtendedConsultingTypeResponseDTOList(
       int size) {
-    return new Random().ints(size, Integer.MIN_VALUE, Integer.MAX_VALUE)
-        .mapToObj(this::generateExtendedConsultingTypeResponseDTO).collect(
-            Collectors.toList());
+    return new Random()
+        .ints(size, Integer.MIN_VALUE, Integer.MAX_VALUE)
+        .mapToObj(this::generateExtendedConsultingTypeResponseDTO)
+        .collect(Collectors.toList());
   }
 
   @Test
-  public void getExtendedConsultingTypeResponseDTO_Should_callConsultingTypeController_When_idExists() {
+  public void
+      getExtendedConsultingTypeResponseDTO_Should_callConsultingTypeController_When_idExists() {
     givenRequestContextIsSet();
     when(securityHeaderSupplier.getCsrfHttpHeaders()).thenReturn(new HttpHeaders());
 
@@ -98,6 +95,4 @@ public class ConsultingTypeServiceTest {
     when(httpServletRequest.getHeaderNames()).thenReturn(headers);
     RequestContextHolder.setRequestAttributes(requestAttributes);
   }
-
-
 }

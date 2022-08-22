@@ -16,11 +16,9 @@ import org.springframework.data.domain.PageRequest;
 @RunWith(MockitoJUnitRunner.class)
 public class AllSessionPageProviderTest {
 
-  @InjectMocks
-  private AllSessionPageProvider allSessionPageProvider;
+  @InjectMocks private AllSessionPageProvider allSessionPageProvider;
 
-  @Mock
-  private SessionRepository sessionRepository;
+  @Mock private SessionRepository sessionRepository;
 
   @Test
   public void supports_Should_returnTrue() {
@@ -37,5 +35,4 @@ public class AllSessionPageProviderTest {
 
     verify(this.sessionRepository, atLeastOnce()).findAll(pageable);
   }
-
 }

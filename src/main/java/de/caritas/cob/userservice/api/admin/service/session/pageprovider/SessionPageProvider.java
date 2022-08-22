@@ -4,9 +4,7 @@ import de.caritas.cob.userservice.api.model.Session;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-/**
- * Defines functionality to provide paged {@link Session}.
- */
+/** Defines functionality to provide paged {@link Session}. */
 public interface SessionPageProvider {
 
   /**
@@ -25,5 +23,4 @@ public interface SessionPageProvider {
   default boolean isSupported() {
     return true;
   }
-
 }

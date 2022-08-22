@@ -11,5 +11,4 @@ public class SessionDeletionWorkflowDTO {
 
   private Session session;
   private List<DeletionWorkflowError> deletionWorkflowErrors;
-
 }

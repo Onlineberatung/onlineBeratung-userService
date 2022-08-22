@@ -26,20 +26,15 @@ class AgencyServiceTest {
 
   private static final String ORIGIN_URL = "subdomain.onlineberatung.net";
 
-  @InjectMocks
-  AgencyService agencyService;
+  @InjectMocks AgencyService agencyService;
 
-  @Mock
-  AgencyControllerApi agencyControllerApi;
+  @Mock AgencyControllerApi agencyControllerApi;
 
-  @Mock
-  TenantHeaderSupplier tenantHeaderSupplier;
+  @Mock TenantHeaderSupplier tenantHeaderSupplier;
 
-  @Mock
-  SecurityHeaderSupplier securityHeaderSupplier;
+  @Mock SecurityHeaderSupplier securityHeaderSupplier;
 
-  @Mock
-  ApiClient apiClient;
+  @Mock ApiClient apiClient;
 
   @ParameterizedTest
   @NullAndEmptySource
@@ -58,7 +53,9 @@ class AgencyServiceTest {
     HttpHeaders headers = new HttpHeaders();
     when(securityHeaderSupplier.getCsrfHttpHeaders()).thenReturn(headers);
     when(this.agencyControllerApi.getApiClient()).thenReturn(apiClient);
-    var agencyDTOS = Lists.newArrayList(new de.caritas.cob.userservice.agencyserivce.generated.web.model.AgencyResponseDTO());
+    var agencyDTOS =
+        Lists.newArrayList(
+            new de.caritas.cob.userservice.agencyserivce.generated.web.model.AgencyResponseDTO());
     when(this.agencyControllerApi.getAgenciesByIds(Lists.newArrayList(1L))).thenReturn(agencyDTOS);
 
     this.agencyService.getAgency(1L);
@@ -66,5 +63,4 @@ class AgencyServiceTest {
     assertThat(headers.get("tenantId").get(0)).isEqualTo("1");
     TenantContext.clear();
   }
-
 }

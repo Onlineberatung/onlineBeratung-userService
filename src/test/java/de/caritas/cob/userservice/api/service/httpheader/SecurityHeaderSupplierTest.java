@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,10 +25,8 @@ public class SecurityHeaderSupplierTest {
   private final String CSRF_TOKEN_COOKIE_VALUE = "CSRF-TOKEN";
   private final String BEARER_TOKEN = "sadifsdfj)(JWifa";
 
-  @InjectMocks
-  private SecurityHeaderSupplier securityHeaderSupplier;
-  @Mock
-  private AuthenticatedUser authenticatedUser;
+  @InjectMocks private SecurityHeaderSupplier securityHeaderSupplier;
+  @Mock private AuthenticatedUser authenticatedUser;
 
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
@@ -75,7 +72,8 @@ public class SecurityHeaderSupplierTest {
   }
 
   @Test
-  public void getTechnicalKeycloakAndCsrfHttpHeaders_Should_ReturnHeaderWithKeycloakAuthorizationHeader() {
+  public void
+      getTechnicalKeycloakAndCsrfHttpHeaders_Should_ReturnHeaderWithKeycloakAuthorizationHeader() {
     HttpHeaders result = securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders("token");
 
     assertThat(result.get("Authorization").get(0), is("Bearer " + "token"));

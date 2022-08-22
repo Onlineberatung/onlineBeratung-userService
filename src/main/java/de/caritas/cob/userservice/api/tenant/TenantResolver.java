@@ -4,6 +4,7 @@ import static de.caritas.cob.userservice.api.config.auth.UserRole.TECHNICAL;
 import static de.caritas.cob.userservice.api.config.auth.UserRole.TENANT_ADMIN;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
+
 import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.SubdomainExtractor;
 import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
@@ -51,7 +52,8 @@ public class TenantResolver {
   }
 
   private Long resolveForAuthenticatedUser(HttpServletRequest request) {
-    return isTechnicalOrTenantSuperAdminUserRole(request) ? TECHNICAL_TENANT_ID
+    return isTechnicalOrTenantSuperAdminUserRole(request)
+        ? TECHNICAL_TENANT_ID
         : resolveForAuthenticatedNonTechnicalUser(request);
   }
 
@@ -60,8 +62,11 @@ public class TenantResolver {
   }
 
   private boolean containsAnyRole(HttpServletRequest request, String... expectedRoles) {
-    AccessToken token = ((KeycloakAuthenticationToken) request.getUserPrincipal()).getAccount()
-        .getKeycloakSecurityContext().getToken();
+    AccessToken token =
+        ((KeycloakAuthenticationToken) request.getUserPrincipal())
+            .getAccount()
+            .getKeycloakSecurityContext()
+            .getToken();
     if (hasRoles(token)) {
       Set<String> roles = token.getRealmAccess().getRoles();
       return containsAny(roles, expectedRoles);
@@ -86,8 +91,8 @@ public class TenantResolver {
 
     Optional<Long> tenantFromHeader = tenantHeaderSupplier.getTenantFromHeader();
     if (tenantFromHeader.isPresent()) {
-      var currentSubdomain = tenantService.getRestrictedTenantData(tenantFromHeader.get())
-          .getSubdomain();
+      var currentSubdomain =
+          tenantService.getRestrictedTenantData(tenantFromHeader.get()).getSubdomain();
       TenantContext.setCurrentSubdomain(currentSubdomain);
       return tenantFromHeader;
     }
@@ -134,9 +139,9 @@ public class TenantResolver {
 
   private Map<String, Object> getClaimMap(HttpServletRequest request) {
     KeycloakSecurityContext keycloakSecContext =
-        ((KeycloakAuthenticationToken) request.getUserPrincipal()).getAccount()
+        ((KeycloakAuthenticationToken) request.getUserPrincipal())
+            .getAccount()
             .getKeycloakSecurityContext();
     return keycloakSecContext.getToken().getOtherClaims();
   }
-
 }

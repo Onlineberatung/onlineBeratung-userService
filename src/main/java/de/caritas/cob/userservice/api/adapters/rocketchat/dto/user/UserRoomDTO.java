@@ -14,5 +14,4 @@ public class UserRoomDTO {
 
   @JsonProperty("rid")
   private String roomId;
-
 }

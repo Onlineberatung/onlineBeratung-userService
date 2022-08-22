@@ -26,8 +26,11 @@ public class UserDtoMapper {
   @Value("${feature.appointment.enabled}")
   private boolean appointmentFeatureEnabled;
 
-  public UserDataResponseDTO userDataOf(UserDataResponseDTO userData, OtpInfoDTO otpInfoDTO,
-      boolean isE2eEncEnabled, boolean isDisplayNameAllowed) {
+  public UserDataResponseDTO userDataOf(
+      UserDataResponseDTO userData,
+      OtpInfoDTO otpInfoDTO,
+      boolean isE2eEncEnabled,
+      boolean isDisplayNameAllowed) {
     var twoFactorAuthDTO = new TwoFactorAuthDTO();
 
     if (nonNull(otpInfoDTO)) {
@@ -49,8 +52,7 @@ public class UserDtoMapper {
     userData.setTwoFactorAuth(twoFactorAuthDTO);
     userData.setE2eEncryptionEnabled(isE2eEncEnabled);
     userData.setIsDisplayNameEditable(
-        isDisplayNameAllowed && userData.getUserRoles().contains(UserRole.CONSULTANT.getValue())
-    );
+        isDisplayNameAllowed && userData.getUserRoles().contains(UserRole.CONSULTANT.getValue()));
 
     userData.setAppointmentFeatureEnabled(appointmentFeatureEnabled);
 
@@ -73,9 +75,22 @@ public class UserDtoMapper {
     return null;
   }
 
+  public Optional<String> preferredLanguageOf(PatchUserDTO patchUserDTO) {
+    if (nonNull(patchUserDTO.getPreferredLanguage())) {
+      var preferredLanguage = patchUserDTO.getPreferredLanguage().toString();
+
+      return Optional.of(preferredLanguage);
+    }
+
+    return Optional.empty();
+  }
+
   public Optional<Map<String, Object>> mapOf(PatchUserDTO patchUserDTO, AuthenticatedUser user) {
-    if (isNull(patchUserDTO.getEncourage2fa()) && isNull(patchUserDTO.getDisplayName()) && isNull(
-        patchUserDTO.getWalkThroughEnabled()) && isNull(patchUserDTO.getEmailToggles())) {
+    if (isNull(patchUserDTO.getEncourage2fa())
+        && isNull(patchUserDTO.getDisplayName())
+        && isNull(patchUserDTO.getWalkThroughEnabled())
+        && isNull(patchUserDTO.getEmailToggles())
+        && isNull(patchUserDTO.getPreferredLanguage())) {
       return Optional.empty();
     }
 
@@ -90,11 +105,14 @@ public class UserDtoMapper {
     if (nonNull(patchUserDTO.getWalkThroughEnabled())) {
       map.put("walkThroughEnabled", patchUserDTO.getWalkThroughEnabled());
     }
+    if (nonNull(patchUserDTO.getPreferredLanguage())) {
+      map.put("preferredLanguage", patchUserDTO.getPreferredLanguage().toString());
+    }
     var emailToggles = patchUserDTO.getEmailToggles();
     if (nonNull(emailToggles)) {
-      var emailToggleMap = emailToggles.stream().collect(Collectors.toMap(
-          this::mapEmailType, EmailToggle::getState
-      ));
+      var emailToggleMap =
+          emailToggles.stream()
+              .collect(Collectors.toMap(this::mapEmailType, EmailToggle::getState));
       map.putAll(emailToggleMap);
     }
 
@@ -102,10 +120,7 @@ public class UserDtoMapper {
   }
 
   public Map<String, Object> mapOf(String email, AuthenticatedUser user) {
-    return Map.of(
-        "id", user.getUserId(),
-        "email", email
-    );
+    return Map.of("id", user.getUserId(), "email", email);
   }
 
   private String mapEmailType(EmailToggle emailToggle) {

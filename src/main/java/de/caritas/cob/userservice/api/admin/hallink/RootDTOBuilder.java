@@ -9,9 +9,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.RootDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.RootLinks;
 import de.caritas.cob.userservice.generated.api.adapters.web.controller.UseradminApi;
 
-/**
- * Builder to create the root navigation hal DTO.
- */
+/** Builder to create the root navigation hal DTO. */
 public class RootDTOBuilder implements HalLinkBuilder {
 
   public static final Integer DEFAULT_PAGE = 1;
@@ -24,13 +22,14 @@ public class RootDTOBuilder implements HalLinkBuilder {
    */
   public RootDTO buildRootDTO() {
     return new RootDTO()
-        .links(new RootLinks()
-            .self(buildSelfLink())
-            .sessions(buildSessionsLink())
-            .consultants(buildConsultantsLink())
-            .consultantAgencies(buildConsultantAgenciesLink())
-            .createConsultant(buildCreateConsultantLink())
-            .deleteAsker(buildDeleteAskerLink()));
+        .links(
+            new RootLinks()
+                .self(buildSelfLink())
+                .sessions(buildSessionsLink())
+                .consultants(buildConsultantsLink())
+                .consultantAgencies(buildConsultantAgenciesLink())
+                .createConsultant(buildCreateConsultantLink())
+                .deleteAsker(buildDeleteAskerLink()));
   }
 
   private HalLink buildSelfLink() {
@@ -60,5 +59,4 @@ public class RootDTOBuilder implements HalLinkBuilder {
   private HalLink buildDeleteAskerLink() {
     return buildHalLink(methodOn(UseradminApi.class).markAskerForDeletion(null), MethodEnum.DELETE);
   }
-
 }

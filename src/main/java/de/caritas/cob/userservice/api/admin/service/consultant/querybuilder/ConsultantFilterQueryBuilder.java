@@ -8,9 +8,7 @@ import org.apache.lucene.search.Query;
 import org.hibernate.search.query.dsl.BooleanJunction;
 import org.hibernate.search.query.dsl.QueryBuilder;
 
-/**
- * Builder for the filter based query used by hibernate search.
- */
+/** Builder for the filter based query used by hibernate search. */
 public class ConsultantFilterQueryBuilder {
 
   private static final String FIELD_USERNAME = "username";
@@ -54,8 +52,9 @@ public class ConsultantFilterQueryBuilder {
    * @return the created {@link Query}
    */
   public Query buildQuery() {
-    return nonNull(this.consultantFilter) ? buildFilteredQuery() :
-        this.queryBuilder.all().createQuery();
+    return nonNull(this.consultantFilter)
+        ? buildFilteredQuery()
+        : this.queryBuilder.all().createQuery();
   }
 
   private Query buildFilteredQuery() {
@@ -70,26 +69,23 @@ public class ConsultantFilterQueryBuilder {
     return junction.isEmpty() ? this.queryBuilder.all().createQuery() : junction.createQuery();
   }
 
-  private void addStringFilterCondition(String filterValue, String targetField,
-      BooleanJunction<BooleanJunction> junction) {
+  private void addStringFilterCondition(
+      String filterValue, String targetField, BooleanJunction<BooleanJunction> junction) {
     if (StringUtils.isNotBlank(filterValue)) {
       addFilterCondition(filterValue, targetField, junction);
     }
   }
 
-  private void addFilterCondition(Object filterValue, String targetField,
-      BooleanJunction<BooleanJunction> junction) {
-    junction.must(this.queryBuilder.keyword()
-        .onField(targetField)
-        .matching(filterValue)
-        .createQuery());
+  private void addFilterCondition(
+      Object filterValue, String targetField, BooleanJunction<BooleanJunction> junction) {
+    junction.must(
+        this.queryBuilder.keyword().onField(targetField).matching(filterValue).createQuery());
   }
 
-  private void addObjectFilterCondition(Object filterValue, String targetField,
-      BooleanJunction<BooleanJunction> junction) {
+  private void addObjectFilterCondition(
+      Object filterValue, String targetField, BooleanJunction<BooleanJunction> junction) {
     if (nonNull(filterValue)) {
       addFilterCondition(filterValue, targetField, junction);
     }
   }
-
 }

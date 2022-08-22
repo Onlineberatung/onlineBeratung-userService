@@ -22,14 +22,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-/**
- * Action to send a live finished anonymous conversation event.
- */
+/** Action to send a live finished anonymous conversation event. */
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class SendFinishedAnonymousConversationEventActionCommand implements
-    ActionCommand<Session> {
+public class SendFinishedAnonymousConversationEventActionCommand implements ActionCommand<Session> {
 
   private final @NonNull LiveEventNotificationService liveEventNotificationService;
   private final @NonNull AuthenticatedUser authenticatedUser;
@@ -45,9 +42,8 @@ public class SendFinishedAnonymousConversationEventActionCommand implements
 
     if (isNotEmpty(userIdsToSendLiveEvent)) {
       try {
-        this.liveEventNotificationService
-            .sendLiveFinishedAnonymousConversationToUsers(userIdsToSendLiveEvent,
-                forSession(session));
+        this.liveEventNotificationService.sendLiveFinishedAnonymousConversationToUsers(
+            userIdsToSendLiveEvent, forSession(session));
       } catch (Exception e) {
         log.error("Unable to send anonymous conversation finished live event");
         log.error(getStackTrace(e));
@@ -90,5 +86,4 @@ public class SendFinishedAnonymousConversationEventActionCommand implements
   private FinishConversationPhaseEnum forSession(Session session) {
     return isNull(session.getConsultant()) ? NEW : IN_PROGRESS;
   }
-
 }

@@ -30,5 +30,4 @@ public class EncodeUsernameJsonDeserializer extends JsonDeserializer<String> {
 
     return username;
   }
-
 }

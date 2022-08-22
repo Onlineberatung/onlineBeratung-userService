@@ -9,12 +9,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatRollbackService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Before;
@@ -46,88 +46,89 @@ public class RocketChatRollbackServiceTest {
   private final RocketChatAddUserToGroupException RC_EXCEPTION =
       new RocketChatAddUserToGroupException(EXCEPTION);
 
-  @InjectMocks
-  private RocketChatRollbackService rocketChatRollbackService;
-  @Mock
-  private RocketChatService rocketChatService;
-  @Mock
-  Logger logger;
-  @Mock
-  private RocketChatCredentialsProvider rcCredentialHelper;
+  @InjectMocks private RocketChatRollbackService rocketChatRollbackService;
+  @Mock private RocketChatService rocketChatService;
+  @Mock Logger logger;
+  @Mock private RocketChatCredentialsProvider rcCredentialHelper;
 
   @Before
   public void setup() {
     setInternalState(RocketChatRollbackService.class, "log", logger);
   }
 
-  /**
-   * Method: rollbackRemoveUsersFromRocketChatGroup
-   */
-
+  /** Method: rollbackRemoveUsersFromRocketChatGroup */
   @Test
-  public void rollbackRemoveUsersFromRocketChatGroup_Should_LogInternalServerError_WhenTechUserAddToGroupFails()
-      throws Exception {
+  public void
+      rollbackRemoveUsersFromRocketChatGroup_Should_LogInternalServerError_WhenTechUserAddToGroupFails()
+          throws Exception {
 
     when(rocketChatService.getMembersOfGroup(Mockito.anyString()))
         .thenReturn(CURRENT_GROUP_MEMBER_DTO_LIST);
     doThrow(new RocketChatAddUserToGroupException("error"))
-        .when(rocketChatService).addTechnicalUserToGroup(anyString());
+        .when(rocketChatService)
+        .addTechnicalUserToGroup(anyString());
 
     when(rcCredentialHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
-    rocketChatRollbackService.rollbackRemoveUsersFromRocketChatGroup(GROUP_ID,
-        GROUP_MEMBER_DTO_LIST);
+    rocketChatRollbackService.rollbackRemoveUsersFromRocketChatGroup(
+        GROUP_ID, GROUP_MEMBER_DTO_LIST);
 
     verify(logger, atLeastOnce()).error(anyString(), anyString());
   }
 
   @Test
-  public void rollbackRemoveUsersFromRocketChatGroup_Should_LogInternalServerError_WhenTechUserRemoveFromGroupFails()
-      throws Exception {
+  public void
+      rollbackRemoveUsersFromRocketChatGroup_Should_LogInternalServerError_WhenTechUserRemoveFromGroupFails()
+          throws Exception {
 
     when(rocketChatService.getMembersOfGroup(Mockito.anyString()))
         .thenReturn(GROUP_MEMBER_DTO_LIST);
-    doThrow(new RocketChatRemoveUserFromGroupException("error")).when(rocketChatService)
+    doThrow(new RocketChatRemoveUserFromGroupException("error"))
+        .when(rocketChatService)
         .removeTechnicalUserFromGroup(anyString());
 
     when(rcCredentialHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
-    rocketChatRollbackService.rollbackRemoveUsersFromRocketChatGroup(GROUP_ID,
-        GROUP_MEMBER_DTO_LIST);
+    rocketChatRollbackService.rollbackRemoveUsersFromRocketChatGroup(
+        GROUP_ID, GROUP_MEMBER_DTO_LIST);
 
     verify(logger, atLeastOnce()).error(anyString(), anyString());
   }
 
   @Test
-  public void rollbackRemoveUsersFromRocketChatGroup_Should_LogInternalServerError_WhenAddUserToGroupFails()
-      throws Exception {
+  public void
+      rollbackRemoveUsersFromRocketChatGroup_Should_LogInternalServerError_WhenAddUserToGroupFails()
+          throws Exception {
 
-    doThrow(new RocketChatRemoveUserFromGroupException("error")).when(rocketChatService)
+    doThrow(new RocketChatRemoveUserFromGroupException("error"))
+        .when(rocketChatService)
         .removeTechnicalUserFromGroup(anyString());
     when(rocketChatService.getMembersOfGroup(Mockito.anyString()))
         .thenReturn(CURRENT_GROUP_MEMBER_DTO_LIST);
 
     when(rcCredentialHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
-    rocketChatRollbackService.rollbackRemoveUsersFromRocketChatGroup(GROUP_ID,
-        GROUP_MEMBER_DTO_LIST);
+    rocketChatRollbackService.rollbackRemoveUsersFromRocketChatGroup(
+        GROUP_ID, GROUP_MEMBER_DTO_LIST);
 
     verify(logger, atLeastOnce()).error(anyString(), anyString());
   }
 
   @Test
-  public void rollbackRemoveUsersFromRocketChatGroup_Should_AddMissingUserToGroup_WhenUserWasRemovedBeforeRollback()
-      throws Exception {
+  public void
+      rollbackRemoveUsersFromRocketChatGroup_Should_AddMissingUserToGroup_WhenUserWasRemovedBeforeRollback()
+          throws Exception {
 
     when(rocketChatService.getMembersOfGroup(Mockito.anyString()))
         .thenReturn(CURRENT_GROUP_MEMBER_DTO_LIST);
-    doThrow(RC_EXCEPTION).when(rocketChatService).addUserToGroup(Mockito.anyString(),
-        Mockito.anyString());
+    doThrow(RC_EXCEPTION)
+        .when(rocketChatService)
+        .addUserToGroup(Mockito.anyString(), Mockito.anyString());
 
     when(rcCredentialHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
-    rocketChatRollbackService.rollbackRemoveUsersFromRocketChatGroup(GROUP_ID,
-        GROUP_MEMBER_DTO_LIST);
+    rocketChatRollbackService.rollbackRemoveUsersFromRocketChatGroup(
+        GROUP_ID, GROUP_MEMBER_DTO_LIST);
 
     verify(logger, atLeastOnce()).error(anyString(), anyString(), any(Exception.class));
   }

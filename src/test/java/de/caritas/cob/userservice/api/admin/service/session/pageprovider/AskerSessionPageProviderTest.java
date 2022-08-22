@@ -18,14 +18,11 @@ import org.springframework.data.domain.PageRequest;
 @RunWith(MockitoJUnitRunner.class)
 public class AskerSessionPageProviderTest {
 
-  @InjectMocks
-  private AskerSessionPageProvider askerSessionPageProvider;
+  @InjectMocks private AskerSessionPageProvider askerSessionPageProvider;
 
-  @Mock
-  private SessionRepository sessionRepository;
+  @Mock private SessionRepository sessionRepository;
 
-  @Mock
-  private SessionFilter sessionFilter;
+  @Mock private SessionFilter sessionFilter;
 
   @Test
   public void supports_Should_returnTrue_When_askerFilterIsSet() {
@@ -54,5 +51,4 @@ public class AskerSessionPageProviderTest {
 
     verify(this.sessionRepository, atLeastOnce()).findByUserUserId("asker", pageable);
   }
-
 }

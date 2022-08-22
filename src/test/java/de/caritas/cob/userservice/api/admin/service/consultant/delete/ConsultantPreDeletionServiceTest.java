@@ -29,20 +29,17 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ConsultantPreDeletionServiceTest {
 
-  @InjectMocks
-  private ConsultantPreDeletionService consultantPreDeletionService;
+  @InjectMocks private ConsultantPreDeletionService consultantPreDeletionService;
 
-  @Mock
-  private ConsultantAgencyDeletionValidationService validationService;
+  @Mock private ConsultantAgencyDeletionValidationService validationService;
 
-  @Mock
-  private SessionRepository sessionRepository;
+  @Mock private SessionRepository sessionRepository;
 
-  @Mock
-  private KeycloakService keycloakService;
+  @Mock private KeycloakService keycloakService;
 
   @Test
-  public void performPreDeletionSteps_Should_throwCustomValidationHttpStatusException_When_consultantHasOpenSessions() {
+  public void
+      performPreDeletionSteps_Should_throwCustomValidationHttpStatusException_When_consultantHasOpenSessions() {
     Consultant consultant = new EasyRandom().nextObject(Consultant.class);
     when(this.sessionRepository.findByConsultantAndStatus(any(), any()))
         .thenReturn(singletonList(mock(Session.class)));
@@ -51,13 +48,15 @@ public class ConsultantPreDeletionServiceTest {
       this.consultantPreDeletionService.performPreDeletionSteps(consultant);
       fail("Exception was not thrown");
     } catch (CustomValidationHttpStatusException e) {
-      assertThat(requireNonNull(e.getCustomHttpHeader().get("X-Reason")).iterator().next(),
+      assertThat(
+          requireNonNull(e.getCustomHttpHeader().get("X-Reason")).iterator().next(),
           is(CONSULTANT_HAS_ACTIVE_SESSIONS.name()));
     }
   }
 
   @Test
-  public void performPreDeletionSteps_Should_executeValidationForAllAgencyRelations_When_consultantIsAssignedToAgencies() {
+  public void
+      performPreDeletionSteps_Should_executeValidationForAllAgencyRelations_When_consultantIsAssignedToAgencies() {
     Consultant consultant = new EasyRandom().nextObject(Consultant.class);
     when(this.sessionRepository.findByConsultantAndStatus(any(), any())).thenReturn(emptyList());
 
@@ -68,7 +67,8 @@ public class ConsultantPreDeletionServiceTest {
   }
 
   @Test
-  public void performPreDeletionSteps_Should_setConsultantInactiveInKeycloak_When_consultantCanBeDeleted() {
+  public void
+      performPreDeletionSteps_Should_setConsultantInactiveInKeycloak_When_consultantCanBeDeleted() {
     Consultant consultant = new EasyRandom().nextObject(Consultant.class);
     when(this.sessionRepository.findByConsultantAndStatus(any(), any())).thenReturn(emptyList());
 
@@ -76,5 +76,4 @@ public class ConsultantPreDeletionServiceTest {
 
     verify(this.keycloakService, times(1)).deactivateUser(consultant.getId());
   }
-
 }

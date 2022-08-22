@@ -72,5 +72,4 @@ public class MonitoringTest {
 
     assertThat(equals, is(true));
   }
-
 }

@@ -1,11 +1,9 @@
 package de.caritas.cob.userservice.api.service.statistics.event;
 
-import java.util.Optional;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType;
+import java.util.Optional;
 
-/**
- * Interface for statistics event.
- */
+/** Interface for statistics event. */
 public interface StatisticsEvent {
 
   /**
@@ -21,5 +19,4 @@ public interface StatisticsEvent {
    * @return the {@link EventType}
    */
   EventType getEventType();
-
 }

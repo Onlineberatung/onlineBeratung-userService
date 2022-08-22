@@ -30,42 +30,43 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ConsultantAgencyDeletionValidationServiceTest {
 
-  @InjectMocks
-  private ConsultantAgencyDeletionValidationService agencyDeletionValidationService;
+  @InjectMocks private ConsultantAgencyDeletionValidationService agencyDeletionValidationService;
 
-  @Mock
-  private ConsultantAgencyRepository consultantAgencyRepository;
+  @Mock private ConsultantAgencyRepository consultantAgencyRepository;
 
-  @Mock
-  private AgencyService agencyService;
+  @Mock private AgencyService agencyService;
 
-  @Mock
-  private SessionRepository sessionRepository;
+  @Mock private SessionRepository sessionRepository;
 
   @Test
-  public void validateForDeletion_Should_throwCustomValidationHttpStatusException_When_consultantIsTheLastOfTheAgencyAndAgencyIsStillOnline() {
+  public void
+      validateForDeletion_Should_throwCustomValidationHttpStatusException_When_consultantIsTheLastOfTheAgencyAndAgencyIsStillOnline() {
     ConsultantAgency consultantAgency = new EasyRandom().nextObject(ConsultantAgency.class);
     consultantAgency.setDeleteDate(null);
     when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(any()))
         .thenReturn(singletonList(consultantAgency));
-    when(this.agencyService.getAgencyWithoutCaching(any())).thenReturn(new AgencyDTO().offline(false));
+    when(this.agencyService.getAgencyWithoutCaching(any()))
+        .thenReturn(new AgencyDTO().offline(false));
 
     try {
       this.agencyDeletionValidationService.validateAndMarkForDeletion(consultantAgency);
       fail("Exception was not thrown");
     } catch (CustomValidationHttpStatusException e) {
-      assertThat(requireNonNull(e.getCustomHttpHeader().get("X-Reason")).iterator().next(),
+      assertThat(
+          requireNonNull(e.getCustomHttpHeader().get("X-Reason")).iterator().next(),
           is(CONSULTANT_IS_THE_LAST_OF_AGENCY_AND_AGENCY_IS_STILL_ACTIVE.name()));
     }
   }
 
   @Test
-  public void validateForDeletion_Should_throwCustomValidationHttpStatusException_When_consultantIsTheLastOfTheAgencyAndAgencyHasOpenEnquiries() {
+  public void
+      validateForDeletion_Should_throwCustomValidationHttpStatusException_When_consultantIsTheLastOfTheAgencyAndAgencyHasOpenEnquiries() {
     ConsultantAgency consultantAgency = new EasyRandom().nextObject(ConsultantAgency.class);
     consultantAgency.setDeleteDate(null);
     when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(any()))
         .thenReturn(singletonList(consultantAgency));
-    when(this.agencyService.getAgencyWithoutCaching(any())).thenReturn(new AgencyDTO().offline(true));
+    when(this.agencyService.getAgencyWithoutCaching(any()))
+        .thenReturn(new AgencyDTO().offline(true));
     when(this.sessionRepository.findByAgencyIdAndStatusAndConsultantIsNull(any(), any()))
         .thenReturn(singletonList(mock(Session.class)));
 
@@ -73,32 +74,36 @@ public class ConsultantAgencyDeletionValidationServiceTest {
       this.agencyDeletionValidationService.validateAndMarkForDeletion(consultantAgency);
       fail("Exception was not thrown");
     } catch (CustomValidationHttpStatusException e) {
-      assertThat(requireNonNull(e.getCustomHttpHeader().get("X-Reason")).iterator().next(),
+      assertThat(
+          requireNonNull(e.getCustomHttpHeader().get("X-Reason")).iterator().next(),
           is(CONSULTANT_IS_THE_LAST_OF_AGENCY_AND_AGENCY_HAS_OPEN_ENQUIRIES.name()));
     }
   }
 
   @Test(expected = InternalServerErrorException.class)
-  public void validateForDeletion_Should_throwInternalServerErrorException_When_agencyCanNotBeFetched() {
+  public void
+      validateForDeletion_Should_throwInternalServerErrorException_When_agencyCanNotBeFetched() {
     ConsultantAgency consultantAgency = new EasyRandom().nextObject(ConsultantAgency.class);
     consultantAgency.setDeleteDate(null);
     when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(any()))
         .thenReturn(singletonList(consultantAgency));
-    when(this.agencyService.getAgencyWithoutCaching(any())).thenThrow(new InternalServerErrorException(""));
+    when(this.agencyService.getAgencyWithoutCaching(any()))
+        .thenThrow(new InternalServerErrorException(""));
 
     this.agencyDeletionValidationService.validateAndMarkForDeletion(consultantAgency);
   }
 
   @Test
-  public void validateForDeletion_Should_notThrowAnyException_When_consultantAgencyIsValidForDeletion() {
+  public void
+      validateForDeletion_Should_notThrowAnyException_When_consultantAgencyIsValidForDeletion() {
     ConsultantAgency consultantAgency = new EasyRandom().nextObject(ConsultantAgency.class);
     consultantAgency.setDeleteDate(null);
     when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(any()))
         .thenReturn(singletonList(consultantAgency));
-    when(this.agencyService.getAgencyWithoutCaching(any())).thenReturn(new AgencyDTO().offline(true));
+    when(this.agencyService.getAgencyWithoutCaching(any()))
+        .thenReturn(new AgencyDTO().offline(true));
 
     assertDoesNotThrow(
         () -> this.agencyDeletionValidationService.validateAndMarkForDeletion(consultantAgency));
   }
-
 }

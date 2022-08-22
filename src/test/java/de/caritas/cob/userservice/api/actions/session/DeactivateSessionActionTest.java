@@ -1,12 +1,7 @@
 package de.caritas.cob.userservice.api.actions.session;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -30,14 +25,11 @@ import org.slf4j.Logger;
 @ExtendWith(MockitoExtension.class)
 class DeactivateSessionActionTest {
 
-  @InjectMocks
-  private DeactivateSessionActionCommand deactivateSessionAction;
+  @InjectMocks private DeactivateSessionActionCommand deactivateSessionAction;
 
-  @Mock
-  private SessionService sessionService;
+  @Mock private SessionService sessionService;
 
-  @Mock
-  private Logger logger;
+  @Mock private Logger logger;
 
   @BeforeEach
   public void setup() {
@@ -60,8 +52,7 @@ class DeactivateSessionActionTest {
     Session mockedSession = mock(Session.class);
     when(mockedSession.getStatus()).thenReturn(SessionStatus.DONE);
 
-    assertThrows(ConflictException.class,
-        () -> this.deactivateSessionAction.execute(mockedSession));
+    assertThrows(
+        ConflictException.class, () -> this.deactivateSessionAction.execute(mockedSession));
   }
-
 }

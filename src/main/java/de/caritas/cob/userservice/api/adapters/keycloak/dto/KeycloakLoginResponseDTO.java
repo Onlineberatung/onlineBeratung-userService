@@ -6,9 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Response body object for a Keycloak login call
- */
+/** Response body object for a Keycloak login call */
 @Getter
 @Setter
 @NoArgsConstructor

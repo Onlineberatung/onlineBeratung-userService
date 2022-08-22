@@ -23,11 +23,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 public class LiveEventNotificationServiceApiClientConfigIT {
 
-  @Autowired
-  private LiveControllerApi liveControllerApi;
+  @Autowired private LiveControllerApi liveControllerApi;
 
-  @MockBean
-  private LinkDiscoverers linkDiscoverers;
+  @MockBean private LinkDiscoverers linkDiscoverers;
 
   @Value("${live.service.api.url}")
   private String liveServiceApiUrl;
@@ -38,6 +36,4 @@ public class LiveEventNotificationServiceApiClientConfigIT {
 
     assertThat(apiClientUrl, is(this.liveServiceApiUrl));
   }
-
 }
-

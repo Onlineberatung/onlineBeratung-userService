@@ -11,9 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-/**
- * Verifier class for user verifications.
- */
+/** Verifier class for user verifications. */
 @Component
 @RequiredArgsConstructor
 public class UserVerifier {
@@ -38,7 +36,8 @@ public class UserVerifier {
   }
 
   public void checkIfAllRequiredAttributesAreCorrectlyFilled(UserDTO userDTO) {
-    if (demographicsFeatureEnabled && anyRequiredDemographicsAttributeMissingOrHaveInvalidFormat(userDTO)) {
+    if (demographicsFeatureEnabled
+        && anyRequiredDemographicsAttributeMissingOrHaveInvalidFormat(userDTO)) {
       throw new CustomValidationHttpStatusException(
           HttpStatusExceptionReason.DEMOGRAPHICS_ATTRIBUTE_MISSING, HttpStatus.BAD_REQUEST);
     }
@@ -51,7 +50,6 @@ public class UserVerifier {
   }
 
   private boolean anyRequiredDemographicsAttributeMissingOrHaveInvalidFormat(UserDTO userDTO) {
-    return ageIsNotCorrect(userDTO)
-        || StringUtils.isEmpty(userDTO.getUserGender());
+    return ageIsNotCorrect(userDTO) || StringUtils.isEmpty(userDTO.getUserGender());
   }
 }

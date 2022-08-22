@@ -22,8 +22,7 @@ public class TenantServiceApiClientConfig {
   @Bean
   @Primary
   public ApiClient tenantApiClient(RestTemplate restTemplate) {
-    ApiClient apiClient = new TenantServiceApiClient(
-        restTemplate);
+    ApiClient apiClient = new TenantServiceApiClient(restTemplate);
     apiClient.setBasePath(this.tenantServiceApiUrl);
     return apiClient;
   }

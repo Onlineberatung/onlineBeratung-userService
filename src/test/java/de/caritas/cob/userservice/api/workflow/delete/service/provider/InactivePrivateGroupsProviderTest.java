@@ -37,15 +37,11 @@ import org.slf4j.Logger;
 @RunWith(MockitoJUnitRunner.class)
 public class InactivePrivateGroupsProviderTest {
 
-  @InjectMocks
-  private InactivePrivateGroupsProvider inactivePrivateGroupsProvider;
+  @InjectMocks private InactivePrivateGroupsProvider inactivePrivateGroupsProvider;
 
-  @Mock
-  private RocketChatService rocketChatService;
-  @Mock
-  private ChatRepository chatRepository;
-  @Mock
-  private Logger logger;
+  @Mock private RocketChatService rocketChatService;
+  @Mock private ChatRepository chatRepository;
+  @Mock private Logger logger;
 
   @Before
   public void setup() {
@@ -53,12 +49,13 @@ public class InactivePrivateGroupsProviderTest {
   }
 
   @Test
-  public void retrieveUserWithInactiveGroupsMap_ShouldReturnEmptyMap_WhenFetchOfInactiveGroupsFails()
-      throws RocketChatGetGroupsListAllException {
+  public void
+      retrieveUserWithInactiveGroupsMap_ShouldReturnEmptyMap_WhenFetchOfInactiveGroupsFails()
+          throws RocketChatGetGroupsListAllException {
 
     when(chatRepository.findAll()).thenReturn(IterableUtils.emptyIterable());
-    doThrow(new RocketChatGetGroupsListAllException(new RuntimeException())).when(
-            this.rocketChatService)
+    doThrow(new RocketChatGetGroupsListAllException(new RuntimeException()))
+        .when(this.rocketChatService)
         .fetchAllInactivePrivateGroupsSinceGivenDate(any());
 
     var result = inactivePrivateGroupsProvider.retrieveUserWithInactiveGroupsMap();
@@ -67,19 +64,22 @@ public class InactivePrivateGroupsProviderTest {
   }
 
   @Test
-  public void retrieveUserWithInactiveGroupsMap_Should_FetchInactiveRocketChatGroupsWithCorrectDate()
-      throws RocketChatGetGroupsListAllException {
+  public void
+      retrieveUserWithInactiveGroupsMap_Should_FetchInactiveRocketChatGroupsWithCorrectDate()
+          throws RocketChatGetGroupsListAllException {
 
-    String fieldNameSessionInactiveDeleteWorkflowCheckDays = "sessionInactiveDeleteWorkflowCheckDays";
+    String fieldNameSessionInactiveDeleteWorkflowCheckDays =
+        "sessionInactiveDeleteWorkflowCheckDays";
     int valueSessionInactiveDeleteWorkflowCheckDays = 30;
 
-    setField(inactivePrivateGroupsProvider,
+    setField(
+        inactivePrivateGroupsProvider,
         fieldNameSessionInactiveDeleteWorkflowCheckDays,
         valueSessionInactiveDeleteWorkflowCheckDays);
-    LocalDateTime dateToCheck = LocalDateTime
-        .now()
-        .with(LocalTime.MIDNIGHT)
-        .minusDays(valueSessionInactiveDeleteWorkflowCheckDays);
+    LocalDateTime dateToCheck =
+        LocalDateTime.now()
+            .with(LocalTime.MIDNIGHT)
+            .minusDays(valueSessionInactiveDeleteWorkflowCheckDays);
     when(chatRepository.findAll()).thenReturn(IterableUtils.emptyIterable());
 
     inactivePrivateGroupsProvider.retrieveUserWithInactiveGroupsMap();
@@ -92,8 +92,8 @@ public class InactivePrivateGroupsProviderTest {
       throws RocketChatGetGroupsListAllException {
 
     when(chatRepository.findAll()).thenReturn(IterableUtils.emptyIterable());
-    doThrow(new RocketChatGetGroupsListAllException(new RuntimeException())).when(
-            this.rocketChatService)
+    doThrow(new RocketChatGetGroupsListAllException(new RuntimeException()))
+        .when(this.rocketChatService)
         .fetchAllInactivePrivateGroupsSinceGivenDate(any());
 
     inactivePrivateGroupsProvider.retrieveUserWithInactiveGroupsMap();
@@ -123,17 +123,18 @@ public class InactivePrivateGroupsProviderTest {
     assertThat(result.containsKey(RC_USER_ID), is(true));
     assertThat(result.containsKey(RC_USER_ID_2), is(true));
     assertThat(result.get(RC_USER_ID).size(), is(2));
-    assertThat(result.get(RC_USER_ID).stream().anyMatch(s -> groupDTO1User1.getId().equals(s)),
-        is(true));
-    assertThat(result.get(RC_USER_ID).stream().anyMatch(s -> groupDTO2User1.getId().equals(s)),
-        is(true));
+    assertThat(
+        result.get(RC_USER_ID).stream().anyMatch(s -> groupDTO1User1.getId().equals(s)), is(true));
+    assertThat(
+        result.get(RC_USER_ID).stream().anyMatch(s -> groupDTO2User1.getId().equals(s)), is(true));
     assertThat(result.get(RC_USER_ID_2).size(), is(1));
     assertThat(result.get(RC_USER_ID_2).get(0).equals(groupDTO1User2.getId()), is(true));
   }
 
   @Test
-  public void retrieveUserWithInactiveGroupsMap_Should_ReturnUserWithInactiveGroupsMapWithoutGroupChats()
-      throws RocketChatGetGroupsListAllException {
+  public void
+      retrieveUserWithInactiveGroupsMap_Should_ReturnUserWithInactiveGroupsMapWithoutGroupChats()
+          throws RocketChatGetGroupsListAllException {
 
     EasyRandom easyRandom = new EasyRandom();
     GroupDTO groupDTO1User1 = easyRandom.nextObject(GroupDTO.class);
@@ -155,10 +156,9 @@ public class InactivePrivateGroupsProviderTest {
     assertThat(result.containsKey(RC_USER_ID), is(true));
     assertThat(result.containsKey(RC_USER_ID_2), is(false));
     assertThat(result.get(RC_USER_ID).size(), is(2));
-    assertThat(result.get(RC_USER_ID).stream().anyMatch(s -> groupDTO1User1.getId().equals(s)),
-        is(true));
-    assertThat(result.get(RC_USER_ID).stream().anyMatch(s -> groupDTO2User1.getId().equals(s)),
-        is(true));
+    assertThat(
+        result.get(RC_USER_ID).stream().anyMatch(s -> groupDTO1User1.getId().equals(s)), is(true));
+    assertThat(
+        result.get(RC_USER_ID).stream().anyMatch(s -> groupDTO2User1.getId().equals(s)), is(true));
   }
-
 }

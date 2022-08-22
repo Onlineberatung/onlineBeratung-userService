@@ -1,12 +1,12 @@
 package de.caritas.cob.userservice.api.workflow.delete.service.provider;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupDTO;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupsListAllException;
 import de.caritas.cob.userservice.api.helper.DateCalculator;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupDTO;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.port.out.ChatRepository;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,9 +21,7 @@ import org.apache.commons.collections4.IterableUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-/**
- * Provider for user to inactive Rocket.Chat group map.
- */
+/** Provider for user to inactive Rocket.Chat group map. */
 @Service
 @RequiredArgsConstructor
 public class InactivePrivateGroupsProvider {
@@ -45,12 +43,13 @@ public class InactivePrivateGroupsProvider {
     Set<String> groupChatIdSet = buildSetOfGroupChatGroupdIds();
 
     Map<String, List<String>> userWithInactiveGroupsMap = new HashMap<>();
-    fetchAllInactivePrivateGroups()
-        .stream()
+    fetchAllInactivePrivateGroups().stream()
         .filter(group -> !groupChatIdSet.contains(group.getId()))
-        .forEach(group -> userWithInactiveGroupsMap
-            .computeIfAbsent(group.getUser().getId(), v -> new ArrayList<>())
-            .add(group.getId()));
+        .forEach(
+            group ->
+                userWithInactiveGroupsMap
+                    .computeIfAbsent(group.getUser().getId(), v -> new ArrayList<>())
+                    .add(group.getId()));
     return userWithInactiveGroupsMap;
   }
 
@@ -60,8 +59,8 @@ public class InactivePrivateGroupsProvider {
   }
 
   private List<GroupDTO> fetchAllInactivePrivateGroups() {
-    LocalDateTime dateTimeToCheck = DateCalculator
-        .calculateDateInThePastAtMidnight(sessionInactiveDeleteWorkflowCheckDays);
+    LocalDateTime dateTimeToCheck =
+        DateCalculator.calculateDateInThePastAtMidnight(sessionInactiveDeleteWorkflowCheckDays);
     try {
       return rocketChatService.fetchAllInactivePrivateGroupsSinceGivenDate(dateTimeToCheck);
     } catch (RocketChatGetGroupsListAllException ex) {
@@ -69,6 +68,4 @@ public class InactivePrivateGroupsProvider {
     }
     return Collections.emptyList();
   }
-
-
 }

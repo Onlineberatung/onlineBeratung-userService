@@ -34,6 +34,7 @@ import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.Exte
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.NewMessageDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.NotificationsDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.TeamSessionsDTO;
+import de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.ArrayList;
@@ -55,41 +56,34 @@ public class NewMessageEmailSupplierTest {
 
   private NewMessageEmailSupplier newMessageEmailSupplier;
 
-  @Mock
-  private Session session;
+  @Mock private Session session;
 
-  @Mock
-  private Set<String> roles;
+  @Mock private Set<String> roles;
 
-  @Mock
-  private ConsultantAgencyService consultantAgencyService;
+  @Mock private ConsultantAgencyService consultantAgencyService;
 
-  @Mock
-  private ConsultingTypeManager consultingTypeManager;
+  @Mock private ConsultingTypeManager consultingTypeManager;
 
-  @Mock
-  private ConsultantService consultantService;
+  @Mock private ConsultantService consultantService;
 
-  @Mock
-  private Logger logger;
+  @Mock private Logger logger;
 
-  @Mock
-  private TenantTemplateSupplier tenantTemplateSupplier;
+  @Mock private TenantTemplateSupplier tenantTemplateSupplier;
 
   @Before
   public void setup() {
-    this.newMessageEmailSupplier = NewMessageEmailSupplier
-        .builder()
-        .session(session)
-        .rcGroupId("feedbackGroupId")
-        .roles(roles)
-        .userId(USER.getUserId())
-        .consultantAgencyService(consultantAgencyService)
-        .consultingTypeManager(consultingTypeManager)
-        .consultantService(consultantService)
-        .applicationBaseUrl("app baseurl")
-        .emailDummySuffix("dummySuffix")
-        .build();
+    this.newMessageEmailSupplier =
+        NewMessageEmailSupplier.builder()
+            .session(session)
+            .rcGroupId("feedbackGroupId")
+            .roles(roles)
+            .userId(USER.getUserId())
+            .consultantAgencyService(consultantAgencyService)
+            .consultingTypeManager(consultingTypeManager)
+            .consultantService(consultantService)
+            .applicationBaseUrl("app baseurl")
+            .emailDummySuffix("dummySuffix")
+            .build();
     setInternalState(NewMessageEmailSupplier.class, "log", logger);
   }
 
@@ -101,7 +95,8 @@ public class NewMessageEmailSupplierTest {
   }
 
   @Test
-  public void generateEmails_Should_ReturnEmptyListAndLogError_When_UserRoleIsUserAndSessionIsNotValidAndMessageIsNotTheFirst() {
+  public void
+      generateEmails_Should_ReturnEmptyListAndLogError_When_UserRoleIsUserAndSessionIsNotValidAndMessageIsNotTheFirst() {
     when(roles.contains(UserRole.USER.getValue())).thenReturn(true);
     User userAnotherId = mock(User.class);
     when(userAnotherId.getUserId()).thenReturn("another");
@@ -115,7 +110,8 @@ public class NewMessageEmailSupplierTest {
   }
 
   @Test
-  public void generateEmails_Should_ReturnEmptyListAndNotLogError_When_UserRoleIsUserAndSessionIsNotValidAndMessageIsTheFirst() {
+  public void
+      generateEmails_Should_ReturnEmptyListAndNotLogError_When_UserRoleIsUserAndSessionIsNotValidAndMessageIsTheFirst() {
     when(roles.contains(UserRole.USER.getValue())).thenReturn(true);
     when(session.getUser()).thenReturn(USER);
     when(session.getStatus()).thenReturn(SessionStatus.NEW);
@@ -126,7 +122,8 @@ public class NewMessageEmailSupplierTest {
   }
 
   @Test
-  public void generateEmails_Should_ReturnEmptyList_When_UserRoleIsUserAndSessionIsValidAndMessageAndNoDependentConsultantsExists() {
+  public void
+      generateEmails_Should_ReturnEmptyList_When_UserRoleIsUserAndSessionIsValidAndMessageAndNoDependentConsultantsExists() {
     when(roles.contains(UserRole.USER.getValue())).thenReturn(true);
     when(session.getUser()).thenReturn(USER);
     when(session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
@@ -138,7 +135,8 @@ public class NewMessageEmailSupplierTest {
   }
 
   @Test
-  public void generateEmails_Should_ReturnExpectedMail_When_UserRoleIsUserAndSessionIsNoTeamSession() {
+  public void
+      generateEmails_Should_ReturnExpectedMail_When_UserRoleIsUserAndSessionIsNoTeamSession() {
     when(roles.contains(UserRole.USER.getValue())).thenReturn(true);
     User user = mock(User.class);
     when(user.getUserId()).thenReturn(USER.getUserId());
@@ -153,6 +151,7 @@ public class NewMessageEmailSupplierTest {
     MailDTO generatedMail = generatedMails.get(0);
     assertThat(generatedMail.getTemplate(), is(TEMPLATE_NEW_MESSAGE_NOTIFICATION_CONSULTANT));
     assertThat(generatedMail.getEmail(), is("email@email.com"));
+    assertThat(generatedMail.getLanguage(), is(LanguageCode.DE));
     List<TemplateDataDTO> templateData = generatedMail.getTemplateData();
     assertThat(templateData, hasSize(3));
     assertThat(templateData.get(0).getKey(), is("name"));
@@ -164,7 +163,8 @@ public class NewMessageEmailSupplierTest {
   }
 
   @Test
-  public void generateEmails_Should_ReturnExpectedMail_When_UserRoleIsUserAndSessionIsTeamSession() {
+  public void
+      generateEmails_Should_ReturnExpectedMail_When_UserRoleIsUserAndSessionIsTeamSession() {
     ExtendedConsultingTypeResponseDTO settings = mock(ExtendedConsultingTypeResponseDTO.class);
     NewMessageDTO newMessageDTO = new NewMessageDTO().allTeamConsultants(true);
     TeamSessionsDTO teamSessionsDTO = new TeamSessionsDTO().newMessage(newMessageDTO);
@@ -187,6 +187,7 @@ public class NewMessageEmailSupplierTest {
     MailDTO generatedMail = generatedMails.get(0);
     assertThat(generatedMail.getTemplate(), is(TEMPLATE_NEW_MESSAGE_NOTIFICATION_CONSULTANT));
     assertThat(generatedMail.getEmail(), is("email@email.com"));
+    assertThat(generatedMail.getLanguage(), is(LanguageCode.DE));
     List<TemplateDataDTO> templateData = generatedMail.getTemplateData();
     assertThat(templateData, hasSize(3));
     assertThat(templateData.get(0).getKey(), is("name"));
@@ -198,7 +199,8 @@ public class NewMessageEmailSupplierTest {
   }
 
   @Test
-  public void generateEmails_Should_ReturnEmptyListAndLogError_When_UserRoleIsConsultantAndAskerHasNoMailAddress() {
+  public void
+      generateEmails_Should_ReturnEmptyListAndLogError_When_UserRoleIsConsultantAndAskerHasNoMailAddress() {
     when(roles.contains(UserRole.CONSULTANT.getValue())).thenReturn(true);
     User user = Mockito.mock(User.class);
     when(session.getUser()).thenReturn(user);
@@ -250,7 +252,8 @@ public class NewMessageEmailSupplierTest {
   }
 
   @Test
-  public void generateEmails_Should_ReturnExpectedEmailToAsker_When_ConsultantWritesToValidReceiver() {
+  public void
+      generateEmails_Should_ReturnExpectedEmailToAsker_When_ConsultantWritesToValidReceiver() {
     when(roles.contains(UserRole.CONSULTANT.getValue())).thenReturn(true);
     Consultant consultant = mock(Consultant.class);
     when(consultant.getUsername()).thenReturn(USERNAME_ENCODED);
@@ -264,6 +267,7 @@ public class NewMessageEmailSupplierTest {
     MailDTO generatedMail = generatedMails.get(0);
     assertThat(generatedMail.getTemplate(), is(TEMPLATE_NEW_MESSAGE_NOTIFICATION_ASKER));
     assertThat(generatedMail.getEmail(), is("email@email.com"));
+    assertThat(generatedMail.getLanguage(), is(LanguageCode.DE));
     List<TemplateDataDTO> templateData = generatedMail.getTemplateData();
     assertThat(templateData, hasSize(3));
     assertThat(templateData.get(0).getKey(), is("consultantName"));
@@ -275,7 +279,8 @@ public class NewMessageEmailSupplierTest {
   }
 
   @Test
-  public void generateEmails_Should_ReturnExpectedEmailToAsker_When_ConsultantWritesToValidReceiverMultiTenancy() {
+  public void
+      generateEmails_Should_ReturnExpectedEmailToAsker_When_ConsultantWritesToValidReceiverMultiTenancy() {
     // given
     givenCurrentTenantDataIsSet();
     when(roles.contains(UserRole.CONSULTANT.getValue())).thenReturn(true);
@@ -288,10 +293,10 @@ public class NewMessageEmailSupplierTest {
     mockedTemplateAtt.add(new TemplateDataDTO());
     when(tenantTemplateSupplier.getTemplateAttributes()).thenReturn(mockedTemplateAtt);
     ReflectionTestUtils.setField(newMessageEmailSupplier, "multiTenancyEnabled", true);
-    ReflectionTestUtils.setField(newMessageEmailSupplier, "tenantTemplateSupplier",
-        tenantTemplateSupplier);
+    ReflectionTestUtils.setField(
+        newMessageEmailSupplier, "tenantTemplateSupplier", tenantTemplateSupplier);
 
-    //when
+    // when
     List<MailDTO> generatedMails = this.newMessageEmailSupplier.generateEmails();
 
     // then
@@ -307,8 +312,7 @@ public class NewMessageEmailSupplierTest {
     when(session.getConsultant()).thenReturn(consultant);
     when(consultant.getId()).thenReturn(CONSULTANT_ID);
     when(session.getUser()).thenReturn(USER);
-    when(consultantService.getConsultant(USER.getUserId()))
-        .thenReturn(Optional.empty());
+    when(consultantService.getConsultant(USER.getUserId())).thenReturn(Optional.empty());
 
     this.newMessageEmailSupplier.generateEmails();
   }
@@ -319,6 +323,4 @@ public class NewMessageEmailSupplierTest {
     tenantData.setSubdomain("subdomain");
     TenantContext.setCurrentTenantData(tenantData);
   }
-
-
 }

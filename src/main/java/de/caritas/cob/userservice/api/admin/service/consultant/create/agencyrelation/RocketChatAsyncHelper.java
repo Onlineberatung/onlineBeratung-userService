@@ -44,19 +44,19 @@ public class RocketChatAsyncHelper {
   private final @NonNull ConsultantRepository consultantRepository;
   private final @NonNull ConsultantAgencyRepository consultantAgencyRepository;
   private final @NonNull MailService mailService;
+
   @Value("${app.base.url}")
   private String applicationBaseUrl;
 
   @Async
   @Transactional
-  public void addConsultantToSessions(Consultant consultant, AgencyDTO agency,
-      Consumer<String> logMethod, Long tenantId) {
+  public void addConsultantToSessions(
+      Consultant consultant, AgencyDTO agency, Consumer<String> logMethod, Long tenantId) {
     try {
       TenantContext.setCurrentTenant(tenantId);
       List<Session> relevantSessions = collectRelevantSessionsToAddConsultant(agency);
-      RocketChatAddToGroupOperationService
-          .getInstance(this.rocketChatFacade, identityClient, logMethod,
-              consultingTypeManager)
+      RocketChatAddToGroupOperationService.getInstance(
+              this.rocketChatFacade, identityClient, logMethod, consultingTypeManager)
           .onSessions(relevantSessions)
           .withConsultant(consultant)
           .addToGroupsOrRollbackOnFailure();
@@ -71,44 +71,50 @@ public class RocketChatAsyncHelper {
   }
 
   private void updateConsultantStatus(Consultant consultant, AgencyDTO agencyDTO) {
-    ConsultantAgency consultantAgency = consultantAgencyRepository
-        .findByConsultantIdAndAgencyIdAndStatusAndDeleteDateIsNull(consultant.getId(),
-            agencyDTO.getId(), ConsultantAgencyStatus.IN_PROGRESS);
+    ConsultantAgency consultantAgency =
+        consultantAgencyRepository.findByConsultantIdAndAgencyIdAndStatusAndDeleteDateIsNull(
+            consultant.getId(), agencyDTO.getId(), ConsultantAgencyStatus.IN_PROGRESS);
 
     consultantAgency.setStatus(ConsultantAgencyStatus.CREATED);
-    List<ConsultantAgency> consultantAgencies = consultantAgencyRepository
-        .findByConsultantIdAndStatusAndDeleteDateIsNull(consultant.getId(),
-            ConsultantAgencyStatus.IN_PROGRESS);
+    List<ConsultantAgency> consultantAgencies =
+        consultantAgencyRepository.findByConsultantIdAndStatusAndDeleteDateIsNull(
+            consultant.getId(), ConsultantAgencyStatus.IN_PROGRESS);
     if (consultantAgencies.size() == 0) {
       consultant.setStatus(ConsultantStatus.CREATED);
       consultantRepository.save(consultant);
     }
-
   }
 
   private void sendErrorEmail(Consultant consultant, Exception exception) {
-    ErrorMailDTO errorMailDTO = new ErrorMailDTO()
-        .template(TEMPLATE_FREE_TEXT)
-        .templateData(asList(
-            new TemplateDataDTO().key("subject").value("RocketChat sessions assignment error"),
-            new TemplateDataDTO().key("url").value(this.applicationBaseUrl),
-            new TemplateDataDTO().key("text").value(getEmailText(consultant, exception))));
+    ErrorMailDTO errorMailDTO =
+        new ErrorMailDTO()
+            .template(TEMPLATE_FREE_TEXT)
+            .templateData(
+                asList(
+                    new TemplateDataDTO()
+                        .key("subject")
+                        .value("RocketChat sessions assignment error"),
+                    new TemplateDataDTO().key("url").value(this.applicationBaseUrl),
+                    new TemplateDataDTO().key("text").value(getEmailText(consultant, exception))));
     this.mailService.sendErrorEmailNotification(errorMailDTO);
   }
 
   private String getEmailText(Consultant consultant, Exception exception) {
-    return "Error happened during rocket chat session assignments for consultant " + consultant
-        .getUsername() + ". Error message: " + exception.getMessage();
+    return "Error happened during rocket chat session assignments for consultant "
+        + consultant.getUsername()
+        + ". Error message: "
+        + exception.getMessage();
   }
 
   private List<Session> collectRelevantSessionsToAddConsultant(AgencyDTO agency) {
-    List<Session> sessionsToAddConsultant = sessionRepository
-        .findByAgencyIdAndStatusAndConsultantIsNull(agency.getId(), SessionStatus.NEW);
+    List<Session> sessionsToAddConsultant =
+        sessionRepository.findByAgencyIdAndStatusAndConsultantIsNull(
+            agency.getId(), SessionStatus.NEW);
     if (isTrue(agency.getTeamAgency())) {
-      sessionsToAddConsultant.addAll(sessionRepository
-          .findByAgencyIdAndStatusAndTeamSessionIsTrue(agency.getId(), SessionStatus.IN_PROGRESS));
+      sessionsToAddConsultant.addAll(
+          sessionRepository.findByAgencyIdAndStatusAndTeamSessionIsTrue(
+              agency.getId(), SessionStatus.IN_PROGRESS));
     }
     return sessionsToAddConsultant;
   }
-
 }

@@ -25,11 +25,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class InvalidAgencyForConsultantViolationReportRuleTest {
 
-  @InjectMocks
-  private InvalidAgencyForConsultantViolationReportRule reportRule;
+  @InjectMocks private InvalidAgencyForConsultantViolationReportRule reportRule;
 
-  @Mock
-  private ConsultantAgencyRepository consultantAgencyRepository;
+  @Mock private ConsultantAgencyRepository consultantAgencyRepository;
 
   @Test
   public void generateViolations_Should_returnEmptyList_When_noViolationExists() {
@@ -50,23 +48,25 @@ public class InvalidAgencyForConsultantViolationReportRuleTest {
 
     assertThat(violations, hasSize(1));
     ViolationDTO resultViolation = violations.iterator().next();
-    assertThat(resultViolation.getIdentifier(),
-        is(violatedConsultantAgency.getConsultant().getId()));
+    assertThat(
+        resultViolation.getIdentifier(), is(violatedConsultantAgency.getConsultant().getId()));
     assertThat(resultViolation.getViolationType(), is(CONSULTANT));
     assertThat(resultViolation.getReason(), is("Assigned agency with id 1 has been deleted"));
     assertThat(resultViolation.getAdditionalInformation(), hasSize(2));
     assertThat(resultViolation.getAdditionalInformation().get(0).getName(), is("Username"));
-    assertThat(resultViolation.getAdditionalInformation().get(0).getValue(),
+    assertThat(
+        resultViolation.getAdditionalInformation().get(0).getValue(),
         is(violatedConsultantAgency.getConsultant().getUsername()));
     assertThat(resultViolation.getAdditionalInformation().get(1).getName(), is("Email"));
-    assertThat(resultViolation.getAdditionalInformation().get(1).getValue(),
+    assertThat(
+        resultViolation.getAdditionalInformation().get(1).getValue(),
         is(violatedConsultantAgency.getConsultant().getEmail()));
   }
 
   @Test
   public void generateViolations_Should_returnViolationsOnlyForConsultantsWithDeletedAgency() {
-    List<ConsultantAgency> consultantAgencies = new EasyRandom().objects(ConsultantAgency.class, 10)
-        .collect(Collectors.toList());
+    List<ConsultantAgency> consultantAgencies =
+        new EasyRandom().objects(ConsultantAgency.class, 10).collect(Collectors.toList());
     consultantAgencies.get(0).setAgencyId(1L);
     consultantAgencies.get(2).setAgencyId(2L);
     consultantAgencies.get(4).setAgencyId(3L);
@@ -82,17 +82,16 @@ public class InvalidAgencyForConsultantViolationReportRuleTest {
         .thenReturn(singletonList(consultantAgencies.get(6)));
     when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(5L))
         .thenReturn(singletonList(consultantAgencies.get(9)));
-    this.reportRule.setAllAgencies(asList(
-        new AgencyAdminResponseDTO().id(1L),
-        new AgencyAdminResponseDTO().id(2L),
-        new AgencyAdminResponseDTO().id(3L),
-        new AgencyAdminResponseDTO().id(4L),
-        new AgencyAdminResponseDTO().id(5L)
-    ));
+    this.reportRule.setAllAgencies(
+        asList(
+            new AgencyAdminResponseDTO().id(1L),
+            new AgencyAdminResponseDTO().id(2L),
+            new AgencyAdminResponseDTO().id(3L),
+            new AgencyAdminResponseDTO().id(4L),
+            new AgencyAdminResponseDTO().id(5L)));
 
     List<ViolationDTO> violations = this.reportRule.generateViolations();
 
     assertThat(violations, hasSize(5));
   }
-
 }

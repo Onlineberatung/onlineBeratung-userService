@@ -809,6 +809,29 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /users/statistics/registration:
+    get:
+      tags:
+        - user-controller
+      summary: 'Returns a list of user registration data per tenant'
+      operationId: getRegistrationStatistics
+      responses:
+        200:
+          description: successful operation
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/RegistrationStatisticsListResponseDTO'
+        204:
+          description: successful operation, but no content
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /users/mails/messages/new:
     post:
       tags:
@@ -1273,9 +1296,39 @@ paths:
     post:
       tags:
         - user-controller
-      summary: 'Create a new group chat [Authorization: Role: consultant with authority
+      summary: 'Create a new group chat with chat_agency relation so that all advice seekers from that agency can see this chat. [Authorization: Role: consultant with authority
         CREATE_NEW_CHAT]'
-      operationId: createChat
+      operationId: createChatV1
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/ChatDTO'
+        required: true
+      responses:
+        201:
+          description: CREATED - group chat was created successfully
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/CreateChatResponseDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
+        409:
+          description: CONFLICT - group chat with same name already existing
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+  /users/chat/v2/new:
+    post:
+      tags:
+        - user-controller
+      summary: 'Create a new group chat that will be visible to the user only by invitation [Authorization: Role: consultant with authority
+        CREATE_NEW_CHAT]'
+      operationId: createChatV2
       requestBody:
         content:
           'application/json':
@@ -1465,6 +1518,31 @@ paths:
             'application/json':
               schema:
                 $ref: '#/components/schemas/ChatInfoResponseDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        404:
+          description: NOT FOUND - Chat not found
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+  /users/chat/{chatId}/assign:
+    put:
+      tags:
+        - user-controller
+      summary: 'Assign the user to the given chat [Authorization: Role: consultant or user]'
+      operationId: assignChat
+      parameters:
+        - name: chatId
+          in: path
+          description: Chat Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK - successful operation
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -1881,6 +1959,47 @@ components:
           type: string
           example: 8
           description: mandatory depending on the consulting type
+
+    RegistrationStatisticsListResponseDTO:
+      type: object
+      properties:
+        registrationStatistics:
+          type: array
+          items:
+            $ref: '#/components/schemas/RegistrationStatisticsResponseDTO'
+
+    RegistrationStatisticsResponseDTO:
+      type: object
+      required:
+        - userId
+        - registrationDate
+      properties:
+        userId:
+          type: string
+        registrationDate:
+          type: string
+          example: '2022-08-15T21:11:29'
+        age:
+          type: integer
+          example: '25'
+        gender:
+          type: string
+          example: 'FEMALE'
+        counsellingRelation:
+          type: string
+          example: 'SELF_COUNSELLING'
+        topicsInternalAttributes:
+          type: array
+          items:
+            type: string
+          example: [ 'angeho01','angeho13' ]
+        mainTopicInternalAttribute:
+          type: string
+          example: 'angeho01'
+        postalCode:
+          type: string
+          example: '99999'
+
 
     ConsultantSessionListResponseDTO:
       type: object
@@ -2442,6 +2561,8 @@ components:
             description: each an ISO 639-1 code
             default: de
             example: de, en
+        preferredLanguage:
+          $ref: "#/components/schemas/LanguageCode"
         absenceMessage:
           type: string
           example: Bin mal weg...
@@ -2512,6 +2633,8 @@ components:
           uniqueItems: true
           items:
             $ref: '#/components/schemas/EmailToggle'
+        preferredLanguage:
+          $ref: '#/components/schemas/LanguageCode'
 
     UpdateConsultantDTO:
       type: object
@@ -2682,14 +2805,10 @@ components:
       type: object
       required:
         - groupId
-        - chatLink
       properties:
         groupId:
           type: string
           example: WCET6GWir78pNMyyD
-        chatLink:
-          type: string
-          example: https://{baseUrl}}/{consultingTypeName}/GEYDA
 
     ChatInfoResponseDTO:
       type: object
@@ -2750,14 +2869,10 @@ components:
       type: object
       required:
         - groupId
-        - chatLink
       properties:
         groupId:
           type: string
           example: WCET6GWir78pNMyyD
-        chatLink:
-          type: string
-          example: https://{baseUrl}}/{consultingTypeName}/GEYDA
 
     NewRegistrationDto:
       type: object

@@ -19,10 +19,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
 import de.caritas.cob.userservice.api.facade.sessionlist.RocketChatRoomInformationProvider;
 import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
-import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -33,17 +33,15 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ConsultantChatEnricherTest {
 
-  @InjectMocks
-  private ConsultantChatEnricher consultantChatEnricher;
+  @InjectMocks private ConsultantChatEnricher consultantChatEnricher;
 
-  @Mock
-  private SessionListAnalyser sessionListAnalyser;
+  @Mock private SessionListAnalyser sessionListAnalyser;
 
-  @Mock
-  private RocketChatRoomInformationProvider rocketChatRoomInformationProvider;
+  @Mock private RocketChatRoomInformationProvider rocketChatRoomInformationProvider;
 
   @Test
-  public void updateRequiredConsultantChatValues_Should_SetSubscribedFlagToTrue_WhenConsultantIsAttendeeOfAChat() {
+  public void
+      updateRequiredConsultantChatValues_Should_SetSubscribedFlagToTrue_WhenConsultantIsAttendeeOfAChat() {
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
             .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
@@ -54,16 +52,20 @@ public class ConsultantChatEnricherTest {
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
 
-    ConsultantSessionResponseDTO result = consultantChatEnricher
-        .updateRequiredConsultantChatValues(
-            singletonList(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE), RC_TOKEN,
-            CONSULTANT).get(0);
+    ConsultantSessionResponseDTO result =
+        consultantChatEnricher
+            .updateRequiredConsultantChatValues(
+                singletonList(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE),
+                RC_TOKEN,
+                CONSULTANT)
+            .get(0);
 
     assertTrue(result.getChat().isSubscribed());
   }
 
   @Test
-  public void updateRequiredConsultantChatValues_Should_SetSubscribedFlagToFalse_WhenConsultantIsNotAttendeeOfAChat() {
+  public void
+      updateRequiredConsultantChatValues_Should_SetSubscribedFlagToFalse_WhenConsultantIsNotAttendeeOfAChat() {
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
             .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
@@ -74,16 +76,20 @@ public class ConsultantChatEnricherTest {
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
 
-    ConsultantSessionResponseDTO result = consultantChatEnricher
-        .updateRequiredConsultantChatValues(
-            singletonList(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE), RC_TOKEN,
-            CONSULTANT).get(0);
+    ConsultantSessionResponseDTO result =
+        consultantChatEnricher
+            .updateRequiredConsultantChatValues(
+                singletonList(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE),
+                RC_TOKEN,
+                CONSULTANT)
+            .get(0);
 
     assertFalse(result.getChat().isSubscribed());
   }
 
   @Test
-  public void updateRequiredConsultantChatValues_Should_ReturnCorrectFileTypeAndImagePreviewForChat() {
+  public void
+      updateRequiredConsultantChatValues_Should_ReturnCorrectFileTypeAndImagePreviewForChat() {
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
             .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
@@ -93,24 +99,26 @@ public class ConsultantChatEnricherTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    when(sessionListAnalyser
-        .getAttachmentFromRocketChatMessageIfAvailable(
-            Mockito.eq(CONSULTANT_2.getRocketChatId()),
-            Mockito.any())).thenReturn(SESSION_ATTACHMENT_DTO_NOT_RECEIVED);
+    when(sessionListAnalyser.getAttachmentFromRocketChatMessageIfAvailable(
+            Mockito.eq(CONSULTANT_2.getRocketChatId()), Mockito.any()))
+        .thenReturn(SESSION_ATTACHMENT_DTO_NOT_RECEIVED);
 
-    ConsultantSessionResponseDTO result = consultantChatEnricher
-        .updateRequiredConsultantChatValues(
-            singletonList(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE), RC_TOKEN,
-            CONSULTANT).get(0);
+    ConsultantSessionResponseDTO result =
+        consultantChatEnricher
+            .updateRequiredConsultantChatValues(
+                singletonList(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE),
+                RC_TOKEN,
+                CONSULTANT)
+            .get(0);
 
     assertEquals(FILE_DTO.getType(), result.getChat().getAttachment().getFileType());
-    assertEquals(ATTACHMENT_DTO.getImagePreview(),
-        result.getChat().getAttachment().getImagePreview());
-
+    assertEquals(
+        ATTACHMENT_DTO.getImagePreview(), result.getChat().getAttachment().getImagePreview());
   }
 
   @Test
-  public void updateRequiredConsultantChatValues_Should_ReturnSessionListWithChatMessagesReadFalse_WhenThereAreUnreadChatMessages() {
+  public void
+      updateRequiredConsultantChatValues_Should_ReturnSessionListWithChatMessagesReadFalse_WhenThereAreUnreadChatMessages() {
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
             .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
@@ -121,16 +129,20 @@ public class ConsultantChatEnricherTest {
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
 
-    ConsultantSessionResponseDTO result = consultantChatEnricher
-        .updateRequiredConsultantChatValues(
-            singletonList(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE), RC_TOKEN,
-            CONSULTANT).get(0);
+    ConsultantSessionResponseDTO result =
+        consultantChatEnricher
+            .updateRequiredConsultantChatValues(
+                singletonList(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE),
+                RC_TOKEN,
+                CONSULTANT)
+            .get(0);
 
     assertFalse(result.getChat().isMessagesRead());
   }
 
   @Test
-  public void updateRequiredConsultantChatValues_Should_ReturnSessionListWithChatMessagesReadTrue_WhenThereAreNoUnreadChatMessages() {
+  public void
+      updateRequiredConsultantChatValues_Should_ReturnSessionListWithChatMessagesReadTrue_WhenThereAreNoUnreadChatMessages() {
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
             .roomsForUpdate(ROOMS_UPDATE_DTO_LIST_WITH_ATTACHMENT)
@@ -141,12 +153,14 @@ public class ConsultantChatEnricherTest {
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
 
-    ConsultantSessionResponseDTO result = consultantChatEnricher
-        .updateRequiredConsultantChatValues(
-            singletonList(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE), RC_TOKEN,
-            CONSULTANT).get(0);
+    ConsultantSessionResponseDTO result =
+        consultantChatEnricher
+            .updateRequiredConsultantChatValues(
+                singletonList(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE),
+                RC_TOKEN,
+                CONSULTANT)
+            .get(0);
 
     assertTrue(result.getChat().isMessagesRead());
   }
-
 }

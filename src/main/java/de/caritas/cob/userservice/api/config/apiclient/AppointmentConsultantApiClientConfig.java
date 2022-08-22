@@ -7,9 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.web.client.RestTemplate;
 
-/**
- * Configuration class for the AppointmentService API client.
- */
+/** Configuration class for the AppointmentService API client. */
 @Configuration
 public class AppointmentConsultantApiClientConfig {
 
@@ -27,5 +25,4 @@ public class AppointmentConsultantApiClientConfig {
   public ApiClient appointmentConsultantApiClient(RestTemplate restTemplate) {
     return new ApiClient(restTemplate).setBasePath(this.appointmentServiceApiUrl);
   }
-
 }

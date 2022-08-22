@@ -7,9 +7,10 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
+import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
-import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
@@ -18,19 +19,15 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
-import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
-/**
- * Supplier to provide mails to be sent when a new enquiry was created.
- */
+/** Supplier to provide mails to be sent when a new enquiry was created. */
 @RequiredArgsConstructor
 @Service
 @Slf4j
@@ -39,6 +36,7 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
 
   private final @NonNull ConsultantAgencyRepository consultantAgencyRepository;
   private final @NonNull AgencyService agencyService;
+
   @Value("${app.base.url}")
   private String applicationBaseUrl;
 
@@ -84,19 +82,14 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
   }
 
   private Function<ConsultantAgency, MailDTO> toEnquiryMailDTO(AgencyDTO agency) {
-    return consultantAgency -> buildMailDtoForNewEnquiryNotificationConsultant(
-        consultantAgency.getConsultant().getEmail(),
-        consultantAgency.getConsultant().getFullName(),
-        session.getPostcode(),
-        agency.getName()
-    );
+    return consultantAgency ->
+        mailOf(consultantAgency.getConsultant(), session.getPostcode(), agency.getName());
   }
 
-  private MailDTO buildMailDtoForNewEnquiryNotificationConsultant(String email, String name,
-      String postCode, String agency) {
+  private MailDTO mailOf(Consultant consultant, String postCode, String agency) {
 
     var templateAttributes = new ArrayList<TemplateDataDTO>();
-    templateAttributes.add(new TemplateDataDTO().key("name").value(name));
+    templateAttributes.add(new TemplateDataDTO().key("name").value(consultant.getFullName()));
     templateAttributes.add(new TemplateDataDTO().key("plz").value(postCode));
     templateAttributes.add(new TemplateDataDTO().key("beratungsstelle").value(agency));
 
@@ -106,10 +99,14 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
       templateAttributes.addAll(tenantTemplateSupplier.getTemplateAttributes());
     }
 
+    var language =
+        de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.fromValue(
+            consultant.getLanguageCode().toString());
+
     return new MailDTO()
         .template(TEMPLATE_NEW_ENQUIRY_NOTIFICATION)
-        .email(email)
+        .email(consultant.getEmail())
+        .language(language)
         .templateData(templateAttributes);
   }
-
 }

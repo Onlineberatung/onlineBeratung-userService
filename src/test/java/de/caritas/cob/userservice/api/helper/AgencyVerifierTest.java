@@ -10,10 +10,10 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
-import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
@@ -25,16 +25,15 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 public class AgencyVerifierTest {
 
-  @InjectMocks
-  private AgencyVerifier agencyVerifier;
+  @InjectMocks private AgencyVerifier agencyVerifier;
 
-  @Mock
-  private AgencyService agencyService;
+  @Mock private AgencyService agencyService;
 
   private final EasyRandom easyRandom = new EasyRandom();
 
   @Test
-  public void getVerifiedAgency_Should_ThrowInternalServerErrorException_When_AgencyServiceHelperFails() {
+  public void
+      getVerifiedAgency_Should_ThrowInternalServerErrorException_When_AgencyServiceHelperFails() {
     when(agencyService.getAgencyWithoutCaching(AGENCY_ID))
         .thenThrow(new InternalServerErrorException(""));
 
@@ -47,7 +46,8 @@ public class AgencyVerifierTest {
   }
 
   @Test
-  public void getVerifiedAgency_Should_ThrowBadRequestException_When_AgencyIsNotAssignedToGivenConsultingType() {
+  public void
+      getVerifiedAgency_Should_ThrowBadRequestException_When_AgencyIsNotAssignedToGivenConsultingType() {
     when(agencyService.getAgencyWithoutCaching(AGENCY_ID)).thenReturn(AGENCY_DTO_SUCHT);
 
     try {
@@ -67,7 +67,8 @@ public class AgencyVerifierTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void checkIfConsultingTypeMatchesToAgency_Should_ThrowBadRequestException_When_ConsultingTypeDoesNotMatchToAgency() {
+  public void
+      checkIfConsultingTypeMatchesToAgency_Should_ThrowBadRequestException_When_ConsultingTypeDoesNotMatchToAgency() {
     when(agencyService.getAgencyWithoutCaching(any())).thenReturn(AGENCY_DTO_SUCHT);
 
     UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
@@ -76,7 +77,8 @@ public class AgencyVerifierTest {
   }
 
   @Test
-  public void checkIfConsultingTypeMatchesToAgency_ShouldNot_ThrowException_When_ConsultingTypeMatchesToAgency() {
+  public void
+      checkIfConsultingTypeMatchesToAgency_ShouldNot_ThrowException_When_ConsultingTypeMatchesToAgency() {
     when(agencyService.getAgencyWithoutCaching(any())).thenReturn(AGENCY_DTO_SUCHT);
 
     UserDTO userDTO = easyRandom.nextObject(UserDTO.class);

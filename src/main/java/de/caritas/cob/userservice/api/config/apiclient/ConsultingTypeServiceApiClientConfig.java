@@ -1,16 +1,14 @@
 package de.caritas.cob.userservice.api.config.apiclient;
 
-import de.caritas.cob.userservice.consultingtypeservice.generated.web.ConsultingTypeControllerApi;
 import de.caritas.cob.userservice.consultingtypeservice.generated.ApiClient;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.ConsultingTypeControllerApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-/**
- * Configuration class for the ConsultingTypeService API client.
- */
+/** Configuration class for the ConsultingTypeService API client. */
 @Component
 public class ConsultingTypeServiceApiClientConfig {
 
@@ -39,5 +37,4 @@ public class ConsultingTypeServiceApiClientConfig {
   public ApiClient consultingTypeApiClient(RestTemplate restTemplate) {
     return new ApiClient(restTemplate).setBasePath(this.consultingTypeServiceApiUrl);
   }
-
 }

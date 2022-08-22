@@ -30,5 +30,4 @@ class ConsultantServiceIT extends ConsultantServiceITBase {
   void addMobileTokensToConsultant_Should_throwConflictException_When_tokenAlreadyExists() {
     super.addMobileTokensToConsultant_Should_throwConflictException_When_tokenAlreadyExists();
   }
-
 }

@@ -11,19 +11,20 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.util.Lists;
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.UserServiceApplication;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
 import de.caritas.cob.userservice.api.conversation.model.PageableListRequest;
-import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
-import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import java.util.Collections;
@@ -53,20 +54,15 @@ public class ArchivedTeamSessionConversationListProviderTestIT {
   @Autowired
   private ArchivedTeamSessionConversationListProvider archivedTeamSessionConversationListProvider;
 
-  @Autowired
-  private SessionRepository sessionRepository;
+  @Autowired private SessionRepository sessionRepository;
 
-  @Autowired
-  private ConsultantRepository consultantRepository;
+  @Autowired private ConsultantRepository consultantRepository;
 
-  @Autowired
-  private ConsultantAgencyRepository consultantAgencyRepository;
+  @Autowired private ConsultantAgencyRepository consultantAgencyRepository;
 
-  @Autowired
-  private UserRepository userRepository;
+  @Autowired private UserRepository userRepository;
 
-  @MockBean
-  private ValidatedUserAccountProvider userAccountProvider;
+  @MockBean private ValidatedUserAccountProvider userAccountProvider;
 
   @After
   public void cleanDatabase() {
@@ -76,15 +72,13 @@ public class ArchivedTeamSessionConversationListProviderTestIT {
   }
 
   @Test
-  public void buildConversations_Should_returnExpectedResponseDTO_When_consultantHasArchivedTeamSessions() {
+  public void
+      buildConversations_Should_returnExpectedResponseDTO_When_consultantHasArchivedTeamSessions() {
     saveTestData(10);
-    PageableListRequest request = PageableListRequest.builder()
-        .count(5)
-        .offset(0)
-        .build();
+    PageableListRequest request = PageableListRequest.builder().count(5).offset(0).build();
 
-    ConsultantSessionListResponseDTO responseDTO = this.archivedTeamSessionConversationListProvider
-        .buildConversations(request);
+    ConsultantSessionListResponseDTO responseDTO =
+        this.archivedTeamSessionConversationListProvider.buildConversations(request);
 
     assertThat(responseDTO.getCount(), is(5));
     assertThat(responseDTO.getOffset(), is(0));
@@ -95,13 +89,10 @@ public class ArchivedTeamSessionConversationListProviderTestIT {
   @Test
   public void buildConversations_Should_returnExpectedElements_When_paginationParamsAreAtTheEnd() {
     saveTestData(10);
-    PageableListRequest request = PageableListRequest.builder()
-        .count(3)
-        .offset(9)
-        .build();
+    PageableListRequest request = PageableListRequest.builder().count(3).offset(9).build();
 
-    ConsultantSessionListResponseDTO responseDTO = this.archivedTeamSessionConversationListProvider
-        .buildConversations(request);
+    ConsultantSessionListResponseDTO responseDTO =
+        this.archivedTeamSessionConversationListProvider.buildConversations(request);
 
     assertThat(responseDTO.getCount(), is(1));
     assertThat(responseDTO.getOffset(), is(9));
@@ -112,13 +103,10 @@ public class ArchivedTeamSessionConversationListProviderTestIT {
   @Test
   public void buildConversations_Should_returnElementsInExpectedOrder() {
     saveTestData(100);
-    PageableListRequest request = PageableListRequest.builder()
-        .count(100)
-        .offset(0)
-        .build();
+    PageableListRequest request = PageableListRequest.builder().count(100).offset(0).build();
 
-    ConsultantSessionListResponseDTO responseDTO = this.archivedTeamSessionConversationListProvider
-        .buildConversations(request);
+    ConsultantSessionListResponseDTO responseDTO =
+        this.archivedTeamSessionConversationListProvider.buildConversations(request);
 
     PeekingIterator<ConsultantSessionResponseDTO> peeker =
         new PeekingIterator<>(responseDTO.getSessions().iterator());
@@ -133,8 +121,8 @@ public class ArchivedTeamSessionConversationListProviderTestIT {
 
   @Test
   public void providedType_Should_return_archivedTeamSession() {
-    ConversationListType conversationListType = this.archivedTeamSessionConversationListProvider
-        .providedType();
+    ConversationListType conversationListType =
+        this.archivedTeamSessionConversationListProvider.providedType();
 
     assertThat(conversationListType, is(ARCHIVED_TEAM_SESSION));
   }
@@ -151,22 +139,23 @@ public class ArchivedTeamSessionConversationListProviderTestIT {
     ConsultantAgency consultantAgency2 = buildConsultantAgency(consultant2);
     consultantAgencyRepository.save(consultantAgency2);
 
-    List<Session> sessions = new EasyRandom().objects(Session.class, amount + 5)
-        .collect(Collectors.toList());
+    List<Session> sessions =
+        new EasyRandom().objects(Session.class, amount + 5).collect(Collectors.toList());
     User user = this.userRepository.findAll().iterator().next();
-    sessions.forEach(session -> {
-      session.setRegistrationType(REGISTERED);
-      session.setConsultant(consultant2);
-      session.setUser(user);
-      session.setId(null);
-      session.setSessionData(null);
-      session.setTeamSession(true);
-      session.setPostcode("12345");
-      session.setConsultingTypeId(CONSULTING_TYPE_ID_OFFENDER);
-      session.setStatus(SessionStatus.IN_ARCHIVE);
-      session.setAgencyId(1L);
-      session.setSessionTopics(Lists.newArrayList());
-    });
+    sessions.forEach(
+        session -> {
+          session.setRegistrationType(REGISTERED);
+          session.setConsultant(consultant2);
+          session.setUser(user);
+          session.setId(null);
+          session.setSessionData(null);
+          session.setTeamSession(true);
+          session.setPostcode("12345");
+          session.setConsultingTypeId(CONSULTING_TYPE_ID_OFFENDER);
+          session.setStatus(SessionStatus.IN_ARCHIVE);
+          session.setAgencyId(1L);
+          session.setSessionTopics(Lists.newArrayList());
+        });
     sessions.get(0).setStatus(SessionStatus.INITIAL);
     sessions.get(1).setStatus(SessionStatus.IN_PROGRESS);
     sessions.get(2).setStatus(SessionStatus.DONE);
@@ -193,6 +182,8 @@ public class ArchivedTeamSessionConversationListProviderTestIT {
     consultant.setNotifyNewChatMessageFromAdviceSeeker(true);
     consultant.setNotifyNewFeedbackMessageFromAdviceSeeker(true);
     consultant.setWalkThroughEnabled(true);
+    consultant.setLanguageCode(LanguageCode.de);
+
     return consultant;
   }
 

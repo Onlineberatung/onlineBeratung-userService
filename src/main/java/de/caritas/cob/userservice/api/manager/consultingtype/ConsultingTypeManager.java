@@ -55,9 +55,8 @@ public class ConsultingTypeManager {
   }
 
   public boolean isConsultantBoundedToAgency(int consultingTypeId) {
-    var extendedConsultingTypeResponseDTO = consultingTypeService
-        .getExtendedConsultingTypeResponseDTO(consultingTypeId);
+    var extendedConsultingTypeResponseDTO =
+        consultingTypeService.getExtendedConsultingTypeResponseDTO(consultingTypeId);
     return isTrue(extendedConsultingTypeResponseDTO.getConsultantBoundedToConsultingType());
   }
-
 }

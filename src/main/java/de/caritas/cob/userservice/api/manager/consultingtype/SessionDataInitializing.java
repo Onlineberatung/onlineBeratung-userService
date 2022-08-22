@@ -23,10 +23,11 @@ public class SessionDataInitializing {
   public static SessionDataInitializing convertSessionDataInitializingDTOtoSessionDataInitializing(
       SessionDataInitializingDTO sessionDataInitializingDTO) {
 
-    return new SessionDataInitializing(isTrue(sessionDataInitializingDTO.getAddictiveDrugs()),
-        isTrue(sessionDataInitializingDTO.getAge()), isTrue(sessionDataInitializingDTO.getGender()),
+    return new SessionDataInitializing(
+        isTrue(sessionDataInitializingDTO.getAddictiveDrugs()),
+        isTrue(sessionDataInitializingDTO.getAge()),
+        isTrue(sessionDataInitializingDTO.getGender()),
         isTrue(sessionDataInitializingDTO.getRelation()),
         isTrue(sessionDataInitializingDTO.getState()));
   }
-
 }

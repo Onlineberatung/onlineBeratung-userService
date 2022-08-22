@@ -5,10 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Rocket.Chat subscriptions.get DTO
- */
-
+/** Rocket.Chat subscriptions.get DTO */
 @Setter
 @Getter
 @AllArgsConstructor
@@ -19,5 +16,4 @@ public class SubscriptionsGetDTO {
   private boolean success;
   private String status;
   private String message;
-
 }

@@ -24,14 +24,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class StopChatFacadeTest {
 
-  @InjectMocks
-  private StopChatFacade stopChatFacade;
+  @InjectMocks private StopChatFacade stopChatFacade;
 
-  @Mock
-  private ChatPermissionVerifier chatPermissionVerifier;
+  @Mock private ChatPermissionVerifier chatPermissionVerifier;
 
-  @Mock
-  private ActionsRegistry actionsRegistry;
+  @Mock private ActionsRegistry actionsRegistry;
 
   private final ActionCommandMockProvider mockProvider = new ActionCommandMockProvider();
 
@@ -42,9 +39,9 @@ public class StopChatFacadeTest {
   }
 
   @Test
-  public void stopChat_Should_ThrowRequestForbiddenException_When_ConsultantHasNoPermissionToStopChat() {
-    when(chatPermissionVerifier.hasSameAgencyAssigned(ACTIVE_CHAT, CONSULTANT))
-        .thenReturn(false);
+  public void
+      stopChat_Should_ThrowRequestForbiddenException_When_ConsultantHasNoPermissionToStopChat() {
+    when(chatPermissionVerifier.hasSameAgencyAssigned(ACTIVE_CHAT, CONSULTANT)).thenReturn(false);
 
     try {
       stopChatFacade.stopChat(ACTIVE_CHAT, CONSULTANT);
@@ -56,13 +53,11 @@ public class StopChatFacadeTest {
 
   @Test
   public void stopChat_Should_executeExpectedAction_When_ConsultantHasPermissionToStopChat() {
-    when(chatPermissionVerifier.hasSameAgencyAssigned(ACTIVE_CHAT, CONSULTANT))
-        .thenReturn(true);
+    when(chatPermissionVerifier.hasSameAgencyAssigned(ACTIVE_CHAT, CONSULTANT)).thenReturn(true);
 
     stopChatFacade.stopChat(ACTIVE_CHAT, CONSULTANT);
 
     verify(this.mockProvider.getActionMock(StopChatActionCommand.class), times(1))
         .execute(ACTIVE_CHAT);
   }
-
 }

@@ -14,5 +14,4 @@ public class NoContentException extends CustomHttpStatusException {
   public NoContentException(String message) {
     super(message, LogService::logWarn);
   }
-
 }

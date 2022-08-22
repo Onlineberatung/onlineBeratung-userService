@@ -25,5 +25,4 @@ public class ImportRecordAgencyCreationInputAdapter implements ConsultantAgencyC
   public Long getAgencyId() {
     return this.agencyId;
   }
-
 }

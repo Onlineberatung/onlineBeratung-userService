@@ -11,9 +11,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-/**
- * Facade for capsuling to get a chat.
- */
+/** Facade for capsuling to get a chat. */
 @Service
 @RequiredArgsConstructor
 public class GetChatFacade {
@@ -29,9 +27,11 @@ public class GetChatFacade {
    */
   public ChatInfoResponseDTO getChat(Long chatId) {
 
-    Chat chat = chatService.getChat(chatId)
-        .orElseThrow(
-            () -> new NotFoundException(String.format("Chat with id %s not found.", chatId)));
+    Chat chat =
+        chatService
+            .getChat(chatId)
+            .orElseThrow(
+                () -> new NotFoundException(String.format("Chat with id %s not found.", chatId)));
 
     this.chatPermissionVerifier.verifyPermissionForChat(chat);
 
@@ -40,5 +40,4 @@ public class GetChatFacade {
         .groupId(chat.getGroupId())
         .active(isTrue(chat.isActive()));
   }
-
 }

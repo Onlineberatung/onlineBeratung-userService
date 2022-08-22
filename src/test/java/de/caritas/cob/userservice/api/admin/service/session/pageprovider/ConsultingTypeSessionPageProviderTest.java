@@ -18,14 +18,11 @@ import org.springframework.data.domain.PageRequest;
 @RunWith(MockitoJUnitRunner.class)
 public class ConsultingTypeSessionPageProviderTest {
 
-  @InjectMocks
-  private ConsultingTypeSessionPageProvider consultingTypeSessionPageProvider;
+  @InjectMocks private ConsultingTypeSessionPageProvider consultingTypeSessionPageProvider;
 
-  @Mock
-  private SessionRepository sessionRepository;
+  @Mock private SessionRepository sessionRepository;
 
-  @Mock
-  private SessionFilter sessionFilter;
+  @Mock private SessionFilter sessionFilter;
 
   @Test
   public void supports_Should_returnTrue_When_consultantTypeFilterIsSet() {

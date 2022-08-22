@@ -8,9 +8,9 @@ import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.User;
-import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.model.UserMobileToken;
 import de.caritas.cob.userservice.api.port.out.UserMobileTokenRepository;
+import de.caritas.cob.userservice.api.port.out.UserRepository;
 import java.util.List;
 import java.util.Optional;
 import lombok.NonNull;
@@ -39,9 +39,9 @@ public class UserService {
   /**
    * Creates a new {@link User}.
    *
-   * @param userId         the new user id
-   * @param username       the name for the user
-   * @param email          the email of the user
+   * @param userId the new user id
+   * @param username the name for the user
+   * @param email the email of the user
    * @param languageFormal flag for language formal
    * @return The created {@link User}
    */
@@ -52,15 +52,15 @@ public class UserService {
   /**
    * Creates a new {@link User}.
    *
-   * @param userId         the new user id
-   * @param oldId          an optional old user id
-   * @param username       the name for the user
-   * @param email          the email of the user
+   * @param userId the new user id
+   * @param oldId an optional old user id
+   * @param username the name for the user
+   * @param email the email of the user
    * @param languageFormal flag for language formal
    * @return The created {@link User}
    */
-  public User createUser(String userId, Long oldId, String username, String email,
-      boolean languageFormal) {
+  public User createUser(
+      String userId, Long oldId, String username, String email, boolean languageFormal) {
     var user = new User(userId, oldId, username, email, languageFormal);
     auditingHandler.markCreated(user);
 
@@ -114,14 +114,15 @@ public class UserService {
    */
   public Optional<User> findUserByUsername(String username) {
     return userRepository.findByUsernameInAndDeleteDateIsNull(
-        List.of(usernameTranscoder.encodeUsername(username),
+        List.of(
+            usernameTranscoder.encodeUsername(username),
             usernameTranscoder.decodeUsername(username)));
   }
 
   /**
    * Updates/sets the user's Rocket.Chat ID in MariaDB if not already set.
    *
-   * @param user     {@link User}
+   * @param user {@link User}
    * @param rcUserId Rocket.Chat user ID
    */
   public void updateRocketChatIdInDatabase(User user, String rcUserId) {
@@ -134,13 +135,12 @@ public class UserService {
   /**
    * Adds a mobile client token of the current authenticated user in database.
    *
-   * @param userId      the id of the user
+   * @param userId the id of the user
    * @param mobileToken the new mobile device identifier token
    */
   public void addMobileAppToken(String userId, String mobileToken) {
     if (isNotBlank(mobileToken)) {
-      this.getUser(userId)
-          .ifPresent(user -> this.addUserToken(user, mobileToken));
+      this.getUser(userId).ifPresent(user -> this.addUserToken(user, mobileToken));
     }
   }
 
@@ -159,5 +159,4 @@ public class UserService {
       throw new ConflictException("Mobile Token already exists");
     }
   }
-
 }

@@ -13,14 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 class ConsultantServiceITBase {
 
-  @Autowired
-  private ConsultantService consultantService;
+  @Autowired private ConsultantService consultantService;
 
-  @Autowired
-  private ConsultantRepository consultantRepository;
+  @Autowired private ConsultantRepository consultantRepository;
 
-  @Autowired
-  protected ConsultantMobileTokenRepository consultantMobileTokenRepository;
+  @Autowired protected ConsultantMobileTokenRepository consultantMobileTokenRepository;
 
   void addMobileTokensToConsultant_Should_persistMobileTokens_When_tokensAreUnique() {
     var consultantId = this.consultantRepository.findAll().iterator().next().getId();
@@ -41,9 +38,9 @@ class ConsultantServiceITBase {
 
     this.consultantService.addMobileAppToken(consultantId, "token");
 
-    assertThrows(ConflictException.class,
+    assertThrows(
+        ConflictException.class,
         () -> this.consultantService.addMobileAppToken(consultantId, "token"));
     TenantContext.clear();
   }
-
 }

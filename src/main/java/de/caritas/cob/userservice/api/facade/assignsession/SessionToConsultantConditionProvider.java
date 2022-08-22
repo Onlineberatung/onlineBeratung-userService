@@ -89,8 +89,8 @@ public class SessionToConsultantConditionProvider {
    *
    * @return true if agencyId of {@link Session} is not contained in consultants agencies
    */
-  public boolean isSessionsAgencyNotAvailableInConsultantAgencies(Consultant consultant,
-      Session session) {
+  public boolean isSessionsAgencyNotAvailableInConsultantAgencies(
+      Consultant consultant, Session session) {
     if (isEmpty(consultant.getConsultantAgencies())) {
       return true;
     }
@@ -104,8 +104,8 @@ public class SessionToConsultantConditionProvider {
    *
    * @return true if consuling type is available for {@link Consultant}
    */
-  public boolean isSessionsConsultingTypeNotAvailableForConsultant(Consultant consultant,
-      Session session) {
+  public boolean isSessionsConsultingTypeNotAvailableForConsultant(
+      Consultant consultant, Session session) {
     if (isEmpty(consultant.getConsultantAgencies())) {
       return true;
     }

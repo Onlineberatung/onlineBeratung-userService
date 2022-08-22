@@ -32,14 +32,17 @@ public class PathConstants {
       "/users/sessions/teams?offset=0&count=1&filter=all";
   public static final String PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITHOUT_OFFSET =
       "/users/sessions/teams?count=1&filter=all";
-  public static final String PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_NEGATIVE_OFFSET =
-      "/users/sessions/teams?offset=-10&count=1&filter=all";
+  public static final String
+      PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_NEGATIVE_OFFSET =
+          "/users/sessions/teams?offset=-10&count=1&filter=all";
   public static final String PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITHOUT_COUNT =
       "/users/sessions/teams?offset=0&filter=all";
-  public static final String PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_NEGATIVE_COUNT =
-      "/users/sessions/teams?offset=0&count=-1&filter=all";
-  public static final String PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_INVALID_FILTER =
-      "/users/sessions/teams?offset=0&count=1&filter=sdfsegsgsdfdsf";
+  public static final String
+      PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_NEGATIVE_COUNT =
+          "/users/sessions/teams?offset=0&count=-1&filter=all";
+  public static final String
+      PATH_GET_TEAM_SESSIONS_FOR_AUTHENTICATED_CONSULTANT_WITH_INVALID_FILTER =
+          "/users/sessions/teams?offset=0&count=1&filter=sdfsegsgsdfdsf";
   public static final String PATH_SEND_NEW_MESSAGE_NOTIFICATION = "/users/mails/messages/new";
   public static final String PATH_USER_DATA = "/users/data";
   public static final String PATH_GET_CONSULTANTS_FOR_AGENCY_WITHOUT_PARAM = "/users/consultants";
@@ -64,9 +67,13 @@ public class PathConstants {
   public static final String PATH_PUT_UPDATE_MONITORING = "/users/sessions/monitoring/100";
   public static final String PATH_GET_CONSULTANTS = "/users/consultants";
   public static final String PATH_POST_CHAT_NEW = "/users/chat/new";
+  public static final String PATH_POST_CHAT_NEW_V2 = "/users/chat/v2/new";
   public static final String PATH_PUT_CHAT_START = "/users/chat/" + CHAT_ID + "/start";
   public static final String PATH_PUT_CHAT_START_WITH_INVALID_PATH_PARAMS =
       "/users/chat/" + INVALID_CHAT_ID + "/start";
+  public static final String PATH_PUT_ASSIGN_CHAT_WITH_INVALID_PATH_PARAMS =
+      "/users/chat/" + INVALID_CHAT_ID + "/assign";
+  public static final String PATH_PUT_ASSIGN_CHAT = "/users/chat/" + CHAT_ID + "/assign";
   public static final String PATH_PUT_JOIN_CHAT = "/users/chat/" + CHAT_ID + "/join";
   public static final String PATH_PUT_JOIN_CHAT_WITH_INVALID_PATH_PARAMS =
       "/users/chat/" + INVALID_CHAT_ID + "/join";
@@ -84,17 +91,17 @@ public class PathConstants {
       "/users/chat/" + INVALID_CHAT_ID + "/update";
   public static final String PATH_POST_IMPORT_ASKERS_WITHOUT_SESSION =
       "/users/askersWithoutSession/import";
-  public static final String PATH_GET_SESSION_FOR_CONSULTANT =
-      "/users/consultants/sessions/1";
+  public static final String PATH_GET_SESSION_FOR_CONSULTANT = "/users/consultants/sessions/1";
   public static final String PATH_PUT_UPDATE_EMAIL = "/users/email";
   public static final String PATH_DELETE_FLAG_USER_DELETED = "/users/account";
   public static final String PATH_PUT_UPDATE_MOBILE_TOKEN = "/users/mobiletoken";
   public static final String PATH_PUT_UPDATE_SESSION_DATA = "/users/sessions/123/data";
-  public static final String PATH_PUT_UPDATE_SESSION_DATA_INVALID_PATH_VAR = "/users/sessions"
-      + "/1x2y3/data";
+  public static final String PATH_PUT_UPDATE_SESSION_DATA_INVALID_PATH_VAR =
+      "/users/sessions" + "/1x2y3/data";
   public static final String PATH_ARCHIVE_SESSION = "/users/sessions/123/archive";
   public static final String PATH_ARCHIVE_SESSION_INVALID_PATH_VAR = "/users/sessions/xyz/archive";
   public static final String PATH_DEARCHIVE_SESSION = "/users/sessions/123/dearchive";
-  public static final String PATH_DEARCHIVE_SESSION_INVALID_PATH_VAR = "/users/sessions/xyz/dearchive";
+  public static final String PATH_DEARCHIVE_SESSION_INVALID_PATH_VAR =
+      "/users/sessions/xyz/dearchive";
   public static final String PATH_PUT_ADD_MOBILE_TOKEN = "/users/mobile/app/token";
 }

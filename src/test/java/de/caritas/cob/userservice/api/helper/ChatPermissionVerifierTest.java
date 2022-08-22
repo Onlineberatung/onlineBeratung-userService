@@ -35,44 +35,38 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 public class ChatPermissionVerifierTest {
 
-  @InjectMocks
-  private ChatPermissionVerifier chatPermissionVerifier;
+  @InjectMocks private ChatPermissionVerifier chatPermissionVerifier;
 
-  @Mock
-  private ConsultantService consultantService;
+  @Mock private ConsultantService consultantService;
 
-  @Mock
-  private UserService userService;
+  @Mock private UserService userService;
 
-  @Mock
-  private AuthenticatedUser authenticatedUser;
+  @Mock private AuthenticatedUser authenticatedUser;
 
-  @Mock
-  private Chat chat;
+  @Mock private Chat chat;
 
-  @Mock
-  private Consultant consultant;
+  @Mock private Consultant consultant;
 
-  @Mock
-  private User user;
+  @Mock private User user;
 
   @Before
   public void setup() {
-    ChatAgency[] chatAgencyArray = new ChatAgency[]{new ChatAgency(chat, AGENCY_ID_2)};
+    ChatAgency[] chatAgencyArray = new ChatAgency[] {new ChatAgency(chat, AGENCY_ID_2)};
     Set<ChatAgency> chatAgencySet = new HashSet<>(Arrays.asList(chatAgencyArray));
     when(chat.getChatAgencies()).thenReturn(chatAgencySet);
   }
 
   @Test
-  public void isChatAgenciesContainConsultantAgency_Should_ReturnTrue_WhenChatAgenciesContainConsultantAgency() {
+  public void
+      isChatAgenciesContainConsultantAgency_Should_ReturnTrue_WhenChatAgenciesContainConsultantAgency() {
     ConsultantAgency[] consultantAgencyArray =
-        new ConsultantAgency[]{
-            new ConsultantAgency(AGENCY_ID, consultant, AGENCY_ID, nowInUtc(),
-                nowInUtc(), nowInUtc(), null, null),
-            new ConsultantAgency(AGENCY_ID_2, consultant, AGENCY_ID_2, nowInUtc(),
-                nowInUtc(), nowInUtc(), null, null)};
-    Set<ConsultantAgency> consultantAgencySet =
-        new HashSet<>(Arrays.asList(consultantAgencyArray));
+        new ConsultantAgency[] {
+          new ConsultantAgency(
+              AGENCY_ID, consultant, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc(), null, null),
+          new ConsultantAgency(
+              AGENCY_ID_2, consultant, AGENCY_ID_2, nowInUtc(), nowInUtc(), nowInUtc(), null, null)
+        };
+    Set<ConsultantAgency> consultantAgencySet = new HashSet<>(Arrays.asList(consultantAgencyArray));
 
     when(consultant.getConsultantAgencies()).thenReturn(consultantAgencySet);
 
@@ -80,15 +74,16 @@ public class ChatPermissionVerifierTest {
   }
 
   @Test
-  public void isChatAgenciesContainConsultantAgency_Should_ReturnFalse_WhenChatAgenciesNotContainConsultantAgency() {
+  public void
+      isChatAgenciesContainConsultantAgency_Should_ReturnFalse_WhenChatAgenciesNotContainConsultantAgency() {
     ConsultantAgency[] consultantAgencyArray =
-        new ConsultantAgency[]{
-            new ConsultantAgency(AGENCY_ID, consultant, AGENCY_ID, nowInUtc(),
-                nowInUtc(), nowInUtc(), null, null),
-            new ConsultantAgency(AGENCY_ID_3, consultant, AGENCY_ID_3, nowInUtc(),
-                nowInUtc(), nowInUtc(), null, null)};
-    Set<ConsultantAgency> consultantAgencySet =
-        new HashSet<>(Arrays.asList(consultantAgencyArray));
+        new ConsultantAgency[] {
+          new ConsultantAgency(
+              AGENCY_ID, consultant, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc(), null, null),
+          new ConsultantAgency(
+              AGENCY_ID_3, consultant, AGENCY_ID_3, nowInUtc(), nowInUtc(), nowInUtc(), null, null)
+        };
+    Set<ConsultantAgency> consultantAgencySet = new HashSet<>(Arrays.asList(consultantAgencyArray));
 
     when(consultant.getConsultantAgencies()).thenReturn(consultantAgencySet);
 
@@ -96,10 +91,13 @@ public class ChatPermissionVerifierTest {
   }
 
   @Test
-  public void isChatAgenciesContainUserAgency_Should_ReturnTrue_WhenChatAgenciesContainUserAgency() {
-    UserAgency[] userAgencyArray = new UserAgency[]{
-        new UserAgency(AGENCY_ID, user, AGENCY_ID, null, null),
-        new UserAgency(AGENCY_ID_2, user, AGENCY_ID_2, null, null)};
+  public void
+      isChatAgenciesContainUserAgency_Should_ReturnTrue_WhenChatAgenciesContainUserAgency() {
+    UserAgency[] userAgencyArray =
+        new UserAgency[] {
+          new UserAgency(AGENCY_ID, user, AGENCY_ID, null, null),
+          new UserAgency(AGENCY_ID_2, user, AGENCY_ID_2, null, null)
+        };
     Set<UserAgency> userAgencySet = new HashSet<>(Arrays.asList(userAgencyArray));
 
     when(user.getUserAgencies()).thenReturn(userAgencySet);
@@ -108,10 +106,13 @@ public class ChatPermissionVerifierTest {
   }
 
   @Test
-  public void isChatAgenciesContainUserAgency_Should_ReturnFalse_WhenChatAgenciesNotContainUserAgency() {
-    UserAgency[] userAgencyArray = new UserAgency[]{
-        new UserAgency(AGENCY_ID, user, AGENCY_ID, null, null),
-        new UserAgency(AGENCY_ID_3, user, AGENCY_ID_3, null, null)};
+  public void
+      isChatAgenciesContainUserAgency_Should_ReturnFalse_WhenChatAgenciesNotContainUserAgency() {
+    UserAgency[] userAgencyArray =
+        new UserAgency[] {
+          new UserAgency(AGENCY_ID, user, AGENCY_ID, null, null),
+          new UserAgency(AGENCY_ID_3, user, AGENCY_ID_3, null, null)
+        };
     Set<UserAgency> userAgencySet = new HashSet<>(Arrays.asList(userAgencyArray));
 
     when(user.getUserAgencies()).thenReturn(userAgencySet);
@@ -120,7 +121,8 @@ public class ChatPermissionVerifierTest {
   }
 
   @Test
-  public void verifyPermissionForChat_Should_verifyConsultantPermission_When_authenticatedUserHasRoleConsultant() {
+  public void
+      verifyPermissionForChat_Should_verifyConsultantPermission_When_authenticatedUserHasRoleConsultant() {
     Consultant consultant = new Consultant();
     ConsultantAgency consultantAgency = new ConsultantAgency();
     consultantAgency.setAgencyId(1L);
@@ -130,23 +132,25 @@ public class ChatPermissionVerifierTest {
     Chat chat = new Chat();
     chat.setChatAgencies(asSet(chatAgency));
     when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.CONSULTANT.getValue()));
-    when(consultantService.getConsultantViaAuthenticatedUser(authenticatedUser)).thenReturn(
-        Optional.of(consultant));
+    when(consultantService.getConsultantViaAuthenticatedUser(authenticatedUser))
+        .thenReturn(Optional.of(consultant));
 
     assertDoesNotThrow(() -> this.chatPermissionVerifier.verifyPermissionForChat(chat));
   }
 
   @Test(expected = NotFoundException.class)
-  public void verifyPermissionForChat_Should_throwNotFoundException_When_consultantDoesNotExistInDatabase() {
+  public void
+      verifyPermissionForChat_Should_throwNotFoundException_When_consultantDoesNotExistInDatabase() {
     when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.CONSULTANT.getValue()));
-    when(consultantService.getConsultantViaAuthenticatedUser(authenticatedUser)).thenReturn(
-        Optional.empty());
+    when(consultantService.getConsultantViaAuthenticatedUser(authenticatedUser))
+        .thenReturn(Optional.empty());
 
     this.chatPermissionVerifier.verifyPermissionForChat(chat);
   }
 
   @Test(expected = ForbiddenException.class)
-  public void verifyPermissionForChat_Should_throwForbiddenException_When_agenciesOfChatAndConsultantAreDifferent() {
+  public void
+      verifyPermissionForChat_Should_throwForbiddenException_When_agenciesOfChatAndConsultantAreDifferent() {
     Consultant consultant = new Consultant();
     ConsultantAgency consultantAgency = new ConsultantAgency();
     consultantAgency.setAgencyId(1L);
@@ -156,14 +160,15 @@ public class ChatPermissionVerifierTest {
     Chat chat = new Chat();
     chat.setChatAgencies(asSet(chatAgency));
     when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.CONSULTANT.getValue()));
-    when(consultantService.getConsultantViaAuthenticatedUser(authenticatedUser)).thenReturn(
-        Optional.of(consultant));
+    when(consultantService.getConsultantViaAuthenticatedUser(authenticatedUser))
+        .thenReturn(Optional.of(consultant));
 
     this.chatPermissionVerifier.verifyPermissionForChat(chat);
   }
 
   @Test
-  public void verifyPermissionForChat_Should_verifyUserPermission_When_authenticatedUserHasRoleUser() {
+  public void
+      verifyPermissionForChat_Should_verifyUserPermission_When_authenticatedUserHasRoleUser() {
     User user = new User();
     UserAgency userAgency = new UserAgency();
     userAgency.setAgencyId(1L);
@@ -179,7 +184,8 @@ public class ChatPermissionVerifierTest {
   }
 
   @Test(expected = NotFoundException.class)
-  public void verifyPermissionForChat_Should_throwNotFoundException_When_userDoesNotExistInDatabase() {
+  public void
+      verifyPermissionForChat_Should_throwNotFoundException_When_userDoesNotExistInDatabase() {
     when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.USER.getValue()));
     when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(Optional.empty());
 
@@ -187,7 +193,8 @@ public class ChatPermissionVerifierTest {
   }
 
   @Test(expected = ForbiddenException.class)
-  public void verifyPermissionForChat_Should_throwForbiddenException_When_agenciesOfChatAndUserAreDifferent() {
+  public void
+      verifyPermissionForChat_Should_throwForbiddenException_When_agenciesOfChatAndUserAreDifferent() {
     User user = new User();
     UserAgency userAgency = new UserAgency();
     userAgency.setAgencyId(1L);
@@ -201,5 +208,4 @@ public class ChatPermissionVerifierTest {
 
     this.chatPermissionVerifier.verifyPermissionForChat(chat);
   }
-
 }

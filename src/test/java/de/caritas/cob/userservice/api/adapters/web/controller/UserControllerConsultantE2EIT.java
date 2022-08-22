@@ -97,52 +97,40 @@ class UserControllerConsultantE2EIT {
   private static final String CSRF_VALUE = "test";
   private static final Cookie CSRF_COOKIE = new Cookie("csrfCookie", CSRF_VALUE);
 
-  @Autowired
-  private MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
 
-  @Autowired
-  private ObjectMapper objectMapper;
+  @Autowired private ObjectMapper objectMapper;
 
-  @Autowired
-  private ConsultantRepository consultantRepository;
+  @Autowired private ConsultantRepository consultantRepository;
 
-  @Autowired
-  private ConsultantAgencyRepository consultantAgencyRepository;
+  @Autowired private ConsultantAgencyRepository consultantAgencyRepository;
 
-  @Autowired
-  private UserRepository userRepository;
+  @Autowired private UserRepository userRepository;
 
-  @Autowired
-  private ChatRepository chatRepository;
+  @Autowired private ChatRepository chatRepository;
 
-  @Autowired
-  private ChatAgencyRepository chatAgencyRepository;
+  @Autowired private ChatAgencyRepository chatAgencyRepository;
 
-  @Autowired
-  private UserAgencyRepository userAgencyRepository;
+  @Autowired private UserAgencyRepository userAgencyRepository;
 
-  @Autowired
-  private VideoChatConfig videoChatConfig;
+  @Autowired private VideoChatConfig videoChatConfig;
 
-  @Autowired
-  private IdentityConfig identityConfig;
+  @Autowired private IdentityConfig identityConfig;
 
-  @Autowired
-  private UsernameTranscoder usernameTranscoder;
+  @Autowired private UsernameTranscoder usernameTranscoder;
 
   @MockBean
   @Qualifier("rocketChatRestTemplate")
   private RestTemplate rocketChatRestTemplate;
 
-  @MockBean
-  private RocketChatCredentialsProvider rocketChatCredentialsProvider;
+  @MockBean private RocketChatCredentialsProvider rocketChatCredentialsProvider;
 
-  @SpyBean
-  private AgencyService agencyService;
+  @SpyBean private AgencyService agencyService;
 
   private User user;
   private Consultant consultant;
-  private Set<de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode> allLanguages = new HashSet<>();
+  private Set<de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode> allLanguages =
+      new HashSet<>();
   private Set<Consultant> consultantsToReset = new HashSet<>();
   private List<String> consultantIdsToDelete = new ArrayList<>();
   private List<ConsultantAgency> consultantAgencies = new ArrayList<>();
@@ -160,13 +148,14 @@ class UserControllerConsultantE2EIT {
     }
     consultant = null;
     allLanguages = new HashSet<>();
-    consultantsToReset.forEach(consultantToReset -> {
-      consultantToReset.setLanguages(null);
-      consultantToReset.setNotifyEnquiriesRepeating(true);
-      consultantToReset.setNotifyNewChatMessageFromAdviceSeeker(true);
-      consultantToReset.setNotifyNewFeedbackMessageFromAdviceSeeker(true);
-      consultantRepository.save(consultantToReset);
-    });
+    consultantsToReset.forEach(
+        consultantToReset -> {
+          consultantToReset.setLanguages(null);
+          consultantToReset.setNotifyEnquiriesRepeating(true);
+          consultantToReset.setNotifyNewChatMessageFromAdviceSeeker(true);
+          consultantToReset.setNotifyNewFeedbackMessageFromAdviceSeeker(true);
+          consultantRepository.save(consultantToReset);
+        });
     consultantsToReset = new HashSet<>();
     consultantAgencyRepository.deleteAll(consultantAgencies);
     consultantIdsToDelete.forEach(id -> consultantRepository.deleteById(id));
@@ -192,12 +181,13 @@ class UserControllerConsultantE2EIT {
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
   void searchConsultantsShouldRespondWithBadRequestIfQueryIsNotGiven() throws Exception {
-    mockMvc.perform(
-        get("/users/consultants/search")
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .accept("application/hal+json")
-    ).andExpect(status().isBadRequest());
+    mockMvc
+        .perform(
+            get("/users/consultants/search")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept("application/hal+json"))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
@@ -205,14 +195,15 @@ class UserControllerConsultantE2EIT {
   void searchConsultantsShouldRespondWithBadRequestIfPageTooSmall() throws Exception {
     int pageNumber = -easyRandom.nextInt(3);
 
-    mockMvc.perform(
-        get("/users/consultants/search")
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .accept("application/hal+json")
-            .param("query", RandomStringUtils.randomAlphabetic(1))
-            .param("page", String.valueOf(pageNumber))
-    ).andExpect(status().isBadRequest());
+    mockMvc
+        .perform(
+            get("/users/consultants/search")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept("application/hal+json")
+                .param("query", RandomStringUtils.randomAlphabetic(1))
+                .param("page", String.valueOf(pageNumber)))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
@@ -220,40 +211,43 @@ class UserControllerConsultantE2EIT {
   void searchConsultantsShouldRespondWithBadRequestIfPerPageTooSmall() throws Exception {
     int perPage = -easyRandom.nextInt(3);
 
-    mockMvc.perform(
-        get("/users/consultants/search")
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .accept("application/hal+json")
-            .param("query", RandomStringUtils.randomAlphabetic(1))
-            .param("perPage", String.valueOf(perPage))
-    ).andExpect(status().isBadRequest());
+    mockMvc
+        .perform(
+            get("/users/consultants/search")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept("application/hal+json")
+                .param("query", RandomStringUtils.randomAlphabetic(1))
+                .param("perPage", String.valueOf(perPage)))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
   void searchConsultantsShouldRespondWithBadRequestIfFieldIsNotInEnum() throws Exception {
-    mockMvc.perform(
-        get("/users/consultants/search")
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .accept("application/hal+json")
-            .param("query", RandomStringUtils.randomAlphabetic(1))
-            .param("field", RandomStringUtils.randomAlphabetic(16))
-    ).andExpect(status().isBadRequest());
+    mockMvc
+        .perform(
+            get("/users/consultants/search")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept("application/hal+json")
+                .param("query", RandomStringUtils.randomAlphabetic(1))
+                .param("field", RandomStringUtils.randomAlphabetic(16)))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
   void searchConsultantsShouldRespondWithBadRequestIfOrderIsNotInEnum() throws Exception {
-    mockMvc.perform(
-        get("/users/consultants/search")
-            .cookie(CSRF_COOKIE)
-            .header(CSRF_HEADER, CSRF_VALUE)
-            .accept("application/hal+json")
-            .param("query", RandomStringUtils.randomAlphabetic(1))
-            .param("order", RandomStringUtils.randomAlphabetic(16))
-    ).andExpect(status().isBadRequest());
+    mockMvc
+        .perform(
+            get("/users/consultants/search")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept("application/hal+json")
+                .param("query", RandomStringUtils.randomAlphabetic(1))
+                .param("order", RandomStringUtils.randomAlphabetic(16)))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
@@ -266,84 +260,107 @@ class UserControllerConsultantE2EIT {
 
     var pageUrlPrefix = "http://localhost/users/consultants/search?";
     var consultantUrlPrefix = "http://localhost/useradmin/consultants/";
-    var response = mockMvc.perform(
-            get("/users/consultants/search")
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .accept("application/hal+json")
-                .param("query", URLEncoder.encode(infix, StandardCharsets.UTF_8))
-        )
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("total", is(numMatching)))
-        .andExpect(jsonPath("_embedded", hasSize(10)))
-        .andExpect(jsonPath("_embedded[*]._embedded.id", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[*]._embedded.firstname", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[0]._embedded.lastname", containsString(infix)))
-        .andExpect(jsonPath("_embedded[9]._embedded.lastname", containsString(infix)))
-        .andExpect(jsonPath("_embedded[*]._embedded.username", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[0]._embedded.status", is("CREATED")))
-        .andExpect(jsonPath("_embedded[9]._embedded.status", is("CREATED")))
-        .andExpect(jsonPath("_embedded[0]._embedded.absenceMessage", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[0]._embedded.absent", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[0]._embedded.formalLanguage", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[0]._embedded.teamConsultant", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[0]._embedded.createDate", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[0]._embedded.updateDate", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[*]._embedded.email", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[0]._embedded.agencies[0].id", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[0]._embedded.agencies[0].name", not(contains(nullValue()))))
-        .andExpect(
-            jsonPath("_embedded[0]._embedded.agencies[0].postcode", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[0]._embedded.agencies[0].city", not(contains(nullValue()))))
-        .andExpect(
-            jsonPath("_embedded[0]._embedded.agencies[0].description", not(contains(nullValue()))))
-        .andExpect(
-            jsonPath("_embedded[0]._embedded.agencies[0].teamAgency", not(contains(nullValue()))))
-        .andExpect(
-            jsonPath("_embedded[0]._embedded.agencies[0].offline", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[0]._embedded.agencies[0].consultingType",
-            not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[9]._embedded.agencies[0].id", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[9]._embedded.agencies[0].name", not(contains(nullValue()))))
-        .andExpect(
-            jsonPath("_embedded[9]._embedded.agencies[0].postcode", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[9]._embedded.agencies[0].city", not(contains(nullValue()))))
-        .andExpect(
-            jsonPath("_embedded[9]._embedded.agencies[0].description", not(contains(nullValue()))))
-        .andExpect(
-            jsonPath("_embedded[9]._embedded.agencies[0].teamAgency", not(contains(nullValue()))))
-        .andExpect(
-            jsonPath("_embedded[9]._embedded.agencies[0].offline", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[9]._embedded.agencies[0].consultingType",
-            not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[0]._links.self.href", startsWith(consultantUrlPrefix)))
-        .andExpect(jsonPath("_embedded[0]._links.self.method", is("GET")))
-        .andExpect(jsonPath("_embedded[0]._links.self.templated", is(false)))
-        .andExpect(jsonPath("_embedded[0]._links.update.href", startsWith(consultantUrlPrefix)))
-        .andExpect(jsonPath("_embedded[0]._links.update.method", is("PUT")))
-        .andExpect(jsonPath("_embedded[0]._links.update.templated", is(false)))
-        .andExpect(jsonPath("_embedded[0]._links.delete.href", startsWith(consultantUrlPrefix)))
-        .andExpect(jsonPath("_embedded[0]._links.delete.method", is("DELETE")))
-        .andExpect(jsonPath("_embedded[0]._links.delete.templated", is(false)))
-        .andExpect(jsonPath("_embedded[0]._links.agencies.href", startsWith(consultantUrlPrefix)))
-        .andExpect(jsonPath("_embedded[0]._links.agencies.href", Matchers.endsWith("/agencies")))
-        .andExpect(jsonPath("_embedded[0]._links.agencies.method", is("GET")))
-        .andExpect(jsonPath("_embedded[0]._links.agencies.templated", is(false)))
-        .andExpect(jsonPath("_embedded[0]._links.addAgency.href", startsWith(consultantUrlPrefix)))
-        .andExpect(jsonPath("_embedded[0]._links.addAgency.href", Matchers.endsWith("/agencies")))
-        .andExpect(jsonPath("_embedded[0]._links.addAgency.method", is("POST")))
-        .andExpect(jsonPath("_embedded[0]._links.addAgency.templated", is(false)))
-        .andExpect(jsonPath("_links.self.href", startsWith(pageUrlPrefix)))
-        .andExpect(jsonPath("_links.self.method", is("GET")))
-        .andExpect(jsonPath("_links.self.templated", is(false)))
-        .andExpect(jsonPath("_links.next.href", startsWith(pageUrlPrefix)))
-        .andExpect(jsonPath("_links.next.method", is("GET")))
-        .andExpect(jsonPath("_links.next.templated", is(false)))
-        .andExpect(jsonPath("_links.previous", is(nullValue())))
-        .andReturn().getResponse();
+    var response =
+        mockMvc
+            .perform(
+                get("/users/consultants/search")
+                    .cookie(CSRF_COOKIE)
+                    .header(CSRF_HEADER, CSRF_VALUE)
+                    .accept("application/hal+json")
+                    .param("query", URLEncoder.encode(infix, StandardCharsets.UTF_8)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("total", is(numMatching)))
+            .andExpect(jsonPath("_embedded", hasSize(10)))
+            .andExpect(jsonPath("_embedded[*]._embedded.id", not(contains(nullValue()))))
+            .andExpect(jsonPath("_embedded[*]._embedded.firstname", not(contains(nullValue()))))
+            .andExpect(jsonPath("_embedded[0]._embedded.lastname", containsString(infix)))
+            .andExpect(jsonPath("_embedded[9]._embedded.lastname", containsString(infix)))
+            .andExpect(jsonPath("_embedded[*]._embedded.username", not(contains(nullValue()))))
+            .andExpect(jsonPath("_embedded[0]._embedded.status", is("CREATED")))
+            .andExpect(jsonPath("_embedded[9]._embedded.status", is("CREATED")))
+            .andExpect(
+                jsonPath("_embedded[0]._embedded.absenceMessage", not(contains(nullValue()))))
+            .andExpect(jsonPath("_embedded[0]._embedded.absent", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[0]._embedded.formalLanguage", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[0]._embedded.teamConsultant", not(contains(nullValue()))))
+            .andExpect(jsonPath("_embedded[0]._embedded.createDate", not(contains(nullValue()))))
+            .andExpect(jsonPath("_embedded[0]._embedded.updateDate", not(contains(nullValue()))))
+            .andExpect(jsonPath("_embedded[*]._embedded.email", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[0]._embedded.agencies[0].id", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[0]._embedded.agencies[0].name", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[0]._embedded.agencies[0].postcode", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[0]._embedded.agencies[0].city", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath(
+                    "_embedded[0]._embedded.agencies[0].description", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath(
+                    "_embedded[0]._embedded.agencies[0].teamAgency", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[0]._embedded.agencies[0].offline", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath(
+                    "_embedded[0]._embedded.agencies[0].consultingType",
+                    not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[9]._embedded.agencies[0].id", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[9]._embedded.agencies[0].name", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[9]._embedded.agencies[0].postcode", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[9]._embedded.agencies[0].city", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath(
+                    "_embedded[9]._embedded.agencies[0].description", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath(
+                    "_embedded[9]._embedded.agencies[0].teamAgency", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[9]._embedded.agencies[0].offline", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath(
+                    "_embedded[9]._embedded.agencies[0].consultingType",
+                    not(contains(nullValue()))))
+            .andExpect(jsonPath("_embedded[0]._links.self.href", startsWith(consultantUrlPrefix)))
+            .andExpect(jsonPath("_embedded[0]._links.self.method", is("GET")))
+            .andExpect(jsonPath("_embedded[0]._links.self.templated", is(false)))
+            .andExpect(jsonPath("_embedded[0]._links.update.href", startsWith(consultantUrlPrefix)))
+            .andExpect(jsonPath("_embedded[0]._links.update.method", is("PUT")))
+            .andExpect(jsonPath("_embedded[0]._links.update.templated", is(false)))
+            .andExpect(jsonPath("_embedded[0]._links.delete.href", startsWith(consultantUrlPrefix)))
+            .andExpect(jsonPath("_embedded[0]._links.delete.method", is("DELETE")))
+            .andExpect(jsonPath("_embedded[0]._links.delete.templated", is(false)))
+            .andExpect(
+                jsonPath("_embedded[0]._links.agencies.href", startsWith(consultantUrlPrefix)))
+            .andExpect(
+                jsonPath("_embedded[0]._links.agencies.href", Matchers.endsWith("/agencies")))
+            .andExpect(jsonPath("_embedded[0]._links.agencies.method", is("GET")))
+            .andExpect(jsonPath("_embedded[0]._links.agencies.templated", is(false)))
+            .andExpect(
+                jsonPath("_embedded[0]._links.addAgency.href", startsWith(consultantUrlPrefix)))
+            .andExpect(
+                jsonPath("_embedded[0]._links.addAgency.href", Matchers.endsWith("/agencies")))
+            .andExpect(jsonPath("_embedded[0]._links.addAgency.method", is("POST")))
+            .andExpect(jsonPath("_embedded[0]._links.addAgency.templated", is(false)))
+            .andExpect(jsonPath("_links.self.href", startsWith(pageUrlPrefix)))
+            .andExpect(jsonPath("_links.self.method", is("GET")))
+            .andExpect(jsonPath("_links.self.templated", is(false)))
+            .andExpect(jsonPath("_links.next.href", startsWith(pageUrlPrefix)))
+            .andExpect(jsonPath("_links.next.method", is("GET")))
+            .andExpect(jsonPath("_links.next.templated", is(false)))
+            .andExpect(jsonPath("_links.previous", is(nullValue())))
+            .andReturn()
+            .getResponse();
 
-    var searchResult = objectMapper.readValue(response.getContentAsString(),
-        ConsultantSearchResultDTO.class);
+    var searchResult =
+        objectMapper.readValue(response.getContentAsString(), ConsultantSearchResultDTO.class);
     var foundConsultants = searchResult.getEmbedded();
     var previousFirstName = foundConsultants.get(0).getEmbedded().getFirstname();
     for (var foundConsultant : foundConsultants) {
@@ -363,73 +380,88 @@ class UserControllerConsultantE2EIT {
 
     var pageUrlPrefix = "http://localhost/users/consultants/search?";
     var consultantUrlPrefix = "http://localhost/useradmin/consultants/";
-    var response = mockMvc.perform(
-            get("/users/consultants/search")
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .accept("application/hal+json")
-                .param("query", URLEncoder.encode(infix, StandardCharsets.UTF_8))
-                .param("page", "3")
-                .param("perPage", "11")
-                .param("field", "LASTNAME")
-                .param("order", "DESC")
-        ).andExpect(status().isOk())
-        .andExpect(jsonPath("total", is(numMatching)))
-        .andExpect(jsonPath("_embedded", hasSize(4)))
-        .andExpect(jsonPath("_embedded[*]._embedded.id", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[*]._embedded.firstname", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[0]._embedded.lastname", containsString(infix)))
-        .andExpect(jsonPath("_embedded[*]._embedded.username", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[*]._embedded.email", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[0]._embedded.agencies", hasSize(1)))
-        .andExpect(jsonPath("_embedded[0]._embedded.agencies[0].id", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[0]._embedded.agencies[0].name", not(contains(nullValue()))))
-        .andExpect(
-            jsonPath("_embedded[0]._embedded.agencies[0].postcode", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[1]._embedded.agencies[0].id", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[1]._embedded.agencies[0].name", not(contains(nullValue()))))
-        .andExpect(
-            jsonPath("_embedded[1]._embedded.agencies[0].postcode", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[2]._embedded.agencies[0].id", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[2]._embedded.agencies[0].name", not(contains(nullValue()))))
-        .andExpect(
-            jsonPath("_embedded[2]._embedded.agencies[0].postcode", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[3]._embedded.agencies[0].id", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[3]._embedded.agencies[0].name", not(contains(nullValue()))))
-        .andExpect(
-            jsonPath("_embedded[3]._embedded.agencies[0].postcode", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[0]._embedded.status", is("CREATED")))
-        .andExpect(jsonPath("_embedded[1]._embedded.status", is("CREATED")))
-        .andExpect(jsonPath("_embedded[2]._embedded.status", is("CREATED")))
-        .andExpect(jsonPath("_embedded[3]._embedded.status", is("CREATED")))
-        .andExpect(jsonPath("_embedded[0]._links.self.href", startsWith(consultantUrlPrefix)))
-        .andExpect(jsonPath("_embedded[0]._links.self.method", is("GET")))
-        .andExpect(jsonPath("_embedded[0]._links.self.templated", is(false)))
-        .andExpect(jsonPath("_embedded[0]._links.update.href", startsWith(consultantUrlPrefix)))
-        .andExpect(jsonPath("_embedded[0]._links.update.method", is("PUT")))
-        .andExpect(jsonPath("_embedded[0]._links.update.templated", is(false)))
-        .andExpect(jsonPath("_embedded[0]._links.delete.href", startsWith(consultantUrlPrefix)))
-        .andExpect(jsonPath("_embedded[0]._links.delete.method", is("DELETE")))
-        .andExpect(jsonPath("_embedded[0]._links.delete.templated", is(false)))
-        .andExpect(jsonPath("_embedded[0]._links.agencies.href", startsWith(consultantUrlPrefix)))
-        .andExpect(jsonPath("_embedded[0]._links.agencies.href", Matchers.endsWith("/agencies")))
-        .andExpect(jsonPath("_embedded[0]._links.agencies.method", is("GET")))
-        .andExpect(jsonPath("_embedded[0]._links.agencies.templated", is(false)))
-        .andExpect(jsonPath("_embedded[0]._links.addAgency.href", startsWith(consultantUrlPrefix)))
-        .andExpect(jsonPath("_embedded[0]._links.addAgency.href", Matchers.endsWith("/agencies")))
-        .andExpect(jsonPath("_embedded[0]._links.addAgency.method", is("POST")))
-        .andExpect(jsonPath("_embedded[0]._links.addAgency.templated", is(false)))
-        .andExpect(jsonPath("_links.self.href", startsWith(pageUrlPrefix)))
-        .andExpect(jsonPath("_links.self.method", is("GET")))
-        .andExpect(jsonPath("_links.self.templated", is(false)))
-        .andExpect(jsonPath("_links.previous.href", startsWith(pageUrlPrefix)))
-        .andExpect(jsonPath("_links.previous.method", is("GET")))
-        .andExpect(jsonPath("_links.previous.templated", is(false)))
-        .andExpect(jsonPath("_links.next", is(nullValue())))
-        .andReturn().getResponse();
+    var response =
+        mockMvc
+            .perform(
+                get("/users/consultants/search")
+                    .cookie(CSRF_COOKIE)
+                    .header(CSRF_HEADER, CSRF_VALUE)
+                    .accept("application/hal+json")
+                    .param("query", URLEncoder.encode(infix, StandardCharsets.UTF_8))
+                    .param("page", "3")
+                    .param("perPage", "11")
+                    .param("field", "LASTNAME")
+                    .param("order", "DESC"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("total", is(numMatching)))
+            .andExpect(jsonPath("_embedded", hasSize(4)))
+            .andExpect(jsonPath("_embedded[*]._embedded.id", not(contains(nullValue()))))
+            .andExpect(jsonPath("_embedded[*]._embedded.firstname", not(contains(nullValue()))))
+            .andExpect(jsonPath("_embedded[0]._embedded.lastname", containsString(infix)))
+            .andExpect(jsonPath("_embedded[*]._embedded.username", not(contains(nullValue()))))
+            .andExpect(jsonPath("_embedded[*]._embedded.email", not(contains(nullValue()))))
+            .andExpect(jsonPath("_embedded[0]._embedded.agencies", hasSize(1)))
+            .andExpect(
+                jsonPath("_embedded[0]._embedded.agencies[0].id", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[0]._embedded.agencies[0].name", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[0]._embedded.agencies[0].postcode", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[1]._embedded.agencies[0].id", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[1]._embedded.agencies[0].name", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[1]._embedded.agencies[0].postcode", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[2]._embedded.agencies[0].id", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[2]._embedded.agencies[0].name", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[2]._embedded.agencies[0].postcode", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[3]._embedded.agencies[0].id", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[3]._embedded.agencies[0].name", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[3]._embedded.agencies[0].postcode", not(contains(nullValue()))))
+            .andExpect(jsonPath("_embedded[0]._embedded.status", is("CREATED")))
+            .andExpect(jsonPath("_embedded[1]._embedded.status", is("CREATED")))
+            .andExpect(jsonPath("_embedded[2]._embedded.status", is("CREATED")))
+            .andExpect(jsonPath("_embedded[3]._embedded.status", is("CREATED")))
+            .andExpect(jsonPath("_embedded[0]._links.self.href", startsWith(consultantUrlPrefix)))
+            .andExpect(jsonPath("_embedded[0]._links.self.method", is("GET")))
+            .andExpect(jsonPath("_embedded[0]._links.self.templated", is(false)))
+            .andExpect(jsonPath("_embedded[0]._links.update.href", startsWith(consultantUrlPrefix)))
+            .andExpect(jsonPath("_embedded[0]._links.update.method", is("PUT")))
+            .andExpect(jsonPath("_embedded[0]._links.update.templated", is(false)))
+            .andExpect(jsonPath("_embedded[0]._links.delete.href", startsWith(consultantUrlPrefix)))
+            .andExpect(jsonPath("_embedded[0]._links.delete.method", is("DELETE")))
+            .andExpect(jsonPath("_embedded[0]._links.delete.templated", is(false)))
+            .andExpect(
+                jsonPath("_embedded[0]._links.agencies.href", startsWith(consultantUrlPrefix)))
+            .andExpect(
+                jsonPath("_embedded[0]._links.agencies.href", Matchers.endsWith("/agencies")))
+            .andExpect(jsonPath("_embedded[0]._links.agencies.method", is("GET")))
+            .andExpect(jsonPath("_embedded[0]._links.agencies.templated", is(false)))
+            .andExpect(
+                jsonPath("_embedded[0]._links.addAgency.href", startsWith(consultantUrlPrefix)))
+            .andExpect(
+                jsonPath("_embedded[0]._links.addAgency.href", Matchers.endsWith("/agencies")))
+            .andExpect(jsonPath("_embedded[0]._links.addAgency.method", is("POST")))
+            .andExpect(jsonPath("_embedded[0]._links.addAgency.templated", is(false)))
+            .andExpect(jsonPath("_links.self.href", startsWith(pageUrlPrefix)))
+            .andExpect(jsonPath("_links.self.method", is("GET")))
+            .andExpect(jsonPath("_links.self.templated", is(false)))
+            .andExpect(jsonPath("_links.previous.href", startsWith(pageUrlPrefix)))
+            .andExpect(jsonPath("_links.previous.method", is("GET")))
+            .andExpect(jsonPath("_links.previous.templated", is(false)))
+            .andExpect(jsonPath("_links.next", is(nullValue())))
+            .andReturn()
+            .getResponse();
 
-    var searchResult = objectMapper.readValue(response.getContentAsString(),
-        ConsultantSearchResultDTO.class);
+    var searchResult =
+        objectMapper.readValue(response.getContentAsString(), ConsultantSearchResultDTO.class);
     var foundConsultants = searchResult.getEmbedded();
 
     var previousLastName = foundConsultants.get(0).getEmbedded().getLastname();
@@ -439,8 +471,10 @@ class UserControllerConsultantE2EIT {
       previousLastName = currentLastname;
     }
 
-    var agencyIdConsultantMap = consultantAgencies.stream()
-        .collect(Collectors.toMap(ConsultantAgency::getAgencyId, ConsultantAgency::getConsultant));
+    var agencyIdConsultantMap =
+        consultantAgencies.stream()
+            .collect(
+                Collectors.toMap(ConsultantAgency::getAgencyId, ConsultantAgency::getConsultant));
     for (var foundConsultant : foundConsultants) {
       var embedded = foundConsultant.getEmbedded();
       var foundAgencyId = embedded.getAgencies().get(0).getId();
@@ -458,60 +492,70 @@ class UserControllerConsultantE2EIT {
 
     var pageUrlPrefix = "http://localhost/users/consultants/search?";
     var consultantUrlPrefix = "http://localhost/useradmin/consultants/";
-    var response = mockMvc.perform(
-            get("/users/consultants/search")
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .accept("application/hal+json")
-                .param("query", "*")
-                .param("perPage", String.valueOf(numAll) + 1)
-        )
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("total", is(numAll)))
-        .andExpect(jsonPath("_embedded", hasSize(numAll)))
-        .andExpect(jsonPath("_embedded[*]._embedded.id", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[*]._embedded.firstname", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[0]._embedded.lastname", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[9]._embedded.lastname", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[*]._embedded.username", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[0]._embedded.status", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[9]._embedded.status", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[*]._embedded.email", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[0]._embedded.agencies[0].id", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[0]._embedded.agencies[0].name", not(contains(nullValue()))))
-        .andExpect(
-            jsonPath("_embedded[0]._embedded.agencies[0].postcode", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[9]._embedded.agencies[0].id", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[9]._embedded.agencies[0].name", not(contains(nullValue()))))
-        .andExpect(
-            jsonPath("_embedded[9]._embedded.agencies[0].postcode", not(contains(nullValue()))))
-        .andExpect(jsonPath("_embedded[0]._links.self.href", startsWith(consultantUrlPrefix)))
-        .andExpect(jsonPath("_embedded[0]._links.self.method", is("GET")))
-        .andExpect(jsonPath("_embedded[0]._links.self.templated", is(false)))
-        .andExpect(jsonPath("_embedded[0]._links.update.href", startsWith(consultantUrlPrefix)))
-        .andExpect(jsonPath("_embedded[0]._links.update.method", is("PUT")))
-        .andExpect(jsonPath("_embedded[0]._links.update.templated", is(false)))
-        .andExpect(jsonPath("_embedded[0]._links.delete.href", startsWith(consultantUrlPrefix)))
-        .andExpect(jsonPath("_embedded[0]._links.delete.method", is("DELETE")))
-        .andExpect(jsonPath("_embedded[0]._links.delete.templated", is(false)))
-        .andExpect(jsonPath("_embedded[0]._links.agencies.href", startsWith(consultantUrlPrefix)))
-        .andExpect(jsonPath("_embedded[0]._links.agencies.href", Matchers.endsWith("/agencies")))
-        .andExpect(jsonPath("_embedded[0]._links.agencies.method", is("GET")))
-        .andExpect(jsonPath("_embedded[0]._links.agencies.templated", is(false)))
-        .andExpect(jsonPath("_embedded[0]._links.addAgency.href", startsWith(consultantUrlPrefix)))
-        .andExpect(jsonPath("_embedded[0]._links.addAgency.href", Matchers.endsWith("/agencies")))
-        .andExpect(jsonPath("_embedded[0]._links.addAgency.method", is("POST")))
-        .andExpect(jsonPath("_embedded[0]._links.addAgency.templated", is(false)))
-        .andExpect(jsonPath("_links.self.href", startsWith(pageUrlPrefix)))
-        .andExpect(jsonPath("_links.self.href", containsString("query=*")))
-        .andExpect(jsonPath("_links.self.method", is("GET")))
-        .andExpect(jsonPath("_links.self.templated", is(false)))
-        .andExpect(jsonPath("_links.next", is(nullValue())))
-        .andExpect(jsonPath("_links.previous", is(nullValue())))
-        .andReturn().getResponse();
+    var response =
+        mockMvc
+            .perform(
+                get("/users/consultants/search")
+                    .cookie(CSRF_COOKIE)
+                    .header(CSRF_HEADER, CSRF_VALUE)
+                    .accept("application/hal+json")
+                    .param("query", "*")
+                    .param("perPage", String.valueOf(numAll) + 1))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("total", is(numAll)))
+            .andExpect(jsonPath("_embedded", hasSize(numAll)))
+            .andExpect(jsonPath("_embedded[*]._embedded.id", not(contains(nullValue()))))
+            .andExpect(jsonPath("_embedded[*]._embedded.firstname", not(contains(nullValue()))))
+            .andExpect(jsonPath("_embedded[0]._embedded.lastname", not(contains(nullValue()))))
+            .andExpect(jsonPath("_embedded[9]._embedded.lastname", not(contains(nullValue()))))
+            .andExpect(jsonPath("_embedded[*]._embedded.username", not(contains(nullValue()))))
+            .andExpect(jsonPath("_embedded[0]._embedded.status", not(contains(nullValue()))))
+            .andExpect(jsonPath("_embedded[9]._embedded.status", not(contains(nullValue()))))
+            .andExpect(jsonPath("_embedded[*]._embedded.email", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[0]._embedded.agencies[0].id", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[0]._embedded.agencies[0].name", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[0]._embedded.agencies[0].postcode", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[9]._embedded.agencies[0].id", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[9]._embedded.agencies[0].name", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[9]._embedded.agencies[0].postcode", not(contains(nullValue()))))
+            .andExpect(jsonPath("_embedded[0]._links.self.href", startsWith(consultantUrlPrefix)))
+            .andExpect(jsonPath("_embedded[0]._links.self.method", is("GET")))
+            .andExpect(jsonPath("_embedded[0]._links.self.templated", is(false)))
+            .andExpect(jsonPath("_embedded[0]._links.update.href", startsWith(consultantUrlPrefix)))
+            .andExpect(jsonPath("_embedded[0]._links.update.method", is("PUT")))
+            .andExpect(jsonPath("_embedded[0]._links.update.templated", is(false)))
+            .andExpect(jsonPath("_embedded[0]._links.delete.href", startsWith(consultantUrlPrefix)))
+            .andExpect(jsonPath("_embedded[0]._links.delete.method", is("DELETE")))
+            .andExpect(jsonPath("_embedded[0]._links.delete.templated", is(false)))
+            .andExpect(
+                jsonPath("_embedded[0]._links.agencies.href", startsWith(consultantUrlPrefix)))
+            .andExpect(
+                jsonPath("_embedded[0]._links.agencies.href", Matchers.endsWith("/agencies")))
+            .andExpect(jsonPath("_embedded[0]._links.agencies.method", is("GET")))
+            .andExpect(jsonPath("_embedded[0]._links.agencies.templated", is(false)))
+            .andExpect(
+                jsonPath("_embedded[0]._links.addAgency.href", startsWith(consultantUrlPrefix)))
+            .andExpect(
+                jsonPath("_embedded[0]._links.addAgency.href", Matchers.endsWith("/agencies")))
+            .andExpect(jsonPath("_embedded[0]._links.addAgency.method", is("POST")))
+            .andExpect(jsonPath("_embedded[0]._links.addAgency.templated", is(false)))
+            .andExpect(jsonPath("_links.self.href", startsWith(pageUrlPrefix)))
+            .andExpect(jsonPath("_links.self.href", containsString("query=*")))
+            .andExpect(jsonPath("_links.self.method", is("GET")))
+            .andExpect(jsonPath("_links.self.templated", is(false)))
+            .andExpect(jsonPath("_links.next", is(nullValue())))
+            .andExpect(jsonPath("_links.previous", is(nullValue())))
+            .andReturn()
+            .getResponse();
 
-    var searchResult = objectMapper.readValue(response.getContentAsString(),
-        ConsultantSearchResultDTO.class);
+    var searchResult =
+        objectMapper.readValue(response.getContentAsString(), ConsultantSearchResultDTO.class);
     var foundConsultants = searchResult.getEmbedded();
     var previousFirstName = foundConsultants.get(0).getEmbedded().getFirstname();
     for (var foundConsultant : foundConsultants) {
@@ -532,14 +576,14 @@ class UserControllerConsultantE2EIT {
     assertEquals(1, consultantsMarkedAsDeleted.size());
     var onlyConsultant = consultantsMarkedAsDeleted.get(0);
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             get("/users/consultants/search")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept("application/hal+json")
                 .param("query", infix)
-                .param("perPage", "1")
-        )
+                .param("perPage", "1"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("total", is(1)))
         .andExpect(jsonPath("_embedded", hasSize(1)))
@@ -562,45 +606,55 @@ class UserControllerConsultantE2EIT {
     givenConsultantsMatching(numMatching, infix, true, false);
     givenAgencyServiceReturningDummyAgencies();
 
-    var response = mockMvc.perform(
-            get("/users/consultants/search")
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .accept("application/hal+json")
-                .param("query", URLEncoder.encode(infix, StandardCharsets.UTF_8))
-        ).andExpect(status().isOk())
-        .andExpect(jsonPath("total", is(numMatching)))
-        .andReturn().getResponse().getContentAsString();
+    var response =
+        mockMvc
+            .perform(
+                get("/users/consultants/search")
+                    .cookie(CSRF_COOKIE)
+                    .header(CSRF_HEADER, CSRF_VALUE)
+                    .accept("application/hal+json")
+                    .param("query", URLEncoder.encode(infix, StandardCharsets.UTF_8)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("total", is(numMatching)))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
 
     var searchResult = objectMapper.readValue(response, ConsultantSearchResultDTO.class);
-    var consultantAgenciesMarkedForDeletion = consultantAgencies.stream()
-        .filter(consultantAgency -> nonNull(consultantAgency.getDeleteDate()))
-        .map(ConsultantAgency::getAgencyId)
-        .collect(Collectors.toSet());
-    var consultantAgenciesNotMarkedForDeletion = consultantAgencies.stream()
-        .filter(consultantAgency -> isNull(consultantAgency.getDeleteDate()))
-        .map(ConsultantAgency::getAgencyId)
-        .collect(Collectors.toSet());
+    var consultantAgenciesMarkedForDeletion =
+        consultantAgencies.stream()
+            .filter(consultantAgency -> nonNull(consultantAgency.getDeleteDate()))
+            .map(ConsultantAgency::getAgencyId)
+            .collect(Collectors.toSet());
+    var consultantAgenciesNotMarkedForDeletion =
+        consultantAgencies.stream()
+            .filter(consultantAgency -> isNull(consultantAgency.getDeleteDate()))
+            .map(ConsultantAgency::getAgencyId)
+            .collect(Collectors.toSet());
 
     for (var foundConsultant : searchResult.getEmbedded()) {
-      foundConsultant.getEmbedded().getAgencies().forEach(agency -> {
-        var agencyId = agency.getId();
-        assertFalse(consultantAgenciesMarkedForDeletion.contains(agencyId));
-        assertTrue(consultantAgenciesNotMarkedForDeletion.contains(agencyId));
-      });
+      foundConsultant
+          .getEmbedded()
+          .getAgencies()
+          .forEach(
+              agency -> {
+                var agencyId = agency.getId();
+                assertFalse(consultantAgenciesMarkedForDeletion.contains(agencyId));
+                assertTrue(consultantAgenciesNotMarkedForDeletion.contains(agencyId));
+              });
     }
   }
 
   @Test
   @WithMockUser
   void getLanguagesShouldRespondWithBadRequestIfAgencyIdIsNotGiven() throws Exception {
-    mockMvc.perform(
+    mockMvc
+        .perform(
             get("/users/consultants/languages")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
 
@@ -610,14 +664,14 @@ class UserControllerConsultantE2EIT {
       throws Exception {
     var agencyId = givenAnAgencyIdWithDefaultLanguageOnly();
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             get("/users/consultants/languages")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .param("agencyId", String.valueOf(agencyId))
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("languages", hasSize(1)))
         .andExpect(jsonPath("languages[0]", is("de")));
@@ -629,17 +683,19 @@ class UserControllerConsultantE2EIT {
       throws Exception {
     var agencyId = givenAnAgencyWithMultipleLanguages();
 
-    var response = mockMvc.perform(
-            get("/users/consultants/languages")
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .param("agencyId", String.valueOf(agencyId))
-                .accept(MediaType.APPLICATION_JSON)
-        )
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("languages", hasSize(allLanguages.size())))
-        .andReturn().getResponse();
+    var response =
+        mockMvc
+            .perform(
+                get("/users/consultants/languages")
+                    .cookie(CSRF_COOKIE)
+                    .header(CSRF_HEADER, CSRF_VALUE)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .param("agencyId", String.valueOf(agencyId))
+                    .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("languages", hasSize(allLanguages.size())))
+            .andReturn()
+            .getResponse();
 
     var dto = objectMapper.readValue(response.getContentAsByteArray(), LanguageResponseDTO.class);
     assertEquals(allLanguages, new HashSet<>(dto.getLanguages()));
@@ -652,13 +708,13 @@ class UserControllerConsultantE2EIT {
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse("user1", "user2", "user3");
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             get("/users/consultants")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .param("agencyId", String.valueOf(agencyId))
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(3)))
         .andExpect(jsonPath("[0].displayName", is("user1")))
@@ -674,13 +730,13 @@ class UserControllerConsultantE2EIT {
   void getConsultantPublicDataShouldRespondWithOk() throws Exception {
     givenAConsultantWithMultipleAgencies();
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             get("/users/consultants/{consultantId}", consultant.getId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-        )
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("consultantId", is(consultant.getId())))
         .andExpect(jsonPath("firstName").doesNotExist())
@@ -699,17 +755,16 @@ class UserControllerConsultantE2EIT {
   }
 
   @SuppressWarnings("unchecked,SameParameterValue")
-  private void givenAValidRocketChatInfoUserResponse(String username1, String username2,
-      String username3) {
+  private void givenAValidRocketChatInfoUserResponse(
+      String username1, String username2, String username3) {
     var urlInfix = "/api/v1/users.info?userId=";
     when(rocketChatRestTemplate.exchange(
-        contains(urlInfix), eq(HttpMethod.GET),
-        any(HttpEntity.class), eq(UserInfoResponseDTO.class))
-    ).thenReturn(
-        ResponseEntity.ok(userInfoResponseDTO(username1)),
-        ResponseEntity.ok(userInfoResponseDTO(username2)),
-        ResponseEntity.ok(userInfoResponseDTO(username3))
-    );
+            contains(urlInfix), eq(HttpMethod.GET),
+            any(HttpEntity.class), eq(UserInfoResponseDTO.class)))
+        .thenReturn(
+            ResponseEntity.ok(userInfoResponseDTO(username1)),
+            ResponseEntity.ok(userInfoResponseDTO(username2)),
+            ResponseEntity.ok(userInfoResponseDTO(username3)));
   }
 
   @NonNull
@@ -735,17 +790,21 @@ class UserControllerConsultantE2EIT {
   }
 
   private void givenAnInfix() {
-    infix = RandomStringUtils.randomAlphanumeric(7)
-        + (easyRandom.nextBoolean() ? "ä" : "Ö")
-        + RandomStringUtils.randomAlphanumeric(7);
+    infix =
+        RandomStringUtils.randomAlphanumeric(7)
+            + (easyRandom.nextBoolean() ? "ä" : "Ö")
+            + RandomStringUtils.randomAlphanumeric(7);
   }
 
   private void givenConsultantsMatching(@PositiveOrZero int count, @NotBlank String infix) {
     givenConsultantsMatching(count, infix, false, false);
   }
 
-  private void givenConsultantsMatching(@PositiveOrZero int count, @NotBlank String infix,
-      boolean includingAgenciesMarkedAsDeleted, boolean markedAsDeleted) {
+  private void givenConsultantsMatching(
+      @PositiveOrZero int count,
+      @NotBlank String infix,
+      boolean includingAgenciesMarkedAsDeleted,
+      boolean markedAsDeleted) {
     while (count-- > 0) {
       var dbConsultant = consultantRepository.findAll().iterator().next();
       var consultant = new Consultant();
@@ -770,10 +829,8 @@ class UserControllerConsultantE2EIT {
       consultantRepository.save(consultant);
       consultantIdsToDelete.add(consultant.getId());
 
-      var consultantAgency = ConsultantAgency.builder()
-          .consultant(consultant)
-          .agencyId(aPositiveLong())
-          .build();
+      var consultantAgency =
+          ConsultantAgency.builder().consultant(consultant).agencyId(aPositiveLong()).build();
       if (includingAgenciesMarkedAsDeleted) {
         var deleteDate = easyRandom.nextBoolean() ? null : LocalDateTime.now();
         consultantAgency.setDeleteDate(deleteDate);
@@ -812,50 +869,50 @@ class UserControllerConsultantE2EIT {
   }
 
   private String aStringWithInfix(String infix) {
-    return RandomStringUtils.randomAlphabetic(4)
-        + infix
-        + RandomStringUtils.randomAlphabetic(4);
+    return RandomStringUtils.randomAlphabetic(4) + infix + RandomStringUtils.randomAlphabetic(4);
   }
 
   private void givenAgencyServiceReturningAgencies() {
     var agencies = new ArrayList<AgencyDTO>();
-    consultantAgencies.forEach(consultantAgency -> {
-      var agency = new AgencyDTO();
-      agency.setId(consultantAgency.getAgencyId());
-      agency.setName(RandomStringUtils.randomAlphabetic(16));
-      agency.setPostcode(RandomStringUtils.randomNumeric(5));
-      agency.setCity(RandomStringUtils.randomNumeric(8));
-      agency.setDescription(RandomStringUtils.randomNumeric(8));
-      agency.setTeamAgency(easyRandom.nextBoolean());
-      agency.setOffline(easyRandom.nextBoolean());
-      agency.setConsultingType(easyRandom.nextInt());
-      agencies.add(agency);
-    });
+    consultantAgencies.forEach(
+        consultantAgency -> {
+          var agency = new AgencyDTO();
+          agency.setId(consultantAgency.getAgencyId());
+          agency.setName(RandomStringUtils.randomAlphabetic(16));
+          agency.setPostcode(RandomStringUtils.randomNumeric(5));
+          agency.setCity(RandomStringUtils.randomNumeric(8));
+          agency.setDescription(RandomStringUtils.randomNumeric(8));
+          agency.setTeamAgency(easyRandom.nextBoolean());
+          agency.setOffline(easyRandom.nextBoolean());
+          agency.setConsultingType(easyRandom.nextInt());
+          agencies.add(agency);
+        });
 
-    when(agencyService.getAgenciesWithoutCaching(anyList()))
-        .thenReturn(agencies);
+    when(agencyService.getAgenciesWithoutCaching(anyList())).thenReturn(agencies);
   }
 
   private void givenAgencyServiceReturningDummyAgencies() {
     var agencies = new ArrayList<AgencyDTO>();
 
     when(agencyService.getAgenciesWithoutCaching(anyList()))
-        .thenAnswer(i -> {
-          List<Long> agencyIds = i.getArgument(0);
-          agencyIds.forEach(agencyId -> {
-            var agency = new AgencyDTO();
-            agency.setId(agencyId);
-            agency.setName(RandomStringUtils.randomAlphabetic(16));
-            agency.setPostcode(RandomStringUtils.randomNumeric(5));
-            agencies.add(agency);
-          });
-          return agencies;
-        });
+        .thenAnswer(
+            i -> {
+              List<Long> agencyIds = i.getArgument(0);
+              agencyIds.forEach(
+                  agencyId -> {
+                    var agency = new AgencyDTO();
+                    agency.setId(agencyId);
+                    agency.setName(RandomStringUtils.randomAlphabetic(16));
+                    agency.setPostcode(RandomStringUtils.randomNumeric(5));
+                    agencies.add(agency);
+                  });
+              return agencies;
+            });
   }
 
   private void givenAConsultantWithMultipleAgencies() {
-    consultant = consultantRepository.findById("5674839f-d0a3-47e2-8f9c-bb49fc2ddbbe")
-        .orElseThrow();
+    consultant =
+        consultantRepository.findById("5674839f-d0a3-47e2-8f9c-bb49fc2ddbbe").orElseThrow();
   }
 
   private long givenAnAgencyIdWithDefaultLanguageOnly() {
@@ -867,18 +924,19 @@ class UserControllerConsultantE2EIT {
 
     consultantAgencyRepository
         .findByAgencyIdAndDeleteDateIsNull(agencyId)
-        .forEach(consultantAgency -> {
-          var consultant = consultantAgency.getConsultant();
-          var language1 = new Language(consultant, aLanguageCode());
-          var language2 = new Language(consultant, aLanguageCode());
-          allLanguages.add(mapLanguageCode(language1));
-          allLanguages.add(mapLanguageCode(language2));
-          var languages = Set.of(language1, language2);
-          consultant.setLanguages(languages);
-          consultantRepository.save(consultant);
+        .forEach(
+            consultantAgency -> {
+              var consultant = consultantAgency.getConsultant();
+              var language1 = new Language(consultant, aLanguageCode());
+              var language2 = new Language(consultant, aLanguageCode());
+              allLanguages.add(mapLanguageCode(language1));
+              allLanguages.add(mapLanguageCode(language2));
+              var languages = Set.of(language1, language2);
+              consultant.setLanguages(languages);
+              consultantRepository.save(consultant);
 
-          consultantsToReset.add(consultant);
-        });
+              consultantsToReset.add(consultant);
+            });
 
     return agencyId;
   }
@@ -894,7 +952,6 @@ class UserControllerConsultantE2EIT {
   private de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode mapLanguageCode(
       Language language) {
     return de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode.fromValue(
-        language.getLanguageCode().name()
-    );
+        language.getLanguageCode().name());
   }
 }

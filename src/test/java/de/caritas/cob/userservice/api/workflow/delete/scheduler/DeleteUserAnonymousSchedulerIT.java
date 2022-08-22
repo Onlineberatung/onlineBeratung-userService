@@ -4,11 +4,11 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import de.caritas.cob.userservice.api.conversation.facade.CreateAnonymousEnquiryFacade;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAnonymousEnquiryDTO;
+import de.caritas.cob.userservice.api.conversation.facade.CreateAnonymousEnquiryFacade;
 import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.api.testConfig.ApiControllerTestConfig;
@@ -30,24 +30,23 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-@Import({KeycloakTestConfig.class, RocketChatTestConfig.class, ApiControllerTestConfig.class,
-    ConsultingTypeManagerTestConfig.class})
+@Import({
+  KeycloakTestConfig.class,
+  RocketChatTestConfig.class,
+  ApiControllerTestConfig.class,
+  ConsultingTypeManagerTestConfig.class
+})
 class DeleteUserAnonymousSchedulerIT {
 
-  @Autowired
-  private DeleteUserAnonymousScheduler deleteUserAnonymousScheduler;
+  @Autowired private DeleteUserAnonymousScheduler deleteUserAnonymousScheduler;
 
-  @Autowired
-  private CreateAnonymousEnquiryFacade createAnonymousEnquiryFacade;
+  @Autowired private CreateAnonymousEnquiryFacade createAnonymousEnquiryFacade;
 
-  @Autowired
-  private SessionRepository sessionRepository;
+  @Autowired private SessionRepository sessionRepository;
 
-  @Autowired
-  private UserRepository userRepository;
+  @Autowired private UserRepository userRepository;
 
-  @Autowired
-  private UserService userService;
+  @Autowired private UserService userService;
 
   @Value("${user.anonymous.deleteworkflow.periodMinutes}")
   private long deletionPeriodInMinutes;
@@ -56,8 +55,8 @@ class DeleteUserAnonymousSchedulerIT {
 
   @BeforeEach
   public void setup() {
-    var createAnonymousEnquiryDTO = new CreateAnonymousEnquiryDTO()
-        .consultingType(CONSULTING_TYPE_ID_AIDS);
+    var createAnonymousEnquiryDTO =
+        new CreateAnonymousEnquiryDTO().consultingType(CONSULTING_TYPE_ID_AIDS);
     var responseDTO =
         createAnonymousEnquiryFacade.createAnonymousEnquiry(createAnonymousEnquiryDTO);
 
@@ -88,10 +87,8 @@ class DeleteUserAnonymousSchedulerIT {
   @Test
   void performDeletionWorkflow_Should_notDeleteUser_When_SessionAreDoneWithinDeletionPeriod() {
     currentSession.setStatus(SessionStatus.DONE);
-    var oneMinuteBeforeDeletionPeriodIsOver = LocalDateTime
-        .now()
-        .minusMinutes(deletionPeriodInMinutes)
-        .plusMinutes(1L);
+    var oneMinuteBeforeDeletionPeriodIsOver =
+        LocalDateTime.now().minusMinutes(deletionPeriodInMinutes).plusMinutes(1L);
     currentSession.setUpdateDate(oneMinuteBeforeDeletionPeriodIsOver);
     sessionRepository.save(currentSession);
 
@@ -101,20 +98,20 @@ class DeleteUserAnonymousSchedulerIT {
   }
 
   @Test
-  void performDeletionWorkflow_Should_deleteUser_When_UserSessionIsDoneAndOutsideOfDeletionPeriod() {
+  void
+      performDeletionWorkflow_Should_deleteUser_When_UserSessionIsDoneAndOutsideOfDeletionPeriod() {
     prepareCurrentSessionForDeletion();
 
     deleteUserAnonymousScheduler.performDeletionWorkflow();
 
-    assertSessionAndUserDoNotExistInDatabase(currentSession.getId(),
-        currentSession.getUser().getUserId());
+    assertSessionAndUserDoNotExistInDatabase(
+        currentSession.getId(), currentSession.getUser().getUserId());
   }
 
   private void prepareCurrentSessionForDeletion() {
     currentSession.setStatus(SessionStatus.DONE);
-    var oneMinuteBeforeDeletionPeriodIsOver = LocalDateTime
-        .now()
-        .minusMinutes(deletionPeriodInMinutes);
+    var oneMinuteBeforeDeletionPeriodIsOver =
+        LocalDateTime.now().minusMinutes(deletionPeriodInMinutes);
     currentSession.setUpdateDate(oneMinuteBeforeDeletionPeriodIsOver);
     sessionRepository.save(currentSession);
   }
@@ -135,7 +132,7 @@ class DeleteUserAnonymousSchedulerIT {
 
     deleteUserAnonymousScheduler.performDeletionWorkflow();
 
-    assertSessionAndUserDoNotExistInDatabase(currentSession.getId(),
-        currentSession.getUser().getUserId());
+    assertSessionAndUserDoNotExistInDatabase(
+        currentSession.getId(), currentSession.getUser().getUserId());
   }
 }

@@ -23,20 +23,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ConsultantAdminFacadeTest {
 
-  @InjectMocks
-  private ConsultantAdminFacade consultantAdminFacade;
+  @InjectMocks private ConsultantAdminFacade consultantAdminFacade;
 
-  @Mock
-  private ConsultantAdminService consultantAdminService;
+  @Mock private ConsultantAdminService consultantAdminService;
 
-  @Mock
-  private ConsultantAdminFilterService consultantAdminFilterService;
+  @Mock private ConsultantAdminFilterService consultantAdminFilterService;
 
-  @Mock
-  private ConsultantAgencyAdminService consultantAgencyAdminService;
+  @Mock private ConsultantAgencyAdminService consultantAgencyAdminService;
 
-  @Mock
-  private ConsultantAgencyRelationCreatorService relationCreatorService;
+  @Mock private ConsultantAgencyRelationCreatorService relationCreatorService;
 
   @Test
   void findConsultant_Should_useConsultantAdminService() {
@@ -47,9 +42,8 @@ class ConsultantAdminFacadeTest {
 
   @Test
   void findFilteredConsultants_Should_useConsultantAdminFilterService() {
-    this.consultantAdminFacade
-        .findFilteredConsultants(1, 1, new ConsultantFilter(), new Sort().field(
-            FieldEnum.EMAIL));
+    this.consultantAdminFacade.findFilteredConsultants(
+        1, 1, new ConsultantFilter(), new Sort().field(FieldEnum.EMAIL));
 
     verify(this.consultantAdminFilterService).findFilteredConsultants(eq(1), eq(1), any(), any());
   }
@@ -92,14 +86,16 @@ class ConsultantAdminFacadeTest {
   }
 
   @Test
-  void changeAgencyType_Should_callMarkAllAssignedConsultantsAsTeamConsultant_When_typeIsTeamAgency() {
+  void
+      changeAgencyType_Should_callMarkAllAssignedConsultantsAsTeamConsultant_When_typeIsTeamAgency() {
     this.consultantAdminFacade.changeAgencyType(1L, new AgencyTypeDTO().agencyType(TEAM_AGENCY));
 
     verify(this.consultantAgencyAdminService).markAllAssignedConsultantsAsTeamConsultant(1L);
   }
 
   @Test
-  void changeAgencyType_Should_callRemoveConsultantsFromTeamSessionsByAgencyId_When_typeIsDefaultAgency() {
+  void
+      changeAgencyType_Should_callRemoveConsultantsFromTeamSessionsByAgencyId_When_typeIsDefaultAgency() {
     this.consultantAdminFacade.changeAgencyType(1L, new AgencyTypeDTO().agencyType(DEFAULT_AGENCY));
 
     verify(this.consultantAgencyAdminService).removeConsultantsFromTeamSessionsByAgencyId(1L);
@@ -125,5 +121,4 @@ class ConsultantAdminFacadeTest {
 
     verify(this.consultantAgencyAdminService).findConsultantsForAgency(1L);
   }
-
 }

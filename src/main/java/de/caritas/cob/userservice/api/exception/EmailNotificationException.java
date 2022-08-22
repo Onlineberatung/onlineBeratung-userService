@@ -31,5 +31,4 @@ public class EmailNotificationException extends RuntimeException {
   public EmailNotificationException(Exception ex) {
     super(ex);
   }
-
 }

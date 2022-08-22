@@ -29,17 +29,13 @@ class OrganizerIT {
 
   private static final EasyRandom easyRandom = new EasyRandom();
 
-  @Autowired
-  private ConsultantRepository consultantRepository;
+  @Autowired private ConsultantRepository consultantRepository;
 
-  @Autowired
-  private AppointmentRepository appointmentRepository;
+  @Autowired private AppointmentRepository appointmentRepository;
 
-  @MockBean
-  private Clock clock;
+  @MockBean private Clock clock;
 
-  @Autowired
-  private Organizer organizer;
+  @Autowired private Organizer organizer;
 
   @Test
   void deleteObsoleteAppointmentsShouldDeleteAppointmentsOlderThanLifespan() {
@@ -56,12 +52,12 @@ class OrganizerIT {
 
     organizer.deleteObsoleteAppointments();
 
-    var notDeleted = StreamSupport.stream(appointmentRepository.findAll().spliterator(), false)
-        .map(Appointment::getDatetime)
-        .collect(Collectors.toList());
+    var notDeleted =
+        StreamSupport.stream(appointmentRepository.findAll().spliterator(), false)
+            .map(Appointment::getDatetime)
+            .collect(Collectors.toList());
     assertThat(notDeleted).containsExactlyInAnyOrder(today, tomorrow);
   }
-
 
   private void createAppointment(Instant datetime) {
     var consultant = consultantRepository.findAll().iterator().next();

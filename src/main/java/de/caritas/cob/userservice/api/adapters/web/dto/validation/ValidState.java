@@ -12,7 +12,6 @@ import javax.validation.Payload;
  * Custom validation annotation for the state property of the registration {@link UserDTO}. The
  * state is optional by default but could be mandatory for specific consulting types (e.q. U25)
  */
-
 @Documented
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -24,5 +23,4 @@ public @interface ValidState {
   Class<?>[] groups() default {};
 
   Class<? extends Payload>[] payload() default {};
-
 }

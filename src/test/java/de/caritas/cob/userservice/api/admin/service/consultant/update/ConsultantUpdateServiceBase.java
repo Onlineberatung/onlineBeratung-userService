@@ -7,26 +7,23 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.fail;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 public class ConsultantUpdateServiceBase {
 
-  private final static String VALID_CONSULTANT_ID = "5674839f-d0a3-47e2-8f9c-bb49fc2ddbbe";
+  private static final String VALID_CONSULTANT_ID = "5674839f-d0a3-47e2-8f9c-bb49fc2ddbbe";
 
-  @Autowired
-  protected ConsultantUpdateService consultantUpdateService;
+  @Autowired protected ConsultantUpdateService consultantUpdateService;
 
-  @MockBean
-  protected IdentityClient identityClient;
+  @MockBean protected IdentityClient identityClient;
 
-  @MockBean
-  protected RocketChatService rocketChatService;
+  @MockBean protected RocketChatService rocketChatService;
 
   public void updateConsultant_Should_returnUpdatedPersistedConsultant_When_inputDataIsValid() {
     UpdateAdminConsultantDTO updateConsultantDTO = new UpdateAdminConsultantDTO();
@@ -58,7 +55,8 @@ public class ConsultantUpdateServiceBase {
       this.consultantUpdateService.updateConsultant(getValidConsultantId(), updateConsultantDTO);
       fail("Exception should be thrown");
     } catch (CustomValidationHttpStatusException e) {
-      assertThat(e.getCustomHttpHeader().get("X-Reason").get(0),
+      assertThat(
+          e.getCustomHttpHeader().get("X-Reason").get(0),
           is(MISSING_ABSENCE_MESSAGE_FOR_ABSENT_USER.name()));
     }
   }
@@ -71,13 +69,11 @@ public class ConsultantUpdateServiceBase {
       this.consultantUpdateService.updateConsultant(getValidConsultantId(), updateConsultantDTO);
       fail("Exception should be thrown");
     } catch (CustomValidationHttpStatusException e) {
-      assertThat(e.getCustomHttpHeader().get("X-Reason").get(0),
-          is(EMAIL_NOT_VALID.name()));
+      assertThat(e.getCustomHttpHeader().get("X-Reason").get(0), is(EMAIL_NOT_VALID.name()));
     }
   }
 
   protected String getValidConsultantId() {
     return VALID_CONSULTANT_ID;
   }
-
 }

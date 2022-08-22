@@ -1,15 +1,15 @@
 package de.caritas.cob.userservice.api.conversation.service;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
+import de.caritas.cob.userservice.api.conversation.model.AnonymousUserCredentials;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackUserAccountInformation;
-import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
-import de.caritas.cob.userservice.api.conversation.model.AnonymousUserCredentials;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
-import de.caritas.cob.userservice.api.model.Session.RegistrationType;
 import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.model.Session.RegistrationType;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
@@ -23,9 +23,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-/**
- * Service to create anonymous user conversations (sessions).
- */
+/** Service to create anonymous user conversations (sessions). */
 @Service
 @RequiredArgsConstructor
 public class AnonymousConversationCreatorService {
@@ -41,24 +39,25 @@ public class AnonymousConversationCreatorService {
   /**
    * Creates a new anonymous conversation session with the corresponding Rocket.Chat room.
    *
-   * @param userDTO     {@link UserDTO}
+   * @param userDTO {@link UserDTO}
    * @param credentials {@link AnonymousUserCredentials}
    * @return {@link Session}
    */
-  public Session createAnonymousConversation(UserDTO userDTO,
-      AnonymousUserCredentials credentials) {
+  public Session createAnonymousConversation(
+      UserDTO userDTO, AnonymousUserCredentials credentials) {
 
     var user = obtainAnonymousUser(credentials);
     List<ConsultantAgency> consultantAgencies;
     Session session;
 
     try {
-      session = sessionService.initializeSession(user, userDTO, false,
-          RegistrationType.ANONYMOUS, SessionStatus.NEW);
+      session =
+          sessionService.initializeSession(
+              user, userDTO, false, RegistrationType.ANONYMOUS, SessionStatus.NEW);
       consultantAgencies = obtainConsultants(session.getConsultingTypeId());
-      String rcGroupId = createEnquiryMessageFacade.createRocketChatRoomAndAddUsers(session,
-          consultantAgencies,
-          credentials.getRocketChatCredentials());
+      String rcGroupId =
+          createEnquiryMessageFacade.createRocketChatRoomAndAddUsers(
+              session, consultantAgencies, credentials.getRocketChatCredentials());
       session.setGroupId(rcGroupId);
       sessionService.saveSession(session);
 
@@ -75,16 +74,21 @@ public class AnonymousConversationCreatorService {
   }
 
   private User obtainAnonymousUser(AnonymousUserCredentials credentials) {
-    return userService.getUser(credentials.getUserId())
-        .orElseThrow(() -> new InternalServerErrorException(String.format(
-            "Could not get user %s to create a new anonymous conversation.",
-            credentials.getUserId())));
+    return userService
+        .getUser(credentials.getUserId())
+        .orElseThrow(
+            () ->
+                new InternalServerErrorException(
+                    String.format(
+                        "Could not get user %s to create a new anonymous conversation.",
+                        credentials.getUserId())));
   }
 
   private List<ConsultantAgency> obtainConsultants(int consultingTypeId) {
-    List<Long> agencyList = agencyService.getAgenciesByConsultingType(consultingTypeId).stream()
-        .map(AgencyDTO::getId)
-        .collect(Collectors.toList());
+    List<Long> agencyList =
+        agencyService.getAgenciesByConsultingType(consultingTypeId).stream()
+            .map(AgencyDTO::getId)
+            .collect(Collectors.toList());
 
     return consultantAgencyService.getConsultantsOfAgencies(agencyList);
   }
@@ -98,10 +102,12 @@ public class AnonymousConversationCreatorService {
             .build());
   }
 
-  private void sendNewAnonymousEnquiryLiveEvent(List<ConsultantAgency> consultantAgencies,
-      Session session) {
-    liveEventNotificationService.sendLiveNewAnonymousEnquiryEventToUsers(consultantAgencies
-            .stream().map(agency -> agency.getConsultant().getId()).collect(Collectors.toList()),
+  private void sendNewAnonymousEnquiryLiveEvent(
+      List<ConsultantAgency> consultantAgencies, Session session) {
+    liveEventNotificationService.sendLiveNewAnonymousEnquiryEventToUsers(
+        consultantAgencies.stream()
+            .map(agency -> agency.getConsultant().getId())
+            .collect(Collectors.toList()),
         session.getId());
   }
 }

@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.workflow.deactivate.scheduler;
 
-import de.caritas.cob.userservice.api.workflow.deactivate.service.DeactivateAnonymousUserService;
 import de.caritas.cob.userservice.api.tenant.TenantContextProvider;
+import de.caritas.cob.userservice.api.workflow.deactivate.service.DeactivateAnonymousUserService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;

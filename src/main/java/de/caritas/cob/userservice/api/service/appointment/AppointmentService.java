@@ -19,9 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-/**
- * Service class to communicate with the AppointmentService.
- */
+/** Service class to communicate with the AppointmentService. */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -32,6 +30,7 @@ public class AppointmentService {
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
   private final @NonNull TenantHeaderSupplier tenantHeaderSupplier;
   private final @NonNull IdentityClient identityClient;
+
   @Value("${feature.appointment.enabled}")
   private boolean appointmentFeatureEnabled;
 
@@ -40,7 +39,6 @@ public class AppointmentService {
 
   @Value("${keycloakService.technical.password}")
   private String keycloakTechnicalPassword;
-
 
   public void createConsultant(ConsultantAdminResponseDTO consultantAdminResponseDTO) {
     if (!appointmentFeatureEnabled) {
@@ -52,8 +50,10 @@ public class AppointmentService {
       addTechnicalUserHeaders(this.appointmentConsultantApi.getApiClient());
       try {
         de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO consultant =
-            mapper.readValue(mapper.writeValueAsString(consultantAdminResponseDTO.getEmbedded()),
-                de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO.class);
+            mapper.readValue(
+                mapper.writeValueAsString(consultantAdminResponseDTO.getEmbedded()),
+                de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO
+                    .class);
         this.appointmentConsultantApi.createConsultant(consultant);
       } catch (Exception e) {
         log.error(e.getMessage());
@@ -71,8 +71,10 @@ public class AppointmentService {
       addTechnicalUserHeaders(this.appointmentConsultantApi.getApiClient());
       try {
         de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO consultant =
-            mapper.readValue(mapper.writeValueAsString(consultantAdminResponseDTO.getEmbedded()),
-                de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO.class);
+            mapper.readValue(
+                mapper.writeValueAsString(consultantAdminResponseDTO.getEmbedded()),
+                de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO
+                    .class);
         this.appointmentConsultantApi.updateConsultant(consultant.getId(), consultant);
       } catch (Exception e) {
         log.error(e.getMessage());
@@ -87,8 +89,9 @@ public class AppointmentService {
    * @return ObjectMapper
    */
   protected ObjectMapper getObjectMapper(boolean failOnUnknownProperties) {
-    ObjectMapper mapper = new ObjectMapper()
-        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, failOnUnknownProperties);
+    ObjectMapper mapper =
+        new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, failOnUnknownProperties);
     return mapper;
   }
 
@@ -110,11 +113,11 @@ public class AppointmentService {
   }
 
   private void addTechnicalUserHeaders(ApiClient apiClient) {
-    var keycloakLoginResponseDTO = identityClient.loginUser(
-        keycloakTechnicalUsername, keycloakTechnicalPassword
-    );
-    var headers = this.securityHeaderSupplier
-        .getKeycloakAndCsrfHttpHeaders(keycloakLoginResponseDTO.getAccessToken());
+    var keycloakLoginResponseDTO =
+        identityClient.loginUser(keycloakTechnicalUsername, keycloakTechnicalPassword);
+    var headers =
+        this.securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders(
+            keycloakLoginResponseDTO.getAccessToken());
     tenantHeaderSupplier.addTenantHeader(headers);
     headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
   }

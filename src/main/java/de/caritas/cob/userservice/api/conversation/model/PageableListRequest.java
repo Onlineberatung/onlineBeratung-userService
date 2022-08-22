@@ -10,5 +10,4 @@ public class PageableListRequest {
   private final Integer offset;
   private final Integer count;
   private final String rcToken;
-
 }

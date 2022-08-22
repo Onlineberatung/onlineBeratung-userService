@@ -31,12 +31,11 @@ class RootDTOBuilderTest {
     RootLinks rootLinks = rootDTO.getLinks();
     assertThat(rootLinks, notNullValue());
     assertThat(rootLinks.getConsultants(), notNullValue());
-    assertThat(rootLinks.getConsultants().getHref(),
-        is("/useradmin/consultants?page=1&perPage=20"));
+    assertThat(
+        rootLinks.getConsultants().getHref(), is("/useradmin/consultants?page=1&perPage=20"));
     assertThat(rootLinks.getConsultants().getMethod(), is(MethodEnum.GET));
     assertThat(rootLinks.getCreateConsultant(), notNullValue());
-    assertThat(rootLinks.getCreateConsultant().getHref(),
-        is("/useradmin/consultants"));
+    assertThat(rootLinks.getCreateConsultant().getHref(), is("/useradmin/consultants"));
     assertThat(rootLinks.getCreateConsultant().getMethod(), is(MethodEnum.POST));
   }
 
@@ -59,7 +58,8 @@ class RootDTOBuilderTest {
     RootLinks rootLinks = rootDTO.getLinks();
     assertThat(rootLinks, notNullValue());
     assertThat(rootLinks.getConsultantAgencies(), notNullValue());
-    assertThat(rootLinks.getConsultantAgencies().getHref(),
+    assertThat(
+        rootLinks.getConsultantAgencies().getHref(),
         is("/useradmin/consultants/{consultantId}/agencies"));
     assertThat(rootLinks.getConsultantAgencies().getMethod(), is(MethodEnum.GET));
   }
@@ -75,5 +75,4 @@ class RootDTOBuilderTest {
     assertThat(rootLinks.getDeleteAsker().getHref(), is("/useradmin/askers/{askerId}"));
     assertThat(rootLinks.getDeleteAsker().getMethod(), is(MethodEnum.DELETE));
   }
-
 }

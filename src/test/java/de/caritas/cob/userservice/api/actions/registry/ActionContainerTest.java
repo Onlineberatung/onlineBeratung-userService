@@ -26,8 +26,9 @@ class ActionContainerTest {
         Set.of(new DeactivateSessionActionCommand(mock(SessionService.class)));
     ActionContainer<Session> actionContainer = new ActionContainer<>(sessionActionCommand);
 
-    assertThrows(NoSuchElementException.class, () ->
-        actionContainer.addActionToExecute(SetRocketChatRoomReadOnlyActionCommand.class));
+    assertThrows(
+        NoSuchElementException.class,
+        () -> actionContainer.addActionToExecute(SetRocketChatRoomReadOnlyActionCommand.class));
   }
 
   @Test
@@ -36,8 +37,7 @@ class ActionContainerTest {
         Set.of(new DeactivateSessionActionCommand(mock(SessionService.class)));
     Session session = mock(Session.class);
 
-    new ActionContainer<>(sessionActionCommand)
-        .executeActions(session);
+    new ActionContainer<>(sessionActionCommand).executeActions(session);
 
     verifyNoInteractions(session);
   }
@@ -53,5 +53,4 @@ class ActionContainerTest {
 
     verify(sessionActionCommand, times(1)).execute(session);
   }
-
 }

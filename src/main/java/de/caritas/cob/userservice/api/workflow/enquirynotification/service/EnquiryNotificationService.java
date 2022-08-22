@@ -6,6 +6,7 @@ import static java.util.Arrays.asList;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
@@ -31,9 +32,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-/**
- * Service to build and send email notifications for open enquiries.
- */
+/** Service to build and send email notifications for open enquiries. */
 @Service
 @RequiredArgsConstructor
 public class EnquiryNotificationService {
@@ -52,17 +51,16 @@ public class EnquiryNotificationService {
   @Value("${app.base.url}")
   private String applicationBaseUrl;
 
-  /**
-   * Entry method to build and send email notifications.
-   */
+  /** Entry method to build and send email notifications. */
   public void sendEmailNotificationsForOpenEnquiries() {
     var agencyIdsWithOpenEnquiries = findAgencyIdsWithOpenEnquiries();
-    var agenciesWithOpenEnquiries = agencyService.getAgencies(
-        new ArrayList<>(agencyIdsWithOpenEnquiries.keySet()));
-    var agencyIdToAgency = agenciesWithOpenEnquiries.stream()
-        .collect(Collectors.toMap(AgencyDTO::getId, Function.identity()));
-    var mailsContentForAgencies = createMailsContentForAgencies(agencyIdsWithOpenEnquiries,
-        agencyIdToAgency);
+    var agenciesWithOpenEnquiries =
+        agencyService.getAgencies(new ArrayList<>(agencyIdsWithOpenEnquiries.keySet()));
+    var agencyIdToAgency =
+        agenciesWithOpenEnquiries.stream()
+            .collect(Collectors.toMap(AgencyDTO::getId, Function.identity()));
+    var mailsContentForAgencies =
+        createMailsContentForAgencies(agencyIdsWithOpenEnquiries, agencyIdToAgency);
 
     mailsContentForAgencies.forEach(this::buildAndSendNotificationMails);
   }
@@ -79,9 +77,7 @@ public class EnquiryNotificationService {
     var enquiryMessageDate = session.getEnquiryMessageDate();
 
     if (nonNull(enquiryMessageDate)) {
-      return rightNow
-          .minusHours(openEnquiryCheckHours)
-          .isAfter(enquiryMessageDate);
+      return rightNow.minusHours(openEnquiryCheckHours).isAfter(enquiryMessageDate);
     }
     return false;
   }
@@ -109,30 +105,33 @@ public class EnquiryNotificationService {
   }
 
   private void buildAndSendNotificationMails(EnquiriesNotificationMailContent enquiryMailContent) {
-    var mailDTOs = consultantAgencyService
-        .findConsultantsByAgencyId(enquiryMailContent.getAgencyId()).stream()
-        .map(ConsultantAgency::getConsultant)
-        .filter(Consultant::getNotifyEnquiriesRepeating)
-        .map(consultant -> buildMailTO(consultant, enquiryMailContent))
-        .collect(Collectors.toList());
+    var mailDTOs =
+        consultantAgencyService.findConsultantsByAgencyId(enquiryMailContent.getAgencyId()).stream()
+            .map(ConsultantAgency::getConsultant)
+            .filter(Consultant::getNotifyEnquiriesRepeating)
+            .map(consultant -> buildMailTO(consultant, enquiryMailContent))
+            .collect(Collectors.toList());
 
     buildAndSendNotificationEmail(mailDTOs);
   }
 
-  private MailDTO buildMailTO(Consultant consultant,
-      EnquiriesNotificationMailContent enquiryNotificationContent) {
+  private MailDTO buildMailTO(
+      Consultant consultant, EnquiriesNotificationMailContent enquiryNotificationContent) {
     return new MailDTO()
         .template(TEMPLATE_DAILY_ENQUIRY_NOTIFICATION)
         .email(consultant.getEmail())
-        .templateData(asList(
-            new TemplateDataDTO().key("subject").value(MAIL_SUBJECT),
-            new TemplateDataDTO().key("consultant_name").value(consultant.getFullName()),
-            new TemplateDataDTO().key("url").value(applicationBaseUrl),
-            new TemplateDataDTO().key("agency_name")
-                .value(enquiryNotificationContent.getAgencyName()),
-            new TemplateDataDTO().key("enquiries")
-                .value(String.valueOf(enquiryNotificationContent.getAmountOfOpenEnquiries()))
-        ));
+        .language(languageOf(consultant.getLanguageCode()))
+        .templateData(
+            asList(
+                new TemplateDataDTO().key("subject").value(MAIL_SUBJECT),
+                new TemplateDataDTO().key("consultant_name").value(consultant.getFullName()),
+                new TemplateDataDTO().key("url").value(applicationBaseUrl),
+                new TemplateDataDTO()
+                    .key("agency_name")
+                    .value(enquiryNotificationContent.getAgencyName()),
+                new TemplateDataDTO()
+                    .key("enquiries")
+                    .value(String.valueOf(enquiryNotificationContent.getAmountOfOpenEnquiries()))));
   }
 
   private void buildAndSendNotificationEmail(List<MailDTO> mailsToSend) {
@@ -142,4 +141,9 @@ public class EnquiryNotificationService {
     }
   }
 
+  private static de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode languageOf(
+      LanguageCode languageCode) {
+    return de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.fromValue(
+        languageCode.toString());
+  }
 }

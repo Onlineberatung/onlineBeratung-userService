@@ -57,29 +57,21 @@ public class ConsultantAgencyAdminServiceTenantAwareIT {
   public static final String CONSULTANT1_ID = "0b3b1cc6-be98-4787-aa56-212259d811b8";
   public static final String CONSULTANT2_ID = "0b3b1cc6-be98-4787-aa56-212259d811b7";
 
-  @Autowired
-  private ConsultantAgencyAdminService consultantAgencyAdminService;
+  @Autowired private ConsultantAgencyAdminService consultantAgencyAdminService;
 
-  @Autowired
-  private ConsultantRepository consultantRepository;
+  @Autowired private ConsultantRepository consultantRepository;
 
-  @Autowired
-  private ConsultantAgencyRepository consultantAgencyRepository;
+  @Autowired private ConsultantAgencyRepository consultantAgencyRepository;
 
-  @MockBean
-  private ConsultantAgencyRelationCreatorService consultantAgencyRelationCreatorService;
+  @MockBean private ConsultantAgencyRelationCreatorService consultantAgencyRelationCreatorService;
 
-  @MockBean
-  private AgencyService agencyService;
+  @MockBean private AgencyService agencyService;
 
-  @MockBean
-  private AgencyAdminService agencyAdminService;
+  @MockBean private AgencyAdminService agencyAdminService;
 
-  @Autowired
-  private Organizer organizer;
+  @Autowired private Organizer organizer;
 
-  @MockBean
-  private RemoveConsultantFromRocketChatService removeConsultantFromRocketChatService;
+  @MockBean private RemoveConsultantFromRocketChatService removeConsultantFromRocketChatService;
 
   private final EasyRandom easyRandom = new EasyRandom();
 
@@ -97,7 +89,8 @@ public class ConsultantAgencyAdminServiceTenantAwareIT {
   }
 
   @Test
-  public void findConsultantAgencies_Should_returnAllConsultantAgenciesForGivenConsultantId_with_correctConsultantId() {
+  public void
+      findConsultantAgencies_Should_returnAllConsultantAgenciesForGivenConsultantId_with_correctConsultantId() {
     givenAValidConsultantPersisted(CONSULTANT1_ID);
     var agencyAdminResponseDTO = new EasyRandom().nextObject(AgencyAdminResponseDTO.class);
     agencyAdminResponseDTO.setId(0L);
@@ -106,30 +99,28 @@ public class ConsultantAgencyAdminServiceTenantAwareIT {
     when(this.agencyAdminService.retrieveAllAgencies())
         .thenReturn(List.of(agencyAdminResponseDTO, anotherAgencyAdminResponseDTO));
 
-    var consultantAgencies = consultantAgencyAdminService
-        .findConsultantAgencies(CONSULTANT1_ID);
+    var consultantAgencies = consultantAgencyAdminService.findConsultantAgencies(CONSULTANT1_ID);
 
     assertThat(consultantAgencies, notNullValue());
     assertThat(consultantAgencies.getEmbedded(), hasSize(1));
     assertThat(consultantAgencies.getTotal(), is(1));
-    assertThat(consultantAgencies.getLinks().getSelf().getHref(),
+    assertThat(
+        consultantAgencies.getLinks().getSelf().getHref(),
         is("http://localhost/useradmin/consultants/0b3b1cc6-be98-4787-aa56-212259d811b8/agencies"));
   }
 
   @Test
   public void findConsultantAgencies_Should_returnFullMappedSessionAdminDTO() {
     givenAValidConsultantPersisted(CONSULTANT2_ID);
-    var agencyAdminResponseDTO = new EasyRandom()
-        .nextObject(AgencyAdminResponseDTO.class);
+    var agencyAdminResponseDTO = new EasyRandom().nextObject(AgencyAdminResponseDTO.class);
     agencyAdminResponseDTO.setId(1L);
     when(this.agencyAdminService.retrieveAllAgencies())
         .thenReturn(singletonList(agencyAdminResponseDTO));
 
-    var consultantAgencies = consultantAgencyAdminService
-        .findConsultantAgencies("0b3b1cc6-be98-4787-aa56-212259d811b7");
+    var consultantAgencies =
+        consultantAgencyAdminService.findConsultantAgencies("0b3b1cc6-be98-4787-aa56-212259d811b7");
 
-    var consultantAgencyAdminDTO = consultantAgencies.getEmbedded().iterator()
-        .next();
+    var consultantAgencyAdminDTO = consultantAgencies.getEmbedded().iterator().next();
     assertThat(consultantAgencyAdminDTO.getEmbedded().getCity(), notNullValue());
     assertThat(consultantAgencyAdminDTO.getEmbedded().getId(), notNullValue());
     assertThat(consultantAgencyAdminDTO.getEmbedded().getCreateDate(), notNullValue());
@@ -144,50 +135,57 @@ public class ConsultantAgencyAdminServiceTenantAwareIT {
       fail("There was no BadRequestException");
     } catch (Exception e) {
       assertThat(e, instanceOf(BadRequestException.class));
-      assertThat(e.getMessage(),
+      assertThat(
+          e.getMessage(),
           is("Consultant with id 12345678-1234-1234-1234-1234567890ab does not exist"));
     }
   }
 
   @Test
-  public void markAllAssignedConsultantsAsTeamConsultant_Should_markAssignedConsultantsAsTeamConsultant() {
+  public void
+      markAllAssignedConsultantsAsTeamConsultant_Should_markAssignedConsultantsAsTeamConsultant() {
     givenAValidConsultantPersisted(CONSULTANT1_ID);
-    long teamConsultantsBefore = this.consultantRepository
-        .findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(singletonList(1L))
-        .stream()
-        .filter(Consultant::isTeamConsultant)
-        .count();
+    long teamConsultantsBefore =
+        this.consultantRepository
+            .findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(singletonList(1L))
+            .stream()
+            .filter(Consultant::isTeamConsultant)
+            .count();
 
     this.consultantAgencyAdminService.markAllAssignedConsultantsAsTeamConsultant(1L);
 
-    long teamConsultantsAfter = this.consultantRepository
-        .findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(singletonList(1L))
-        .stream()
-        .filter(Consultant::isTeamConsultant)
-        .count();
+    long teamConsultantsAfter =
+        this.consultantRepository
+            .findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(singletonList(1L))
+            .stream()
+            .filter(Consultant::isTeamConsultant)
+            .count();
 
     assertThat(teamConsultantsAfter, is(not(teamConsultantsBefore)));
     assertThat(teamConsultantsAfter, is(greaterThan(teamConsultantsBefore)));
   }
 
   @Test
-  public void removeConsultantsFromTeamSessionsByAgencyId_Should_removeTeamConsultantFlagAndCallServices() {
+  public void
+      removeConsultantsFromTeamSessionsByAgencyId_Should_removeTeamConsultantFlagAndCallServices() {
     givenAValidConsultantPersisted(CONSULTANT1_ID, true);
     when(this.agencyService.getAgency(any())).thenReturn(new AgencyDTO().teamAgency(false));
 
-    long teamCosnultantsBefore = this.consultantRepository
-        .findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(singletonList(1L))
-        .stream()
-        .filter(Consultant::isTeamConsultant)
-        .count();
+    long teamCosnultantsBefore =
+        this.consultantRepository
+            .findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(singletonList(1L))
+            .stream()
+            .filter(Consultant::isTeamConsultant)
+            .count();
 
     this.consultantAgencyAdminService.removeConsultantsFromTeamSessionsByAgencyId(1L);
 
-    long teamConsultantsAfter = this.consultantRepository
-        .findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(singletonList(1L))
-        .stream()
-        .filter(Consultant::isTeamConsultant)
-        .count();
+    long teamConsultantsAfter =
+        this.consultantRepository
+            .findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(singletonList(1L))
+            .stream()
+            .filter(Consultant::isTeamConsultant)
+            .count();
 
     assertThat(teamConsultantsAfter, is(not(teamCosnultantsBefore)));
     assertThat(teamConsultantsAfter, is(lessThan(teamCosnultantsBefore)));
@@ -196,12 +194,14 @@ public class ConsultantAgencyAdminServiceTenantAwareIT {
   }
 
   @Test
-  public void markConsultantAgencyForDeletion_Should_setDeletedFlagIndatabase_When_consultantAgencyCanBeDeleted() {
+  public void
+      markConsultantAgencyForDeletion_Should_setDeletedFlagIndatabase_When_consultantAgencyCanBeDeleted() {
     givenAValidConsultantPersisted(CONSULTANT1_ID, true);
     ConsultantAgency validRelation = this.consultantAgencyRepository.findAll().iterator().next();
     String consultantId = validRelation.getConsultant().getId();
     Long agencyId = validRelation.getAgencyId();
-    when(this.agencyService.getAgencyWithoutCaching(any())).thenReturn(new AgencyDTO().teamAgency(false));
+    when(this.agencyService.getAgencyWithoutCaching(any()))
+        .thenReturn(new AgencyDTO().teamAgency(false));
 
     this.consultantAgencyAdminService.markConsultantAgencyForDeletion(consultantId, agencyId);
 
@@ -211,21 +211,25 @@ public class ConsultantAgencyAdminServiceTenantAwareIT {
   }
 
   @Test
-  public void findConsultantsForAgency_Should_returnExpectedConsultants_When_agencyHasConsultatns() {
+  public void
+      findConsultantsForAgency_Should_returnExpectedConsultants_When_agencyHasConsultatns() {
     givenAValidConsultantPersisted(CONSULTANT1_ID);
     givenAValidConsultantPersisted(CONSULTANT2_ID);
     var consultantsOfAgency = this.consultantAgencyAdminService.findConsultantsForAgency(1L);
 
     assertThat(consultantsOfAgency.getEmbedded(), hasSize(2));
-    consultantsOfAgency.getEmbedded().forEach(consultant -> {
-      assertThat(consultant.getEmbedded(), notNullValue());
-      assertThat(consultant.getLinks(), notNullValue());
-      assertThat(consultant.getLinks().getAddAgency(), notNullValue());
-      assertThat(consultant.getLinks().getAgencies(), notNullValue());
-      assertThat(consultant.getLinks().getDelete(), notNullValue());
-      assertThat(consultant.getLinks().getSelf(), notNullValue());
-      assertThat(consultant.getLinks().getUpdate(), notNullValue());
-    });
+    consultantsOfAgency
+        .getEmbedded()
+        .forEach(
+            consultant -> {
+              assertThat(consultant.getEmbedded(), notNullValue());
+              assertThat(consultant.getLinks(), notNullValue());
+              assertThat(consultant.getLinks().getAddAgency(), notNullValue());
+              assertThat(consultant.getLinks().getAgencies(), notNullValue());
+              assertThat(consultant.getLinks().getDelete(), notNullValue());
+              assertThat(consultant.getLinks().getSelf(), notNullValue());
+              assertThat(consultant.getLinks().getUpdate(), notNullValue());
+            });
   }
 
   private Consultant givenAValidConsultantPersisted(String id, boolean isTeamConsultant) {
@@ -247,7 +251,6 @@ public class ConsultantAgencyAdminServiceTenantAwareIT {
     consultantAgency.setTenantId(1L);
     consultantAgency.setConsultant(consultant);
     consultantAgencyRepository.save(consultantAgency);
-
   }
 
   private Consultant givenAValidConsultant(String id, boolean isTeamConsultant) {
@@ -268,7 +271,8 @@ public class ConsultantAgencyAdminServiceTenantAwareIT {
     consultant.setWalkThroughEnabled(true);
     consultant.setTeamConsultant(isTeamConsultant);
     consultant.setConsultantMobileTokens(Sets.newHashSet());
+    consultant.setLanguageCode(LanguageCode.de);
+
     return consultant;
   }
-
 }

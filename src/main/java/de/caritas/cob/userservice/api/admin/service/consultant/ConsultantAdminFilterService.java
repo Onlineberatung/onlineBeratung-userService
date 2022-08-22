@@ -17,9 +17,7 @@ import org.hibernate.search.jpa.FullTextQuery;
 import org.hibernate.search.jpa.Search;
 import org.springframework.stereotype.Service;
 
-/**
- * Service class to provide filtered search for all {@link Consultant} entities.
- */
+/** Service class to provide filtered search for all {@link Consultant} entities. */
 @Service
 @RequiredArgsConstructor
 public class ConsultantAdminFilterService {
@@ -31,43 +29,49 @@ public class ConsultantAdminFilterService {
    * generates a {@link ConsultantSearchResultDTO} containing hal links.
    *
    * @param consultantFilter the filter object containing filter values
-   * @param page             the current requested page
-   * @param perPage          the amount of items in one page
+   * @param page the current requested page
+   * @param perPage the amount of items in one page
    * @return the result list
    */
-  public ConsultantSearchResultDTO findFilteredConsultants(final Integer page,
-      final Integer perPage, final ConsultantFilter consultantFilter, final Sort sort) {
-    var fullTextEntityManager = Search
-        .getFullTextEntityManager(entityManagerFactory.createEntityManager());
+  public ConsultantSearchResultDTO findFilteredConsultants(
+      final Integer page,
+      final Integer perPage,
+      final ConsultantFilter consultantFilter,
+      final Sort sort) {
+    var fullTextEntityManager =
+        Search.getFullTextEntityManager(entityManagerFactory.createEntityManager());
 
     var fullTextQuery = buildFilteredQuery(consultantFilter, fullTextEntityManager);
     fullTextQuery.setMaxResults(Math.max(perPage, 1));
     fullTextQuery.setFirstResult(Math.max((page - 1) * perPage, 0));
     fullTextQuery.setSort(buildSort(sort));
 
-    var searchResultDTO = ConsultantSearchResultBuilder
-        .getInstance(fullTextQuery)
-        .withFilter(consultantFilter)
-        .withSort(sort)
-        .withPage(page)
-        .withPerPage(perPage)
-        .buildConsultantSearchResult();
+    var searchResultDTO =
+        ConsultantSearchResultBuilder.getInstance(fullTextQuery)
+            .withFilter(consultantFilter)
+            .withSort(sort)
+            .withPage(page)
+            .withPerPage(perPage)
+            .buildConsultantSearchResult();
 
     fullTextEntityManager.close();
     return searchResultDTO;
   }
 
-  protected FullTextQuery buildFilteredQuery(ConsultantFilter consultantFilter,
-      FullTextEntityManager fullTextEntityManager) {
+  protected FullTextQuery buildFilteredQuery(
+      ConsultantFilter consultantFilter, FullTextEntityManager fullTextEntityManager) {
 
-    var queryBuilder = fullTextEntityManager.getSearchFactory()
-        .buildQueryBuilder()
-        .forEntity(Consultant.class)
-        .get();
+    var queryBuilder =
+        fullTextEntityManager
+            .getSearchFactory()
+            .buildQueryBuilder()
+            .forEntity(Consultant.class)
+            .get();
 
-    var query = ConsultantFilterQueryBuilder.getInstance(queryBuilder)
-        .onConsultantFilter(consultantFilter)
-        .buildQuery();
+    var query =
+        ConsultantFilterQueryBuilder.getInstance(queryBuilder)
+            .onConsultantFilter(consultantFilter)
+            .buildQuery();
 
     return fullTextEntityManager.createFullTextQuery(query, Consultant.class);
   }
@@ -76,11 +80,11 @@ public class ConsultantAdminFilterService {
     var luceneSort = new org.apache.lucene.search.Sort();
     if (nonNull(sort) && nonNull(sort.getField())) {
       var reverse = OrderEnum.DESC.equals(sort.getOrder());
-      luceneSort.setSort(SortField.FIELD_SCORE,
+      luceneSort.setSort(
+          SortField.FIELD_SCORE,
           new SortField(sort.getField().getValue(), SortField.Type.STRING, reverse));
     }
 
     return luceneSort;
   }
-
 }

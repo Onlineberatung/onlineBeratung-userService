@@ -1,10 +1,11 @@
 package de.caritas.cob.userservice.api.facade.userdata;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.SessionDataProvider;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.model.UserAgency;
@@ -25,9 +26,7 @@ import org.apache.commons.collections4.SetUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-/**
- * Provider for asker information.
- */
+/** Provider for asker information. */
 @Component
 @RequiredArgsConstructor
 public class AskerDataProvider {
@@ -36,6 +35,7 @@ public class AskerDataProvider {
   private final @NonNull SessionDataProvider sessionDataProvider;
   private final @NonNull AuthenticatedUser authenticatedUser;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
+
   @Value("${keycloakService.user.dummySuffix}")
   private String emailDummySuffix;
 
@@ -53,6 +53,7 @@ public class AskerDataProvider {
         .isAbsent(false)
         .encourage2fa(user.getEncourage2fa())
         .isFormalLanguage(user.isLanguageFormal())
+        .preferredLanguage(LanguageCode.fromValue(user.getLanguageCode().toString()))
         .isInTeamAgency(false)
         .userRoles(authenticatedUser.getRoles())
         .grantedAuthorities(authenticatedUser.getGrantedAuthorities())
@@ -73,19 +74,19 @@ public class AskerDataProvider {
     List<AgencyDTO> agencyDTOs = this.agencyService.getAgencies(agencyIds);
     LinkedHashMap<String, Object> consultingTypes = new LinkedHashMap<>();
     for (int type : consultingTypeManager.getAllConsultingTypeIds()) {
-      consultingTypes.put(Integer.toString(type),
-          getConsultingTypeData(type, sessionList, agencyDTOs));
+      consultingTypes.put(
+          Integer.toString(type), getConsultingTypeData(type, sessionList, agencyDTOs));
     }
 
     return consultingTypes;
   }
 
-  private LinkedHashMap<String, Object> getConsultingTypeData(int consultingType,
-      Set<Session> sessionList, List<AgencyDTO> agencyDTOs) {
+  private LinkedHashMap<String, Object> getConsultingTypeData(
+      int consultingType, Set<Session> sessionList, List<AgencyDTO> agencyDTOs) {
 
     LinkedHashMap<String, Object> consultingTypeData = new LinkedHashMap<>();
-    Optional<Session> consultingTypeSession = findSessionByConsultingType(consultingType,
-        sessionList);
+    Optional<Session> consultingTypeSession =
+        findSessionByConsultingType(consultingType, sessionList);
     Optional<Map<String, Object>> consultingTypeSessionData =
         consultingTypeSession.map(sessionDataProvider::getSessionDataMapFromSession);
     Optional<AgencyDTO> agency = findAgencyByConsultingType(consultingType, agencyDTOs);
@@ -97,15 +98,15 @@ public class AskerDataProvider {
     return consultingTypeData;
   }
 
-  private Optional<AgencyDTO> findAgencyByConsultingType(int consultingTypeId,
-      List<AgencyDTO> agencyDTOs) {
+  private Optional<AgencyDTO> findAgencyByConsultingType(
+      int consultingTypeId, List<AgencyDTO> agencyDTOs) {
     return agencyDTOs.stream()
         .filter(agencyDTO -> agencyDTO.getConsultingType() == consultingTypeId)
         .findFirst();
   }
 
-  private Optional<Session> findSessionByConsultingType(int consultingTypeId,
-      Set<Session> sessionList) {
+  private Optional<Session> findSessionByConsultingType(
+      int consultingTypeId, Set<Session> sessionList) {
     return sessionList.stream()
         .filter(session -> session.getConsultingTypeId() == consultingTypeId)
         .findFirst();
@@ -119,17 +120,20 @@ public class AskerDataProvider {
   }
 
   private List<Long> collectAgencyIdsFromSessions(Set<Session> sessionList) {
-    return CollectionUtils.isNotEmpty(sessionList) ? sessionList.stream()
-        .map(Session::getAgencyId)
-        .filter(Objects::nonNull)
-        .collect(Collectors.toList()) : Collections.emptyList();
+    return CollectionUtils.isNotEmpty(sessionList)
+        ? sessionList.stream()
+            .map(Session::getAgencyId)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList())
+        : Collections.emptyList();
   }
 
   private List<Long> collectAgencyIdsFromUser(User user) {
-    return CollectionUtils.isNotEmpty(user.getUserAgencies()) ? user.getUserAgencies().stream()
-        .map(UserAgency::getAgencyId)
-        .filter(Objects::nonNull)
-        .collect(Collectors.toList()) : Collections.emptyList();
+    return CollectionUtils.isNotEmpty(user.getUserAgencies())
+        ? user.getUserAgencies().stream()
+            .map(UserAgency::getAgencyId)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList())
+        : Collections.emptyList();
   }
-
 }

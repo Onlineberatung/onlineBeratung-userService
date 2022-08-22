@@ -35,12 +35,9 @@ public class StatisticsServiceTest {
   private AssignSessionStatisticsEvent assignSessionStatisticsEvent;
   private final EventType eventType = EventType.ASSIGN_SESSION;
 
-  @InjectMocks
-  private StatisticsService statisticsService;
-  @Mock
-  private AmqpTemplate amqpTemplate;
-  @Mock
-  Logger logger;
+  @InjectMocks private StatisticsService statisticsService;
+  @Mock private AmqpTemplate amqpTemplate;
+  @Mock Logger logger;
 
   @Before
   public void setup() {

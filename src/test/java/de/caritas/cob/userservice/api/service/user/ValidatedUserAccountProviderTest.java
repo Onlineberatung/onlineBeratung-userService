@@ -17,6 +17,9 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserUpdateDataDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserUpdateRequestDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
@@ -24,9 +27,6 @@ import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.ConsultantService;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserUpdateDataDTO;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserUpdateRequestDTO;
 import java.util.Optional;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
@@ -42,20 +42,13 @@ public class ValidatedUserAccountProviderTest {
 
   private static final EasyRandom EASY_RANDOM = new EasyRandom();
 
-  @InjectMocks
-  private ValidatedUserAccountProvider accountProvider;
-  @Mock
-  private UserService userService;
-  @Mock
-  private ConsultantService consultantService;
-  @Mock
-  private AuthenticatedUser authenticatedUser;
-  @Mock
-  private KeycloakService keycloakService;
-  @Mock
-  private RocketChatService rocketChatService;
-  @Mock
-  private UserHelper userHelper;
+  @InjectMocks private ValidatedUserAccountProvider accountProvider;
+  @Mock private UserService userService;
+  @Mock private ConsultantService consultantService;
+  @Mock private AuthenticatedUser authenticatedUser;
+  @Mock private KeycloakService keycloakService;
+  @Mock private RocketChatService rocketChatService;
+  @Mock private UserHelper userHelper;
 
   @Test
   public void retrieveValidatedUser_Should_ReturnUser_When_UserIsPresent() {
@@ -68,7 +61,8 @@ public class ValidatedUserAccountProviderTest {
   }
 
   @Test(expected = InternalServerErrorException.class)
-  public void retrieveValidatedUser_Should_Throw_InternalServerErrorException_When_UserIsNotPresent() {
+  public void
+      retrieveValidatedUser_Should_Throw_InternalServerErrorException_When_UserIsNotPresent() {
     when(userService.getUser(any())).thenReturn(Optional.empty());
 
     this.accountProvider.retrieveValidatedUser();
@@ -85,14 +79,16 @@ public class ValidatedUserAccountProviderTest {
   }
 
   @Test(expected = InternalServerErrorException.class)
-  public void retrieveValidatedConsultant_Should_Throw_InternalServerErrorException_When_ConsultantIsNotPresent() {
+  public void
+      retrieveValidatedConsultant_Should_Throw_InternalServerErrorException_When_ConsultantIsNotPresent() {
     when(consultantService.getConsultant(any())).thenReturn(Optional.empty());
 
     this.accountProvider.retrieveValidatedConsultant();
   }
 
   @Test
-  public void retrieveValidatedTeamConsultant_Should_ReturnTeamConsultant_When_TeamConsultantIsPresent() {
+  public void
+      retrieveValidatedTeamConsultant_Should_ReturnTeamConsultant_When_TeamConsultantIsPresent() {
     Consultant teamConsultantMock = mock(Consultant.class);
     when(teamConsultantMock.isTeamConsultant()).thenReturn(true);
     when(consultantService.getConsultant(any())).thenReturn(Optional.of(teamConsultantMock));
@@ -103,7 +99,8 @@ public class ValidatedUserAccountProviderTest {
   }
 
   @Test(expected = ForbiddenException.class)
-  public void retrieveValidatedTeamConsultant_Should_Throw_ForbiddenException_When_ConsultantIsNotATeamConsultant() {
+  public void
+      retrieveValidatedTeamConsultant_Should_Throw_ForbiddenException_When_ConsultantIsNotATeamConsultant() {
     Consultant consultantMock = mock(Consultant.class);
     when(consultantService.getConsultant(any())).thenReturn(Optional.of(consultantMock));
 
@@ -111,7 +108,8 @@ public class ValidatedUserAccountProviderTest {
   }
 
   @Test
-  public void changeUserAccountEmailAddress_Should_changeNonEmptyAddressInKeycloakRocketChatAndConsultantRepository_When_authenticatedUserIsConsultant() {
+  public void
+      changeUserAccountEmailAddress_Should_changeNonEmptyAddressInKeycloakRocketChatAndConsultantRepository_When_authenticatedUserIsConsultant() {
     Consultant consultant = EASY_RANDOM.nextObject(Consultant.class);
     when(this.authenticatedUser.getUserId()).thenReturn("consultant");
     when(this.consultantService.getConsultant("consultant")).thenReturn(Optional.of(consultant));
@@ -122,8 +120,7 @@ public class ValidatedUserAccountProviderTest {
     verify(this.rocketChatService, times(1))
         .updateUser(
             new UserUpdateRequestDTO(
-                consultant.getRocketChatId(),
-                new UserUpdateDataDTO("newMail")));
+                consultant.getRocketChatId(), new UserUpdateDataDTO("newMail")));
     consultant.setEmail("newMail");
     verify(this.consultantService, times(1)).saveConsultant(consultant);
     verifyNoMoreInteractions(this.rocketChatService);
@@ -133,7 +130,8 @@ public class ValidatedUserAccountProviderTest {
   }
 
   @Test
-  public void changeUserAccountEmailAddress_Should_changeNonEmptyAddressInKeycloakRocketChatAndUserRepository_When_authenticatedUserIsUser() {
+  public void
+      changeUserAccountEmailAddress_Should_changeNonEmptyAddressInKeycloakRocketChatAndUserRepository_When_authenticatedUserIsUser() {
     User user = EASY_RANDOM.nextObject(User.class);
     when(this.authenticatedUser.getUserId()).thenReturn("user");
     when(this.userService.getUser("user")).thenReturn(Optional.of(user));
@@ -142,9 +140,7 @@ public class ValidatedUserAccountProviderTest {
 
     verify(keycloakService).changeEmailAddress("newMail");
     verify(this.rocketChatService, times(1))
-        .updateUser(
-            new UserUpdateRequestDTO(
-                user.getRcUserId(), new UserUpdateDataDTO("newMail")));
+        .updateUser(new UserUpdateRequestDTO(user.getRcUserId(), new UserUpdateDataDTO("newMail")));
     user.setEmail("newMail");
     verify(this.userService, times(1)).saveUser(user);
     verifyNoMoreInteractions(this.rocketChatService);
@@ -154,7 +150,8 @@ public class ValidatedUserAccountProviderTest {
   }
 
   @Test
-  public void changeUserAccountEmailAddress_Should_changeEmptyAddressInKeycloakRocketChatAndConsultantRepository_When_authenticatedUserIsConsultant() {
+  public void
+      changeUserAccountEmailAddress_Should_changeEmptyAddressInKeycloakRocketChatAndConsultantRepository_When_authenticatedUserIsConsultant() {
     var consultant = EASY_RANDOM.nextObject(Consultant.class);
     var consultantId = RandomStringUtils.randomAlphabetic(16);
     var dummyEmail = RandomStringUtils.randomAlphabetic(16);
@@ -169,8 +166,7 @@ public class ValidatedUserAccountProviderTest {
     verify(rocketChatService)
         .updateUser(
             new UserUpdateRequestDTO(
-                consultant.getRocketChatId(),
-                new UserUpdateDataDTO(dummyEmail)));
+                consultant.getRocketChatId(), new UserUpdateDataDTO(dummyEmail)));
     consultant.setEmail(dummyEmail);
     verify(consultantService).saveConsultant(consultant);
     verifyNoMoreInteractions(rocketChatService);
@@ -179,7 +175,8 @@ public class ValidatedUserAccountProviderTest {
   }
 
   @Test
-  public void changeUserAccountEmailAddress_Should_changeEmptyAddressInKeycloakRocketChatAndUserRepository_When_authenticatedUserIsUser() {
+  public void
+      changeUserAccountEmailAddress_Should_changeEmptyAddressInKeycloakRocketChatAndUserRepository_When_authenticatedUserIsUser() {
     var user = EASY_RANDOM.nextObject(User.class);
     var userId = RandomStringUtils.randomAlphabetic(16);
     var dummyEmail = RandomStringUtils.randomAlphabetic(16);
@@ -193,8 +190,7 @@ public class ValidatedUserAccountProviderTest {
     verify(keycloakService, never()).changeEmailAddress(anyString());
     verify(rocketChatService)
         .updateUser(
-            new UserUpdateRequestDTO(
-                user.getRcUserId(), new UserUpdateDataDTO(dummyEmail)));
+            new UserUpdateRequestDTO(user.getRcUserId(), new UserUpdateDataDTO(dummyEmail)));
     user.setEmail(dummyEmail);
     verify(userService).saveUser(user);
     verifyNoMoreInteractions(rocketChatService);
@@ -203,7 +199,8 @@ public class ValidatedUserAccountProviderTest {
   }
 
   @Test
-  public void deactivateAndFlagUserAccountForDeletion_Should_DeactivateKeycloakAccountAndSetDeleteDate() {
+  public void
+      deactivateAndFlagUserAccountForDeletion_Should_DeactivateKeycloakAccountAndSetDeleteDate() {
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(userService.getUser(USER_ID)).thenReturn(Optional.of(USER));
 
@@ -260,5 +257,4 @@ public class ValidatedUserAccountProviderTest {
     verify(this.userService, times(1)).addMobileAppToken(USER_ID, "token");
     verify(this.consultantService, times(1)).addMobileAppToken(USER_ID, "token");
   }
-
 }

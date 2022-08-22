@@ -23,9 +23,7 @@ import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-/**
- * This custom filter checks CSRF cookie and header token for equality.
- */
+/** This custom filter checks CSRF cookie and header token for equality. */
 public class StatelessCsrfFilter extends OncePerRequestFilter {
 
   private final RequestMatcher requireCsrfProtectionMatcher;
@@ -38,8 +36,9 @@ public class StatelessCsrfFilter extends OncePerRequestFilter {
   }
 
   @Override
-  public void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-      FilterChain filterChain) throws ServletException, IOException {
+  public void doFilterInternal(
+      HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+      throws ServletException, IOException {
 
     if (requireCsrfProtectionMatcher.matches(request)) {
       final String csrfTokenValue =
@@ -47,8 +46,8 @@ public class StatelessCsrfFilter extends OncePerRequestFilter {
       String csrfCookieValue = retrieveCsrfCookieValue(request);
 
       if (isNull(csrfTokenValue) || !csrfTokenValue.equals(csrfCookieValue)) {
-        accessDeniedHandler.handle(request, response,
-            new AccessDeniedException("Missing or non-matching CSRF-token"));
+        accessDeniedHandler.handle(
+            request, response, new AccessDeniedException("Missing or non-matching CSRF-token"));
         return;
       }
     }
@@ -57,12 +56,15 @@ public class StatelessCsrfFilter extends OncePerRequestFilter {
 
   private String retrieveCsrfCookieValue(HttpServletRequest request) {
     final Cookie[] cookies = request.getCookies();
-    return isNull(cookies) ? null : Stream.of(cookies)
-        .filter(cookie -> cookie.getName()
-            .equals(this.csrfSecurityProperties.getCookie().getProperty()))
-        .map(Cookie::getValue)
-        .findFirst()
-        .orElse(null);
+    return isNull(cookies)
+        ? null
+        : Stream.of(cookies)
+            .filter(
+                cookie ->
+                    cookie.getName().equals(this.csrfSecurityProperties.getCookie().getProperty()))
+            .map(Cookie::getValue)
+            .findFirst()
+            .orElse(null);
   }
 
   @RequiredArgsConstructor
@@ -77,8 +79,8 @@ public class StatelessCsrfFilter extends OncePerRequestFilter {
     }
 
     private boolean isWhiteListUrl(HttpServletRequest request) {
-      List<String> csrfWhitelist = new ArrayList<>(
-          Arrays.asList(csrfSecurityProperties.getWhitelist().getConfigUris()));
+      List<String> csrfWhitelist =
+          new ArrayList<>(Arrays.asList(csrfSecurityProperties.getWhitelist().getConfigUris()));
       csrfWhitelist.addAll(Arrays.asList(csrfSecurityProperties.getWhitelist().getAdminUris()));
       return csrfWhitelist.parallelStream()
           .anyMatch(request.getRequestURI().toLowerCase()::contains);
@@ -92,6 +94,5 @@ public class StatelessCsrfFilter extends OncePerRequestFilter {
     private boolean isAllowedMethod(HttpServletRequest request) {
       return allowedMethods.matcher(request.getMethod()).matches();
     }
-
   }
 }

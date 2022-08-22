@@ -84,7 +84,7 @@ public class DecryptionService {
    * Decrypts a given message with the given secret
    *
    * @param messageToDecrypt The message to decrypt
-   * @param secret           The secret to be used
+   * @param secret The secret to be used
    * @return The decrypted message
    */
   public String decrypt(String messageToDecrypt, String secret) throws CustomCryptoException {
@@ -108,5 +108,4 @@ public class DecryptionService {
       throw new CustomCryptoException(e);
     }
   }
-
 }

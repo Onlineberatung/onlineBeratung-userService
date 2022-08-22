@@ -28,20 +28,15 @@ import org.springframework.http.MediaType;
 @RunWith(MockitoJUnitRunner.class)
 public class MailServiceTest {
 
-  @Mock
-  private Logger logger;
+  @Mock private Logger logger;
 
-  @Mock
-  private SecurityHeaderSupplier securityHeaderSupplier;
+  @Mock private SecurityHeaderSupplier securityHeaderSupplier;
 
-  @Mock
-  private MailsControllerApi mailsControllerApi;
+  @Mock private MailsControllerApi mailsControllerApi;
 
-  @Mock
-  private ApiClient apiClient;
+  @Mock private ApiClient apiClient;
 
-  @InjectMocks
-  private MailService mailService;
+  @InjectMocks private MailService mailService;
 
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
@@ -59,7 +54,8 @@ public class MailServiceTest {
   }
 
   @Test
-  public void sendEmailNotification_ShouldLogException_WhenExceptionOccursWhileCallingTheMailService() {
+  public void
+      sendEmailNotification_ShouldLogException_WhenExceptionOccursWhileCallingTheMailService() {
     when(securityHeaderSupplier.getCsrfHttpHeaders()).thenReturn(getCsrfHttpHeaders());
     doThrow(new RuntimeException()).when(this.mailsControllerApi).sendMails(any());
 
@@ -78,7 +74,8 @@ public class MailServiceTest {
   }
 
   @Test
-  public void sendErrorEmailNotification_ShouldLogException_WhenExceptionOccursWhileCallingTheMailService() {
+  public void
+      sendErrorEmailNotification_ShouldLogException_WhenExceptionOccursWhileCallingTheMailService() {
     when(securityHeaderSupplier.getCsrfHttpHeaders()).thenReturn(getCsrfHttpHeaders());
     doThrow(new RuntimeException()).when(this.mailsControllerApi).sendErrorMail(any());
 
@@ -96,5 +93,4 @@ public class MailServiceTest {
 
     return httpHeaders;
   }
-
 }

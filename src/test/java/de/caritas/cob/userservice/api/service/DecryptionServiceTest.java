@@ -26,11 +26,9 @@ public class DecryptionServiceTest {
   private final String MESSAGE_ENCRYPTED =
       "enc:uWHNUkWrQJikGnVpknvB3SkzT1RWHJuY0igDT9p7fGFHWECLBpV2+0eIZF6Qi7J0";
 
-  @InjectMocks
-  private DecryptionService encryptionService;
+  @InjectMocks private DecryptionService encryptionService;
 
-  @Mock
-  private LogService logService;
+  @Mock private LogService logService;
 
   @Before
   public void setup() throws NoSuchFieldException {
@@ -41,7 +39,9 @@ public class DecryptionServiceTest {
   @Test
   public void check_setup() {
     assertEquals("MasterKey was not properly set", KEY_MASTER, encryptionService.getMasterKey());
-    assertEquals("ApplicationKey was not properly set", KEY_APPLICATION,
+    assertEquals(
+        "ApplicationKey was not properly set",
+        KEY_APPLICATION,
         encryptionService.getApplicationKey());
   }
 
@@ -67,5 +67,4 @@ public class DecryptionServiceTest {
       assertTrue("Expected BadPaddingException thrown", true);
     }
   }
-
 }

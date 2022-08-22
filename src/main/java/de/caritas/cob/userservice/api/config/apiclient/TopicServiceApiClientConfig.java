@@ -17,14 +17,14 @@ public class TopicServiceApiClientConfig {
 
   @Bean
   @Qualifier("topicControllerApiPrimary")
-  public TopicControllerApi topicControllerApi(
-      ApiClient apiClient) {
+  public TopicControllerApi topicControllerApi(ApiClient apiClient) {
     return new TopicControllerApi(apiClient);
   }
 
   @Bean
   @Primary
-  public de.caritas.cob.userservice.topicservice.generated.ApiClient topicApiClient(RestTemplate restTemplate) {
+  public de.caritas.cob.userservice.topicservice.generated.ApiClient topicApiClient(
+      RestTemplate restTemplate) {
     ApiClient apiClient = new TopicServiceApiClient(restTemplate);
     apiClient.setBasePath(this.topicServiceApiUrl);
     return apiClient;

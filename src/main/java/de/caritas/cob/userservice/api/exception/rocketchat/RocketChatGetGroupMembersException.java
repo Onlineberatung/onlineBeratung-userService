@@ -26,10 +26,9 @@ public class RocketChatGetGroupMembersException extends Exception {
    * Exception, when a Rocket.Chat API call to get group m embers fails.
    *
    * @param message an additional message
-   * @param ex      the caused exception
+   * @param ex the caused exception
    */
   public RocketChatGetGroupMembersException(String message, Exception ex) {
     super(message, ex);
   }
-
 }

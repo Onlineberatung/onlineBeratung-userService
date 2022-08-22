@@ -4,9 +4,7 @@ import de.caritas.cob.userservice.api.service.ConsultantImportService.ImportReco
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-/**
- * Adapter class to provide a {@link ConsultantCreationInput} based on a {@link ImportRecord}.
- */
+/** Adapter class to provide a {@link ConsultantCreationInput} based on a {@link ImportRecord}. */
 @RequiredArgsConstructor
 public class ImportRecordCreationInputAdapter implements ConsultantCreationInput {
 
@@ -121,5 +119,4 @@ public class ImportRecordCreationInputAdapter implements ConsultantCreationInput
   public Long getTenantId() {
     return this.importRecord.getTenantId();
   }
-
 }

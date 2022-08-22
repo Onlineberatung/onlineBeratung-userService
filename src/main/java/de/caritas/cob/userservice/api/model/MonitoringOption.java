@@ -15,9 +15,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 
-/**
- * Represents the monitoring option of an asker
- */
+/** Represents the monitoring option of an asker */
 @Entity
 @Table(name = "session_monitoring_option")
 @AllArgsConstructor
@@ -33,7 +31,11 @@ public class MonitoringOption {
   private Long sessionId;
 
   @Id
-  @Column(name = "monitoring_type", updatable = false, nullable = false, columnDefinition = "tinyint(4) unsigned")
+  @Column(
+      name = "monitoring_type",
+      updatable = false,
+      nullable = false,
+      columnDefinition = "tinyint(4) unsigned")
   @NonNull
   private Monitoring.MonitoringType monitoringType;
 
@@ -53,12 +55,21 @@ public class MonitoringOption {
   private Boolean value;
 
   @ManyToOne
-  @JoinColumn(name = "session_id", referencedColumnName = "session_id", insertable = false,
+  @JoinColumn(
+      name = "session_id",
+      referencedColumnName = "session_id",
+      insertable = false,
       updatable = false)
-  @JoinColumn(name = "monitoring_type", referencedColumnName = "type", insertable = false,
+  @JoinColumn(
+      name = "monitoring_type",
+      referencedColumnName = "type",
+      insertable = false,
       updatable = false)
-  @JoinColumn(name = "monitoring_key_name", referencedColumnName = "key_name",
-      insertable = false, updatable = false)
+  @JoinColumn(
+      name = "monitoring_key_name",
+      referencedColumnName = "key_name",
+      insertable = false,
+      updatable = false)
   private Monitoring monitoring;
 
   @Override

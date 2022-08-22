@@ -25,32 +25,30 @@ public class TenantTemplateSupplierTest {
 
   private static final String VALID_SUBDOMAIN = "subdomain";
 
-  @InjectMocks
-  TenantTemplateSupplier tenantTemplateSupplier;
+  @InjectMocks TenantTemplateSupplier tenantTemplateSupplier;
 
-  @Mock
-  TenantService tenantService;
+  @Mock TenantService tenantService;
 
   private final EasyRandom easyRandom = new EasyRandom();
 
   @Test
   public void getTemplateAttributes_Provide_Tenant_Specific_Data_For_Email_Templates() {
-    //given
+    // given
     var tenantData = new TenantData();
     tenantData.setTenantId(1L);
     tenantData.setSubdomain(VALID_SUBDOMAIN);
     TenantContext.setCurrentTenantData(tenantData);
-    ReflectionTestUtils
-        .setField(tenantTemplateSupplier, "applicationBaseUrl", "https://onlineberatung.net");
+    ReflectionTestUtils.setField(
+        tenantTemplateSupplier, "applicationBaseUrl", "https://onlineberatung.net");
     RestrictedTenantDTO mockedTenantData = easyRandom.nextObject(RestrictedTenantDTO.class);
 
-    //when
+    // when
     when(tenantService.getRestrictedTenantData(tenantData.getSubdomain()))
         .thenReturn(mockedTenantData);
     mockedTenantData.setSubdomain(VALID_SUBDOMAIN);
     List<TemplateDataDTO> templateAttributes = tenantTemplateSupplier.getTemplateAttributes();
 
-    //then
+    // then
     assertTemplateAttributesAreCorrect(mockedTenantData, templateAttributes);
 
     verify(tenantService).getRestrictedTenantData(tenantData.getSubdomain());
@@ -59,25 +57,25 @@ public class TenantTemplateSupplierTest {
     TenantContext.clear();
   }
 
-
   @Test
-  public void getTemplateAttributes_Provide_Tenant_Specific_Data_For_Email_Templates_IfSubdomainNotSet() {
-    //given
+  public void
+      getTemplateAttributes_Provide_Tenant_Specific_Data_For_Email_Templates_IfSubdomainNotSet() {
+    // given
     var tenantData = new TenantData();
     tenantData.setTenantId(1L);
     tenantData.setSubdomain(null);
     TenantContext.setCurrentTenantData(tenantData);
-    ReflectionTestUtils
-        .setField(tenantTemplateSupplier, "applicationBaseUrl", "https://onlineberatung.net");
+    ReflectionTestUtils.setField(
+        tenantTemplateSupplier, "applicationBaseUrl", "https://onlineberatung.net");
     RestrictedTenantDTO mockedTenantData = easyRandom.nextObject(RestrictedTenantDTO.class);
     mockedTenantData.setSubdomain(VALID_SUBDOMAIN);
 
-    //when
+    // when
     when(tenantService.getRestrictedTenantData(tenantData.getTenantId()))
         .thenReturn(mockedTenantData);
     List<TemplateDataDTO> templateAttributes = tenantTemplateSupplier.getTemplateAttributes();
 
-    //then
+    // then
     assertTemplateAttributesAreCorrect(mockedTenantData, templateAttributes);
 
     verify(tenantService, Mockito.never()).getRestrictedTenantData(tenantData.getSubdomain());
@@ -86,8 +84,8 @@ public class TenantTemplateSupplierTest {
     TenantContext.clear();
   }
 
-  private void assertTemplateAttributesAreCorrect(RestrictedTenantDTO mockedTenantData,
-      List<TemplateDataDTO> templateAttributes) {
+  private void assertTemplateAttributesAreCorrect(
+      RestrictedTenantDTO mockedTenantData, List<TemplateDataDTO> templateAttributes) {
     assertThat(templateAttributes.get(0).getKey(), is("tenant_name"));
     assertThat(templateAttributes.get(0).getValue(), is(mockedTenantData.getName()));
 
@@ -98,12 +96,12 @@ public class TenantTemplateSupplierTest {
     assertThat(templateAttributes.get(2).getValue(), is("https://subdomain.onlineberatung.net"));
 
     assertThat(templateAttributes.get(3).getKey(), is("tenant_urlimpressum"));
-    assertThat(templateAttributes.get(3).getValue(),
-        is("https://subdomain.onlineberatung.net/impressum"));
+    assertThat(
+        templateAttributes.get(3).getValue(), is("https://subdomain.onlineberatung.net/impressum"));
 
     assertThat(templateAttributes.get(4).getKey(), is("tenant_urldatenschutz"));
-    assertThat(templateAttributes.get(4).getValue(),
+    assertThat(
+        templateAttributes.get(4).getValue(),
         is("https://subdomain.onlineberatung.net/datenschutz"));
   }
-
 }

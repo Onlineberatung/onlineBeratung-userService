@@ -45,11 +45,9 @@ class ConsultantRepositoryIT {
 
   private List<String> nonMatchingIds = new ArrayList<>();
 
-  @Autowired
-  private ConsultantRepository underTest;
+  @Autowired private ConsultantRepository underTest;
 
-  @Autowired
-  private AppointmentRepository appointmentRepository;
+  @Autowired private AppointmentRepository appointmentRepository;
 
   @BeforeEach
   public void backup() {
@@ -81,6 +79,13 @@ class ConsultantRepositoryIT {
     assertEquals(countConsultants - 1, underTest.count());
     assertFalse(underTest.existsById(consultant.getId()));
     assertFalse(appointmentRepository.existsById(appointment.getId()));
+  }
+
+  @Test
+  void saveShouldWriteDefaultPreferredLanguageIndependentlyFromDefaultLanguageCapability() {
+    givenAnExistingConsultantSpeaking(LanguageCode.en);
+
+    assertEquals(LanguageCode.de, consultant.getLanguageCode());
   }
 
   @Test
@@ -118,9 +123,8 @@ class ConsultantRepositoryIT {
     assertEquals(2, languages.size());
 
     var expectedLanguages = Set.of(LanguageCode.en, LanguageCode.tr);
-    var areLanguagesIn = languages.stream()
-        .map(Language::getLanguageCode)
-        .allMatch(expectedLanguages::contains);
+    var areLanguagesIn =
+        languages.stream().map(Language::getLanguageCode).allMatch(expectedLanguages::contains);
     assertTrue(areLanguagesIn);
   }
 
@@ -210,9 +214,7 @@ class ConsultantRepositoryIT {
     int allMatching = firstNameMatching + lastNameMatching + emailMatching;
     assertEquals(allMatching, consultantPage.getTotalElements());
     assertEquals(allMatching, matchingIds.size());
-    consultantPage.forEach(consultant ->
-        assertTrue(matchingIds.contains(consultant.getId()))
-    );
+    consultantPage.forEach(consultant -> assertTrue(matchingIds.contains(consultant.getId())));
   }
 
   @Test
@@ -240,9 +242,7 @@ class ConsultantRepositoryIT {
     assertEquals(2, consultantPage.getTotalPages());
     assertEquals(pageSize + 1, consultantPage.getTotalElements());
     assertEquals(pageSize + 1, matchingIds.size());
-    consultantPage.forEach(consultant ->
-        assertTrue(matchingIds.contains(consultant.getId()))
-    );
+    consultantPage.forEach(consultant -> assertTrue(matchingIds.contains(consultant.getId())));
   }
 
   @Test
@@ -305,9 +305,7 @@ class ConsultantRepositoryIT {
     int allMatching = firstNameMatching + lastNameMatching + emailMatching;
     assertEquals(allMatching, consultantPage.getTotalElements());
     assertEquals(allMatching, matchingIds.size());
-    consultantPage.forEach(consultant ->
-        assertTrue(matchingIds.contains(consultant.getId()))
-    );
+    consultantPage.forEach(consultant -> assertTrue(matchingIds.contains(consultant.getId())));
   }
 
   @Test
@@ -330,8 +328,8 @@ class ConsultantRepositoryIT {
     assertEquals(allMatching, consultantPage.getTotalElements());
   }
 
-  private void givenConsultantsMatchingFirstName(@PositiveOrZero int count,
-      @NotBlank String infix) {
+  private void givenConsultantsMatchingFirstName(
+      @PositiveOrZero int count, @NotBlank String infix) {
     while (count-- > 0) {
       var dbConsultant = underTest.findAll().iterator().next();
       var consultant = new Consultant();
@@ -460,9 +458,7 @@ class ConsultantRepositoryIT {
   }
 
   private String aStringWithInfix(String infix) {
-    return RandomStringUtils.randomAlphabetic(4)
-        + infix
-        + RandomStringUtils.randomAlphabetic(4);
+    return RandomStringUtils.randomAlphabetic(4) + infix + RandomStringUtils.randomAlphabetic(4);
   }
 
   private void givenAnExistingConsultantSpeaking(LanguageCode... languageCodes) {
@@ -479,4 +475,3 @@ class ConsultantRepositoryIT {
     }
   }
 }
-

@@ -22,11 +22,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class MissingAgencyForConsultantViolationReportRuleTest {
 
-  @InjectMocks
-  private MissingAgencyForConsultantViolationReportRule reportRule;
+  @InjectMocks private MissingAgencyForConsultantViolationReportRule reportRule;
 
-  @Mock
-  private ConsultantRepository consultantRepository;
+  @Mock private ConsultantRepository consultantRepository;
 
   @Test
   public void generateViolations_Should_returnEmptyList_When_noViolationExists() {
@@ -50,17 +48,19 @@ public class MissingAgencyForConsultantViolationReportRuleTest {
     assertThat(resultViolation.getReason(), is("Missing agency assignment for consultant"));
     assertThat(resultViolation.getAdditionalInformation(), hasSize(2));
     assertThat(resultViolation.getAdditionalInformation().get(0).getName(), is("Username"));
-    assertThat(resultViolation.getAdditionalInformation().get(0).getValue(),
+    assertThat(
+        resultViolation.getAdditionalInformation().get(0).getValue(),
         is(violatedConsultant.getUsername()));
     assertThat(resultViolation.getAdditionalInformation().get(1).getName(), is("Email"));
-    assertThat(resultViolation.getAdditionalInformation().get(1).getValue(),
+    assertThat(
+        resultViolation.getAdditionalInformation().get(1).getValue(),
         is(violatedConsultant.getEmail()));
   }
 
   @Test
   public void generateViolations_Should_returnViolationsOnlyForConsultantsWithoutAgency() {
-    List<Consultant> consultants = new EasyRandom().objects(Consultant.class, 10)
-        .collect(Collectors.toList());
+    List<Consultant> consultants =
+        new EasyRandom().objects(Consultant.class, 10).collect(Collectors.toList());
     consultants.get(0).setConsultantAgencies(null);
     consultants.get(2).setConsultantAgencies(null);
     consultants.get(4).setConsultantAgencies(null);
@@ -72,5 +72,4 @@ public class MissingAgencyForConsultantViolationReportRuleTest {
 
     assertThat(violations, hasSize(5));
   }
-
 }

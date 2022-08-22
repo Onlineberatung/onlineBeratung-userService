@@ -20,17 +20,14 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 
-
 @RunWith(MockitoJUnitRunner.class)
 public class LogServiceTest {
 
   private final String ERROR_MESSAGE = "Error message";
 
-  @Mock
-  Exception exception;
+  @Mock Exception exception;
 
-  @Mock
-  private Logger logger;
+  @Mock private Logger logger;
 
   @Before
   public void setup() {
@@ -42,7 +39,6 @@ public class LogServiceTest {
 
     LogService.logDatabaseError(exception);
     verify(exception, atLeastOnce()).printStackTrace(any(PrintWriter.class));
-
   }
 
   @Test

@@ -1,7 +1,5 @@
 package de.caritas.cob.userservice.api.model;
 
-import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import java.time.LocalDateTime;
@@ -21,6 +19,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -36,6 +35,7 @@ import org.hibernate.annotations.FetchMode;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 @ToString
 public class Chat {
 
@@ -54,8 +54,7 @@ public class Chat {
   @NonNull
   private String topic;
 
-  @Column(name = "consulting_type", updatable = false, nullable = false, columnDefinition = "tinyint(4) unsigned")
-  @NonNull
+  @Column(name = "consulting_type", updatable = false, columnDefinition = "tinyint(4) unsigned")
   private Integer consultingTypeId;
 
   @Column(name = "initial_start_date", nullable = false)
@@ -94,22 +93,12 @@ public class Chat {
   @Exclude
   private Set<ChatAgency> chatAgencies;
 
+  @OneToMany(mappedBy = "chat", orphanRemoval = true)
+  @Exclude
+  private Set<UserChat> chatUsers;
+
   @Column(name = "update_date")
   private LocalDateTime updateDate;
-
-  public Chat(@NonNull String topic, int consultingTypeId, @NonNull LocalDateTime initialStartDate,
-      @NonNull LocalDateTime startDate, int duration, boolean repetitive, ChatInterval chatInterval,
-      Consultant chatOwner) {
-    this.topic = topic;
-    this.consultingTypeId = consultingTypeId;
-    this.initialStartDate = initialStartDate;
-    this.startDate = startDate;
-    this.duration = duration;
-    this.repetitive = repetitive;
-    this.chatInterval = chatInterval;
-    this.chatOwner = chatOwner;
-    this.updateDate = nowInUtc();
-  }
 
   @Override
   public boolean equals(Object o) {

@@ -3,6 +3,10 @@ package de.caritas.cob.userservice.api.facade;
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ChatMemberResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ChatMembersResponseDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
@@ -10,23 +14,16 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMem
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
-import de.caritas.cob.userservice.api.adapters.web.dto.ChatMemberResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.ChatMembersResponseDTO;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-/**
- * Facade to encapsulate the steps for get the chat members.
- */
-
+/** Facade to encapsulate the steps for get the chat members. */
 @Service
 @RequiredArgsConstructor
 public class GetChatMembersFacade {
@@ -43,9 +40,11 @@ public class GetChatMembersFacade {
    */
   public ChatMembersResponseDTO getChatMembers(Long chatId) {
 
-    Chat chat = chatService.getChat(chatId)
-        .orElseThrow(
-            () -> new NotFoundException(String.format("Chat with id %s not found", chatId)));
+    Chat chat =
+        chatService
+            .getChat(chatId)
+            .orElseThrow(
+                () -> new NotFoundException(String.format("Chat with id %s not found", chatId)));
 
     verifyActiveStatus(chat);
     this.chatPermissionVerifier.verifyPermissionForChat(chat);
@@ -62,8 +61,8 @@ public class GetChatMembersFacade {
   private void verifyActiveStatus(Chat chat) {
     if (isFalse(chat.isActive())) {
       throw new ConflictException(
-          String.format("Could not get members of chat with id %s, because it's not started.",
-              chat.getId()));
+          String.format(
+              "Could not get members of chat with id %s, because it's not started.", chat.getId()));
     }
   }
 
@@ -76,14 +75,17 @@ public class GetChatMembersFacade {
 
   private ChatMembersResponseDTO convertGroupMemberDTOListToChatMemberResponseDTO(
       List<GroupMemberDTO> groupMemberDTOList) {
-    return new ChatMembersResponseDTO().members(groupMemberDTOList.stream()
-        .map(member -> new ChatMemberResponseDTO()
-            .id(member.get_id())
-            .status(member.getStatus())
-            .username(new UsernameTranscoder().decodeUsername(member.getUsername()))
-            .displayName(member.getName())
-            .utcOffset(member.getUtcOffset()))
-        .collect(Collectors.toList()));
+    return new ChatMembersResponseDTO()
+        .members(
+            groupMemberDTOList.stream()
+                .map(
+                    member ->
+                        new ChatMemberResponseDTO()
+                            .id(member.get_id())
+                            .status(member.getStatus())
+                            .username(new UsernameTranscoder().decodeUsername(member.getUsername()))
+                            .displayName(member.getName())
+                            .utcOffset(member.getUtcOffset()))
+                .collect(Collectors.toList()));
   }
-
 }

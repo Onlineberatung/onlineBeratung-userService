@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.facade.rollback;
 
-
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -23,27 +22,19 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class RollbackFacadeTest {
 
-  @InjectMocks
-  private RollbackFacade rollbackFacade;
-  @Mock
-  private KeycloakService keycloakService;
-  @Mock
-  private UserAgencyService userAgencyService;
-  @Mock
-  private SessionService sessionService;
-  @Mock
-  private UserService userService;
-  @Mock
-  private MonitoringService monitoringService;
+  @InjectMocks private RollbackFacade rollbackFacade;
+  @Mock private KeycloakService keycloakService;
+  @Mock private UserAgencyService userAgencyService;
+  @Mock private SessionService sessionService;
+  @Mock private UserService userService;
+  @Mock private MonitoringService monitoringService;
 
   @Test
   public void rollBackUserAccount_Should_DeleteSessionAndMonitoring_When_SessionIsGiven() {
     EasyRandom easyRandom = new EasyRandom();
     Session session = easyRandom.nextObject(Session.class);
-    RollbackUserAccountInformation rbUserInfo = RollbackUserAccountInformation
-        .builder()
-        .session(session)
-        .build();
+    RollbackUserAccountInformation rbUserInfo =
+        RollbackUserAccountInformation.builder().session(session).build();
 
     rollbackFacade.rollBackUserAccount(rbUserInfo);
 
@@ -55,10 +46,8 @@ public class RollbackFacadeTest {
   public void rollBackUserAccount_Should_DeleteUserAgency_When_UserAgencyIsGiven() {
     EasyRandom easyRandom = new EasyRandom();
     UserAgency userAgency = easyRandom.nextObject(UserAgency.class);
-    RollbackUserAccountInformation rbUserInfo = RollbackUserAccountInformation
-        .builder()
-        .userAgency(userAgency)
-        .build();
+    RollbackUserAccountInformation rbUserInfo =
+        RollbackUserAccountInformation.builder().userAgency(userAgency).build();
 
     rollbackFacade.rollBackUserAccount(rbUserInfo);
 
@@ -66,12 +55,10 @@ public class RollbackFacadeTest {
   }
 
   @Test
-  public void rollBackUserAccount_Should_DeleteKeycloakAccount_When_UserIdIsGivenAndRollbackUserAccountFlagIsTrue() {
-    RollbackUserAccountInformation rbUserInfo = RollbackUserAccountInformation
-        .builder()
-        .userId(USER_ID)
-        .rollBackUserAccount(true)
-        .build();
+  public void
+      rollBackUserAccount_Should_DeleteKeycloakAccount_When_UserIdIsGivenAndRollbackUserAccountFlagIsTrue() {
+    RollbackUserAccountInformation rbUserInfo =
+        RollbackUserAccountInformation.builder().userId(USER_ID).rollBackUserAccount(true).build();
 
     rollbackFacade.rollBackUserAccount(rbUserInfo);
 
@@ -79,15 +66,13 @@ public class RollbackFacadeTest {
   }
 
   @Test
-  public void rollBackUserAccount_Should_DeleteMariaDbAccount_When_UserIsGivenAndRollbackUserAccountFlagIsTrue() {
+  public void
+      rollBackUserAccount_Should_DeleteMariaDbAccount_When_UserIsGivenAndRollbackUserAccountFlagIsTrue() {
     EasyRandom easyRandom = new EasyRandom();
     User user = easyRandom.nextObject(User.class);
     user.setUserId(USER_ID);
-    RollbackUserAccountInformation rbUserInfo = RollbackUserAccountInformation
-        .builder()
-        .user(user)
-        .rollBackUserAccount(true)
-        .build();
+    RollbackUserAccountInformation rbUserInfo =
+        RollbackUserAccountInformation.builder().user(user).rollBackUserAccount(true).build();
 
     rollbackFacade.rollBackUserAccount(rbUserInfo);
 

@@ -12,9 +12,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-/**
- * Provider to observe assigned session user ids instead of initiator.
- */
+/** Provider to observe assigned session user ids instead of initiator. */
 @Component
 @RequiredArgsConstructor
 public class RelevantUserAccountIdsBySessionProvider implements UserIdsProvider {
@@ -30,9 +28,10 @@ public class RelevantUserAccountIdsBySessionProvider implements UserIdsProvider 
    */
   @Override
   public List<String> collectUserIds(String rcGroupId) {
-    Session session = this.sessionRepository.findByGroupId(rcGroupId)
-        .orElse(this.sessionRepository.findByFeedbackGroupId(rcGroupId)
-            .orElse(null));
+    Session session =
+        this.sessionRepository
+            .findByGroupId(rcGroupId)
+            .orElse(this.sessionRepository.findByFeedbackGroupId(rcGroupId).orElse(null));
 
     return extractDependentUserIds(session);
   }
@@ -44,5 +43,4 @@ public class RelevantUserAccountIdsBySessionProvider implements UserIdsProvider 
     return Stream.of(session.getUser().getUserId(), session.getConsultant().getId())
         .collect(Collectors.toList());
   }
-
 }

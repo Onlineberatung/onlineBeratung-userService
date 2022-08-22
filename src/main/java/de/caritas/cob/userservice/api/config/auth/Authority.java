@@ -24,44 +24,47 @@ import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-/**
- * Definition of all authorities and of the role-authority-mapping.
- */
+/** Definition of all authorities and of the role-authority-mapping. */
 @AllArgsConstructor
 @Getter
 public enum Authority {
-
   ANONYMOUS(UserRole.ANONYMOUS, singletonList(ANONYMOUS_DEFAULT)),
   USER(UserRole.USER, List.of(USER_DEFAULT, ASSIGN_CONSULTANT_TO_SESSION)),
-  CONSULTANT(UserRole.CONSULTANT,
+  CONSULTANT(
+      UserRole.CONSULTANT,
       List.of(CONSULTANT_DEFAULT, ASSIGN_CONSULTANT_TO_SESSION, VIEW_AGENCY_CONSULTANTS)),
   PEER_CONSULTANT(UserRole.PEER_CONSULTANT, singletonList(USE_FEEDBACK)),
-  MAIN_CONSULTANT(UserRole.MAIN_CONSULTANT,
-      List.of(VIEW_ALL_FEEDBACK_SESSIONS, VIEW_ALL_PEER_SESSIONS, ASSIGN_CONSULTANT_TO_ENQUIRY,
+  MAIN_CONSULTANT(
+      UserRole.MAIN_CONSULTANT,
+      List.of(
+          VIEW_ALL_FEEDBACK_SESSIONS,
+          VIEW_ALL_PEER_SESSIONS,
+          ASSIGN_CONSULTANT_TO_ENQUIRY,
           ASSIGN_CONSULTANT_TO_PEER_SESSION)),
   TECHNICAL(UserRole.TECHNICAL, singletonList(TECHNICAL_DEFAULT)),
-  GROUP_CHAT_CONSULTANT(UserRole.GROUP_CHAT_CONSULTANT,
+  GROUP_CHAT_CONSULTANT(
+      UserRole.GROUP_CHAT_CONSULTANT,
       List.of(CONSULTANT_DEFAULT, CREATE_NEW_CHAT, START_CHAT, STOP_CHAT, UPDATE_CHAT)),
   USER_ADMIN(UserRole.USER_ADMIN, singletonList(AuthorityValue.USER_ADMIN)),
-  SINGLE_TENANT_ADMIN(UserRole.SINGLE_TENANT_ADMIN, singletonList(AuthorityValue.SINGLE_TENANT_ADMIN)),
+  SINGLE_TENANT_ADMIN(
+      UserRole.SINGLE_TENANT_ADMIN, singletonList(AuthorityValue.SINGLE_TENANT_ADMIN)),
   TENANT_ADMIN(UserRole.TENANT_ADMIN, singletonList(AuthorityValue.TENANT_ADMIN));
 
   private final UserRole userRole;
   private final List<String> grantedAuthorities;
 
   public static List<String> getAuthoritiesByUserRole(UserRole userRole) {
-    Optional<Authority> authorityByUserRole = Stream.of(values())
-        .filter(authority -> authority.userRole.equals(userRole))
-        .findFirst();
+    Optional<Authority> authorityByUserRole =
+        Stream.of(values()).filter(authority -> authority.userRole.equals(userRole)).findFirst();
 
-    return authorityByUserRole.isPresent() ? authorityByUserRole.get().getGrantedAuthorities()
+    return authorityByUserRole.isPresent()
+        ? authorityByUserRole.get().getGrantedAuthorities()
         : emptyList();
   }
 
   public static class AuthorityValue {
 
-    private AuthorityValue() {
-    }
+    private AuthorityValue() {}
 
     public static final String PREFIX = "AUTHORIZATION_";
     public static final String ANONYMOUS_DEFAULT = PREFIX + "ANONYMOUS_DEFAULT";
@@ -86,5 +89,4 @@ public enum Authority {
     public static final String SINGLE_TENANT_ADMIN = PREFIX + "SINGLE_TENANT_ADMIN";
     public static final String TENANT_ADMIN = PREFIX + "TENANT_ADMIN";
   }
-
 }

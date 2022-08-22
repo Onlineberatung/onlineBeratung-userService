@@ -8,9 +8,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-/**
- * Configuration class for the AgencyAdminService API client.
- */
+/** Configuration class for the AgencyAdminService API client. */
 @Component
 public class AgencyAdminServiceApiClientConfig {
 
@@ -39,5 +37,4 @@ public class AgencyAdminServiceApiClientConfig {
   public ApiClient adminAgencyApiClient(RestTemplate restTemplate) {
     return new ApiClient(restTemplate).setBasePath(this.agencyAdminServiceApiUrl);
   }
-
 }

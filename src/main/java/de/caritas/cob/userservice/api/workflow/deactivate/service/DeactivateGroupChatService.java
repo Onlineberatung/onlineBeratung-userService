@@ -12,9 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-/**
- * Service to trigger stopping of group chats.
- */
+/** Service to trigger stopping of group chats. */
 @Service
 @RequiredArgsConstructor
 public class DeactivateGroupChatService {
@@ -25,9 +23,7 @@ public class DeactivateGroupChatService {
   @Value("${group.chat.deactivateworkflow.periodMinutes}")
   private long deactivatePeriodMinutes;
 
-  /**
-   * Stops all still open group chats with special constraints.
-   */
+  /** Stops all still open group chats with special constraints. */
   @Transactional
   public void deactivateStaleGroupChats() {
     var deactivationTime = LocalDateTime.now().minusMinutes(deactivatePeriodMinutes);
@@ -41,9 +37,9 @@ public class DeactivateGroupChatService {
   }
 
   private void deactivateStaleActiveChat(Chat staleChat) {
-    this.actionsRegistry.buildContainerForType(Chat.class)
+    this.actionsRegistry
+        .buildContainerForType(Chat.class)
         .addActionToExecute(StopChatActionCommand.class)
         .executeActions(staleChat);
   }
-
 }

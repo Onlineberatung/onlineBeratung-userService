@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.facade.assignsession;
 
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.admin.service.rocketchat.RocketChatRemoveFromGroupOperationService;
 import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
@@ -9,7 +10,6 @@ import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
 import de.caritas.cob.userservice.api.service.statistics.event.AssignSessionStatisticsEvent;
@@ -47,12 +47,10 @@ public class AssignSessionFacade {
    * <p>If the statistics function is enabled, the assignment of the session is processed as a
    * statistical event.
    */
-  public void assignSession(Session session, Consultant consultantToAssign,
-      Consultant authConsultant) {
-    var consultantSessionDTO = ConsultantSessionDTO.builder()
-        .consultant(consultantToAssign)
-        .session(session)
-        .build();
+  public void assignSession(
+      Session session, Consultant consultantToAssign, Consultant authConsultant) {
+    var consultantSessionDTO =
+        ConsultantSessionDTO.builder().consultant(consultantToAssign).session(session).build();
     sessionToConsultantVerifier.verifyPreconditionsForAssignment(consultantSessionDTO);
 
     updateSessionInDatabase(session, consultantToAssign);
@@ -63,13 +61,15 @@ public class AssignSessionFacade {
     }
 
     statisticsService.fireEvent(
-        new AssignSessionStatisticsEvent(consultantToAssign.getId(), UserRole.CONSULTANT,
-            session.getId()));
+        new AssignSessionStatisticsEvent(
+            consultantToAssign.getId(), UserRole.CONSULTANT, session.getId()));
   }
 
   private void updateSessionInDatabase(Session session, Consultant consultant) {
     var initialStatus = session.getStatus();
-    sessionService.updateConsultantAndStatusForSession(session, consultant,
+    sessionService.updateConsultantAndStatusForSession(
+        session,
+        consultant,
         initialStatus == SessionStatus.NEW ? SessionStatus.IN_PROGRESS : initialStatus);
   }
 
@@ -85,49 +85,56 @@ public class AssignSessionFacade {
     rocketChatFacade.removeSystemMessagesFromRocketChatGroup(rcGroupId);
   }
 
-  private void removeUnauthorizedMembersFromGroups(Session session, Consultant consultant,
-      Consultant consultantToKeep) {
+  private void removeUnauthorizedMembersFromGroups(
+      Session session, Consultant consultant, Consultant consultantToKeep) {
     var memberList = rocketChatFacade.retrieveRocketChatMembers(session.getGroupId());
     removeUnauthorizedMembersFromGroup(session, consultant, memberList, consultantToKeep);
 
     if (session.hasFeedbackChat()) {
-      var feedbackMemberList = rocketChatFacade
-          .retrieveRocketChatMembers(session.getFeedbackGroupId());
-      removeUnauthorizedMembersFromFeedbackGroup(session, consultant, feedbackMemberList,
-          consultantToKeep);
+      var feedbackMemberList =
+          rocketChatFacade.retrieveRocketChatMembers(session.getFeedbackGroupId());
+      removeUnauthorizedMembersFromFeedbackGroup(
+          session, consultant, feedbackMemberList, consultantToKeep);
     }
   }
 
-  private void removeUnauthorizedMembersFromGroup(Session session, Consultant consultant,
-      List<GroupMemberDTO> memberList, Consultant consultantToKeep) {
+  private void removeUnauthorizedMembersFromGroup(
+      Session session,
+      Consultant consultant,
+      List<GroupMemberDTO> memberList,
+      Consultant consultantToKeep) {
     var consultantsToRemoveFromRocketChat =
-        unauthorizedMembersProvider.obtainConsultantsToRemove(session.getGroupId(), session,
-            consultant, memberList, consultantToKeep);
+        unauthorizedMembersProvider.obtainConsultantsToRemove(
+            session.getGroupId(), session, consultant, memberList, consultantToKeep);
 
-    RocketChatRemoveFromGroupOperationService
-        .getInstance(this.rocketChatFacade, this.identityClient, this.consultingTypeManager)
+    RocketChatRemoveFromGroupOperationService.getInstance(
+            this.rocketChatFacade, this.identityClient, this.consultingTypeManager)
         .onSessionConsultants(Map.of(session, consultantsToRemoveFromRocketChat))
         .removeFromGroupOrRollbackOnFailure();
   }
 
-  private void removeUnauthorizedMembersFromFeedbackGroup(Session session,
-      Consultant consultant, List<GroupMemberDTO> memberList, Consultant consultantToKeep) {
+  private void removeUnauthorizedMembersFromFeedbackGroup(
+      Session session,
+      Consultant consultant,
+      List<GroupMemberDTO> memberList,
+      Consultant consultantToKeep) {
     var consultantsToRemoveFromRocketChat =
-        unauthorizedMembersProvider.obtainConsultantsToRemove(session.getFeedbackGroupId(), session,
-            consultant, memberList, consultantToKeep);
+        unauthorizedMembersProvider.obtainConsultantsToRemove(
+            session.getFeedbackGroupId(), session, consultant, memberList, consultantToKeep);
 
-    RocketChatRemoveFromGroupOperationService
-        .getInstance(this.rocketChatFacade, this.identityClient, this.consultingTypeManager)
+    RocketChatRemoveFromGroupOperationService.getInstance(
+            this.rocketChatFacade, this.identityClient, this.consultingTypeManager)
         .onSessionConsultants(Map.of(session, consultantsToRemoveFromRocketChat))
         .removeFromFeedbackGroupOrRollbackOnFailure();
   }
 
   private void sendEmailForConsultantChange(Session session, Consultant consultant) {
     if (!authenticatedUser.getUserId().equals(consultant.getId())) {
-      emailNotificationFacade.sendAssignEnquiryEmailNotification(consultant,
-          authenticatedUser.getUserId(), session.getUser().getUsername(),
+      emailNotificationFacade.sendAssignEnquiryEmailNotification(
+          consultant,
+          authenticatedUser.getUserId(),
+          session.getUser().getUsername(),
           TenantContext.getCurrentTenantData());
     }
   }
-
 }

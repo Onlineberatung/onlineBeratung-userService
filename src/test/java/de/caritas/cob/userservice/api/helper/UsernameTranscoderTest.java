@@ -11,7 +11,8 @@ public class UsernameTranscoderTest {
   private final UsernameTranscoder usernameTranscoder = new UsernameTranscoder();
 
   @Test
-  public void encodeUsername_Should_ReturnEncodedUsernameWithReplacedPaddingAndAddedPrefix_WhenDecodedUsernameIsGiven() {
+  public void
+      encodeUsername_Should_ReturnEncodedUsernameWithReplacedPaddingAndAddedPrefix_WhenDecodedUsernameIsGiven() {
     assertEquals(USERNAME_ENCODED, usernameTranscoder.encodeUsername(USERNAME_DECODED));
   }
 

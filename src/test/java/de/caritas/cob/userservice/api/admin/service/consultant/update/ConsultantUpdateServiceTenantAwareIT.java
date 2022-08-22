@@ -35,11 +35,9 @@ public class ConsultantUpdateServiceTenantAwareIT extends ConsultantUpdateServic
 
   private final EasyRandom easyRandom = new EasyRandom();
 
-  @Autowired
-  ConsultantRepository consultantRepository;
+  @Autowired ConsultantRepository consultantRepository;
 
-  @Autowired
-  ConsultantAgencyRepository consultantAgencyRepository;
+  @Autowired ConsultantAgencyRepository consultantAgencyRepository;
   private Set<String> consultantsToRemove = Sets.newHashSet();
 
   @Before
@@ -94,7 +92,6 @@ public class ConsultantUpdateServiceTenantAwareIT extends ConsultantUpdateServic
     consultantAgency.setTenantId(1L);
     consultantAgency.setConsultant(consultant);
     consultantAgencyRepository.save(consultantAgency);
-
   }
 
   private Consultant givenAValidConsultant(String id, boolean isTeamConsultant) {
@@ -114,7 +111,8 @@ public class ConsultantUpdateServiceTenantAwareIT extends ConsultantUpdateServic
     consultant.setWalkThroughEnabled(true);
     consultant.setTeamConsultant(isTeamConsultant);
     consultant.setConsultantMobileTokens(Sets.newHashSet());
+    consultant.setLanguageCode(LanguageCode.de);
+
     return consultant;
   }
-
 }

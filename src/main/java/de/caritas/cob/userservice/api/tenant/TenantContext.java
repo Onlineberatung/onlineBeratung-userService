@@ -1,13 +1,9 @@
 package de.caritas.cob.userservice.api.tenant;
 
-/**
- * Holds the tenant_id variable for ongoing thread assigned for HTTP request.
- */
+/** Holds the tenant_id variable for ongoing thread assigned for HTTP request. */
 public class TenantContext {
 
-  private TenantContext() {
-
-  }
+  private TenantContext() {}
 
   private static final ThreadLocal<TenantData> CURRENT_TENANT_DATA = new ThreadLocal<>();
 

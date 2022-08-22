@@ -20,9 +20,7 @@ import java.util.function.Consumer;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-/**
- * Updater singleton to update Rocket.Chat relevant data on session items.
- */
+/** Updater singleton to update Rocket.Chat relevant data on session items. */
 @RequiredArgsConstructor
 public class AvailableLastMessageUpdater {
 
@@ -33,24 +31,30 @@ public class AvailableLastMessageUpdater {
   /**
    * Updates the given session with further Rocket.Chat last message information.
    *
-   * @param session                   the {@link SessionDTO}
-   * @param latestMessageDate         consumer for setting the date of the latest message
+   * @param session the {@link SessionDTO}
+   * @param latestMessageDate consumer for setting the date of the latest message
    * @param rocketChatRoomInformation the {@link RocketChatRoomInformation}
-   * @param rcUserId                  the Rocket.Chat user id
+   * @param rcUserId the Rocket.Chat user id
    */
-  void updateSessionWithAvailableLastMessage(SessionDTO session, Consumer<Date> latestMessageDate,
-      RocketChatRoomInformation rocketChatRoomInformation, String rcUserId) {
+  void updateSessionWithAvailableLastMessage(
+      SessionDTO session,
+      Consumer<Date> latestMessageDate,
+      RocketChatRoomInformation rocketChatRoomInformation,
+      String rcUserId) {
     var groupId = session.getGroupId();
     var roomsLastMessage = rocketChatRoomInformation.getLastMessagesRoom().get(groupId);
 
     setLastMessage(session::setE2eLastMessage, session::setLastMessage, groupId, roomsLastMessage);
-    setLatestMessageDateOrFallback(session, latestMessageDate, rocketChatRoomInformation, groupId,
-        roomsLastMessage);
+    setLatestMessageDateOrFallback(
+        session, latestMessageDate, rocketChatRoomInformation, groupId, roomsLastMessage);
     setAttachmentAndVideoCallMessage(session, rcUserId, roomsLastMessage);
   }
 
-  void updateChatWithAvailableLastMessage(UserChatDTO chat, Consumer<Date> latestMessageDate,
-      RocketChatRoomInformation rocketChatRoomInformation, String rcUserId) {
+  void updateChatWithAvailableLastMessage(
+      UserChatDTO chat,
+      Consumer<Date> latestMessageDate,
+      RocketChatRoomInformation rocketChatRoomInformation,
+      String rcUserId) {
     var groupId = chat.getGroupId();
     var roomsLastMessage = rocketChatRoomInformation.getLastMessagesRoom().get(groupId);
 
@@ -62,12 +66,15 @@ public class AvailableLastMessageUpdater {
     setLastMessage(chat::setE2eLastMessage, ignoreFurtherSteps(chat), groupId, roomsLastMessage);
     chat.setMessageDate(Helper.getUnixTimestampFromDate(roomsLastMessage.getTimestamp()));
     latestMessageDate.accept(roomsLastMessage.getTimestamp());
-    chat.setAttachment(sessionListAnalyser.getAttachmentFromRocketChatMessageIfAvailable(rcUserId,
-        roomsLastMessage));
+    chat.setAttachment(
+        sessionListAnalyser.getAttachmentFromRocketChatMessageIfAvailable(
+            rcUserId, roomsLastMessage));
   }
 
-  private void setLastMessage(Consumer<LastMessageDTO> e2eLastMessageSetter,
-      Consumer<String> lastMessageSetter, String groupId,
+  private void setLastMessage(
+      Consumer<LastMessageDTO> e2eLastMessageSetter,
+      Consumer<String> lastMessageSetter,
+      String groupId,
       RoomsLastMessageDTO roomsLastMessage) {
     var lastMessage = extractLastMessage(roomsLastMessage, groupId);
     e2eLastMessageSetter.accept(lastMessage);
@@ -84,8 +91,8 @@ public class AvailableLastMessageUpdater {
 
     lastMessage.setT(roomsLastMessage.getType());
     if (isNotBlank(roomsLastMessage.getMessage())) {
-      var message = sessionListAnalyser.prepareMessageForSessionList(
-          roomsLastMessage.getMessage(), groupId);
+      var message =
+          sessionListAnalyser.prepareMessageForSessionList(roomsLastMessage.getMessage(), groupId);
       lastMessage.setMsg(message);
       return lastMessage;
     }
@@ -94,16 +101,20 @@ public class AvailableLastMessageUpdater {
 
   private boolean isLastMessageFurtherStepsAlias(RoomsLastMessageDTO roomsLastMessageDTO) {
     var alias = roomsLastMessageDTO.getAlias();
-    return nonNull(alias) && nonNull(alias.getMessageType()) && FURTHER_STEPS.name()
-        .equals(roomsLastMessageDTO.getAlias().getMessageType().name());
+    return nonNull(alias)
+        && nonNull(alias.getMessageType())
+        && FURTHER_STEPS.name().equals(roomsLastMessageDTO.getAlias().getMessageType().name());
   }
 
-  private void setLatestMessageDateOrFallback(SessionDTO session, Consumer<Date> latestMessageDate,
-      RocketChatRoomInformation rocketChatRoomInformation, String groupId,
+  private void setLatestMessageDateOrFallback(
+      SessionDTO session,
+      Consumer<Date> latestMessageDate,
+      RocketChatRoomInformation rocketChatRoomInformation,
+      String groupId,
       RoomsLastMessageDTO roomsLastMessage) {
     if (isNull(roomsLastMessage)) {
-      var fallbackDate = rocketChatRoomInformation.getGroupIdToLastMessageFallbackDate()
-          .get(groupId);
+      var fallbackDate =
+          rocketChatRoomInformation.getGroupIdToLastMessageFallbackDate().get(groupId);
       setFallbackDate(latestMessageDate, session, fallbackDate);
       return;
     }
@@ -112,8 +123,8 @@ public class AvailableLastMessageUpdater {
     session.setMessageDate(Helper.getUnixTimestampFromDate(roomsLastMessage.getTimestamp()));
   }
 
-  private void setFallbackDate(Consumer<Date> latestMessageDate, SessionDTO session,
-      Date fallbackDate) {
+  private void setFallbackDate(
+      Consumer<Date> latestMessageDate, SessionDTO session, Date fallbackDate) {
     if (nonNull(fallbackDate)) {
       session.setMessageDate(Helper.getUnixTimestampFromDate(fallbackDate));
       latestMessageDate.accept(fallbackDate);
@@ -128,14 +139,15 @@ public class AvailableLastMessageUpdater {
     }
   }
 
-  private void setAttachmentAndVideoCallMessage(SessionDTO session, String rcUserId,
-      RoomsLastMessageDTO roomsLastMessage) {
+  private void setAttachmentAndVideoCallMessage(
+      SessionDTO session, String rcUserId, RoomsLastMessageDTO roomsLastMessage) {
     if (isNull(roomsLastMessage)) {
       session.setLastMessageType(FURTHER_STEPS);
       return;
     }
-    var attachment = sessionListAnalyser.getAttachmentFromRocketChatMessageIfAvailable(rcUserId,
-        roomsLastMessage);
+    var attachment =
+        sessionListAnalyser.getAttachmentFromRocketChatMessageIfAvailable(
+            rcUserId, roomsLastMessage);
     session.setAttachment(attachment);
     var alias = roomsLastMessage.getAlias();
     if (nonNull(alias)) {

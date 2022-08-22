@@ -12,5 +12,4 @@ public class SessionListQueryParameter {
   private int offset;
   private int count;
   SessionFilter sessionFilter;
-
 }

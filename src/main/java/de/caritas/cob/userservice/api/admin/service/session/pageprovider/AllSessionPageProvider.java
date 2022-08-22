@@ -7,9 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-/**
- * Page provider for {@link Session} unfiltered.
- */
+/** Page provider for {@link Session} unfiltered. */
 @RequiredArgsConstructor
 public class AllSessionPageProvider implements SessionPageProvider {
 
@@ -25,5 +23,4 @@ public class AllSessionPageProvider implements SessionPageProvider {
   public Page<Session> executeQuery(Pageable pageable) {
     return sessionRepository.findAll(pageable);
   }
-
 }

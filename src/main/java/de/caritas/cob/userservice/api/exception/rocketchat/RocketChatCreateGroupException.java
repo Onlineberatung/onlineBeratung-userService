@@ -21,5 +21,4 @@ public class RocketChatCreateGroupException extends Exception {
   public RocketChatCreateGroupException(String message) {
     super(message);
   }
-
 }

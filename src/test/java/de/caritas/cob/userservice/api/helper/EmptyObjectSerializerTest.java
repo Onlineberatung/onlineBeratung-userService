@@ -14,8 +14,12 @@ public class EmptyObjectSerializerTest {
 
   private final String USERNAME = "username";
   private final String PASSWORD = "password";
-  private final String EXPECTED_JSON = "{\"username\":\"" + USERNAME + "\",\"ldapPass\":\""
-      + PASSWORD + "\",\"ldap\":true,\"ldapOptions\":\"{}\"}";
+  private final String EXPECTED_JSON =
+      "{\"username\":\""
+          + USERNAME
+          + "\",\"ldapPass\":\""
+          + PASSWORD
+          + "\",\"ldap\":true,\"ldapOptions\":\"{}\"}";
 
   @Test
   public void EmptyObjectSerializer_Should_SerializeEmptyObjectsToCurlyBraces()
@@ -30,5 +34,4 @@ public class EmptyObjectSerializerTest {
     String result = objectMapper.writerFor(LdapLoginDTO.class).writeValueAsString(ldapLoginDTO);
     assertEquals(EXPECTED_JSON, result);
   }
-
 }

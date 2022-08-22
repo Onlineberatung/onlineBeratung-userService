@@ -25,9 +25,7 @@ import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.FieldBridge;
 import org.hibernate.search.bridge.builtin.LongBridge;
 
-/**
- * Represents the relation between consultant and agency
- */
+/** Represents the relation between consultant and agency */
 @Entity
 @Table(name = "consultant_agency")
 @AllArgsConstructor
@@ -35,7 +33,9 @@ import org.hibernate.search.bridge.builtin.LongBridge;
 @Builder
 @Getter
 @Setter
-@FilterDef(name = "tenantFilter", parameters = {@ParamDef(name = "tenantId", type = "long")})
+@FilterDef(
+    name = "tenantFilter",
+    parameters = {@ParamDef(name = "tenantId", type = "long")})
 @Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
 public class ConsultantAgency implements TenantAware {
 

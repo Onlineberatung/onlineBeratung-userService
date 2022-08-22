@@ -18,7 +18,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ChatReCreator {
 
-  private static final RocketChatRoomNameGenerator roomNameGenerator = new RocketChatRoomNameGenerator();
+  private static final RocketChatRoomNameGenerator roomNameGenerator =
+      new RocketChatRoomNameGenerator();
 
   private final ChatService chatService;
   private final RocketChatService rocketChatService;
@@ -36,21 +37,23 @@ public class ChatReCreator {
     String rcGroupId = null;
     var groupName = roomNameGenerator.generateGroupChatName(chat);
     try {
-      var response = rocketChatService
-          .createPrivateGroupWithSystemUser(groupName)
-          .orElseThrow(() -> new RocketChatCreateGroupException(
-              "RocketChat group is not present while creating chat: " + chat)
-          );
+      var response =
+          rocketChatService
+              .createPrivateGroupWithSystemUser(groupName)
+              .orElseThrow(
+                  () ->
+                      new RocketChatCreateGroupException(
+                          "RocketChat group is not present while creating chat: " + chat));
       rcGroupId = response.getGroup().getId();
       rocketChatService.addTechnicalUserToGroup(rcGroupId);
     } catch (RocketChatCreateGroupException
-             | RocketChatAddUserToGroupException
-             | RocketChatUserNotInitializedException e) {
+        | RocketChatAddUserToGroupException
+        | RocketChatUserNotInitializedException e) {
       if (nonNull(rcGroupId)) {
         rocketChatService.deleteGroupAsSystemUser(rcGroupId);
       }
-      throw new InternalServerErrorException("Error while creating private group in Rocket.Chat "
-          + "for group chat: " + chat);
+      throw new InternalServerErrorException(
+          "Error while creating private group in Rocket.Chat " + "for group chat: " + chat);
     }
 
     return rcGroupId;

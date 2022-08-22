@@ -29,45 +29,39 @@ public class ConsultantAgencyRelationCreatorServiceTest {
   @InjectMocks
   private ConsultantAgencyRelationCreatorService consultantAgencyRelationCreatorService;
 
-  @Mock
-  private ConsultantAgencyService consultantAgencyService;
+  @Mock private ConsultantAgencyService consultantAgencyService;
 
-  @Mock
-  private ConsultantRepository consultantRepository;
+  @Mock private ConsultantRepository consultantRepository;
 
-  @Mock
-  private AgencyService agencyService;
+  @Mock private AgencyService agencyService;
 
-  @Mock
-  private KeycloakService keycloakService;
+  @Mock private KeycloakService keycloakService;
 
-  @Mock
-  private RocketChatAsyncHelper rocketChatAsyncHelper;
+  @Mock private RocketChatAsyncHelper rocketChatAsyncHelper;
 
-  @Mock
-  private ConsultingTypeManager consultingTypeManager;
+  @Mock private ConsultingTypeManager consultingTypeManager;
 
   @Test
-  public void createNewConsultantAgency_Should_notThrowNullPointerException_When_agencyTypeIsU25AndConsultantHasNoAgencyAssigned() {
-    AgencyDTO agencyDTO = new AgencyDTO()
-        .consultingType(1)
-        .id(2L);
+  public void
+      createNewConsultantAgency_Should_notThrowNullPointerException_When_agencyTypeIsU25AndConsultantHasNoAgencyAssigned() {
+    AgencyDTO agencyDTO = new AgencyDTO().consultingType(1).id(2L);
 
     when(this.consultantRepository.findByIdAndDeleteDateIsNull(anyString()))
         .thenReturn(Optional.of(new Consultant()));
     when(agencyService.getAgencyWithoutCaching(eq(2L))).thenReturn(agencyDTO);
 
-    CreateConsultantAgencyDTO createConsultantAgencyDTO = new CreateConsultantAgencyDTO()
-        .roleSetKey("valid role set")
-        .agencyId(2L);
+    CreateConsultantAgencyDTO createConsultantAgencyDTO =
+        new CreateConsultantAgencyDTO().roleSetKey("valid role set").agencyId(2L);
 
-    final var response = easyRandom.nextObject(
-        de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO.class);
+    final var response =
+        easyRandom.nextObject(
+            de.caritas.cob.userservice.consultingtypeservice.generated.web.model
+                .ExtendedConsultingTypeResponseDTO.class);
     when(consultingTypeManager.getConsultingTypeSettings(1)).thenReturn(response);
 
-    assertDoesNotThrow(() -> this.consultantAgencyRelationCreatorService
-        .createNewConsultantAgency("consultant Id", createConsultantAgencyDTO));
-
+    assertDoesNotThrow(
+        () ->
+            this.consultantAgencyRelationCreatorService.createNewConsultantAgency(
+                "consultant Id", createConsultantAgencyDTO));
   }
-
 }

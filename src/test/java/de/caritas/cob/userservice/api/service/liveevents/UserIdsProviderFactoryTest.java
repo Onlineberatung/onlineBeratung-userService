@@ -17,17 +17,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class UserIdsProviderFactoryTest {
 
-  @InjectMocks
-  private UserIdsProviderFactory userIdsProviderFactory;
+  @InjectMocks private UserIdsProviderFactory userIdsProviderFactory;
 
-  @Mock
-  private ChatRepository chatRepository;
+  @Mock private ChatRepository chatRepository;
 
-  @Mock
-  private RelevantUserAccountIdsByChatProvider byChatProvider;
+  @Mock private RelevantUserAccountIdsByChatProvider byChatProvider;
 
-  @Mock
-  private RelevantUserAccountIdsBySessionProvider bySessionProvider;
+  @Mock private RelevantUserAccountIdsBySessionProvider bySessionProvider;
 
   @Test
   public void buildUserIdsProvider_Should_returnByChatProvider_When_rcGroupIdIsAChat() {
@@ -46,5 +42,4 @@ public class UserIdsProviderFactoryTest {
 
     assertThat(resultProvider, is(this.bySessionProvider));
   }
-
 }

@@ -79,7 +79,7 @@ public class ConsultantService {
    * Find a consultant by these steps: 1. username 2. encoded username 3. email.
    *
    * @param username username
-   * @param email    email address
+   * @param email email address
    * @return an optional with the consultant found or an empty optional
    */
   public Optional<Consultant> findConsultantByUsernameOrEmail(String username, String email) {
@@ -120,9 +120,8 @@ public class ConsultantService {
    * @return {@link List} of {@link Consultant}
    */
   public List<Consultant> findConsultantsByAgencyIds(Set<ChatAgency> chatAgencies) {
-    List<Long> agencyIds = chatAgencies.stream()
-        .map(ChatAgency::getAgencyId)
-        .collect(Collectors.toList());
+    List<Long> agencyIds =
+        chatAgencies.stream().map(ChatAgency::getAgencyId).collect(Collectors.toList());
 
     return consultantRepository.findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(agencyIds);
   }
@@ -141,7 +140,7 @@ public class ConsultantService {
    * Adds a mobile client token of the current authenticated consultant in database.
    *
    * @param consultantId the id of the consultant
-   * @param mobileToken  the new mobile device identifier token
+   * @param mobileToken the new mobile device identifier token
    */
   public void addMobileAppToken(String consultantId, String mobileToken) {
     if (isNotBlank(mobileToken)) {
@@ -169,5 +168,4 @@ public class ConsultantService {
       throw new ConflictException("Mobile Token already exists");
     }
   }
-
 }

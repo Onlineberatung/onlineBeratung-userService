@@ -24,29 +24,28 @@ import org.springframework.test.context.junit4.SpringRunner;
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 public class SessionAdminServiceIT {
 
-  @Autowired
-  private SessionAdminService sessionAdminService;
+  @Autowired private SessionAdminService sessionAdminService;
 
   @Test
   public void findSessions_Should_returnAllSessions_When_noFilterIsGiven() {
-    SessionAdminResultDTO sessions = this.sessionAdminService
-        .findSessions(1, 100, new SessionFilter());
+    SessionAdminResultDTO sessions =
+        this.sessionAdminService.findSessions(1, 100, new SessionFilter());
 
     assertThat(sessions.getEmbedded(), hasSize(100));
   }
 
   @Test
   public void findSessions_Should_returnOneSession_When_perPageIsNegativeValue() {
-    SessionAdminResultDTO sessions = this.sessionAdminService
-        .findSessions(1, -100, new SessionFilter());
+    SessionAdminResultDTO sessions =
+        this.sessionAdminService.findSessions(1, -100, new SessionFilter());
 
     assertThat(sessions.getEmbedded(), hasSize(1));
   }
 
   @Test
   public void findSessions_Should_returnFullMappedSessionAdminDTO() {
-    SessionAdminResultDTO sessions = this.sessionAdminService
-        .findSessions(1, 1, new SessionFilter());
+    SessionAdminResultDTO sessions =
+        this.sessionAdminService.findSessions(1, 1, new SessionFilter());
 
     SessionAdminDTO sessionAdminDTO = sessions.getEmbedded().iterator().next();
     assertThat(sessionAdminDTO.getAgencyId(), notNullValue());
@@ -62,13 +61,12 @@ public class SessionAdminServiceIT {
     assertThat(sessionAdminDTO.getUsername(), notNullValue());
   }
 
-
   @Test
   public void findSessions_Should_haveCorrectPagedResults_When_noFilterIsGiven() {
-    SessionAdminResultDTO firstPage = this.sessionAdminService
-        .findSessions(1, 100, new SessionFilter());
-    SessionAdminResultDTO secondPage = this.sessionAdminService
-        .findSessions(2, 100, new SessionFilter());
+    SessionAdminResultDTO firstPage =
+        this.sessionAdminService.findSessions(1, 100, new SessionFilter());
+    SessionAdminResultDTO secondPage =
+        this.sessionAdminService.findSessions(2, 100, new SessionFilter());
 
     assertThat(firstPage.getEmbedded(), hasSize(100));
     assertThat(secondPage.getEmbedded(), hasSize(56));
@@ -80,21 +78,24 @@ public class SessionAdminServiceIT {
 
     SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 200, sessionFilter);
 
-    sessions.getEmbedded().forEach(sessionAdminDTO ->
-        assertThat(sessionAdminDTO.getAgencyId(), is(1))
-    );
+    sessions
+        .getEmbedded()
+        .forEach(sessionAdminDTO -> assertThat(sessionAdminDTO.getAgencyId(), is(1)));
   }
 
   @Test
   public void findSessions_Should_returnSessionsFilteredByConsultant_When_filterHasConsultantSet() {
-    SessionFilter sessionFilter = new SessionFilter()
-        .consultant("bad14912-cf9f-4c16-9d0e-fe8ede9b60dc");
+    SessionFilter sessionFilter =
+        new SessionFilter().consultant("bad14912-cf9f-4c16-9d0e-fe8ede9b60dc");
 
     SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 200, sessionFilter);
 
-    sessions.getEmbedded().forEach(sessionAdminDTO ->
-        assertThat(sessionAdminDTO.getConsultantId(), is("bad14912-cf9f-4c16-9d0e-fe8ede9b60dc"))
-    );
+    sessions
+        .getEmbedded()
+        .forEach(
+            sessionAdminDTO ->
+                assertThat(
+                    sessionAdminDTO.getConsultantId(), is("bad14912-cf9f-4c16-9d0e-fe8ede9b60dc")));
   }
 
   @Test
@@ -103,20 +104,24 @@ public class SessionAdminServiceIT {
 
     SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 200, sessionFilter);
 
-    sessions.getEmbedded().forEach(sessionAdminDTO ->
-        assertThat(sessionAdminDTO.getUserId(), is("a38983e3-43f7-49ac-ab61-18161fd45b69"))
-    );
+    sessions
+        .getEmbedded()
+        .forEach(
+            sessionAdminDTO ->
+                assertThat(
+                    sessionAdminDTO.getUserId(), is("a38983e3-43f7-49ac-ab61-18161fd45b69")));
   }
 
   @Test
-  public void findSessions_Should_returnSessionsFilteredByConsultingType_When_filterHasConsultingTypeSet() {
+  public void
+      findSessions_Should_returnSessionsFilteredByConsultingType_When_filterHasConsultingTypeSet() {
     SessionFilter sessionFilter = new SessionFilter().consultingType(1);
 
     SessionAdminResultDTO sessions = this.sessionAdminService.findSessions(1, 200, sessionFilter);
 
-    sessions.getEmbedded().forEach(sessionAdminDTO ->
-        assertThat(sessionAdminDTO.getConsultingType(), is(1))
-    );
+    sessions
+        .getEmbedded()
+        .forEach(sessionAdminDTO -> assertThat(sessionAdminDTO.getConsultingType(), is(1)));
   }
 
   @Test
@@ -154,5 +159,4 @@ public class SessionAdminServiceIT {
 
     assertThat(sessions.getEmbedded(), hasSize(0));
   }
-
 }

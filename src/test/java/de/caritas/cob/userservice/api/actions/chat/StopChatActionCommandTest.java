@@ -36,20 +36,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class StopChatActionCommandTest {
 
-  @InjectMocks
-  private StopChatActionCommand stopChatActionCommand;
+  @InjectMocks private StopChatActionCommand stopChatActionCommand;
 
-  @Mock
-  private ChatService chatService;
+  @Mock private ChatService chatService;
 
-  @Mock
-  private RocketChatService rocketChatService;
+  @Mock private RocketChatService rocketChatService;
 
-  @Mock
-  private Chat chat;
+  @Mock private Chat chat;
 
-  @Mock
-  private ChatReCreator chatReCreator;
+  @Mock private ChatReCreator chatReCreator;
 
   @Test
   void stopChat_Should_ThrowConflictException_When_ChatIsAlreadyStopped() {
@@ -108,8 +103,17 @@ class StopChatActionCommandTest {
 
   @Test
   void stopChatShouldDeleteChatGroupAndRecreateRespUpdateWhenRepetitive() {
-    Chat chatWithDate = new Chat("topic", 15, CHAT_START_DATETIME, CHAT_START_DATETIME,
-        1, IS_REPETITIVE, CHAT_INTERVAL_WEEKLY, CONSULTANT);
+    Chat chatWithDate =
+        Chat.builder()
+            .topic("topic")
+            .consultingTypeId(15)
+            .initialStartDate(CHAT_START_DATETIME)
+            .startDate(CHAT_START_DATETIME)
+            .duration(1)
+            .repetitive(IS_REPETITIVE)
+            .chatInterval(CHAT_INTERVAL_WEEKLY)
+            .chatOwner(CONSULTANT)
+            .build();
     chatWithDate.setActive(true);
     chatWithDate.setGroupId("groupId");
     chatWithDate.setChatAgencies(Set.of(new ChatAgency(chat, 1L)));
@@ -126,9 +130,19 @@ class StopChatActionCommandTest {
 
   @Test
   void stopChatShouldDeleteChatGroupAndNotRecreateWhenNotRepetitive()
-      throws RocketChatCreateGroupException, RocketChatUserNotInitializedException, RocketChatAddUserToGroupException {
-    Chat chatWithDate = new Chat("topic", 15, CHAT_START_DATETIME, CHAT_START_DATETIME,
-        1, false, CHAT_INTERVAL_WEEKLY, CONSULTANT);
+      throws RocketChatCreateGroupException, RocketChatUserNotInitializedException,
+          RocketChatAddUserToGroupException {
+    Chat chatWithDate =
+        Chat.builder()
+            .topic("topic")
+            .consultingTypeId(15)
+            .initialStartDate(CHAT_START_DATETIME)
+            .startDate(CHAT_START_DATETIME)
+            .duration(1)
+            .repetitive(false)
+            .chatInterval(CHAT_INTERVAL_WEEKLY)
+            .chatOwner(CONSULTANT)
+            .build();
     chatWithDate.setActive(true);
     chatWithDate.setGroupId("groupId");
     chatWithDate.setChatAgencies(Set.of(new ChatAgency(chat, 1L)));
@@ -157,5 +171,4 @@ class StopChatActionCommandTest {
     verify(rocketChatService, times(1)).deleteGroupAsSystemUser(chat.getGroupId());
     verify(chatService, times(1)).deleteChat(chat);
   }
-
 }

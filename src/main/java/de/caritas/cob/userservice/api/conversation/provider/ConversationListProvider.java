@@ -1,13 +1,11 @@
 package de.caritas.cob.userservice.api.conversation.provider;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
 import de.caritas.cob.userservice.api.conversation.model.PageableListRequest;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResponseDTO;
 
-/**
- * The basic provider for all conversation lists.
- */
+/** The basic provider for all conversation lists. */
 public interface ConversationListProvider {
 
   /**
@@ -31,5 +29,4 @@ public interface ConversationListProvider {
     }
     return pageableListRequest.getOffset() / pageableListRequest.getCount();
   }
-
 }

@@ -5,8 +5,8 @@ import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
-import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.statistics.model.SessionStatisticsResultDTO;
 import java.util.Optional;
 import lombok.NonNull;

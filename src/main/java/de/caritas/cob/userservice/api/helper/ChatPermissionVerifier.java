@@ -17,9 +17,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-/**
- * Analyzer class for chats.
- */
+/** Analyzer class for chats. */
 @Component
 @RequiredArgsConstructor
 public class ChatPermissionVerifier {
@@ -50,13 +48,19 @@ public class ChatPermissionVerifier {
    */
   private void verifyConsultantPermissionForChat(Chat chat) {
     Consultant consultant =
-        consultantService.getConsultantViaAuthenticatedUser(authenticatedUser)
-            .orElseThrow(() -> new NotFoundException(String.format("Consultant with id %s not "
-                + "found", authenticatedUser.getUserId())));
+        consultantService
+            .getConsultantViaAuthenticatedUser(authenticatedUser)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format(
+                            "Consultant with id %s not " + "found",
+                            authenticatedUser.getUserId())));
 
     if (!hasSameAgencyAssigned(chat, consultant)) {
       throw new ForbiddenException(
-          String.format("Consultant with id %s has no permission for chat with id %s",
+          String.format(
+              "Consultant with id %s has no permission for chat with id %s",
               consultant.getId(), chat.getId()));
     }
   }
@@ -64,16 +68,18 @@ public class ChatPermissionVerifier {
   /**
    * Checks if chat agencies contain consultant agency.
    *
-   * @param chat       the chat
+   * @param chat the chat
    * @param consultant the {@link Consultant}
    * @return true if agency of consultant is contained
    */
   public boolean hasSameAgencyAssigned(Chat chat, Consultant consultant) {
     return chat.getChatAgencies().stream()
         .map(ChatAgency::getAgencyId)
-        .anyMatch(consultant.getConsultantAgencies().stream()
-            .map(ConsultantAgency::getAgencyId)
-            .collect(Collectors.toSet())::contains);
+        .anyMatch(
+            consultant.getConsultantAgencies().stream()
+                    .map(ConsultantAgency::getAgencyId)
+                    .collect(Collectors.toSet())
+                ::contains);
   }
 
   /**
@@ -86,9 +92,9 @@ public class ChatPermissionVerifier {
   public boolean hasSameAgencyAssigned(Chat chat, User user) {
     return chat.getChatAgencies().stream()
         .map(ChatAgency::getAgencyId)
-        .anyMatch(user.getUserAgencies().stream()
-            .map(UserAgency::getAgencyId)
-            .collect(Collectors.toSet())::contains);
+        .anyMatch(
+            user.getUserAgencies().stream().map(UserAgency::getAgencyId).collect(Collectors.toSet())
+                ::contains);
   }
 
   /**
@@ -97,15 +103,19 @@ public class ChatPermissionVerifier {
    * @param chat the chat
    */
   private void verifyUserPermissionForChat(Chat chat) {
-    User user = userService.getUserViaAuthenticatedUser(authenticatedUser)
-        .orElseThrow(() -> new NotFoundException(String.format("User with id %s not found",
-            authenticatedUser.getUserId())));
+    User user =
+        userService
+            .getUserViaAuthenticatedUser(authenticatedUser)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("User with id %s not found", authenticatedUser.getUserId())));
 
     if (!hasSameAgencyAssigned(chat, user)) {
       throw new ForbiddenException(
-          String.format("User with id %s has no permission for chat with id %s",
+          String.format(
+              "User with id %s has no permission for chat with id %s",
               user.getUserId(), chat.getId()));
     }
   }
-
 }

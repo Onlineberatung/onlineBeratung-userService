@@ -21,9 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
-/**
- * Service class to communicate with the AgencyService.
- */
+/** Service class to communicate with the AgencyService. */
 @Component
 @RequiredArgsConstructor
 public class AgencyService {
@@ -41,9 +39,7 @@ public class AgencyService {
    */
   @Cacheable(value = CacheManagerConfig.AGENCY_CACHE, key = "#agencyId")
   public AgencyDTO getAgency(Long agencyId) {
-    return getAgenciesFromAgencyService(Collections.singletonList(agencyId))
-        .iterator()
-        .next();
+    return getAgenciesFromAgencyService(Collections.singletonList(agencyId)).iterator().next();
   }
 
   /**
@@ -54,9 +50,7 @@ public class AgencyService {
    * @return AgencyDTO {@link AgencyDTO}
    */
   public AgencyDTO getAgencyWithoutCaching(Long agencyId) {
-    return getAgenciesFromAgencyService(Collections.singletonList(agencyId))
-        .iterator()
-        .next();
+    return getAgenciesFromAgencyService(Collections.singletonList(agencyId)).iterator().next();
   }
 
   /**
@@ -95,8 +89,7 @@ public class AgencyService {
    */
   public List<AgencyDTO> getAgenciesByConsultingType(int consultingTypeId) {
     addDefaultHeaders(this.agencyControllerApi.getApiClient());
-    return this.agencyControllerApi.getAgenciesByConsultingType(consultingTypeId)
-        .stream()
+    return this.agencyControllerApi.getAgenciesByConsultingType(consultingTypeId).stream()
         .map(this::fromOriginalAgency)
         .collect(Collectors.toList());
   }
@@ -110,11 +103,12 @@ public class AgencyService {
   private AgencyDTO fromOriginalAgency(AgencyResponseDTO agencyResponseDTO) {
     var objectMapper = new ObjectMapper();
     try {
-      return objectMapper
-          .readValue(objectMapper.writeValueAsString(agencyResponseDTO), AgencyDTO.class);
+      return objectMapper.readValue(
+          objectMapper.writeValueAsString(agencyResponseDTO), AgencyDTO.class);
     } catch (JsonProcessingException e) {
-      throw new InternalServerErrorException("Model definition of agency in userservice does not "
-          + "match the definition of agencyservice");
+      throw new InternalServerErrorException(
+          "Model definition of agency in userservice does not "
+              + "match the definition of agencyservice");
     }
   }
 

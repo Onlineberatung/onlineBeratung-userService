@@ -6,7 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Body object for Rocket.Chat API Call for posting a message https://rocket.chat/docs/developer-guides/rest-api/chat/postmessage/
+ * Body object for Rocket.Chat API Call for posting a message
+ * https://rocket.chat/docs/developer-guides/rest-api/chat/postmessage/
  */
 @Getter
 @Setter
@@ -16,5 +17,4 @@ public class PostMessageDTO {
 
   private String roomId;
   private String text;
-
 }

@@ -21,20 +21,15 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class RocketChatOperationConditionProviderTest {
 
-  @InjectMocks
-  private RocketChatOperationConditionProvider conditionProvider;
+  @InjectMocks private RocketChatOperationConditionProvider conditionProvider;
 
-  @Mock
-  private KeycloakService keycloakService;
+  @Mock private KeycloakService keycloakService;
 
-  @Mock
-  private Session session;
+  @Mock private Session session;
 
-  @Mock
-  private Consultant consultant;
+  @Mock private Consultant consultant;
 
-  @Mock
-  private ConsultingTypeManager consultingTypeManager;
+  @Mock private ConsultingTypeManager consultingTypeManager;
 
   @Test
   public void canAddToRocketChatGroup_Should_returnTrue_When_sessionIsAnEnquiry() {
@@ -59,7 +54,8 @@ public class RocketChatOperationConditionProviderTest {
   }
 
   @Test
-  public void canAddToRocketChatGroup_Should_returnTrue_When_sessionIsATeamSessionAndConsultingTypeIsU25AndConsultantHasAuthority() {
+  public void
+      canAddToRocketChatGroup_Should_returnTrue_When_sessionIsATeamSessionAndConsultingTypeIsU25AndConsultantHasAuthority() {
     when(this.session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
     when(this.session.isTeamSession()).thenReturn(true);
     when(this.session.getConsultingTypeId()).thenReturn(1);
@@ -72,7 +68,8 @@ public class RocketChatOperationConditionProviderTest {
   }
 
   @Test
-  public void canAddToRocketChatGroup_Should_returnTrue_When_sessionIsATeamSessionAndConsultingTypeIsU25AndConsultantHasRole() {
+  public void
+      canAddToRocketChatGroup_Should_returnTrue_When_sessionIsATeamSessionAndConsultingTypeIsU25AndConsultantHasRole() {
     when(this.session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
     when(this.session.isTeamSession()).thenReturn(true);
     when(this.session.getConsultingTypeId()).thenReturn(1);
@@ -96,7 +93,8 @@ public class RocketChatOperationConditionProviderTest {
   }
 
   @Test
-  public void canAddToRocketChatGroup_Should_returnFalse_When_sessionIsInProgressButNoTeamSession() {
+  public void
+      canAddToRocketChatGroup_Should_returnFalse_When_sessionIsInProgressButNoTeamSession() {
     when(this.session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
     when(this.session.isTeamSession()).thenReturn(false);
 
@@ -106,7 +104,8 @@ public class RocketChatOperationConditionProviderTest {
   }
 
   @Test
-  public void canAddToRocketChatGroup_Should_returnFalse_When_sessionIsATeamSessionAndConsultingTypeIsU25AndConsultantHasNoAuthorityAndNoRole() {
+  public void
+      canAddToRocketChatGroup_Should_returnFalse_When_sessionIsATeamSessionAndConsultingTypeIsU25AndConsultantHasNoAuthorityAndNoRole() {
     when(this.session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
     when(this.session.isTeamSession()).thenReturn(true);
     when(this.session.getConsultingTypeId()).thenReturn(1);
@@ -121,7 +120,8 @@ public class RocketChatOperationConditionProviderTest {
   }
 
   @Test
-  public void canAddToRocketChatFeedbackGroup_Should_returnTrue_When_sessionHasFeedbackGroupAndIsEnquiry() {
+  public void
+      canAddToRocketChatFeedbackGroup_Should_returnTrue_When_sessionHasFeedbackGroupAndIsEnquiry() {
     when(this.session.getFeedbackGroupId()).thenReturn("feedbackGroup");
     when(this.session.getStatus()).thenReturn(SessionStatus.NEW);
 
@@ -131,7 +131,8 @@ public class RocketChatOperationConditionProviderTest {
   }
 
   @Test
-  public void canAddToRocketChatFeedbackGroup_Should_returnTrue_When_sessionHasFeedbackGroupAndConsultantHasMainConsultantAuthority() {
+  public void
+      canAddToRocketChatFeedbackGroup_Should_returnTrue_When_sessionHasFeedbackGroupAndConsultantHasMainConsultantAuthority() {
     when(this.session.getFeedbackGroupId()).thenReturn("feedbackGroup");
     when(this.session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
     when(this.keycloakService.userHasAuthority(any(), any())).thenReturn(true);
@@ -142,7 +143,8 @@ public class RocketChatOperationConditionProviderTest {
   }
 
   @Test
-  public void canAddToRocketChatFeedbackGroup_Should_returnTrue_When_sessionHasFeedbackGroupAndConsultantHasMainConsultantRole() {
+  public void
+      canAddToRocketChatFeedbackGroup_Should_returnTrue_When_sessionHasFeedbackGroupAndConsultantHasMainConsultantRole() {
     when(this.session.getFeedbackGroupId()).thenReturn("feedbackGroup");
     when(this.session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
     when(this.keycloakService.userHasAuthority(any(), any())).thenReturn(false);
@@ -161,7 +163,8 @@ public class RocketChatOperationConditionProviderTest {
   }
 
   @Test
-  public void canAddToRocketChatFeedbackGroup_Should_returnFalse_When_sessionHasFeedbackGroupAndConsultantHasNoRoleAndNoAuthority() {
+  public void
+      canAddToRocketChatFeedbackGroup_Should_returnFalse_When_sessionHasFeedbackGroupAndConsultantHasNoRoleAndNoAuthority() {
     when(this.session.getFeedbackGroupId()).thenReturn("feedbackGroup");
     when(this.session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
     when(this.keycloakService.userHasAuthority(any(), any())).thenReturn(false);
@@ -171,5 +174,4 @@ public class RocketChatOperationConditionProviderTest {
 
     assertThat(result, is(false));
   }
-
 }

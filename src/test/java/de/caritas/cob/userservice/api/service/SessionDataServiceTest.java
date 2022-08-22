@@ -6,9 +6,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionDataDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.helper.SessionDataProvider;
-import de.caritas.cob.userservice.api.adapters.web.dto.SessionDataDTO;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.port.out.SessionDataRepository;
 import de.caritas.cob.userservice.api.service.session.SessionService;
@@ -23,14 +23,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class SessionDataServiceTest {
 
-  @InjectMocks
-  private SessionDataService sessionDataService;
-  @Mock
-  private SessionDataRepository sessionDataRepository;
-  @Mock
-  private SessionDataProvider sessionDataProvider;
-  @Mock
-  private SessionService sessionService;
+  @InjectMocks private SessionDataService sessionDataService;
+  @Mock private SessionDataRepository sessionDataRepository;
+  @Mock private SessionDataProvider sessionDataProvider;
+  @Mock private SessionService sessionService;
 
   private final EasyRandom easyRandom = new EasyRandom();
 

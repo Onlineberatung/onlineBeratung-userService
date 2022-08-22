@@ -47,5 +47,4 @@ public class ChatAgencyTest {
 
     assertThat(equals, is(true));
   }
-
 }

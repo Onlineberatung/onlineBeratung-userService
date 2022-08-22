@@ -25,12 +25,16 @@ public class ActionContainer<T> {
    * @return the current {@link ActionContainer}
    */
   public ActionContainer<T> addActionToExecute(Class<? extends ActionCommand<T>> actionToAdd) {
-    actionsToExecute.add(allActionsByType.stream()
-        .filter(actionCommand -> actionCommand.getClass().equals(actionToAdd))
-        .findFirst()
-        .orElseThrow(() -> new NoSuchElementException(
-            String.format("ActionCommand class %s does not exist or is not implemented yet",
-                actionToAdd.getSimpleName()))));
+    actionsToExecute.add(
+        allActionsByType.stream()
+            .filter(actionCommand -> actionCommand.getClass().equals(actionToAdd))
+            .findFirst()
+            .orElseThrow(
+                () ->
+                    new NoSuchElementException(
+                        String.format(
+                            "ActionCommand class %s does not exist or is not implemented yet",
+                            actionToAdd.getSimpleName()))));
     return this;
   }
 
@@ -42,5 +46,4 @@ public class ActionContainer<T> {
   public void executeActions(T executionTarget) {
     actionsToExecute.forEach(sessionActionCommand -> sessionActionCommand.execute(executionTarget));
   }
-
 }

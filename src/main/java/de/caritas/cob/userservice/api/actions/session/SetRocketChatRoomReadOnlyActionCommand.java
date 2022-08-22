@@ -4,16 +4,14 @@ import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.actions.ActionCommand;
-import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.model.Session;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-/**
- * Sets the rooms to read only in Rocket.Chat.
- */
+/** Sets the rooms to read only in Rocket.Chat. */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -43,5 +41,4 @@ public class SetRocketChatRoomReadOnlyActionCommand implements ActionCommand<Ses
       }
     }
   }
-
 }

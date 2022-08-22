@@ -17,6 +17,6 @@ public class SessionUserDTO {
 
   @ApiModelProperty(example = "Username", position = 0)
   private String username;
-  private Map<String, Object> sessionData;
 
+  private Map<String, Object> sessionData;
 }

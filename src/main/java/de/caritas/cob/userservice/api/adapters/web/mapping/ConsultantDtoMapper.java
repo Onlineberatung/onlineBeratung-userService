@@ -33,8 +33,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class ConsultantDtoMapper {
 
-  public UpdateAdminConsultantDTO updateAdminConsultantOf(UpdateConsultantDTO updateConsultantDTO,
-      Consultant consultant) {
+  public UpdateAdminConsultantDTO updateAdminConsultantOf(
+      UpdateConsultantDTO updateConsultantDTO, Consultant consultant) {
 
     return new UpdateAdminConsultantDTO()
         .email(updateConsultantDTO.getEmail())
@@ -46,20 +46,16 @@ public class ConsultantDtoMapper {
         .absenceMessage(consultant.getAbsenceMessage());
   }
 
-  public ConsultantResponseDTO consultantResponseDtoOf(Consultant consultant,
-      List<AgencyDTO> agencies, boolean mapNames) {
-    var agencyDtoList = agencies.stream()
-        .map(this::agencyResponseDtoOf)
-        .collect(Collectors.toList());
+  public ConsultantResponseDTO consultantResponseDtoOf(
+      Consultant consultant, List<AgencyDTO> agencies, boolean mapNames) {
+    var agencyDtoList =
+        agencies.stream().map(this::agencyResponseDtoOf).collect(Collectors.toList());
 
-    var consultantResponseDto = new ConsultantResponseDTO()
-        .consultantId(consultant.getId())
-        .agencies(agencyDtoList);
+    var consultantResponseDto =
+        new ConsultantResponseDTO().consultantId(consultant.getId()).agencies(agencyDtoList);
 
     if (mapNames) {
-      consultantResponseDto
-          .firstName(consultant.getFirstName())
-          .lastName(consultant.getLastName());
+      consultantResponseDto.firstName(consultant.getFirstName()).lastName(consultant.getLastName());
     }
 
     return consultantResponseDto;
@@ -70,9 +66,9 @@ public class ConsultantDtoMapper {
   }
 
   public List<String> languageStringsOf(List<LanguageCode> languages) {
-    return isNull(languages) ? null : languages.stream()
-        .map(this::languageOf)
-        .collect(Collectors.toList());
+    return isNull(languages)
+        ? null
+        : languages.stream().map(this::languageOf).collect(Collectors.toList());
   }
 
   public AgencyResponseDTO agencyResponseDtoOf(AgencyDTO agencyDTO) {
@@ -88,10 +84,8 @@ public class ConsultantDtoMapper {
   }
 
   public LanguageResponseDTO languageResponseDtoOf(Set<String> languageCodes) {
-    var languages = languageCodes.stream()
-        .sorted()
-        .map(LanguageCode::fromValue)
-        .collect(Collectors.toList());
+    var languages =
+        languageCodes.stream().sorted().map(LanguageCode::fromValue).collect(Collectors.toList());
 
     var dto = new LanguageResponseDTO();
     dto.setLanguages(languages);
@@ -100,17 +94,23 @@ public class ConsultantDtoMapper {
   }
 
   @SuppressWarnings("unchecked")
-  public ConsultantSearchResultDTO consultantSearchResultOf(Map<String, Object> resultMap,
-      String query, int page, int perPage, String field, String order) {
+  public ConsultantSearchResultDTO consultantSearchResultOf(
+      Map<String, Object> resultMap,
+      String query,
+      int page,
+      int perPage,
+      String field,
+      String order) {
     var consultants = new ArrayList<ConsultantAdminResponseDTO>();
 
     var consultantMaps = (List<Map<String, Object>>) resultMap.get("consultants");
-    consultantMaps.forEach(consultantMap -> {
-      var response = new ConsultantAdminResponseDTO();
-      response.setEmbedded(consultantDtoOf(consultantMap));
-      response.setLinks(consultantLinksOf(consultantMap));
-      consultants.add(response);
-    });
+    consultantMaps.forEach(
+        consultantMap -> {
+          var response = new ConsultantAdminResponseDTO();
+          response.setEmbedded(consultantDtoOf(consultantMap));
+          response.setLinks(consultantLinksOf(consultantMap));
+          consultants.add(response);
+        });
 
     var result = new ConsultantSearchResultDTO();
     result.setTotal((Integer) resultMap.get("totalElements"));
@@ -147,18 +147,19 @@ public class ConsultantDtoMapper {
 
     var agencies = new ArrayList<AgencyAdminResponseDTO>();
     var agencyMaps = (ArrayList<Map<String, Object>>) consultantMap.get("agencies");
-    agencyMaps.forEach(agencyMap -> {
-      var agency = new AgencyAdminResponseDTO();
-      agency.setId((Long) agencyMap.get("id"));
-      agency.setName((String) agencyMap.get("name"));
-      agency.setPostcode((String) agencyMap.get("postcode"));
-      agency.setCity((String) agencyMap.get("city"));
-      agency.setDescription((String) agencyMap.get("description"));
-      agency.setTeamAgency((Boolean) agencyMap.get("isTeamAgency"));
-      agency.setOffline((Boolean) agencyMap.get("isOffline"));
-      agency.setConsultingType((Integer) agencyMap.get("consultingType"));
-      agencies.add(agency);
-    });
+    agencyMaps.forEach(
+        agencyMap -> {
+          var agency = new AgencyAdminResponseDTO();
+          agency.setId((Long) agencyMap.get("id"));
+          agency.setName((String) agencyMap.get("name"));
+          agency.setPostcode((String) agencyMap.get("postcode"));
+          agency.setCity((String) agencyMap.get("city"));
+          agency.setDescription((String) agencyMap.get("description"));
+          agency.setTeamAgency((Boolean) agencyMap.get("isTeamAgency"));
+          agency.setOffline((Boolean) agencyMap.get("isOffline"));
+          agency.setConsultingType((Integer) agencyMap.get("consultingType"));
+          agencies.add(agency);
+        });
     consultant.setAgencies(agencies);
 
     return consultant;
@@ -205,8 +206,8 @@ public class ConsultantDtoMapper {
   }
 
   public HalLink pageLinkOf(String query, int page, int perPage, String field, String order) {
-    var httpEntity = methodOn(UserController.class)
-        .searchConsultants(query, page, perPage, field, order);
+    var httpEntity =
+        methodOn(UserController.class).searchConsultants(query, page, perPage, field, order);
 
     return halLinkOf(httpEntity, MethodEnum.GET);
   }
@@ -214,10 +215,7 @@ public class ConsultantDtoMapper {
   public HalLink halLinkOf(HttpEntity<?> httpEntity, MethodEnum method) {
     var link = linkTo(httpEntity).withSelfRel();
 
-    return new HalLink()
-        .href(link.getHref())
-        .method(method)
-        .templated(link.isTemplated());
+    return new HalLink().href(link.getHref()).method(method).templated(link.isTemplated());
   }
 
   public String mappedFieldOf(String field) {

@@ -1,19 +1,19 @@
 package de.caritas.cob.userservice.api.model;
 
+import com.neovisionaries.i18n.LanguageCode;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
-import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.FilterDef;
-import org.hibernate.annotations.ParamDef;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,13 +21,14 @@ import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.ToString.Exclude;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-/**
- * Represents a user
- */
+/** Represents a user */
 @Entity
 @Table(name = "user")
 @AllArgsConstructor
@@ -36,7 +37,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Setter
 @ToString
 @EntityListeners(AuditingEntityListener.class)
-@FilterDef(name = "tenantFilter", parameters = {@ParamDef(name = "tenantId", type = "long")})
+@FilterDef(
+    name = "tenantFilter",
+    parameters = {@ParamDef(name = "tenantId", type = "long")})
 @Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
 public class User implements TenantAware {
 
@@ -98,8 +101,15 @@ public class User implements TenantAware {
   @Column(name = "encourage_2fa", nullable = false, columnDefinition = "bit default true")
   private Boolean encourage2fa;
 
-  public User(@Size(max = 36) @NonNull String userId, Long oldId,
-      @Size(max = 255) @NonNull String username, @Size(max = 255) @NonNull String email,
+  @Enumerated(EnumType.STRING)
+  @Column(length = 2, nullable = false, columnDefinition = "varchar(2) default 'de'")
+  private LanguageCode languageCode;
+
+  public User(
+      @Size(max = 36) @NonNull String userId,
+      Long oldId,
+      @Size(max = 255) @NonNull String username,
+      @Size(max = 255) @NonNull String email,
       boolean languageFormal) {
     this.userId = userId;
     this.oldId = oldId;
@@ -107,6 +117,7 @@ public class User implements TenantAware {
     this.email = email;
     this.languageFormal = languageFormal;
     setEncourage2fa(true);
+    setLanguageCode(LanguageCode.de);
   }
 
   @Override
