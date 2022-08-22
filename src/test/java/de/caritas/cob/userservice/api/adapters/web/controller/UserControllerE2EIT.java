@@ -1257,7 +1257,12 @@ class UserControllerE2EIT {
         .andExpect(status().isCreated());
   }
 
-  // FIXME: (for all registerUser tests) Currently, we cannot easily get the generated data. The API does not return anything from the generated user, which would lead us to write code for tests. Which I don't like. Idea, API could return the user or at least the ID, then for the user we could fetch the sessions (de.caritas.cob.userservice.api.port.out.SessionRepository#findByUser), since there is only one at the time, I think this would be an acceptable solution.
+  // FIXME: (for all registerUser tests) Currently, we cannot easily get the generated data. The API
+  // does not return anything from the generated user, which would lead us to write code for tests.
+  // Which I don't like. Idea, API could return the user or at least the ID, then for the user we
+  // could fetch the sessions
+  // (de.caritas.cob.userservice.api.port.out.SessionRepository#findByUser), since there is only one
+  // at the time, I think this would be an acceptable solution.
   @Test
   void registerUserWithoutConsultingIdShouldSaveCreateUserWithDemographicsData() throws Exception {
     ReflectionTestUtils.setField(userVerifier, "demographicsFeatureEnabled", true);
@@ -1284,7 +1289,8 @@ class UserControllerE2EIT {
     givenARealmResource();
     givenAUserDTOWithCounsellingRelation();
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             post("/users/askers/new")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
@@ -1299,7 +1305,8 @@ class UserControllerE2EIT {
     givenARealmResource();
     givenAUserDTOWithMainTopic();
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             post("/users/askers/new")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
@@ -1314,7 +1321,8 @@ class UserControllerE2EIT {
     givenARealmResource();
     givenAUserDTOWithTopics();
 
-    mockMvc.perform(
+    mockMvc
+        .perform(
             post("/users/askers/new")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
