@@ -94,6 +94,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import javax.servlet.http.Cookie;
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -1241,7 +1242,7 @@ class UserControllerE2EIT {
   }
 
   @Test
-  void registerUserWithoutConsultingIdShouldSaveMonitoring() throws Exception {
+  void registerUserWithoutConsultingIdShouldSaveMonitoringAndPreferredLanguage() throws Exception {
     givenConsultingTypeServiceResponse();
     givenARealmResource();
     givenAUserDTO();
@@ -1254,6 +1255,38 @@ class UserControllerE2EIT {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userDTO)))
         .andExpect(status().isCreated());
+
+    var savedUser =
+        StreamSupport.stream(userRepository.findAll().spliterator(), true)
+            .filter(dbUser -> userDTO.getEmail().equals(dbUser.getEmail()))
+            .findFirst();
+    assertTrue(savedUser.isPresent());
+    assertEquals(
+        userDTO.getPreferredLanguage().toString(), savedUser.get().getLanguageCode().toString());
+  }
+
+  @Test
+  void registerUserShouldSaveDefaultPreferredLanguage() throws Exception {
+    givenConsultingTypeServiceResponse();
+    givenARealmResource();
+    givenAUserDTO();
+    userDTO.setPreferredLanguage(null);
+
+    mockMvc
+        .perform(
+            post("/users/askers/new")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userDTO)))
+        .andExpect(status().isCreated());
+
+    var savedUser =
+        StreamSupport.stream(userRepository.findAll().spliterator(), true)
+            .filter(dbUser -> userDTO.getEmail().equals(dbUser.getEmail()))
+            .findFirst();
+    assertTrue(savedUser.isPresent());
+    assertEquals("de", savedUser.get().getLanguageCode().toString());
   }
 
   @Test
