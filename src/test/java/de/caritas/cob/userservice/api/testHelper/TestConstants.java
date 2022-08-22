@@ -72,7 +72,6 @@ public class TestConstants {
    * Common
    */
   public static final String APPLICATION_BASE_URL = "https://beratung.caritas.de";
-  public static final String HOST_BASE_URL = "https://beratung.caritas.de";
   public static final String APPLICATION_BASE_URL_FIELD_NAME = "applicationBaseUrl";
   public static final String POSTCODE = "12345";
   public static final String OTP = "122321";
@@ -96,9 +95,8 @@ public class TestConstants {
   public static final Date NOW_MINUS_3_DAYS = new Date(NOW.getTime() - (3 * 86400000));
 
   /** ConsultingTypes */
-  public static final String CONSULTING_TYPE_SUCHT_URL_NAME = "suchtberatung";
-
   public static final int CONSULTING_TYPE_ID_SUCHT = 0;
+
   public static final int CONSULTING_TYPE_ID_U25 = 1;
   public static final int CONSULTING_TYPE_ID_PREGNANCY = 2;
   public static final int CONSULTING_TYPE_ID_AIDS = 12;
@@ -1135,15 +1133,11 @@ public class TestConstants {
   public static final Long CHAT_ID_2 = 137L;
   public static final Long CHAT_ID_3 = 138L;
   public static final String INVALID_CHAT_ID = "xyz";
-  public static final String CHAT_ID_ENCODED = "GEZTM";
   public static final String GROUP_CHAT_NAME = "GROUP_CHAT_NAME";
-  public static final String CHAT_LINK_SUCHT =
-      HOST_BASE_URL + "/" + CONSULTING_TYPE_SUCHT_URL_NAME + "/" + CHAT_ID_ENCODED;
-  public static final String CHAT_LINK_SUCHT_V2 = HOST_BASE_URL + "/" + CHAT_ID_ENCODED;
   public static final ChatDTO CHAT_DTO =
       new ChatDTO(CHAT_TOPIC, CHAT_START_DATE, CHAT_START_TIME, CHAT_DURATION, CHAT_REPETITIVE);
   public static final CreateChatResponseDTO CREATE_CHAT_RESPONSE_DTO =
-      new CreateChatResponseDTO().groupId(RC_GROUP_ID).chatLink(CHAT_LINK_SUCHT);
+      new CreateChatResponseDTO().groupId(RC_GROUP_ID);
   public static final Chat ACTIVE_CHAT =
       new Chat(
           CHAT_ID,
