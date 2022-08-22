@@ -2805,14 +2805,10 @@ components:
       type: object
       required:
         - groupId
-        - chatLink
       properties:
         groupId:
           type: string
           example: WCET6GWir78pNMyyD
-        chatLink:
-          type: string
-          example: https://{baseUrl}}/{consultingTypeName}/GEYDA
 
     ChatInfoResponseDTO:
       type: object
@@ -2873,14 +2869,10 @@ components:
       type: object
       required:
         - groupId
-        - chatLink
       properties:
         groupId:
           type: string
           example: WCET6GWir78pNMyyD
-        chatLink:
-          type: string
-          example: https://{baseUrl}}/{consultingTypeName}/GEYDA
 
     NewRegistrationDto:
       type: object
