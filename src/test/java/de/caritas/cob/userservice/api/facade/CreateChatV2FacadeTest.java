@@ -27,7 +27,6 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
-import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.ChatAgency;
 import de.caritas.cob.userservice.api.model.Consultant;
@@ -63,13 +62,13 @@ public class CreateChatV2FacadeTest {
 
   @Mock private ChatAgency chatAgency;
 
-  @Mock private UserHelper userHelper;
-
   @Mock private GroupResponseDTO groupResponseDTO;
 
   @Mock private GroupDTO groupDTO;
 
-  @Spy private ChatConverter chatConverter;
+  @SuppressWarnings("unused")
+  @Spy
+  private ChatConverter chatConverter;
 
   @Mock private Logger logger;
 

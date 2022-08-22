@@ -2,8 +2,6 @@ package de.caritas.cob.userservice.api.helper;
 
 import static java.util.Objects.nonNull;
 
-import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
-import de.caritas.cob.userservice.api.model.Chat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -12,7 +10,6 @@ import org.passay.CharacterData;
 import org.passay.CharacterRule;
 import org.passay.EnglishCharacterData;
 import org.passay.PasswordGenerator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -27,11 +24,6 @@ public class UserHelper {
   @Value("${keycloakService.user.dummySuffix}")
   private String emailDummySuffix;
 
-  @Value("${app.base.url}")
-  private String hostBaseUrl;
-
-  @Autowired private ConsultingTypeManager consultingTypeManager;
-
   public static final int USERNAME_MIN_LENGTH = 5;
   public static final int USERNAME_MAX_LENGTH = 30;
   public static final String VALID_POSTCODE_REGEX = "^[0-9]{5}$";
@@ -45,7 +37,6 @@ public class UserHelper {
   public static final int CHAT_MAX_DURATION = 180;
   public static final int CHAT_TOPIC_MIN_LENGTH = 3;
   public static final int CHAT_TOPIC_MAX_LENGTH = 50;
-  private static final String BASE32_PLACEHOLDER_CHAT_ID_REPLACE_STRING = "";
 
   private final UsernameTranscoder usernameTranscoder = new UsernameTranscoder();
 
@@ -118,34 +109,5 @@ public class UserHelper {
     return StringUtils.equals(
         this.usernameTranscoder.encodeUsername(firstUsername).toLowerCase(),
         this.usernameTranscoder.encodeUsername(secondUsername).toLowerCase());
-  }
-
-  /**
-   * Generates the URL for a chat with the given {@link Chat} id and consultingType ID.
-   *
-   * @param chatId the {@link Chat}'s id
-   * @param consultingTypeId the chat's consultingType ID
-   * @return URL (String)
-   */
-  public String generateChatUrl(Long chatId, int consultingTypeId) {
-    return hostBaseUrl
-        + "/"
-        + consultingTypeManager.getConsultingTypeSettings(consultingTypeId).getSlug()
-        + "/"
-        + this.usernameTranscoder.base32EncodeAndReplacePlaceholder(
-            Long.toString(chatId), BASE32_PLACEHOLDER_CHAT_ID_REPLACE_STRING);
-  }
-
-  /**
-   * Generates the URL for a chat with the given {@link Chat} id.
-   *
-   * @param chatId the {@link Chat}'s id
-   * @return URL (String)
-   */
-  public String generateChatUrl(Long chatId) {
-    return hostBaseUrl
-        + "/"
-        + this.usernameTranscoder.base32EncodeAndReplacePlaceholder(
-            Long.toString(chatId), BASE32_PLACEHOLDER_CHAT_ID_REPLACE_STRING);
   }
 }

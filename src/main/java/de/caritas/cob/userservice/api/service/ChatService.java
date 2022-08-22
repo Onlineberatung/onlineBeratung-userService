@@ -12,7 +12,6 @@ import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestExceptio
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.Chat.ChatInterval;
 import de.caritas.cob.userservice.api.model.ChatAgency;
@@ -44,7 +43,6 @@ public class ChatService {
   private final @NonNull ChatAgencyRepository chatAgencyRepository;
   private final @NonNull UserChatRepository userChatRepository;
   private final @NonNull ConsultantService consultantService;
-  private final @NonNull UserHelper userHelper;
 
   /**
    * Returns a list of current chats for the provided {@link Consultant}
@@ -242,8 +240,6 @@ public class ChatService {
 
     this.saveChat(chat);
 
-    return new UpdateChatResponseDTO()
-        .groupId(chat.getGroupId())
-        .chatLink(userHelper.generateChatUrl(chat.getId(), chat.getConsultingTypeId()));
+    return new UpdateChatResponseDTO().groupId(chat.getGroupId());
   }
 }
