@@ -96,6 +96,7 @@ public class TestConstants {
 
   /** ConsultingTypes */
   public static final int CONSULTING_TYPE_ID_SUCHT = 0;
+
   public static final int CONSULTING_TYPE_ID_U25 = 1;
   public static final int CONSULTING_TYPE_ID_PREGNANCY = 2;
   public static final int CONSULTING_TYPE_ID_AIDS = 12;
