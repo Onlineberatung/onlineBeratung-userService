@@ -342,7 +342,9 @@ public class KeycloakService implements IdentityClient {
    */
   public KeycloakCreateUserResponseDTO createKeycloakUser(
       final UserDTO user, final String firstName, final String lastName) {
-    var kcUser = getUserRepresentation(user, firstName, lastName, "de");
+    var locale =
+        isNull(user.getPreferredLanguage()) ? "de" : user.getPreferredLanguage().toString();
+    var kcUser = getUserRepresentation(user, firstName, lastName, locale);
     try (var response = keycloakClient.getUsersResource().create(kcUser)) {
       if (response.getStatus() == HttpStatus.CREATED.value()) {
         return new KeycloakCreateUserResponseDTO(getCreatedUserId(response.getLocation()));

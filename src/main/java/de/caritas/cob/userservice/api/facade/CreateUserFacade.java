@@ -70,13 +70,17 @@ public class CreateUserFacade {
 
       var extendedConsultingTypeResponseDTO =
           consultingTypeManager.getConsultingTypeSettings(userDTO.getConsultingType());
+      var language =
+          isNull(userDTO.getPreferredLanguage()) ? null : userDTO.getPreferredLanguage().toString();
 
       user =
           userService.createUser(
               userId,
+              null,
               userDTO.getUsername(),
               returnDummyEmailIfNoneGiven(userDTO, userId),
-              isTrue(extendedConsultingTypeResponseDTO.getLanguageFormal()));
+              isTrue(extendedConsultingTypeResponseDTO.getLanguageFormal()),
+              language);
 
     } catch (Exception ex) {
       rollBackAccountInitialization(userId, userDTO);

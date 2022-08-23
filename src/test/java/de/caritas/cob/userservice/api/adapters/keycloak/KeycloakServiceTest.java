@@ -366,6 +366,7 @@ public class KeycloakServiceTest {
   @Test
   public void createKeycloakUser_Should_createUserWithDefaultLocale() {
     var userDTO = easyRandom.nextObject(UserDTO.class);
+    userDTO.setPreferredLanguage(null);
     var usersResource = mock(UsersResource.class);
     var response = mock(Response.class);
     when(response.getStatus()).thenReturn(HttpStatus.CREATED.value());

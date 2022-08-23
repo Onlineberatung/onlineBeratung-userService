@@ -9,7 +9,6 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_V2;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.INACTIVE_CHAT;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -28,12 +27,10 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UpdateChatResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
-import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.ChatAgency;
 import de.caritas.cob.userservice.api.model.Consultant;
@@ -66,8 +63,6 @@ public class ChatServiceTest {
   @Mock private UserChatRepository chatUserRepository;
 
   @Mock private Logger logger;
-
-  @Mock private UserHelper userHelper;
 
   @Mock private ConsultantService consultantService;
 
@@ -264,25 +259,6 @@ public class ChatServiceTest {
     chatService.updateChat(CHAT_ID, CHAT_DTO, AUTHENTICATED_USER_CONSULTANT);
 
     verify(chatRepository, times(1)).save(Mockito.any());
-  }
-
-  @Test
-  public void updateChat_Should_ReturnCorrectGroupIdAndChatLinkObject() {
-    Chat inactiveChat = mock(Chat.class);
-    when(inactiveChat.isActive()).thenReturn(false);
-    when(inactiveChat.getChatOwner()).thenReturn(CONSULTANT);
-    when(inactiveChat.getGroupId()).thenReturn(RC_GROUP_ID);
-    when(inactiveChat.getConsultingTypeId()).thenReturn(15);
-
-    when(chatRepository.findById(CHAT_ID)).thenReturn(Optional.of(inactiveChat));
-
-    UpdateChatResponseDTO result =
-        chatService.updateChat(CHAT_ID, CHAT_DTO, AUTHENTICATED_USER_CONSULTANT);
-    String chatLink =
-        userHelper.generateChatUrl(inactiveChat.getId(), inactiveChat.getConsultingTypeId());
-
-    assertEquals(result.getGroupId(), inactiveChat.getGroupId());
-    assertEquals(result.getChatLink(), chatLink);
   }
 
   @Test
