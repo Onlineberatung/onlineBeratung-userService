@@ -4,6 +4,7 @@ import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
@@ -61,8 +62,21 @@ public class UserService {
    */
   public User createUser(
       String userId, Long oldId, String username, String email, boolean languageFormal) {
+    return createUser(userId, oldId, username, email, languageFormal, null);
+  }
+
+  public User createUser(
+      String userId,
+      Long oldId,
+      String username,
+      String email,
+      boolean languageFormal,
+      String preferredLanguage) {
     var user = new User(userId, oldId, username, email, languageFormal);
     auditingHandler.markCreated(user);
+    if (nonNull(preferredLanguage)) {
+      user.setLanguageCode(LanguageCode.valueOf(preferredLanguage));
+    }
 
     return userRepository.save(user);
   }

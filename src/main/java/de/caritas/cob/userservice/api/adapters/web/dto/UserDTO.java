@@ -122,6 +122,8 @@ public class UserDTO implements UserRegistrationDTO {
   @JsonProperty("counsellingRelation")
   private String counsellingRelation;
 
+  private LanguageCode preferredLanguage;
+
   public Integer getUserAge() {
     return age == null ? null : Integer.valueOf(age);
   }

@@ -13,7 +13,6 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGr
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.RocketChatRoomNameGenerator;
-import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.ChatAgency;
 import de.caritas.cob.userservice.api.model.Consultant;
@@ -31,9 +30,7 @@ public class CreateChatFacade {
 
   private final @NonNull ChatService chatService;
   private final @NonNull RocketChatService rocketChatService;
-  private final @NonNull UserHelper userHelper;
   private final @NonNull AgencyService agencyService;
-
   private final @NonNull ChatConverter chatConverter;
 
   /**
@@ -68,17 +65,11 @@ public class CreateChatFacade {
       rcGroupId = createRocketChatGroupWithTechnicalUser(chatDTO, chat);
       chat.setGroupId(rcGroupId);
       chatService.saveChat(chat);
-      return new CreateChatResponseDTO().groupId(rcGroupId).chatLink(generateChatUrl(chat));
+      return new CreateChatResponseDTO().groupId(rcGroupId);
     } catch (InternalServerErrorException e) {
       doRollback(chat, rcGroupId);
       throw e;
     }
-  }
-
-  private String generateChatUrl(Chat chat) {
-    return chat.getConsultingTypeId() != null
-        ? userHelper.generateChatUrl(chat.getId(), chat.getConsultingTypeId())
-        : userHelper.generateChatUrl(chat.getId());
   }
 
   private Chat saveChatV1(Consultant consultant, ChatDTO chatDTO) {
