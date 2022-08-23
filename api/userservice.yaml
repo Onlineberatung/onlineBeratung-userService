@@ -2720,6 +2720,11 @@ components:
         consultingType:
           type: integer
           example: 1
+        tenantId:
+          type: integer
+          format: int64
+          example: 12
+
 
     MobileTokenDTO:
       type: object
