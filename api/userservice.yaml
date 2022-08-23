@@ -1931,6 +1931,8 @@ components:
         gender:
           type: string
           example: 'DIVERSE'
+        preferredLanguage:
+          $ref: "#/components/schemas/LanguageCode"
 
     SessionDataDTO:
       allOf:

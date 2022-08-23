@@ -5,7 +5,6 @@ import static de.caritas.cob.userservice.api.testHelper.KeycloakConstants.KEYCLO
 import static de.caritas.cob.userservice.api.testHelper.KeycloakConstants.KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_KREUZBUND;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.ERROR;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_DTO_KREUZBUND;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_DTO_SUCHT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
@@ -118,7 +117,6 @@ public class CreateUserFacadeTest {
     when(keycloakService.createKeycloakUser(any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID);
     doNothing().when(keycloakService).updatePassword(anyString(), anyString());
-    when(userService.createUser(any(), any(), any(), anyBoolean())).thenReturn(USER);
 
     createUserFacade.createUserAccountWithInitializedConsultingType(USER_DTO_KREUZBUND);
 
@@ -133,7 +131,6 @@ public class CreateUserFacadeTest {
     when(keycloakService.createKeycloakUser(any()))
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID);
     doNothing().when(keycloakService).updatePassword(anyString(), anyString());
-    when(userService.createUser(any(), any(), any(), anyBoolean())).thenReturn(USER);
 
     createUserFacade.createUserAccountWithInitializedConsultingType(USER_DTO_KREUZBUND);
 
@@ -151,7 +148,6 @@ public class CreateUserFacadeTest {
     when(consultingTypeManager.getConsultingTypeSettings(any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_KREUZBUND);
     doNothing().when(keycloakService).updatePassword(anyString(), anyString());
-    when(userService.createUser(any(), any(), any(), anyBoolean())).thenReturn(USER);
 
     createUserFacade.updateKeycloakAccountAndCreateDatabaseUserAccount(
         USER_ID, USER_DTO_SUCHT, UserRole.USER);
@@ -191,7 +187,7 @@ public class CreateUserFacadeTest {
     when(consultingTypeManager.getConsultingTypeSettings(any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_KREUZBUND);
     doNothing().when(keycloakService).updatePassword(anyString(), anyString());
-    when(userService.createUser(any(), any(), any(), anyBoolean()))
+    when(userService.createUser(any(), any(), any(), any(), anyBoolean(), any()))
         .thenThrow(new IllegalArgumentException());
 
     createUserFacade.updateKeycloakAccountAndCreateDatabaseUserAccount(
