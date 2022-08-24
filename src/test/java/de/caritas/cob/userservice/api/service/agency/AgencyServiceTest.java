@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import de.caritas.cob.userservice.agencyserivce.generated.ApiClient;
 import de.caritas.cob.userservice.agencyserivce.generated.web.AgencyControllerApi;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
+import de.caritas.cob.userservice.api.service.httpheader.HttpHeadersResolver;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
@@ -40,14 +41,13 @@ class AgencyServiceTest {
   @NullAndEmptySource
   void getAgenciesFromAgencyService_Should_returnEmptyList_When_nullPassed(List<Long> emptyIds) {
     List<AgencyDTO> result = this.agencyService.getAgencies(emptyIds);
-
     assertThat(result).isEmpty();
   }
 
   @Test
   void getAgenciesFromAgencyService_Should_passTenantId() {
     TenantContext.setCurrentTenant(1L);
-    TenantHeaderSupplier tenantHeaderSupplier = new TenantHeaderSupplier();
+    TenantHeaderSupplier tenantHeaderSupplier = new TenantHeaderSupplier(new HttpHeadersResolver());
     ReflectionTestUtils.setField(tenantHeaderSupplier, "multitenancy", true);
     ReflectionTestUtils.setField(agencyService, "tenantHeaderSupplier", tenantHeaderSupplier);
     HttpHeaders headers = new HttpHeaders();

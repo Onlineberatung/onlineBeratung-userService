@@ -49,6 +49,11 @@ paths:
           schema:
             type: integer
             example: 20
+        - name: sort
+          in: query
+          description: The sort parameter containing field and order the response should be sorted
+          schema:
+            $ref: '#/components/schemas/Sort'
       responses:
         200:
           description: OK - successfull operation
@@ -256,43 +261,32 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-  /agencyadmin/agencies/{agencyId}/postcoderanges:
+
+  /agencyadmin/postcoderanges/{agencyId}:
     get:
       tags:
         - admin-agency-controller
-      summary: 'Returns the list of the postcode ranges for an agency.  [Authorization: Role: agency-admin]'
+      summary: 'Get the postcode ranges for an agency [Authorization: Role: agency-admin]'
       operationId: getAgencyPostcodeRanges
       parameters:
         - name: agencyId
           in: path
-          description: Agency Id
+          description: Agency id
           required: true
           schema:
             type: integer
             format: int64
-        - name: page
-          in: query
-          description: Number of page where to start (1 = first page)
-          required: true
-          schema:
-            type: integer
-            example: 1
-        - name: perPage
-          in: query
-          description: Number of items which are being returned per page
-          required: true
-          schema:
-            type: integer
-            example: 20
       responses:
         200:
-          description: OK - successfull operation
+          description: OK - agency postcode range found
           content:
-            'application/hal+json':
+            'application/json':
               schema:
-                $ref: '#/components/schemas/AgencyPostcodeRangesResultDTO'
+                $ref: '#/components/schemas/AgencyPostcodeRangeResponseDTO'
+        204:
+          description: NO CONTENT - agency postcode range with the provided agency ID does not exist
         400:
-          description: BAD REQUEST - invalid/incomplete request or body object
+          description: BAD REQUEST - invalid/incomplete request
         401:
           description: UNAUTHORIZED - no/invalid role/authorization
         500:
@@ -308,7 +302,7 @@ paths:
         content:
           'application/json':
             schema:
-              $ref: '#/components/schemas/PostCodeRangeDTO'
+              $ref: '#/components/schemas/PostcodeRangeDTO'
         required: true
       parameters:
         - name: agencyId
@@ -335,38 +329,6 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-
-  /agencyadmin/postcoderanges/{postcodeRangeId}:
-    get:
-      tags:
-        - admin-agency-controller
-      summary: 'Get a specific postcode range for an agency [Authorization: Role: agency-admin]'
-      operationId: getAgencyPostcodeRange
-      parameters:
-        - name: postcodeRangeId
-          in: path
-          description: Postcode range id
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        200:
-          description: OK - agency postcode range found
-          content:
-            'application/json':
-              schema:
-                $ref: '#/components/schemas/AgencyPostcodeRangeResponseDTO'
-        204:
-          description: NO CONTENT - agency postcode range with the provided ID does not exist
-        400:
-          description: BAD REQUEST - invalid/incomplete request
-        401:
-          description: UNAUTHORIZED - no/invalid role/authorization
-        500:
-          description: INTERNAL SERVER ERROR - server encountered unexpected condition
-      security:
-        - Bearer: [ ]
     put:
       tags:
         - admin-agency-controller
@@ -376,12 +338,12 @@ paths:
         content:
           'application/json':
             schema:
-              $ref: '#/components/schemas/PostCodeRangeDTO'
+              $ref: '#/components/schemas/PostcodeRangeDTO'
         required: true
       parameters:
-        - name: postcodeRangeId
+        - name: agencyId
           in: path
-          description: Postcode range id
+          description: Agency id
           required: true
           schema:
             type: integer
@@ -409,9 +371,9 @@ paths:
       summary: 'Delete a specific postcode range [Authorization: Role: agency-admin]'
       operationId: deleteAgencyPostcodeRange
       parameters:
-        - name: postcodeRangeId
+        - name: agencyId
           in: path
-          description: Postcode range id
+          description: Agency id
           required: true
           schema:
             type: integer
@@ -479,7 +441,24 @@ components:
           $ref: '#/components/schemas/SearchResultLinks'
         total:
           type: integer
-
+    TopicDTO:
+      type: object
+      properties:
+        id:
+          type: long
+          example: 12132
+        name:
+          type: string
+          example: "Topic name"
+        description:
+          type: string
+          example: "Description"
+        internalIdentifier:
+          type: string
+          example: "identifier for data exports for example: alcohol"
+        status:
+          type: string
+          example: "Active"
     AgencyAdminResponseDTO:
       type: object
       properties:
@@ -540,19 +519,12 @@ components:
           type: string
           example: "2020-09-02T15:53:23"
 
-    PostCodeRangeDTO:
+    PostcodeRangeDTO:
       type: object
       properties:
-        postcodeFrom:
+        postcodeRanges:
           type: string
-          minLength: 5
-          maxLength: 5
-          example: "79106"
-        postcodeTo:
-          type: string
-          minLength: 5
-          maxLength: 5
-          example: "79106"
+          example: "79106-79386;88682;97051-97111"
 
     DioceseAdminResultDTO:
       type: object
@@ -633,6 +605,17 @@ components:
         external:
           type: boolean
           example: false
+        topicIds:
+          type: array
+          items:
+            type: long
+        demographics:
+          $ref: '#/components/schemas/DemographicsDTO'
+        tenantId:
+          type: integer
+          format: int64
+          example: 12
+
 
     AgencyAdminFullResponseDTO:
       type: object
@@ -684,6 +667,31 @@ components:
         external:
           type: boolean
           example: false
+        topicIds:
+          type: array
+          items:
+            type: long
+        demographics:
+          $ref: '#/components/schemas/DemographicsDTO'
+
+    DemographicsDTO:
+      type: object
+      properties:
+        ageFrom:
+          type: integer
+          minimum: 0
+          maximum: 200
+          example: 25
+        ageTo:
+          type: integer
+          minimum: 0
+          maximum: 200
+          example: 55
+        genders:
+          type: array
+          items:
+            type: string
+          example: "[MALE,FEMALE,DIVERS]"
 
     UpdateAgencyResponseDTO:
       type: object
@@ -697,23 +705,11 @@ components:
       type: object
       properties:
         _embedded:
-          $ref: '#/components/schemas/PostCodeRangeResponseDTO'
+          $ref: '#/components/schemas/PostcodeRangeResponseDTO'
         _links:
           $ref: '#/components/schemas/DefaultLinks'
 
-    AgencyPostcodeRangesResultDTO:
-      type: object
-      properties:
-        _embedded:
-          type: array
-          items:
-            $ref: '#/components/schemas/AgencyPostcodeRangeResponseDTO'
-        _links:
-          $ref: '#/components/schemas/PaginationLinks'
-        total:
-          type: integer
-
-    PostCodeRangeResponseDTO:
+    PostcodeRangeResponseDTO:
       type: object
       properties:
         id:
@@ -722,28 +718,10 @@ components:
           minimum: 0
           maximum: 9223372036854775807
           example: 684
-        agencyId:
-          type: integer
-          format: int64
-          minimum: 0
-          maximum: 9223372036854775807
-          example: 684
-        postcodeFrom:
+          description: "The agency id of the related postcoderanges"
+        postcodeRanges:
           type: string
-          minLength: 5
-          maxLength: 5
-          example: "79106"
-        postcodeTo:
-          type: string
-          minLength: 5
-          maxLength: 5
-          example: "79106"
-        createDate:
-          type: string
-          example: "2019-08-23T08:52:05"
-        updateDate:
-          type: string
-          example: "2019-12-02T13:12:08"
+          example: "79106-79386;88682;97051-97111"
 
     AgencyTypeRequestDTO:
       type: object
@@ -793,8 +771,28 @@ components:
         - $ref: '#/components/schemas/DefaultLinks'
         - type: object
           properties:
-            postcoderanges:
+            postcodeRanges:
               $ref: '#/components/schemas/HalLink'
+
+    Sort:
+      type: object
+      properties:
+        field:
+          type: string
+          example: 'name|description|postcode|city|teamAgency|offline'
+          enum:
+            - 'name'
+            - 'description'
+            - 'postCode'
+            - 'city'
+            - 'teamAgency'
+            - 'offline'
+        order:
+          type: string
+          example: 'ASC|DESC'
+          enum:
+            - 'ASC'
+            - 'DESC'
 
   securitySchemes:
     Bearer:

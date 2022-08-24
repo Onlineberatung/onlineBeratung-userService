@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.tenant;
 
-import static de.caritas.cob.userservice.api.tenant.TenantResolver.TECHNICAL_TENANT_ID;
+import static de.caritas.cob.userservice.api.tenant.TenantResolverService.TECHNICAL_TENANT_ID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
