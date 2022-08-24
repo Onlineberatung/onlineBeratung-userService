@@ -35,7 +35,7 @@ public class AgencyAdminService {
    */
   public List<AgencyAdminResponseDTO> retrieveAllAgencies() {
     return requireNonNull(
-            createControllerApi().searchAgencies(0, Integer.MAX_VALUE, null).getEmbedded())
+            createControllerApi().searchAgencies(0, Integer.MAX_VALUE, null, null).getEmbedded())
         .stream()
         .map(AgencyAdminFullResponseDTO::getEmbedded)
         .collect(Collectors.toList());
