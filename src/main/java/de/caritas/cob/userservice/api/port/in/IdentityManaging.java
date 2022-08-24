@@ -12,6 +12,7 @@ public interface IdentityManaging {
 
   Map<String, String> validateOneTimePassword(String username, String code);
 
+  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   boolean validatePasswordIgnoring2fa(String username, String password);
 
   boolean changePassword(String userId, String password);
