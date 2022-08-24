@@ -21,7 +21,12 @@ public class TenantHeaderSupplier {
 
   public void addTenantHeader(HttpHeaders headers) {
     if (multitenancy) {
-      headers.add("tenantId", TenantContext.getCurrentTenant().toString());
+      if (TenantContext.getCurrentTenant() != null) {
+        headers.add("tenantId", TenantContext.getCurrentTenant().toString());
+      } else {
+        log.warn(
+            "Not setting tenantId header, because tenant context was not set. It's okay only for non-auth user context.'");
+      }
     }
   }
 
