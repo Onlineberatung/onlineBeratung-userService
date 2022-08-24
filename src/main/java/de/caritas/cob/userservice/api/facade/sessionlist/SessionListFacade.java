@@ -9,7 +9,6 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.GroupSessionListResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.GroupSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.container.SessionListQueryParameter;
@@ -193,30 +192,19 @@ public class SessionListFacade {
 
   public GroupSessionListResponseDTO retrieveChatsForConsultantByChatIds(
       Consultant consultant, List<Long> chatIds, RocketChatCredentials rocketChatCredentials) {
-    List<ConsultantSessionResponseDTO> consultantSessions =
+    List<ConsultantSessionResponseDTO> consultantChatSessions =
         consultantSessionListService.retrieveChatsForConsultantAndChatIds(
             consultant, chatIds, rocketChatCredentials.getRocketChatToken());
-    consultantSessions.sort(comparing(ConsultantSessionResponseDTO::getLatestMessage).reversed());
+    consultantChatSessions.sort(
+        comparing(ConsultantSessionResponseDTO::getLatestMessage).reversed());
 
     SessionMapper sessionMapper = new SessionMapper();
     var sessions =
-        consultantSessions.stream()
+        consultantChatSessions.stream()
             .map(sessionMapper::toGroupSessionResponse)
             .collect(Collectors.toList());
 
-    if (topicsFeatureEnabled) {
-      enrichWithTopicDataForGroupSessionResponse(sessions);
-    }
-
     return new GroupSessionListResponseDTO().sessions(sessions);
-  }
-
-  private void enrichWithTopicDataForGroupSessionResponse(List<GroupSessionResponseDTO> sessions) {
-    if (sessions != null) {
-      sessions.stream()
-          .map(GroupSessionResponseDTO::getSession)
-          .forEach(sessionTopicEnrichmentService::enrichSessionWithTopicData);
-    }
   }
 
   /**
