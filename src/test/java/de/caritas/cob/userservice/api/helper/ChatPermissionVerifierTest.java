@@ -19,20 +19,20 @@ import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.model.UserAgency;
+import de.caritas.cob.userservice.api.model.UserChat;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
-@RunWith(SpringRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class ChatPermissionVerifierTest {
 
   @InjectMocks private ChatPermissionVerifier chatPermissionVerifier;
@@ -49,16 +49,13 @@ public class ChatPermissionVerifierTest {
 
   @Mock private User user;
 
-  @Before
-  public void setup() {
+  @Test
+  public void hasSameAgencyAssigned_Should_ReturnTrue_When_ChatAgenciesContainConsultantAgency() {
     ChatAgency[] chatAgencyArray = new ChatAgency[] {new ChatAgency(chat, AGENCY_ID_2)};
     Set<ChatAgency> chatAgencySet = new HashSet<>(Arrays.asList(chatAgencyArray));
-    when(chat.getChatAgencies()).thenReturn(chatAgencySet);
-  }
 
-  @Test
-  public void
-      isChatAgenciesContainConsultantAgency_Should_ReturnTrue_WhenChatAgenciesContainConsultantAgency() {
+    when(chat.getChatAgencies()).thenReturn(chatAgencySet);
+
     ConsultantAgency[] consultantAgencyArray =
         new ConsultantAgency[] {
           new ConsultantAgency(
@@ -75,7 +72,7 @@ public class ChatPermissionVerifierTest {
 
   @Test
   public void
-      isChatAgenciesContainConsultantAgency_Should_ReturnFalse_WhenChatAgenciesNotContainConsultantAgency() {
+      hasSameAgencyAssigned_Should_ReturnFalse_When_ChatAgenciesNotContainConsultantAgency() {
     ConsultantAgency[] consultantAgencyArray =
         new ConsultantAgency[] {
           new ConsultantAgency(
@@ -91,8 +88,12 @@ public class ChatPermissionVerifierTest {
   }
 
   @Test
-  public void
-      isChatAgenciesContainUserAgency_Should_ReturnTrue_WhenChatAgenciesContainUserAgency() {
+  public void hasSameAgencyAssigned_Should_ReturnTrue_When_ChatAgenciesContainUserAgency() {
+    ChatAgency[] chatAgencyArray = new ChatAgency[] {new ChatAgency(chat, AGENCY_ID_2)};
+    Set<ChatAgency> chatAgencySet = new HashSet<>(Arrays.asList(chatAgencyArray));
+
+    when(chat.getChatAgencies()).thenReturn(chatAgencySet);
+
     UserAgency[] userAgencyArray =
         new UserAgency[] {
           new UserAgency(AGENCY_ID, user, AGENCY_ID, null, null),
@@ -106,8 +107,7 @@ public class ChatPermissionVerifierTest {
   }
 
   @Test
-  public void
-      isChatAgenciesContainUserAgency_Should_ReturnFalse_WhenChatAgenciesNotContainUserAgency() {
+  public void hasSameAgencyAssigned_Should_ReturnFalse_When_ChatAgenciesNotContainUserAgency() {
     UserAgency[] userAgencyArray =
         new UserAgency[] {
           new UserAgency(AGENCY_ID, user, AGENCY_ID, null, null),
@@ -121,8 +121,40 @@ public class ChatPermissionVerifierTest {
   }
 
   @Test
+  public void hasSameAgencyAssigned_Should_ReturnFalse_When_UsersChatAgenciesAreNull() {
+    Chat chat = new Chat();
+
+    assertFalse(chatPermissionVerifier.hasSameAgencyAssigned(chat, user));
+  }
+
+  @Test
+  public void hasChatUserAssignment_Should_ReturnTrue_When_UserHasUserChatAssignment() {
+    Chat chat = new Chat();
+    UserChat userChat = UserChat.builder().chat(chat).user(user).build();
+    chat.setChatUsers(Set.of(userChat));
+
+    assertTrue(chatPermissionVerifier.hasChatUserAssignment(chat, user));
+  }
+
+  @Test
+  public void hasChatUserAssignment_Should_ReturnFalse_When_UserHasNoUserChatAssignment() {
+    Chat chat = new Chat();
+    UserChat userChat = UserChat.builder().chat(chat).user(new User()).build();
+    chat.setChatUsers(Set.of(userChat));
+
+    assertFalse(chatPermissionVerifier.hasChatUserAssignment(chat, user));
+  }
+
+  @Test
+  public void hasChatUserAssignment_Should_ReturnFalse_When_UsersChatUsersAreNull() {
+    Chat chat = new Chat();
+
+    assertFalse(chatPermissionVerifier.hasChatUserAssignment(chat, user));
+  }
+
+  @Test
   public void
-      verifyPermissionForChat_Should_verifyConsultantPermission_When_authenticatedUserHasRoleConsultant() {
+      verifyPermissionForChat_Should_verifyConsultantPermission_When_ChatAgenciesContainConsultantAgency() {
     Consultant consultant = new Consultant();
     ConsultantAgency consultantAgency = new ConsultantAgency();
     consultantAgency.setAgencyId(1L);
@@ -168,7 +200,7 @@ public class ChatPermissionVerifierTest {
 
   @Test
   public void
-      verifyPermissionForChat_Should_verifyUserPermission_When_authenticatedUserHasRoleUser() {
+      verifyPermissionForChat_Should_verifyUserPermission_When_ChatAgenciesContainUserAgency() {
     User user = new User();
     UserAgency userAgency = new UserAgency();
     userAgency.setAgencyId(1L);
@@ -183,9 +215,19 @@ public class ChatPermissionVerifierTest {
     assertDoesNotThrow(() -> this.chatPermissionVerifier.verifyPermissionForChat(chat));
   }
 
+  @Test
+  public void verifyPermissionForChat_Should_verifyUserPermission_When_UserHasUserChatAssignment() {
+    UserChat userChat = UserChat.builder().chat(chat).user(user).build();
+    when(chat.getChatUsers()).thenReturn(Set.of(userChat));
+    when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.USER.getValue()));
+    when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(Optional.of(user));
+
+    assertDoesNotThrow(() -> this.chatPermissionVerifier.verifyPermissionForChat(chat));
+  }
+
   @Test(expected = NotFoundException.class)
   public void
-      verifyPermissionForChat_Should_throwNotFoundException_When_userDoesNotExistInDatabase() {
+      verifyPermissionForChat_Should_throwNotFoundException_When_UserDoesNotExistInDatabase() {
     when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.USER.getValue()));
     when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(Optional.empty());
 
@@ -194,7 +236,7 @@ public class ChatPermissionVerifierTest {
 
   @Test(expected = ForbiddenException.class)
   public void
-      verifyPermissionForChat_Should_throwForbiddenException_When_agenciesOfChatAndUserAreDifferent() {
+      verifyPermissionForChat_Should_throwForbiddenException_When_AgenciesOfChatAndUserAreDifferent() {
     User user = new User();
     UserAgency userAgency = new UserAgency();
     userAgency.setAgencyId(1L);
@@ -203,6 +245,19 @@ public class ChatPermissionVerifierTest {
     chatAgency.setAgencyId(2L);
     Chat chat = new Chat();
     chat.setChatAgencies(asSet(chatAgency));
+    when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.USER.getValue()));
+    when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(Optional.of(user));
+
+    this.chatPermissionVerifier.verifyPermissionForChat(chat);
+  }
+
+  @Test(expected = ForbiddenException.class)
+  public void
+      verifyPermissionForChat_Should_throwForbiddenException_When_UserHasNoChatUserAssignment() {
+    Chat chat = new Chat();
+    UserChat userChat = UserChat.builder().user(new User()).chat(chat).build();
+    chat.setChatUsers(Set.of(userChat));
+
     when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.USER.getValue()));
     when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(Optional.of(user));
 
