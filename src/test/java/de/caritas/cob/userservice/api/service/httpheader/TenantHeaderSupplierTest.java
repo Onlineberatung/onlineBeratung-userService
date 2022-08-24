@@ -24,4 +24,12 @@ class TenantHeaderSupplierTest {
     // when, then
     assertThat(tenantHeaderSupplier.getTenantFromHeader()).isEqualTo(Optional.of(1L));
   }
+
+  @Test
+  void getOriginHeaderValue_Should_NotAddTenantIdHeaderIfTenantIdIsEmpty() {
+    // given
+    when(httpHeadersResolver.findHeaderValue("tenantId")).thenReturn(Optional.empty());
+    // when, then
+    assertThat(tenantHeaderSupplier.getTenantFromHeader()).isEmpty();
+  }
 }
