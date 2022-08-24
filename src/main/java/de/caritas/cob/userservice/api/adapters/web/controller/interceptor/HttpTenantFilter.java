@@ -1,7 +1,8 @@
 package de.caritas.cob.userservice.api.adapters.web.controller.interceptor;
 
+import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
-import de.caritas.cob.userservice.api.tenant.TenantResolver;
+import de.caritas.cob.userservice.api.tenant.TenantResolverService;
 import java.io.IOException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -21,17 +22,25 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Slf4j
 public class HttpTenantFilter extends OncePerRequestFilter {
 
-  private final @Nullable TenantResolver tenantResolver;
+  private final @Nullable TenantResolverService tenantResolverService;
+
+  private final @Nullable TenantService tenantService;
 
   @Override
   protected void doFilterInternal(
       HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
     log.debug("Trying to resolve tenant for request coming from URI {}", request.getRequestURI());
-    Long tenantId = tenantResolver.resolve(request);
+    Long tenantId = tenantResolverService.resolve(request);
+    resolveSubdomain(tenantId);
     log.debug("Setting current tenant context to: " + tenantId);
     TenantContext.setCurrentTenant(tenantId);
     filterChain.doFilter(request, response);
     TenantContext.clear();
+  }
+
+  private void resolveSubdomain(Long resolvedTenant) {
+    var currentSubdomain = tenantService.getRestrictedTenantData(resolvedTenant).getSubdomain();
+    TenantContext.setCurrentSubdomain(currentSubdomain);
   }
 }
