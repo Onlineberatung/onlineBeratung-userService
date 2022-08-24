@@ -32,9 +32,7 @@ public class FinishAnonymousConversationFacade {
         this.sessionService
             .getSession(sessionId)
             .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("Session with id %s does not exist", sessionId)));
+                () -> new NotFoundException("Session with id %s does not exist", sessionId));
 
     this.actionsRegistry
         .buildContainerForType(User.class)

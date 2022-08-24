@@ -54,9 +54,7 @@ public class ChatPermissionVerifier {
             .orElseThrow(
                 () ->
                     new NotFoundException(
-                        String.format(
-                            "Consultant with id %s not " + "found",
-                            authenticatedUser.getUserId())));
+                        "Consultant with id %s not found", authenticatedUser.getUserId()));
 
     if (!hasSameAgencyAssigned(chat, consultant)) {
       throw new ForbiddenException(
@@ -131,7 +129,7 @@ public class ChatPermissionVerifier {
             .orElseThrow(
                 () ->
                     new NotFoundException(
-                        String.format("User with id %s not found", authenticatedUser.getUserId())));
+                        "User with id %s not found", authenticatedUser.getUserId()));
 
     if (!hasChatUserAssignment(chat, user) && !hasSameAgencyAssigned(chat, user)) {
       throw new ForbiddenException(

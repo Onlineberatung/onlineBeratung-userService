@@ -91,8 +91,7 @@ public class JoinAndLeaveChatFacade {
     Chat chat =
         chatService
             .getChat(chatId)
-            .orElseThrow(
-                () -> new NotFoundException(String.format("Chat with id %s not found", chatId)));
+            .orElseThrow(() -> new NotFoundException("Chat with id %s not found", chatId));
 
     if (isFalse(chat.isActive())) {
       throw new ConflictException(
