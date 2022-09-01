@@ -22,23 +22,32 @@ public class IdentityConfig implements IdentityClientConfig {
 
   private static final char PATH_SEPARATOR = '/';
 
-  @NotBlank private String errorMessageDuplicatedEmail;
+  @NotBlank
+  private String errorMessageDuplicatedEmail;
 
-  @NotBlank private String errorMessageDuplicatedUsername;
+  @NotBlank
+  private String errorMessageDuplicatedUsername;
 
-  @URL private String openidConnectUrl;
+  @URL
+  private String openidConnectUrl;
 
-  @URL private String otpUrl;
+  @URL
+  private String otpUrl;
 
-  @NotNull private Boolean otpAllowedForUsers;
+  @NotNull
+  private Boolean otpAllowedForUsers;
 
-  @NotNull private Boolean otpAllowedForConsultants;
+  @NotNull
+  private Boolean otpAllowedForConsultants;
 
-  @NotNull private Boolean otpAllowedForSingleTenantAdmins;
+  @NotNull
+  private Boolean otpAllowedForSingleTenantAdmins;
 
-  @NotNull private Boolean otpAllowedForTenantSuperAdmins;
+  @NotNull
+  private Boolean otpAllowedForTenantSuperAdmins;
 
-  @NotNull private Boolean displayNameAllowedForConsultants;
+  @NotNull
+  private Boolean displayNameAllowedForConsultants;
 
   @Value("${multitenancy.enabled}")
   private boolean multiTenancyEnabled;
@@ -67,9 +76,9 @@ public class IdentityConfig implements IdentityClientConfig {
 
   private void addPath(String path, String arg, UriComponentsBuilder builder) {
     Arrays.stream(
-            StringUtils.trimLeadingCharacter(path, PATH_SEPARATOR)
-                .replaceAll("(\\{).*(})", arg)
-                .split(Character.toString(PATH_SEPARATOR)))
+        StringUtils.trimLeadingCharacter(path, PATH_SEPARATOR)
+            .replaceAll("(\\{).*(})", arg)
+            .split(Character.toString(PATH_SEPARATOR)))
         .forEach(builder::pathSegment);
   }
 
@@ -81,7 +90,8 @@ public class IdentityConfig implements IdentityClientConfig {
   }
 
   private boolean isMultitenancyEnabledAndOtpAllowed(Set<String> roles) {
-    return multiTenancyEnabled && isAnyTenantAdminAndOtpIsAllowed(roles);
+//    return multiTenancyEnabled && isAnyTenantAdminAndOtpIsAllowed(roles);
+    return isAnyTenantAdminAndOtpIsAllowed(roles);
   }
 
   private boolean isAnyTenantAdminAndOtpIsAllowed(Set<String> roles) {
