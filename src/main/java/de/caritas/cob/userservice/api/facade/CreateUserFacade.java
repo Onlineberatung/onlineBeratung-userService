@@ -15,6 +15,9 @@ import de.caritas.cob.userservice.api.helper.UserVerifier;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
+import de.caritas.cob.userservice.api.service.session.SessionService;
+import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
+import de.caritas.cob.userservice.api.service.statistics.event.RegistrationStatisticsEvent;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import lombok.NonNull;
@@ -34,6 +37,7 @@ public class CreateUserFacade {
   private final @NonNull AgencyVerifier agencyVerifier;
   private final @NonNull CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
 
+  private final @NonNull StatisticsService statisticsService;
   /**
    * Creates a user in Keycloak and MariaDB. Then creates a session or chat account depending on the
    * provided consulting ID.
@@ -52,6 +56,9 @@ public class CreateUserFacade {
             response.getUserId(), userDTO, UserRole.USER);
     createNewConsultingTypeFacade.initializeNewConsultingType(
         userDTO, user, obtainConsultingTypeSettings(userDTO));
+
+    RegistrationStatisticsEvent registrationEvent = new RegistrationStatisticsEvent(userDTO, user);
+    statisticsService.fireEvent(registrationEvent);
   }
 
   /**

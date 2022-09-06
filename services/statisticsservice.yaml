@@ -49,6 +49,7 @@ components:
         - "CREATE_MESSAGE"
         - "START_VIDEO_CALL"
         - "STOP_VIDEO_CALL"
+        - "REGISTRATION"
 
     UserRole:
       type: string
@@ -141,6 +142,41 @@ components:
           type: string
           description: The uuid of the video call
           example: 123e4567-e89b-12d3-a456-556642440000
+
+    RegistrationStatisticsEventMessage:
+      type: object
+      required:
+        - userId
+        - registrationDate
+      allOf:
+        - $ref: '#/components/schemas/StatisticsEventMessage'
+        - type: object
+      properties:
+        userId:
+          type: string
+        registrationDate:
+          type: string
+          example: '2022-08-15T21:11:29'
+        age:
+          type: integer
+          example: '25'
+        gender:
+          type: string
+          example: 'FEMALE'
+        counsellingRelation:
+          type: string
+          example: 'SELF_COUNSELLING'
+        topicsInternalAttributes:
+          type: array
+          items:
+            type: string
+          example: [ 'angeho01','angeho13' ]
+        mainTopicInternalAttribute:
+          type: string
+          example: 'angeho01'
+        postalCode:
+          type: string
+          example: '99999'
 
   securitySchemes:
     Bearer:
