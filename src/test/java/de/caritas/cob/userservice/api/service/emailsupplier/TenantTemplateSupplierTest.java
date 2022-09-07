@@ -12,7 +12,6 @@ import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDT
 import de.caritas.cob.userservice.tenantservice.generated.web.model.RestrictedTenantDTO;
 import java.util.List;
 import org.jeasy.random.EasyRandom;
-import org.junit.After;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
