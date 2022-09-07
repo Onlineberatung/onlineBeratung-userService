@@ -27,7 +27,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 class MultitenancyWithSingleDomainTenantResolverTest {
 
   public static final String CONSULTANT_ID = "cid-1234";
-  public static final long TENANT = 1L;
   public static final long ANOTHER_TENANT = 2L;
 
   @InjectMocks
