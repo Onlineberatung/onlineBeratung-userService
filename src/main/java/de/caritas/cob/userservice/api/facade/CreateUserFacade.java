@@ -36,7 +36,6 @@ public class CreateUserFacade {
   private final @NonNull ConsultingTypeManager consultingTypeManager;
   private final @NonNull AgencyVerifier agencyVerifier;
   private final @NonNull CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
-
   private final @NonNull StatisticsService statisticsService;
   /**
    * Creates a user in Keycloak and MariaDB. Then creates a session or chat account depending on the
@@ -54,11 +53,12 @@ public class CreateUserFacade {
     var user =
         updateKeycloakAccountAndCreateDatabaseUserAccount(
             response.getUserId(), userDTO, UserRole.USER);
-    NewRegistrationResponseDto newRegistrationResponseDto = createNewConsultingTypeFacade.initializeNewConsultingType(
-        userDTO, user, obtainConsultingTypeSettings(userDTO));
+    NewRegistrationResponseDto newRegistrationResponseDto =
+        createNewConsultingTypeFacade.initializeNewConsultingType(
+            userDTO, user, obtainConsultingTypeSettings(userDTO));
 
-    RegistrationStatisticsEvent registrationEvent = new RegistrationStatisticsEvent(userDTO, user,
-        newRegistrationResponseDto.getSessionId());
+    RegistrationStatisticsEvent registrationEvent =
+        new RegistrationStatisticsEvent(userDTO, user, newRegistrationResponseDto.getSessionId());
     statisticsService.fireEvent(registrationEvent);
   }
 

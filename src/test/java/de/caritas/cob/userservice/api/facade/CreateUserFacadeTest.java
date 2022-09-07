@@ -16,11 +16,13 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
+import de.caritas.cob.userservice.api.adapters.web.dto.NewRegistrationResponseDto;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
@@ -30,6 +32,7 @@ import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.helper.AgencyVerifier;
 import de.caritas.cob.userservice.api.helper.UserVerifier;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
+import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import org.hamcrest.Matchers;
@@ -51,6 +54,7 @@ public class CreateUserFacadeTest {
   @Mock private AgencyVerifier agencyVerifier;
   @Mock private CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
   @Mock private UserVerifier userVerifier;
+  @Mock private StatisticsService statisticsService;
 
   @Test
   public void
@@ -118,6 +122,10 @@ public class CreateUserFacadeTest {
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID);
     doNothing().when(keycloakService).updatePassword(anyString(), anyString());
 
+    when(createNewConsultingTypeFacade.initializeNewConsultingType(
+            any(), any(), any(ExtendedConsultingTypeResponseDTO.class)))
+        .thenReturn(mock(NewRegistrationResponseDto.class));
+
     createUserFacade.createUserAccountWithInitializedConsultingType(USER_DTO_KREUZBUND);
 
     verify(rollbackFacade, times(0)).rollBackUserAccount(any());
@@ -132,6 +140,10 @@ public class CreateUserFacadeTest {
         .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITH_USER_ID);
     doNothing().when(keycloakService).updatePassword(anyString(), anyString());
 
+    when(createNewConsultingTypeFacade.initializeNewConsultingType(
+            any(), any(), any(ExtendedConsultingTypeResponseDTO.class)))
+        .thenReturn(mock(NewRegistrationResponseDto.class));
+
     createUserFacade.createUserAccountWithInitializedConsultingType(USER_DTO_KREUZBUND);
 
     verify(keycloakService, times(1)).createKeycloakUser(any(UserDTO.class));
@@ -140,6 +152,7 @@ public class CreateUserFacadeTest {
     verify(createNewConsultingTypeFacade, times(1))
         .initializeNewConsultingType(any(), any(), any(ExtendedConsultingTypeResponseDTO.class));
     verify(rollbackFacade, times(0)).rollBackUserAccount(any());
+    verify(statisticsService, times(1)).fireEvent(any());
   }
 
   @Test

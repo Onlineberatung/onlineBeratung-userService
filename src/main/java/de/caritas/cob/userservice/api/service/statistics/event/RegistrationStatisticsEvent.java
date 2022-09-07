@@ -67,16 +67,12 @@ public class RegistrationStatisticsEvent implements StatisticsEvent {
         .addSerializer(OffsetDateTime.class, new OffsetDateTimeToStringSerializer());
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public EventType getEventType() {
     return EVENT_TYPE;
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   @Override
   public Optional<String> getPayload() {
     var registrationStatisticsEventMessage =
@@ -92,7 +88,6 @@ public class RegistrationStatisticsEvent implements StatisticsEvent {
                 findTopicInternalIdentifier(registeredUser.getMainTopicId()))
             .topicsInternalAttributes(findTopicsInternalAttributes(registeredUser.getTopicIds()))
             .postalCode(registeredUser.getPostcode())
-
             .timestamp(CustomOffsetDateTime.nowInUtc());
 
     try {
