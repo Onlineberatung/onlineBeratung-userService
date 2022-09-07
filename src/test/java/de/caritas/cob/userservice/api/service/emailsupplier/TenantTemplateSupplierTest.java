@@ -12,16 +12,18 @@ import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDT
 import de.caritas.cob.userservice.tenantservice.generated.web.model.RestrictedTenantDTO;
 import java.util.List;
 import org.jeasy.random.EasyRandom;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-@RunWith(MockitoJUnitRunner.class)
-public class TenantTemplateSupplierTest {
+@ExtendWith(MockitoExtension.class)
+class TenantTemplateSupplierTest {
 
   private static final String VALID_SUBDOMAIN = "subdomain";
 
@@ -31,8 +33,13 @@ public class TenantTemplateSupplierTest {
 
   private final EasyRandom easyRandom = new EasyRandom();
 
+  @AfterEach
+  void tearDown() {
+    ReflectionTestUtils.setField(tenantTemplateSupplier, "multitenancyWithSingleDomain", false);
+  }
+
   @Test
-  public void getTemplateAttributes_Provide_Tenant_Specific_Data_For_Email_Templates() {
+  void getTemplateAttributes_ShouldProvideTenantSpecificDataForEmailTemplates() {
     // given
     var tenantData = new TenantData();
     tenantData.setTenantId(1L);
@@ -58,12 +65,40 @@ public class TenantTemplateSupplierTest {
   }
 
   @Test
-  public void
-      getTemplateAttributes_Provide_Tenant_Specific_Data_For_Email_Templates_IfSubdomainNotSet() {
+  void
+      getTemplateAttributes_Should_ProvideTenantSpecificDataForEmailTemplates_When_SubdomainNotSet() {
     // given
     var tenantData = new TenantData();
     tenantData.setTenantId(1L);
     tenantData.setSubdomain(null);
+    TenantContext.setCurrentTenantData(tenantData);
+    ReflectionTestUtils.setField(
+        tenantTemplateSupplier, "applicationBaseUrl", "https://onlineberatung.net");
+    RestrictedTenantDTO mockedTenantData = easyRandom.nextObject(RestrictedTenantDTO.class);
+    mockedTenantData.setSubdomain(VALID_SUBDOMAIN);
+
+    // when
+    when(tenantService.getRestrictedTenantData(tenantData.getTenantId()))
+        .thenReturn(mockedTenantData);
+    List<TemplateDataDTO> templateAttributes = tenantTemplateSupplier.getTemplateAttributes();
+
+    // then
+    assertTemplateAttributesAreCorrect(mockedTenantData, templateAttributes);
+
+    verify(tenantService, Mockito.never()).getRestrictedTenantData(tenantData.getSubdomain());
+    verify(tenantService).getRestrictedTenantData(tenantData.getTenantId());
+
+    TenantContext.clear();
+  }
+
+  @Test
+  void
+      getTemplateAttributes_ProvideTenantSpecificDataForEmailTemplates_When_FeatureMultitenancyWithSingleDomainIsEnabled() {
+    // given
+    ReflectionTestUtils.setField(tenantTemplateSupplier, "multitenancyWithSingleDomain", true);
+    var tenantData = new TenantData();
+    tenantData.setTenantId(1L);
+    tenantData.setSubdomain("somedomain");
     TenantContext.setCurrentTenantData(tenantData);
     ReflectionTestUtils.setField(
         tenantTemplateSupplier, "applicationBaseUrl", "https://onlineberatung.net");
