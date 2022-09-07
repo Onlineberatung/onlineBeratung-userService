@@ -12,6 +12,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackUserAccountInformation;
 import de.caritas.cob.userservice.api.helper.AgencyVerifier;
+import de.caritas.cob.userservice.api.helper.RegistrationStatisticsHelper;
 import de.caritas.cob.userservice.api.helper.UserVerifier;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.User;
@@ -28,7 +29,6 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class CreateUserFacade {
-
   private final @NonNull UserVerifier userVerifier;
   private final @NonNull IdentityClient identityClient;
   private final @NonNull UserService userService;
@@ -37,6 +37,8 @@ public class CreateUserFacade {
   private final @NonNull AgencyVerifier agencyVerifier;
   private final @NonNull CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
   private final @NonNull StatisticsService statisticsService;
+  private final @NonNull RegistrationStatisticsHelper registrationStatisticsHelper;
+
   /**
    * Creates a user in Keycloak and MariaDB. Then creates a session or chat account depending on the
    * provided consulting ID.
@@ -58,7 +60,8 @@ public class CreateUserFacade {
             userDTO, user, obtainConsultingTypeSettings(userDTO));
 
     RegistrationStatisticsEvent registrationEvent =
-        new RegistrationStatisticsEvent(userDTO, user, newRegistrationResponseDto.getSessionId());
+        new RegistrationStatisticsEvent(
+            userDTO, user, newRegistrationResponseDto.getSessionId(), registrationStatisticsHelper);
     statisticsService.fireEvent(registrationEvent);
   }
 

@@ -15,7 +15,6 @@ import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventTyp
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.RegistrationStatisticsEventMessage;
 import java.time.OffsetDateTime;
 import java.util.Optional;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -24,16 +23,20 @@ public class RegistrationStatisticsEvent implements StatisticsEvent {
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final EventType EVENT_TYPE = EventType.REGISTRATION;
 
-  private static @NonNull RegistrationStatisticsHelper registrationStatisticsHelper;
-
   private final UserDTO registeredUser;
   private final User createdUser;
   private final Long sessionId;
+  private final RegistrationStatisticsHelper registrationStatisticsHelper;
 
-  public RegistrationStatisticsEvent(UserDTO registeredUser, User createdUser, Long sessionId) {
+  public RegistrationStatisticsEvent(
+      UserDTO registeredUser,
+      User createdUser,
+      Long sessionId,
+      RegistrationStatisticsHelper registrationStatisticsHelper) {
     this.registeredUser = registeredUser;
     this.createdUser = createdUser;
     this.sessionId = sessionId;
+    this.registrationStatisticsHelper = registrationStatisticsHelper;
     OBJECT_MAPPER.registerModule(new JavaTimeModule());
     OBJECT_MAPPER.registerModule(buildSimpleModule());
   }

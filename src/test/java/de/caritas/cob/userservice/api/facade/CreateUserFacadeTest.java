@@ -30,6 +30,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHt
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.helper.AgencyVerifier;
+import de.caritas.cob.userservice.api.helper.RegistrationStatisticsHelper;
 import de.caritas.cob.userservice.api.helper.UserVerifier;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
@@ -55,6 +56,8 @@ public class CreateUserFacadeTest {
   @Mock private CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
   @Mock private UserVerifier userVerifier;
   @Mock private StatisticsService statisticsService;
+
+  @Mock private RegistrationStatisticsHelper registrationStatisticsHelper;
 
   @Test
   public void
