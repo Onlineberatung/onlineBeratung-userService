@@ -5,6 +5,7 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.NewRegistrationResponseDto;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -15,7 +16,6 @@ import de.caritas.cob.userservice.api.helper.UserVerifier;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
-import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
 import de.caritas.cob.userservice.api.service.statistics.event.RegistrationStatisticsEvent;
 import de.caritas.cob.userservice.api.service.user.UserService;
@@ -54,10 +54,11 @@ public class CreateUserFacade {
     var user =
         updateKeycloakAccountAndCreateDatabaseUserAccount(
             response.getUserId(), userDTO, UserRole.USER);
-    createNewConsultingTypeFacade.initializeNewConsultingType(
+    NewRegistrationResponseDto newRegistrationResponseDto = createNewConsultingTypeFacade.initializeNewConsultingType(
         userDTO, user, obtainConsultingTypeSettings(userDTO));
 
-    RegistrationStatisticsEvent registrationEvent = new RegistrationStatisticsEvent(userDTO, user);
+    RegistrationStatisticsEvent registrationEvent = new RegistrationStatisticsEvent(userDTO, user,
+        newRegistrationResponseDto.getSessionId());
     statisticsService.fireEvent(registrationEvent);
   }
 

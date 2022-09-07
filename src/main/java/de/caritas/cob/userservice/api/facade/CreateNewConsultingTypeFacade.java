@@ -19,7 +19,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-/** Facade to encapsulate the steps to initialize a new consulting type. */
+/**
+ * Facade to encapsulate the steps to initialize a new consulting type.
+ */
 @Service
 @RequiredArgsConstructor
 public class CreateNewConsultingTypeFacade {
@@ -32,11 +34,11 @@ public class CreateNewConsultingTypeFacade {
    * Initializes the new consulting type settings and creates a session or a chat-agency relation
    * depending on its type. This method should be used for new consulting type registrations.
    *
-   * @param userRegistrationDTO {@link UserRegistrationDTO}
-   * @param user {@link User}
+   * @param userRegistrationDTO   {@link UserRegistrationDTO}
+   * @param user                  {@link User}
    * @param rocketChatCredentials {@link RocketChatCredentials}
    * @return session ID of created session (if not consulting id refers to a group only consulting
-   *     type)
+   * type)
    */
   public NewRegistrationResponseDto initializeNewConsultingType(
       UserRegistrationDTO userRegistrationDTO,
@@ -61,12 +63,12 @@ public class CreateNewConsultingTypeFacade {
    * @param user {@link User}
    * @param extendedConsultingTypeResponseDTO {@link ExtendedConsultingTypeResponseDTO}
    */
-  public void initializeNewConsultingType(
+  public NewRegistrationResponseDto initializeNewConsultingType(
       UserRegistrationDTO userRegistrationDTO,
       User user,
       ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO) {
 
-    createSessionOrChat(userRegistrationDTO, user, extendedConsultingTypeResponseDTO, null);
+    return createSessionOrChat(userRegistrationDTO, user, extendedConsultingTypeResponseDTO, null);
   }
 
   private NewRegistrationResponseDto createSessionOrChat(

@@ -32,10 +32,12 @@ public class RegistrationStatisticsEvent implements StatisticsEvent {
 
   private final UserDTO registeredUser;
   private final User createdUser;
+  private final Long sessionId;
 
-  public RegistrationStatisticsEvent(UserDTO registeredUser, User createdUser) {
+  public RegistrationStatisticsEvent(UserDTO registeredUser, User createdUser, Long sessionId) {
     this.registeredUser = registeredUser;
     this.createdUser = createdUser;
+    this.sessionId = sessionId;
     OBJECT_MAPPER.registerModule(new JavaTimeModule());
     OBJECT_MAPPER.registerModule(buildSimpleModule());
   }
@@ -80,6 +82,7 @@ public class RegistrationStatisticsEvent implements StatisticsEvent {
     var registrationStatisticsEventMessage =
         new RegistrationStatisticsEventMessage()
             .eventType(EVENT_TYPE)
+            .sessionId(sessionId)
             .userId(createdUser.getUserId())
             .registrationDate(toIsoTime(createdUser.getCreateDate()))
             .age(registeredUser.getUserAge())

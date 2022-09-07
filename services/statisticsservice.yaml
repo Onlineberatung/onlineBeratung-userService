@@ -146,14 +146,18 @@ components:
     RegistrationStatisticsEventMessage:
       type: object
       required:
+        - sessionId
         - userId
         - registrationDate
       allOf:
         - $ref: '#/components/schemas/StatisticsEventMessage'
         - type: object
       properties:
-        userId:
-          type: string
+        sessionId:
+          type: integer
+          format: int64
+          description: The id of the session
+          example: 12345
         registrationDate:
           type: string
           example: '2022-08-15T21:11:29'
