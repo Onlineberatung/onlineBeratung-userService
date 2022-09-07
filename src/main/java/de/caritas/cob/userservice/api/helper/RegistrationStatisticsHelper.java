@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.helper;
 
+import de.caritas.cob.userservice.api.service.consultingtype.TopicService;
 import de.caritas.cob.userservice.topicservice.generated.web.model.TopicDTO;
 import java.util.Collection;
 import java.util.List;
@@ -15,7 +16,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class RegistrationStatisticsHelper {
-  private @NonNull Map<Long, TopicDTO> allTopicsMap;
+
+  private final @NonNull TopicService topicService;
 
   public List<String> findTopicsInternalAttributes(Collection<Integer> topicsList) {
     return topicsList.stream().map(this::findTopicInternalIdentifier).collect(Collectors.toList());
@@ -26,6 +28,7 @@ public class RegistrationStatisticsHelper {
   }
 
   private Optional<String> findTopicInternalIdentifierInTopicsMap(Integer topicId) {
+    Map<Long, TopicDTO> allTopicsMap = topicService.getAllTopicsMap();
     Long key = Long.valueOf(topicId);
     if (allTopicsMap.containsKey(key)) {
       return Optional.ofNullable(allTopicsMap.get(key).getInternalIdentifier());

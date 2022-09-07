@@ -13,6 +13,7 @@ import de.caritas.cob.userservice.api.helper.json.OffsetDateTimeToStringSerializ
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.RegistrationStatisticsEventMessage;
+import de.caritas.cob.userservice.statisticsservice.generated.web.model.UserRole;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -59,6 +60,7 @@ public class RegistrationStatisticsEvent implements StatisticsEvent {
             .eventType(EVENT_TYPE)
             .sessionId(sessionId)
             .userId(createdUser.getUserId())
+            .userRole(UserRole.ASKER)
             .registrationDate(toIsoTime(createdUser.getCreateDate()))
             .age(registeredUser.getUserAge())
             .gender(registeredUser.getUserGender())
