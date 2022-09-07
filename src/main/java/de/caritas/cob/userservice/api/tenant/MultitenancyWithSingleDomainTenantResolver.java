@@ -2,6 +2,8 @@ package de.caritas.cob.userservice.api.tenant;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.httpheader.HttpHeadersResolver;
 import java.util.Optional;
@@ -9,8 +11,11 @@ import javax.servlet.http.HttpServletRequest;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Component
 @RequiredArgsConstructor
@@ -23,13 +28,37 @@ public class MultitenancyWithSingleDomainTenantResolver implements TenantResolve
 
   private final @NonNull HttpHeadersResolver httpHeadersResolver;
 
+  private final @NonNull ConsultantService consultantService;
+
   @Override
   public Optional<Long> resolve(HttpServletRequest request) {
     if (multitenancyWithSingleDomain) {
-      return resolveTenantFromAgency();
-    } else {
-      return Optional.empty();
+      Optional<Long> tenantIDfromAgency = resolveTenantFromAgency();
+      if (tenantIDfromAgency.isEmpty() && requestParameterContainsConsultantId()) {
+        return resolveTenantFromConsultantRequestParameter();
+      } else {
+        return tenantIDfromAgency;
+      }
     }
+    return Optional.empty();
+  }
+
+  private Optional<Long> resolveTenantFromConsultantRequestParameter() {
+    Optional<Consultant> consultant = consultantService.getConsultant(getConsultantId());
+    if (consultant.isPresent()) {
+      return Optional.of(consultant.get().getTenantId());
+    }
+    return Optional.empty();
+  }
+
+  private boolean requestParameterContainsConsultantId() {
+    return StringUtils.isNotBlank(getConsultantId());
+  }
+
+  private String getConsultantId() {
+    HttpServletRequest request =
+        ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+    return request.getParameter("cid");
   }
 
   private Optional<Long> resolveTenantFromAgency() {
