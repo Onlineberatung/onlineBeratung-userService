@@ -28,7 +28,7 @@ public class RegistrationStatisticsHelper {
   }
 
   private Optional<String> findTopicInternalIdentifierInTopicsMap(Integer topicId) {
-    Map<Long, TopicDTO> allTopicsMap = topicService.getAllTopicsMap();
+    Map<Long, TopicDTO> allTopicsMap = topicService.getAllActiveTopicsMap();
     Long key = Long.valueOf(topicId);
     if (allTopicsMap.containsKey(key)) {
       return Optional.ofNullable(allTopicsMap.get(key).getInternalIdentifier());

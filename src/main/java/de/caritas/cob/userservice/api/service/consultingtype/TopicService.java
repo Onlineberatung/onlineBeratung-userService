@@ -33,6 +33,13 @@ public class TopicService {
     return topicControllerApi.getAllTopics();
   }
 
+  @Cacheable(cacheNames = CacheManagerConfig.TOPICS_CACHE)
+  public List<TopicDTO> getAllActiveTopics() {
+    log.info("Calling topic service to get all active topics");
+    addDefaultHeaders(this.topicControllerApi.getApiClient());
+    return topicControllerApi.getAllActiveTopics();
+  }
+
   private void addDefaultHeaders(ApiClient apiClient) {
     var headers = this.securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders();
     tenantHeaderSupplier.addTenantHeader(headers);
@@ -42,6 +49,12 @@ public class TopicService {
   @Cacheable(cacheNames = CacheManagerConfig.TOPICS_CACHE)
   public Map<Long, TopicDTO> getAllTopicsMap() {
     var allTopics = this.getAllTopics();
+    return allTopics.isEmpty() ? Maps.newHashMap() : getAllTopicsMap(allTopics);
+  }
+
+  @Cacheable(cacheNames = CacheManagerConfig.TOPICS_CACHE)
+  public Map<Long, TopicDTO> getAllActiveTopicsMap() {
+    var allTopics = this.getAllActiveTopics();
     return allTopics.isEmpty() ? Maps.newHashMap() : getAllTopicsMap(allTopics);
   }
 
