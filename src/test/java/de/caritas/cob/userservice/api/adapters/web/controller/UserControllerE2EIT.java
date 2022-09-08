@@ -1268,6 +1268,7 @@ class UserControllerE2EIT {
 
   @Test
   void registerUserShouldSaveDefaultPreferredLanguage() throws Exception {
+    givenAValidTopicServiceResponse();
     givenConsultingTypeServiceResponse();
     givenARealmResource();
     givenAUserDTO();
@@ -1299,6 +1300,7 @@ class UserControllerE2EIT {
   @Test
   void registerUserWithoutConsultingIdShouldSaveCreateUserWithDemographicsData() throws Exception {
     ReflectionTestUtils.setField(userVerifier, "demographicsFeatureEnabled", true);
+    givenAValidTopicServiceResponse();
     givenConsultingTypeServiceResponse(2);
     givenARealmResource();
     givenAUserDTOWithDemographics();
