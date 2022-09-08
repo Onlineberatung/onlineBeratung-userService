@@ -14,6 +14,7 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -42,6 +43,10 @@ class MultitenancyWithSingleDomainTenantResolverTest {
 
   @Mock private ServletRequestAttributes requestAttributes;
 
+  @BeforeEach
+  public void initialize() {
+    TenantContext.clear();
+  }
   @AfterEach
   public void tearDown() {
     resetRequestAttributes();
