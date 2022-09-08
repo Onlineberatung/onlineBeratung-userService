@@ -26,8 +26,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @ExtendWith(MockitoExtension.class)
 class MultitenancyWithSingleDomainTenantResolverTest {
 
-  public static final String CONSULTANT_ID = "cid-1234";
-  public static final long ANOTHER_TENANT = 2L;
+  private static final String CONSULTANT_ID = "cid-1234";
+  private static final long ANOTHER_TENANT = 2L;
 
   @InjectMocks
   MultitenancyWithSingleDomainTenantResolver multitenancyWithSingleDomainTenantResolver;
@@ -70,14 +70,14 @@ class MultitenancyWithSingleDomainTenantResolverTest {
 
   @Test
   void
-      resolve_Should_GetTenantIdFromConsultant_When_FeatureMultitenancyWithSingleDomainIsEnabledAndNoAgencyIdIsProvided() {
+      resolve_Should_GetTenantIdFromConsultant_When_FeatureMultitenancyWithSingleDomainIsEnabledAndNoAgencyIdIsProvidedAndUrlMatchesConsultantGetById() {
     // given
     givenRequestContextIsSet();
     ReflectionTestUtils.setField(
         multitenancyWithSingleDomainTenantResolver, "multitenancyWithSingleDomain", true);
 
     when(headersResolver.findHeaderValue("agencyId")).thenReturn(Optional.empty());
-    when(request.getParameter("cid")).thenReturn(CONSULTANT_ID);
+    when(request.getRequestURI()).thenReturn("/users/consultants/" + CONSULTANT_ID);
 
     EasyRandom random = new EasyRandom();
     Consultant consultant = random.nextObject(Consultant.class);
@@ -87,6 +87,25 @@ class MultitenancyWithSingleDomainTenantResolverTest {
     assertThat(multitenancyWithSingleDomainTenantResolver.canResolve(request)).isTrue();
     assertThat(multitenancyWithSingleDomainTenantResolver.resolve(request))
         .isEqualTo(Optional.of(ANOTHER_TENANT));
+  }
+
+  @Test
+  void
+      resolve_Should_ResolveToEmptyTenant_When_FeatureMultitenancyWithSingleDomainIsEnabledAndNoAgencyIdIsProvidedAndUrlDoesNotMatchConsultantGetById() {
+    // given
+    givenRequestContextIsSet();
+    ReflectionTestUtils.setField(
+        multitenancyWithSingleDomainTenantResolver, "multitenancyWithSingleDomain", true);
+
+    when(headersResolver.findHeaderValue("agencyId")).thenReturn(Optional.empty());
+    when(request.getRequestURI()).thenReturn("/users/sessions/1");
+
+    EasyRandom random = new EasyRandom();
+    Consultant consultant = random.nextObject(Consultant.class);
+    consultant.setTenantId(ANOTHER_TENANT);
+    // when
+    assertThat(multitenancyWithSingleDomainTenantResolver.canResolve(request)).isFalse();
+    assertThat(multitenancyWithSingleDomainTenantResolver.resolve(request)).isEmpty();
   }
 
   @Test
