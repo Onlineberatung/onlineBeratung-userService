@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.service.emailsupplier;
 
+import static de.caritas.cob.userservice.api.tenant.TenantContext.getCurrentTenantData;
+
 import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
@@ -24,9 +26,12 @@ public class TenantTemplateSupplier {
   @Value("${app.base.url}")
   private String applicationBaseUrl;
 
+  @Value("${feature.multitenancy.with.single.domain.enabled}")
+  private boolean multitenancyWithSingleDomain;
+
   public List<TemplateDataDTO> getTemplateAttributes() {
-    var subdomain = TenantContext.getCurrentTenantData().getSubdomain();
-    RestrictedTenantDTO tenantData = getRestrictedTenantDTO(subdomain);
+
+    RestrictedTenantDTO tenantData = getRestrictedTenantDTO();
 
     List<TemplateDataDTO> templateAttributes = new ArrayList<>();
     templateAttributes.add(getTenantName(tenantData));
@@ -35,19 +40,24 @@ public class TenantTemplateSupplier {
     templateAttributes.add(new TemplateDataDTO().key("url").value(tenantBaseUrl));
     templateAttributes.add(getTenantImprintUrl(tenantBaseUrl));
     templateAttributes.add(getTanantPrivacyUrl(tenantBaseUrl));
-
     return templateAttributes;
   }
 
-  private RestrictedTenantDTO getRestrictedTenantDTO(String subdomain) {
-    if (subdomain != null) {
-      return tenantService.getRestrictedTenantData(subdomain);
+  private RestrictedTenantDTO getRestrictedTenantDTO() {
+
+    if (shouldResolveTenantDataBySubdomin()) {
+      return tenantService.getRestrictedTenantData(getCurrentTenantData().getSubdomain());
     } else {
       log.warn("Subdomain was null, fallback to tenant data resolution by tenant id");
-      var tenantId = TenantContext.getCurrentTenantData().getTenantId();
+      var tenantId = getCurrentTenantData().getTenantId();
       log.info("Resolving tenant data by tenantId {}", tenantId);
       return tenantService.getRestrictedTenantData(tenantId);
     }
+  }
+
+  private boolean shouldResolveTenantDataBySubdomin() {
+    return !multitenancyWithSingleDomain
+        && TenantContext.getCurrentTenantData().getSubdomain() != null;
   }
 
   private TemplateDataDTO getTenantImprintUrl(String tenantUrl) {
