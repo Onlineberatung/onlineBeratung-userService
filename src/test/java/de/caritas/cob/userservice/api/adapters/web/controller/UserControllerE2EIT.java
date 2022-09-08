@@ -1247,6 +1247,7 @@ class UserControllerE2EIT {
     givenConsultingTypeServiceResponse();
     givenARealmResource();
     givenAUserDTO();
+    givenAValidTopicServiceResponse();
 
     mockMvc
         .perform(
@@ -1323,6 +1324,7 @@ class UserControllerE2EIT {
     givenConsultingTypeServiceResponse(2);
     givenARealmResource();
     givenAUserDTOWithCounsellingRelation();
+    givenAValidTopicServiceResponse();
 
     mockMvc
         .perform(
@@ -1339,6 +1341,7 @@ class UserControllerE2EIT {
     givenConsultingTypeServiceResponse(2);
     givenARealmResource();
     givenAUserDTOWithMainTopic();
+    givenAValidTopicServiceResponse();
 
     mockMvc
         .perform(
@@ -1355,6 +1358,7 @@ class UserControllerE2EIT {
     givenConsultingTypeServiceResponse(2);
     givenARealmResource();
     givenAUserDTOWithTopics();
+    givenAValidTopicServiceResponse();
 
     mockMvc
         .perform(
@@ -1572,7 +1576,7 @@ class UserControllerE2EIT {
             .description("topic desc 2")
             .status("ACTIVE")
             .internalIdentifier("internal identifier 2");
-    ;
+
     when(topicControllerApi.getApiClient()).thenReturn(new ApiClient());
     when(topicControllerApi.getAllTopics()).thenReturn(Lists.newArrayList(firstTopic, secondTopic));
     when(topicControllerApi.getAllActiveTopics())
