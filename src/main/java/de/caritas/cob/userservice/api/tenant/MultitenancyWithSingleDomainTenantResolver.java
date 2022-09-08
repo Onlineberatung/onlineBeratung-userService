@@ -11,7 +11,6 @@ import javax.servlet.http.HttpServletRequest;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -21,6 +20,10 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @RequiredArgsConstructor
 @Slf4j
 public class MultitenancyWithSingleDomainTenantResolver implements TenantResolver {
+
+  private static final String USERS_CONSULTANTS = "/users/consultants/";
+  private static final String USERS_CONSULTANTS_BY_ID_URL_REGEX = USERS_CONSULTANTS + "[a-z0-9-]+";
+
   @Value("${feature.multitenancy.with.single.domain.enabled}")
   private boolean multitenancyWithSingleDomain;
 
@@ -52,13 +55,17 @@ public class MultitenancyWithSingleDomainTenantResolver implements TenantResolve
   }
 
   private boolean requestParameterContainsConsultantId() {
-    return StringUtils.isNotBlank(getConsultantId());
+    HttpServletRequest request = getRequest();
+    return request.getRequestURI().matches(USERS_CONSULTANTS_BY_ID_URL_REGEX);
   }
 
   private String getConsultantId() {
-    HttpServletRequest request =
-        ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
-    return request.getParameter("cid");
+    return getRequest().getRequestURI().replace(USERS_CONSULTANTS, "");
+  }
+
+  private HttpServletRequest getRequest() {
+    return ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+        .getRequest();
   }
 
   private Optional<Long> resolveTenantFromAgency() {
