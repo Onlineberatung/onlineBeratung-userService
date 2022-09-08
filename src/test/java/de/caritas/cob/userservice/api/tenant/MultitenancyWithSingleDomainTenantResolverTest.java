@@ -47,6 +47,7 @@ class MultitenancyWithSingleDomainTenantResolverTest {
   public void initialize() {
     TenantContext.clear();
   }
+
   @AfterEach
   public void tearDown() {
     resetRequestAttributes();
