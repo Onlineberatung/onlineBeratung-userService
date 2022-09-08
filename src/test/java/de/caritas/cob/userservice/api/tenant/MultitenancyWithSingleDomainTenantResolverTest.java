@@ -87,6 +87,7 @@ class MultitenancyWithSingleDomainTenantResolverTest {
     assertThat(multitenancyWithSingleDomainTenantResolver.canResolve(request)).isTrue();
     assertThat(multitenancyWithSingleDomainTenantResolver.resolve(request))
         .isEqualTo(Optional.of(ANOTHER_TENANT));
+    assertThat(TenantContext.getCurrentTenant()).isNull();
   }
 
   @Test
@@ -106,6 +107,7 @@ class MultitenancyWithSingleDomainTenantResolverTest {
     // when
     assertThat(multitenancyWithSingleDomainTenantResolver.canResolve(request)).isFalse();
     assertThat(multitenancyWithSingleDomainTenantResolver.resolve(request)).isEmpty();
+    assertThat(TenantContext.getCurrentTenant()).isNull();
   }
 
   @Test
