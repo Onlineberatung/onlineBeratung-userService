@@ -61,7 +61,11 @@ public class CreateUserFacade {
 
     RegistrationStatisticsEvent registrationEvent =
         new RegistrationStatisticsEvent(
-            userDTO, user, newRegistrationResponseDto.getSessionId(), registrationStatisticsHelper);
+            userDTO,
+            user,
+            newRegistrationResponseDto.getSessionId(),
+            registrationStatisticsHelper.findTopicInternalIdentifier(userDTO.getMainTopicId()),
+            registrationStatisticsHelper.findTopicsInternalAttributes(userDTO.getTopicIds()));
     statisticsService.fireEvent(registrationEvent);
   }
 

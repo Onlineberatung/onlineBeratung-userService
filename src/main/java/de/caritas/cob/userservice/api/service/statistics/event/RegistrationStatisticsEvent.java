@@ -8,13 +8,13 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.helper.CustomOffsetDateTime;
-import de.caritas.cob.userservice.api.helper.RegistrationStatisticsHelper;
 import de.caritas.cob.userservice.api.helper.json.OffsetDateTimeToStringSerializer;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.RegistrationStatisticsEventMessage;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.UserRole;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,17 +27,20 @@ public class RegistrationStatisticsEvent implements StatisticsEvent {
   private final UserDTO registeredUser;
   private final User createdUser;
   private final Long sessionId;
-  private final RegistrationStatisticsHelper registrationStatisticsHelper;
+  private final String mainTopicInternalAttribute;
+  private final List<String> topicsInternalAttributes;
 
   public RegistrationStatisticsEvent(
       UserDTO registeredUser,
       User createdUser,
       Long sessionId,
-      RegistrationStatisticsHelper registrationStatisticsHelper) {
+      String mainTopicInternalAttribute,
+      List<String> topicsInternalAttributes) {
     this.registeredUser = registeredUser;
     this.createdUser = createdUser;
     this.sessionId = sessionId;
-    this.registrationStatisticsHelper = registrationStatisticsHelper;
+    this.mainTopicInternalAttribute = mainTopicInternalAttribute;
+    this.topicsInternalAttributes = topicsInternalAttributes;
     OBJECT_MAPPER.registerModule(new JavaTimeModule());
     OBJECT_MAPPER.registerModule(buildSimpleModule());
   }
@@ -65,12 +68,8 @@ public class RegistrationStatisticsEvent implements StatisticsEvent {
             .age(registeredUser.getUserAge())
             .gender(registeredUser.getUserGender())
             .counsellingRelation(registeredUser.getCounsellingRelation())
-            .mainTopicInternalAttribute(
-                registrationStatisticsHelper.findTopicInternalIdentifier(
-                    registeredUser.getMainTopicId()))
-            .topicsInternalAttributes(
-                registrationStatisticsHelper.findTopicsInternalAttributes(
-                    registeredUser.getTopicIds()))
+            .mainTopicInternalAttribute(mainTopicInternalAttribute)
+            .topicsInternalAttributes(topicsInternalAttributes)
             .postalCode(registeredUser.getPostcode())
             .timestamp(CustomOffsetDateTime.nowInUtc());
 
