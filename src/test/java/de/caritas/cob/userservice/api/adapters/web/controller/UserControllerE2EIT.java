@@ -1575,7 +1575,8 @@ class UserControllerE2EIT {
     ;
     when(topicControllerApi.getApiClient()).thenReturn(new ApiClient());
     when(topicControllerApi.getAllTopics()).thenReturn(Lists.newArrayList(firstTopic, secondTopic));
-    when(topicControllerApi.getAllActiveTopics()).thenReturn(Lists.newArrayList(firstTopic, secondTopic));
+    when(topicControllerApi.getAllActiveTopics())
+        .thenReturn(Lists.newArrayList(firstTopic, secondTopic));
   }
 
   private void givenAValidRocketChatSubscriptionsResponse() {
