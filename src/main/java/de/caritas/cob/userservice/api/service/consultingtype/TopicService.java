@@ -33,7 +33,6 @@ public class TopicService {
     return topicControllerApi.getAllTopics();
   }
 
-  @Cacheable(cacheNames = CacheManagerConfig.TOPICS_CACHE)
   public List<TopicDTO> getAllActiveTopics() {
     log.info("Calling topic service to get all active topics");
     addDefaultHeaders(this.topicControllerApi.getApiClient());
@@ -52,7 +51,6 @@ public class TopicService {
     return allTopics.isEmpty() ? Maps.newHashMap() : getAllTopicsMap(allTopics);
   }
 
-  @Cacheable(cacheNames = CacheManagerConfig.TOPICS_CACHE)
   public Map<Long, TopicDTO> getAllActiveTopicsMap() {
     var allTopics = this.getAllActiveTopics();
     return allTopics.isEmpty() ? Maps.newHashMap() : getAllTopicsMap(allTopics);
