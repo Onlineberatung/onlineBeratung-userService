@@ -15,6 +15,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -35,7 +36,7 @@ public class TopicService {
 
   public List<TopicDTO> getAllActiveTopics() {
     log.info("Calling topic service to get all active topics");
-    addDefaultHeaders(this.topicControllerApi.getApiClient());
+    addTenantHeaders(this.topicControllerApi.getApiClient());
     return topicControllerApi.getAllActiveTopics();
   }
 
@@ -43,6 +44,12 @@ public class TopicService {
     var headers = this.securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders();
     tenantHeaderSupplier.addTenantHeader(headers);
     headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
+  }
+
+  private void addTenantHeaders(ApiClient apiClient) {
+    var httpHeaders = new HttpHeaders();
+    tenantHeaderSupplier.addTenantHeader(httpHeaders);
+    httpHeaders.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
   }
 
   @Cacheable(cacheNames = CacheManagerConfig.TOPICS_CACHE)

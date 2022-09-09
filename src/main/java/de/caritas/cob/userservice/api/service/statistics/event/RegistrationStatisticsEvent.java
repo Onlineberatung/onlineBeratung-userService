@@ -62,6 +62,7 @@ public class RegistrationStatisticsEvent implements StatisticsEvent {
         new RegistrationStatisticsEventMessage()
             .eventType(EVENT_TYPE)
             .sessionId(sessionId)
+            .tenantId(createdUser.getTenantId())
             .userId(createdUser.getUserId())
             .userRole(UserRole.ASKER)
             .registrationDate(toIsoTime(createdUser.getCreateDate()))
