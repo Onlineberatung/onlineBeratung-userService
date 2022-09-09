@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.facade;
 
 import static de.caritas.cob.userservice.api.helper.SessionDataProvider.fromUserDTO;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
@@ -130,11 +131,14 @@ public class CreateSessionFacade {
   }
 
   private Session initializeSession(UserDTO userDTO, User user, AgencyDTO agencyDTO) {
+    var sessionData = fromUserDTO(userDTO);
+    var isTeaming = isTrue(agencyDTO.getTeamAgency());
+    boolean initialized = false;
 
     try {
-      var session =
-          sessionService.initializeSession(user, userDTO, isTrue(agencyDTO.getTeamAgency()));
-      sessionDataService.saveSessionData(session, fromUserDTO(userDTO));
+      var session = sessionService.initializeSession(user, userDTO, isTeaming);
+      initialized = nonNull(session) && nonNull(session.getId());
+      sessionDataService.saveSessionData(session, sessionData);
 
       return session;
     } catch (Exception ex) {
@@ -145,9 +149,9 @@ public class CreateSessionFacade {
               .rollBackUserAccount(Boolean.parseBoolean(userDTO.getTermsAccepted()))
               .build());
 
-      throw new InternalServerErrorException(
-          String.format(
-              "Could not create session for user %s. %s", user.getUsername(), ex.getMessage()));
+      var stepWord = initialized ? "save session data" : "initialize session";
+      var message = String.format("Could not %s for user %s.", stepWord, user.getUsername());
+      throw new InternalServerErrorException(message, ex);
     }
   }
 

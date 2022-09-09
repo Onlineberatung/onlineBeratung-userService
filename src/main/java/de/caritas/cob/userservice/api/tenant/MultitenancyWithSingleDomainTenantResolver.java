@@ -49,7 +49,10 @@ public class MultitenancyWithSingleDomainTenantResolver implements TenantResolve
   }
 
   private Optional<Long> resolveTenantFromConsultantRequestParameter() {
+    // temporarily set technical tenant to be able to run query during tenant determination
+    TenantContext.setCurrentTenant(0L);
     Optional<Consultant> consultant = consultantService.getConsultant(getConsultantId());
+    TenantContext.clear();
     if (consultant.isPresent()) {
       return Optional.of(consultant.get().getTenantId());
     }
