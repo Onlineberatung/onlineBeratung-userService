@@ -27,7 +27,7 @@ public class TopicServiceApiClientConfig {
   @Bean
   @Primary
   @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-  public de.caritas.cob.userservice.topicservice.generated.ApiClient topicApiClient(
+  public ApiClient topicApiClient(
       RestTemplate restTemplate) {
     ApiClient apiClient = new TopicServiceApiClient(restTemplate);
     apiClient.setBasePath(this.topicServiceApiUrl);
