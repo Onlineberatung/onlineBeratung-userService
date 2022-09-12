@@ -27,8 +27,7 @@ public class TopicServiceApiClientConfig {
   @Bean
   @Primary
   @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-  public ApiClient topicApiClient(
-      RestTemplate restTemplate) {
+  public ApiClient topicApiClient(RestTemplate restTemplate) {
     ApiClient apiClient = new TopicServiceApiClient(restTemplate);
     apiClient.setBasePath(this.topicServiceApiUrl);
     return apiClient;
