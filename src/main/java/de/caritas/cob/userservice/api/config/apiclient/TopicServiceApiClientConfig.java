@@ -19,6 +19,7 @@ public class TopicServiceApiClientConfig {
 
   @Bean
   @Qualifier("topicControllerApiPrimary")
+  @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
   public TopicControllerApi topicControllerApi(ApiClient apiClient) {
     return new TopicControllerApi(apiClient);
   }
