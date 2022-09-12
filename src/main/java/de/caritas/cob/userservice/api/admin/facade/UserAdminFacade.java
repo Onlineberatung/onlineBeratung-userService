@@ -32,10 +32,7 @@ public class UserAdminFacade {
     User user =
         userService
             .getUser(userId)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("Asker with id %s does not exist", userId)));
+            .orElseThrow(() -> new NotFoundException("Asker with id %s does not exist", userId));
 
     if (nonNull(user.getDeleteDate())) {
       throw new ConflictException(
@@ -51,10 +48,7 @@ public class UserAdminFacade {
     User user =
         userService
             .getUser(userId)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("Asker with id %s does not exist", userId)));
+            .orElseThrow(() -> new NotFoundException("Asker with id %s does not exist", userId));
     AskerResponseDTO asker = new AskerResponseDTO();
     asker.setId(user.getUserId());
     asker.setUsername(this.usernameTranscoder.decodeUsername(user.getUsername()));

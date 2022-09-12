@@ -84,8 +84,7 @@ public class SessionArchiveService {
   private Session retrieveSession(Long sessionId) {
     return sessionRepository
         .findById(sessionId)
-        .orElseThrow(
-            () -> new NotFoundException(String.format("Session with id %s not found.", sessionId)));
+        .orElseThrow(() -> new NotFoundException("Session with id %s not found.", sessionId));
   }
 
   private void executeArchiving(

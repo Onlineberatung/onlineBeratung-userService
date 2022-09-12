@@ -37,8 +37,7 @@ public class AssignChatFacade {
   private Chat getChat(Long chatId) {
     return chatService
         .getChat(chatId)
-        .orElseThrow(
-            () -> new NotFoundException(String.format("Chat with id %s not found", chatId)));
+        .orElseThrow(() -> new NotFoundException("Chat with id %s not found", chatId));
   }
 
   private User getUser(AuthenticatedUser authenticatedUser) {
@@ -46,7 +45,6 @@ public class AssignChatFacade {
         .getUserViaAuthenticatedUser(authenticatedUser)
         .orElseThrow(
             () ->
-                new NotFoundException(
-                    String.format("User with id %s not found", authenticatedUser.getUserId())));
+                new NotFoundException("User with id %s not found", authenticatedUser.getUserId()));
   }
 }
