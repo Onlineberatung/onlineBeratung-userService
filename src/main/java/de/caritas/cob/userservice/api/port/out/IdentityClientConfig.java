@@ -15,10 +15,6 @@ public interface IdentityClientConfig {
 
   String getOpenIdConnectUrl(String path, String arg);
 
-  String getOtpUrl();
-
-  String getOtpUrl(String path);
-
   String getOtpUrl(String path, String arg);
 
   Boolean getOtpAllowedForUsers();

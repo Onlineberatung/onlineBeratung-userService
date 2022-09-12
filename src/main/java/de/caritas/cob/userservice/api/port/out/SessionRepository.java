@@ -100,42 +100,6 @@ public interface SessionRepository extends CrudRepository<Session, Long> {
   Page<Session> findByUserUserId(String userId, Pageable pageable);
 
   /**
-   * Find the {@link Session}s by Rocket.Chat group id and asker id.
-   *
-   * @param groupId the rc group id to search for
-   * @param userId the user id to search for
-   * @return the result sessions
-   */
-  List<Session> findByGroupIdAndUserUserId(String groupId, String userId);
-
-  /**
-   * Find the {@link Session}s by Rocket.Chat group id and consultant id.
-   *
-   * @param groupId the rc group id to search for
-   * @param consultantId the consultant id to search for
-   * @return the result sessions
-   */
-  List<Session> findByGroupIdAndConsultantId(String groupId, String consultantId);
-
-  /**
-   * Find the {@link Session}s by Rocket.Chat group id and asker id.
-   *
-   * @param feedbackGroupId the feedback group id to search for
-   * @param userId the user id to search for
-   * @return the result sessions
-   */
-  List<Session> findByFeedbackGroupIdAndUserUserId(String feedbackGroupId, String userId);
-
-  /**
-   * Find the {@link Session}s by Rocket.Chat feedback group id and consultant id.
-   *
-   * @param feedbackGroupId the feedback group id to search for
-   * @param consultantId the consultant id to search for
-   * @return the result sessions
-   */
-  List<Session> findByFeedbackGroupIdAndConsultantId(String feedbackGroupId, String consultantId);
-
-  /**
    * Find the {@link Session} by Rocket.Chat feedback group id.
    *
    * @param feedbackGroupId the rocket chat feedback group id

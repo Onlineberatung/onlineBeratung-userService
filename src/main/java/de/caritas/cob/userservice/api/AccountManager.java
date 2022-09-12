@@ -121,11 +121,6 @@ public class AccountManager implements AccountManaging {
   }
 
   @Override
-  public boolean existsAdviceSeeker(String id) {
-    return userRepository.findByUserIdAndDeleteDateIsNull(id).isPresent();
-  }
-
-  @Override
   public Optional<Map<String, Object>> findAdviceSeeker(String id) {
     var userMap = new HashMap<String, Object>();
     userRepository
