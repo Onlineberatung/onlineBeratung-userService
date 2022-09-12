@@ -15,6 +15,7 @@ import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
 import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Date;
 import java.util.function.Consumer;
 import lombok.NonNull;
@@ -119,8 +120,32 @@ public class AvailableLastMessageUpdater {
       return;
     }
 
-    latestMessageDate.accept(roomsLastMessage.getTimestamp());
-    session.setMessageDate(Helper.getUnixTimestampFromDate(roomsLastMessage.getTimestamp()));
+    var lastMessageDate =
+        findNewestLastMessageDateFromRoom(rocketChatRoomInformation, groupId, roomsLastMessage);
+    latestMessageDate.accept(lastMessageDate);
+    session.setMessageDate(Helper.getUnixTimestampFromDate(lastMessageDate));
+  }
+
+  private Date findNewestLastMessageDateFromRoom(
+      RocketChatRoomInformation rocketChatRoomInformation,
+      String groupId,
+      RoomsLastMessageDTO roomsLastMessage) {
+    var updateRoomTimestamp =
+        rocketChatRoomInformation.getRoomsForUpdate().stream()
+            .filter(room -> room.getId().equals(groupId))
+            .findFirst();
+    var latestMessageFromUpdateRoom =
+        updateRoomTimestamp.isPresent()
+            ? updateRoomTimestamp.get().getLastMessageDate()
+            : Date.from(Instant.EPOCH);
+    var roomsLastMessageDate =
+        nonNull(roomsLastMessage.getTimestamp())
+            ? roomsLastMessage.getTimestamp()
+            : Date.from(Instant.EPOCH);
+
+    return latestMessageFromUpdateRoom.after(roomsLastMessageDate)
+        ? latestMessageFromUpdateRoom
+        : roomsLastMessageDate;
   }
 
   private void setFallbackDate(
