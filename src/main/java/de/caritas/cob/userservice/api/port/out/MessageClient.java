@@ -10,8 +10,10 @@ public interface MessageClient {
 
   Optional<Map<String, Object>> getChatInfo(String chatId);
 
+  @SuppressWarnings("UnusedReturnValue")
   boolean unmuteUserInChat(String chatUserId, String chatId);
 
+  @SuppressWarnings("UnusedReturnValue")
   boolean updateUser(String chatUserId, String displayName);
 
   Optional<Map<String, Object>> findUser(String chatUserId);

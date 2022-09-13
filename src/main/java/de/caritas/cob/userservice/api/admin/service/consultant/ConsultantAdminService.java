@@ -98,9 +98,7 @@ public class ConsultantAdminService {
         this.consultantRepository
             .findByIdAndDeleteDateIsNull(consultantId)
             .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("Consultant with id %s does not exist", consultantId)));
+                () -> new NotFoundException("Consultant with id %s does not exist", consultantId));
 
     this.consultantPreDeletionService.performPreDeletionSteps(consultant);
 

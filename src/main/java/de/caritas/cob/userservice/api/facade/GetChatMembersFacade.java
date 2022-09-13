@@ -43,8 +43,7 @@ public class GetChatMembersFacade {
     Chat chat =
         chatService
             .getChat(chatId)
-            .orElseThrow(
-                () -> new NotFoundException(String.format("Chat with id %s not found", chatId)));
+            .orElseThrow(() -> new NotFoundException("Chat with id %s not found", chatId));
 
     verifyActiveStatus(chat);
     this.chatPermissionVerifier.verifyPermissionForChat(chat);

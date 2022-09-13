@@ -30,6 +30,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 /** User model */
 @AllArgsConstructor
@@ -125,7 +126,7 @@ public class UserDTO implements UserRegistrationDTO {
   private LanguageCode preferredLanguage;
 
   public Integer getUserAge() {
-    return age == null ? null : Integer.valueOf(age);
+    return StringUtils.isNumeric(age) ? Integer.valueOf(age) : null;
   }
 
   public UserDTO(String email) {
