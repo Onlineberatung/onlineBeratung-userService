@@ -6,9 +6,10 @@ import static net.javacrumbs.jsonunit.JsonMatchers.jsonEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-import de.caritas.cob.userservice.api.helper.CustomOffsetDateTime;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.UserRole;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,7 +48,7 @@ public class AssignSessionStatisticsEventTest {
             + SESSION_ID
             + ","
             + "  \"timestamp\":\""
-            + CustomOffsetDateTime.nowInUtc()
+            + OffsetDateTime.now(ZoneOffset.UTC)
             + "\","
             + "  \"eventType\":\""
             + EventType.ASSIGN_SESSION
