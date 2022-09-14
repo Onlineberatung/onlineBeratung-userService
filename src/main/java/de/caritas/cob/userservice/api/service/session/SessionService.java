@@ -482,11 +482,7 @@ public class SessionService {
   public Session getSessionByGroupId(String rcGroupId) {
     return sessionRepository
         .findByGroupId(rcGroupId)
-        .orElseThrow(
-            () ->
-                new NotFoundException(
-                    String.format("Session with groupId %s not found.", rcGroupId),
-                    LogService::logWarn));
+        .orElseThrow(() -> new NotFoundException("Session with groupId %s not found.", rcGroupId));
   }
 
   private void checkUserPermissionForSession(Session session, String userId, Set<String> roles) {
@@ -596,10 +592,8 @@ public class SessionService {
 
     var session =
         getSession(sessionId)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("Session with id %s not found.", sessionId)));
+            .orElseThrow(() -> new NotFoundException("Session with id %s not found.", sessionId));
+
     checkPermissionForConsultantSession(session, consultant);
     return toConsultantSessionDTO(session);
   }

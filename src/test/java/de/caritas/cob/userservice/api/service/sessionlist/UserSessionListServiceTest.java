@@ -209,8 +209,7 @@ public class UserSessionListServiceTest {
         userSessionListService.retrieveSessionsForAuthenticatedUser(USER_ID, RC_CREDENTIALS);
 
     assertEquals(
-        Helper.getUnixTimestampFromDate(
-            ROOMS_UPDATE_DTO_LIST.get(0).getLastMessage().getTimestamp()),
+        Helper.getUnixTimestampFromDate(ROOMS_UPDATE_DTO_LIST.get(0).getLastMessageDate()),
         result.get(0).getSession().getMessageDate());
   }
 

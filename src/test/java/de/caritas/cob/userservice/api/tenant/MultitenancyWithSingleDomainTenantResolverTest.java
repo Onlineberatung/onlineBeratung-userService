@@ -14,6 +14,7 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -41,6 +42,11 @@ class MultitenancyWithSingleDomainTenantResolverTest {
   @Mock ConsultantService consultantService;
 
   @Mock private ServletRequestAttributes requestAttributes;
+
+  @BeforeEach
+  public void initialize() {
+    TenantContext.clear();
+  }
 
   @AfterEach
   public void tearDown() {
@@ -87,6 +93,7 @@ class MultitenancyWithSingleDomainTenantResolverTest {
     assertThat(multitenancyWithSingleDomainTenantResolver.canResolve(request)).isTrue();
     assertThat(multitenancyWithSingleDomainTenantResolver.resolve(request))
         .isEqualTo(Optional.of(ANOTHER_TENANT));
+    assertThat(TenantContext.getCurrentTenant()).isNull();
   }
 
   @Test
@@ -106,6 +113,7 @@ class MultitenancyWithSingleDomainTenantResolverTest {
     // when
     assertThat(multitenancyWithSingleDomainTenantResolver.canResolve(request)).isFalse();
     assertThat(multitenancyWithSingleDomainTenantResolver.resolve(request)).isEmpty();
+    assertThat(TenantContext.getCurrentTenant()).isNull();
   }
 
   @Test
