@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.service.emailsupplier;
 
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
-import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.TEMPLATE_NEW_ENQUIRY_NOTIFICATION;
+import static de.caritas.cob.userservice.api.service.emailsupplier.EmailSupplier.TEMPLATE_NEW_ENQUIRY_NOTIFICATION;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_DTO_U25;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.MAIN_CONSULTANT;
 import static java.util.Arrays.asList;

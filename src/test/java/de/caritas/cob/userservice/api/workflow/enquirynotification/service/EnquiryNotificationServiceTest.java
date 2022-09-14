@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.workflow.enquirynotification.service;
 
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
-import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.TEMPLATE_DAILY_ENQUIRY_NOTIFICATION;
+import static de.caritas.cob.userservice.api.service.emailsupplier.EmailSupplier.TEMPLATE_DAILY_ENQUIRY_NOTIFICATION;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
