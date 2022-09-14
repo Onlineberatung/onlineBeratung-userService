@@ -12,7 +12,6 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostFurther
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostMessageException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostWelcomeMessageException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
-import de.caritas.cob.userservice.api.helper.MessageHelper;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.AppointmentData;
 import de.caritas.cob.userservice.api.model.User;
@@ -26,8 +25,10 @@ import de.caritas.cob.userservice.messageservice.generated.web.model.AliasOnlyMe
 import de.caritas.cob.userservice.messageservice.generated.web.model.MessageDTO;
 import de.caritas.cob.userservice.messageservice.generated.web.model.MessageResponseDTO;
 import de.caritas.cob.userservice.messageservice.generated.web.model.MessageType;
+import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.text.StringSubstitutor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 
@@ -103,10 +104,10 @@ public class MessageServiceProvider {
       return;
     }
 
-    String welcomeMessage =
-        MessageHelper.replaceUsernameInMessage(
-            welcomeMessageDTO.getWelcomeMessageText(),
-            new UsernameTranscoder().decodeUsername(user.getUsername()));
+    var username = new UsernameTranscoder().decodeUsername(user.getUsername());
+    var placeholderMap = Map.of("username", username);
+    var stringSubstitutor = new StringSubstitutor(placeholderMap, "${", "}");
+    var welcomeMessage = stringSubstitutor.replace(welcomeMessageDTO.getWelcomeMessageText());
 
     try {
       this.postMessageAsSystemUser(welcomeMessage, rcGroupId);
