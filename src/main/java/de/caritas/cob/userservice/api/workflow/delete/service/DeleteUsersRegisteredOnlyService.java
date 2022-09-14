@@ -7,7 +7,6 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetUserIdException;
 import de.caritas.cob.userservice.api.helper.CustomLocalDateTime;
-import de.caritas.cob.userservice.api.helper.DateCalculator;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionTargetType;
@@ -39,7 +38,9 @@ public class DeleteUsersRegisteredOnlyService {
   /** Deletes all askers with no running sessions before the set date. */
   public void deleteUserAccountsTimeSensitive() {
     var dateTimeToCheck =
-        DateCalculator.calculateDateInThePastAtMidnight(userRegisteredOnlyDeleteWorkflowCheckDays);
+        CustomLocalDateTime.nowInUtc()
+            .with(LocalTime.MIDNIGHT)
+            .minusDays(userRegisteredOnlyDeleteWorkflowCheckDays);
     deleteUserAccountsBefore(dateTimeToCheck);
   }
 

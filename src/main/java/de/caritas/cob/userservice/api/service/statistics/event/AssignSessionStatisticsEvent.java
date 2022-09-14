@@ -4,12 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import de.caritas.cob.userservice.api.helper.CustomOffsetDateTime;
 import de.caritas.cob.userservice.api.helper.json.OffsetDateTimeToStringSerializer;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.AssignSessionStatisticsEventMessage;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.UserRole;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Optional;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +47,7 @@ public class AssignSessionStatisticsEvent implements StatisticsEvent {
             .userId(userId)
             .userRole(userRole)
             .sessionId(sessionId)
-            .timestamp(CustomOffsetDateTime.nowInUtc());
+            .timestamp(OffsetDateTime.now(ZoneOffset.UTC));
 
     try {
       return Optional.of(OBJECT_MAPPER.writeValueAsString(assignSessionStatisticsEventMessage));
