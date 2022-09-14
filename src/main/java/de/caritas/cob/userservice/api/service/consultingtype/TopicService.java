@@ -39,12 +39,11 @@ public class TopicService {
 
   public List<TopicDTO> getAllActiveTopics() {
     log.info("Calling topic service to get all active topics");
-    return createTopicControllerApi().getAllActiveTopics();
+    return createTopicControllerApiWithoutHeaders().getAllActiveTopics();
   }
 
-  public TopicControllerApi createTopicControllerApi() {
+  public TopicControllerApi createTopicControllerApiWithoutHeaders() {
     var apiClient = new ApiClient().setBasePath(this.topicServiceApiUrl);
-    addDefaultHeaders(apiClient);
     TopicControllerApi topicControllerApi = new TopicControllerApi(apiClient);
     topicControllerApi.setApiClient(apiClient);
     return topicControllerApi;
