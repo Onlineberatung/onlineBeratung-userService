@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.service.emailsupplier;
 
-import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.TEMPLATE_REASSIGN_CONFIRMATION_NOTIFICATION;
 import static java.util.Arrays.asList;
 
 import com.neovisionaries.i18n.LanguageCode;
