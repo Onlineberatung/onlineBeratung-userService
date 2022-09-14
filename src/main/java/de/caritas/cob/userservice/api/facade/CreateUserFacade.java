@@ -23,11 +23,13 @@ import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /** Facade to encapsulate the steps to initialize a user account. */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CreateUserFacade {
   private final @NonNull UserVerifier userVerifier;
   private final @NonNull IdentityClient identityClient;
@@ -59,14 +61,18 @@ public class CreateUserFacade {
         createNewConsultingTypeFacade.initializeNewConsultingType(
             userDTO, user, obtainConsultingTypeSettings(userDTO));
 
-    RegistrationStatisticsEvent registrationEvent =
-        new RegistrationStatisticsEvent(
-            userDTO,
-            user,
-            newRegistrationResponseDto.getSessionId(),
-            registrationStatisticsHelper.findTopicInternalIdentifier(userDTO.getMainTopicId()),
-            registrationStatisticsHelper.findTopicsInternalAttributes(userDTO.getTopicIds()));
-    statisticsService.fireEvent(registrationEvent);
+    try {
+      RegistrationStatisticsEvent registrationEvent =
+          new RegistrationStatisticsEvent(
+              userDTO,
+              user,
+              newRegistrationResponseDto.getSessionId(),
+              registrationStatisticsHelper.findTopicInternalIdentifier(userDTO.getMainTopicId()),
+              registrationStatisticsHelper.findTopicsInternalAttributes(userDTO.getTopicIds()));
+      statisticsService.fireEvent(registrationEvent);
+    } catch (Exception e) {
+      log.error("Could not create registration statistics event", e);
+    }
   }
 
   /**
