@@ -35,9 +35,8 @@ public class SessionStatisticsService {
         session.orElseThrow(
             () ->
                 new NotFoundException(
-                    String.format(
-                        "Session with id %s or Rocket.Chat group id %s not found",
-                        sessionId, rcGroupId))));
+                    "Session with id %s or Rocket.Chat group id %s not found",
+                    sessionId, rcGroupId)));
   }
 
   private void checkRequestParameter(Long sessionId, String rcGroupId) {

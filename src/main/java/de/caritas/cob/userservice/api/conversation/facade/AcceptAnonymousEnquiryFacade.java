@@ -27,12 +27,11 @@ public class AcceptAnonymousEnquiryFacade {
    */
   public void acceptAnonymousEnquiry(Long sessionId) {
     var session =
-        this.sessionService
+        sessionService
             .getSession(sessionId)
             .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("Session with id %s does not exist", sessionId)));
+                () -> new NotFoundException("Session with id %s does not exist", sessionId));
+
     var consultant = this.userAccountProvider.retrieveValidatedConsultant();
     this.assignEnquiryFacade.assignAnonymousEnquiry(session, consultant);
     this.liveEventNotificationService.sendAcceptAnonymousEnquiryEventToUser(

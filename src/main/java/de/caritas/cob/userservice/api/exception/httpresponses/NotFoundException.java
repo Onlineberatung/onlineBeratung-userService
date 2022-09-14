@@ -28,6 +28,10 @@ public class NotFoundException extends CustomHttpStatusException {
     super(String.format(message, arg1, arg2), LogService::logWarn);
   }
 
+  public NotFoundException(String message, Long arg1, String arg2) {
+    super(String.format(message, arg1, arg2), LogService::logWarn);
+  }
+
   /**
    * Not found exception.
    *

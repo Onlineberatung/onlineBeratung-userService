@@ -31,10 +31,7 @@ public class SessionDataService {
     Session session =
         sessionService
             .getSession(sessionId)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("Session with id %s not found.", sessionId)));
+            .orElseThrow(() -> new NotFoundException("Session with id %s not found.", sessionId));
     this.saveSessionData(session, sessionData);
   }
 

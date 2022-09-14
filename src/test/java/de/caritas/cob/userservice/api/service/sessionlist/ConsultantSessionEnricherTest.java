@@ -185,8 +185,7 @@ public class ConsultantSessionEnricherTest {
             .get(0);
 
     assertEquals(
-        Helper.getUnixTimestampFromDate(
-            ROOMS_LAST_MESSAGE_DTO_MAP.get(result.getSession().getGroupId()).getTimestamp()),
+        Helper.getUnixTimestampFromDate(ROOMS_UPDATE_DTO_LIST.get(0).getLastMessageDate()),
         result.getSession().getMessageDate());
   }
 

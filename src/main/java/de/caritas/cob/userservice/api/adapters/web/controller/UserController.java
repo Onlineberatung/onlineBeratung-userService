@@ -289,9 +289,7 @@ public class UserController implements UsersApi {
         sessionService
             .getSession(sessionId)
             .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("A session with an id %s does not exist.", sessionId)));
+                () -> new NotFoundException("A session with an id %s does not exist.", sessionId));
 
     var user = session.getUser();
     if (user.getSessions().size() == 1) {
@@ -527,9 +525,7 @@ public class UserController implements UsersApi {
         consultantService
             .getConsultant(consultantId)
             .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("Consultant with id %s not found", consultantId)));
+                () -> new NotFoundException("Consultant with id %s not found", consultantId));
 
     var updateAdminConsultantDTO =
         consultantDtoMapper.updateAdminConsultantOf(updateConsultantDTO, consultant);
@@ -874,15 +870,12 @@ public class UserController implements UsersApi {
         accountManager
             .findConsultant(consultantId.toString())
             .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("Consultant (%s) not found", consultantId)));
+                () -> new NotFoundException("Consultant (%s) not found", consultantId.toString()));
 
     var sessionMap =
         messenger
             .findSession(sessionId)
-            .orElseThrow(
-                () -> new NotFoundException(String.format("Session (%s) not found", sessionId)));
+            .orElseThrow(() -> new NotFoundException("Session (%s) not found", sessionId));
 
     var chatId = consultantDtoMapper.chatIdOf(sessionMap);
     var chatUserId = userDtoMapper.chatUserIdOf(consultantMap);
@@ -1376,14 +1369,13 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<ConsultantResponseDTO> getConsultantPublicData(UUID consultantId) {
+    var consultantIdString = consultantId.toString();
     var consultant =
         consultantService
-            .getConsultant(consultantId.toString())
+            .getConsultant(consultantIdString)
             .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("Consultant with id %s not found", consultantId)));
-    var agencies = consultantAgencyService.getAgenciesOfConsultant(consultantId.toString());
+                () -> new NotFoundException("Consultant with id %s not found", consultantIdString));
+    var agencies = consultantAgencyService.getAgenciesOfConsultant(consultantIdString);
     var consultantDto = consultantDtoMapper.consultantResponseDtoOf(consultant, agencies, false);
 
     return new ResponseEntity<>(consultantDto, HttpStatus.OK);
