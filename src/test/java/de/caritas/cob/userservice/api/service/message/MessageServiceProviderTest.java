@@ -12,6 +12,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_I
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -35,6 +36,8 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInit
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.WelcomeMessageDTO;
 import de.caritas.cob.userservice.messageservice.generated.web.MessageControllerApi;
 import de.caritas.cob.userservice.messageservice.generated.web.model.AliasOnlyMessageDTO;
 import de.caritas.cob.userservice.messageservice.generated.web.model.MessageDTO;
@@ -47,6 +50,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpHeaders;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClientException;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -179,15 +183,17 @@ public class MessageServiceProviderTest {
     when(securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders()).thenReturn(headers);
     when(this.rocketChatCredentialsProvider.getSystemUser()).thenReturn(credentials);
     ArgumentCaptor<MessageDTO> captor = ArgumentCaptor.forClass(MessageDTO.class);
+    var ctr =
+        new ExtendedConsultingTypeResponseDTO()
+            .welcomeMessage(new WelcomeMessageDTO().welcomeMessageText("Hallo ${username}"));
 
     this.messageServiceProvider.postWelcomeMessageIfConfigured(
-        RC_GROUP_ID, USER, CONSULTING_TYPE_SETTINGS_U25, exceptionInformation);
+        RC_GROUP_ID, USER, ctr, exceptionInformation);
 
-    verify(messageControllerApi, times(1))
+    verify(messageControllerApi)
         .createMessage(anyString(), anyString(), eq(RC_GROUP_ID), captor.capture());
-    assertThat(
-        captor.getValue().getMessage(),
-        is(CONSULTING_TYPE_SETTINGS_U25.getWelcomeMessage().getWelcomeMessageText()));
+    assertFalse(StringUtils.isEmpty(USER.getUsername()));
+    assertThat(captor.getValue().getMessage(), is("Hallo " + USER.getUsername()));
   }
 
   @Test
