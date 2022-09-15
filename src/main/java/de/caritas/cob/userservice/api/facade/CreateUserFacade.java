@@ -12,11 +12,11 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackUserAccountInformation;
 import de.caritas.cob.userservice.api.helper.AgencyVerifier;
-import de.caritas.cob.userservice.api.helper.RegistrationStatisticsHelper;
 import de.caritas.cob.userservice.api.helper.UserVerifier;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
+import de.caritas.cob.userservice.api.service.consultingtype.TopicService;
 import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
 import de.caritas.cob.userservice.api.service.statistics.event.RegistrationStatisticsEvent;
 import de.caritas.cob.userservice.api.service.user.UserService;
@@ -39,7 +39,7 @@ public class CreateUserFacade {
   private final @NonNull AgencyVerifier agencyVerifier;
   private final @NonNull CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
   private final @NonNull StatisticsService statisticsService;
-  private final @NonNull RegistrationStatisticsHelper registrationStatisticsHelper;
+  private final @NonNull TopicService topicService;
 
   /**
    * Creates a user in Keycloak and MariaDB. Then creates a session or chat account depending on the
@@ -67,8 +67,8 @@ public class CreateUserFacade {
               userDTO,
               user,
               newRegistrationResponseDto.getSessionId(),
-              registrationStatisticsHelper.findTopicInternalIdentifier(userDTO.getMainTopicId()),
-              registrationStatisticsHelper.findTopicsInternalAttributes(userDTO.getTopicIds()));
+              topicService.findTopicInternalIdentifier(userDTO.getMainTopicId()),
+              topicService.findTopicsInternalAttributes(userDTO.getTopicIds()));
       statisticsService.fireEvent(registrationEvent);
     } catch (Exception e) {
       log.error("Could not create registration statistics event", e);

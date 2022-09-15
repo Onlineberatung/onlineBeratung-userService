@@ -7,8 +7,10 @@ import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import de.caritas.cob.userservice.topicservice.generated.ApiClient;
 import de.caritas.cob.userservice.topicservice.generated.web.TopicControllerApi;
 import de.caritas.cob.userservice.topicservice.generated.web.model.TopicDTO;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.NonNull;
@@ -39,6 +41,7 @@ public class TopicService {
 
   public List<TopicDTO> getAllActiveTopics() {
     log.info("Calling topic service to get all active topics");
+    // Public endpoints needs to be called without Authentication header as not to cause a 401 error
     return createTopicControllerApiWithoutHeaders().getAllActiveTopics();
   }
 
@@ -68,5 +71,24 @@ public class TopicService {
 
   private Map<Long, TopicDTO> getAllTopicsMap(List<TopicDTO> allTopics) {
     return allTopics.stream().collect(Collectors.toMap(TopicDTO::getId, Function.identity()));
+  }
+
+  public List<String> findTopicsInternalAttributes(Collection<Integer> topicsList) {
+    return topicsList.stream().map(this::findTopicInternalIdentifier).collect(Collectors.toList());
+  }
+
+  public String findTopicInternalIdentifier(Integer topicId) {
+    return topicId == null ? "" : findTopicInternalIdentifierInTopicsMap(topicId).orElse("");
+  }
+
+  private Optional<String> findTopicInternalIdentifierInTopicsMap(Integer topicId) {
+    Map<Long, TopicDTO> allTopicsMap = this.getAllActiveTopicsMap();
+    Long key = Long.valueOf(topicId);
+    if (allTopicsMap.containsKey(key)) {
+      return Optional.ofNullable(allTopicsMap.get(key).getInternalIdentifier());
+    } else {
+      log.warn("No topic found for a given topicId in all topics map {}", topicId);
+      return Optional.empty();
+    }
   }
 }
