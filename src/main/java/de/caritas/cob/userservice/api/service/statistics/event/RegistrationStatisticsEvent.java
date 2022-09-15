@@ -7,13 +7,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
-import de.caritas.cob.userservice.api.helper.CustomOffsetDateTime;
 import de.caritas.cob.userservice.api.helper.json.OffsetDateTimeToStringSerializer;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.RegistrationStatisticsEventMessage;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.UserRole;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -72,7 +72,7 @@ public class RegistrationStatisticsEvent implements StatisticsEvent {
             .mainTopicInternalAttribute(mainTopicInternalAttribute)
             .topicsInternalAttributes(topicsInternalAttributes)
             .postalCode(registeredUser.getPostcode())
-            .timestamp(CustomOffsetDateTime.nowInUtc());
+            .timestamp(OffsetDateTime.now(ZoneOffset.UTC));
 
     try {
       return Optional.of(OBJECT_MAPPER.writeValueAsString(registrationStatisticsEventMessage));
