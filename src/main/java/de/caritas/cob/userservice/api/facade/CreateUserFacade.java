@@ -5,6 +5,7 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.NewRegistrationResponseDto;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -15,17 +16,21 @@ import de.caritas.cob.userservice.api.helper.UserVerifier;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
+import de.caritas.cob.userservice.api.service.consultingtype.TopicService;
+import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
+import de.caritas.cob.userservice.api.service.statistics.event.RegistrationStatisticsEvent;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /** Facade to encapsulate the steps to initialize a user account. */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CreateUserFacade {
-
   private final @NonNull UserVerifier userVerifier;
   private final @NonNull IdentityClient identityClient;
   private final @NonNull UserService userService;
@@ -33,6 +38,8 @@ public class CreateUserFacade {
   private final @NonNull ConsultingTypeManager consultingTypeManager;
   private final @NonNull AgencyVerifier agencyVerifier;
   private final @NonNull CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
+  private final @NonNull StatisticsService statisticsService;
+  private final @NonNull TopicService topicService;
 
   /**
    * Creates a user in Keycloak and MariaDB. Then creates a session or chat account depending on the
@@ -50,8 +57,22 @@ public class CreateUserFacade {
     var user =
         updateKeycloakAccountAndCreateDatabaseUserAccount(
             response.getUserId(), userDTO, UserRole.USER);
-    createNewConsultingTypeFacade.initializeNewConsultingType(
-        userDTO, user, obtainConsultingTypeSettings(userDTO));
+    NewRegistrationResponseDto newRegistrationResponseDto =
+        createNewConsultingTypeFacade.initializeNewConsultingType(
+            userDTO, user, obtainConsultingTypeSettings(userDTO));
+
+    try {
+      RegistrationStatisticsEvent registrationEvent =
+          new RegistrationStatisticsEvent(
+              userDTO,
+              user,
+              newRegistrationResponseDto.getSessionId(),
+              topicService.findTopicInternalIdentifier(userDTO.getMainTopicId()),
+              topicService.findTopicsInternalAttributes(userDTO.getTopicIds()));
+      statisticsService.fireEvent(registrationEvent);
+    } catch (Exception e) {
+      log.error("Could not create registration statistics event", e);
+    }
   }
 
   /**

@@ -1247,6 +1247,7 @@ class UserControllerE2EIT {
     givenConsultingTypeServiceResponse();
     givenARealmResource();
     givenAUserDTO();
+    givenAValidTopicServiceResponse();
 
     mockMvc
         .perform(
@@ -1268,6 +1269,7 @@ class UserControllerE2EIT {
 
   @Test
   void registerUserShouldSaveDefaultPreferredLanguage() throws Exception {
+    givenAValidTopicServiceResponse();
     givenConsultingTypeServiceResponse();
     givenARealmResource();
     givenAUserDTO();
@@ -1299,6 +1301,7 @@ class UserControllerE2EIT {
   @Test
   void registerUserWithoutConsultingIdShouldSaveCreateUserWithDemographicsData() throws Exception {
     ReflectionTestUtils.setField(userVerifier, "demographicsFeatureEnabled", true);
+    givenAValidTopicServiceResponse();
     givenConsultingTypeServiceResponse(2);
     givenARealmResource();
     givenAUserDTOWithDemographics();
@@ -1321,6 +1324,7 @@ class UserControllerE2EIT {
     givenConsultingTypeServiceResponse(2);
     givenARealmResource();
     givenAUserDTOWithCounsellingRelation();
+    givenAValidTopicServiceResponse();
 
     mockMvc
         .perform(
@@ -1337,6 +1341,7 @@ class UserControllerE2EIT {
     givenConsultingTypeServiceResponse(2);
     givenARealmResource();
     givenAUserDTOWithMainTopic();
+    givenAValidTopicServiceResponse();
 
     mockMvc
         .perform(
@@ -1353,6 +1358,7 @@ class UserControllerE2EIT {
     givenConsultingTypeServiceResponse(2);
     givenARealmResource();
     givenAUserDTOWithTopics();
+    givenAValidTopicServiceResponse();
 
     mockMvc
         .perform(
@@ -1570,9 +1576,11 @@ class UserControllerE2EIT {
             .description("topic desc 2")
             .status("ACTIVE")
             .internalIdentifier("internal identifier 2");
-    ;
+
     when(topicControllerApi.getApiClient()).thenReturn(new ApiClient());
     when(topicControllerApi.getAllTopics()).thenReturn(Lists.newArrayList(firstTopic, secondTopic));
+    when(topicControllerApi.getAllActiveTopics())
+        .thenReturn(Lists.newArrayList(firstTopic, secondTopic));
   }
 
   private void givenAValidRocketChatSubscriptionsResponse() {
