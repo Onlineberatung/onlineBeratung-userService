@@ -407,11 +407,6 @@ public class TestConstants {
   public static final List<AgencyDTO> AGENCY_DTO_LIST = Collections.singletonList(AGENCY_DTO_SUCHT);
 
   /*
-   * Tenants
-   */
-  public static final Long TENANT_ID = 1L;
-
-  /*
    * Users / Consultants
    */
   public static final String USER_ID = "9b71cc46-650d-42bb-8299-f8e3f6d7249f";

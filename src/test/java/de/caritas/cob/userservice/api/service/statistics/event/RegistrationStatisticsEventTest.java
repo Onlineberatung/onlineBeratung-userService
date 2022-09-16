@@ -5,7 +5,6 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.GENDER_VAL
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.POSTCODE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RELATION_VALUE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.SESSION_ID;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.TENANT_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -36,7 +35,7 @@ public class RegistrationStatisticsEventTest {
             .build();
     User createdUser = new User();
     createdUser.setUserId(USER_ID);
-    createdUser.setTenantId(TENANT_ID);
+    createdUser.setTenantId(1L);
     LocalDateTime now = LocalDateTime.now();
     createdUser.setCreateDate(now);
     registrationStatisticsEvent =
