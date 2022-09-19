@@ -42,7 +42,9 @@ public class TopicService {
   @Cacheable(cacheNames = CacheManagerConfig.TOPICS_CACHE)
   public Map<Long, TopicDTO> getAllTopicsMap() {
     var allTopics = this.getAllTopics();
-    return allTopics == null || allTopics.isEmpty() ? Maps.newHashMap() : getAllTopicsMap(allTopics);
+    return allTopics == null || allTopics.isEmpty()
+        ? Maps.newHashMap()
+        : getAllTopicsMap(allTopics);
   }
 
   private Map<Long, TopicDTO> getAllTopicsMap(List<TopicDTO> allTopics) {
