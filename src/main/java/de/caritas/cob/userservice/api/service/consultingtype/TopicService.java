@@ -47,9 +47,9 @@ public class TopicService {
 
   public TopicControllerApi createTopicControllerApiWithoutHeaders() {
     var apiClient = new ApiClient().setBasePath(this.topicServiceApiUrl);
-    TopicControllerApi topicControllerApi = new TopicControllerApi(apiClient);
-    topicControllerApi.setApiClient(apiClient);
-    return topicControllerApi;
+    var controllerApi = new TopicControllerApi(apiClient);
+    controllerApi.setApiClient(apiClient);
+    return controllerApi;
   }
 
   private void addDefaultHeaders(ApiClient apiClient) {
@@ -61,7 +61,9 @@ public class TopicService {
   @Cacheable(cacheNames = CacheManagerConfig.TOPICS_CACHE)
   public Map<Long, TopicDTO> getAllTopicsMap() {
     var allTopics = this.getAllTopics();
-    return allTopics.isEmpty() ? Maps.newHashMap() : getAllTopicsMap(allTopics);
+    return allTopics == null || allTopics.isEmpty()
+        ? Maps.newHashMap()
+        : getAllTopicsMap(allTopics);
   }
 
   public Map<Long, TopicDTO> getAllActiveTopicsMap() {
