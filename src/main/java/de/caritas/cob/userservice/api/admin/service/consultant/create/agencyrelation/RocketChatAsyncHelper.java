@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation;
 
-import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.TEMPLATE_FREE_TEXT;
+import static de.caritas.cob.userservice.api.service.emailsupplier.EmailSupplier.TEMPLATE_FREE_TEXT;
 import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 

@@ -7,12 +7,13 @@ import static org.apache.commons.codec.CharEncoding.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import de.caritas.cob.userservice.api.UserServiceApplication;
-import de.caritas.cob.userservice.api.helper.CustomOffsetDateTime;
 import de.caritas.cob.userservice.api.service.statistics.event.AssignSessionStatisticsEvent;
 import de.caritas.cob.userservice.api.testConfig.RabbitMqTestConfig;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.UserRole;
 import java.io.IOException;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,7 +61,7 @@ public class StatisticsServiceIT {
             + SESSION_ID
             + ","
             + "  \"timestamp\":\""
-            + CustomOffsetDateTime.nowInUtc()
+            + OffsetDateTime.now(ZoneOffset.UTC)
             + "\","
             + "  \"eventType\":\""
             + EventType.ASSIGN_SESSION
