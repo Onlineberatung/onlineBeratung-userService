@@ -97,7 +97,7 @@ public class RocketChatServiceIT {
     presenceDto = new PresenceDTO();
     var status = present ? "online" : "offline";
     presenceDto.setPresence(status);
-    presenceDto.setSuccess("true");
+    presenceDto.setSuccess(true);
 
     when(restTemplate.exchange(
             eq("https://testing.com/api/v1/users.getPresence?userId=" + chatUserId),

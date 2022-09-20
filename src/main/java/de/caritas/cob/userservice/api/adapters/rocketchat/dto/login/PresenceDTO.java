@@ -10,7 +10,7 @@ public class PresenceDTO {
 
   private String presence;
 
-  private String success;
+  private Boolean success;
 
   @JsonIgnore
   public boolean isPresent() {
