@@ -219,7 +219,7 @@ public class RocketChatService implements MessageClient {
     try {
       var body = rocketChatClient.getForEntity(url, PresenceDTO.class).getBody();
       if (isNull(body)) {
-        log.warn("Presence check inconclusive (user \"" + chatUserId + "\".)");
+        log.warn("Presence check inconclusive (user \"{}\".)", chatUserId);
         return Optional.empty();
       } else {
         return Optional.of(body.isPresent());
