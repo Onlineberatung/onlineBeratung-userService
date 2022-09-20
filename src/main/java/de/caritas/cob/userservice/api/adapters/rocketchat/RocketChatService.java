@@ -220,14 +220,14 @@ public class RocketChatService implements MessageClient {
       var body = rocketChatClient.getForEntity(url, PresenceDTO.class).getBody();
       if (isNull(body)) {
         log.warn("Presence check inconclusive (user \"{}\".)", chatUserId);
-        return Optional.empty();
       } else {
         return Optional.of(body.isPresent());
       }
     } catch (HttpClientErrorException exception) {
       log.error("Presence check failed.", exception);
-      return Optional.empty();
     }
+
+    return Optional.empty();
   }
 
   @Override
