@@ -15,6 +15,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
+import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -99,35 +100,29 @@ class RocketChatServiceIT {
     presenceDto.setPresence(status);
     presenceDto.setSuccess(true);
 
-    when(restTemplate.exchange(
-            eq("https://testing.com/api/v1/users.getPresence?userId=" + chatUserId),
-            eq(HttpMethod.GET),
-            any(HttpEntity.class),
-            ArgumentMatchers.<Class<PresenceDTO>>any()))
-        .thenReturn(ResponseEntity.ok(presenceDto));
+    whenPresenceIsRequested().thenReturn(ResponseEntity.ok(presenceDto));
   }
 
   private void givenAnInvalidPresenceResponse() {
-    when(restTemplate.exchange(
-            eq("https://testing.com/api/v1/users.getPresence?userId=" + chatUserId),
-            eq(HttpMethod.GET),
-            any(HttpEntity.class),
-            ArgumentMatchers.<Class<PresenceDTO>>any()))
-        .thenReturn(ResponseEntity.ok(null));
+    whenPresenceIsRequested().thenReturn(ResponseEntity.ok(null));
   }
 
   private void givenAnErroneousPresenceResponse() {
     var errorException = new HttpClientErrorException(HttpStatus.BAD_REQUEST, "error", null, null);
-    when(restTemplate.exchange(
-            eq("https://testing.com/api/v1/users.getPresence?userId=" + chatUserId),
-            eq(HttpMethod.GET),
-            any(HttpEntity.class),
-            ArgumentMatchers.<Class<PresenceDTO>>any()))
-        .thenThrow(errorException);
+    whenPresenceIsRequested().thenThrow(errorException);
   }
 
   private void givenAValidChatUserId() {
     chatUserId = RandomStringUtils.randomAlphanumeric(17);
+  }
+
+  private OngoingStubbing<ResponseEntity<PresenceDTO>> whenPresenceIsRequested() {
+    return when(
+        restTemplate.exchange(
+            eq("https://testing.com/api/v1/users.getPresence?userId=" + chatUserId),
+            eq(HttpMethod.GET),
+            any(HttpEntity.class),
+            ArgumentMatchers.<Class<PresenceDTO>>any()));
   }
 
   private void givenAValidRocketChatSystemUser() throws RocketChatUserNotInitializedException {
