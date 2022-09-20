@@ -4,15 +4,24 @@ import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.Appointment;
 import de.caritas.cob.userservice.api.adapters.web.dto.AppointmentStatus;
+import de.caritas.cob.userservice.api.config.auth.UserRole;
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class AppointmentDtoMapper {
+
+  private final ConsultantRepository consultantRepository;
 
   public Map<String, Object> mapOf(Appointment appointment, AuthenticatedUser authenticatedUser) {
     var appointmentMap = new HashMap<String, Object>();
@@ -22,7 +31,22 @@ public class AppointmentDtoMapper {
     appointmentMap.put("description", appointment.getDescription());
     appointmentMap.put("datetime", appointment.getDatetime().toString());
     appointmentMap.put("status", appointment.getStatus().getValue());
-    appointmentMap.put("consultantId", authenticatedUser.getUserId());
+
+    if (authenticatedUser.getRoles().contains(UserRole.CONSULTANT.getValue())
+        && appointment.getConsultantEmail() == null) {
+      appointmentMap.put("consultantId", authenticatedUser.getUserId());
+    } else if (authenticatedUser.getRoles().contains(UserRole.TECHNICAL.getValue())
+        && appointment.getConsultantEmail() != null) {
+      Optional<Consultant> consultant = consultantRepository
+          .findByEmailAndDeleteDateIsNull(appointment.getConsultantEmail());
+      if (!consultant.isPresent()) {
+        throw new BadRequestException(
+            "Consultant doesn't exist for give email " + appointment.getConsultantEmail());
+      }
+      appointmentMap.put("consultantId", consultant.get().getId());
+    } else {
+      throw new BadRequestException("Can not create appointment for given request.");
+    }
 
     return appointmentMap;
   }

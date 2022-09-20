@@ -201,6 +201,9 @@ components:
         description:
           type: string
           maxLength: 300
+        consultantEmail:
+          type: string
+          maxLength: 300
         datetime:
           type: string
           format: date-time

@@ -189,7 +189,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
             "/users/sessions/{sessionId:[0-9]+}/archive",
             "/users/sessions/{sessionId:[0-9]+}",
             "/appointments")
-        .hasAuthority(CONSULTANT_DEFAULT)
+        .hasAnyAuthority(CONSULTANT_DEFAULT, TECHNICAL_DEFAULT)
         .antMatchers(HttpMethod.PUT, APPOINTMENTS_APPOINTMENT_ID + UUID_PATTERN + "}")
         .hasAuthority(CONSULTANT_DEFAULT)
         .antMatchers(HttpMethod.DELETE, APPOINTMENTS_APPOINTMENT_ID + UUID_PATTERN + "}")
