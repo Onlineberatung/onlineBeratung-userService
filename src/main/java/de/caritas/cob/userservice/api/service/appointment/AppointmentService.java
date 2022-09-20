@@ -91,9 +91,8 @@ public class AppointmentService {
    * @return ObjectMapper
    */
   protected ObjectMapper getObjectMapper(boolean failOnUnknownProperties) {
-    return
-        new ObjectMapper()
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, failOnUnknownProperties);
+    return new ObjectMapper()
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, failOnUnknownProperties);
   }
 
   public void deleteConsultant(String consultantId) {
@@ -137,7 +136,10 @@ public class AppointmentService {
       return;
     }
     addTechnicalUserHeaders(this.appointmentConsultantApi.getApiClient());
-    var agencies = agencyList.stream().map(CreateConsultantAgencyDTO::getAgencyId).collect(Collectors.toList());
+    var agencies =
+        agencyList.stream()
+            .map(CreateConsultantAgencyDTO::getAgencyId)
+            .collect(Collectors.toList());
     AgencyConsultantSyncRequestDTO request = new AgencyConsultantSyncRequestDTO();
     request.setAgencies(agencies);
     request.setConsultantId(consultantId);
