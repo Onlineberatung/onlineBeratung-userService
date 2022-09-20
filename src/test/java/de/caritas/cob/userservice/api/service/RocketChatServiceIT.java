@@ -29,7 +29,7 @@ import org.springframework.web.client.RestTemplate;
 
 @SpringBootTest
 @ActiveProfiles("testing")
-public class RocketChatServiceIT {
+class RocketChatServiceIT {
 
   @Autowired private MessageClient underTest;
 
