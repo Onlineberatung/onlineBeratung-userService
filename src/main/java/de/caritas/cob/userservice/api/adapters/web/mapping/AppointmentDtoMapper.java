@@ -37,8 +37,8 @@ public class AppointmentDtoMapper {
       appointmentMap.put("consultantId", authenticatedUser.getUserId());
     } else if (authenticatedUser.getRoles().contains(UserRole.TECHNICAL.getValue())
         && appointment.getConsultantEmail() != null) {
-      Optional<Consultant> consultant = consultantRepository
-          .findByEmailAndDeleteDateIsNull(appointment.getConsultantEmail());
+      Optional<Consultant> consultant =
+          consultantRepository.findByEmailAndDeleteDateIsNull(appointment.getConsultantEmail());
       if (!consultant.isPresent()) {
         throw new BadRequestException(
             "Consultant doesn't exist for give email " + appointment.getConsultantEmail());
