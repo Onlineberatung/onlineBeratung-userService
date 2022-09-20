@@ -17,7 +17,9 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 
 /** Service class to communicate with the AppointmentService. */
 @Component
@@ -89,10 +91,8 @@ public class AppointmentService {
    * @return ObjectMapper
    */
   protected ObjectMapper getObjectMapper(boolean failOnUnknownProperties) {
-    ObjectMapper mapper =
-        new ObjectMapper()
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, failOnUnknownProperties);
-    return mapper;
+    return new ObjectMapper()
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, failOnUnknownProperties);
   }
 
   public void deleteConsultant(String consultantId) {
@@ -102,14 +102,23 @@ public class AppointmentService {
 
     if (consultantId != null && !consultantId.isEmpty()) {
       addTechnicalUserHeaders(this.appointmentConsultantApi.getApiClient());
-      this.appointmentConsultantApi.deleteConsultant(consultantId);
+      try {
+        this.appointmentConsultantApi.deleteConsultant(consultantId);
+      } catch (HttpClientErrorException ex) {
+        acceptDeletionIfConsultantNotFoundInAppointmentService(ex, consultantId);
+      }
     }
   }
 
-  private void addDefaultHeaders(ApiClient apiClient) {
-    var headers = this.securityHeaderSupplier.getCsrfHttpHeaders();
-    tenantHeaderSupplier.addTenantHeader(headers);
-    headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
+  private void acceptDeletionIfConsultantNotFoundInAppointmentService(
+      HttpClientErrorException ex, String consultantId) {
+    if (!HttpStatus.NOT_FOUND.equals(ex.getStatusCode())) {
+      throw ex;
+    } else {
+      log.warn(
+          "No consultant with id {} was found in appointmentService. Proceeding with deletion.",
+          consultantId);
+    }
   }
 
   private void addTechnicalUserHeaders(ApiClient apiClient) {
@@ -127,7 +136,10 @@ public class AppointmentService {
       return;
     }
     addTechnicalUserHeaders(this.appointmentConsultantApi.getApiClient());
-    var agencies = agencyList.stream().map(el -> el.getAgencyId()).collect(Collectors.toList());
+    var agencies =
+        agencyList.stream()
+            .map(CreateConsultantAgencyDTO::getAgencyId)
+            .collect(Collectors.toList());
     AgencyConsultantSyncRequestDTO request = new AgencyConsultantSyncRequestDTO();
     request.setAgencies(agencies);
     request.setConsultantId(consultantId);
