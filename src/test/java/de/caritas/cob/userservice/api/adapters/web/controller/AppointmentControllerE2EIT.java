@@ -285,7 +285,31 @@ class AppointmentControllerE2EIT {
   void postAppointmentShouldReturnCreated() throws Exception {
     givenAValidAppointmentDto(null, AppointmentStatus.CREATED);
     givenAValidConsultant(true);
+    appointment.setConsultantEmail(null);
+    mockMvc
+        .perform(
+            post("/appointments")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(appointment)))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("id", is(notNullValue())))
+        .andExpect(jsonPath("description", is(appointment.getDescription())))
+        .andExpect(jsonPath("datetime", is(appointment.getDatetime().toString())))
+        .andExpect(jsonPath("status", is(appointment.getStatus().getValue())));
 
+    assertEquals(1, appointmentRepository.count());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.TECHNICAL_DEFAULT)
+  void postAppointmentFromTechnicalRoleContextShouldReturnCreated() throws Exception {
+    givenAValidAppointmentDto(null, AppointmentStatus.CREATED);
+    consultant = consultantRepository.findAll().iterator().next();
+    when(authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.TECHNICAL.getValue()));
+    appointment.setConsultantEmail("emigration@consultant.de");
     mockMvc
         .perform(
             post("/appointments")

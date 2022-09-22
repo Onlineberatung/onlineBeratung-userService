@@ -9,20 +9,24 @@ import de.caritas.cob.userservice.api.adapters.web.dto.AppointmentStatus;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateEnquiryMessageResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.EnquiryAppointmentDTO;
 import de.caritas.cob.userservice.api.adapters.web.mapping.AppointmentDtoMapper;
+import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
 import de.caritas.cob.userservice.api.facade.assignsession.AssignEnquiryFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.AppointmentData;
+import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.EnquiryData;
 import de.caritas.cob.userservice.api.port.in.Organizing;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import de.caritas.cob.userservice.generated.api.adapters.web.controller.AppointmentsApi;
 import io.swagger.annotations.Api;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
@@ -56,6 +60,8 @@ public class AppointmentController implements AppointmentsApi {
   private final @NotNull SessionService sessionService;
 
   private final @NotNull ConsultantService consultantService;
+
+  private final @NotNull ConsultantRepository consultantRepository;
 
   @Override
   public ResponseEntity<Appointment> getAppointment(UUID id) {
@@ -113,11 +119,30 @@ public class AppointmentController implements AppointmentsApi {
       throw new BadRequestException("The initial appointment status must be 'created.'");
     }
 
-    var appointmentMap = mapper.mapOf(appointment, currentUser);
+    String consultantId = resolveConsultantId(appointment);
+    var appointmentMap = mapper.mapOf(appointment, consultantId);
     var savedMap = organizer.upsertAppointment(appointmentMap);
     var savedAppointment = mapper.appointmentOf(savedMap, true);
 
     return new ResponseEntity<>(savedAppointment, HttpStatus.CREATED);
+  }
+
+  private String resolveConsultantId(Appointment appointment) {
+    if (currentUser.getRoles().contains(UserRole.CONSULTANT.getValue())
+        && appointment.getConsultantEmail() == null) {
+      return currentUser.getUserId();
+    } else if (currentUser.getRoles().contains(UserRole.TECHNICAL.getValue())
+        && appointment.getConsultantEmail() != null) {
+      Optional<Consultant> consultant =
+          consultantRepository.findByEmailAndDeleteDateIsNull(appointment.getConsultantEmail());
+      if (!consultant.isPresent()) {
+        throw new BadRequestException(
+            "Consultant doesn't exist for given email " + appointment.getConsultantEmail());
+      }
+      return consultant.get().getId();
+    } else {
+      throw new BadRequestException("Can not create appointment for given request.");
+    }
   }
 
   @Override
