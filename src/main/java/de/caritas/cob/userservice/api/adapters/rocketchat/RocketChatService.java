@@ -22,6 +22,7 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupRespons
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupsListAllResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.LdapLoginDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.LoginResponseDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.PresenceDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.logout.LogoutResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.MessageResponse;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomResponse;
@@ -106,6 +107,7 @@ public class RocketChatService implements MessageClient {
   private static final String ENDPOINT_USER_LIST = "/users.list";
   private static final String ENDPOINT_USER_LOGIN = "/login";
   private static final String ENDPOINT_USER_LOGOUT = "/logout";
+  private static final String ENDPOINT_USER_PRESENCE = "/users.getPresence?userId=";
 
   private static final String ERROR_MESSAGE =
       "Error during rollback: Rocket.Chat group with id " + "%s could not be deleted";
@@ -208,6 +210,24 @@ public class RocketChatService implements MessageClient {
       log.error("Setting display failed.", exception);
       return false;
     }
+  }
+
+  @Override
+  public Optional<Boolean> isLoggedIn(String chatUserId) {
+    var url = rocketChatConfig.getApiUrl(ENDPOINT_USER_PRESENCE + chatUserId);
+
+    try {
+      var body = rocketChatClient.getForEntity(url, PresenceDTO.class).getBody();
+      if (isNull(body)) {
+        log.warn("Presence check inconclusive (user \"{}\".)", chatUserId);
+      } else {
+        return Optional.of(body.isPresent());
+      }
+    } catch (HttpClientErrorException exception) {
+      log.error("Presence check failed.", exception);
+    }
+
+    return Optional.empty();
   }
 
   @Override

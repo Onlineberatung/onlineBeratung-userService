@@ -16,6 +16,8 @@ public interface MessageClient {
   @SuppressWarnings("UnusedReturnValue")
   boolean updateUser(String chatUserId, String displayName);
 
+  Optional<Boolean> isLoggedIn(String chatUserId);
+
   Optional<Map<String, Object>> findUser(String chatUserId);
 
   Optional<List<Map<String, String>>> findAllChats(String chatUserId);
