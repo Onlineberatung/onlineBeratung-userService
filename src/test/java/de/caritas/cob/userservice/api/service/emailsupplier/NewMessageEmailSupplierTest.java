@@ -9,6 +9,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME_ENCODED;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -256,6 +257,32 @@ public class NewMessageEmailSupplierTest {
   }
 
   @Test
+  public void generateEmails_Should_ReturnEmailToConsultant_When_ConsultantIsOffline() {
+    when(roles.contains(UserRole.USER.getValue())).thenReturn(true);
+    when(session.getConsultant()).thenReturn(CONSULTANT);
+    when(session.getUser()).thenReturn(USER);
+    when(session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
+    when(messageClient.isLoggedIn(anyString())).thenReturn(Optional.of(false));
+
+    var generatedMails = newMessageEmailSupplier.generateEmails();
+
+    assertThat(generatedMails, hasSize(1));
+  }
+
+  @Test
+  public void generateEmails_Should_ReturnNoEmailToConsultant_When_ConsultantIsOnline() {
+    when(roles.contains(UserRole.USER.getValue())).thenReturn(true);
+    when(session.getConsultant()).thenReturn(CONSULTANT);
+    when(session.getUser()).thenReturn(USER);
+    when(session.getStatus()).thenReturn(SessionStatus.IN_PROGRESS);
+    when(messageClient.isLoggedIn(anyString())).thenReturn(Optional.of(true));
+
+    var generatedMails = newMessageEmailSupplier.generateEmails();
+
+    assertThat(generatedMails, empty());
+  }
+
+  @Test
   public void
       generateEmails_Should_ReturnExpectedEmailToAsker_When_ConsultantWritesToValidReceiver() {
     when(roles.contains(UserRole.CONSULTANT.getValue())).thenReturn(true);
@@ -280,6 +307,32 @@ public class NewMessageEmailSupplierTest {
     assertThat(templateData.get(1).getValue(), is("username"));
     assertThat(templateData.get(2).getKey(), is("url"));
     assertThat(templateData.get(2).getValue(), is("app baseurl"));
+  }
+
+  @Test
+  public void generateEmails_Should_ReturnExpectedEmailToAdviceSeeker_When_AdviceSeekerIsOffline() {
+    when(roles.contains(UserRole.CONSULTANT.getValue())).thenReturn(true);
+    Consultant consultant = mock(Consultant.class);
+    when(consultant.getUsername()).thenReturn(USERNAME_ENCODED);
+    when(session.getConsultant()).thenReturn(consultant);
+    when(consultant.getId()).thenReturn(USER.getUserId());
+    when(session.getUser()).thenReturn(USER);
+    when(messageClient.isLoggedIn(any())).thenReturn(Optional.of(false));
+
+    List<MailDTO> generatedMails = this.newMessageEmailSupplier.generateEmails();
+
+    assertThat(generatedMails, hasSize(1));
+  }
+
+  @Test
+  public void generateEmails_Should_ReturnExpectedEmailToAdviceSeeker_When_AdviceSeekerIsOnline() {
+    when(roles.contains(UserRole.CONSULTANT.getValue())).thenReturn(true);
+    when(session.getUser()).thenReturn(USER);
+    when(messageClient.isLoggedIn(any())).thenReturn(Optional.of(true));
+
+    List<MailDTO> generatedMails = this.newMessageEmailSupplier.generateEmails();
+
+    assertThat(generatedMails, empty());
   }
 
   @Test
