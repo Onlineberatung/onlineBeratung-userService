@@ -26,6 +26,7 @@ import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.out.MessageClient;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
@@ -70,6 +71,8 @@ public class NewMessageEmailSupplierTest {
 
   @Mock private TenantTemplateSupplier tenantTemplateSupplier;
 
+  @Mock private MessageClient messageClient;
+
   @Before
   public void setup() {
     this.newMessageEmailSupplier =
@@ -83,6 +86,7 @@ public class NewMessageEmailSupplierTest {
             .consultantService(consultantService)
             .applicationBaseUrl("app baseurl")
             .emailDummySuffix("dummySuffix")
+            .messageClient(messageClient)
             .build();
     setInternalState(NewMessageEmailSupplier.class, "log", logger);
   }
@@ -209,7 +213,7 @@ public class NewMessageEmailSupplierTest {
     List<MailDTO> generatedMails = this.newMessageEmailSupplier.generateEmails();
 
     assertThat(generatedMails, hasSize(0));
-    verify(logger).error(anyString(), anyString(), anyString());
+    verify(logger).info(anyString(), anyString());
   }
 
   @Test

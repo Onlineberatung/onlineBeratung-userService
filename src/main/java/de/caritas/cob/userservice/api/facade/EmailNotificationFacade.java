@@ -60,7 +60,7 @@ public class EmailNotificationFacade {
   private final @NonNull SessionService sessionService;
   private final @NonNull ConsultantAgencyService consultantAgencyService;
   private final @NonNull ConsultantService consultantService;
-  private final @NonNull RocketChatService rocketChatService;
+  private final @NonNull RocketChatService messageClient;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
   private final @NonNull IdentityClient identityClient;
   private final @NonNull NewEnquiryEmailSupplier newEnquiryEmailSupplier;
@@ -135,6 +135,7 @@ public class EmailNotificationFacade {
               .emailDummySuffix(emailDummySuffix)
               .tenantTemplateSupplier(tenantTemplateSupplier)
               .multiTenancyEnabled(multiTenancyEnabled)
+              .messageClient(messageClient)
               .build();
       sendMailTasksToMailService(newMessageMails);
 
@@ -174,7 +175,7 @@ public class EmailNotificationFacade {
               userId,
               applicationBaseUrl,
               consultantService,
-              rocketChatService,
+              messageClient,
               rocketChatSystemUserId,
               identityClient);
       sendMailTasksToMailService(newFeedbackMessages);
