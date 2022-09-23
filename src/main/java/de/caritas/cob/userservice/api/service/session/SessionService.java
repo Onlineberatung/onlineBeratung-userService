@@ -712,8 +712,8 @@ public class SessionService {
     return Optional.empty();
   }
 
-  public String findGroupIdByConsultantAndUserAndConsultingType(
-      String consultantId, String askerId, Integer consultingTypeId) {
+  public String findGroupIdByConsultantAndUser(String consultantId, String askerId) {
+
     Optional<Consultant> consultant = consultantService.getConsultant(consultantId);
     if (!consultant.isPresent()) {
       throw new BadRequestException(
@@ -724,10 +724,15 @@ public class SessionService {
       throw new BadRequestException(String.format("Asker for given id %s not found", askerId));
     }
 
-    Optional<Session> session =
-        findSessionByConsultantAndUserAndConsultingType(
-            consultant.get(), user.get(), consultingTypeId);
-    return session.orElseThrow().getGroupId();
+    List<Session> sessions =
+        sessionRepository.findByConsultantAndUser(consultant.get(), user.get());
+
+    if (sessions.size() != 1) {
+      throw new BadRequestException(
+          "No rocketchat group found for given consultant or consultant is assigned to multiple sessions");
+    }
+
+    return sessions.get(0).getGroupId();
   }
 
   public List<Session> findAllSessions() {
