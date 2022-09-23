@@ -1375,8 +1375,9 @@ public class UserController implements UsersApi {
             .getConsultant(consultantIdString)
             .orElseThrow(
                 () -> new NotFoundException("Consultant with id %s not found", consultantIdString));
-    var agencies = consultantAgencyService.getAgenciesOfConsultant(consultantIdString);
-    var consultantDto = consultantDtoMapper.consultantResponseDtoOf(consultant, agencies, false);
+    var onlineAgencies = consultantAgencyService.getOnlineAgenciesOfConsultant(consultantIdString);
+    var consultantDto =
+        consultantDtoMapper.consultantResponseDtoOf(consultant, onlineAgencies, false);
 
     return new ResponseEntity<>(consultantDto, HttpStatus.OK);
   }
