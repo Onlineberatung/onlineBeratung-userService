@@ -30,5 +30,7 @@ public interface IdentityClientConfig {
 
   TechnicalUserConfig getTechnicalUser();
 
+  String getEmailDummySuffix();
+
   boolean isOtpAllowed(@NotNull Set<String> roles);
 }

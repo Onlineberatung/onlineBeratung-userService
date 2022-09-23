@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Set;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import lombok.Data;
 import org.hibernate.validator.constraints.URL;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,6 +43,10 @@ public class IdentityConfig implements IdentityClientConfig {
 
   @NotNull private TechnicalUserConfig technicalUser;
 
+  @NotBlank
+  @Pattern(regexp = "^@\\S+$")
+  private String emailDummySuffix;
+
   @Value("${multitenancy.enabled}")
   private boolean multiTenancyEnabled;
 
@@ -54,10 +59,6 @@ public class IdentityConfig implements IdentityClientConfig {
     addPath(path, arg, builder);
 
     return builder.toUriString();
-  }
-
-  public String getOtpUrl(String path) {
-    return getOtpUrl(path, "");
   }
 
   public String getOtpUrl(String path, String arg) {

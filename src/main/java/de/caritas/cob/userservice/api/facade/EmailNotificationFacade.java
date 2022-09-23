@@ -15,6 +15,7 @@ import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
+import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.emailsupplier.AssignEnquiryEmailSupplier;
@@ -50,9 +51,6 @@ public class EmailNotificationFacade {
   @Value("${app.base.url}")
   private String applicationBaseUrl;
 
-  @Value("${keycloakService.user.dummySuffix}")
-  private String emailDummySuffix;
-
   @Value("${rocket.systemuser.id}")
   private String rocketChatSystemUserId;
 
@@ -63,6 +61,7 @@ public class EmailNotificationFacade {
   private final @NonNull RocketChatService messageClient;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
   private final @NonNull IdentityClient identityClient;
+  private final @NonNull IdentityClientConfig identityClientConfig;
   private final @NonNull NewEnquiryEmailSupplier newEnquiryEmailSupplier;
   private final @NonNull AssignEnquiryEmailSupplier assignEnquiryEmailSupplier;
   private final @NonNull TenantTemplateSupplier tenantTemplateSupplier;
@@ -132,7 +131,7 @@ public class EmailNotificationFacade {
               .consultingTypeManager(consultingTypeManager)
               .consultantService(consultantService)
               .applicationBaseUrl(applicationBaseUrl)
-              .emailDummySuffix(emailDummySuffix)
+              .emailDummySuffix(identityClientConfig.getEmailDummySuffix())
               .tenantTemplateSupplier(tenantTemplateSupplier)
               .multiTenancyEnabled(multiTenancyEnabled)
               .messageClient(messageClient)
@@ -246,7 +245,7 @@ public class EmailNotificationFacade {
   private boolean hasUserValidEmailAddress(User user) {
     return nonNull(user)
         && isNotBlank(user.getEmail())
-        && !user.getEmail().endsWith(emailDummySuffix);
+        && !user.getEmail().endsWith(identityClientConfig.getEmailDummySuffix());
   }
 
   @Async
