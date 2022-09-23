@@ -7,6 +7,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.GROUP_MEMB
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.GROUP_MEMBER_USER_1;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -222,6 +223,54 @@ public class NewFeedbackEmailSupplierTest {
   }
 
   @Test
+  public void generateEmails_Should_ReturnExpectedMail_When_ConsultantIsOffline()
+      throws RocketChatGetGroupMembersException {
+    when(session.getUser()).thenReturn(USER);
+    when(session.getConsultant()).thenReturn(CONSULTANT);
+    setField(newFeedbackEmailSupplier, "userId", CONSULTANT.getId());
+    when(consultantService.getConsultant(anyString())).thenReturn(Optional.of(CONSULTANT));
+    when(rocketChatService.getMembersOfGroup(anyString())).thenReturn(List.of(GROUP_MEMBER_USER_1));
+    var consultant = mock(Consultant.class);
+    when(consultant.getId()).thenReturn(UUID.randomUUID().toString());
+    when(consultant.getEmail()).thenReturn("a@b.com");
+    when(consultant.getLanguageCode()).thenReturn(LanguageCode.de);
+    when(consultant.isAbsent()).thenReturn(false);
+    when(consultant.getRocketChatId()).thenReturn(RandomStringUtils.randomAlphanumeric(17));
+    when(consultant.getNotifyNewFeedbackMessageFromAdviceSeeker()).thenReturn(true);
+    when(rocketChatService.isLoggedIn(anyString())).thenReturn(Optional.of(false));
+    when(consultantService.getConsultantByRcUserId(anyString()))
+        .thenReturn(Optional.of(consultant));
+    when(keycloakService.userHasRole(anyString(), anyString())).thenReturn(true);
+
+    var generatedMails = newFeedbackEmailSupplier.generateEmails();
+
+    assertThat(generatedMails, hasSize(1));
+  }
+
+  @Test
+  public void generateEmails_Should_ReturnNoMail_When_ConsultantIsOnline()
+      throws RocketChatGetGroupMembersException {
+    when(session.getConsultant()).thenReturn(CONSULTANT);
+    setField(newFeedbackEmailSupplier, "userId", CONSULTANT.getId());
+    when(consultantService.getConsultant(anyString())).thenReturn(Optional.of(CONSULTANT));
+    when(rocketChatService.getMembersOfGroup(anyString())).thenReturn(List.of(GROUP_MEMBER_USER_1));
+    var consultant = mock(Consultant.class);
+    when(consultant.getId()).thenReturn(UUID.randomUUID().toString());
+    when(consultant.getEmail()).thenReturn("a@b.com");
+    when(consultant.isAbsent()).thenReturn(false);
+    when(consultant.getRocketChatId()).thenReturn(RandomStringUtils.randomAlphanumeric(17));
+    when(consultant.getNotifyNewFeedbackMessageFromAdviceSeeker()).thenReturn(true);
+    when(rocketChatService.isLoggedIn(anyString())).thenReturn(Optional.of(true));
+    when(consultantService.getConsultantByRcUserId(anyString()))
+        .thenReturn(Optional.of(consultant));
+    when(keycloakService.userHasRole(anyString(), anyString())).thenReturn(true);
+
+    var generatedMails = newFeedbackEmailSupplier.generateEmails();
+
+    assertThat(generatedMails, empty());
+  }
+
+  @Test
   public void generateEmails_Should_ReturnEmptyList_When_SessionConsultantIsAbsent()
       throws RocketChatGetGroupMembersException {
     when(session.getConsultant()).thenReturn(CONSULTANT);
@@ -287,6 +336,34 @@ public class NewFeedbackEmailSupplierTest {
     var generatedMails = newFeedbackEmailSupplier.generateEmails();
 
     assertThat(generatedMails, hasSize(0));
+  }
+
+  @Test
+  public void
+      generateEmails_Should_ReturnExpectedMail_When_AnotherConsultantWroteAndConsultantIsOffline()
+          throws RocketChatGetGroupMembersException {
+    when(session.getUser()).thenReturn(USER);
+    when(session.getConsultant()).thenReturn(CONSULTANT_2);
+    setField(newFeedbackEmailSupplier, "userId", CONSULTANT.getId());
+    when(consultantService.getConsultant(anyString())).thenReturn(Optional.of(CONSULTANT_2));
+    when(rocketChatService.isLoggedIn(anyString())).thenReturn(Optional.of(false));
+
+    var generatedMails = newFeedbackEmailSupplier.generateEmails();
+
+    assertThat(generatedMails, hasSize(1));
+  }
+
+  @Test
+  public void generateEmails_Should_ReturnNoMail_When_AnotherConsultantWroteAndConsultantIsOnline()
+      throws RocketChatGetGroupMembersException {
+    when(session.getConsultant()).thenReturn(CONSULTANT_2);
+    setField(newFeedbackEmailSupplier, "userId", CONSULTANT.getId());
+    when(consultantService.getConsultant(anyString())).thenReturn(Optional.of(CONSULTANT_2));
+    when(rocketChatService.isLoggedIn(anyString())).thenReturn(Optional.of(true));
+
+    var generatedMails = newFeedbackEmailSupplier.generateEmails();
+
+    assertThat(generatedMails, empty());
   }
 
   @Test

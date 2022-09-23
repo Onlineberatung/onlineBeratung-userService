@@ -1375,20 +1375,17 @@ public class UserController implements UsersApi {
             .getConsultant(consultantIdString)
             .orElseThrow(
                 () -> new NotFoundException("Consultant with id %s not found", consultantIdString));
-    var agencies = consultantAgencyService.getAgenciesOfConsultant(consultantIdString);
-    var consultantDto = consultantDtoMapper.consultantResponseDtoOf(consultant, agencies, false);
+    var onlineAgencies = consultantAgencyService.getOnlineAgenciesOfConsultant(consultantIdString);
+    var consultantDto =
+        consultantDtoMapper.consultantResponseDtoOf(consultant, onlineAgencies, false);
 
     return new ResponseEntity<>(consultantDto, HttpStatus.OK);
   }
 
   @Override
   public ResponseEntity<RocketChatGroupIdDTO> getRocketChatGroupId(
-      @NotNull @Valid String consultantId,
-      @NotNull @Valid String askerId,
-      @NotNull @Valid Integer consultingTypeId) {
-    String groupId =
-        sessionService.findGroupIdByConsultantAndUserAndConsultingType(
-            consultantId, askerId, consultingTypeId);
+      @NotNull @Valid String consultantId, @NotNull @Valid String askerId) {
+    String groupId = sessionService.findGroupIdByConsultantAndUser(consultantId, askerId);
     return new ResponseEntity<>(new RocketChatGroupIdDTO().groupId(groupId), HttpStatus.OK);
   }
 }
