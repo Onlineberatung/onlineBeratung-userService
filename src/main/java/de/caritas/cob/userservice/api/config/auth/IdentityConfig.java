@@ -40,6 +40,8 @@ public class IdentityConfig implements IdentityClientConfig {
 
   @NotNull private Boolean displayNameAllowedForConsultants;
 
+  @NotNull private TechnicalUserConfig technicalUser;
+
   @Value("${multitenancy.enabled}")
   private boolean multiTenancyEnabled;
 
