@@ -2615,7 +2615,8 @@ public class UserControllerIT {
     mvc.perform(get(PATH_GET_PUBLIC_CONSULTANT_DATA).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(consultantAgencyService).getOnlineAgenciesOfConsultant("65c1095e-b977-493a-a34f-064b729d1d6c");
+    verify(consultantAgencyService)
+        .getOnlineAgenciesOfConsultant("65c1095e-b977-493a-a34f-064b729d1d6c");
   }
 
   @Test
