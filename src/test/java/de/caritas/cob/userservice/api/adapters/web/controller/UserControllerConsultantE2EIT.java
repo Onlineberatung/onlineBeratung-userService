@@ -741,7 +741,7 @@ class UserControllerConsultantE2EIT {
         .andExpect(jsonPath("consultantId", is(consultant.getId())))
         .andExpect(jsonPath("firstName").doesNotExist())
         .andExpect(jsonPath("lastName").doesNotExist())
-        .andExpect(jsonPath("agencies", hasSize(24)))
+        .andExpect(jsonPath("agencies", hasSize(14)))
         .andExpect(jsonPath("agencies[0].id", is(notNullValue())))
         .andExpect(jsonPath("agencies[0].name", is(notNullValue())))
         .andExpect(jsonPath("agencies[0].postcode", is(notNullValue())))
