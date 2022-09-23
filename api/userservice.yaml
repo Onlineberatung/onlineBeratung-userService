@@ -325,11 +325,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: consultingTypeId
-          in: query
-          required: true
-          schema:
-            type: integer
       responses:
         200:
           description: OK - successful operation

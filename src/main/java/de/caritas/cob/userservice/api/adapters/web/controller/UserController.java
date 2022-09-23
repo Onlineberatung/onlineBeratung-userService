@@ -1384,12 +1384,8 @@ public class UserController implements UsersApi {
 
   @Override
   public ResponseEntity<RocketChatGroupIdDTO> getRocketChatGroupId(
-      @NotNull @Valid String consultantId,
-      @NotNull @Valid String askerId,
-      @NotNull @Valid Integer consultingTypeId) {
-    String groupId =
-        sessionService.findGroupIdByConsultantAndUserAndConsultingType(
-            consultantId, askerId, consultingTypeId);
+      @NotNull @Valid String consultantId, @NotNull @Valid String askerId) {
+    String groupId = sessionService.findGroupIdByConsultantAndUser(consultantId, askerId);
     return new ResponseEntity<>(new RocketChatGroupIdDTO().groupId(groupId), HttpStatus.OK);
   }
 }
