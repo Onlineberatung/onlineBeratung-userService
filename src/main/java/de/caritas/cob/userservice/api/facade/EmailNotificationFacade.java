@@ -218,6 +218,7 @@ public class EmailNotificationFacade {
   }
 
   @Async
+  @Transactional
   public void sendReassignRequestNotification(String rcGroupId, TenantData tenantData) {
     TenantContext.setCurrentTenantData(tenantData);
     var session = sessionService.getSessionByGroupId(rcGroupId);
@@ -250,6 +251,7 @@ public class EmailNotificationFacade {
   }
 
   @Async
+  @Transactional
   public void sendReassignConfirmationNotification(
       ReassignmentNotificationDTO reassignmentNotification, TenantData tenantData) {
     TenantContext.setCurrentTenantData(tenantData);
