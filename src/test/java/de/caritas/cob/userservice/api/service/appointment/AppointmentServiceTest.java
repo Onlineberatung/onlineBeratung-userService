@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.service.appointment;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -32,6 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.slf4j.Logger;
+import org.springframework.web.client.HttpClientErrorException;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(
@@ -59,9 +61,6 @@ class AppointmentServiceTest {
   @Mock org.springframework.http.HttpHeaders httpHeaders;
 
   @Mock ObjectMapper objectMapper;
-
-  @Before
-  public void setup() {}
 
   @BeforeEach
   public void beforeEach() throws JsonProcessingException {
@@ -97,6 +96,14 @@ class AppointmentServiceTest {
     appointmentService.deleteConsultant("testId");
     verify(appointmentConsultantApi, never()).deleteConsultant(any());
     verify(appointmentConsultantApi, never()).deleteConsultantWithHttpInfo(any());
+  }
+
+  @Test
+  void deleteConsultant_Should_CallAppointmentService_WhenAppointmentsIsEnabled() {
+    setField(appointmentService, FIELD_NAME_APPOINTMENTS_ENABLED, true);
+    doThrow(HttpClientErrorException.class).when(appointmentConsultantApi).deleteConsultant("testId");
+    appointmentService.deleteConsultant("testId");
+    verify(appointmentConsultantApi).deleteConsultant("testId");
   }
 
   @Test
