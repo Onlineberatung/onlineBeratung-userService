@@ -1,15 +1,10 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
-import static de.caritas.cob.userservice.api.adapters.web.controller.UserController.COUNT_INVALID_MESSAGE;
-import static de.caritas.cob.userservice.api.adapters.web.controller.UserController.MIN_COUNT;
-import static de.caritas.cob.userservice.api.adapters.web.controller.UserController.MIN_OFFSET;
-import static de.caritas.cob.userservice.api.adapters.web.controller.UserController.OFFSET_INVALID_MESSAGE;
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.ANONYMOUS_ENQUIRY;
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.ARCHIVED_SESSION;
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.ARCHIVED_TEAM_SESSION;
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.REGISTERED_ENQUIRY;
 
-import de.caritas.cob.userservice.api.adapters.web.controller.validation.MinValue;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAnonymousEnquiryDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAnonymousEnquiryResponseDTO;
@@ -48,9 +43,7 @@ public class ConversationController implements ConversationsApi {
    */
   @Override
   public ResponseEntity<ConsultantSessionListResponseDTO> getAnonymousEnquiries(
-      @MinValue(value = MIN_OFFSET, message = OFFSET_INVALID_MESSAGE) Integer offset,
-      @MinValue(value = MIN_COUNT, message = COUNT_INVALID_MESSAGE) Integer count,
-      @RequestHeader String rcToken) {
+      Integer offset, Integer count, @RequestHeader String rcToken) {
 
     ConsultantSessionListResponseDTO anonymousEnquirySessions =
         this.conversationListResolver.resolveConversations(
@@ -68,9 +61,7 @@ public class ConversationController implements ConversationsApi {
    */
   @Override
   public ResponseEntity<ConsultantSessionListResponseDTO> getRegisteredEnquiries(
-      @MinValue(value = MIN_OFFSET, message = OFFSET_INVALID_MESSAGE) Integer offset,
-      @MinValue(value = MIN_COUNT, message = COUNT_INVALID_MESSAGE) Integer count,
-      @RequestHeader String rcToken) {
+      Integer offset, Integer count, @RequestHeader String rcToken) {
 
     ConsultantSessionListResponseDTO registeredEnquirySessions =
         this.conversationListResolver.resolveConversations(
@@ -88,9 +79,7 @@ public class ConversationController implements ConversationsApi {
    */
   @Override
   public ResponseEntity<ConsultantSessionListResponseDTO> getArchivedSessions(
-      @MinValue(value = MIN_OFFSET, message = OFFSET_INVALID_MESSAGE) Integer offset,
-      @MinValue(value = MIN_COUNT, message = COUNT_INVALID_MESSAGE) Integer count,
-      @RequestHeader String rcToken) {
+      Integer offset, Integer count, @RequestHeader String rcToken) {
 
     ConsultantSessionListResponseDTO archivedSessions =
         this.conversationListResolver.resolveConversations(
@@ -108,9 +97,7 @@ public class ConversationController implements ConversationsApi {
    */
   @Override
   public ResponseEntity<ConsultantSessionListResponseDTO> getArchivedTeamSessions(
-      @MinValue(value = MIN_OFFSET, message = OFFSET_INVALID_MESSAGE) Integer offset,
-      @MinValue(value = MIN_COUNT, message = COUNT_INVALID_MESSAGE) Integer count,
-      @RequestHeader String rcToken) {
+      Integer offset, Integer count, @RequestHeader String rcToken) {
 
     ConsultantSessionListResponseDTO archivedTeamSessions =
         this.conversationListResolver.resolveConversations(
