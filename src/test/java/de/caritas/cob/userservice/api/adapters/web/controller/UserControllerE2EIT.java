@@ -530,6 +530,58 @@ class UserControllerE2EIT {
   }
 
   @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  void getSessionsForAuthenticatedConsultantShouldRespondWithBadRequestIfOffsetNegative()
+      throws Exception {
+    givenABearerToken();
+    givenAValidConsultantWithId("34c3x5b1-0677-4fd2-a7ea-56a71aefd099");
+    givenConsultingTypeServiceResponse();
+    givenAValidRocketChatInfoUserResponse();
+    givenAValidRocketChatSubscriptionsResponse();
+    givenAValidRocketChatRoomsResponse();
+    givenAValidTopicServiceResponse();
+
+    mockMvc
+        .perform(
+            get("/users/sessions/consultants")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header("rcToken", RC_TOKEN)
+                .param("offset", "-1")
+                .param("count", "1")
+                .param("status", "2")
+                .param("filter", "all")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  void getSessionsForAuthenticatedConsultantShouldRespondWithBadRequestIfCountIdLessThanOne()
+      throws Exception {
+    givenABearerToken();
+    givenAValidConsultantWithId("34c3x5b1-0677-4fd2-a7ea-56a71aefd099");
+    givenConsultingTypeServiceResponse();
+    givenAValidRocketChatInfoUserResponse();
+    givenAValidRocketChatSubscriptionsResponse();
+    givenAValidRocketChatRoomsResponse();
+    givenAValidTopicServiceResponse();
+
+    mockMvc
+        .perform(
+            get("/users/sessions/consultants")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header("rcToken", RC_TOKEN)
+                .param("offset", "0")
+                .param("count", "0")
+                .param("status", "2")
+                .param("filter", "all")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
   @WithMockUser(authorities = {AuthorityValue.SINGLE_TENANT_ADMIN})
   void getSessionsStatisticsAuthenticatedConsultant_ShouldGetSessionsWithTopics() throws Exception {
     givenABearerToken();

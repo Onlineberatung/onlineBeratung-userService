@@ -10,7 +10,6 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
-import de.caritas.cob.userservice.api.adapters.web.controller.validation.MinValue;
 import de.caritas.cob.userservice.api.adapters.web.dto.AbsenceDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ChatDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ChatInfoResponseDTO;
@@ -127,11 +126,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Api(tags = "user-controller")
 public class UserController implements UsersApi {
-
-  static final int MIN_OFFSET = 0;
-  static final int MIN_COUNT = 1;
-  static final String OFFSET_INVALID_MESSAGE = "offset must be a positive number";
-  static final String COUNT_INVALID_MESSAGE = "count must be a positive number";
 
   private final @NotNull ValidatedUserAccountProvider userAccountProvider;
   private final @NotNull SessionService sessionService;
@@ -556,8 +550,8 @@ public class UserController implements UsersApi {
   @Override
   public ResponseEntity<ConsultantSessionListResponseDTO> getSessionsForAuthenticatedConsultant(
       @RequestHeader String rcToken,
-      @MinValue(value = MIN_OFFSET, message = OFFSET_INVALID_MESSAGE) Integer offset,
-      @MinValue(value = MIN_COUNT, message = COUNT_INVALID_MESSAGE) Integer count,
+      Integer offset,
+      Integer count,
       @RequestParam String filter,
       @RequestParam Integer status) {
 
@@ -597,10 +591,7 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<ConsultantSessionListResponseDTO> getTeamSessionsForAuthenticatedConsultant(
-      @RequestHeader String rcToken,
-      @MinValue(value = MIN_OFFSET, message = OFFSET_INVALID_MESSAGE) Integer offset,
-      @MinValue(value = MIN_COUNT, message = COUNT_INVALID_MESSAGE) Integer count,
-      @RequestParam String filter) {
+      @RequestHeader String rcToken, Integer offset, Integer count, @RequestParam String filter) {
 
     var consultant = this.userAccountProvider.retrieveValidatedTeamConsultant();
 
