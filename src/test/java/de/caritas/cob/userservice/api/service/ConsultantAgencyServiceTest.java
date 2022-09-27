@@ -216,8 +216,8 @@ public class ConsultantAgencyServiceTest {
   @Test
   public void
       getAgenciesOfConsultant_Should_returnExpectedAgenciesAndFilterOutOfflineAgencies_When_consultantAgenciesExists() {
-    var consultantAgencies =
-        new EasyRandom().objects(ConsultantAgency.class, 10).collect(Collectors.toList());
+    List<ConsultantAgency> consultantAgencies = givenConsultantAgenciesWithDeletionDateNull();
+
     when(consultantAgencyRepository.findByConsultantId(any())).thenReturn(consultantAgencies);
     var agencyIds =
         consultantAgencies.stream().map(ConsultantAgency::getAgencyId).collect(Collectors.toList());
@@ -237,6 +237,13 @@ public class ConsultantAgencyServiceTest {
           assertNotNull(agency.getDescription());
           assertNotNull(agency.getPostcode());
         });
+  }
+
+  private static List<ConsultantAgency> givenConsultantAgenciesWithDeletionDateNull() {
+    var consultantAgencies =
+        new EasyRandom().objects(ConsultantAgency.class, 10).collect(Collectors.toList());
+    consultantAgencies.stream().forEach(ca -> ca.setDeleteDate(null));
+    return consultantAgencies;
   }
 
   private List<AgencyDTO> mockAgenciesForIds(List<Long> agencyIds) {

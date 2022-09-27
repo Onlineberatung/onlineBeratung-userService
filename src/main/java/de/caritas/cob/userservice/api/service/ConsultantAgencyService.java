@@ -152,6 +152,7 @@ public class ConsultantAgencyService {
   public List<AgencyDTO> getOnlineAgenciesOfConsultant(String consultantId) {
     var agencyIds =
         consultantAgencyRepository.findByConsultantId(consultantId).stream()
+            .filter(agency -> agency.getDeleteDate() == null)
             .map(ConsultantAgency::getAgencyId)
             .collect(Collectors.toList());
 
