@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.service.emailsupplier;
 
-import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.TEMPLATE_NEW_FEEDBACK_MESSAGE_NOTIFICATION;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -90,8 +89,11 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
     }
 
     if (receivingConsultant.getNotifyNewFeedbackMessageFromAdviceSeeker()
-        && didAnotherConsultantWrite()) {
-      return singletonList(buildMailForAssignedConsultant(sendingConsultant, receivingConsultant));
+        && didAnotherConsultantWrite()
+        && isLoggedOut(receivingConsultant)) {
+      var mail = buildMailForAssignedConsultant(sendingConsultant, receivingConsultant);
+
+      return singletonList(mail);
     }
 
     return emptyList();
@@ -125,6 +127,7 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
         .filter(this::notHimselfAndNotAbsent)
         .filter(this::isMainConsultantOrAssignedToSession)
         .filter(Consultant::getNotifyNewFeedbackMessageFromAdviceSeeker)
+        .filter(this::isLoggedOut)
         .map(consultant -> buildMailForAssignedConsultant(sendingConsultant, consultant))
         .collect(Collectors.toList());
   }
@@ -165,6 +168,10 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
     return !areUsersEqual(userId, session.getConsultant())
         && !session.getConsultant().getEmail().isEmpty()
         && !session.getConsultant().isAbsent();
+  }
+
+  private boolean isLoggedOut(Consultant consultant) {
+    return !rocketChatService.isLoggedIn(consultant.getRocketChatId()).orElse(false);
   }
 
   private MailDTO buildMailForAssignedConsultant(

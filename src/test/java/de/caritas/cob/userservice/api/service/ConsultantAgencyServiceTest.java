@@ -196,7 +196,7 @@ public class ConsultantAgencyServiceTest {
   public void getAgenciesOfConsultant_Should_returnEmptyList_When_consultantDoesNotExist() {
     when(consultantAgencyRepository.findByConsultantId(any())).thenReturn(emptyList());
 
-    var agencies = consultantAgencyService.getAgenciesOfConsultant("invalid");
+    var agencies = consultantAgencyService.getOnlineAgenciesOfConsultant("invalid");
 
     assertThat(agencies, hasSize(0));
   }
@@ -208,24 +208,26 @@ public class ConsultantAgencyServiceTest {
     when(consultantAgencyRepository.findByConsultantId(any()))
         .thenReturn(singletonList(consultantAgency));
 
-    var agencies = consultantAgencyService.getAgenciesOfConsultant("valid");
+    var agencies = consultantAgencyService.getOnlineAgenciesOfConsultant("valid");
 
     assertThat(agencies, hasSize(0));
   }
 
   @Test
   public void
-      getAgenciesOfConsultant_Should_returnExpectedAgencies_When_consultantAgenciesExists() {
-    var consultantAgencies =
-        new EasyRandom().objects(ConsultantAgency.class, 10).collect(Collectors.toList());
+      getAgenciesOfConsultant_Should_returnExpectedAgenciesAndFilterOutOfflineAgencies_When_consultantAgenciesExists() {
+    List<ConsultantAgency> consultantAgencies = givenConsultantAgenciesWithDeletionDateNull();
+
     when(consultantAgencyRepository.findByConsultantId(any())).thenReturn(consultantAgencies);
     var agencyIds =
         consultantAgencies.stream().map(ConsultantAgency::getAgencyId).collect(Collectors.toList());
-    when(agencyService.getAgencies(agencyIds)).thenReturn(mockAgenciesForIds(agencyIds));
+    List<AgencyDTO> agencies = mockAgenciesForIds(agencyIds);
+    agencies.get(0).setOffline(true);
+    when(agencyService.getAgencies(agencyIds)).thenReturn(agencies);
 
-    var resultAgencies = consultantAgencyService.getAgenciesOfConsultant("valid");
+    var resultAgencies = consultantAgencyService.getOnlineAgenciesOfConsultant("valid");
 
-    assertThat(resultAgencies, hasSize(10));
+    assertThat(resultAgencies, hasSize(9));
     resultAgencies.forEach(
         agency -> {
           assertTrue(agencyIds.contains(agency.getId()));
@@ -235,6 +237,13 @@ public class ConsultantAgencyServiceTest {
           assertNotNull(agency.getDescription());
           assertNotNull(agency.getPostcode());
         });
+  }
+
+  private static List<ConsultantAgency> givenConsultantAgenciesWithDeletionDateNull() {
+    var consultantAgencies =
+        new EasyRandom().objects(ConsultantAgency.class, 10).collect(Collectors.toList());
+    consultantAgencies.stream().forEach(ca -> ca.setDeleteDate(null));
+    return consultantAgencies;
   }
 
   private List<AgencyDTO> mockAgenciesForIds(List<Long> agencyIds) {

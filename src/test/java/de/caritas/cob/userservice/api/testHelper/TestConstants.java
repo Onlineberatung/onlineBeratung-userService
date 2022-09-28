@@ -405,6 +405,7 @@ public class TestConstants {
           .offline(IS_NOT_OFFLINE)
           .consultingType(15);
   public static final List<AgencyDTO> AGENCY_DTO_LIST = Collections.singletonList(AGENCY_DTO_SUCHT);
+
   /*
    * Users / Consultants
    */

@@ -530,6 +530,58 @@ class UserControllerE2EIT {
   }
 
   @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  void getSessionsForAuthenticatedConsultantShouldRespondWithBadRequestIfOffsetNegative()
+      throws Exception {
+    givenABearerToken();
+    givenAValidConsultantWithId("34c3x5b1-0677-4fd2-a7ea-56a71aefd099");
+    givenConsultingTypeServiceResponse();
+    givenAValidRocketChatInfoUserResponse();
+    givenAValidRocketChatSubscriptionsResponse();
+    givenAValidRocketChatRoomsResponse();
+    givenAValidTopicServiceResponse();
+
+    mockMvc
+        .perform(
+            get("/users/sessions/consultants")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header("rcToken", RC_TOKEN)
+                .param("offset", "-1")
+                .param("count", "1")
+                .param("status", "2")
+                .param("filter", "all")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  void getSessionsForAuthenticatedConsultantShouldRespondWithBadRequestIfCountIdLessThanOne()
+      throws Exception {
+    givenABearerToken();
+    givenAValidConsultantWithId("34c3x5b1-0677-4fd2-a7ea-56a71aefd099");
+    givenConsultingTypeServiceResponse();
+    givenAValidRocketChatInfoUserResponse();
+    givenAValidRocketChatSubscriptionsResponse();
+    givenAValidRocketChatRoomsResponse();
+    givenAValidTopicServiceResponse();
+
+    mockMvc
+        .perform(
+            get("/users/sessions/consultants")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header("rcToken", RC_TOKEN)
+                .param("offset", "0")
+                .param("count", "0")
+                .param("status", "2")
+                .param("filter", "all")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
   @WithMockUser(authorities = {AuthorityValue.SINGLE_TENANT_ADMIN})
   void getSessionsStatisticsAuthenticatedConsultant_ShouldGetSessionsWithTopics() throws Exception {
     givenABearerToken();
@@ -1247,6 +1299,7 @@ class UserControllerE2EIT {
     givenConsultingTypeServiceResponse();
     givenARealmResource();
     givenAUserDTO();
+    givenAValidTopicServiceResponse();
 
     mockMvc
         .perform(
@@ -1268,6 +1321,7 @@ class UserControllerE2EIT {
 
   @Test
   void registerUserShouldSaveDefaultPreferredLanguage() throws Exception {
+    givenAValidTopicServiceResponse();
     givenConsultingTypeServiceResponse();
     givenARealmResource();
     givenAUserDTO();
@@ -1299,6 +1353,7 @@ class UserControllerE2EIT {
   @Test
   void registerUserWithoutConsultingIdShouldSaveCreateUserWithDemographicsData() throws Exception {
     ReflectionTestUtils.setField(userVerifier, "demographicsFeatureEnabled", true);
+    givenAValidTopicServiceResponse();
     givenConsultingTypeServiceResponse(2);
     givenARealmResource();
     givenAUserDTOWithDemographics();
@@ -1321,6 +1376,7 @@ class UserControllerE2EIT {
     givenConsultingTypeServiceResponse(2);
     givenARealmResource();
     givenAUserDTOWithCounsellingRelation();
+    givenAValidTopicServiceResponse();
 
     mockMvc
         .perform(
@@ -1337,6 +1393,7 @@ class UserControllerE2EIT {
     givenConsultingTypeServiceResponse(2);
     givenARealmResource();
     givenAUserDTOWithMainTopic();
+    givenAValidTopicServiceResponse();
 
     mockMvc
         .perform(
@@ -1353,6 +1410,7 @@ class UserControllerE2EIT {
     givenConsultingTypeServiceResponse(2);
     givenARealmResource();
     givenAUserDTOWithTopics();
+    givenAValidTopicServiceResponse();
 
     mockMvc
         .perform(
@@ -1570,9 +1628,11 @@ class UserControllerE2EIT {
             .description("topic desc 2")
             .status("ACTIVE")
             .internalIdentifier("internal identifier 2");
-    ;
+
     when(topicControllerApi.getApiClient()).thenReturn(new ApiClient());
     when(topicControllerApi.getAllTopics()).thenReturn(Lists.newArrayList(firstTopic, secondTopic));
+    when(topicControllerApi.getAllActiveTopics())
+        .thenReturn(Lists.newArrayList(firstTopic, secondTopic));
   }
 
   private void givenAValidRocketChatSubscriptionsResponse() {

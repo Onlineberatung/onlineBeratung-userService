@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service.appointment;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -21,7 +22,6 @@ import de.caritas.cob.userservice.appointmentservice.generated.web.AgencyApi;
 import de.caritas.cob.userservice.appointmentservice.generated.web.ConsultantApi;
 import de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO;
 import java.util.LinkedList;
-import org.junit.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,6 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.slf4j.Logger;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,6 +44,8 @@ class AppointmentServiceTest {
   private static final String FIELD_NAME_APPOINTMENTS_ENABLED = "appointmentFeatureEnabled";
 
   @Spy @InjectMocks AppointmentService appointmentService;
+
+  @InjectMocks AppointmentService nonSpiedAppointmentService;
 
   @Mock ConsultantApi appointmentConsultantApi;
   @Mock AgencyApi appointmentAgencyApi;
@@ -61,6 +64,8 @@ class AppointmentServiceTest {
   @Mock org.springframework.http.HttpHeaders httpHeaders;
 
   @Mock ObjectMapper objectMapper;
+
+  @Mock HttpClientErrorException httpClientErrorException;
 
   @BeforeEach
   public void beforeEach() throws JsonProcessingException {
@@ -99,11 +104,24 @@ class AppointmentServiceTest {
   }
 
   @Test
-  void deleteConsultant_Should_CallAppointmentService_WhenAppointmentsIsEnabled() {
+  void
+      deleteConsultant_Should_ProceedWithDeletion_WhenAppointmentsIsEnabledAndConsultantNotFoundInAppointmentService() {
     setField(appointmentService, FIELD_NAME_APPOINTMENTS_ENABLED, true);
-    doThrow(HttpClientErrorException.class).when(appointmentConsultantApi).deleteConsultant("testId");
+    when(httpClientErrorException.getStatusCode()).thenReturn(HttpStatus.NOT_FOUND);
+    doThrow(httpClientErrorException).when(appointmentConsultantApi).deleteConsultant("testId");
     appointmentService.deleteConsultant("testId");
     verify(appointmentConsultantApi).deleteConsultant("testId");
+  }
+
+  @Test
+  void
+      deleteConsultant_Should_ProceedWithDeletion_WhenAppointmentsIsEnabledAndAppointmentServiceThrowsExceptionOtherThan404() {
+    setField(nonSpiedAppointmentService, FIELD_NAME_APPOINTMENTS_ENABLED, true);
+    when(httpClientErrorException.getStatusCode()).thenReturn(HttpStatus.BAD_REQUEST);
+    doThrow(httpClientErrorException).when(appointmentConsultantApi).deleteConsultant("testId");
+    assertThrows(
+        HttpClientErrorException.class,
+        () -> nonSpiedAppointmentService.deleteConsultant("testId"));
   }
 
   @Test

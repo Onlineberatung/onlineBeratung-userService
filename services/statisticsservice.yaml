@@ -10,9 +10,28 @@ paths:
         - statistics-controller
       summary: 'Returns statistical data for a consultant. [Authorization: consultant]'
       operationId: getConsultantStatistics
+      parameters:
+        - name: startDate
+          in: query
+          description: start of the period (inclusive)
+          schema:
+            type: string
+            format: date
+            example: 2019-10-23
+        - name: endDate
+          in: query
+          description: end of the period (inclusive)
+          schema:
+            type: string
+            format: date
+            example: 2019-10-23
       responses:
         200:
           description: OK - successfull operation
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ConsultantStatisticsResponseDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         403:
@@ -21,19 +40,25 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-  /statistics/consultant/csv:
+  /statistics/registration:
     get:
       tags:
         - statistics-controller
-      summary: 'Returns statistical data for a consultant as csv file. [Authorization: consultant]'
-      operationId: getConsultantStatisticsCsv
+      summary: 'Returns a list of user registration data per tenant'
+      operationId: getRegistrationStatistics
       responses:
         200:
-          description: OK - successfull operation
-        400:
-          description: BAD REQUEST - invalid/incomplete request or body object
+          description: successful operation
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/RegistrationStatisticsListResponseDTO'
+        204:
+          description: successful operation, but no content
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
         403:
-          description: FORBIDDEN - no/invalid CSRF token
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
@@ -42,6 +67,38 @@ paths:
 components:
   schemas:
 
+    ConsultantStatisticsResponseDTO:
+      type: object
+      properties:
+        startDate:
+          type: string
+          format: date
+          example: 2019-10-23
+        endDate:
+          type: string
+          format: date
+          example: 2019-10-23
+        numberOfAssignedSessions:
+          type: integer
+          format: int64
+          description: The number of assigned sessions in the given period of time
+          example: 15
+        numberOfSessionsWhereConsultantWasActive:
+          type: integer
+          format: int64
+          description: The number of sessions in which the consultant was active in the given period of time
+          example: 5
+        numberOfSentMessages:
+          type: integer
+          format: int64
+          description: Number of messages sent by the consultant in the given period of time
+          example: 5
+        videoCallDuration:
+          type: integer
+          format: int64
+          description: The duration of all video calls of the consultant in the given period of time in seconds
+          example: 3560
+
     EventType:
       type: string
       enum:
@@ -49,6 +106,7 @@ components:
         - "CREATE_MESSAGE"
         - "START_VIDEO_CALL"
         - "STOP_VIDEO_CALL"
+        - "REGISTRATION"
 
     UserRole:
       type: string
@@ -141,6 +199,90 @@ components:
           type: string
           description: The uuid of the video call
           example: 123e4567-e89b-12d3-a456-556642440000
+
+    RegistrationStatisticsEventMessage:
+      type: object
+      required:
+        - sessionId
+        - userId
+        - registrationDate
+      allOf:
+        - $ref: '#/components/schemas/StatisticsEventMessage'
+        - type: object
+      properties:
+        sessionId:
+          type: integer
+          format: int64
+          description: The id of the session
+          example: 12345
+        tenantId:
+          type: integer
+          format: int64
+          description: The id of the tenant
+          example: 1
+        registrationDate:
+          type: string
+          example: '2022-08-15T21:11:29'
+        age:
+          type: integer
+          example: '25'
+        gender:
+          type: string
+          example: 'FEMALE'
+        counsellingRelation:
+          type: string
+          example: 'SELF_COUNSELLING'
+        topicsInternalAttributes:
+          type: array
+          items:
+            type: string
+          example: [ 'angeho01','angeho13' ]
+        mainTopicInternalAttribute:
+          type: string
+          example: 'angeho01'
+        postalCode:
+          type: string
+          example: '99999'
+
+    RegistrationStatisticsListResponseDTO:
+      type: object
+      properties:
+        registrationStatistics:
+          type: array
+          items:
+            $ref: '#/components/schemas/RegistrationStatisticsResponseDTO'
+
+    RegistrationStatisticsResponseDTO:
+      type: object
+      required:
+        - userId
+        - registrationDate
+      properties:
+        userId:
+          type: string
+        registrationDate:
+          type: string
+          example: '2022-08-15T21:11:29'
+        age:
+          type: integer
+          example: '25'
+        gender:
+          type: string
+          example: 'FEMALE'
+        counsellingRelation:
+          type: string
+          example: 'SELF_COUNSELLING'
+        topicsInternalAttributes:
+          type: array
+          items:
+            type: string
+          example: [ 'angeho01','angeho13' ]
+        mainTopicInternalAttribute:
+          type: string
+          example: 'angeho01'
+        postalCode:
+          type: string
+          example: '99999'
 
   securitySchemes:
     Bearer:

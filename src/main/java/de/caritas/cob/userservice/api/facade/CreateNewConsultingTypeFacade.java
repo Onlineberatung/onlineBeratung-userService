@@ -61,12 +61,12 @@ public class CreateNewConsultingTypeFacade {
    * @param user {@link User}
    * @param extendedConsultingTypeResponseDTO {@link ExtendedConsultingTypeResponseDTO}
    */
-  public void initializeNewConsultingType(
+  public NewRegistrationResponseDto initializeNewConsultingType(
       UserRegistrationDTO userRegistrationDTO,
       User user,
       ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO) {
 
-    createSessionOrChat(userRegistrationDTO, user, extendedConsultingTypeResponseDTO, null);
+    return createSessionOrChat(userRegistrationDTO, user, extendedConsultingTypeResponseDTO, null);
   }
 
   private NewRegistrationResponseDto createSessionOrChat(

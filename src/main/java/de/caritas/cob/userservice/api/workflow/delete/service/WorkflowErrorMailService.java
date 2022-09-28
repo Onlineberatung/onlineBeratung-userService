@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.workflow.delete.service;
 
-import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.TEMPLATE_FREE_TEXT;
+import static de.caritas.cob.userservice.api.service.emailsupplier.EmailSupplier.TEMPLATE_FREE_TEXT;
 import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 

@@ -149,12 +149,18 @@ public class ConsultantAgencyService {
    * @param consultantId the id of the consultant
    * @return the related agencies
    */
-  public List<AgencyDTO> getAgenciesOfConsultant(String consultantId) {
+  public List<AgencyDTO> getOnlineAgenciesOfConsultant(String consultantId) {
     var agencyIds =
         consultantAgencyRepository.findByConsultantId(consultantId).stream()
+            .filter(agency -> agency.getDeleteDate() == null)
             .map(ConsultantAgency::getAgencyId)
             .collect(Collectors.toList());
 
-    return agencyService.getAgencies(agencyIds);
+    List<AgencyDTO> agencies = agencyService.getAgencies(agencyIds);
+    return filterOutOfflineAgencies(agencies);
+  }
+
+  private List<AgencyDTO> filterOutOfflineAgencies(List<AgencyDTO> agencies) {
+    return agencies.stream().filter(a -> !a.getOffline()).collect(Collectors.toList());
   }
 }

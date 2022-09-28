@@ -1,7 +1,5 @@
 package de.caritas.cob.userservice.api.service.emailsupplier;
 
-import static de.caritas.cob.userservice.api.helper.EmailNotificationTemplates.TEMPLATE_REASSIGN_REQUEST_NOTIFICATION;
-
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
