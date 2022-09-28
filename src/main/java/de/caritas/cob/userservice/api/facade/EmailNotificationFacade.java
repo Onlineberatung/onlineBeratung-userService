@@ -102,7 +102,9 @@ public class EmailNotificationFacade {
     List<MailDTO> generatedMails = mailsToSend.generateEmails();
     if (isNotEmpty(generatedMails)) {
       MailsDTO mailsDTO = new MailsDTO().mails(generatedMails);
-      log.info("Sending email notifications with mailDTOs {}", mailsDTO);
+      log.info(
+          "Sending email notifications with mailDTOs. MailSupplier class: {}",
+          mailsToSend.getClass());
       mailService.sendEmailNotification(mailsDTO);
     }
   }
