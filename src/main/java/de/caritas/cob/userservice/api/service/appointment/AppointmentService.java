@@ -116,7 +116,7 @@ public class AppointmentService {
       throw ex;
     } else {
       log.warn(
-          "No consultant with id {} was found in appointmentService. Proceeding with deletion.",
+          "No consultant with id {} was not found in appointmentService. Proceeding with deletion.",
           consultantId);
     }
   }
