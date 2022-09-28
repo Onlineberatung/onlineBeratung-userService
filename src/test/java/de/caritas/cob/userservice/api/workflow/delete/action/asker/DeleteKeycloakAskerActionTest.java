@@ -16,6 +16,7 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.workflow.delete.action.DeleteKeycloakUserAction;
 import de.caritas.cob.userservice.api.workflow.delete.model.AskerDeletionWorkflowDTO;
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
 import java.util.ArrayList;
@@ -27,6 +28,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpClientErrorException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DeleteKeycloakAskerActionTest {
@@ -40,6 +43,7 @@ public class DeleteKeycloakAskerActionTest {
   @Before
   public void setup() {
     setInternalState(DeleteKeycloakAskerAction.class, "log", logger);
+    setInternalState(DeleteKeycloakUserAction.class, "log", logger);
   }
 
   @Test
@@ -70,5 +74,24 @@ public class DeleteKeycloakAskerActionTest {
     assertThat(workflowErrors.get(0).getReason(), is("Unable to delete keycloak user account"));
     assertThat(workflowErrors.get(0).getTimestamp(), notNullValue());
     verify(logger).error(anyString(), any(RuntimeException.class));
+  }
+
+  @Test
+  public void execute_Should_notReturnWorkflowErrorIfUserCouldNotBeFoundInKeycloak() {
+    User user = new User();
+    user.setUserId("userId");
+    doThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND))
+        .when(this.keycloakService)
+        .deleteUser(any());
+    AskerDeletionWorkflowDTO workflowDTO = new AskerDeletionWorkflowDTO(user, new ArrayList<>());
+
+    this.deleteKeycloakAskerAction.execute(workflowDTO);
+    List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
+
+    assertThat(workflowErrors, hasSize(0));
+    verify(logger)
+        .warn(
+            "No user with id {} could be found in keycloak, but proceeding with further actions.",
+            "userId");
   }
 }
