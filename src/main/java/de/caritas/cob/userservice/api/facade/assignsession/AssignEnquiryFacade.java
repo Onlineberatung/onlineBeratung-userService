@@ -76,7 +76,8 @@ public class AssignEnquiryFacade {
           consultant.getRocketChatId(), session.getGroupId());
       this.rocketChatFacade.removeSystemMessagesFromRocketChatGroup(session.getGroupId());
       statisticsService.fireEvent(
-              new AssignSessionStatisticsEvent(consultant.getId(), UserRole.CONSULTANT, session.getId()));
+          new AssignSessionStatisticsEvent(
+              consultant.getId(), UserRole.CONSULTANT, session.getId()));
     } catch (Exception e) {
       rollbackSessionUpdate(session);
       throw new InternalServerErrorException(
