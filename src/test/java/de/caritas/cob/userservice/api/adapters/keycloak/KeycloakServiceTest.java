@@ -29,6 +29,8 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
@@ -43,6 +45,7 @@ import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
+import java.util.HashMap;
 import java.util.List;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.Response;
@@ -66,6 +69,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -604,8 +608,7 @@ public class KeycloakServiceTest {
   @Test
   public void updatePassword_Should_callServicesCorrectly() {
     UserResource userResource = mock(UserResource.class);
-    UsersResource usersResource = mock(UsersResource.class);
-    when(usersResource.get(any())).thenReturn(userResource);
+    UsersResource usersResource = givenUsersResourceWithAnyUserId(userResource);
     when(keycloakClient.getUsersResource()).thenReturn(usersResource);
 
     this.keycloakService.updatePassword("userId", "password");
@@ -616,8 +619,7 @@ public class KeycloakServiceTest {
   @Test
   public void updateDummyMail_id_dto_Should_callServicesCorrectly() {
     UserResource userResource = mock(UserResource.class);
-    UsersResource usersResource = mock(UsersResource.class);
-    when(usersResource.get(any())).thenReturn(userResource);
+    UsersResource usersResource = givenUsersResourceWithAnyUserId(userResource);
     when(keycloakClient.getUsersResource()).thenReturn(usersResource);
     when(this.userHelper.getDummyEmail(anyString())).thenReturn("dummy");
 
@@ -646,12 +648,9 @@ public class KeycloakServiceTest {
 
   @Test
   public void updateUserData_Should_callServicesCorrectly_When_emailIsChangedAndAvailable() {
-    UserRepresentation userRepresentation = mock(UserRepresentation.class);
-    when(userRepresentation.getEmail()).thenReturn("email");
-    UserResource userResource = mock(UserResource.class);
-    when(userResource.toRepresentation()).thenReturn(userRepresentation);
-    UsersResource usersResource = mock(UsersResource.class);
-    when(usersResource.get(any())).thenReturn(userResource);
+    UserRepresentation userRepresentation = givenUserRepresentation("email");
+    UserResource userResource = givenUserResourceWithRepresentation(userRepresentation);
+    UsersResource usersResource = givenUsersResourceWithAnyUserId(userResource);
     when(keycloakClient.getUsersResource()).thenReturn(usersResource);
     UserDTO userDTO = new UserDTO();
     userDTO.setEmail("anotherEmail");
@@ -663,12 +662,9 @@ public class KeycloakServiceTest {
 
   @Test
   public void updateUserData_Should_callServicesCorrectly_When_emailIsUnchanged() {
-    UserRepresentation userRepresentation = mock(UserRepresentation.class);
-    when(userRepresentation.getEmail()).thenReturn("email");
-    UserResource userResource = mock(UserResource.class);
-    when(userResource.toRepresentation()).thenReturn(userRepresentation);
-    UsersResource usersResource = mock(UsersResource.class);
-    when(usersResource.get(any())).thenReturn(userResource);
+    UserRepresentation userRepresentation = givenUserRepresentation("email");
+    UserResource userResource = givenUserResourceWithRepresentation(userRepresentation);
+    UsersResource usersResource = givenUsersResourceWithAnyUserId(userResource);
     when(keycloakClient.getUsersResource()).thenReturn(usersResource);
     UserDTO userDTO = new UserDTO();
     userDTO.setEmail("email");
@@ -680,14 +676,10 @@ public class KeycloakServiceTest {
 
   @Test
   public void updateUserData_Should_throwCustomException_When_emailIsChangedButNotAvailable() {
-    UserRepresentation userRepresentation = mock(UserRepresentation.class);
-    when(userRepresentation.getEmail()).thenReturn("email");
-    UserRepresentation otherUserRepresentation = mock(UserRepresentation.class);
-    when(otherUserRepresentation.getEmail()).thenReturn("newemail");
-    UserResource userResource = mock(UserResource.class);
-    when(userResource.toRepresentation()).thenReturn(userRepresentation);
-    UsersResource usersResource = mock(UsersResource.class);
-    when(usersResource.get(any())).thenReturn(userResource);
+    UserRepresentation userRepresentation = givenUserRepresentation("email");
+    UserRepresentation otherUserRepresentation = givenUserRepresentation("newemail");
+    UserResource userResource = givenUserResourceWithRepresentation(userRepresentation);
+    UsersResource usersResource = givenUsersResourceWithAnyUserId(userResource);
     when(usersResource.search(any(), any(), any()))
         .thenReturn(singletonList(otherUserRepresentation));
     when(keycloakClient.getUsersResource()).thenReturn(usersResource);
@@ -705,8 +697,7 @@ public class KeycloakServiceTest {
   @Test
   public void rollbackUser_Should_callServicesCorrectly() {
     UserResource userResource = mock(UserResource.class);
-    UsersResource usersResource = mock(UsersResource.class);
-    when(usersResource.get(any())).thenReturn(userResource);
+    UsersResource usersResource = givenUsersResourceWithAnyUserId(userResource);
     when(keycloakClient.getUsersResource()).thenReturn(usersResource);
 
     this.keycloakService.rollBackUser("userId");
@@ -718,8 +709,7 @@ public class KeycloakServiceTest {
   public void rollbackUser_Should_logError_When_rollbackFails() {
     UserResource userResource = mock(UserResource.class);
     doThrow(new RuntimeException()).when(userResource).remove();
-    UsersResource usersResource = mock(UsersResource.class);
-    when(usersResource.get(any())).thenReturn(userResource);
+    UsersResource usersResource = givenUsersResourceWithAnyUserId(userResource);
     when(keycloakClient.getUsersResource()).thenReturn(usersResource);
 
     this.keycloakService.rollBackUser("userId");
@@ -737,8 +727,7 @@ public class KeycloakServiceTest {
     when(roleMappingResource.realmLevel()).thenReturn(roleScopeResource);
     UserResource userResource = mock(UserResource.class);
     when(userResource.roles()).thenReturn(roleMappingResource);
-    UsersResource usersResource = mock(UsersResource.class);
-    when(usersResource.get(any())).thenReturn(userResource);
+    UsersResource usersResource = givenUsersResourceWithAnyUserId(userResource);
     when(keycloakClient.getUsersResource()).thenReturn(usersResource);
 
     boolean hasAuthority =
@@ -750,8 +739,7 @@ public class KeycloakServiceTest {
   @Test(expected = KeycloakException.class)
   public void userHasAuthority_Should_returnThrowKeycloakException_When_userHasNoRoles() {
     UserResource userResource = mock(UserResource.class);
-    UsersResource usersResource = mock(UsersResource.class);
-    when(usersResource.get(any())).thenReturn(userResource);
+    UsersResource usersResource = givenUsersResourceWithAnyUserId(userResource);
     when(keycloakClient.getUsersResource()).thenReturn(usersResource);
 
     this.keycloakService.userHasAuthority("user", "authority");
@@ -767,8 +755,7 @@ public class KeycloakServiceTest {
     when(roleMappingResource.realmLevel()).thenReturn(roleScopeResource);
     UserResource userResource = mock(UserResource.class);
     when(userResource.roles()).thenReturn(roleMappingResource);
-    UsersResource usersResource = mock(UsersResource.class);
-    when(usersResource.get(any())).thenReturn(userResource);
+    UsersResource usersResource = givenUsersResourceWithAnyUserId(userResource);
     when(keycloakClient.getUsersResource()).thenReturn(usersResource);
 
     boolean hasAuthority = this.keycloakService.userHasAuthority("user", AuthorityValue.USER_ADMIN);
@@ -803,18 +790,86 @@ public class KeycloakServiceTest {
 
   @Test
   public void changeEmailAddress_Should_callServicesCorrectly_When_emailIsChangedAndAvailable() {
-    UserRepresentation userRepresentation = mock(UserRepresentation.class);
-    when(userRepresentation.getEmail()).thenReturn("email");
-    UserResource userResource = mock(UserResource.class);
-    when(userResource.toRepresentation()).thenReturn(userRepresentation);
-    UsersResource usersResource = mock(UsersResource.class);
-    when(usersResource.get(any())).thenReturn(userResource);
+    UserRepresentation userRepresentation = givenUserRepresentation("email");
+    UserResource userResource = givenUserResourceWithRepresentation(userRepresentation);
+    UsersResource usersResource = givenUsersResourceWithAnyUserId(userResource);
     when(keycloakClient.getUsersResource()).thenReturn(usersResource);
 
     this.keycloakService.updateEmail("userId", "anotherEmail");
 
     verify(userRepresentation, times(1)).setEmail("anotherEmail");
     verify(userResource, times(1)).update(any());
+  }
+
+  @Test
+  public void changeLanguage_ShouldNotChangeLanguageIfLanguageExistInKeycloak() {
+    // given
+    UserRepresentation userRepresentation = givenUserRepresentation("email");
+    UserResource userResource = givenUserResourceWithRepresentation(userRepresentation);
+    UsersResource usersResource = givenUsersResourceWithAnyUserId(userResource);
+    when(keycloakClient.getUsersResource()).thenReturn(usersResource);
+    HashMap<String, List<String>> attributeMap = Maps.newHashMap();
+    attributeMap.put("locale", Lists.newArrayList("de"));
+    when(userRepresentation.getAttributes()).thenReturn(attributeMap);
+
+    // when
+    this.keycloakService.changeLanguage("userId", "de");
+
+    // then
+    verify(userResource, Mockito.never()).update(userRepresentation);
+  }
+
+  private UsersResource givenUsersResourceWithAnyUserId(UserResource userResource) {
+    UsersResource usersResource = mock(UsersResource.class);
+    when(usersResource.get(any())).thenReturn(userResource);
+    return usersResource;
+  }
+
+  @Test
+  public void changeLanguage_ShouldChangeLanguageIfLanguageDoesNotExistInKeycloak() {
+    // given
+    UserRepresentation userRepresentation = givenUserRepresentation("email");
+    UserResource userResource = givenUserResourceWithRepresentation(userRepresentation);
+    UsersResource usersResource = givenUsersResourceWithAnyUserId(userResource);
+    when(keycloakClient.getUsersResource()).thenReturn(usersResource);
+    HashMap<String, List<String>> attributeMap = Maps.newHashMap();
+    attributeMap.put("locale", Lists.newArrayList("en"));
+    when(userRepresentation.getAttributes()).thenReturn(attributeMap);
+
+    // when
+    this.keycloakService.changeLanguage("userId", "de");
+
+    // then
+    verify(userResource).update(userRepresentation);
+  }
+
+  private UserResource givenUserResourceWithRepresentation(UserRepresentation userRepresentation) {
+    UserResource userResource = mock(UserResource.class);
+    when(userResource.toRepresentation()).thenReturn(userRepresentation);
+    return userResource;
+  }
+
+  private UserRepresentation givenUserRepresentation(String email) {
+    UserRepresentation userRepresentation = mock(UserRepresentation.class);
+    when(userRepresentation.getEmail()).thenReturn(email);
+    return userRepresentation;
+  }
+
+  @Test
+  public void changeLanguage_ShouldChangeLanguageIfLocaleAttributeDoesNotExistInKeycloak() {
+    // given
+    UserRepresentation userRepresentation = givenUserRepresentation("email");
+    UserResource userResource = givenUserResourceWithRepresentation(userRepresentation);
+    UsersResource usersResource = givenUsersResourceWithAnyUserId(userResource);
+    when(keycloakClient.getUsersResource()).thenReturn(usersResource);
+    HashMap<String, List<String>> attributeMap = Maps.newHashMap();
+    when(userRepresentation.getAttributes()).thenReturn(attributeMap);
+
+    // when
+    this.keycloakService.changeLanguage("userId", "de");
+
+    // then
+    verify(userResource).update(userRepresentation);
   }
 
   @Test
