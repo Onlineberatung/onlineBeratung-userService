@@ -10,6 +10,7 @@ import de.caritas.cob.userservice.agencyserivce.generated.web.AgencyControllerAp
 import de.caritas.cob.userservice.agencyserivce.generated.web.model.AgencyResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.config.CacheManagerConfig;
+import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiClientFactory;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
@@ -26,10 +27,9 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class AgencyService {
 
-  private final @NonNull AgencyControllerApi agencyControllerApi;
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
   private final @NonNull TenantHeaderSupplier tenantHeaderSupplier;
-
+  private final @NonNull AgencyServiceApiClientFactory agencyServiceApiClientFactory;
   /**
    * Returns the {@link AgencyDTO} for the provided agencyId. Agency will be cached for further
    * requests.
@@ -73,12 +73,17 @@ public class AgencyService {
    */
   private List<AgencyDTO> getAgenciesFromAgencyService(List<Long> agencyIds) {
     if (isNotEmpty(agencyIds)) {
-      addDefaultHeaders(this.agencyControllerApi.getApiClient());
-      return this.agencyControllerApi.getAgenciesByIds(agencyIds).stream()
+      AgencyControllerApi agencyControllerApi = this.getAgencyControllerApi();
+      addDefaultHeaders(agencyControllerApi.getApiClient());
+      return agencyControllerApi.getAgenciesByIds(agencyIds).stream()
           .map(this::fromOriginalAgency)
           .collect(Collectors.toList());
     }
     return emptyList();
+  }
+
+  private AgencyControllerApi getAgencyControllerApi() {
+    return agencyServiceApiClientFactory.createControllerApi();
   }
 
   /**
@@ -88,8 +93,9 @@ public class AgencyService {
    * @return List of {@link AgencyDTO}
    */
   public List<AgencyDTO> getAgenciesByConsultingType(int consultingTypeId) {
-    addDefaultHeaders(this.agencyControllerApi.getApiClient());
-    return this.agencyControllerApi.getAgenciesByConsultingType(consultingTypeId).stream()
+    var agencyControllerApi = getAgencyControllerApi();
+    addDefaultHeaders(agencyControllerApi.getApiClient());
+    return agencyControllerApi.getAgenciesByConsultingType(consultingTypeId).stream()
         .map(this::fromOriginalAgency)
         .collect(Collectors.toList());
   }

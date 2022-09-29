@@ -55,6 +55,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.RegistrationStatisticsLis
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
+import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiClientFactory;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
@@ -79,6 +80,7 @@ import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
+import de.caritas.cob.userservice.api.testConfig.TestAgencyControllerApi;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.ConsultingTypeControllerApi;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.BasicConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.MailsControllerApi;
@@ -102,6 +104,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.assertj.core.util.Lists;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
@@ -201,6 +204,8 @@ class UserControllerE2EIT {
   @Qualifier("mailsControllerApi")
   private MailsControllerApi mailsControllerApi;
 
+  @MockBean AgencyServiceApiClientFactory agencyServiceApiClientFactory;
+
   @MockBean private Keycloak keycloak;
 
   @Captor private ArgumentCaptor<HttpEntity<UpdateUser>> updateUserCaptor;
@@ -260,6 +265,14 @@ class UserControllerE2EIT {
     userInfoResponse = null;
     identityConfig.setDisplayNameAllowedForConsultants(false);
     userResource = null;
+  }
+
+  @BeforeEach
+  public void setUp() {
+    when(agencyServiceApiClientFactory.createControllerApi())
+        .thenReturn(
+            new TestAgencyControllerApi(
+                new de.caritas.cob.userservice.agencyserivce.generated.ApiClient()));
   }
 
   @Test
