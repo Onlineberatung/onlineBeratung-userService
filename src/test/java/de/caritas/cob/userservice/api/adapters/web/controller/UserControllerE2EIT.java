@@ -1514,6 +1514,7 @@ class UserControllerE2EIT {
   }
 
   private void givenAValidKeycloakUpdateLocaleResponse(String id) {
+
     var usersResource = mock(UsersResource.class);
     userResource = mock(UserResource.class);
     when(usersResource.get(id)).thenReturn(userResource);
