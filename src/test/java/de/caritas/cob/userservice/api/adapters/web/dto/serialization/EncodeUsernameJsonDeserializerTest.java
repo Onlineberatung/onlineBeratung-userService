@@ -7,11 +7,14 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME_T
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.userservice.api.helper.UserHelper;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,22 +22,28 @@ import java.nio.charset.StandardCharsets;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EncodeUsernameJsonDeserializerTest {
 
   private ObjectMapper objectMapper;
-  private EncodeUsernameJsonDeserializer encodeUsernameJsonDeserializer;
+
+  @InjectMocks private EncodeUsernameJsonDeserializer encodeUsernameJsonDeserializer;
+
+  @Mock private UserHelper userHelper;
 
   @Before
   public void setup() {
     objectMapper = new ObjectMapper();
-    encodeUsernameJsonDeserializer = new EncodeUsernameJsonDeserializer();
   }
 
   @Test
   public void deserialize_Should_EncodeDecodedUsername() throws IOException {
+    when(userHelper.isUsernameValid(anyString())).thenReturn(true);
+
     String json = "{\"username:\":\"" + USERNAME_DECODED + "\"}";
     String result = deserializeUsername(json);
     assertEquals(USERNAME_ENCODED, result);
@@ -42,6 +51,8 @@ public class EncodeUsernameJsonDeserializerTest {
 
   @Test
   public void deserialize_ShouldNot_ReencodeEncodedUsername() throws IOException {
+    when(userHelper.isUsernameValid(anyString())).thenReturn(true);
+
     String json = "{\"username:\":\"" + USERNAME_ENCODED + "\"}";
     String result = deserializeUsername(json);
     assertEquals(USERNAME_ENCODED, result);

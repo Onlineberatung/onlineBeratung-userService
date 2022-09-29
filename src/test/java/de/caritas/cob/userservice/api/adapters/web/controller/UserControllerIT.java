@@ -679,7 +679,7 @@ public class UserControllerIT {
   public void
       registerUser_Should_ReturnCreated_WhenProvidedWithValidRequestBodyAndKeycloakResponseIsSuccessful()
           throws Exception {
-
+    when(userHelper.isUsernameValid(anyString())).thenReturn(true);
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(anyString()))
         .thenReturn(
             MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(
@@ -699,7 +699,7 @@ public class UserControllerIT {
   public void
       registerUser_Should_ReturnCreated_WhenProvidedWithValidU25RequestBodyAndKeycloakResponseIsSuccessful()
           throws Exception {
-
+    when(userHelper.isUsernameValid(anyString())).thenReturn(true);
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(anyString()))
         .thenReturn(
             MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(
@@ -719,7 +719,7 @@ public class UserControllerIT {
   public void
       registerUser_Should_ReturnConflict_WhenProvidedWithValidRequestBodyAndKeycloakResponseIsConflict()
           throws Exception {
-
+    when(userHelper.isUsernameValid(anyString())).thenReturn(true);
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(anyString()))
         .thenReturn(
             MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(
@@ -1910,7 +1910,7 @@ public class UserControllerIT {
 
   @Test
   public void registerUser_Should_DecodePassword() throws Exception {
-
+    when(userHelper.isUsernameValid(anyString())).thenReturn(true);
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(anyString()))
         .thenReturn(
             MandatoryFields.convertMandatoryFieldsDTOtoMandatoryFields(

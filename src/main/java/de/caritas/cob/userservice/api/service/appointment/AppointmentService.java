@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
+import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import de.caritas.cob.userservice.appointmentservice.generated.ApiClient;
@@ -32,15 +33,10 @@ public class AppointmentService {
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
   private final @NonNull TenantHeaderSupplier tenantHeaderSupplier;
   private final @NonNull IdentityClient identityClient;
+  private final @NonNull IdentityClientConfig identityClientConfig;
 
   @Value("${feature.appointment.enabled}")
   private boolean appointmentFeatureEnabled;
-
-  @Value("${keycloakService.technical.username}")
-  private String keycloakTechnicalUsername;
-
-  @Value("${keycloakService.technical.password}")
-  private String keycloakTechnicalPassword;
 
   public void createConsultant(ConsultantAdminResponseDTO consultantAdminResponseDTO) {
     if (!appointmentFeatureEnabled) {
@@ -121,12 +117,12 @@ public class AppointmentService {
     }
   }
 
+  @SuppressWarnings("Duplicates")
   private void addTechnicalUserHeaders(ApiClient apiClient) {
-    var keycloakLoginResponseDTO =
-        identityClient.loginUser(keycloakTechnicalUsername, keycloakTechnicalPassword);
+    var techUser = identityClientConfig.getTechnicalUser();
+    var keycloakLogin = identityClient.loginUser(techUser.getUsername(), techUser.getPassword());
     var headers =
-        this.securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders(
-            keycloakLoginResponseDTO.getAccessToken());
+        securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders(keycloakLogin.getAccessToken());
     tenantHeaderSupplier.addTenantHeader(headers);
     headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
   }
