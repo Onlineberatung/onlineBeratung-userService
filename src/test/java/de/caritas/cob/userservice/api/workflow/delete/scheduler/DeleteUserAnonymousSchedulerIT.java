@@ -3,8 +3,10 @@ package de.caritas.cob.userservice.api.workflow.delete.scheduler;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_AIDS;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAnonymousEnquiryDTO;
+import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiClientFactory;
 import de.caritas.cob.userservice.api.conversation.facade.CreateAnonymousEnquiryFacade;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
@@ -15,6 +17,7 @@ import de.caritas.cob.userservice.api.testConfig.ApiControllerTestConfig;
 import de.caritas.cob.userservice.api.testConfig.ConsultingTypeManagerTestConfig;
 import de.caritas.cob.userservice.api.testConfig.KeycloakTestConfig;
 import de.caritas.cob.userservice.api.testConfig.RocketChatTestConfig;
+import de.caritas.cob.userservice.api.testConfig.TestAgencyControllerApi;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +27,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
@@ -51,10 +55,16 @@ class DeleteUserAnonymousSchedulerIT {
   @Value("${user.anonymous.deleteworkflow.periodMinutes}")
   private long deletionPeriodInMinutes;
 
+  @MockBean AgencyServiceApiClientFactory agencyServiceApiClientFactory;
+
   private Session currentSession;
 
   @BeforeEach
   public void setup() {
+    when(agencyServiceApiClientFactory.createControllerApi())
+        .thenReturn(
+            new TestAgencyControllerApi(
+                new de.caritas.cob.userservice.agencyserivce.generated.ApiClient()));
     var createAnonymousEnquiryDTO =
         new CreateAnonymousEnquiryDTO().consultingType(CONSULTING_TYPE_ID_AIDS);
     var responseDTO =
