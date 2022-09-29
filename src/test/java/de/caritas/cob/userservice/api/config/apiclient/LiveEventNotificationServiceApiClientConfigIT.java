@@ -12,8 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.hateoas.client.LinkDiscoverers;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -25,14 +23,15 @@ public class LiveEventNotificationServiceApiClientConfigIT {
 
   @Autowired private LiveControllerApi liveControllerApi;
 
-  @MockBean private LinkDiscoverers linkDiscoverers;
-
   @Value("${live.service.api.url}")
   private String liveServiceApiUrl;
 
   @Test
-  public void configureLiveControllerApi_Should_setCorrectApiUrl() {
-    String apiClientUrl = this.liveControllerApi.getApiClient().getBasePath();
+  public void configureLiveControllerApi_Should_setCorrectApiUrl()
+      throws NoSuchFieldException, IllegalAccessException {
+    var field = liveControllerApi.getClass().getDeclaredField("memberVarBaseUri");
+    field.setAccessible(true);
+    var apiClientUrl = (String) field.get(liveControllerApi);
 
     assertThat(apiClientUrl, is(this.liveServiceApiUrl));
   }

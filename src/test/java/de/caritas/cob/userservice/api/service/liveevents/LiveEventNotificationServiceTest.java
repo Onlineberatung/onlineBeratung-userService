@@ -18,6 +18,7 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.service.mobilepushmessage.MobilePushNotificationService;
+import de.caritas.cob.userservice.liveservice.generated.ApiException;
 import de.caritas.cob.userservice.liveservice.generated.web.LiveControllerApi;
 import de.caritas.cob.userservice.liveservice.generated.web.model.EventType;
 import de.caritas.cob.userservice.liveservice.generated.web.model.LiveEventMessage;
@@ -32,7 +33,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
-import org.springframework.web.client.RestClientException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LiveEventNotificationServiceTest {
@@ -61,8 +61,8 @@ public class LiveEventNotificationServiceTest {
   }
 
   @Test
-  public void
-      sendLiveDirectMessageEventToUsers_Should_callFactoryAndLiveApi_When_rcGroupIdIsValid() {
+  public void sendLiveDirectMessageEventToUsers_Should_callFactoryAndLiveApi_When_rcGroupIdIsValid()
+      throws ApiException {
     when(this.bySessionProvider.collectUserIds(any())).thenReturn(asList("1", "2"));
     when(this.userIdsProviderFactory.byRocketChatGroup(any())).thenReturn(bySessionProvider);
 
@@ -90,19 +90,20 @@ public class LiveEventNotificationServiceTest {
   }
 
   @Test
-  public void sendLiveDirectMessageEventToUsers_Should_logError_When_apiCallFails() {
+  public void sendLiveDirectMessageEventToUsers_Should_logError_When_apiCallFails()
+      throws ApiException {
     when(this.userIdsProviderFactory.byRocketChatGroup(any())).thenReturn(bySessionProvider);
     when(this.bySessionProvider.collectUserIds(any())).thenReturn(singletonList("test"));
-    doThrow(new RestClientException("")).when(this.liveControllerApi).sendLiveEvent(any());
+    doThrow(new ApiException("")).when(this.liveControllerApi).sendLiveEvent(any());
 
     this.liveEventNotificationService.sendLiveDirectMessageEventToUsers("group id");
 
-    verify(logger).error(anyString(), anyString(), any(RestClientException.class));
+    verify(logger).error(anyString(), anyString(), any(ApiException.class));
   }
 
   @Test
-  public void
-      sendLiveDirectMessageEventToUsers_Should_sendEventToAllUsersInsteadOfInitiatingUser() {
+  public void sendLiveDirectMessageEventToUsers_Should_sendEventToAllUsersInsteadOfInitiatingUser()
+      throws ApiException {
     List<String> userIds = asList("id1", "id2", "id3", "id4");
     when(this.byChatProvider.collectUserIds(any())).thenReturn(userIds);
     when(this.userIdsProviderFactory.byRocketChatGroup(any())).thenReturn(this.byChatProvider);
@@ -125,7 +126,8 @@ public class LiveEventNotificationServiceTest {
 
   @Test
   public void
-      sendLiveDirectMessageEventToUsers_Should_sendEventToAllUsers_When_initiatingUserIsAnother() {
+      sendLiveDirectMessageEventToUsers_Should_sendEventToAllUsers_When_initiatingUserIsAnother()
+          throws ApiException {
     List<String> userIds = asList("id1", "id2", "id3", "id4");
     when(this.byChatProvider.collectUserIds(any())).thenReturn(userIds);
     when(this.userIdsProviderFactory.byRocketChatGroup(any())).thenReturn(this.byChatProvider);
@@ -137,8 +139,8 @@ public class LiveEventNotificationServiceTest {
   }
 
   @Test
-  public void
-      sendLiveNewAnonymousEnquiryEventToUsers_Should_TriggerLiveEventWithCorrectEventType() {
+  public void sendLiveNewAnonymousEnquiryEventToUsers_Should_TriggerLiveEventWithCorrectEventType()
+      throws ApiException {
     List<String> userIds = List.of("1", "2");
 
     this.liveEventNotificationService.sendLiveNewAnonymousEnquiryEventToUsers(userIds, 1L);
@@ -163,7 +165,8 @@ public class LiveEventNotificationServiceTest {
   }
 
   @Test
-  public void sendAcceptAnonymousEnquiryEventToUser_Should_triggerLiveEvent_When_userIdIsValid() {
+  public void sendAcceptAnonymousEnquiryEventToUser_Should_triggerLiveEvent_When_userIdIsValid()
+      throws ApiException {
     this.liveEventNotificationService.sendAcceptAnonymousEnquiryEventToUser("userId");
 
     verify(this.liveControllerApi, times(1))
@@ -190,7 +193,8 @@ public class LiveEventNotificationServiceTest {
 
   @Test
   public void
-      sendLiveFinishedAnonymousConversationToUsers_Should_triggerLiveEvent_When_userIdIsValid() {
+      sendLiveFinishedAnonymousConversationToUsers_Should_triggerLiveEvent_When_userIdIsValid()
+          throws ApiException {
     this.liveEventNotificationService.sendLiveFinishedAnonymousConversationToUsers(
         singletonList("userId"), FinishConversationPhaseEnum.IN_PROGRESS);
 
