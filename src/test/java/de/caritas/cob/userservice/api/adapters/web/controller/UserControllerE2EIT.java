@@ -57,6 +57,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
 import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.apiclient.ConsultingTypeServiceApiControllerFactory;
+import de.caritas.cob.userservice.api.config.apiclient.TopicServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
@@ -203,6 +204,8 @@ class UserControllerE2EIT {
   @MockBean
   @Qualifier("topicControllerApiPrimary")
   private TopicControllerApi topicControllerApi;
+
+  @MockBean private TopicServiceApiControllerFactory topicServiceApiControllerFactory;
 
   @MockBean
   @Qualifier("mailsControllerApi")
@@ -1650,6 +1653,7 @@ class UserControllerE2EIT {
             .status("ACTIVE")
             .internalIdentifier("internal identifier 2");
 
+    when(topicServiceApiControllerFactory.createControllerApi()).thenReturn(topicControllerApi);
     when(topicControllerApi.getApiClient()).thenReturn(new ApiClient());
     when(topicControllerApi.getAllTopics()).thenReturn(Lists.newArrayList(firstTopic, secondTopic));
     when(topicControllerApi.getAllActiveTopics())

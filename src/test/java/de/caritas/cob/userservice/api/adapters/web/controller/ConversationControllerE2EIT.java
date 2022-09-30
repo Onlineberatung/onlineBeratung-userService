@@ -18,6 +18,7 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsGetDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsUpdateDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.subscriptions.SubscriptionsGetDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.subscriptions.SubscriptionsUpdateDTO;
+import de.caritas.cob.userservice.api.config.apiclient.TopicServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.Consultant;
@@ -73,6 +74,8 @@ class ConversationControllerE2EIT {
   @MockBean
   @Qualifier("topicControllerApiPrimary")
   private TopicControllerApi topicControllerApi;
+
+  @MockBean private TopicServiceApiControllerFactory topicServiceApiControllerFactory;
 
   private Consultant consultant;
 
@@ -165,6 +168,7 @@ class ConversationControllerE2EIT {
             .name("topic name 2")
             .description("topic desc 2")
             .status("ACTIVE");
+    when(topicServiceApiControllerFactory.createControllerApi()).thenReturn(topicControllerApi);
     when(topicControllerApi.getApiClient())
         .thenReturn(new de.caritas.cob.userservice.topicservice.generated.ApiClient());
     when(topicControllerApi.getAllTopics()).thenReturn(Lists.newArrayList(firstTopic, secondTopic));
