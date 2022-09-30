@@ -17,8 +17,6 @@ public class ConsultingTypeServiceApiControllerFactory {
 
   public ConsultingTypeControllerApi createControllerApi() {
     var apiClient = new ApiClient(restTemplate).setBasePath(this.consultingTypeServiceApiUrl);
-    ConsultingTypeControllerApi controllerApi = new ConsultingTypeControllerApi(apiClient);
-    controllerApi.setApiClient(apiClient);
-    return controllerApi;
+    return new ConsultingTypeControllerApi(apiClient);
   }
 }

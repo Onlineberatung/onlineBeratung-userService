@@ -17,8 +17,6 @@ public class AgencyServiceApiControllerFactory {
 
   public AgencyControllerApi createControllerApi() {
     var apiClient = new ApiClient(restTemplate).setBasePath(this.agencyServiceApiUrl);
-    AgencyControllerApi adminAgencyControllerApi = new AgencyControllerApi(apiClient);
-    adminAgencyControllerApi.setApiClient(apiClient);
-    return adminAgencyControllerApi;
+    return new AgencyControllerApi(apiClient);
   }
 }

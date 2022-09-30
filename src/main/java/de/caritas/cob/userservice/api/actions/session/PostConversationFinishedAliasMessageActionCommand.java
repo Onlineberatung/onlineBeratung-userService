@@ -6,12 +6,12 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace;
 
 import de.caritas.cob.userservice.api.actions.ActionCommand;
+import de.caritas.cob.userservice.api.config.apiclient.MessageServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import de.caritas.cob.userservice.messageservice.generated.ApiClient;
-import de.caritas.cob.userservice.messageservice.generated.web.MessageControllerApi;
 import de.caritas.cob.userservice.messageservice.generated.web.model.AliasOnlyMessageDTO;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class PostConversationFinishedAliasMessageActionCommand implements ActionCommand<Session> {
 
-  private final @NonNull MessageControllerApi messageControllerApi;
+  private final @NonNull MessageServiceApiControllerFactory messageServiceApiControllerFactory;
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
   private final @NonNull TenantHeaderSupplier tenantHeaderSupplier;
   private final @NonNull IdentityClient identityClient;
@@ -45,8 +45,9 @@ public class PostConversationFinishedAliasMessageActionCommand implements Action
   public void execute(Session actionTarget) {
     if (nonNull(actionTarget) && isNotBlank(actionTarget.getGroupId())) {
       try {
+        var messageControllerApi = messageServiceApiControllerFactory.createControllerApi();
         addDefaultHeaders(messageControllerApi.getApiClient());
-        this.messageControllerApi.saveAliasOnlyMessage(
+        messageControllerApi.saveAliasOnlyMessage(
             actionTarget.getGroupId(),
             new AliasOnlyMessageDTO().messageType(FINISHED_CONVERSATION));
       } catch (Exception e) {

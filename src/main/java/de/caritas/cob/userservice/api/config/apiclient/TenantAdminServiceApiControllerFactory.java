@@ -17,8 +17,6 @@ public class TenantAdminServiceApiControllerFactory {
   public TenantAdminControllerApi createControllerApi() {
     var apiClient =
         new TenantAdminServiceApiClient(restTemplate).setBasePath(this.tenantServiceApiUrl);
-    TenantAdminControllerApi controllerApi = new TenantAdminControllerApi(apiClient);
-    controllerApi.setApiClient(apiClient);
-    return controllerApi;
+    return new TenantAdminControllerApi(apiClient);
   }
 }
