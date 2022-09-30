@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAnonymousEnquiryDTO;
-import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiClientFactory;
+import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.conversation.facade.CreateAnonymousEnquiryFacade;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
@@ -55,13 +55,13 @@ class DeleteUserAnonymousSchedulerIT {
   @Value("${user.anonymous.deleteworkflow.periodMinutes}")
   private long deletionPeriodInMinutes;
 
-  @MockBean AgencyServiceApiClientFactory agencyServiceApiClientFactory;
+  @MockBean AgencyServiceApiControllerFactory agencyServiceApiControllerFactory;
 
   private Session currentSession;
 
   @BeforeEach
   public void setup() {
-    when(agencyServiceApiClientFactory.createControllerApi())
+    when(agencyServiceApiControllerFactory.createControllerApi())
         .thenReturn(
             new TestAgencyControllerApi(
                 new de.caritas.cob.userservice.agencyserivce.generated.ApiClient()));

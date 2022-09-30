@@ -46,7 +46,7 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.RocketChatUse
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.E2eKeyDTO;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
-import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiClientFactory;
+import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
@@ -140,7 +140,7 @@ class UserControllerChatE2EIT {
 
   @MockBean private RocketChatCredentialsProvider rocketChatCredentialsProvider;
 
-  @MockBean private AgencyServiceApiClientFactory agencyServiceApiClientFactory;
+  @MockBean private AgencyServiceApiControllerFactory agencyServiceApiControllerFactory;
 
   @MockBean
   @Qualifier("restTemplate")
@@ -190,7 +190,7 @@ class UserControllerChatE2EIT {
 
   @BeforeEach
   public void setUp() {
-    when(agencyServiceApiClientFactory.createControllerApi())
+    when(agencyServiceApiControllerFactory.createControllerApi())
         .thenReturn(
             new TestAgencyControllerApi(
                 new de.caritas.cob.userservice.agencyserivce.generated.ApiClient()));

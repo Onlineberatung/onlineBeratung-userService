@@ -6,7 +6,7 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAnonymousEnquiryDTO;
-import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiClientFactory;
+import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.conversation.facade.CreateAnonymousEnquiryFacade;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
@@ -45,7 +45,7 @@ class DeactivateAnonymousUserSchedulerIT {
 
   @Autowired private ActionsRegistry actionsRegistry;
 
-  @MockBean AgencyServiceApiClientFactory agencyServiceApiClientFactory;
+  @MockBean AgencyServiceApiControllerFactory agencyServiceApiControllerFactory;
 
   @Value("${user.anonymous.deactivateworkflow.periodMinutes}")
   private long deactivatePeriodInMinutes;
@@ -54,7 +54,7 @@ class DeactivateAnonymousUserSchedulerIT {
 
   @BeforeEach
   public void setup() {
-    when(agencyServiceApiClientFactory.createControllerApi())
+    when(agencyServiceApiControllerFactory.createControllerApi())
         .thenReturn(
             new TestAgencyControllerApi(
                 new de.caritas.cob.userservice.agencyserivce.generated.ApiClient()));

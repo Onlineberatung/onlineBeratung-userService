@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.agencyserivce.generated.web.AgencyControllerApi;
 import de.caritas.cob.userservice.agencyserivce.generated.web.model.AgencyResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
-import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiClientFactory;
+import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
@@ -50,11 +50,11 @@ public class AgencySecurityHeaderSupplierTest {
 
   @Mock private TenantHeaderSupplier tenantHeaderSupplier;
 
-  @Mock private AgencyServiceApiClientFactory agencyServiceApiClientFactory;
+  @Mock private AgencyServiceApiControllerFactory agencyServiceApiControllerFactory;
 
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
-    when(agencyServiceApiClientFactory.createControllerApi()).thenReturn(agencyControllerApi);
+    when(agencyServiceApiControllerFactory.createControllerApi()).thenReturn(agencyControllerApi);
     this.agencyResponseDTOS =
         AGENCY_DTO_LIST.stream().map(this::toAgencyResponseDTO).collect(Collectors.toList());
     when(this.securityHeaderSupplier.getCsrfHttpHeaders()).thenReturn(new HttpHeaders());
@@ -90,7 +90,7 @@ public class AgencySecurityHeaderSupplierTest {
         new AgencyService(
             mock(SecurityHeaderSupplier.class),
             mock(TenantHeaderSupplier.class),
-            mock(AgencyServiceApiClientFactory.class));
+            mock(AgencyServiceApiControllerFactory.class));
     Class classToTest = agencyService.getClass();
     Method methodToTest =
         classToTest.getMethod(GET_AGENCIES_METHOD_NAME, GET_AGENCIES_METHOD_PARAMS);
@@ -118,7 +118,7 @@ public class AgencySecurityHeaderSupplierTest {
         new AgencyService(
             mock(SecurityHeaderSupplier.class),
             mock(TenantHeaderSupplier.class),
-            mock(AgencyServiceApiClientFactory.class));
+            mock(AgencyServiceApiControllerFactory.class));
     Class classToTest = agencyService.getClass();
     Method methodToTest = classToTest.getMethod(GET_AGENCY_METHOD_NAME, GET_AGENCY_METHOD_PARAMS);
     Cacheable annotation = methodToTest.getAnnotation(Cacheable.class);

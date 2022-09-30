@@ -6,7 +6,7 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.agencyadminserivce.generated.ApiClient;
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.AdminAgencyControllerApi;
 import de.caritas.cob.userservice.api.admin.service.agency.AgencyAdminService;
-import de.caritas.cob.userservice.api.config.apiclient.AgencyAdminServiceApiClientFactory;
+import de.caritas.cob.userservice.api.config.apiclient.AgencyAdminServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import org.junit.Test;
@@ -28,7 +28,7 @@ public class AgencyAdminServiceTest {
 
   @Mock private RestTemplate restTemplate;
 
-  @Mock private AgencyAdminServiceApiClientFactory agencyAdminServiceApiClientFactory;
+  @Mock private AgencyAdminServiceApiControllerFactory agencyAdminServiceApiControllerFactory;
 
   @Test
   public void agencyAdminControllerShouldHaveCorrectHeaders() {
@@ -37,10 +37,10 @@ public class AgencyAdminServiceTest {
     when(securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders()).thenReturn(headers);
     AdminAgencyControllerApi api = new AdminAgencyControllerApi();
     api.setApiClient(new ApiClient());
-    when(agencyAdminServiceApiClientFactory.createControllerApi()).thenReturn(api);
+    when(agencyAdminServiceApiControllerFactory.createControllerApi()).thenReturn(api);
 
     AdminAgencyControllerApi controllerApi =
-        this.agencyAdminServiceApiClientFactory.createControllerApi();
+        this.agencyAdminServiceApiControllerFactory.createControllerApi();
     ApiClient apiClient = controllerApi.getApiClient();
     agencyAdminService.addDefaultHeaders(apiClient);
 

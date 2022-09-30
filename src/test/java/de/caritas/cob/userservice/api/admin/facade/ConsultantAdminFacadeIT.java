@@ -17,8 +17,8 @@ import de.caritas.cob.userservice.api.adapters.web.dto.Sort;
 import de.caritas.cob.userservice.api.adapters.web.dto.Sort.FieldEnum;
 import de.caritas.cob.userservice.api.adapters.web.dto.Sort.OrderEnum;
 import de.caritas.cob.userservice.api.admin.service.agency.AgencyAdminService;
-import de.caritas.cob.userservice.api.config.apiclient.AgencyAdminServiceApiClientFactory;
-import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiClientFactory;
+import de.caritas.cob.userservice.api.config.apiclient.AgencyAdminServiceApiControllerFactory;
+import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
@@ -65,9 +65,9 @@ public class ConsultantAdminFacadeIT {
 
   @MockBean private ConsultingTypeManager consultingTypeManager;
 
-  @MockBean private AgencyAdminServiceApiClientFactory agencyAdminServiceApiClientFactory;
+  @MockBean private AgencyAdminServiceApiControllerFactory agencyAdminServiceApiControllerFactory;
 
-  @MockBean private AgencyServiceApiClientFactory agencyServiceApiClientFactory;
+  @MockBean private AgencyServiceApiControllerFactory agencyServiceApiControllerFactory;
 
   @Test
   public void
@@ -194,7 +194,7 @@ public class ConsultantAdminFacadeIT {
 
     ConsultantFilter consultantFilter = new ConsultantFilter();
     consultantFilter.setAgencyId(agencyId);
-    when(agencyServiceApiClientFactory.createControllerApi())
+    when(agencyServiceApiControllerFactory.createControllerApi())
         .thenReturn(new TestAgencyControllerApi(new ApiClient()));
 
     var searchResult =

@@ -50,7 +50,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.EnquiryMessageDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.MessageType;
 import de.caritas.cob.userservice.api.adapters.web.dto.MonitoringDTO;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
-import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiClientFactory;
+import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
@@ -172,7 +172,7 @@ class UserControllerSessionE2EIT {
 
   @MockBean private Keycloak keycloak;
 
-  @MockBean private AgencyServiceApiClientFactory agencyServiceApiClientFactory;
+  @MockBean private AgencyServiceApiControllerFactory agencyServiceApiControllerFactory;
 
   @Captor private ArgumentCaptor<RequestEntity<Object>> requestCaptor;
 
@@ -233,7 +233,7 @@ class UserControllerSessionE2EIT {
 
   @BeforeEach
   public void setUp() {
-    when(agencyServiceApiClientFactory.createControllerApi())
+    when(agencyServiceApiControllerFactory.createControllerApi())
         .thenReturn(
             new TestAgencyControllerApi(
                 new de.caritas.cob.userservice.agencyserivce.generated.ApiClient()));

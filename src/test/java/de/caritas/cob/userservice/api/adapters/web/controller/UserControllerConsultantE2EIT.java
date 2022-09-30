@@ -33,7 +33,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.LanguageResponseDTO;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
-import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiClientFactory;
+import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
@@ -131,7 +131,7 @@ class UserControllerConsultantE2EIT {
 
   @SpyBean private AgencyService agencyService;
 
-  @MockBean AgencyServiceApiClientFactory agencyServiceApiClientFactory;
+  @MockBean AgencyServiceApiControllerFactory agencyServiceApiControllerFactory;
 
   private User user;
   private Consultant consultant;
@@ -147,7 +147,7 @@ class UserControllerConsultantE2EIT {
 
   @BeforeEach
   void setUp() {
-    when(agencyServiceApiClientFactory.createControllerApi())
+    when(agencyServiceApiControllerFactory.createControllerApi())
         .thenReturn(
             new TestAgencyControllerApi(
                 new de.caritas.cob.userservice.agencyserivce.generated.ApiClient()));

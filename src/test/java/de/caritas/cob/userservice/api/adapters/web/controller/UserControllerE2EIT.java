@@ -55,7 +55,8 @@ import de.caritas.cob.userservice.api.adapters.web.dto.RegistrationStatisticsLis
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
-import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiClientFactory;
+import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiControllerFactory;
+import de.caritas.cob.userservice.api.config.apiclient.ConsultingTypeServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
@@ -185,6 +186,9 @@ class UserControllerE2EIT {
   @MockBean private RocketChatCredentialsProvider rocketChatCredentialsProvider;
 
   @MockBean
+  private ConsultingTypeServiceApiControllerFactory consultingTypeServiceApiControllerFactory;
+
+  @MockBean
   @Qualifier("restTemplate")
   private RestTemplate restTemplate;
 
@@ -204,7 +208,7 @@ class UserControllerE2EIT {
   @Qualifier("mailsControllerApi")
   private MailsControllerApi mailsControllerApi;
 
-  @MockBean AgencyServiceApiClientFactory agencyServiceApiClientFactory;
+  @MockBean AgencyServiceApiControllerFactory agencyServiceApiControllerFactory;
 
   @MockBean private Keycloak keycloak;
 
@@ -269,10 +273,13 @@ class UserControllerE2EIT {
 
   @BeforeEach
   public void setUp() {
-    when(agencyServiceApiClientFactory.createControllerApi())
+    when(agencyServiceApiControllerFactory.createControllerApi())
         .thenReturn(
             new TestAgencyControllerApi(
                 new de.caritas.cob.userservice.agencyserivce.generated.ApiClient()));
+
+    when(consultingTypeServiceApiControllerFactory.createControllerApi())
+        .thenReturn(consultingTypeControllerApi);
   }
 
   @Test

@@ -10,7 +10,7 @@ import de.caritas.cob.userservice.agencyserivce.generated.web.AgencyControllerAp
 import de.caritas.cob.userservice.agencyserivce.generated.web.model.AgencyResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.config.CacheManagerConfig;
-import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiClientFactory;
+import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
@@ -29,7 +29,7 @@ public class AgencyService {
 
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
   private final @NonNull TenantHeaderSupplier tenantHeaderSupplier;
-  private final @NonNull AgencyServiceApiClientFactory agencyServiceApiClientFactory;
+  private final @NonNull AgencyServiceApiControllerFactory agencyServiceApiControllerFactory;
   /**
    * Returns the {@link AgencyDTO} for the provided agencyId. Agency will be cached for further
    * requests.
@@ -83,7 +83,7 @@ public class AgencyService {
   }
 
   private AgencyControllerApi getAgencyControllerApi() {
-    return agencyServiceApiClientFactory.createControllerApi();
+    return agencyServiceApiControllerFactory.createControllerApi();
   }
 
   /**

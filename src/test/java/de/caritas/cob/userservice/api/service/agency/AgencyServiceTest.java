@@ -7,7 +7,7 @@ import com.google.common.collect.Lists;
 import de.caritas.cob.userservice.agencyserivce.generated.ApiClient;
 import de.caritas.cob.userservice.agencyserivce.generated.web.AgencyControllerApi;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
-import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiClientFactory;
+import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.service.httpheader.HttpHeadersResolver;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
@@ -32,7 +32,7 @@ class AgencyServiceTest {
 
   @Mock AgencyControllerApi agencyControllerApi;
 
-  @Mock AgencyServiceApiClientFactory agencyServiceApiClientFactory;
+  @Mock AgencyServiceApiControllerFactory agencyServiceApiControllerFactory;
 
   @Mock TenantHeaderSupplier tenantHeaderSupplier;
 
@@ -59,7 +59,7 @@ class AgencyServiceTest {
     var agencyDTOS =
         Lists.newArrayList(
             new de.caritas.cob.userservice.agencyserivce.generated.web.model.AgencyResponseDTO());
-    when(agencyServiceApiClientFactory.createControllerApi()).thenReturn(agencyControllerApi);
+    when(agencyServiceApiControllerFactory.createControllerApi()).thenReturn(agencyControllerApi);
     when(this.agencyControllerApi.getAgenciesByIds(Lists.newArrayList(1L))).thenReturn(agencyDTOS);
 
     this.agencyService.getAgency(1L);

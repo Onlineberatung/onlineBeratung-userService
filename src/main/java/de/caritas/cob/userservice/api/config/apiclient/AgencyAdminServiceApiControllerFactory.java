@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 @Component
-public class AgencyAdminServiceApiClientFactory {
+public class AgencyAdminServiceApiControllerFactory {
 
   @Value("${agency.admin.service.api.url}")
   private String agencyAdminServiceApiUrl;
