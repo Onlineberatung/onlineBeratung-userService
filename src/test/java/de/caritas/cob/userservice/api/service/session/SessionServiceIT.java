@@ -4,6 +4,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.UserServiceApplication;
@@ -16,14 +17,18 @@ import de.caritas.cob.userservice.api.model.Session.RegistrationType;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
+import de.caritas.cob.userservice.topicservice.generated.web.TopicControllerApi;
 import java.util.Collections;
 import java.util.Set;
+import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,8 +36,9 @@ import org.springframework.transaction.annotation.Transactional;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = UserServiceApplication.class)
 @TestPropertySource(properties = "spring.profiles.active=testing")
+@TestPropertySource(properties = "feature.topics.enabled=true")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class SessionServiceIT {
+class SessionServiceIT {
 
   @Autowired private SessionService sessionService;
 
@@ -42,15 +48,18 @@ public class SessionServiceIT {
 
   @Autowired private UserRepository userRepository;
 
+  @MockBean
+  @Qualifier("topicControllerApiPrimary")
+  private TopicControllerApi topicControllerApi;
+
   @Test
-  public void fetchSessionForConsultant_Should_ThrowNotFoundException_When_SessionIsNotFound() {
+  void fetchSessionForConsultant_Should_ThrowNotFoundException_When_SessionIsNotFound() {
     assertThrows(
         NotFoundException.class, () -> sessionService.fetchSessionForConsultant(-1L, CONSULTANT));
   }
 
   @Test
-  public void
-      fetchSessionForConsultant_Should_Throw_ForbiddenException_When_ConsultantHasNoPermission() {
+  void fetchSessionForConsultant_Should_Throw_ForbiddenException_When_ConsultantHasNoPermission() {
     Consultant consultant =
         consultantRepository
             .findByIdAndDeleteDateIsNull("fb77d849-470f-4cec-89ca-6aa673bacb88")
@@ -61,8 +70,7 @@ public class SessionServiceIT {
   }
 
   @Test
-  public void
-      getSessionsByUserAndGroupOrFeedbackGroupIdsShouldBeForbiddenIfUserHasNotRequiredRole() {
+  void getSessionsByUserAndGroupOrFeedbackGroupIdsShouldBeForbiddenIfUserHasNotRequiredRole() {
     assertThrows(
         ForbiddenException.class,
         () ->
@@ -73,7 +81,7 @@ public class SessionServiceIT {
   }
 
   @Test
-  public void getSessionsByUserAndGroupOrFeedbackGroupIdsShouldFetchAgencyForSession() {
+  void getSessionsByUserAndGroupOrFeedbackGroupIdsShouldFetchAgencyForSession() {
     var sessions =
         sessionService.getSessionsByUserAndGroupOrFeedbackGroupIds(
             "9c4057d0-05ad-4e86-a47c-dc5bdeec03b9", Set.of("9faSTWZ5gurHLXy4R"), Set.of("user"));
@@ -84,14 +92,16 @@ public class SessionServiceIT {
   }
 
   @Test
-  public void
+  void
       fetchSessionForConsultant_Should_Return_ValidConsultantSessionDTO_When_ConsultantIsAssigned() {
+    givenAValidTopicServiceResponse();
     Consultant consultant =
         consultantRepository
             .findByIdAndDeleteDateIsNull("473f7c4b-f011-4fc2-847c-ceb636a5b399")
             .get();
-    Session session = sessionRepository.findById(1L).get();
-    ConsultantSessionDTO result = sessionService.fetchSessionForConsultant(1L, consultant);
+    Session session = sessionRepository.findById(1200L).get();
+
+    ConsultantSessionDTO result = sessionService.fetchSessionForConsultant(1200L, consultant);
 
     assertNotNull(result);
     assertEquals(session.getId(), result.getId());
@@ -108,12 +118,30 @@ public class SessionServiceIT {
     assertEquals(session.getGroupId(), result.getGroupId());
     assertEquals(session.getFeedbackGroupId(), result.getFeedbackGroupId());
     assertEquals(session.getConsultingTypeId(), result.getConsultingType().intValue());
+    assertEquals(session.getUserAge(), result.getAge());
+    assertEquals(session.getUserGender(), result.getGender());
+    assertEquals(session.getCounsellingRelation(), result.getCounsellingRelation());
+    assertNotNull(result.getMainTopic());
+    assertEquals(1, result.getMainTopic().getId());
+    assertEquals("topic name", result.getMainTopic().getName());
+    assertEquals("topic desc", result.getMainTopic().getDescription());
+    assertNotNull(result.getTopics());
+    assertEquals(2, result.getTopics().size());
+    assertNotNull(result.getTopics().get(0));
+    assertEquals(1, result.getTopics().get(0).getId());
+    assertEquals("topic name", result.getTopics().get(0).getName());
+    assertEquals("topic desc", result.getTopics().get(0).getDescription());
+    assertNotNull(result.getTopics().get(1));
+    assertEquals(2, result.getTopics().get(1).getId());
+    assertEquals("topic name 2", result.getTopics().get(1).getName());
+    assertEquals("topic desc 2", result.getTopics().get(1).getDescription());
   }
 
   @Test
   @Transactional
-  public void
+  void
       fetchSessionForConsultant_Should_Return_ConsultantSessionDTO_When_ConsultantIsToTeamSessionAgencyAssigned() {
+    givenAValidTopicServiceResponse();
     Consultant consultant =
         consultantRepository
             .findByIdAndDeleteDateIsNull("e2f20d3a-1ca7-4cb5-9fac-8e26033416b3")
@@ -122,7 +150,7 @@ public class SessionServiceIT {
   }
 
   @Test
-  public void fetchGroupIdWithConsultantAndUser_Should_Return_GroupId() {
+  void fetchGroupIdWithConsultantAndUser_Should_Return_GroupId() {
     String groupId =
         sessionService.findGroupIdByConsultantAndUser(
             "473f7c4b-f011-4fc2-847c-ceb636a5b399", "1da238c6-cd46-4162-80f1-bff74eafe77f");
@@ -130,7 +158,7 @@ public class SessionServiceIT {
   }
 
   @Test
-  public void fetchGroupIdWithConsultantAndUser_Should_Return_BadRequestException() {
+  void fetchGroupIdWithConsultantAndUser_Should_Return_BadRequestException() {
     Session session = new Session();
     session.setConsultant(
         consultantRepository.findById("473f7c4b-f011-4fc2-847c-ceb636a5b399").get());
@@ -148,5 +176,28 @@ public class SessionServiceIT {
         });
 
     sessionRepository.delete(session);
+  }
+
+  private void givenAValidTopicServiceResponse() {
+    var firstTopic =
+        new de.caritas.cob.userservice.topicservice.generated.web.model.TopicDTO()
+            .id(1L)
+            .name("topic name")
+            .description("topic desc")
+            .status("INACTIVE")
+            .internalIdentifier("internal identifier 1");
+    var secondTopic =
+        new de.caritas.cob.userservice.topicservice.generated.web.model.TopicDTO()
+            .id(2L)
+            .name("topic name 2")
+            .description("topic desc 2")
+            .status("ACTIVE")
+            .internalIdentifier("internal identifier 2");
+
+    when(topicControllerApi.getApiClient())
+        .thenReturn(new de.caritas.cob.userservice.topicservice.generated.ApiClient());
+    when(topicControllerApi.getAllTopics()).thenReturn(Lists.newArrayList(firstTopic, secondTopic));
+    when(topicControllerApi.getAllActiveTopics())
+        .thenReturn(Lists.newArrayList(firstTopic, secondTopic));
   }
 }

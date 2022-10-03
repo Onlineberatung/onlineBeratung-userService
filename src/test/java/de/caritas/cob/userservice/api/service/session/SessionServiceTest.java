@@ -88,8 +88,10 @@ import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class SessionServiceTest {
@@ -590,6 +592,48 @@ class SessionServiceTest {
     assertEquals(session.getGroupId(), result.getGroupId());
     assertEquals(session.getFeedbackGroupId(), result.getFeedbackGroupId());
     assertEquals(session.getConsultingTypeId(), result.getConsultingType().intValue());
+    assertEquals(session.getUserAge(), result.getAge());
+    assertEquals(session.getUserGender(), result.getGender());
+    assertEquals(session.getCounsellingRelation(), result.getCounsellingRelation());
+  }
+
+  @Test
+  void
+      fetchSessionForConsultant_Should_NotEnrichTopicsData_When_TopicsFeatureEnabledIsNotEnabled() {
+
+    Session session = easyRandom.nextObject(Session.class);
+    session.setConsultant(CONSULTANT_WITH_AGENCY);
+    session.setUser(USER_WITH_RC_ID);
+    when(sessionRepository.findById(session.getId())).thenReturn(Optional.of(session));
+
+    ConsultantSessionDTO result =
+        sessionService.fetchSessionForConsultant(session.getId(), CONSULTANT_WITH_AGENCY);
+
+    assertEquals(session.getId(), result.getId());
+
+    assertNull(result.getMainTopic());
+    assertNull(result.getTopics());
+  }
+
+  @Test
+  void
+      fetchSessionForConsultant_Should_CallSessionTopicEnrichmentService_When_TopicsFeatureEnabledIsEnabled() {
+    ReflectionTestUtils.setField(sessionService, "topicsFeatureEnabled", true);
+    var sessionTopicEnrichmentService = mock(ConsultantSessionTopicEnrichmentService.class);
+    ReflectionTestUtils.setField(
+        sessionService, "sessionTopicEnrichmentService", sessionTopicEnrichmentService);
+
+    Session session = easyRandom.nextObject(Session.class);
+    session.setConsultant(CONSULTANT_WITH_AGENCY);
+    session.setUser(USER_WITH_RC_ID);
+    when(sessionRepository.findById(session.getId())).thenReturn(Optional.of(session));
+
+    sessionService.fetchSessionForConsultant(session.getId(), CONSULTANT_WITH_AGENCY);
+
+    verify(sessionTopicEnrichmentService)
+        .enrichSessionWithTopicData(Mockito.any(ConsultantSessionDTO.class));
+
+    ReflectionTestUtils.setField(sessionService, "topicsFeatureEnabled", false);
   }
 
   @Test
