@@ -9,13 +9,13 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class TopicServiceApiControllerFactory {
 
-  @Value("${tenant.service.api.url}")
-  private String tenantServiceApiUrl;
+  @Value("${consulting.type.service.api.url}")
+  private String topicServiceApiUrl;
 
   @Autowired private RestTemplate restTemplate;
 
   public TopicControllerApi createControllerApi() {
-    var apiClient = new TopicServiceApiClient(restTemplate).setBasePath(this.tenantServiceApiUrl);
+    var apiClient = new TopicServiceApiClient(restTemplate).setBasePath(this.topicServiceApiUrl);
     TopicControllerApi controllerApi = new TopicControllerApi(apiClient);
     controllerApi.setApiClient(apiClient);
     return controllerApi;
