@@ -99,9 +99,9 @@ class SessionServiceIT {
         consultantRepository
             .findByIdAndDeleteDateIsNull("473f7c4b-f011-4fc2-847c-ceb636a5b399")
             .get();
-    Session session = sessionRepository.findById(1200L).get();
+    Session session = sessionRepository.findById(1216L).get();
 
-    ConsultantSessionDTO result = sessionService.fetchSessionForConsultant(1200L, consultant);
+    ConsultantSessionDTO result = sessionService.fetchSessionForConsultant(1216L, consultant);
 
     assertNotNull(result);
     assertEquals(session.getId(), result.getId());
@@ -154,7 +154,7 @@ class SessionServiceIT {
     String groupId =
         sessionService.findGroupIdByConsultantAndUser(
             "473f7c4b-f011-4fc2-847c-ceb636a5b399", "1da238c6-cd46-4162-80f1-bff74eafe77f");
-    assertEquals(groupId, "4WKq3kj9C7WESSQuK");
+    assertEquals("4WKq3kj9C7WESSQuK", groupId);
   }
 
   @Test

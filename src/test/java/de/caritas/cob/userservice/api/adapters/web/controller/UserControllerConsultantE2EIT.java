@@ -773,13 +773,13 @@ class UserControllerConsultantE2EIT {
 
     mockMvc
         .perform(
-            get("/users/consultants/sessions/{sessionId}", 1200L)
+            get("/users/consultants/sessions/{sessionId}", 1216L)
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("id", is(1200)))
+        .andExpect(jsonPath("id", is(1216)))
         .andExpect(jsonPath("agencyId", is(121)))
         .andExpect(jsonPath("consultingType", is(1)))
         .andExpect(jsonPath("status", is(1)))
