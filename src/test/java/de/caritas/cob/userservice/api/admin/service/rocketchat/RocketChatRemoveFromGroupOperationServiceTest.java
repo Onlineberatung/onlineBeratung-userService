@@ -163,6 +163,22 @@ public class RocketChatRemoveFromGroupOperationServiceTest {
   }
 
   @Test
+  public void removeFromGroupsOrRollbackOnFailure_Should_doNothing_When_rcGroupIdIsNull() {
+    when(this.session.getGroupId()).thenReturn("group");
+    when(this.session.getFeedbackGroupId()).thenReturn("feedback");
+    when(this.consultant.getRocketChatId()).thenReturn("rcId");
+    GroupMemberDTO groupMemberDTO = new GroupMemberDTO();
+    groupMemberDTO.set_id(this.consultant.getRocketChatId());
+    when(this.rocketChatFacade.retrieveRocketChatMembers(any()))
+        .thenReturn(singletonList(groupMemberDTO));
+
+    this.removeService.removeFromGroupsOrRollbackOnFailure();
+
+    verify(this.rocketChatFacade, never()).removeUserFromGroup("rcId", null);
+    verify(this.rocketChatFacade, never()).removeUserFromGroup("rcId", null);
+  }
+
+  @Test
   public void
       removeFromGroupOrRollbackOnFailure_Should_throwInternalServerErrorAndPerformRollback_When_error() {
     when(this.session.getGroupId()).thenReturn("group");
