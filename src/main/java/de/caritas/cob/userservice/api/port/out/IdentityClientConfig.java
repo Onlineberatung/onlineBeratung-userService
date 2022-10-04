@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.port.out;
 
+import de.caritas.cob.userservice.api.config.auth.TechnicalUserConfig;
 import java.util.Set;
 import javax.validation.constraints.NotNull;
 
@@ -26,6 +27,10 @@ public interface IdentityClientConfig {
   Boolean getOtpAllowedForTenantSuperAdmins();
 
   Boolean getDisplayNameAllowedForConsultants();
+
+  TechnicalUserConfig getTechnicalUser();
+
+  String getEmailDummySuffix();
 
   boolean isOtpAllowed(@NotNull Set<String> roles);
 }
