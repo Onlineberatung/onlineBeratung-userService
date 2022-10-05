@@ -159,8 +159,6 @@ public class AppointmentService {
     AgencyConsultantSyncRequestDTO request = new AgencyConsultantSyncRequestDTO();
     request.setAgencies(agencies);
     request.setConsultantId(consultantId);
-    this.appointmentAgencyServiceApiControllerFactory
-        .createControllerApi()
-        .agencyConsultantsSync(request);
+    controllerApi.agencyConsultantsSync(request);
   }
 }
