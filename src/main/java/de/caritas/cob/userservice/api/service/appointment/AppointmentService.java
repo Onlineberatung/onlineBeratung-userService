@@ -10,6 +10,7 @@ import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import de.caritas.cob.userservice.appointmentservice.generated.ApiClient;
+import de.caritas.cob.userservice.appointmentservice.generated.web.AgencyApi;
 import de.caritas.cob.userservice.appointmentservice.generated.web.ConsultantApi;
 import de.caritas.cob.userservice.appointmentservice.generated.web.model.AgencyConsultantSyncRequestDTO;
 import java.util.List;
@@ -146,10 +147,11 @@ public class AppointmentService {
     if (!appointmentFeatureEnabled) {
       return;
     }
-    ConsultantApi appointmentConsultantApi =
-        this.appointmentConsultantServiceApiControllerFactory.createControllerApi();
 
-    addTechnicalUserHeaders(appointmentConsultantApi.getApiClient());
+    AgencyApi controllerApi =
+        this.appointmentAgencyServiceApiControllerFactory.createControllerApi();
+
+    addTechnicalUserHeaders(controllerApi.getApiClient());
     var agencies =
         agencyList.stream()
             .map(CreateConsultantAgencyDTO::getAgencyId)
