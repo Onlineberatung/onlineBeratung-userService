@@ -648,7 +648,8 @@ public class SessionService {
               session.getSessionTopics().stream()
                   .map(topic -> new SessionTopicDTO().id(topic.getTopicId()))
                   .collect(Collectors.toList()));
-      sessionTopicEnrichmentService.enrichSessionWithTopicData(consultantSessionDTO);
+      sessionTopicEnrichmentService.enrichSessionWithMainTopicData(consultantSessionDTO);
+      sessionTopicEnrichmentService.enrichSessionWithTopicsData(consultantSessionDTO);
     }
 
     return consultantSessionDTO;

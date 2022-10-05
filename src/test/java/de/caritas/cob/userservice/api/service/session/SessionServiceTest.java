@@ -45,6 +45,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
@@ -600,6 +601,9 @@ class SessionServiceTest {
   @Test
   void
       fetchSessionForConsultant_Should_NotEnrichTopicsData_When_TopicsFeatureEnabledIsNotEnabled() {
+    var sessionTopicEnrichmentService = mock(ConsultantSessionTopicEnrichmentService.class);
+    ReflectionTestUtils.setField(
+        sessionService, "sessionTopicEnrichmentService", sessionTopicEnrichmentService);
 
     Session session = easyRandom.nextObject(Session.class);
     session.setConsultant(CONSULTANT_WITH_AGENCY);
@@ -611,6 +615,7 @@ class SessionServiceTest {
 
     assertEquals(session.getId(), result.getId());
 
+    verifyNoInteractions(sessionTopicEnrichmentService);
     assertNull(result.getMainTopic());
     assertNull(result.getTopics());
   }
@@ -631,7 +636,9 @@ class SessionServiceTest {
     sessionService.fetchSessionForConsultant(session.getId(), CONSULTANT_WITH_AGENCY);
 
     verify(sessionTopicEnrichmentService)
-        .enrichSessionWithTopicData(Mockito.any(ConsultantSessionDTO.class));
+        .enrichSessionWithTopicsData(Mockito.any(ConsultantSessionDTO.class));
+    verify(sessionTopicEnrichmentService)
+        .enrichSessionWithTopicsData(Mockito.any(ConsultantSessionDTO.class));
 
     ReflectionTestUtils.setField(sessionService, "topicsFeatureEnabled", false);
   }

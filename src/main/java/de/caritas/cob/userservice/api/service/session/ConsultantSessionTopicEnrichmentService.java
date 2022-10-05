@@ -23,20 +23,50 @@ public class ConsultantSessionTopicEnrichmentService {
 
   private final @NonNull TopicService topicService;
 
-  public ConsultantSessionDTO enrichSessionWithTopicData(ConsultantSessionDTO session) {
-    if (session.getMainTopic() != null && session.getMainTopic().getId() != null
-        || session.getTopics() != null && !session.getTopics().isEmpty()) {
+  public ConsultantSessionDTO enrichSessionWithMainTopicData(ConsultantSessionDTO session) {
+    if (shouldEnrichMainTopic(session)) {
       var availableTopics = topicService.getAllTopicsMap();
-      log.debug("Enriching session with id: {} with information about the topics", session.getId());
+      log.debug(
+          "Enriching session with id: {} with information about the mainTopic", session.getId());
 
       enrichMainTopicTo(session, availableTopics);
-      enrichTopicsTo(session, availableTopics);
     } else {
       log.debug(
           "Skipping topic enrichment, topic id is not set for session with id: {}",
           session.getId());
     }
     return session;
+  }
+
+  public ConsultantSessionDTO enrichSessionWithTopicsData(ConsultantSessionDTO session) {
+    if (shouldEnrichTopics(session)) {
+      var availableTopics = topicService.getAllTopicsMap();
+      log.debug("Enriching session with id: {} with information about the topics", session.getId());
+
+      enrichTopicsTo(session, availableTopics);
+    } else {
+      log.debug(
+          "Skipping topic enrichment, topics are not set for session with id: {}", session.getId());
+    }
+    return session;
+  }
+
+  private boolean shouldEnrichMainTopic(ConsultantSessionDTO session) {
+    return session.getMainTopic() != null && session.getMainTopic().getId() != null;
+  }
+
+  private boolean shouldEnrichTopics(ConsultantSessionDTO session) {
+    return session.getTopics() != null && !session.getTopics().isEmpty();
+  }
+
+  private void enrichMainTopicTo(
+      ConsultantSessionDTO session, Map<Long, TopicDTO> availableTopics) {
+    if (nonNull(session.getMainTopic())) {
+      var mainTopic = getTopicData(availableTopics, session.getMainTopic().getId());
+      if (nonNull(mainTopic)) {
+        session.setMainTopic(mainTopic);
+      }
+    }
   }
 
   private void enrichTopicsTo(ConsultantSessionDTO session, Map<Long, TopicDTO> availableTopics) {
@@ -47,16 +77,6 @@ public class ConsultantSessionTopicEnrichmentService {
               .filter(Objects::nonNull)
               .collect(Collectors.toList());
       session.setTopics(topics);
-    }
-  }
-
-  private void enrichMainTopicTo(
-      ConsultantSessionDTO session, Map<Long, TopicDTO> availableTopics) {
-    if (nonNull(session.getMainTopic())) {
-      var mainTopic = getTopicData(availableTopics, session.getMainTopic().getId());
-      if (nonNull(mainTopic)) {
-        session.setMainTopic(mainTopic);
-      }
     }
   }
 
