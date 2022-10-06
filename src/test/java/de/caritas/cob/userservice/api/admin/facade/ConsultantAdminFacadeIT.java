@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO;
+import de.caritas.cob.userservice.agencyserivce.generated.ApiClient;
 import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantFilter;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantAgencyDTO;
@@ -16,12 +17,15 @@ import de.caritas.cob.userservice.api.adapters.web.dto.Sort;
 import de.caritas.cob.userservice.api.adapters.web.dto.Sort.FieldEnum;
 import de.caritas.cob.userservice.api.adapters.web.dto.Sort.OrderEnum;
 import de.caritas.cob.userservice.api.admin.service.agency.AgencyAdminService;
+import de.caritas.cob.userservice.api.config.apiclient.AgencyAdminServiceApiControllerFactory;
+import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
+import de.caritas.cob.userservice.api.testConfig.TestAgencyControllerApi;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.RolesDTO;
 import java.util.ArrayList;
@@ -60,6 +64,10 @@ public class ConsultantAdminFacadeIT {
   @MockBean private AgencyAdminService agencyAdminService;
 
   @MockBean private ConsultingTypeManager consultingTypeManager;
+
+  @MockBean private AgencyAdminServiceApiControllerFactory agencyAdminServiceApiControllerFactory;
+
+  @MockBean private AgencyServiceApiControllerFactory agencyServiceApiControllerFactory;
 
   @Test
   public void
@@ -186,6 +194,8 @@ public class ConsultantAdminFacadeIT {
 
     ConsultantFilter consultantFilter = new ConsultantFilter();
     consultantFilter.setAgencyId(agencyId);
+    when(agencyServiceApiControllerFactory.createControllerApi())
+        .thenReturn(new TestAgencyControllerApi(new ApiClient()));
 
     var searchResult =
         this.consultantAdminFacade.findFilteredConsultants(

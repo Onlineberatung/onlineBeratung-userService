@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
+import de.caritas.cob.userservice.api.config.apiclient.MailServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.mailservice.generated.ApiClient;
 import de.caritas.cob.userservice.mailservice.generated.web.MailsControllerApi;
@@ -36,11 +37,14 @@ public class MailServiceTest {
 
   @Mock private ApiClient apiClient;
 
+  @Mock MailServiceApiControllerFactory mailServiceApiControllerFactory;
+
   @InjectMocks private MailService mailService;
 
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
     setInternalState(MailService.class, "log", logger);
+    when(mailServiceApiControllerFactory.createControllerApi()).thenReturn(mailsControllerApi);
     when(this.mailsControllerApi.getApiClient()).thenReturn(this.apiClient);
   }
 

@@ -7,6 +7,7 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
+import de.caritas.cob.userservice.api.config.apiclient.MessageServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostFurtherStepsMessageException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostMessageException;
@@ -37,7 +38,7 @@ import org.springframework.web.client.RestClientException;
 @RequiredArgsConstructor
 public class MessageServiceProvider {
 
-  private final @NonNull MessageControllerApi messageControllerApi;
+  private final @NonNull MessageServiceApiControllerFactory messageServiceApiControllerFactory;
   private final @NonNull RocketChatCredentialsProvider rocketChatCredentialsProvider;
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
   private final @NonNull TenantHeaderSupplier tenantHeaderSupplier;
@@ -69,13 +70,14 @@ public class MessageServiceProvider {
 
   private MessageResponseDTO postMessage(RocketChatData rocketChatData) {
     var rcCredentials = rocketChatData.getRocketChatCredentials();
-    addDefaultHeaders(this.messageControllerApi.getApiClient());
+    MessageControllerApi controllerApi = messageServiceApiControllerFactory.createControllerApi();
+    addDefaultHeaders(controllerApi.getApiClient());
     var message =
         new MessageDTO()
             .message(rocketChatData.getMessage())
             .org(rocketChatData.getOrg())
             .t(rocketChatData.getType());
-    return this.messageControllerApi.createMessage(
+    return controllerApi.createMessage(
         rcCredentials.getRocketChatToken(),
         rcCredentials.getRocketChatUserId(),
         rocketChatData.getRcGroupId(),
@@ -155,11 +157,11 @@ public class MessageServiceProvider {
       CreateEnquiryExceptionInformation exceptionInformation,
       AppointmentData appointmentData)
       throws RocketChatPostFurtherStepsMessageException {
-
-    addDefaultHeaders(this.messageControllerApi.getApiClient());
+    MessageControllerApi controllerApi = messageServiceApiControllerFactory.createControllerApi();
+    addDefaultHeaders(controllerApi.getApiClient());
     try {
       ObjectMapper mapper = new ObjectMapper();
-      return this.messageControllerApi.saveAliasMessageWithContent(
+      return controllerApi.saveAliasMessageWithContent(
           rcGroupId,
           new AliasMessageDTO()
               .messageType(MessageType.APPOINTMENT_SET)
@@ -179,9 +181,10 @@ public class MessageServiceProvider {
       MessageType messageType,
       CreateEnquiryExceptionInformation exceptionInformation)
       throws RocketChatPostFurtherStepsMessageException {
-    addDefaultHeaders(this.messageControllerApi.getApiClient());
+    MessageControllerApi controllerApi = messageServiceApiControllerFactory.createControllerApi();
+    addDefaultHeaders(controllerApi.getApiClient());
     try {
-      this.messageControllerApi.saveAliasOnlyMessage(
+      controllerApi.saveAliasOnlyMessage(
           rcGroupId, new AliasOnlyMessageDTO().messageType(messageType));
 
     } catch (RestClientException exception) {

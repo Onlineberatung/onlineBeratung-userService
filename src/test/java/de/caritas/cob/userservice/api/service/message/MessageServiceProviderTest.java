@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
+import de.caritas.cob.userservice.api.config.apiclient.MessageServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostFurtherStepsMessageException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostMessageException;
@@ -43,6 +44,7 @@ import de.caritas.cob.userservice.messageservice.generated.web.model.AliasOnlyMe
 import de.caritas.cob.userservice.messageservice.generated.web.model.MessageDTO;
 import de.caritas.cob.userservice.messageservice.generated.web.model.MessageType;
 import org.jeasy.random.EasyRandom;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -71,6 +73,13 @@ public class MessageServiceProviderTest {
   private TenantHeaderSupplier tenantHeaderSupplier;
 
   private final RestClientException restClientException = new RestClientException(ERROR);
+
+  @Mock private MessageServiceApiControllerFactory messageServiceApiControllerFactory;
+
+  @Before
+  public void setUp() {
+    when(messageServiceApiControllerFactory.createControllerApi()).thenReturn(messageControllerApi);
+  }
 
   @Test
   public void

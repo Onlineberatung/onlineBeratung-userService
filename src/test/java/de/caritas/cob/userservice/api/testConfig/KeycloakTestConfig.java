@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.testConfig;
 
+import com.google.common.collect.Maps;
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakClient;
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakMapper;
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
@@ -13,6 +14,8 @@ import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.keycloak.admin.client.resource.UserResource;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
@@ -43,6 +46,23 @@ public class KeycloakTestConfig {
       @Override
       public boolean changePassword(String userId, String password) {
         return super.changePassword(userId, password);
+      }
+
+      @Override
+      public void changeLanguage(String userId, String locale) {
+        UserResource userResource = keycloakClient.getUsersResource().get(userId);
+        UserRepresentation user = getUserRepresentationAndCreateNewUserIfNotExist(userResource);
+        super.changeLanguageForTheUser(locale, userResource, user);
+      }
+
+      private UserRepresentation getUserRepresentationAndCreateNewUserIfNotExist(
+          UserResource userResource) {
+        var user = userResource.toRepresentation();
+        if (user == null) {
+          user = new UserRepresentation();
+          user.setAttributes(Maps.newHashMap());
+        }
+        return user;
       }
 
       @Override
