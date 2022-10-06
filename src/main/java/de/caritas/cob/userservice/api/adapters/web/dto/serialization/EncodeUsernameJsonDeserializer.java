@@ -7,16 +7,18 @@ import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestExceptio
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import java.io.IOException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class EncodeUsernameJsonDeserializer extends JsonDeserializer<String> {
 
   @Value("${user.username.invalid.length}")
   private String errorUsernameInvalidLength;
 
-  private final UserHelper userHelper = new UserHelper();
+  private final UserHelper userHelper;
 
   @Override
   public String deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)
