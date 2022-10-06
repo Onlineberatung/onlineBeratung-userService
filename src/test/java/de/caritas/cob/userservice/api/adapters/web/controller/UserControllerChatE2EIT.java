@@ -46,6 +46,7 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.RocketChatUse
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.E2eKeyDTO;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
+import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
@@ -65,6 +66,7 @@ import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.UserAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.UserChatRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
+import de.caritas.cob.userservice.api.testConfig.TestAgencyControllerApi;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -77,6 +79,7 @@ import javax.transaction.Transactional;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -137,6 +140,8 @@ class UserControllerChatE2EIT {
 
   @MockBean private RocketChatCredentialsProvider rocketChatCredentialsProvider;
 
+  @MockBean private AgencyServiceApiControllerFactory agencyServiceApiControllerFactory;
+
   @MockBean
   @Qualifier("restTemplate")
   private RestTemplate restTemplate;
@@ -181,6 +186,14 @@ class UserControllerChatE2EIT {
     subscriptionsGetResponse = null;
     groupDeleteResponse = null;
     identityConfig.setDisplayNameAllowedForConsultants(false);
+  }
+
+  @BeforeEach
+  public void setUp() {
+    when(agencyServiceApiControllerFactory.createControllerApi())
+        .thenReturn(
+            new TestAgencyControllerApi(
+                new de.caritas.cob.userservice.agencyserivce.generated.ApiClient()));
   }
 
   @Test

@@ -413,15 +413,15 @@ public class RocketChatService implements MessageClient {
       response = this.rcCredentialHelper.loginUser(username, password);
     }
 
-    var rocketChatCredentials =
+    var rocketChatCredentialsLocal =
         RocketChatCredentials.builder()
             .rocketChatUserId(response.getBody().getData().getUserId())
             .rocketChatToken(response.getBody().getData().getAuthToken())
             .build();
 
-    logoutUser(rocketChatCredentials);
+    logoutUser(rocketChatCredentialsLocal);
 
-    return rocketChatCredentials.getRocketChatUserId();
+    return rocketChatCredentialsLocal.getRocketChatUserId();
   }
 
   /**

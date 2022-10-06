@@ -5,8 +5,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.config.apiclient.ConsultingTypeServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
+import de.caritas.cob.userservice.consultingtypeservice.generated.ApiClient;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.ConsultingTypeControllerApi;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.BasicConsultingTypeResponseDTO;
 import java.util.Enumeration;
@@ -14,17 +16,18 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-@RunWith(SpringRunner.class)
-public class ConsultingTypeServiceTest {
+@ExtendWith(MockitoExtension.class)
+class ConsultingTypeServiceTest {
 
   @InjectMocks private ConsultingTypeService consultingTypeService;
 
@@ -40,10 +43,20 @@ public class ConsultingTypeServiceTest {
 
   @Mock private TenantHeaderSupplier tenantHeaderSupplier;
 
+  @Mock private ConsultingTypeServiceApiControllerFactory consultingTypeServiceApiControllerFactory;
+
+  @BeforeEach
+  void setUp() {
+    when(consultingTypeServiceApiControllerFactory.createControllerApi())
+        .thenReturn(consultingTypeControllerApi);
+    when(consultingTypeControllerApi.getApiClient()).thenReturn(new ApiClient());
+  }
+
   @Test
-  public void
-      ConsultingTypeService_Should_Return_expectedIdList_From_BasicConsultingTypeResponseDTO() {
-    givenRequestContextIsSet();
+  void getAllConsultingTypeIds_Should_Return_expectedIdList_From_BasicConsultingTypeResponseDTO() {
+    when(consultingTypeServiceApiControllerFactory.createControllerApi())
+        .thenReturn(consultingTypeControllerApi);
+
     int size = 15;
     var randomBasicConsultingTypeResponseDTOList =
         generateRandomExtendedConsultingTypeResponseDTOList(size);
@@ -75,9 +88,8 @@ public class ConsultingTypeServiceTest {
   }
 
   @Test
-  public void
-      getExtendedConsultingTypeResponseDTO_Should_callConsultingTypeController_When_idExists() {
-    givenRequestContextIsSet();
+  void getExtendedConsultingTypeResponseDTO_Should_callConsultingTypeController_When_idExists() {
+
     when(securityHeaderSupplier.getCsrfHttpHeaders()).thenReturn(new HttpHeaders());
 
     this.consultingTypeService.getExtendedConsultingTypeResponseDTO(1);
@@ -88,11 +100,5 @@ public class ConsultingTypeServiceTest {
 
   private void resetRequestAttributes() {
     RequestContextHolder.setRequestAttributes(null);
-  }
-
-  private void givenRequestContextIsSet() {
-    when(requestAttributes.getRequest()).thenReturn(httpServletRequest);
-    when(httpServletRequest.getHeaderNames()).thenReturn(headers);
-    RequestContextHolder.setRequestAttributes(requestAttributes);
   }
 }

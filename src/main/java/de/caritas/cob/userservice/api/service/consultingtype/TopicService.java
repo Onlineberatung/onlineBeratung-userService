@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.service.consultingtype;
 
 import com.google.common.collect.Maps;
 import de.caritas.cob.userservice.api.config.CacheManagerConfig;
+import de.caritas.cob.userservice.api.config.apiclient.TopicServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import de.caritas.cob.userservice.topicservice.generated.ApiClient;
@@ -16,7 +17,6 @@ import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -25,31 +25,22 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class TopicService {
 
-  private final @NonNull TopicControllerApi topicControllerApi;
+  private final @NonNull TopicServiceApiControllerFactory topicServiceApiControllerFactory;
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
   private final @NonNull TenantHeaderSupplier tenantHeaderSupplier;
-
-  @Value("${consulting.type.service.api.url}")
-  private String topicServiceApiUrl;
 
   @Cacheable(cacheNames = CacheManagerConfig.TOPICS_CACHE)
   public List<TopicDTO> getAllTopics() {
     log.info("Calling topic service to get all topics");
-    addDefaultHeaders(this.topicControllerApi.getApiClient());
-    return topicControllerApi.getAllTopics();
+    TopicControllerApi controllerApi = topicServiceApiControllerFactory.createControllerApi();
+    addDefaultHeaders(controllerApi.getApiClient());
+    return controllerApi.getAllTopics();
   }
 
   public List<TopicDTO> getAllActiveTopics() {
     log.info("Calling topic service to get all active topics");
     // Public endpoints needs to be called without Authentication header as not to cause a 401 error
-    return createTopicControllerApiWithoutHeaders().getAllActiveTopics();
-  }
-
-  public TopicControllerApi createTopicControllerApiWithoutHeaders() {
-    var apiClient = new ApiClient().setBasePath(this.topicServiceApiUrl);
-    var controllerApi = new TopicControllerApi(apiClient);
-    controllerApi.setApiClient(apiClient);
-    return controllerApi;
+    return topicServiceApiControllerFactory.createControllerApi().getAllActiveTopics();
   }
 
   private void addDefaultHeaders(ApiClient apiClient) {

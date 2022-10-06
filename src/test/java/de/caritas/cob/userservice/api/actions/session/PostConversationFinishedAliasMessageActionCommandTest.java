@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
+import de.caritas.cob.userservice.api.config.apiclient.MessageServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.auth.TechnicalUserConfig;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
@@ -34,6 +35,8 @@ class PostConversationFinishedAliasMessageActionCommandTest {
   @InjectMocks private PostConversationFinishedAliasMessageActionCommand actionCommand;
 
   @Mock private MessageControllerApi messageControllerApi;
+
+  @Mock private MessageServiceApiControllerFactory messageServiceApiControllerFactory;
 
   @Mock private SecurityHeaderSupplier securityHeaderSupplier;
 
@@ -67,6 +70,7 @@ class PostConversationFinishedAliasMessageActionCommandTest {
     when(identityClientConfig.getTechnicalUser()).thenReturn(new TechnicalUserConfig());
     when(this.securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders(any()))
         .thenReturn(new HttpHeaders());
+    when(messageServiceApiControllerFactory.createControllerApi()).thenReturn(messageControllerApi);
     var session = new EasyRandom().nextObject(Session.class);
 
     this.actionCommand.execute(session);

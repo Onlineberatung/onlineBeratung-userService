@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantAgencyDTO;
+import de.caritas.cob.userservice.api.config.apiclient.AppointmentAgencyServiceApiControllerFactory;
+import de.caritas.cob.userservice.api.config.apiclient.AppointmentConsultantServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
@@ -28,8 +30,12 @@ import org.springframework.web.client.HttpClientErrorException;
 @Slf4j
 public class AppointmentService {
 
-  private final @NonNull ConsultantApi appointmentConsultantApi;
-  private final @NonNull AgencyApi appointmentAgencyApi;
+  private final @NonNull AppointmentConsultantServiceApiControllerFactory
+      appointmentConsultantServiceApiControllerFactory;
+
+  private final @NonNull AppointmentAgencyServiceApiControllerFactory
+      appointmentAgencyServiceApiControllerFactory;
+
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
   private final @NonNull TenantHeaderSupplier tenantHeaderSupplier;
   private final @NonNull IdentityClient identityClient;
@@ -45,14 +51,16 @@ public class AppointmentService {
 
     if (consultantAdminResponseDTO != null) {
       ObjectMapper mapper = getObjectMapper(false);
-      addTechnicalUserHeaders(this.appointmentConsultantApi.getApiClient());
+      ConsultantApi appointmentConsultantApi =
+          this.appointmentConsultantServiceApiControllerFactory.createControllerApi();
+      addTechnicalUserHeaders(appointmentConsultantApi.getApiClient());
       try {
         de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO consultant =
             mapper.readValue(
                 mapper.writeValueAsString(consultantAdminResponseDTO.getEmbedded()),
                 de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO
                     .class);
-        this.appointmentConsultantApi.createConsultant(consultant);
+        appointmentConsultantApi.createConsultant(consultant);
       } catch (Exception e) {
         log.error(e.getMessage());
       }
@@ -63,17 +71,19 @@ public class AppointmentService {
     if (!appointmentFeatureEnabled) {
       return;
     }
+    ConsultantApi appointmentConsultantApi =
+        this.appointmentConsultantServiceApiControllerFactory.createControllerApi();
 
     if (consultantAdminResponseDTO != null) {
       ObjectMapper mapper = getObjectMapper(false);
-      addTechnicalUserHeaders(this.appointmentConsultantApi.getApiClient());
+      addTechnicalUserHeaders(appointmentConsultantApi.getApiClient());
       try {
         de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO consultant =
             mapper.readValue(
                 mapper.writeValueAsString(consultantAdminResponseDTO.getEmbedded()),
                 de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO
                     .class);
-        this.appointmentConsultantApi.updateConsultant(consultant.getId(), consultant);
+        appointmentConsultantApi.updateConsultant(consultant.getId(), consultant);
       } catch (Exception e) {
         log.error(e.getMessage());
       }
@@ -95,11 +105,13 @@ public class AppointmentService {
     if (!appointmentFeatureEnabled) {
       return;
     }
+    ConsultantApi appointmentConsultantApi =
+        this.appointmentConsultantServiceApiControllerFactory.createControllerApi();
 
     if (consultantId != null && !consultantId.isEmpty()) {
-      addTechnicalUserHeaders(this.appointmentConsultantApi.getApiClient());
+      addTechnicalUserHeaders(appointmentConsultantApi.getApiClient());
       try {
-        this.appointmentConsultantApi.deleteConsultant(consultantId);
+        appointmentConsultantApi.deleteConsultant(consultantId);
       } catch (HttpClientErrorException ex) {
         acceptDeletionIfConsultantNotFoundInAppointmentService(ex, consultantId);
       }
@@ -131,7 +143,11 @@ public class AppointmentService {
     if (!appointmentFeatureEnabled) {
       return;
     }
-    addTechnicalUserHeaders(this.appointmentConsultantApi.getApiClient());
+
+    AgencyApi controllerApi =
+        this.appointmentAgencyServiceApiControllerFactory.createControllerApi();
+
+    addTechnicalUserHeaders(controllerApi.getApiClient());
     var agencies =
         agencyList.stream()
             .map(CreateConsultantAgencyDTO::getAgencyId)
@@ -139,6 +155,6 @@ public class AppointmentService {
     AgencyConsultantSyncRequestDTO request = new AgencyConsultantSyncRequestDTO();
     request.setAgencies(agencies);
     request.setConsultantId(consultantId);
-    this.appointmentAgencyApi.agencyConsultantsSync(request);
+    controllerApi.agencyConsultantsSync(request);
   }
 }
