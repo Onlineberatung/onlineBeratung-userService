@@ -33,6 +33,8 @@ import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.LanguageResponseDTO;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
+import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiControllerFactory;
+import de.caritas.cob.userservice.api.config.apiclient.TopicServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
@@ -54,6 +56,7 @@ import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.UserAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import de.caritas.cob.userservice.api.testConfig.TestAgencyControllerApi;
 import de.caritas.cob.userservice.topicservice.generated.web.TopicControllerApi;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -73,6 +76,7 @@ import org.assertj.core.util.Lists;
 import org.hamcrest.Matchers;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -140,6 +144,10 @@ class UserControllerConsultantE2EIT {
 
   @MockBean private AuthenticatedUser authenticatedUser;
 
+  @MockBean private AgencyServiceApiControllerFactory agencyServiceApiControllerFactory;
+
+  @MockBean private TopicServiceApiControllerFactory topicServiceApiControllerFactory;
+
   private User user;
   private Consultant consultant;
   private Set<de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode> allLanguages =
@@ -151,6 +159,16 @@ class UserControllerConsultantE2EIT {
   private ChatAgency chatAgency;
   private UserAgency userAgency;
   private String infix;
+
+  @BeforeEach
+  void setUp() {
+    when(agencyServiceApiControllerFactory.createControllerApi())
+        .thenReturn(
+            new TestAgencyControllerApi(
+                new de.caritas.cob.userservice.agencyserivce.generated.ApiClient()));
+
+    when(topicServiceApiControllerFactory.createControllerApi()).thenReturn(topicControllerApi);
+  }
 
   @AfterEach
   void reset() {
