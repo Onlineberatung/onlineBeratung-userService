@@ -35,7 +35,9 @@ import de.caritas.cob.userservice.api.adapters.web.dto.LanguageResponseDTO;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
+import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
+import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.ChatAgency;
@@ -52,6 +54,7 @@ import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.UserAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import de.caritas.cob.userservice.topicservice.generated.web.TopicControllerApi;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -66,6 +69,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.PositiveOrZero;
 import lombok.NonNull;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.assertj.core.util.Lists;
 import org.hamcrest.Matchers;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
@@ -84,6 +88,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.client.RestTemplate;
 
@@ -91,6 +96,7 @@ import org.springframework.web.client.RestTemplate;
 @AutoConfigureMockMvc
 @ActiveProfiles("testing")
 @AutoConfigureTestDatabase
+@TestPropertySource(properties = "feature.topics.enabled=true")
 class UserControllerConsultantE2EIT {
 
   private static final EasyRandom easyRandom = new EasyRandom();
@@ -127,6 +133,12 @@ class UserControllerConsultantE2EIT {
   @MockBean private RocketChatCredentialsProvider rocketChatCredentialsProvider;
 
   @SpyBean private AgencyService agencyService;
+
+  @MockBean
+  @Qualifier("topicControllerApiPrimary")
+  private TopicControllerApi topicControllerApi;
+
+  @MockBean private AuthenticatedUser authenticatedUser;
 
   private User user;
   private Consultant consultant;
@@ -753,6 +765,82 @@ class UserControllerConsultantE2EIT {
         .andExpect(jsonPath("agencies[0].consultingType", is(notNullValue())));
   }
 
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  void fetchSessionForConsultantShouldRespondWithConsultantSessionData() throws Exception {
+    givenAConsultantWithAAdvisedSession(true);
+    givenAValidTopicServiceResponse();
+
+    mockMvc
+        .perform(
+            get("/users/consultants/sessions/{sessionId}", 1216L)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("id", is(1216)))
+        .andExpect(jsonPath("agencyId", is(121)))
+        .andExpect(jsonPath("consultingType", is(1)))
+        .andExpect(jsonPath("status", is(1)))
+        .andExpect(jsonPath("groupId", is("ix7E7HzXKTgGeQMyb")))
+        .andExpect(jsonPath("feedbackGroupId", is("EQBcSwxn4eCAPYQ2J")))
+        .andExpect(jsonPath("consultantId", is("473f7c4b-f011-4fc2-847c-ceb636a5b399")))
+        .andExpect(jsonPath("consultantRcId", is("CztX9SWF4SJPvgknZ")))
+        .andExpect(jsonPath("askerId", is("06c6601f-a5b4-4812-9260-20065390b1f5")))
+        .andExpect(jsonPath("askerUserName", is("enc.OUZDK5DFON2DGNJVGU2Q....")))
+        .andExpect(jsonPath("isTeamSession", is(true)))
+        .andExpect(jsonPath("isMonitoring", is(true)))
+        .andExpect(jsonPath("postcode", is("12345")))
+        .andExpect(jsonPath("age", is(15)))
+        .andExpect(jsonPath("gender", is("FEMALE")))
+        .andExpect(jsonPath("counsellingRelation", is("SELF_COUNSELLING")))
+        .andExpect(jsonPath("mainTopic").isMap())
+        .andExpect(jsonPath("mainTopic.id", is(1)))
+        .andExpect(jsonPath("mainTopic.name", is("topic name")))
+        .andExpect(jsonPath("mainTopic.description", is("topic desc")))
+        .andExpect(jsonPath("topics").isArray())
+        .andExpect(jsonPath("topics", hasSize(2)))
+        .andExpect(jsonPath("topics[0].id", is(1)))
+        .andExpect(jsonPath("topics[0].name", is("topic name")))
+        .andExpect(jsonPath("topics[0].description", is("topic desc")))
+        .andExpect(jsonPath("topics[1].id", is(2)))
+        .andExpect(jsonPath("topics[1].name", is("topic name 2")))
+        .andExpect(jsonPath("topics[1].description", is("topic desc 2")));
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  void fetchSessionForConsultantShouldRespondNotFoundWhenSessionIsNotValid() throws Exception {
+    givenAConsultantWithAAdvisedSession(true);
+
+    mockMvc
+        .perform(
+            get("/users/consultants/sessions/{sessionId}", 9999)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  void
+      fetchSessionForConsultantShouldRespondForbiddenWhenSessionIsInAdviceAndTeamSessionNotInAgency()
+          throws Exception {
+    givenAConsultantWithAAdvisedSession(true);
+
+    mockMvc
+        .perform(
+            get("/users/consultants/sessions/{sessionId}", 2)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+  }
+
   @SuppressWarnings("unchecked,SameParameterValue")
   private void givenAValidRocketChatInfoUserResponse(
       String username1, String username2, String username3) {
@@ -914,6 +1002,19 @@ class UserControllerConsultantE2EIT {
         consultantRepository.findById("5674839f-d0a3-47e2-8f9c-bb49fc2ddbbe").orElseThrow();
   }
 
+  private void givenAConsultantWithAAdvisedSession(boolean isAuthUser) {
+    consultant =
+        consultantRepository.findById("473f7c4b-f011-4fc2-847c-ceb636a5b399").orElseThrow();
+    if (isAuthUser) {
+      when(authenticatedUser.getUserId()).thenReturn(consultant.getId());
+      when(authenticatedUser.isAdviceSeeker()).thenReturn(false);
+      when(authenticatedUser.isConsultant()).thenReturn(true);
+      when(authenticatedUser.getUsername()).thenReturn(consultant.getUsername());
+      when(authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.CONSULTANT.getValue()));
+      when(authenticatedUser.getGrantedAuthorities()).thenReturn(Set.of("anAuthority"));
+    }
+  }
+
   private long givenAnAgencyIdWithDefaultLanguageOnly() {
     return 121;
   }
@@ -952,5 +1053,28 @@ class UserControllerConsultantE2EIT {
       Language language) {
     return de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode.fromValue(
         language.getLanguageCode().name());
+  }
+
+  private void givenAValidTopicServiceResponse() {
+    var firstTopic =
+        new de.caritas.cob.userservice.topicservice.generated.web.model.TopicDTO()
+            .id(1L)
+            .name("topic name")
+            .description("topic desc")
+            .status("INACTIVE")
+            .internalIdentifier("internal identifier 1");
+    var secondTopic =
+        new de.caritas.cob.userservice.topicservice.generated.web.model.TopicDTO()
+            .id(2L)
+            .name("topic name 2")
+            .description("topic desc 2")
+            .status("ACTIVE")
+            .internalIdentifier("internal identifier 2");
+
+    when(topicControllerApi.getApiClient())
+        .thenReturn(new de.caritas.cob.userservice.topicservice.generated.ApiClient());
+    when(topicControllerApi.getAllTopics()).thenReturn(Lists.newArrayList(firstTopic, secondTopic));
+    when(topicControllerApi.getAllActiveTopics())
+        .thenReturn(Lists.newArrayList(firstTopic, secondTopic));
   }
 }

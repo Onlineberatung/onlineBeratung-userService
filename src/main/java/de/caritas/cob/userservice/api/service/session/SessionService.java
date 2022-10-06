@@ -13,6 +13,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionConsultantForUserDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionTopicDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
@@ -49,6 +50,8 @@ import java.util.stream.StreamSupport;
 import javax.ws.rs.BadRequestException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 /** Service for sessions */
@@ -61,6 +64,10 @@ public class SessionService {
   private final @NonNull ConsultantService consultantService;
   private final @NonNull UserService userService;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
+  private final @Nullable ConsultantSessionTopicEnrichmentService sessionTopicEnrichmentService;
+
+  @Value("${feature.topics.enabled}")
+  private boolean topicsFeatureEnabled;
 
   /**
    * Returns the sessions for a user
@@ -613,22 +620,39 @@ public class SessionService {
 
   private ConsultantSessionDTO toConsultantSessionDTO(Session session) {
 
-    return new ConsultantSessionDTO()
-        .isTeamSession(session.isTeamSession())
-        .agencyId(session.getAgencyId())
-        .consultingType(session.getConsultingTypeId())
-        .id(session.getId())
-        .status(session.getStatus().getValue())
-        .askerId(session.getUser().getUserId())
-        .askerRcId(session.getUser().getRcUserId())
-        .askerUserName(session.getUser().getUsername())
-        .feedbackGroupId(session.getFeedbackGroupId())
-        .groupId(session.getGroupId())
-        .isMonitoring(session.isMonitoring())
-        .postcode(session.getPostcode())
-        .consultantId(nonNull(session.getConsultant()) ? session.getConsultant().getId() : null)
-        .consultantRcId(
-            nonNull(session.getConsultant()) ? session.getConsultant().getRocketChatId() : null);
+    var consultantSessionDTO =
+        new ConsultantSessionDTO()
+            .isTeamSession(session.isTeamSession())
+            .agencyId(session.getAgencyId())
+            .consultingType(session.getConsultingTypeId())
+            .id(session.getId())
+            .status(session.getStatus().getValue())
+            .askerId(session.getUser().getUserId())
+            .askerRcId(session.getUser().getRcUserId())
+            .askerUserName(session.getUser().getUsername())
+            .feedbackGroupId(session.getFeedbackGroupId())
+            .groupId(session.getGroupId())
+            .isMonitoring(session.isMonitoring())
+            .postcode(session.getPostcode())
+            .consultantId(nonNull(session.getConsultant()) ? session.getConsultant().getId() : null)
+            .consultantRcId(
+                nonNull(session.getConsultant()) ? session.getConsultant().getRocketChatId() : null)
+            .age(session.getUserAge())
+            .gender(session.getUserGender())
+            .counsellingRelation(session.getCounsellingRelation());
+
+    if (topicsFeatureEnabled) {
+      consultantSessionDTO
+          .mainTopic(new SessionTopicDTO().id(session.getMainTopicId()))
+          .topics(
+              session.getSessionTopics().stream()
+                  .map(topic -> new SessionTopicDTO().id(topic.getTopicId()))
+                  .collect(Collectors.toList()));
+      sessionTopicEnrichmentService.enrichSessionWithMainTopicData(consultantSessionDTO);
+      sessionTopicEnrichmentService.enrichSessionWithTopicsData(consultantSessionDTO);
+    }
+
+    return consultantSessionDTO;
   }
 
   private void checkPermissionForConsultantSession(Session session, Consultant consultant) {
