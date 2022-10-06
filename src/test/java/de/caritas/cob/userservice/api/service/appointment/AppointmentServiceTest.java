@@ -15,6 +15,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDTO;
+import de.caritas.cob.userservice.api.config.apiclient.AppointmentAgencyServiceApiControllerFactory;
+import de.caritas.cob.userservice.api.config.apiclient.AppointmentConsultantServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
@@ -54,6 +56,7 @@ class AppointmentServiceTest {
   @Mock ConsultantApi appointmentConsultantApi;
   @Mock AgencyApi appointmentAgencyApi;
   @Mock SecurityHeaderSupplier securityHeaderSupplier;
+
   @Mock TenantHeaderSupplier tenantHeaderSupplier;
   @Mock IdentityClient identityClient;
 
@@ -75,6 +78,11 @@ class AppointmentServiceTest {
 
   @Mock HttpClientErrorException httpClientErrorException;
 
+  @Mock AppointmentAgencyServiceApiControllerFactory appointmentAgencyServiceApiControllerFactory;
+
+  @Mock
+  AppointmentConsultantServiceApiControllerFactory appointmentConsultantServiceApiControllerFactory;
+
   @BeforeEach
   public void beforeEach() throws JsonProcessingException {
     when(identityClient.loginUser(any(), any())).thenReturn(keycloakLoginResponseDTO);
@@ -85,6 +93,10 @@ class AppointmentServiceTest {
             nullable(String.class), ArgumentMatchers.<Class<ConsultantDTO>>any()))
         .thenReturn(consultantDTO);
     when(appointmentService.getObjectMapper(anyBoolean())).thenReturn(objectMapper);
+    when(appointmentAgencyServiceApiControllerFactory.createControllerApi())
+        .thenReturn(appointmentAgencyApi);
+    when(appointmentConsultantServiceApiControllerFactory.createControllerApi())
+        .thenReturn(appointmentConsultantApi);
   }
 
   @Test

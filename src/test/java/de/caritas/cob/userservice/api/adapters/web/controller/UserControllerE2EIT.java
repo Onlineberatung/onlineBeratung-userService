@@ -55,6 +55,10 @@ import de.caritas.cob.userservice.api.adapters.web.dto.RegistrationStatisticsLis
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
+import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiControllerFactory;
+import de.caritas.cob.userservice.api.config.apiclient.ConsultingTypeServiceApiControllerFactory;
+import de.caritas.cob.userservice.api.config.apiclient.MailServiceApiControllerFactory;
+import de.caritas.cob.userservice.api.config.apiclient.TopicServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
@@ -79,6 +83,7 @@ import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
+import de.caritas.cob.userservice.api.testConfig.TestAgencyControllerApi;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.ConsultingTypeControllerApi;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.BasicConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.MailsControllerApi;
@@ -102,6 +107,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.assertj.core.util.Lists;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
@@ -182,6 +188,11 @@ class UserControllerE2EIT {
   @MockBean private RocketChatCredentialsProvider rocketChatCredentialsProvider;
 
   @MockBean
+  private ConsultingTypeServiceApiControllerFactory consultingTypeServiceApiControllerFactory;
+
+  @MockBean private MailServiceApiControllerFactory mailServiceApiControllerFactory;
+
+  @MockBean
   @Qualifier("restTemplate")
   private RestTemplate restTemplate;
 
@@ -197,9 +208,13 @@ class UserControllerE2EIT {
   @Qualifier("topicControllerApiPrimary")
   private TopicControllerApi topicControllerApi;
 
+  @MockBean private TopicServiceApiControllerFactory topicServiceApiControllerFactory;
+
   @MockBean
   @Qualifier("mailsControllerApi")
   private MailsControllerApi mailsControllerApi;
+
+  @MockBean AgencyServiceApiControllerFactory agencyServiceApiControllerFactory;
 
   @MockBean private Keycloak keycloak;
 
@@ -260,6 +275,18 @@ class UserControllerE2EIT {
     userInfoResponse = null;
     identityConfig.setDisplayNameAllowedForConsultants(false);
     userResource = null;
+  }
+
+  @BeforeEach
+  public void setUp() {
+    when(agencyServiceApiControllerFactory.createControllerApi())
+        .thenReturn(
+            new TestAgencyControllerApi(
+                new de.caritas.cob.userservice.agencyserivce.generated.ApiClient()));
+
+    when(consultingTypeServiceApiControllerFactory.createControllerApi())
+        .thenReturn(consultingTypeControllerApi);
+    when(mailServiceApiControllerFactory.createControllerApi()).thenReturn(mailsControllerApi);
   }
 
   @Test
@@ -1663,6 +1690,7 @@ class UserControllerE2EIT {
             .status("ACTIVE")
             .internalIdentifier("internal identifier 2");
 
+    when(topicServiceApiControllerFactory.createControllerApi()).thenReturn(topicControllerApi);
     when(topicControllerApi.getApiClient()).thenReturn(new ApiClient());
     when(topicControllerApi.getAllTopics()).thenReturn(Lists.newArrayList(firstTopic, secondTopic));
     when(topicControllerApi.getAllActiveTopics())
