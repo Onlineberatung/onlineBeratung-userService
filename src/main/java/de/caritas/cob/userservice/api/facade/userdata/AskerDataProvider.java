@@ -9,6 +9,7 @@ import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManag
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.model.UserAgency;
+import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,7 +24,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.SetUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /** Provider for asker information. */
@@ -35,9 +35,7 @@ public class AskerDataProvider {
   private final @NonNull SessionDataProvider sessionDataProvider;
   private final @NonNull AuthenticatedUser authenticatedUser;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
-
-  @Value("${keycloakService.user.dummySuffix}")
-  private String emailDummySuffix;
+  private final @NonNull IdentityClientConfig identityClientConfig;
 
   /**
    * Retrieve the user data of an asker, e.g. username, email, name, ...
@@ -64,7 +62,9 @@ public class AskerDataProvider {
   }
 
   private String observeUserEmailAddress(User user) {
-    return user.getEmail().endsWith(this.emailDummySuffix) ? null : user.getEmail();
+    return user.getEmail().endsWith(identityClientConfig.getEmailDummySuffix())
+        ? null
+        : user.getEmail();
   }
 
   private LinkedHashMap<String, Object> getConsultingTypes(User user) {
