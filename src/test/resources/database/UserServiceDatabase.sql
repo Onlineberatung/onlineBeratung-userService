@@ -582,10 +582,9 @@ VALUES ('0b3b1cc6-be98-4787-aa56-212259d811b9', 'enc.MVWWSZ3SMF2GS33OFV2GKYLN', 
         'Consultant', 'new@consultant.de', 0, 0, NULL, 'aaa8Fw2juns6FFTks', 1, 0, NULL,
         '2020-10-08 08:54:09', '2020-10-08 08:54:09', 1),
        ('42c3x532-0677-4fd2-a7ea-56a71aefd088', 'enc.AAAW42LPOJUXI6JNMRTFMYLVDSSA....', 'Default',
-               'Consultant', 'nosessions@consultant.de', 0, 0, NULL, 'xyz8Fw2juns6FFTks', 1, 0, NULL,
-               '2020-10-08 08:54:09', '2020-10-08 08:54:09', 1);
-
-        ;
+        'Consultant', 'nosessions@consultant.de', 0, 0, NULL, 'xyz8Fw2juns6FFTks', 1, 0, NULL,
+        '2020-10-08 08:54:09', '2020-10-08 08:54:09', 1);
+;
 INSERT INTO consultant_agency (`id`, `consultant_id`, `agency_id`, `create_date`, `update_date`)
 VALUES (0, '473f7c4b-f011-4fc2-847c-ceb636a5b399', 1, '2020-10-08 08:53:55', '2020-10-08 08:53:55'),
        (1, '88613f5d-0d40-47e0-b323-e792e7fba3ed', 1, '2020-10-08 08:53:56', '2020-10-08 08:53:56'),
@@ -1165,17 +1164,21 @@ VALUES (1, '1da238c6-cd46-4162-80f1-bff74eafe77f', '473f7c4b-f011-4fc2-847c-ceb6
 
 INSERT INTO session (`id`, `user_id`, `consultant_id`, `consulting_type`, `message_date`,
                      `postcode`, `agency_id`, `rc_group_id`, `rc_feedback_group_id`, `status`,
-                     `is_team_session`, `is_monitoring`, `create_date`, `update_date`,`main_topic_id`,`user_age`, `user_gender`)
-VALUES
-        (1200, '06c6601f-a5b4-4812-9260-20065390b1f5', NULL, 1, '2020-11-05 14:18:16', '12345', 121,
+                     `is_team_session`, `is_monitoring`, `create_date`, `update_date`,
+                     `main_topic_id`, `user_age`, `user_gender`, `counselling_relation`)
+VALUES (1200, '06c6601f-a5b4-4812-9260-20065390b1f5', NULL, 1, '2020-11-05 14:18:16', '12345', 121,
         'ix7E7HzXKTgGeQMyb', 'EQBcSwxn4eCAPYQ2J', 1, 1, 1, '2020-11-05 14:17:34',
-        '2020-11-05 14:18:16', 1, 15, 'FEMALE'),
-        (1215, '1da238c6-cd46-4162-80f1-bff74eafe77f', '34c3x5b1-0677-4fd2-a7ea-56a71aefd099', 0,
+        '2020-11-05 14:18:16', 1, 15, 'FEMALE', 'SELF_COUNSELLING'),
+       (1215, '1da238c6-cd46-4162-80f1-bff74eafe77f', '34c3x5b1-0677-4fd2-a7ea-56a71aefd099', 0,
         '2020-10-08 09:03:45', '12345', 1, 'DJrRTzFg8Ac2BqE8j', 'E6FohkNfEDPY9bRXc', 2, 0, 1,
-        '2020-10-08 09:03:45', '2020-10-08 09:03:45', 1, 25, 'MALE');
+        '2020-10-08 09:03:45', '2020-10-08 09:03:45', 1, 25, 'MALE', 'SELF_COUNSELLING'),
+       (1216, '06c6601f-a5b4-4812-9260-20065390b1f5', '473f7c4b-f011-4fc2-847c-ceb636a5b399', 1,
+        '2020-11-05 14:18:16', '12345', 121, 'ix7E7HzXKTgGeQMyb', 'EQBcSwxn4eCAPYQ2J', 1, 1, 1,
+        '2020-11-05 14:17:34', '2020-11-05 14:18:16', 1, 15, 'FEMALE', 'SELF_COUNSELLING');
 
 
 INSERT INTO session_topic (`id`, `session_id`, `topic_id`, `create_date`, `update_date`)
-VALUES
-        (1, 1200, 1,  '2020-10-08 09:03:45',  '2020-10-08 09:03:45'),
-        (2, 1200, 2,  '2020-10-08 09:03:45',  '2020-10-08 09:03:45');
+VALUES (1, 1200, 1, '2020-10-08 09:03:45', '2020-10-08 09:03:45'),
+       (2, 1200, 2, '2020-10-08 09:03:45', '2020-10-08 09:03:45'),
+       (3, 1216, 1, '2020-10-08 09:03:45', '2020-10-08 09:03:45'),
+       (4, 1216, 2, '2020-10-08 09:03:45', '2020-10-08 09:03:45');

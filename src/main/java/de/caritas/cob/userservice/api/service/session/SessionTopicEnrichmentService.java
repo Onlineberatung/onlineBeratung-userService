@@ -20,7 +20,7 @@ public class SessionTopicEnrichmentService {
   private final @NonNull TopicService topicService;
 
   public SessionDTO enrichSessionWithTopicData(SessionDTO session) {
-    if (session.getTopic() != null && session.getTopic().getId() != null) {
+    if (shouldEnrichTopic(session)) {
       log.debug("Enriching session with topics");
       var availableTopics = topicService.getAllTopicsMap();
       log.debug("Enriching session with id: {} with information about the topics", session.getId());
@@ -32,6 +32,10 @@ public class SessionTopicEnrichmentService {
           session.getId());
     }
     return session;
+  }
+
+  private boolean shouldEnrichTopic(SessionDTO session) {
+    return session.getTopic() != null && session.getTopic().getId() != null;
   }
 
   private void enrichSession(Map<Long, TopicDTO> availableTopics, SessionDTO sessionDTO) {
