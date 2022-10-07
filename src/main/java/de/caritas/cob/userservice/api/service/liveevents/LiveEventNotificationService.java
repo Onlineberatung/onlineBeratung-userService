@@ -8,9 +8,9 @@ import static java.util.Collections.singletonList;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import de.caritas.cob.userservice.api.config.apiclient.LiveServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.service.mobilepushmessage.MobilePushNotificationService;
-import de.caritas.cob.userservice.liveservice.generated.web.LiveControllerApi;
 import de.caritas.cob.userservice.liveservice.generated.web.model.LiveEventMessage;
 import de.caritas.cob.userservice.liveservice.generated.web.model.StatusSource;
 import de.caritas.cob.userservice.liveservice.generated.web.model.StatusSource.FinishConversationPhaseEnum;
@@ -29,7 +29,7 @@ import org.springframework.web.client.RestClientException;
 @RequiredArgsConstructor
 public class LiveEventNotificationService {
 
-  private final @NonNull LiveControllerApi liveControllerApi;
+  private final @NonNull LiveServiceApiControllerFactory liveServiceApiControllerFactory;
   private final @NonNull UserIdsProviderFactory userIdsProviderFactory;
   private final @NonNull AuthenticatedUser authenticatedUser;
   private final @NonNull MobilePushNotificationService mobilePushNotificationService;
@@ -59,7 +59,7 @@ public class LiveEventNotificationService {
   private void sendLiveEventMessage(
       LiveEventMessage liveEventMessage, Supplier<String> errorMessageSupplier) {
     try {
-      this.liveControllerApi.sendLiveEvent(liveEventMessage);
+      this.liveServiceApiControllerFactory.createControllerApi().sendLiveEvent(liveEventMessage);
     } catch (RestClientException e) {
       log.error("Internal Server Error: {}", errorMessageSupplier.get(), e);
     }

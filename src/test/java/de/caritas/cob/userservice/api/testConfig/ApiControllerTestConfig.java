@@ -2,7 +2,8 @@ package de.caritas.cob.userservice.api.testConfig;
 
 import de.caritas.cob.userservice.agencyserivce.generated.web.AgencyControllerApi;
 import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiClientConfig;
-import de.caritas.cob.userservice.api.config.apiclient.MailServiceApiClientConfig;
+import de.caritas.cob.userservice.api.config.apiclient.MailServiceApiControllerFactory;
+import de.caritas.cob.userservice.mailservice.generated.ApiClient;
 import de.caritas.cob.userservice.mailservice.generated.web.MailsControllerApi;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -25,12 +26,11 @@ public class ApiControllerTestConfig {
 
   @Bean
   @Primary
-  public MailServiceApiClientConfig mailServiceApiClientConfig() {
-    return new MailServiceApiClientConfig() {
+  public MailServiceApiControllerFactory mailServiceApiControllerFactory() {
+    return new MailServiceApiControllerFactory() {
       @Override
-      public MailsControllerApi mailsControllerApi(
-          de.caritas.cob.userservice.mailservice.generated.ApiClient mailServiceApiClient) {
-        return new TestMailsControllerApi(mailServiceApiClient);
+      public MailsControllerApi createControllerApi() {
+        return new TestMailsControllerApi(new ApiClient());
       }
     };
   }

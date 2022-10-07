@@ -15,13 +15,18 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDTO;
+import de.caritas.cob.userservice.api.config.apiclient.AppointmentAgencyServiceApiControllerFactory;
+import de.caritas.cob.userservice.api.config.apiclient.AppointmentConsultantServiceApiControllerFactory;
+import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
+import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import de.caritas.cob.userservice.appointmentservice.generated.web.AgencyApi;
 import de.caritas.cob.userservice.appointmentservice.generated.web.ConsultantApi;
 import de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO;
 import java.util.LinkedList;
+import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,6 +47,7 @@ import org.springframework.web.client.HttpClientErrorException;
 class AppointmentServiceTest {
 
   private static final String FIELD_NAME_APPOINTMENTS_ENABLED = "appointmentFeatureEnabled";
+  private static final EasyRandom easyRandom = new EasyRandom();
 
   @Spy @InjectMocks AppointmentService appointmentService;
 
@@ -50,8 +56,13 @@ class AppointmentServiceTest {
   @Mock ConsultantApi appointmentConsultantApi;
   @Mock AgencyApi appointmentAgencyApi;
   @Mock SecurityHeaderSupplier securityHeaderSupplier;
+
   @Mock TenantHeaderSupplier tenantHeaderSupplier;
   @Mock IdentityClient identityClient;
+
+  @SuppressWarnings("unused")
+  @Mock
+  IdentityClientConfig identityClientConfig;
 
   @Mock Logger log;
 
@@ -67,6 +78,11 @@ class AppointmentServiceTest {
 
   @Mock HttpClientErrorException httpClientErrorException;
 
+  @Mock AppointmentAgencyServiceApiControllerFactory appointmentAgencyServiceApiControllerFactory;
+
+  @Mock
+  AppointmentConsultantServiceApiControllerFactory appointmentConsultantServiceApiControllerFactory;
+
   @BeforeEach
   public void beforeEach() throws JsonProcessingException {
     when(identityClient.loginUser(any(), any())).thenReturn(keycloakLoginResponseDTO);
@@ -77,6 +93,10 @@ class AppointmentServiceTest {
             nullable(String.class), ArgumentMatchers.<Class<ConsultantDTO>>any()))
         .thenReturn(consultantDTO);
     when(appointmentService.getObjectMapper(anyBoolean())).thenReturn(objectMapper);
+    when(appointmentAgencyServiceApiControllerFactory.createControllerApi())
+        .thenReturn(appointmentAgencyApi);
+    when(appointmentConsultantServiceApiControllerFactory.createControllerApi())
+        .thenReturn(appointmentConsultantApi);
   }
 
   @Test
@@ -106,6 +126,7 @@ class AppointmentServiceTest {
   @Test
   void
       deleteConsultant_Should_ProceedWithDeletion_WhenAppointmentsIsEnabledAndConsultantNotFoundInAppointmentService() {
+    givenAnIdentityClientConfig();
     setField(appointmentService, FIELD_NAME_APPOINTMENTS_ENABLED, true);
     when(httpClientErrorException.getStatusCode()).thenReturn(HttpStatus.NOT_FOUND);
     doThrow(httpClientErrorException).when(appointmentConsultantApi).deleteConsultant("testId");
@@ -116,6 +137,8 @@ class AppointmentServiceTest {
   @Test
   void
       deleteConsultant_Should_ProceedWithDeletion_WhenAppointmentsIsEnabledAndAppointmentServiceThrowsExceptionOtherThan404() {
+    var identityClientConfig = easyRandom.nextObject(IdentityConfig.class);
+    setField(nonSpiedAppointmentService, "identityClientConfig", identityClientConfig);
     setField(nonSpiedAppointmentService, FIELD_NAME_APPOINTMENTS_ENABLED, true);
     when(httpClientErrorException.getStatusCode()).thenReturn(HttpStatus.BAD_REQUEST);
     doThrow(httpClientErrorException).when(appointmentConsultantApi).deleteConsultant("testId");
@@ -133,6 +156,7 @@ class AppointmentServiceTest {
 
   @Test
   void createConsultant_Should_CallAppointmentService_WhenAppointmentsIsDisabled() {
+    givenAnIdentityClientConfig();
     setField(appointmentService, FIELD_NAME_APPOINTMENTS_ENABLED, true);
     appointmentService.createConsultant(consultantAdminResponseDTO);
     verify(appointmentConsultantApi, times(1)).createConsultant(any());
@@ -140,6 +164,7 @@ class AppointmentServiceTest {
 
   @Test
   void updateConsultant_Should_CallAppointmentService_WhenAppointmentsIsDisabled() {
+    givenAnIdentityClientConfig();
     setField(appointmentService, FIELD_NAME_APPOINTMENTS_ENABLED, true);
     appointmentService.updateConsultant(consultantAdminResponseDTO);
     verify(appointmentConsultantApi, times(1)).updateConsultant(any(), any());
@@ -147,6 +172,7 @@ class AppointmentServiceTest {
 
   @Test
   void deleteConsultant_Should_CallAppointmentService_WhenAppointmentsIsDisabled() {
+    givenAnIdentityClientConfig();
     setField(appointmentService, FIELD_NAME_APPOINTMENTS_ENABLED, true);
     appointmentService.deleteConsultant("testId");
     verify(appointmentConsultantApi, times(1)).deleteConsultant(any());
@@ -154,8 +180,14 @@ class AppointmentServiceTest {
 
   @Test
   void syncAgencies_Should_CallAppointmentService_WhenAppointmentsIsDisabled() {
+    givenAnIdentityClientConfig();
     setField(appointmentService, FIELD_NAME_APPOINTMENTS_ENABLED, true);
     appointmentService.syncAgencies("testId", new LinkedList<>());
     verify(appointmentAgencyApi, times(1)).agencyConsultantsSync(any());
+  }
+
+  private void givenAnIdentityClientConfig() {
+    var identityClientConfig = easyRandom.nextObject(IdentityConfig.class);
+    setField(appointmentService, "identityClientConfig", identityClientConfig);
   }
 }

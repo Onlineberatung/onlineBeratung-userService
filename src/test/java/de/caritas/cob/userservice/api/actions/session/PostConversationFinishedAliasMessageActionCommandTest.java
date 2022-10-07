@@ -9,8 +9,11 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
+import de.caritas.cob.userservice.api.config.apiclient.MessageServiceApiControllerFactory;
+import de.caritas.cob.userservice.api.config.auth.TechnicalUserConfig;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
+import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import de.caritas.cob.userservice.messageservice.generated.web.MessageControllerApi;
@@ -33,11 +36,15 @@ class PostConversationFinishedAliasMessageActionCommandTest {
 
   @Mock private MessageControllerApi messageControllerApi;
 
+  @Mock private MessageServiceApiControllerFactory messageServiceApiControllerFactory;
+
   @Mock private SecurityHeaderSupplier securityHeaderSupplier;
 
   @Mock private TenantHeaderSupplier tenantHeaderSupplier;
 
   @Mock private IdentityClient identityClient;
+
+  @Mock private IdentityClientConfig identityClientConfig;
 
   @ParameterizedTest
   @MethodSource("sessionsWithoutInteractionsExpected")
@@ -60,8 +67,10 @@ class PostConversationFinishedAliasMessageActionCommandTest {
     var keycloakLoginResponseDTO = new KeycloakLoginResponseDTO();
     keycloakLoginResponseDTO.setAccessToken("token");
     when(this.identityClient.loginUser(any(), any())).thenReturn(keycloakLoginResponseDTO);
+    when(identityClientConfig.getTechnicalUser()).thenReturn(new TechnicalUserConfig());
     when(this.securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders(any()))
         .thenReturn(new HttpHeaders());
+    when(messageServiceApiControllerFactory.createControllerApi()).thenReturn(messageControllerApi);
     var session = new EasyRandom().nextObject(Session.class);
 
     this.actionCommand.execute(session);

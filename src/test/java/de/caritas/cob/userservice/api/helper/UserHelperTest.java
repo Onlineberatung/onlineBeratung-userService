@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.helper;
 
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_EMAIL_DUMMY_SUFFIX;
 import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_VALUE_EMAIL_DUMMY_SUFFIX;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME_CONSULTANT_DECODED;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME_CONSULTANT_ENCODED;
@@ -13,27 +12,32 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.util.ReflectionTestUtils.setField;
 
+import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import java.util.List;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UserHelperTest {
 
   private static final EasyRandom easyRandom = new EasyRandom();
+  private final UsernameTranscoder usernameTranscoder = new UsernameTranscoder();
 
   @InjectMocks private UserHelper userHelper;
+  @Mock private IdentityClientConfig identityClientConfig;
 
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
-    ReflectionTestUtils.setField(
-        userHelper, FIELD_NAME_EMAIL_DUMMY_SUFFIX, FIELD_VALUE_EMAIL_DUMMY_SUFFIX);
+    when(identityClientConfig.getEmailDummySuffix()).thenReturn(FIELD_VALUE_EMAIL_DUMMY_SUFFIX);
+    setField(userHelper, "usernameTranscoder", usernameTranscoder);
   }
 
   @Test

@@ -16,6 +16,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
+import de.caritas.cob.userservice.api.config.apiclient.LiveServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.service.mobilepushmessage.MobilePushNotificationService;
 import de.caritas.cob.userservice.liveservice.generated.web.LiveControllerApi;
@@ -55,9 +56,12 @@ public class LiveEventNotificationServiceTest {
 
   @Mock private Logger logger;
 
+  @Mock private LiveServiceApiControllerFactory liveServiceApiControllerFactory;
+
   @Before
   public void setup() {
     setInternalState(LiveEventNotificationService.class, "log", logger);
+    when(liveServiceApiControllerFactory.createControllerApi()).thenReturn(liveControllerApi);
   }
 
   @Test

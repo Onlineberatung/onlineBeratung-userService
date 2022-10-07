@@ -3,7 +3,6 @@ package de.caritas.cob.userservice.api.facade;
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.api.model.Session.RegistrationType.REGISTERED;
 import static de.caritas.cob.userservice.api.testHelper.AsyncVerification.verifyAsync;
-import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_EMAIL_DUMMY_SUFFIX;
 import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_SYSTEM_USER_ID;
 import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_VALUE_EMAIL_DUMMY_SUFFIX;
 import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_VALUE_ROCKET_CHAT_SYSTEM_USER_ID;
@@ -54,6 +53,7 @@ import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
@@ -444,6 +444,7 @@ public class EmailNotificationFacadeTest {
   @Mock ConsultantService consultantService;
   @Mock RocketChatService rocketChatService;
   @Mock ConsultingTypeManager consultingTypeManager;
+  @Mock IdentityClientConfig identityClientConfig;
 
   @Mock
   @SuppressWarnings("unused")
@@ -453,8 +454,7 @@ public class EmailNotificationFacadeTest {
 
   @Before
   public void setup() throws NoSuchFieldException, SecurityException {
-    ReflectionTestUtils.setField(
-        emailNotificationFacade, FIELD_NAME_EMAIL_DUMMY_SUFFIX, FIELD_VALUE_EMAIL_DUMMY_SUFFIX);
+    when(identityClientConfig.getEmailDummySuffix()).thenReturn(FIELD_VALUE_EMAIL_DUMMY_SUFFIX);
     ReflectionTestUtils.setField(
         emailNotificationFacade,
         FIELD_NAME_ROCKET_CHAT_SYSTEM_USER_ID,
