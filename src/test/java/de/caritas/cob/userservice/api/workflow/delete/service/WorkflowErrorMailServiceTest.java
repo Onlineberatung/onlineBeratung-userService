@@ -5,21 +5,28 @@ import static de.caritas.cob.userservice.api.workflow.delete.model.DeletionSourc
 import static de.caritas.cob.userservice.api.workflow.delete.model.DeletionTargetType.ROCKET_CHAT;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static org.mockito.ArgumentMatchers.any;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
+import com.google.common.collect.Lists;
+import de.caritas.cob.userservice.api.service.emailsupplier.TenantTemplateSupplier;
 import de.caritas.cob.userservice.api.service.helper.MailService;
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
+import de.caritas.cob.userservice.mailservice.generated.web.model.ErrorMailDTO;
+import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class WorkflowErrorMailServiceTest {
@@ -27,6 +34,8 @@ public class WorkflowErrorMailServiceTest {
   @InjectMocks private WorkflowErrorMailService workflowErrorMailService;
 
   @Mock private MailService mailService;
+
+  @Mock private TenantTemplateSupplier tenantTemplateSupplier;
 
   @Before
   public void setup() {
@@ -50,6 +59,10 @@ public class WorkflowErrorMailServiceTest {
   @Test
   public void
       buildAndSendErrorMail_Should_buildAndSendExpectedErrorMail_When_workflowErrorsExists() {
+    // given
+    ReflectionTestUtils.setField(workflowErrorMailService, "multitenancyEnabled", true);
+    TemplateDataDTO tenantData = new TemplateDataDTO().key("tenantData");
+    when(tenantTemplateSupplier.getTemplateAttributes()).thenReturn(Lists.newArrayList(tenantData));
     List<DeletionWorkflowError> workflowErrors =
         asList(
             DeletionWorkflowError.builder()
@@ -61,8 +74,19 @@ public class WorkflowErrorMailServiceTest {
                 .build(),
             DeletionWorkflowError.builder().build());
 
+    // when
     this.workflowErrorMailService.buildAndSendErrorMail(workflowErrors);
 
-    verify(this.mailService, times(1)).sendErrorEmailNotification(any());
+    // then
+    ArgumentCaptor<ErrorMailDTO> errorMailDTOArgumentCaptor =
+        ArgumentCaptor.forClass(ErrorMailDTO.class);
+    verify(this.mailService, times(1))
+        .sendErrorEmailNotification(errorMailDTOArgumentCaptor.capture());
+
+    var templateData = errorMailDTOArgumentCaptor.getValue().getTemplateData();
+    assertThat(templateData).contains(tenantData);
+
+    // clean up
+    ReflectionTestUtils.setField(workflowErrorMailService, "multitenancyEnabled", false);
   }
 }
