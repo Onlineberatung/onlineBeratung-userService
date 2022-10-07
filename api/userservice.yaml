@@ -2348,6 +2348,21 @@ components:
         isMonitoring:
           type: boolean
           example: true
+        age:
+          type: integer
+          example: 17
+        gender:
+          type: string
+          example: 0
+        counsellingRelation:
+          type: string
+          example: 'SELF_COUNSELLING'
+        mainTopic:
+          $ref: '#/components/schemas/SessionTopicDTO'
+        topics:
+          type: array
+          items:
+            $ref: '#/components/schemas/SessionTopicDTO'
 
     UserChatDTO:
       type: object

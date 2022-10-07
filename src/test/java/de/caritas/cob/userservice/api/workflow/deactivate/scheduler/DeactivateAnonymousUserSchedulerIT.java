@@ -2,9 +2,11 @@ package de.caritas.cob.userservice.api.workflow.deactivate.scheduler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAnonymousEnquiryDTO;
+import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.conversation.facade.CreateAnonymousEnquiryFacade;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
@@ -13,6 +15,7 @@ import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.api.testConfig.ApiControllerTestConfig;
 import de.caritas.cob.userservice.api.testConfig.KeycloakTestConfig;
 import de.caritas.cob.userservice.api.testConfig.RocketChatTestConfig;
+import de.caritas.cob.userservice.api.testConfig.TestAgencyControllerApi;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
@@ -41,6 +45,8 @@ class DeactivateAnonymousUserSchedulerIT {
 
   @Autowired private ActionsRegistry actionsRegistry;
 
+  @MockBean AgencyServiceApiControllerFactory agencyServiceApiControllerFactory;
+
   @Value("${user.anonymous.deactivateworkflow.periodMinutes}")
   private long deactivatePeriodInMinutes;
 
@@ -48,6 +54,10 @@ class DeactivateAnonymousUserSchedulerIT {
 
   @BeforeEach
   public void setup() {
+    when(agencyServiceApiControllerFactory.createControllerApi())
+        .thenReturn(
+            new TestAgencyControllerApi(
+                new de.caritas.cob.userservice.agencyserivce.generated.ApiClient()));
     var createAnonymousEnquiryDTO = new CreateAnonymousEnquiryDTO().consultingType(12);
     var responseDTO =
         createAnonymousEnquiryFacade.createAnonymousEnquiry(createAnonymousEnquiryDTO);

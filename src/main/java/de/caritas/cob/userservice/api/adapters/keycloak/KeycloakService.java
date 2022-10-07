@@ -6,6 +6,7 @@ import static java.lang.Boolean.TRUE;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
+import com.google.common.collect.Lists;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
@@ -76,6 +77,7 @@ public class KeycloakService implements IdentityClient {
   private static final String ENDPOINT_OTP_TEARDOWN = "/delete-otp/{username}";
   private static final String ENDPOINT_OTP_VERIFY_EMAIL = "/send-verification-mail/{username}";
   private static final String ENDPOINT_OTP_FINISH_EMAIL = "/setup-otp-mail/{username}";
+  private static final String LOCALE = "locale";
 
   private final @NonNull RestTemplate restTemplate;
   private final @NonNull AuthenticatedUser authenticatedUser;
@@ -89,9 +91,6 @@ public class KeycloakService implements IdentityClient {
 
   @Value("${keycloak.config.app-client-id}")
   private String keycloakClientId;
-
-  @Value("${keycloakService.user.role}")
-  private String keycloakUserRole;
 
   @Value("${api.error.keycloakError}")
   private String keycloakError;
@@ -118,9 +117,25 @@ public class KeycloakService implements IdentityClient {
   }
 
   public void changeLanguage(final String userId, final String locale) {
-    var user = keycloakMapper.userRepresentationOf(locale);
+    UserResource userResource = keycloakClient.getUsersResource().get(userId);
+    var user = userResource.toRepresentation();
 
-    keycloakClient.getUsersResource().get(userId).update(user);
+    changeLanguageForTheUser(locale, userResource, user);
+  }
+
+  protected void changeLanguageForTheUser(
+      String locale, UserResource userResource, UserRepresentation user) {
+    if (needToUpdateLocale(locale, user)) {
+      user.getAttributes().put(LOCALE, Lists.newArrayList(locale));
+      userResource.update(user);
+    } else {
+      log.debug("Skipping language update in keycloak");
+    }
+  }
+
+  private boolean needToUpdateLocale(String locale, UserRepresentation userRepresentation) {
+    return !userRepresentation.getAttributes().containsKey(LOCALE)
+        || !userRepresentation.getAttributes().get(LOCALE).contains(locale);
   }
 
   /**
@@ -414,7 +429,7 @@ public class KeycloakService implements IdentityClient {
       kcUser.setLastName(lastName);
     }
     if (nonNull(locale)) {
-      kcUser.singleAttribute("locale", locale);
+      kcUser.singleAttribute(LOCALE, locale);
     }
     kcUser.setEnabled(true);
 
@@ -452,7 +467,7 @@ public class KeycloakService implements IdentityClient {
    * @param userId Keycloak user ID
    */
   public void updateUserRole(final String userId) {
-    updateRole(userId, keycloakUserRole);
+    updateRole(userId, "user");
   }
 
   public void ensureRole(final String userId, final String roleName) {
