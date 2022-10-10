@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class TenantTemplateSupplier {
 
+  private static final String HTTPS = "https://";
   private final @NonNull TenantService tenantService;
 
   @Value("${app.base.url}")
@@ -69,14 +70,25 @@ public class TenantTemplateSupplier {
   }
 
   private String getTenantBaseUrl(String subdomain) {
+    if (multitenancyWithSingleDomain) {
+      return applicationBaseUrl;
+    } else {
+      return getTenantBaseUrlForStandardMultitenancyMode(subdomain);
+    }
+  }
+
+  private String getTenantBaseUrlForStandardMultitenancyMode(String subdomain) {
     String hostName = "";
     try {
       hostName = new URI(applicationBaseUrl).getHost();
     } catch (URISyntaxException exception) {
       log.error("Application base url not valid");
     }
+    return getHostnameWithSubdomainPrefix(subdomain, hostName);
+  }
 
-    return "https://" + subdomain + "." + hostName;
+  private String getHostnameWithSubdomainPrefix(String subdomain, String hostName) {
+    return HTTPS + subdomain + "." + hostName;
   }
 
   private TemplateDataDTO getTenantClaim(RestrictedTenantDTO tenantData) {
