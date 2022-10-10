@@ -12,7 +12,6 @@ import de.caritas.cob.userservice.api.config.apiclient.LiveServiceApiControllerF
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.service.mobilepushmessage.MobilePushNotificationService;
 import de.caritas.cob.userservice.liveservice.generated.ApiException;
-import de.caritas.cob.userservice.liveservice.generated.web.LiveControllerApi;
 import de.caritas.cob.userservice.liveservice.generated.web.model.LiveEventMessage;
 import de.caritas.cob.userservice.liveservice.generated.web.model.StatusSource;
 import de.caritas.cob.userservice.liveservice.generated.web.model.StatusSource.FinishConversationPhaseEnum;
@@ -61,7 +60,7 @@ public class LiveEventNotificationService {
       LiveEventMessage liveEventMessage, Supplier<String> errorMessageSupplier) {
     try {
       this.liveServiceApiControllerFactory.createControllerApi().sendLiveEvent(liveEventMessage);
-    } catch (RestClientException e) {
+    } catch (ApiException e) {
       log.error("Internal Server Error: {}", errorMessageSupplier.get(), e);
     }
   }
