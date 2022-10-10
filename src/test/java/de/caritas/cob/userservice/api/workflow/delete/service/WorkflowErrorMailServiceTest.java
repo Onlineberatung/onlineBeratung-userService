@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.service.helper.MailService;
+import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
 import java.util.List;
 import org.junit.Before;
@@ -27,6 +28,8 @@ public class WorkflowErrorMailServiceTest {
   @InjectMocks private WorkflowErrorMailService workflowErrorMailService;
 
   @Mock private MailService mailService;
+
+  @Mock private TenantHeaderSupplier tenantTemplateSupplier;
 
   @Before
   public void setup() {

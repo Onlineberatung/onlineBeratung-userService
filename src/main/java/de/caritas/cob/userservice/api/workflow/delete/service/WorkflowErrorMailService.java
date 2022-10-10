@@ -1,13 +1,14 @@
 package de.caritas.cob.userservice.api.workflow.delete.service;
 
 import static de.caritas.cob.userservice.api.service.emailsupplier.EmailSupplier.TEMPLATE_FREE_TEXT;
-import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
+import de.caritas.cob.userservice.api.service.emailsupplier.TenantTemplateSupplier;
 import de.caritas.cob.userservice.api.service.helper.MailService;
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
 import de.caritas.cob.userservice.mailservice.generated.web.model.ErrorMailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +22,13 @@ public class WorkflowErrorMailService {
 
   private final @NonNull MailService mailService;
 
+  private final @NonNull TenantTemplateSupplier tenantTemplateSupplier;
+
   @Value("${app.base.url}")
   private String applicationBaseUrl;
+
+  @Value("${multitenancy.enabled}")
+  private boolean multiTenancyEnabled;
 
   /**
    * Builds an {@link ErrorMailDTO} containing a text with all workflow errors and sends it to the
@@ -32,17 +38,20 @@ public class WorkflowErrorMailService {
    */
   public void buildAndSendErrorMail(List<DeletionWorkflowError> workflowErrors) {
     if (isNotEmpty(workflowErrors)) {
-      ErrorMailDTO errorMailDTO =
-          new ErrorMailDTO()
-              .template(TEMPLATE_FREE_TEXT)
-              .templateData(
-                  asList(
-                      new TemplateDataDTO().key("subject").value("Deletion workflow errors"),
-                      new TemplateDataDTO().key("url").value(this.applicationBaseUrl),
-                      new TemplateDataDTO()
-                          .key("text")
-                          .value(convertErrorsToHtmlText(workflowErrors))));
+      var templateAttributes = new ArrayList<TemplateDataDTO>();
+      templateAttributes.add(
+          new TemplateDataDTO().key("subject").value("Deletion workflow errors"));
+      templateAttributes.add(
+          new TemplateDataDTO().key("text").value(convertErrorsToHtmlText(workflowErrors)));
 
+      if (!multiTenancyEnabled) {
+        templateAttributes.add(new TemplateDataDTO().key("url").value(applicationBaseUrl));
+      } else {
+        templateAttributes.addAll(tenantTemplateSupplier.getTemplateAttributes());
+      }
+
+      ErrorMailDTO errorMailDTO =
+          new ErrorMailDTO().template(TEMPLATE_FREE_TEXT).templateData(templateAttributes);
       this.mailService.sendErrorEmailNotification(errorMailDTO);
     }
   }
