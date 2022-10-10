@@ -8,6 +8,7 @@ import static java.util.Collections.singletonList;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import de.caritas.cob.userservice.api.config.apiclient.LiveServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.service.mobilepushmessage.MobilePushNotificationService;
 import de.caritas.cob.userservice.liveservice.generated.ApiException;
@@ -29,7 +30,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class LiveEventNotificationService {
 
-  private final @NonNull LiveControllerApi liveControllerApi;
+  private final @NonNull LiveServiceApiControllerFactory liveServiceApiControllerFactory;
   private final @NonNull UserIdsProviderFactory userIdsProviderFactory;
   private final @NonNull AuthenticatedUser authenticatedUser;
   private final @NonNull MobilePushNotificationService mobilePushNotificationService;
@@ -59,8 +60,8 @@ public class LiveEventNotificationService {
   private void sendLiveEventMessage(
       LiveEventMessage liveEventMessage, Supplier<String> errorMessageSupplier) {
     try {
-      this.liveControllerApi.sendLiveEvent(liveEventMessage);
-    } catch (ApiException e) {
+      this.liveServiceApiControllerFactory.createControllerApi().sendLiveEvent(liveEventMessage);
+    } catch (RestClientException e) {
       log.error("Internal Server Error: {}", errorMessageSupplier.get(), e);
     }
   }

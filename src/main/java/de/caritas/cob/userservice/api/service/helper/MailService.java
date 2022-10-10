@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service.helper;
 
+import de.caritas.cob.userservice.api.config.apiclient.MailServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.mailservice.generated.ApiClient;
 import de.caritas.cob.userservice.mailservice.generated.web.MailsControllerApi;
@@ -18,7 +19,7 @@ import org.springframework.stereotype.Service;
 public class MailService {
 
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
-  private final @NonNull MailsControllerApi mailsControllerApi;
+  private final @NonNull MailServiceApiControllerFactory mailServiceApiControllerFactory;
 
   /**
    * Send a email notification via the MailService.
@@ -26,17 +27,18 @@ public class MailService {
    * @param mailsDTO the transfer object to be handled in MailService
    */
   public void sendEmailNotification(MailsDTO mailsDTO) {
-    addSecurityHeaders();
+    MailsControllerApi controllerApi = mailServiceApiControllerFactory.createControllerApi();
+    addSecurityHeaders(controllerApi);
     try {
-      this.mailsControllerApi.sendMails(mailsDTO);
+      controllerApi.sendMails(mailsDTO);
     } catch (Exception e) {
       log.error("MailServiceHelper error: Error while calling the MailService", e);
     }
   }
 
-  private void addSecurityHeaders() {
+  private void addSecurityHeaders(MailsControllerApi controllerApi) {
     HttpHeaders header = securityHeaderSupplier.getCsrfHttpHeaders();
-    ApiClient apiClient = this.mailsControllerApi.getApiClient();
+    ApiClient apiClient = controllerApi.getApiClient();
     header.forEach((name, value) -> apiClient.addDefaultHeader(name, value.iterator().next()));
   }
 
@@ -46,9 +48,10 @@ public class MailService {
    * @param errorMailDTO the transfer object to be handled in MailService
    */
   public void sendErrorEmailNotification(ErrorMailDTO errorMailDTO) {
-    addSecurityHeaders();
+    MailsControllerApi controllerApi = mailServiceApiControllerFactory.createControllerApi();
+    addSecurityHeaders(controllerApi);
     try {
-      this.mailsControllerApi.sendErrorMail(errorMailDTO);
+      controllerApi.sendErrorMail(errorMailDTO);
     } catch (Exception e) {
       log.error("MailServiceHelper error: Error while calling the MailService", e);
     }

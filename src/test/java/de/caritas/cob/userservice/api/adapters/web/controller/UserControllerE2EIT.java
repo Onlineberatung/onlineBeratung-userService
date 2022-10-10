@@ -55,6 +55,10 @@ import de.caritas.cob.userservice.api.adapters.web.dto.RegistrationStatisticsLis
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
+import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiControllerFactory;
+import de.caritas.cob.userservice.api.config.apiclient.ConsultingTypeServiceApiControllerFactory;
+import de.caritas.cob.userservice.api.config.apiclient.MailServiceApiControllerFactory;
+import de.caritas.cob.userservice.api.config.apiclient.TopicServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
@@ -79,6 +83,7 @@ import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
+import de.caritas.cob.userservice.api.testConfig.TestAgencyControllerApi;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.ConsultingTypeControllerApi;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.BasicConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.MailsControllerApi;
@@ -102,6 +107,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.assertj.core.util.Lists;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
@@ -182,6 +188,11 @@ class UserControllerE2EIT {
   @MockBean private RocketChatCredentialsProvider rocketChatCredentialsProvider;
 
   @MockBean
+  private ConsultingTypeServiceApiControllerFactory consultingTypeServiceApiControllerFactory;
+
+  @MockBean private MailServiceApiControllerFactory mailServiceApiControllerFactory;
+
+  @MockBean
   @Qualifier("restTemplate")
   private RestTemplate restTemplate;
 
@@ -197,9 +208,13 @@ class UserControllerE2EIT {
   @Qualifier("topicControllerApiPrimary")
   private TopicControllerApi topicControllerApi;
 
+  @MockBean private TopicServiceApiControllerFactory topicServiceApiControllerFactory;
+
   @MockBean
   @Qualifier("mailsControllerApi")
   private MailsControllerApi mailsControllerApi;
+
+  @MockBean AgencyServiceApiControllerFactory agencyServiceApiControllerFactory;
 
   @MockBean private Keycloak keycloak;
 
@@ -260,6 +275,18 @@ class UserControllerE2EIT {
     userInfoResponse = null;
     identityConfig.setDisplayNameAllowedForConsultants(false);
     userResource = null;
+  }
+
+  @BeforeEach
+  public void setUp() {
+    when(agencyServiceApiControllerFactory.createControllerApi())
+        .thenReturn(
+            new TestAgencyControllerApi(
+                new de.caritas.cob.userservice.agencyserivce.generated.ApiClient()));
+
+    when(consultingTypeServiceApiControllerFactory.createControllerApi())
+        .thenReturn(consultingTypeControllerApi);
+    when(mailServiceApiControllerFactory.createControllerApi()).thenReturn(mailsControllerApi);
   }
 
   @Test
@@ -1208,11 +1235,13 @@ class UserControllerE2EIT {
   }
 
   @Test
-  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  void updateUserDataShouldSaveDefaultLanguageAndRespondWithOk() throws Exception {
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  void updateUserDataShouldSaveDefaultLanguageAndEmailEvenIfRocketChatIssueOccurs()
+      throws Exception {
     givenAValidConsultant();
     givenAMinimalUpdateConsultantDto(consultant.getEmail());
     givenValidRocketChatTechUserResponse();
+    givenARocketChatUserInfoSyncSendMailIssueResponse();
 
     mockMvc
         .perform(
@@ -1224,11 +1253,40 @@ class UserControllerE2EIT {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    var savedConsultant = consultantRepository.findById(consultant.getId());
-    assertTrue(savedConsultant.isPresent());
-    var savedLanguages = savedConsultant.get().getLanguages();
+    var optionalSavedConsultant = consultantRepository.findById(consultant.getId());
+    assertTrue(optionalSavedConsultant.isPresent());
+    var savedConsultant = optionalSavedConsultant.get();
+    var savedLanguages = savedConsultant.getLanguages();
     assertEquals(1, savedLanguages.size());
     assertEquals(LanguageCode.de, savedLanguages.iterator().next().getLanguageCode());
+    assertEquals(updateConsultantDTO.getEmail(), savedConsultant.getEmail());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  void updateUserDataShouldSaveDefaultLanguageAndEmailAndRespondWithOk() throws Exception {
+    givenAValidConsultant();
+    givenAMinimalUpdateConsultantDto(consultant.getEmail());
+    givenValidRocketChatTechUserResponse();
+    givenValidRocketChatUserInfoResponse();
+
+    mockMvc
+        .perform(
+            put("/users/data")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateConsultantDTO))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    var optionalSavedConsultant = consultantRepository.findById(consultant.getId());
+    assertTrue(optionalSavedConsultant.isPresent());
+    var savedConsultant = optionalSavedConsultant.get();
+    var savedLanguages = savedConsultant.getLanguages();
+    assertEquals(1, savedLanguages.size());
+    assertEquals(LanguageCode.de, savedLanguages.iterator().next().getLanguageCode());
+    assertEquals(updateConsultantDTO.getEmail(), savedConsultant.getEmail());
   }
 
   @Test
@@ -1237,6 +1295,7 @@ class UserControllerE2EIT {
     givenAValidConsultant();
     givenAnUpdateConsultantDtoWithLanguages(consultant.getEmail());
     givenValidRocketChatTechUserResponse();
+    givenValidRocketChatUserInfoResponse();
 
     mockMvc
         .perform(
@@ -1268,6 +1327,7 @@ class UserControllerE2EIT {
     givenAValidConsultantSpeaking(easyRandom.nextObject(LanguageCode.class));
     givenAnUpdateConsultantDtoWithLanguages(consultant.getEmail());
     givenValidRocketChatTechUserResponse();
+    givenValidRocketChatUserInfoResponse();
 
     mockMvc
         .perform(
@@ -1630,6 +1690,7 @@ class UserControllerE2EIT {
             .status("ACTIVE")
             .internalIdentifier("internal identifier 2");
 
+    when(topicServiceApiControllerFactory.createControllerApi()).thenReturn(topicControllerApi);
     when(topicControllerApi.getApiClient()).thenReturn(new ApiClient());
     when(topicControllerApi.getAllTopics()).thenReturn(Lists.newArrayList(firstTopic, secondTopic));
     when(topicControllerApi.getAllActiveTopics())
@@ -1879,7 +1940,9 @@ class UserControllerE2EIT {
 
   private void givenValidRocketChatTechUserResponse() throws RocketChatUserNotInitializedException {
     when(rocketChatCredentialsProvider.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
+  }
 
+  private void givenValidRocketChatUserInfoResponse() {
     var body = new UserInfoResponseDTO();
     body.setSuccess(true);
     if (nonNull(user)) {
@@ -1890,6 +1953,30 @@ class UserControllerE2EIT {
         .thenReturn(userInfoResponseDTO);
     when(restTemplate.exchange(
             anyString(), any(), any(), eq(UserInfoResponseDTO.class), anyString()))
+        .thenReturn(userInfoResponseDTO);
+  }
+
+  private void givenARocketChatUserInfoSyncSendMailIssueResponse() throws JsonProcessingException {
+    var responseMap =
+        Map.of(
+            "success",
+            false,
+            "error",
+            "Error trying to send email: Cannot read property '_syncSendMail' of null");
+    var errorBody = objectMapper.writeValueAsString(responseMap).getBytes();
+    var statusText = HttpStatus.BAD_REQUEST.getReasonPhrase();
+    var syncSendMailIssue =
+        new HttpClientErrorException(HttpStatus.BAD_REQUEST, statusText, errorBody, null);
+
+    var okBody = new UserInfoResponseDTO();
+    okBody.setSuccess(true);
+    if (nonNull(user)) {
+      okBody.setUser(new RocketChatUserDTO("", user.getUsername(), null, null));
+    }
+    var userInfoResponseDTO = ResponseEntity.ok(okBody);
+
+    when(restTemplate.exchange(anyString(), any(), any(), eq(UserInfoResponseDTO.class)))
+        .thenThrow(syncSendMailIssue)
         .thenReturn(userInfoResponseDTO);
   }
 
