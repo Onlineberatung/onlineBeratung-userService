@@ -55,7 +55,8 @@ class TenantTemplateSupplierTest {
     List<TemplateDataDTO> templateAttributes = tenantTemplateSupplier.getTemplateAttributes();
 
     // then
-    assertTemplateAttributesAreCorrect(mockedTenantData, templateAttributes);
+    assertTemplateAttributesAreCorrectWithUrl(
+        mockedTenantData, templateAttributes, "https://subdomain.onlineberatung.net");
 
     verify(tenantService).getRestrictedTenantData(tenantData.getSubdomain());
     verify(tenantService, Mockito.never()).getRestrictedTenantData(tenantData.getTenantId());
@@ -82,7 +83,8 @@ class TenantTemplateSupplierTest {
     List<TemplateDataDTO> templateAttributes = tenantTemplateSupplier.getTemplateAttributes();
 
     // then
-    assertTemplateAttributesAreCorrect(mockedTenantData, templateAttributes);
+    assertTemplateAttributesAreCorrectWithUrl(
+        mockedTenantData, templateAttributes, "https://subdomain.onlineberatung.net");
 
     verify(tenantService, Mockito.never()).getRestrictedTenantData(tenantData.getSubdomain());
     verify(tenantService).getRestrictedTenantData(tenantData.getTenantId());
@@ -110,7 +112,8 @@ class TenantTemplateSupplierTest {
     List<TemplateDataDTO> templateAttributes = tenantTemplateSupplier.getTemplateAttributes();
 
     // then
-    assertTemplateAttributesAreCorrect(mockedTenantData, templateAttributes);
+    assertTemplateAttributesAreCorrectWithUrl(
+        mockedTenantData, templateAttributes, "https://onlineberatung.net");
 
     verify(tenantService, Mockito.never()).getRestrictedTenantData(tenantData.getSubdomain());
     verify(tenantService).getRestrictedTenantData(tenantData.getTenantId());
@@ -118,8 +121,10 @@ class TenantTemplateSupplierTest {
     TenantContext.clear();
   }
 
-  private void assertTemplateAttributesAreCorrect(
-      RestrictedTenantDTO mockedTenantData, List<TemplateDataDTO> templateAttributes) {
+  private void assertTemplateAttributesAreCorrectWithUrl(
+      RestrictedTenantDTO mockedTenantData,
+      List<TemplateDataDTO> templateAttributes,
+      String expectedUrl) {
     assertThat(templateAttributes.get(0).getKey(), is("tenant_name"));
     assertThat(templateAttributes.get(0).getValue(), is(mockedTenantData.getName()));
 
@@ -127,15 +132,12 @@ class TenantTemplateSupplierTest {
     assertThat(templateAttributes.get(1).getValue(), is(mockedTenantData.getContent().getClaim()));
 
     assertThat(templateAttributes.get(2).getKey(), is("url"));
-    assertThat(templateAttributes.get(2).getValue(), is("https://subdomain.onlineberatung.net"));
+    assertThat(templateAttributes.get(2).getValue(), is(expectedUrl));
 
     assertThat(templateAttributes.get(3).getKey(), is("tenant_urlimpressum"));
-    assertThat(
-        templateAttributes.get(3).getValue(), is("https://subdomain.onlineberatung.net/impressum"));
+    assertThat(templateAttributes.get(3).getValue(), is(expectedUrl + "/impressum"));
 
     assertThat(templateAttributes.get(4).getKey(), is("tenant_urldatenschutz"));
-    assertThat(
-        templateAttributes.get(4).getValue(),
-        is("https://subdomain.onlineberatung.net/datenschutz"));
+    assertThat(templateAttributes.get(4).getValue(), is(expectedUrl + "/datenschutz"));
   }
 }
