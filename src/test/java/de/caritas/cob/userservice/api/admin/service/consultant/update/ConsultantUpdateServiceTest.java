@@ -15,6 +15,7 @@ import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAc
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.service.ConsultantService;
+import de.caritas.cob.userservice.api.service.appointment.AppointmentService;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
@@ -35,6 +36,8 @@ public class ConsultantUpdateServiceTest {
   @Mock private UserAccountInputValidator userAccountInputValidator;
 
   @Mock private RocketChatService rocketChatService;
+
+  @Mock private AppointmentService appointmentService;
 
   @Test(expected = BadRequestException.class)
   public void

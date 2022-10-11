@@ -16,6 +16,7 @@ import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Language;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.ConsultantService;
+import de.caritas.cob.userservice.api.service.appointment.AppointmentService;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.NonNull;
@@ -31,6 +32,7 @@ public class ConsultantUpdateService {
   private final @NonNull ConsultantService consultantService;
   private final @NonNull UserAccountInputValidator userAccountInputValidator;
   private final @NonNull RocketChatService rocketChatService;
+  private final @NonNull AppointmentService appointmentService;
 
   /**
    * Updates the basic data of consultant with given id.
@@ -62,7 +64,9 @@ public class ConsultantUpdateService {
     this.rocketChatService.updateUser(
         buildUserUpdateRequestDTO(consultant.getRocketChatId(), updateConsultantDTO));
 
-    return updateDatabaseConsultant(updateConsultantDTO, consultant);
+    var updatedConsultant = updateDatabaseConsultant(updateConsultantDTO, consultant);
+    appointmentService.updateConsultant(updatedConsultant);
+    return updatedConsultant;
   }
 
   private UserDTO buildValidatedUserDTO(
