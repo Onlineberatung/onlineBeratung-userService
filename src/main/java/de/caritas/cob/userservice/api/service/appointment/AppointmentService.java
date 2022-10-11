@@ -76,6 +76,7 @@ public class AppointmentService {
   public void updateConsultant(Consultant consultant) {
     ConsultantAdminResponseDTO ConsultantAdminResponseDTO = new ConsultantAdminResponseDTO();
     ConsultantDTO consultantEmbeded = new ConsultantDTO();
+    consultantEmbeded.setId(consultant.getId());
     consultantEmbeded.setFirstname(consultant.getFirstName());
     consultantEmbeded.setLastname(consultant.getLastName());
     consultantEmbeded.setEmail(consultant.getEmail());
