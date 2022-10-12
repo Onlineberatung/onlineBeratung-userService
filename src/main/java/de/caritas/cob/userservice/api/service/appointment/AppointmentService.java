@@ -73,7 +73,7 @@ public class AppointmentService {
     }
   }
 
-  public void updateConsultant(Consultant consultant) {
+  public void syncConsultantData(Consultant consultant) {
     ConsultantAdminResponseDTO ConsultantAdminResponseDTO = new ConsultantAdminResponseDTO();
     ConsultantDTO consultantEmbeded = new ConsultantDTO();
     consultantEmbeded.setId(consultant.getId());

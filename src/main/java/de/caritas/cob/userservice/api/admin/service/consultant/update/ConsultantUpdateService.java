@@ -65,7 +65,7 @@ public class ConsultantUpdateService {
         buildUserUpdateRequestDTO(consultant.getRocketChatId(), updateConsultantDTO));
 
     var updatedConsultant = updateDatabaseConsultant(updateConsultantDTO, consultant);
-    appointmentService.updateConsultant(updatedConsultant);
+    appointmentService.syncConsultantData(updatedConsultant);
     return updatedConsultant;
   }
 

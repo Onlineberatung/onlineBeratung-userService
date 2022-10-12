@@ -63,5 +63,6 @@ public class ConsultantUpdateServiceTest {
             eq(updateConsultant.getFirstname()),
             eq(updateConsultant.getLastname()));
     verify(this.consultantService, times(1)).saveConsultant(any());
+    verify(this.appointmentService, times(1)).syncConsultantData(any());
   }
 }
