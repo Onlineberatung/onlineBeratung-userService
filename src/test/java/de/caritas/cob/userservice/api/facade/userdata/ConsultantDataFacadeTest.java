@@ -5,15 +5,28 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.ABSENCE_DT
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.ABSENCE_DTO_WITH_HTML_AND_JS;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.ABSENCE_DTO_WITH_NULL_MESSAGE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.GROUP_SESSION_RESPONSE_DTO;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.MESSAGE;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_SESSION_RESPONSE_DTO;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import de.caritas.cob.userservice.api.AccountManager;
+import de.caritas.cob.userservice.api.adapters.web.dto.GroupSessionListResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.GroupSessionResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionListResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.mapping.UserDtoMapper;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.service.ConsultantService;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -26,8 +39,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class ConsultantDataFacadeTest {
 
   @InjectMocks private ConsultantDataFacade consultantDataFacade;
-
   @Mock private ConsultantService consultantService;
+  @Mock private AccountManager accountManager;
+  @Mock private UserDtoMapper userDtoMapper;
 
   @Test
   public void updateConsultantAbsent_Should_UpdateAbsenceMessageAndIsAbsence() {
@@ -70,5 +84,47 @@ public class ConsultantDataFacadeTest {
     ArgumentCaptor<Consultant> captor = ArgumentCaptor.forClass(Consultant.class);
     verify(consultantService).saveConsultant(captor.capture());
     assertNull(captor.getValue().getAbsenceMessage());
+  }
+
+  @Test
+  public void addConsultantDisplayNameToSessionList_GroupSession_Should_AddConsultantDisplayName() {
+
+    List<GroupSessionResponseDTO> sessions = new ArrayList<>();
+    sessions.add(GROUP_SESSION_RESPONSE_DTO);
+
+    GroupSessionListResponseDTO response = new GroupSessionListResponseDTO().sessions(sessions);
+
+    var userName = RandomStringUtils.randomAlphanumeric(16);
+    sessions.get(0).getConsultant().setUsername(userName);
+    var displayName = RandomStringUtils.randomAlphanumeric(16);
+
+    Map<String, Object> map = Map.of("displayName", displayName);
+    when(userDtoMapper.displayNameOf(map)).thenReturn(displayName);
+    when(accountManager.findConsultantByUsername(userName)).thenReturn(Optional.of(map));
+
+    response = consultantDataFacade.addConsultantDisplayNameToSessionList(response);
+
+    assertEquals(displayName, response.getSessions().get(0).getConsultant().getDisplayName());
+  }
+
+  @Test
+  public void addConsultantDisplayNameToSessionList_UserSession_Should_AddConsultantDisplayName() {
+
+    List<UserSessionResponseDTO> sessions = new ArrayList<>();
+    sessions.add(USER_SESSION_RESPONSE_DTO);
+
+    UserSessionListResponseDTO response = new UserSessionListResponseDTO().sessions(sessions);
+
+    var userName = RandomStringUtils.randomAlphanumeric(16);
+    sessions.get(0).getConsultant().setUsername(userName);
+    var displayName = RandomStringUtils.randomAlphanumeric(16);
+
+    Map<String, Object> map = Map.of("displayName", displayName);
+    when(userDtoMapper.displayNameOf(map)).thenReturn(displayName);
+    when(accountManager.findConsultantByUsername(userName)).thenReturn(Optional.of(map));
+
+    response = consultantDataFacade.addConsultantDisplayNameToSessionList(response);
+
+    assertEquals(displayName, response.getSessions().get(0).getConsultant().getDisplayName());
   }
 }
