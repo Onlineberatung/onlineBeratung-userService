@@ -102,7 +102,7 @@ public class ConsultantDataFacadeTest {
     when(userDtoMapper.displayNameOf(map)).thenReturn(displayName);
     when(accountManager.findConsultantByUsername(userName)).thenReturn(Optional.of(map));
 
-    response = consultantDataFacade.addConsultantDisplayNameToSessionList(response);
+    consultantDataFacade.addConsultantDisplayNameToSessionList(response);
 
     assertEquals(displayName, response.getSessions().get(0).getConsultant().getDisplayName());
   }
@@ -123,7 +123,7 @@ public class ConsultantDataFacadeTest {
     when(userDtoMapper.displayNameOf(map)).thenReturn(displayName);
     when(accountManager.findConsultantByUsername(userName)).thenReturn(Optional.of(map));
 
-    response = consultantDataFacade.addConsultantDisplayNameToSessionList(response);
+    consultantDataFacade.addConsultantDisplayNameToSessionList(response);
 
     assertEquals(displayName, response.getSessions().get(0).getConsultant().getDisplayName());
   }

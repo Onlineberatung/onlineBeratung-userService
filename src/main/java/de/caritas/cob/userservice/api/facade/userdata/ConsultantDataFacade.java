@@ -40,8 +40,7 @@ public class ConsultantDataFacade {
     return this.consultantService.saveConsultant(consultant);
   }
 
-  public GroupSessionListResponseDTO addConsultantDisplayNameToSessionList(
-      GroupSessionListResponseDTO groupSessionList) {
+  public void addConsultantDisplayNameToSessionList(GroupSessionListResponseDTO groupSessionList) {
     groupSessionList
         .getSessions()
         .forEach(
@@ -55,11 +54,9 @@ public class ConsultantDataFacade {
                             consultant.setDisplayName(userDtoMapper.displayNameOf(consultantMap)));
               }
             });
-    return groupSessionList;
   }
 
-  public UserSessionListResponseDTO addConsultantDisplayNameToSessionList(
-      UserSessionListResponseDTO userSessionsDTO) {
+  public void addConsultantDisplayNameToSessionList(UserSessionListResponseDTO userSessionsDTO) {
     userSessionsDTO
         .getSessions()
         .forEach(
@@ -73,6 +70,5 @@ public class ConsultantDataFacade {
                             consultant.setDisplayName(userDtoMapper.displayNameOf(consultantMap)));
               }
             });
-    return userSessionsDTO;
   }
 }
