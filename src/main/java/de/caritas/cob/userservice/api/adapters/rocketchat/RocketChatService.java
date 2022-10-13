@@ -413,15 +413,15 @@ public class RocketChatService implements MessageClient {
       response = this.rcCredentialHelper.loginUser(username, password);
     }
 
-    var rocketChatCredentials =
+    var rocketChatCredentialsLocal =
         RocketChatCredentials.builder()
             .rocketChatUserId(response.getBody().getData().getUserId())
             .rocketChatToken(response.getBody().getData().getAuthToken())
             .build();
 
-    logoutUser(rocketChatCredentials);
+    logoutUser(rocketChatCredentialsLocal);
 
-    return rocketChatCredentials.getRocketChatUserId();
+    return rocketChatCredentialsLocal.getRocketChatUserId();
   }
 
   /**
@@ -894,7 +894,19 @@ public class RocketChatService implements MessageClient {
     HttpEntity<UserUpdateRequestDTO> request = buildRocketChatUserUpdateRequestEntity(requestDTO);
 
     var url = rocketChatConfig.getApiUrl(ENDPOINT_USER_UPDATE);
-    var response = restTemplate.exchange(url, HttpMethod.POST, request, UserInfoResponseDTO.class);
+
+    ResponseEntity<UserInfoResponseDTO> response;
+    try {
+      response = restTemplate.exchange(url, HttpMethod.POST, request, UserInfoResponseDTO.class);
+    } catch (HttpClientErrorException exception) {
+      if (exception.getResponseBodyAsString().contains("_syncSendMail")) {
+        // after Rocket.Chat issue occurred, try again
+        // see: https://github.com/RocketChat/Rocket.Chat/issues/25706
+        response = restTemplate.exchange(url, HttpMethod.POST, request, UserInfoResponseDTO.class);
+      } else {
+        throw exception;
+      }
+    }
 
     if (isResponseNotSuccess(response)) {
       throw new InternalServerErrorException(
