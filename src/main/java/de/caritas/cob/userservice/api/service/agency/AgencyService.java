@@ -65,6 +65,10 @@ public class AgencyService {
     return getAgenciesFromAgencyService(agencyIds);
   }
 
+  public List<AgencyDTO> getAgenciesNotCached(List<Long> agencyIds) {
+    return getAgenciesFromAgencyService(agencyIds);
+  }
+
   /**
    * Returns List of {@link AgencyDTO} for provided agencyIds.
    *
