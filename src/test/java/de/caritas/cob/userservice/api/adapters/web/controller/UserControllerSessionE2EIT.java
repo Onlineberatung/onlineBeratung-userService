@@ -55,6 +55,7 @@ import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
+import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.CustomLocalDateTime;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
@@ -161,6 +162,8 @@ class UserControllerSessionE2EIT {
   @MockBean private AuthenticatedUser authenticatedUser;
 
   @MockBean private RocketChatCredentialsProvider rocketChatCredentialsProvider;
+
+  @MockBean private ConsultantDataFacade consultantDataFacade;
 
   @MockBean
   @Qualifier("restTemplate")
