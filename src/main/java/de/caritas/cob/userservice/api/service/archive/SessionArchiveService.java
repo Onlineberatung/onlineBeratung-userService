@@ -12,14 +12,19 @@ import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
+import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
+import de.caritas.cob.userservice.api.service.statistics.event.ArchiveStatisticsEvent;
+import java.time.LocalDateTime;
 import java.util.function.Consumer;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /** Service for archive functionality. */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SessionArchiveService {
 
   private final @NonNull SessionRepository sessionRepository;
@@ -27,6 +32,7 @@ public class SessionArchiveService {
   private final @NonNull RocketChatService rocketChatService;
   private final @NonNull SessionArchiveValidator sessionArchiveValidator;
   private final @NonNull AccountManager accountManager;
+  private final @NonNull StatisticsService statisticsService;
 
   /**
    * Archive a session.
@@ -34,11 +40,24 @@ public class SessionArchiveService {
    * @param sessionId the session id
    */
   public void archiveSession(Long sessionId) {
+
+    Session session = retrieveSession(sessionId);
     changeSessionStatus(
         sessionId,
         SessionStatus.IN_ARCHIVE,
         sessionArchiveValidator::isValidForArchiving,
         rocketChatService::setRoomReadOnly);
+    fireArchiveEvent(session);
+  }
+
+  private void fireArchiveEvent(Session session) {
+    try {
+      ArchiveStatisticsEvent archiveStatisticsEvent =
+          new ArchiveStatisticsEvent(session.getUser(), session.getId(), LocalDateTime.now());
+      statisticsService.fireEvent(archiveStatisticsEvent);
+    } catch (Exception e) {
+      log.error("Could not create session archive statistics event", e);
+    }
   }
 
   /**

@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.service.archive;
 
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.SESSION_ID;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -15,11 +16,16 @@ import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
+import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
+import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
+import de.caritas.cob.userservice.api.service.statistics.event.ArchiveStatisticsEvent;
+import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType;
 import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -48,6 +54,8 @@ public class SessionArchiveServiceTest {
   @Mock
   @SuppressWarnings("unused")
   AccountManager accountManager;
+
+  @Mock StatisticsService statisticsService;
 
   @Test(expected = NotFoundException.class)
   public void archiveSession_Should_ThrowNotFoundException_WhenSessionIsNotFound() {
@@ -113,11 +121,18 @@ public class SessionArchiveServiceTest {
 
     Session session = Mockito.mock(Session.class);
     when(session.isAdvised(any())).thenReturn(true);
+    when(session.getUser()).thenReturn(new User());
     when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
 
     sessionArchiveService.archiveSession(SESSION_ID);
 
     verify(session, times(1)).setStatus(SessionStatus.IN_ARCHIVE);
+    ArgumentCaptor<ArchiveStatisticsEvent> statisticsEventArgumentCaptor =
+        ArgumentCaptor.forClass(ArchiveStatisticsEvent.class);
+    verify(statisticsService).fireEvent(statisticsEventArgumentCaptor.capture());
+    ArchiveStatisticsEvent event = statisticsEventArgumentCaptor.getValue();
+    assertThat(event.getEventType()).isEqualTo(EventType.ARCHIVE_SESSION);
+    assertThat(event.getPayload().get()).isNotEmpty();
   }
 
   @Test(expected = NotFoundException.class)
