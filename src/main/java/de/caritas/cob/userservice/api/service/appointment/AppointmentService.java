@@ -3,9 +3,11 @@ package de.caritas.cob.userservice.api.service.appointment;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.config.apiclient.AppointmentAgencyServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.apiclient.AppointmentConsultantServiceApiControllerFactory;
+import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
@@ -65,6 +67,18 @@ public class AppointmentService {
         log.error(e.getMessage());
       }
     }
+  }
+
+  public void syncConsultantData(Consultant consultant) {
+    ConsultantAdminResponseDTO ConsultantAdminResponseDTO = new ConsultantAdminResponseDTO();
+    ConsultantDTO consultantEmbeded = new ConsultantDTO();
+    consultantEmbeded.setId(consultant.getId());
+    consultantEmbeded.setFirstname(consultant.getFirstName());
+    consultantEmbeded.setLastname(consultant.getLastName());
+    consultantEmbeded.setEmail(consultant.getEmail());
+    consultantEmbeded.setAbsent(consultant.isAbsent());
+    ConsultantAdminResponseDTO.setEmbedded(consultantEmbeded);
+    updateConsultant(ConsultantAdminResponseDTO);
   }
 
   public void updateConsultant(ConsultantAdminResponseDTO consultantAdminResponseDTO) {

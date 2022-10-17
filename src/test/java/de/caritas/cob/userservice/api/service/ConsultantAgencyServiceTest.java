@@ -193,7 +193,7 @@ public class ConsultantAgencyServiceTest {
   }
 
   @Test
-  public void getAgenciesOfConsultant_Should_returnEmptyList_When_consultantDoesNotExist() {
+  public void getOnlineAgenciesOfConsultant_Should_returnEmptyList_When_consultantDoesNotExist() {
     when(consultantAgencyRepository.findByConsultantId(any())).thenReturn(emptyList());
 
     var agencies = consultantAgencyService.getOnlineAgenciesOfConsultant("invalid");
@@ -203,7 +203,7 @@ public class ConsultantAgencyServiceTest {
 
   @Test
   public void
-      getAgenciesOfConsultant_Should_returnEmptyList_When_agencyForConsultantDoesNotExist() {
+      getOnlineAgenciesOfConsultant_Should_returnEmptyList_When_agencyForConsultantDoesNotExist() {
     var consultantAgency = new EasyRandom().nextObject(ConsultantAgency.class);
     when(consultantAgencyRepository.findByConsultantId(any()))
         .thenReturn(singletonList(consultantAgency));
@@ -215,7 +215,7 @@ public class ConsultantAgencyServiceTest {
 
   @Test
   public void
-      getAgenciesOfConsultant_Should_returnExpectedAgenciesAndFilterOutOfflineAgencies_When_consultantAgenciesExists() {
+      getOnlineAgenciesOfConsultant_Should_returnExpectedAgenciesAndFilterOutOfflineAgencies_When_consultantAgenciesExists() {
     List<ConsultantAgency> consultantAgencies = givenConsultantAgenciesWithDeletionDateNull();
 
     when(consultantAgencyRepository.findByConsultantId(any())).thenReturn(consultantAgencies);
@@ -223,11 +223,12 @@ public class ConsultantAgencyServiceTest {
         consultantAgencies.stream().map(ConsultantAgency::getAgencyId).collect(Collectors.toList());
     List<AgencyDTO> agencies = mockAgenciesForIds(agencyIds);
     agencies.get(0).setOffline(true);
-    when(agencyService.getAgencies(agencyIds)).thenReturn(agencies);
+    when(agencyService.getAgenciesNotCached(agencyIds)).thenReturn(agencies);
 
     var resultAgencies = consultantAgencyService.getOnlineAgenciesOfConsultant("valid");
 
     assertThat(resultAgencies, hasSize(9));
+    verify(agencyService, Mockito.never()).getAgencies(agencyIds);
     resultAgencies.forEach(
         agency -> {
           assertTrue(agencyIds.contains(agency.getId()));
