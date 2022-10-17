@@ -456,8 +456,8 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("hasArchive", is(true)))
         .andExpect(jsonPath("twoFactorAuth.isEnabled", is(true)))
         .andExpect(jsonPath("twoFactorAuth.isActive", is(true)))
-        .andExpect(jsonPath("twoFactorAuth.secret", is(nullValue())))
-        .andExpect(jsonPath("twoFactorAuth.qrCode", is(nullValue())))
+        .andExpect(jsonPath("twoFactorAuth.secret", is(notNullValue())))
+        .andExpect(jsonPath("twoFactorAuth.qrCode", is(notNullValue())))
         .andExpect(jsonPath("twoFactorAuth.type", is("EMAIL")))
         .andExpect(jsonPath("twoFactorAuth.isToEncourage", is(consultant.getEncourage2fa())))
         .andExpect(jsonPath("absent", is(consultant.isAbsent())))
@@ -514,8 +514,8 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("hasArchive", is(false)))
         .andExpect(jsonPath("twoFactorAuth.isEnabled", is(true)))
         .andExpect(jsonPath("twoFactorAuth.isActive", is(true)))
-        .andExpect(jsonPath("twoFactorAuth.secret", is(nullValue())))
-        .andExpect(jsonPath("twoFactorAuth.qrCode", is(nullValue())))
+        .andExpect(jsonPath("twoFactorAuth.secret", is(notNullValue())))
+        .andExpect(jsonPath("twoFactorAuth.qrCode", is(notNullValue())))
         .andExpect(jsonPath("twoFactorAuth.type", is("EMAIL")))
         .andExpect(jsonPath("twoFactorAuth.isToEncourage", is(user.getEncourage2fa())))
         .andExpect(jsonPath("absent", is(false)))
@@ -1625,6 +1625,8 @@ class UserControllerE2EIT {
     var otpInfo = new OtpInfoDTO();
     otpInfo.setOtpSetup(true);
     otpInfo.setOtpType(OtpType.EMAIL);
+    otpInfo.setOtpSecret(RandomStringUtils.randomAlphabetic(32));
+    otpInfo.setOtpSecretQrCode(RandomStringUtils.randomAlphabetic(64));
 
     when(keycloakRestTemplate.exchange(
             endsWith(urlSuffix), eq(HttpMethod.GET), any(HttpEntity.class), eq(OtpInfoDTO.class)))

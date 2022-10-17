@@ -563,7 +563,8 @@
 						<configuration>
 							<configOptions>
 								<sourceFolder>/</sourceFolder>
-								<library>resttemplate</library>
+								<library>native</library>
+								<asyncNative>true</asyncNative>
 								<dateLibrary>java8</dateLibrary>
 							</configOptions>
 							<inputSpec>${project.basedir}/services/liveservice.yaml</inputSpec>

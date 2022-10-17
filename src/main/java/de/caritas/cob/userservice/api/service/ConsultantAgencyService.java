@@ -156,7 +156,7 @@ public class ConsultantAgencyService {
             .map(ConsultantAgency::getAgencyId)
             .collect(Collectors.toList());
 
-    List<AgencyDTO> agencies = agencyService.getAgencies(agencyIds);
+    List<AgencyDTO> agencies = agencyService.getAgenciesNotCached(agencyIds);
     return filterOutOfflineAgencies(agencies);
   }
 

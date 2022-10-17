@@ -23,6 +23,8 @@ import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ChatDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateChatResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.GroupSessionConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.GroupSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionAttachmentDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionConsultantForUserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
@@ -527,6 +529,8 @@ public class TestConstants {
           LanguageCode.de);
   public static final SessionConsultantForUserDTO CONSULTANT_DTO =
       new SessionConsultantForUserDTO();
+  public static final GroupSessionConsultantDTO GROUP_SESSION_CONSULTANT_DTO =
+      new GroupSessionConsultantDTO();
   public static final AbsenceDTO ABSENCE_DTO_WITH_NULL_MESSAGE = new AbsenceDTO().absent(true);
   public static final GroupMemberDTO GROUP_MEMBER_USER_1 =
       new GroupMemberDTO(RC_USER_ID, RC_STATUS_ONLINE, USERNAME, USERNAME, RC_UTC_OFFSET);
@@ -1298,6 +1302,12 @@ public class TestConstants {
           USER_SESSION_RESPONSE_DTO_3,
           USER_CHAT_RESPONSE_DTO,
           USER_CHAT_RESPONSE_DTO_2);
+  public static final GroupSessionResponseDTO GROUP_SESSION_RESPONSE_DTO =
+      new GroupSessionResponseDTO()
+          .session(SESSION_DTO_1)
+          .agency(EMPTY_AGENCY_DTO)
+          .consultant(GROUP_SESSION_CONSULTANT_DTO)
+          .latestMessage(NOW);
   public static final Map<String, Boolean> MESSAGES_READ_MAP_WITH_UNREADS =
       new HashMap<>() {
         {
