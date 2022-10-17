@@ -7,6 +7,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.AccountManager;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
@@ -21,8 +22,10 @@ import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
 import de.caritas.cob.userservice.api.service.statistics.event.ArchiveStatisticsEvent;
+import de.caritas.cob.userservice.api.service.statistics.event.StatisticsEvent;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType;
 import java.util.Optional;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -30,6 +33,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.Logger;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SessionArchiveServiceTest {
@@ -56,6 +60,13 @@ public class SessionArchiveServiceTest {
   AccountManager accountManager;
 
   @Mock StatisticsService statisticsService;
+
+  @Mock private Logger logger;
+
+  @Before
+  public void setUp() {
+    setInternalState(SessionArchiveService.class, "log", logger);
+  }
 
   @Test(expected = NotFoundException.class)
   public void archiveSession_Should_ThrowNotFoundException_WhenSessionIsNotFound() {
@@ -133,6 +144,30 @@ public class SessionArchiveServiceTest {
     ArchiveStatisticsEvent event = statisticsEventArgumentCaptor.getValue();
     assertThat(event.getEventType()).isEqualTo(EventType.ARCHIVE_SESSION);
     assertThat(event.getPayload().get()).isNotEmpty();
+  }
+
+  @Test
+  public void archiveSession_Should_LogButNotFail_WhenErrorDuringStatisticsArchiveOccurs() {
+
+    Session session = Mockito.mock(Session.class);
+    when(session.isAdvised(any())).thenReturn(true);
+    when(session.getUser()).thenReturn(new User());
+    when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
+    IllegalStateException illegalStateException = new IllegalStateException();
+    doThrow(illegalStateException)
+        .when(statisticsService)
+        .fireEvent(Mockito.any(StatisticsEvent.class));
+    sessionArchiveService.archiveSession(SESSION_ID);
+
+    verify(session, times(1)).setStatus(SessionStatus.IN_ARCHIVE);
+    ArgumentCaptor<ArchiveStatisticsEvent> statisticsEventArgumentCaptor =
+        ArgumentCaptor.forClass(ArchiveStatisticsEvent.class);
+    verify(statisticsService).fireEvent(statisticsEventArgumentCaptor.capture());
+    ArchiveStatisticsEvent event = statisticsEventArgumentCaptor.getValue();
+    assertThat(event.getEventType()).isEqualTo(EventType.ARCHIVE_SESSION);
+    assertThat(event.getPayload().get()).isNotEmpty();
+    verify(logger)
+        .error("Could not create session archive statistics event", illegalStateException);
   }
 
   @Test(expected = NotFoundException.class)
