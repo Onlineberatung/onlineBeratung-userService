@@ -42,10 +42,10 @@ public class UserDtoMapper {
           var type = foreignType.getValue().equals("APP") ? OtpType.APP : OtpType.EMAIL;
           twoFactorAuthDTO.setType(type);
         }
-      } else {
-        twoFactorAuthDTO.setQrCode(otpInfoDTO.getOtpSecretQrCode());
-        twoFactorAuthDTO.setSecret(otpInfoDTO.getOtpSecret());
       }
+
+      twoFactorAuthDTO.setQrCode(otpInfoDTO.getOtpSecretQrCode());
+      twoFactorAuthDTO.setSecret(otpInfoDTO.getOtpSecret());
     }
 
     twoFactorAuthDTO.setIsToEncourage(userData.getEncourage2fa());
