@@ -11,17 +11,20 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.CREATED;
 
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
+import de.caritas.cob.userservice.api.adapters.web.dto.NewRegistrationResponseDto;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.exception.MissingConsultingTypeException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
@@ -37,6 +40,7 @@ public class CreateNewConsultingTypeFacadeTest {
   @Mock private ConsultingTypeManager consultingTypeManager;
   @Mock private CreateUserChatRelationFacade createUserChatRelationFacade;
   @Mock private CreateSessionFacade createSessionFacade;
+  @Mock private StatisticsService statisticsService;
 
   @Test
   public void
@@ -154,9 +158,15 @@ public class CreateNewConsultingTypeFacadeTest {
     when(consultingTypeManager.getConsultingTypeSettings("15"))
         .thenReturn(CONSULTING_TYPE_SETTINGS_KREUZBUND);
 
+    NewRegistrationResponseDto mockResult = mock(NewRegistrationResponseDto.class);
+    when(mockResult.getSessionId()).thenReturn(1L);
+    when(createSessionFacade.createDirectUserSession(any(), any(), any(), any()))
+        .thenReturn(mockResult);
+
     createNewConsultingTypeFacade.initializeNewConsultingType(userDTO, user, rocketChatCredentials);
 
     verify(createSessionFacade)
         .createDirectUserSession("consultantId", userDTO, user, CONSULTING_TYPE_SETTINGS_KREUZBUND);
+    verify(this.statisticsService, times(1)).fireEvent(any());
   }
 }
