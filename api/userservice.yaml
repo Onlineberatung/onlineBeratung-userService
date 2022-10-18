@@ -1828,25 +1828,6 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-  /users/2fa:
-    delete:
-      tags:
-        - user-controller
-      summary: 'Deactivates 2FA by mobile app [authorities: consultant or user]'
-      operationId: deactivateTwoFactorAuthByApp
-      responses:
-        200:
-          description: OK - successful operation
-        400:
-          description: BAD REQUEST - invalid/incomplete request resp. provided password is wrong
-        401:
-          description: UNAUTHORIZED - no/invalid Keycloak token
-        403:
-          description: FORBIDDEN - no/invalid role/authorization or CSRF token
-        500:
-          description: INTERNAL SERVER ERROR - server encountered unexpected condition
-      security:
-        - Bearer: [ ]
   /liveproxy/send:
     post:
       tags:
