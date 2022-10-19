@@ -102,8 +102,6 @@ public class ConsultantAdminService {
 
     this.consultantPreDeletionService.performPreDeletionSteps(consultant);
 
-    this.appointmentService.deleteConsultant(consultant.getId());
-
     consultant.setDeleteDate(nowInUtc());
     consultant.setStatus(ConsultantStatus.IN_DELETION);
     this.consultantRepository.save(consultant);

@@ -16,14 +16,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.config.apiclient.AppointmentAgencyServiceApiControllerFactory;
+import de.caritas.cob.userservice.api.config.apiclient.AppointmentAskerServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.apiclient.AppointmentConsultantServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
+import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import de.caritas.cob.userservice.appointmentservice.generated.web.AgencyApi;
 import de.caritas.cob.userservice.appointmentservice.generated.web.ConsultantApi;
 import de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO;
 import java.util.LinkedList;
+import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,6 +47,7 @@ import org.springframework.web.client.HttpClientErrorException;
 class AppointmentServiceTest {
 
   private static final String FIELD_NAME_APPOINTMENTS_ENABLED = "appointmentFeatureEnabled";
+  private static final EasyRandom easyRandom = new EasyRandom();
 
   @Spy @InjectMocks AppointmentService appointmentService;
 
@@ -52,8 +56,13 @@ class AppointmentServiceTest {
   @Mock ConsultantApi appointmentConsultantApi;
   @Mock AgencyApi appointmentAgencyApi;
   @Mock SecurityHeaderSupplier securityHeaderSupplier;
+
   @Mock TenantHeaderSupplier tenantHeaderSupplier;
   @Mock IdentityClient identityClient;
+
+  @SuppressWarnings("unused")
+  @Mock
+  IdentityClientConfig identityClientConfig;
 
   @Mock Logger log;
 
@@ -73,6 +82,8 @@ class AppointmentServiceTest {
 
   @Mock
   AppointmentConsultantServiceApiControllerFactory appointmentConsultantServiceApiControllerFactory;
+
+  @Mock AppointmentAskerServiceApiControllerFactory appointmentAskerServiceApiControllerFactory;
 
   @BeforeEach
   public void beforeEach() throws JsonProcessingException {
