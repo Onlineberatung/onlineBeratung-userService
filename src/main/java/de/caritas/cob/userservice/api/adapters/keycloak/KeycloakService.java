@@ -92,9 +92,6 @@ public class KeycloakService implements IdentityClient {
   @Value("${keycloak.config.app-client-id}")
   private String keycloakClientId;
 
-  @Value("${keycloakService.user.role}")
-  private String keycloakUserRole;
-
   @Value("${api.error.keycloakError}")
   private String keycloakError;
 
@@ -470,7 +467,7 @@ public class KeycloakService implements IdentityClient {
    * @param userId Keycloak user ID
    */
   public void updateUserRole(final String userId) {
-    updateRole(userId, keycloakUserRole);
+    updateRole(userId, "user");
   }
 
   public void ensureRole(final String userId, final String roleName) {

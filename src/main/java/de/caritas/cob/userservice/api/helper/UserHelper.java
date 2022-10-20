@@ -2,27 +2,26 @@ package de.caritas.cob.userservice.api.helper;
 
 import static java.util.Objects.nonNull;
 
+import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.passay.CharacterData;
 import org.passay.CharacterRule;
 import org.passay.EnglishCharacterData;
 import org.passay.PasswordGenerator;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class UserHelper {
 
   private static final Pattern EMAIL_PATTERN =
       Pattern.compile(
           "^(?=.{1,64}@)[\\p{L}0-9_-]+(\\.[\\p{L}0-9_-]+)*@"
               + "[^-][\\p{L}0-9-]+(\\.[\\p{L}0-9-]+)*(\\.[\\p{L}]{2,})$");
-
-  @Value("${keycloakService.user.dummySuffix}")
-  private String emailDummySuffix;
 
   public static final int USERNAME_MIN_LENGTH = 5;
   public static final int USERNAME_MAX_LENGTH = 30;
@@ -38,7 +37,8 @@ public class UserHelper {
   public static final int CHAT_TOPIC_MIN_LENGTH = 3;
   public static final int CHAT_TOPIC_MAX_LENGTH = 50;
 
-  private final UsernameTranscoder usernameTranscoder = new UsernameTranscoder();
+  private final UsernameTranscoder usernameTranscoder;
+  private final IdentityClientConfig identityClientConfig;
 
   /**
    * Generates a random password which complies with the Keycloak policy.
@@ -80,7 +80,7 @@ public class UserHelper {
    * @return the generated dummy email address
    */
   public String getDummyEmail(String userId) {
-    return userId + emailDummySuffix;
+    return userId + identityClientConfig.getEmailDummySuffix();
   }
 
   /**
