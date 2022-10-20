@@ -35,7 +35,7 @@ import lombok.Setter;
 public class UserChat {
 
   @Id
-  @SequenceGenerator(name = "id_seq", allocationSize = 1, sequenceName = "sequence_chat_user")
+  @SequenceGenerator(name = "id_seq", allocationSize = 1, sequenceName = "sequence_user_chat")
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "id_seq")
   @Column(name = "id", updatable = false, nullable = false)
   @EqualsAndHashCode.Include
