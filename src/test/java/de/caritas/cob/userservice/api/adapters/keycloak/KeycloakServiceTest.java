@@ -302,14 +302,6 @@ public class KeycloakServiceTest {
             keycloakService.setUpOtpCredential(USERNAME, randomAlphabetic(8), randomAlphabetic(8)));
   }
 
-  @Test
-  public void
-      deleteOtpCredential_Should_Not_ThrowBadRequestException_When_RequestWasSuccessfully() {
-    when(keycloakClient.getBearerToken()).thenReturn(BEARER_TOKEN);
-
-    assertDoesNotThrow(() -> keycloakService.deleteOtpCredential(USERNAME));
-  }
-
   private void givenAKeycloakLoginUrl() {
     when(identityClientConfig.getOpenIdConnectUrl(anyString()))
         .thenReturn(

@@ -30,8 +30,6 @@ public interface IdentityClient {
 
   boolean setUpOtpCredential(final String userName, final String initialCode, final String secret);
 
-  void deleteOtpCredential(final String userName);
-
   Optional<String> initiateEmailVerification(final String username, final String email);
 
   Map<String, String> finishEmailVerification(final String username, final String initialCode);

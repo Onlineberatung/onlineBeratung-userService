@@ -1335,18 +1335,6 @@ public class UserController implements UsersApi {
   }
 
   /**
-   * Deactivates 2FA by mobile app for the calling user.
-   *
-   * @return {@link ResponseEntity} containing {@link HttpStatus}
-   */
-  @Override
-  public ResponseEntity<Void> deactivateTwoFactorAuthByApp() {
-    identityManager.deleteOneTimePassword(authenticatedUser.getUsername());
-
-    return new ResponseEntity<>(HttpStatus.OK);
-  }
-
-  /**
    * Returns all agencies of given consultant.
    *
    * @param consultantId Consultant Id (required)
