@@ -13,6 +13,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -629,6 +630,47 @@ class UserController2faE2EIT {
     mockMvc
         .perform(
             put("/users/2fa/app")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(oneTimePasswordDTO))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isInternalServerError());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  void deactivateTwoFactorAuthByAppShouldRespondWithOK() throws Exception {
+    givenAValidConsultant();
+    givenABearerToken();
+
+    mockMvc
+        .perform(
+            delete("/users/2fa")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(oneTimePasswordDTO))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    var urlSuffix = "/auth/realms/test/otp-config/delete-otp/" + consultant.getUsername();
+    verify(keycloakRestTemplate)
+        .exchange(
+            endsWith(urlSuffix), eq(HttpMethod.DELETE), any(HttpEntity.class), eq(Void.class));
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  void deactivateTwoFactorAuthByAppShouldRespondWithInternalServerErrorWhenKeycloakIsDown()
+      throws Exception {
+    givenAValidConsultant();
+    givenABearerToken();
+    givenKeycloakIsDown();
+
+    mockMvc
+        .perform(
+            delete("/users/2fa")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)

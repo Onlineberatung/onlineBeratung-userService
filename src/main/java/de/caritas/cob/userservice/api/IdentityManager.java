@@ -57,6 +57,11 @@ public class IdentityManager implements IdentityManaging {
   }
 
   @Override
+  public void deleteOneTimePassword(String username) {
+    identityClient.deleteOtpCredential(username);
+  }
+
+  @Override
   public OtpInfoDTO getOtpCredential(String username) {
     return identityClient.getOtpCredential(username);
   }

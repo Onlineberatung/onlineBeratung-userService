@@ -19,6 +19,8 @@ public interface IdentityManaging {
 
   void changeLanguage(String userId, String locale);
 
+  void deleteOneTimePassword(String username);
+
   OtpInfoDTO getOtpCredential(String username);
 
   boolean isEmailAvailableOrOwn(String username, String email);

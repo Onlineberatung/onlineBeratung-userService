@@ -294,6 +294,13 @@ public class KeycloakService implements IdentityClient {
   }
 
   @Override
+  public void deleteOtpCredential(String userName) {
+    var bearerToken = keycloakClient.getBearerToken();
+    var requestUrl = identityClientConfig.getOtpUrl(ENDPOINT_OTP_TEARDOWN, userName);
+    keycloakClient.delete(bearerToken, requestUrl, Void.class);
+  }
+
+  @Override
   public Optional<String> initiateEmailVerification(String username, String email) {
     var otpSetupDTO = keycloakMapper.otpSetupDtoOf(null, null, email);
     var bearerToken = keycloakClient.getBearerToken();
