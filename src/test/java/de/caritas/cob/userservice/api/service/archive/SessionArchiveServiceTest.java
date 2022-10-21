@@ -128,7 +128,8 @@ public class SessionArchiveServiceTest {
   }
 
   @Test
-  public void archiveSession_Should_ChangeStatusOfSession_WhenUserHasPermission() {
+  public void
+      archiveSession_Should_ChangeStatusOfSessionAndFireArchiveStatisticsEvent_WhenUserHasPermission() {
 
     Session session = Mockito.mock(Session.class);
     when(session.isAdvised(any())).thenReturn(true);
