@@ -1521,20 +1521,19 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-  /users/chat/{chatId}/assign:
+  /users/chat/{groupId}/assign:
     put:
       tags:
         - user-controller
       summary: 'Assign the user to the given chat [Authorization: Role: consultant or user]'
       operationId: assignChat
       parameters:
-        - name: chatId
+        - name: groupId
           in: path
-          description: Chat Id
+          description: the rocket chat group uuid part
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
       responses:
         200:
           description: OK - successful operation
