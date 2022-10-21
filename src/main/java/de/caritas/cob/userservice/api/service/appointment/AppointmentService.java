@@ -6,6 +6,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDT
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.config.apiclient.AppointmentAgencyServiceApiControllerFactory;
+import de.caritas.cob.userservice.api.config.apiclient.AppointmentAskerServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.apiclient.AppointmentConsultantServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
@@ -36,6 +37,9 @@ public class AppointmentService {
 
   private final @NonNull AppointmentAgencyServiceApiControllerFactory
       appointmentAgencyServiceApiControllerFactory;
+
+  private final @NonNull AppointmentAskerServiceApiControllerFactory
+      appointmentAskerServiceApiControllerFactory;
 
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
   private final @NonNull TenantHeaderSupplier tenantHeaderSupplier;
@@ -174,5 +178,15 @@ public class AppointmentService {
     request.setAgencies(agencies);
     request.setConsultantId(consultantId);
     controllerApi.agencyConsultantsSync(request);
+  }
+
+  public void deleteAsker(String askerId) {
+    if (!appointmentFeatureEnabled) {
+      return;
+    }
+    de.caritas.cob.userservice.appointmentservice.generated.web.AskerApi controllerApi =
+        this.appointmentAskerServiceApiControllerFactory.createControllerApi();
+    addTechnicalUserHeaders(controllerApi.getApiClient());
+    controllerApi.deleteAskerData(askerId);
   }
 }

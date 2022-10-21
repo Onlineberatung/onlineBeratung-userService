@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.agencyserivce.generated.ApiClient;
+import de.caritas.cob.userservice.agencyserivce.generated.web.AgencyControllerApi;
 import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionDTO;
 import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiControllerFactory;
@@ -24,7 +25,6 @@ import de.caritas.cob.userservice.topicservice.generated.web.TopicControllerApi;
 import java.util.Collections;
 import java.util.Set;
 import org.assertj.core.util.Lists;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,7 +37,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
-import de.caritas.cob.userservice.agencyserivce.generated.web.AgencyControllerApi;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = UserServiceApplication.class)
@@ -54,14 +53,11 @@ class SessionServiceIT {
 
   @Autowired private UserRepository userRepository;
 
-  @MockBean
-  private TopicControllerApi topicControllerApi;
+  @MockBean private TopicControllerApi topicControllerApi;
 
-  @MockBean
-  private TopicServiceApiControllerFactory topicServiceApiControllerFactory;
+  @MockBean private TopicServiceApiControllerFactory topicServiceApiControllerFactory;
 
-  @MockBean
-  private AgencyServiceApiControllerFactory agencyServiceApiControllerFactory;
+  @MockBean private AgencyServiceApiControllerFactory agencyServiceApiControllerFactory;
 
   @MockBean
   @Qualifier("primary")
@@ -73,6 +69,7 @@ class SessionServiceIT {
     when(agencyServiceApiControllerFactory.createControllerApi()).thenReturn(agencyControllerApi);
     when(agencyControllerApi.getApiClient()).thenReturn(new ApiClient());
   }
+
   @Test
   void fetchSessionForConsultant_Should_ThrowNotFoundException_When_SessionIsNotFound() {
     assertThrows(
