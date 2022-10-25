@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.common.collect.Lists;
 import de.caritas.cob.userservice.api.adapters.web.dto.serialization.EncodeUsernameJsonDeserializer;
 import de.caritas.cob.userservice.api.adapters.web.dto.serialization.UrlDecodePasswordJsonDeserializer;
 import de.caritas.cob.userservice.api.adapters.web.dto.validation.ValidAge;
@@ -117,7 +118,7 @@ public class UserDTO implements UserRegistrationDTO {
 
   @ApiModelProperty(required = false, example = "\"[1,5]\"")
   @JsonProperty("topicIds")
-  private Collection<Integer> topicIds;
+  private Collection<Integer> topicIds = Lists.newArrayList();
 
   @ApiModelProperty(required = false, example = "\"RELATIVE_COUNSELLING\"")
   @JsonProperty("counsellingRelation")
