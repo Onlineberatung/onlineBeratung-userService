@@ -13,7 +13,10 @@ import de.caritas.cob.userservice.api.exception.MissingConsultingTypeException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
+import de.caritas.cob.userservice.api.service.statistics.event.AssignSessionStatisticsEvent;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
+import de.caritas.cob.userservice.statisticsservice.generated.web.model.UserRole;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,6 +30,7 @@ public class CreateNewConsultingTypeFacade {
   private final @NonNull ConsultingTypeManager consultingTypeManager;
   private final @NonNull CreateUserChatRelationFacade createUserChatRelationFacade;
   private final @NonNull CreateSessionFacade createSessionFacade;
+  private final @NonNull StatisticsService statisticsService;
 
   /**
    * Initializes the new consulting type settings and creates a session or a chat-agency relation
@@ -76,11 +80,18 @@ public class CreateNewConsultingTypeFacade {
       RocketChatCredentials rocketChatCredentials) {
 
     if (isNotBlank(userRegistrationDTO.getConsultantId())) {
-      return createSessionFacade.createDirectUserSession(
-          userRegistrationDTO.getConsultantId(),
-          fromUserRegistrationDTO(userRegistrationDTO),
-          user,
-          extendedConsultingTypeResponseDTO);
+      NewRegistrationResponseDto newRegistrationResponseDto =
+          createSessionFacade.createDirectUserSession(
+              userRegistrationDTO.getConsultantId(),
+              fromUserRegistrationDTO(userRegistrationDTO),
+              user,
+              extendedConsultingTypeResponseDTO);
+      statisticsService.fireEvent(
+          new AssignSessionStatisticsEvent(
+              userRegistrationDTO.getConsultantId(),
+              UserRole.CONSULTANT,
+              newRegistrationResponseDto.getSessionId()));
+      return newRegistrationResponseDto;
     }
 
     Long sessionId = null;

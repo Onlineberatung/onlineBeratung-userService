@@ -323,19 +323,7 @@ public class UserController implements UsersApi {
         sessionListFacade.retrieveSortedSessionsForAuthenticatedUser(
             user.getUserId(), rocketChatCredentials);
 
-    userSessionsDTO
-        .getSessions()
-        .forEach(
-            session -> {
-              var consultant = session.getConsultant();
-              if (nonNull(consultant) && nonNull(consultant.getUsername())) {
-                accountManager
-                    .findConsultantByUsername(consultant.getUsername())
-                    .ifPresent(
-                        consultantMap ->
-                            consultant.setDisplayName(userDtoMapper.displayNameOf(consultantMap)));
-              }
-            });
+    consultantDataFacade.addConsultantDisplayNameToSessionList(userSessionsDTO);
 
     return isNotEmpty(userSessionsDTO.getSessions())
         ? new ResponseEntity<>(userSessionsDTO, HttpStatus.OK)
@@ -370,6 +358,8 @@ public class UserController implements UsersApi {
               user.getUserId(), rcGroupIds, rocketChatCredentials, authenticatedUser.getRoles());
     }
 
+    consultantDataFacade.addConsultantDisplayNameToSessionList(groupSessionList);
+
     return isNotEmpty(groupSessionList.getSessions())
         ? new ResponseEntity<>(groupSessionList, HttpStatus.OK)
         : new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -398,6 +388,8 @@ public class UserController implements UsersApi {
               rocketChatCredentials,
               authenticatedUser.getRoles());
     }
+
+    consultantDataFacade.addConsultantDisplayNameToSessionList(groupSessionList);
 
     return isNotEmpty(groupSessionList.getSessions())
         ? new ResponseEntity<>(groupSessionList, HttpStatus.OK)
@@ -428,6 +420,8 @@ public class UserController implements UsersApi {
           sessionListFacade.retrieveChatsForUserByChatIds(
               singletonList(chatId), rocketChatCredentials);
     }
+
+    consultantDataFacade.addConsultantDisplayNameToSessionList(groupSessionList);
 
     return isNotEmpty(groupSessionList.getSessions())
         ? new ResponseEntity<>(groupSessionList, HttpStatus.OK)

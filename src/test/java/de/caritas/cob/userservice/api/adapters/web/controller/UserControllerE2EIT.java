@@ -456,8 +456,8 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("hasArchive", is(true)))
         .andExpect(jsonPath("twoFactorAuth.isEnabled", is(true)))
         .andExpect(jsonPath("twoFactorAuth.isActive", is(true)))
-        .andExpect(jsonPath("twoFactorAuth.secret", is(nullValue())))
-        .andExpect(jsonPath("twoFactorAuth.qrCode", is(nullValue())))
+        .andExpect(jsonPath("twoFactorAuth.secret", is(notNullValue())))
+        .andExpect(jsonPath("twoFactorAuth.qrCode", is(notNullValue())))
         .andExpect(jsonPath("twoFactorAuth.type", is("EMAIL")))
         .andExpect(jsonPath("twoFactorAuth.isToEncourage", is(consultant.getEncourage2fa())))
         .andExpect(jsonPath("absent", is(consultant.isAbsent())))
@@ -514,8 +514,8 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("hasArchive", is(false)))
         .andExpect(jsonPath("twoFactorAuth.isEnabled", is(true)))
         .andExpect(jsonPath("twoFactorAuth.isActive", is(true)))
-        .andExpect(jsonPath("twoFactorAuth.secret", is(nullValue())))
-        .andExpect(jsonPath("twoFactorAuth.qrCode", is(nullValue())))
+        .andExpect(jsonPath("twoFactorAuth.secret", is(notNullValue())))
+        .andExpect(jsonPath("twoFactorAuth.qrCode", is(notNullValue())))
         .andExpect(jsonPath("twoFactorAuth.type", is("EMAIL")))
         .andExpect(jsonPath("twoFactorAuth.isToEncourage", is(user.getEncourage2fa())))
         .andExpect(jsonPath("absent", is(false)))
@@ -1235,11 +1235,13 @@ class UserControllerE2EIT {
   }
 
   @Test
-  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  void updateUserDataShouldSaveDefaultLanguageAndRespondWithOk() throws Exception {
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  void updateUserDataShouldSaveDefaultLanguageAndEmailEvenIfRocketChatIssueOccurs()
+      throws Exception {
     givenAValidConsultant();
     givenAMinimalUpdateConsultantDto(consultant.getEmail());
     givenValidRocketChatTechUserResponse();
+    givenARocketChatUserInfoSyncSendMailIssueResponse();
 
     mockMvc
         .perform(
@@ -1251,11 +1253,40 @@ class UserControllerE2EIT {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    var savedConsultant = consultantRepository.findById(consultant.getId());
-    assertTrue(savedConsultant.isPresent());
-    var savedLanguages = savedConsultant.get().getLanguages();
+    var optionalSavedConsultant = consultantRepository.findById(consultant.getId());
+    assertTrue(optionalSavedConsultant.isPresent());
+    var savedConsultant = optionalSavedConsultant.get();
+    var savedLanguages = savedConsultant.getLanguages();
     assertEquals(1, savedLanguages.size());
     assertEquals(LanguageCode.de, savedLanguages.iterator().next().getLanguageCode());
+    assertEquals(updateConsultantDTO.getEmail(), savedConsultant.getEmail());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  void updateUserDataShouldSaveDefaultLanguageAndEmailAndRespondWithOk() throws Exception {
+    givenAValidConsultant();
+    givenAMinimalUpdateConsultantDto(consultant.getEmail());
+    givenValidRocketChatTechUserResponse();
+    givenValidRocketChatUserInfoResponse();
+
+    mockMvc
+        .perform(
+            put("/users/data")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateConsultantDTO))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    var optionalSavedConsultant = consultantRepository.findById(consultant.getId());
+    assertTrue(optionalSavedConsultant.isPresent());
+    var savedConsultant = optionalSavedConsultant.get();
+    var savedLanguages = savedConsultant.getLanguages();
+    assertEquals(1, savedLanguages.size());
+    assertEquals(LanguageCode.de, savedLanguages.iterator().next().getLanguageCode());
+    assertEquals(updateConsultantDTO.getEmail(), savedConsultant.getEmail());
   }
 
   @Test
@@ -1264,6 +1295,7 @@ class UserControllerE2EIT {
     givenAValidConsultant();
     givenAnUpdateConsultantDtoWithLanguages(consultant.getEmail());
     givenValidRocketChatTechUserResponse();
+    givenValidRocketChatUserInfoResponse();
 
     mockMvc
         .perform(
@@ -1295,6 +1327,7 @@ class UserControllerE2EIT {
     givenAValidConsultantSpeaking(easyRandom.nextObject(LanguageCode.class));
     givenAnUpdateConsultantDtoWithLanguages(consultant.getEmail());
     givenValidRocketChatTechUserResponse();
+    givenValidRocketChatUserInfoResponse();
 
     mockMvc
         .perform(
@@ -1592,6 +1625,8 @@ class UserControllerE2EIT {
     var otpInfo = new OtpInfoDTO();
     otpInfo.setOtpSetup(true);
     otpInfo.setOtpType(OtpType.EMAIL);
+    otpInfo.setOtpSecret(RandomStringUtils.randomAlphabetic(32));
+    otpInfo.setOtpSecretQrCode(RandomStringUtils.randomAlphabetic(64));
 
     when(keycloakRestTemplate.exchange(
             endsWith(urlSuffix), eq(HttpMethod.GET), any(HttpEntity.class), eq(OtpInfoDTO.class)))
@@ -1907,7 +1942,9 @@ class UserControllerE2EIT {
 
   private void givenValidRocketChatTechUserResponse() throws RocketChatUserNotInitializedException {
     when(rocketChatCredentialsProvider.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
+  }
 
+  private void givenValidRocketChatUserInfoResponse() {
     var body = new UserInfoResponseDTO();
     body.setSuccess(true);
     if (nonNull(user)) {
@@ -1918,6 +1955,30 @@ class UserControllerE2EIT {
         .thenReturn(userInfoResponseDTO);
     when(restTemplate.exchange(
             anyString(), any(), any(), eq(UserInfoResponseDTO.class), anyString()))
+        .thenReturn(userInfoResponseDTO);
+  }
+
+  private void givenARocketChatUserInfoSyncSendMailIssueResponse() throws JsonProcessingException {
+    var responseMap =
+        Map.of(
+            "success",
+            false,
+            "error",
+            "Error trying to send email: Cannot read property '_syncSendMail' of null");
+    var errorBody = objectMapper.writeValueAsString(responseMap).getBytes();
+    var statusText = HttpStatus.BAD_REQUEST.getReasonPhrase();
+    var syncSendMailIssue =
+        new HttpClientErrorException(HttpStatus.BAD_REQUEST, statusText, errorBody, null);
+
+    var okBody = new UserInfoResponseDTO();
+    okBody.setSuccess(true);
+    if (nonNull(user)) {
+      okBody.setUser(new RocketChatUserDTO("", user.getUsername(), null, null));
+    }
+    var userInfoResponseDTO = ResponseEntity.ok(okBody);
+
+    when(restTemplate.exchange(anyString(), any(), any(), eq(UserInfoResponseDTO.class)))
+        .thenThrow(syncSendMailIssue)
         .thenReturn(userInfoResponseDTO);
   }
 

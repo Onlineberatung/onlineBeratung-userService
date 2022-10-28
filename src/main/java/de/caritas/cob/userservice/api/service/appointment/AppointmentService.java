@@ -10,6 +10,7 @@ import de.caritas.cob.userservice.api.config.apiclient.AppointmentAskerServiceAp
 import de.caritas.cob.userservice.api.config.apiclient.AppointmentConsultantServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
+import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
 import de.caritas.cob.userservice.appointmentservice.generated.ApiClient;
@@ -44,15 +45,10 @@ public class AppointmentService {
   private final @NonNull SecurityHeaderSupplier securityHeaderSupplier;
   private final @NonNull TenantHeaderSupplier tenantHeaderSupplier;
   private final @NonNull IdentityClient identityClient;
+  private final @NonNull IdentityClientConfig identityClientConfig;
 
   @Value("${feature.appointment.enabled}")
   private boolean appointmentFeatureEnabled;
-
-  @Value("${keycloakService.technical.username}")
-  private String keycloakTechnicalUsername;
-
-  @Value("${keycloakService.technical.password}")
-  private String keycloakTechnicalPassword;
 
   public void createConsultant(ConsultantAdminResponseDTO consultantAdminResponseDTO) {
     if (!appointmentFeatureEnabled) {
@@ -146,17 +142,17 @@ public class AppointmentService {
       throw ex;
     } else {
       log.warn(
-          "No consultant with id {} was found in appointmentService. Proceeding with deletion.",
+          "No consultant with id {} was not found in appointmentService. Proceeding with deletion.",
           consultantId);
     }
   }
 
+  @SuppressWarnings("Duplicates")
   private void addTechnicalUserHeaders(ApiClient apiClient) {
-    var keycloakLoginResponseDTO =
-        identityClient.loginUser(keycloakTechnicalUsername, keycloakTechnicalPassword);
+    var techUser = identityClientConfig.getTechnicalUser();
+    var keycloakLogin = identityClient.loginUser(techUser.getUsername(), techUser.getPassword());
     var headers =
-        this.securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders(
-            keycloakLoginResponseDTO.getAccessToken());
+        securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders(keycloakLogin.getAccessToken());
     tenantHeaderSupplier.addTenantHeader(headers);
     headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
   }

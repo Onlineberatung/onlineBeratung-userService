@@ -98,15 +98,24 @@ components:
           format: int64
           description: The duration of all video calls of the consultant in the given period of time in seconds
           example: 3560
+        numberOfAppointments:
+          type: integer
+          format: int64
+          description: The number of completed, non-cancelled appointments in the specified period.
+          example: 327
 
     EventType:
       type: string
       enum:
         - "ASSIGN_SESSION"
+        - "ARCHIVE_SESSION"
         - "CREATE_MESSAGE"
         - "START_VIDEO_CALL"
         - "STOP_VIDEO_CALL"
         - "REGISTRATION"
+        - "BOOKING_CREATED"
+        - "BOOKING_RESCHEDULED"
+        - "BOOKING_CANCELLED"
 
     UserRole:
       type: string
@@ -149,6 +158,29 @@ components:
           format: int64
           description: The id of the session
           example: 12345
+
+    ArchiveSessionStatisticsEventMessage:
+      type: object
+      required:
+        - sessionId
+        - endDate
+      allOf:
+        - $ref: '#/components/schemas/StatisticsEventMessage'
+        - type: object
+      properties:
+        tenantId:
+          type: integer
+          format: int64
+          description: The id of the tenant
+          example: 1
+        sessionId:
+          type: integer
+          format: int64
+          description: The id of the session
+          example: 12345
+        endDate:
+          type: string
+          example: '2022-08-15T21:11:29'
 
     CreateMessageStatisticsEventMessage:
       type: object
@@ -283,6 +315,55 @@ components:
         postalCode:
           type: string
           example: '99999'
+
+    BookingCreatedStatisticsEventMessage:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/StatisticsEventMessage'
+        - type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        startTime:
+          type: string
+        endTime:
+          type: string
+        uid:
+          type: string
+        bookingId:
+          type: integer
+
+    BookingRescheduledStatisticsEventMessage:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/StatisticsEventMessage'
+        - type: object
+      properties:
+        startTime:
+          type: string
+        endTime:
+          type: string
+        uid:
+          type: string
+        bookingId:
+          type: integer
+        prevBookingId:
+          type: integer
+
+    BookingCanceledStatisticsEventMessage:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/StatisticsEventMessage'
+        - type: object
+      properties:
+        uid:
+          type: string
+        bookingId:
+          type: integer
+        prevBookingId:
+          type: integer
 
   securitySchemes:
     Bearer:

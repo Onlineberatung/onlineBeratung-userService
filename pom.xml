@@ -37,6 +37,15 @@
 		</adapters.web.dto.path>
 		<log4j.version>2.17.1
 		</log4j.version> <!-- force safe version due to https://logging.apache.org/log4j/2.x/security.html -->
+		<commons-text.version>1.10.0</commons-text.version>
+		<commons-validator.version>1.7</commons-validator.version>
+		<liquibase-maven-plugin.version>4.8.0</liquibase-maven-plugin.version>
+		<javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
+		<spring-boot-starter-web.version>2.6.6</spring-boot-starter-web.version>
+		<spring-security-core.version>5.7.1</spring-security-core.version>
+		<json-smart.version>2.4.7</json-smart.version>
+		<springfox-swagger-ui.version>2.10.0</springfox-swagger-ui.version>
+		<spring-context-support.version>5.3.23</spring-context-support.version>
 	</properties>
 
 	<dependencies>
@@ -44,6 +53,7 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+			<version>${spring-boot-starter-web.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -75,8 +85,20 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-core</artifactId>
+			<version>${spring-security-core.version}</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.hibernate.validator</groupId>
 			<artifactId>hibernate-validator</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>net.minidev</groupId>
+			<artifactId>json-smart</artifactId>
+			<version>${json-smart.version}</version>
 		</dependency>
 
 		<!-- Search dependency -->
@@ -113,7 +135,7 @@
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger-ui</artifactId>
-			<version>${springfox.version}</version>
+			<version>${springfox-swagger-ui.version}</version>
 		</dependency>
 
 		<!-- Keycloak dependencies -->
@@ -135,7 +157,7 @@
 		<dependency>
 			<groupId>javax.ws.rs</groupId>
 			<artifactId>javax.ws.rs-api</artifactId>
-			<version>2.1.1</version>
+			<version>${javax.ws.rs-api.version}</version>
 		</dependency>
 
 		<!-- Lombok dependencies -->
@@ -155,14 +177,14 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-text</artifactId>
-			<version>1.9</version>
+			<version>${commons-text.version}</version>
 		</dependency>
 
 		<!-- Commons Validator -->
 		<dependency>
 			<groupId>commons-validator</groupId>
 			<artifactId>commons-validator</artifactId>
-			<version>1.7</version>
+			<version>${commons-validator.version}</version>
 		</dependency>
 
 		<!-- Commons Codec -->
@@ -174,7 +196,7 @@
 		<dependency>
 			<groupId>org.liquibase</groupId>
 			<artifactId>liquibase-maven-plugin</artifactId>
-			<version>4.6.1</version>
+			<version>${liquibase-maven-plugin.version}</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client -->
@@ -234,6 +256,7 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context-support</artifactId>
+			<version>${spring-context-support.version}</version>
 		</dependency>
 
 		<!-- Push notification firebase dependency -->
@@ -264,6 +287,12 @@
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.security</groupId>
+					<artifactId>spring-security-core</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<artifactId>powermock-module-junit4</artifactId>
@@ -563,7 +592,8 @@
 						<configuration>
 							<configOptions>
 								<sourceFolder>/</sourceFolder>
-								<library>resttemplate</library>
+								<library>native</library>
+								<asyncNative>true</asyncNative>
 								<dateLibrary>java8</dateLibrary>
 							</configOptions>
 							<inputSpec>${project.basedir}/services/liveservice.yaml</inputSpec>
