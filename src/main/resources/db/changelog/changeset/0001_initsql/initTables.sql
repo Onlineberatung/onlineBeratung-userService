@@ -4,8 +4,8 @@ CREATE TABLE `userservice`.`user` (
   `username` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `email` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `rc_user_id` varchar(255) NULL,
-  `create_date` datetime NOT NULL DEFAULT UTC_TIMESTAMP,
-  `update_date` datetime NOT NULL DEFAULT UTC_TIMESTAMP,
+  `create_date` datetime NOT NULL DEFAULT (UTC_TIMESTAMP),
+  `update_date` datetime NOT NULL DEFAULT (UTC_TIMESTAMP),
   PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 CREATE TABLE `userservice`.`consultant` (
@@ -19,8 +19,8 @@ CREATE TABLE `userservice`.`consultant` (
   `absence_message` longtext COLLATE utf8_unicode_ci DEFAULT NULL,
   `rc_user_id` varchar(255) NULL,
   `id_old` bigint(21) NULL,
-  `create_date` datetime NOT NULL DEFAULT UTC_TIMESTAMP,
-  `update_date` datetime NOT NULL DEFAULT UTC_TIMESTAMP,
+  `create_date` datetime NOT NULL DEFAULT (UTC_TIMESTAMP),
+  `update_date` datetime NOT NULL DEFAULT (UTC_TIMESTAMP),
   PRIMARY KEY (`consultant_id`),
   UNIQUE `username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -28,8 +28,8 @@ CREATE TABLE `userservice`.`consultant_agency` (
   `id` bigint(21) unsigned NOT NULL,
   `consultant_id` varchar(36) COLLATE utf8_unicode_ci NOT NULL,
   `agency_id` bigint(21) unsigned NOT NULL,
-  `create_date` datetime NOT NULL DEFAULT UTC_TIMESTAMP,
-  `update_date` datetime NOT NULL DEFAULT UTC_TIMESTAMP,
+  `create_date` datetime NOT NULL DEFAULT (UTC_TIMESTAMP),
+  `update_date` datetime NOT NULL DEFAULT (UTC_TIMESTAMP),
   PRIMARY KEY (`id`),
   KEY `consultant_id` (`consultant_id`),
   CONSTRAINT `consultant_agency_ibfk_1` FOREIGN KEY (`consultant_id`) REFERENCES `consultant` (`consultant_id`) ON UPDATE CASCADE
@@ -51,8 +51,8 @@ CREATE TABLE `userservice`.`session` (
   `rc_group_id` varchar(255) NULL,
   `status` tinyint(4) NOT NULL,
   `is_team_session` tinyint(4) NOT NULL DEFAULT '0',
-  `create_date` datetime NOT NULL DEFAULT UTC_TIMESTAMP,
-  `update_date` datetime NOT NULL DEFAULT UTC_TIMESTAMP,
+  `create_date` datetime NOT NULL DEFAULT (UTC_TIMESTAMP),
+  `update_date` datetime NOT NULL DEFAULT (UTC_TIMESTAMP),
   PRIMARY KEY (`id`),
   KEY `index_consultant_id_status` (`consultant_id`,`status`),
   KEY `user_id` (`user_id`),
@@ -71,8 +71,8 @@ CREATE TABLE `userservice`.`session_data` (
   `type` tinyint(4) NOT NULL,
   `key_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `value` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `create_date` datetime NOT NULL DEFAULT UTC_TIMESTAMP,
-  `update_date` datetime NOT NULL DEFAULT UTC_TIMESTAMP,
+  `create_date` datetime NOT NULL DEFAULT (UTC_TIMESTAMP),
+  `update_date` datetime NOT NULL DEFAULT (UTC_TIMESTAMP),
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_type_key_name` (`session_id`, `type`,`key_name`),
   KEY `session_id` (`session_id`),
@@ -89,8 +89,8 @@ CREATE TABLE `userservice`.`session_monitoring` (
   `type` tinyint(4) unsigned NOT NULL,
   `key_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `value` tinyint(1) DEFAULT NULL,
-  `create_date` datetime NOT NULL DEFAULT UTC_TIMESTAMP,
-  `update_date` datetime NOT NULL DEFAULT UTC_TIMESTAMP,
+  `create_date` datetime NOT NULL DEFAULT (UTC_TIMESTAMP),
+  `update_date` datetime NOT NULL DEFAULT (UTC_TIMESTAMP),
   PRIMARY KEY (`session_id`,`type`,`key_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 CREATE TABLE `userservice`.`session_monitoring_option` (
@@ -99,7 +99,7 @@ CREATE TABLE `userservice`.`session_monitoring_option` (
   `monitoring_key_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `key_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `value` tinyint(1) DEFAULT NULL,
-  `create_date` datetime NOT NULL DEFAULT UTC_TIMESTAMP,
-  `update_date` datetime NOT NULL DEFAULT UTC_TIMESTAMP,
+  `create_date` datetime NOT NULL DEFAULT (UTC_TIMESTAMP),
+  `update_date` datetime NOT NULL DEFAULT (UTC_TIMESTAMP),
   PRIMARY KEY (`session_id`,`monitoring_type`,`monitoring_key_name`,`key_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
