@@ -8,11 +8,13 @@ import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.workflow.delete.action.asker.DeleteAnonymousRegistryIdAction;
+import de.caritas.cob.userservice.api.workflow.delete.action.asker.DeleteAppointmentServiceAskerAction;
 import de.caritas.cob.userservice.api.workflow.delete.action.asker.DeleteAskerRoomsAndSessionsAction;
 import de.caritas.cob.userservice.api.workflow.delete.action.asker.DeleteDatabaseAskerAction;
 import de.caritas.cob.userservice.api.workflow.delete.action.asker.DeleteDatabaseAskerAgencyAction;
 import de.caritas.cob.userservice.api.workflow.delete.action.asker.DeleteKeycloakAskerAction;
 import de.caritas.cob.userservice.api.workflow.delete.action.asker.DeleteRocketChatAskerAction;
+import de.caritas.cob.userservice.api.workflow.delete.action.consultant.DeleteAppointmentServiceConsultantAction;
 import de.caritas.cob.userservice.api.workflow.delete.action.consultant.DeleteChatAction;
 import de.caritas.cob.userservice.api.workflow.delete.action.consultant.DeleteDatabaseConsultantAction;
 import de.caritas.cob.userservice.api.workflow.delete.action.consultant.DeleteDatabaseConsultantAgencyAction;
@@ -67,6 +69,7 @@ public class DeleteUserAccountService {
         .addActionToExecute(DeleteDatabaseAskerAgencyAction.class)
         .addActionToExecute(DeleteRocketChatAskerAction.class)
         .addActionToExecute(DeleteAnonymousRegistryIdAction.class)
+        .addActionToExecute(DeleteAppointmentServiceAskerAction.class)
         .addActionToExecute(DeleteDatabaseAskerAction.class)
         .executeActions(deletionWorkflowDTO);
 
@@ -90,6 +93,7 @@ public class DeleteUserAccountService {
         .addActionToExecute(DeleteDatabaseConsultantAgencyAction.class)
         .addActionToExecute(DeleteChatAction.class)
         .addActionToExecute(DeleteRocketChatConsultantAction.class)
+        .addActionToExecute(DeleteAppointmentServiceConsultantAction.class)
         .addActionToExecute(DeleteDatabaseConsultantAction.class)
         .executeActions(deletionWorkflowDTO);
 

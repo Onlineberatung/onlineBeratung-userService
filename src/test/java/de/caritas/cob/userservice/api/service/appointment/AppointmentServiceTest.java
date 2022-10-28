@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.config.apiclient.AppointmentAgencyServiceApiControllerFactory;
+import de.caritas.cob.userservice.api.config.apiclient.AppointmentAskerServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.apiclient.AppointmentConsultantServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
@@ -82,6 +83,8 @@ class AppointmentServiceTest {
 
   @Mock
   AppointmentConsultantServiceApiControllerFactory appointmentConsultantServiceApiControllerFactory;
+
+  @Mock AppointmentAskerServiceApiControllerFactory appointmentAskerServiceApiControllerFactory;
 
   @BeforeEach
   public void beforeEach() throws JsonProcessingException {
