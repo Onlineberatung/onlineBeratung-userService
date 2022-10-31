@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.adapters.web.controller;
 import static de.caritas.cob.userservice.api.testHelper.RequestBodyConstants.VALID_CREATE_CHAT_BODY;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS_SYSTEM_A;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS_TECHNICAL_A;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_TOKEN;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_TOKEN_HEADER_PARAMETER_NAME;
 import static java.util.Objects.nonNull;
@@ -465,7 +466,7 @@ class UserControllerChatE2EIT {
   void assignChat_Should_ReturnUnauthorized_When_UserIsMissing() throws Exception {
     mockMvc
         .perform(
-            put("/users/chat/{chatId}/assign", 999)
+            put("/users/chat/{groupId}/assign", "xyz")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
@@ -479,7 +480,7 @@ class UserControllerChatE2EIT {
 
     mockMvc
         .perform(
-            put("/users/chat/{chatId}/assign", 999)
+            put("/users/chat/{groupId}/assign", RC_GROUP_ID)
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
@@ -495,7 +496,7 @@ class UserControllerChatE2EIT {
 
     mockMvc
         .perform(
-            put("/users/chat/{chatId}/assign", chat.getId())
+            put("/users/chat/{groupId}/assign", RC_GROUP_ID)
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
@@ -517,7 +518,7 @@ class UserControllerChatE2EIT {
 
     mockMvc
         .perform(
-            put("/users/chat/{chatId}/assign", chat.getId())
+            put("/users/chat/{groupId}/assign", RC_GROUP_ID)
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
@@ -529,7 +530,7 @@ class UserControllerChatE2EIT {
 
     mockMvc
         .perform(
-            put("/users/chat/{chatId}/assign", chat.getId())
+            put("/users/chat/{groupId}/assign", RC_GROUP_ID)
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
@@ -1385,6 +1386,7 @@ class UserControllerChatE2EIT {
   private void givenAValidChat(boolean isRepetitive) {
     chat = easyRandom.nextObject(Chat.class);
     chat.setId(null);
+    chat.setGroupId(RC_GROUP_ID);
     chat.setActive(true);
     chat.setRepetitive(isRepetitive);
     chat.setChatOwner(consultant);
