@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service.consultingtype;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import de.caritas.cob.userservice.api.config.CacheManagerConfig;
 import de.caritas.cob.userservice.api.config.apiclient.TopicServiceApiControllerFactory;
@@ -67,7 +68,13 @@ public class TopicService {
   }
 
   public List<String> findTopicsInternalAttributes(Collection<Integer> topicsList) {
-    return topicsList.stream().map(this::findTopicInternalIdentifier).collect(Collectors.toList());
+    if (topicsList == null) {
+      return Lists.newArrayList();
+    } else {
+      return topicsList.stream()
+          .map(this::findTopicInternalIdentifier)
+          .collect(Collectors.toList());
+    }
   }
 
   public String findTopicInternalIdentifier(Integer topicId) {
