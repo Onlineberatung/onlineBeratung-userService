@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.admin.service.consultant.create;
 
 import static de.caritas.cob.userservice.api.config.auth.UserRole.CONSULTANT;
+import static de.caritas.cob.userservice.api.config.auth.UserRole.GROUP_CHAT_CONSULTANT;
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.EMAIL_NOT_VALID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -10,6 +11,9 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.UserServiceApplication;
@@ -17,11 +21,14 @@ import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.admin.service.tenant.TenantAdminService;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.service.ConsultantImportService.ImportRecord;
+import de.caritas.cob.userservice.tenantadminservice.generated.web.model.Settings;
+import de.caritas.cob.userservice.tenantadminservice.generated.web.model.TenantDTO;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,12 +49,15 @@ public class ConsultantCreatorServiceIT {
   private static final String DUMMY_RC_ID = "rcUserId";
   private static final String VALID_USERNAME = "validUsername";
   private static final String VALID_EMAILADDRESS = "valid@emailaddress.de";
+  private static final int TENANT_ID = 1;
 
   @Autowired private ConsultantCreatorService consultantCreatorService;
 
   @MockBean private RocketChatService rocketChatService;
 
   @MockBean private KeycloakService keycloakService;
+
+  @MockBean private TenantAdminService tenantAdminService;
 
   private final EasyRandom easyRandom = new EasyRandom();
 
@@ -64,6 +74,9 @@ public class ConsultantCreatorServiceIT {
 
     Consultant consultant = this.consultantCreatorService.createNewConsultant(createConsultantDTO);
 
+    verify(keycloakService).updateRole(anyString(), anyString());
+    verify(keycloakService).updateRole(anyString(), eq(CONSULTANT.getValue()));
+
     assertThat(consultant, notNullValue());
     assertThat(consultant.getId(), notNullValue());
     assertThat(consultant.getRocketChatId(), is(DUMMY_RC_ID));
@@ -75,6 +88,36 @@ public class ConsultantCreatorServiceIT {
     assertThat(consultant.getLastName(), notNullValue());
     assertThat(consultant.getEmail(), notNullValue());
     assertThat(consultant.getFullName(), notNullValue());
+  }
+
+  @Test
+  public void
+      createNewConsultant_Should_addConsultantAndGroupChatConsultantRole_When_groupChatV2ForTenantIsEnabled()
+          throws RocketChatLoginException {
+    // given
+    when(rocketChatService.getUserID(anyString(), anyString(), anyBoolean()))
+        .thenReturn(DUMMY_RC_ID);
+    when(keycloakService.createKeycloakUser(any(), anyString(), any()))
+        .thenReturn(easyRandom.nextObject(KeycloakCreateUserResponseDTO.class));
+    var tenant = new TenantDTO().settings(new Settings().featureGroupChatV2Enabled(true));
+    when(tenantAdminService.getTenantById((long) TENANT_ID)).thenReturn(tenant);
+
+    CreateConsultantDTO createConsultantDTO = this.easyRandom.nextObject(CreateConsultantDTO.class);
+    createConsultantDTO.setTenantId(TENANT_ID);
+    createConsultantDTO.setUsername(VALID_USERNAME);
+    createConsultantDTO.setEmail(VALID_EMAILADDRESS);
+
+    // when
+    Consultant consultant = consultantCreatorService.createNewConsultant(createConsultantDTO);
+
+    // then
+    verify(tenantAdminService).getTenantById((long) TENANT_ID);
+    verify(keycloakService, times(2)).updateRole(anyString(), anyString());
+    verify(keycloakService).updateRole(anyString(), eq(CONSULTANT.getValue()));
+    verify(keycloakService).updateRole(anyString(), eq(GROUP_CHAT_CONSULTANT.getValue()));
+
+    assertThat(consultant, notNullValue());
+    assertThat(consultant.getId(), notNullValue());
   }
 
   @Test
