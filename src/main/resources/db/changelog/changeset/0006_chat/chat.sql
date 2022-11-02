@@ -9,8 +9,8 @@ CREATE TABLE `userservice`.`chat` (
 	`is_active` tinyint(1) unsigned NOT NULL DEFAULT '0',
 	`max_participants` tinyint(4) unsigned NULL,
 	`consultant_id_owner` varchar(36) COLLATE utf8_unicode_ci NOT NULL,
-	`create_date` datetime NOT NULL DEFAULT (UTC_TIMESTAMP),
-  	`update_date` datetime NOT NULL DEFAULT (UTC_TIMESTAMP),
+	`create_date` datetime NOT NULL DEFAULT UTC_TIMESTAMP(),
+  	`update_date` datetime NOT NULL DEFAULT UTC_TIMESTAMP(),
 	PRIMARY KEY (`id`),
 	KEY `consultant_id_owner` (`consultant_id_owner`),
   	CONSTRAINT `chat_consultant_ibfk_1` FOREIGN KEY (`consultant_id_owner`) REFERENCES `consultant` (`consultant_id`) ON UPDATE CASCADE
@@ -25,8 +25,8 @@ CREATE TABLE `userservice`.`chat_agency` (
   `id` bigint(21) unsigned NOT NULL,
   `chat_id` bigint(21) unsigned NOT NULL,
   `agency_id` bigint(21) unsigned NOT NULL,
-  `create_date` datetime NOT NULL DEFAULT (UTC_TIMESTAMP),
-  `update_date` datetime NOT NULL DEFAULT (UTC_TIMESTAMP),
+  `create_date` datetime NOT NULL DEFAULT UTC_TIMESTAMP(),
+  `update_date` datetime NOT NULL DEFAULT UTC_TIMESTAMP(),
   PRIMARY KEY (`id`),
   KEY `chat_id` (`chat_id`),
   CONSTRAINT `chat_agency_ibfk_1` FOREIGN KEY (`chat_id`) REFERENCES `chat` (`id`) ON UPDATE CASCADE
