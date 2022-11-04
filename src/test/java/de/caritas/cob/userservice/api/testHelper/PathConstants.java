@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.testHelper;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.INVALID_CHAT_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.SESSION_ID;
 
 public class PathConstants {
@@ -71,9 +72,7 @@ public class PathConstants {
   public static final String PATH_PUT_CHAT_START = "/users/chat/" + CHAT_ID + "/start";
   public static final String PATH_PUT_CHAT_START_WITH_INVALID_PATH_PARAMS =
       "/users/chat/" + INVALID_CHAT_ID + "/start";
-  public static final String PATH_PUT_ASSIGN_CHAT_WITH_INVALID_PATH_PARAMS =
-      "/users/chat/" + INVALID_CHAT_ID + "/assign";
-  public static final String PATH_PUT_ASSIGN_CHAT = "/users/chat/" + CHAT_ID + "/assign";
+  public static final String PATH_PUT_ASSIGN_CHAT = "/users/chat/" + RC_GROUP_ID + "/assign";
   public static final String PATH_PUT_JOIN_CHAT = "/users/chat/" + CHAT_ID + "/join";
   public static final String PATH_PUT_JOIN_CHAT_WITH_INVALID_PATH_PARAMS =
       "/users/chat/" + INVALID_CHAT_ID + "/join";

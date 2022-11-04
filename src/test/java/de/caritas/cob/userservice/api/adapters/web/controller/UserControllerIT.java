@@ -39,7 +39,6 @@ import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_POST_REGISTER_USER;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_ADD_MOBILE_TOKEN;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_ASSIGN_CHAT;
-import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_ASSIGN_CHAT_WITH_INVALID_PATH_PARAMS;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_ASSIGN_SESSION;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_ASSIGN_SESSION_INVALID_PARAMS;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_CHAT_START;
@@ -80,7 +79,6 @@ import static de.caritas.cob.userservice.api.testHelper.RequestBodyConstants.VAL
 import static de.caritas.cob.userservice.api.testHelper.RequestBodyConstants.VALID_USER_REQUEST_BODY_WITH_ENCODED_PASSWORD;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.ABSENCE_MESSAGE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_ID;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CITY;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_ID;
@@ -127,7 +125,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
@@ -434,8 +431,6 @@ public class UserControllerIT {
 
   @Autowired private MockMvc mvc;
 
-  @Autowired private UserController userController;
-
   @MockBean private ValidatedUserAccountProvider accountProvider;
   @MockBean private SessionService sessionService;
   @MockBean private AuthenticatedUser authenticatedUser;
@@ -527,7 +522,9 @@ public class UserControllerIT {
   @SuppressWarnings("unused")
   private KeycloakUserDataProvider keycloakUserDataProvider;
 
-  @MockBean private UsersStatisticsFacade usersStatisticsFacade;
+  @SuppressWarnings("unused")
+  @MockBean
+  private UsersStatisticsFacade usersStatisticsFacade;
 
   @MockBean
   @SuppressWarnings("unused")
@@ -2151,17 +2148,6 @@ public class UserControllerIT {
   }
 
   @Test
-  public void assignChat_Should_ReturnBadRequest_WhenPathParamsAreInvalid() throws Exception {
-    mvc.perform(
-            put(PATH_PUT_ASSIGN_CHAT_WITH_INVALID_PATH_PARAMS)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isBadRequest());
-
-    verifyNoInteractions(assignChatFacade);
-  }
-
-  @Test
   public void assignChat_Should_ReturnOk_When_ChatWasAssigned() throws Exception {
     mvc.perform(
             put(PATH_PUT_ASSIGN_CHAT)
@@ -2169,7 +2155,7 @@ public class UserControllerIT {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(assignChatFacade).assignChat(CHAT_ID, authenticatedUser);
+    verify(assignChatFacade).assignChat(RC_GROUP_ID, authenticatedUser);
   }
 
   /** Method: joinChat */

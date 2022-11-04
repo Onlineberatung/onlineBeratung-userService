@@ -168,6 +168,16 @@ public class ChatService {
     return chatRepository.findById(chatId);
   }
 
+  /**
+   * Returns an {@link Optional} of {@link Chat} for the provided group ID.
+   *
+   * @param groupId rocket chat group ID
+   * @return {@link Optional} of {@link Chat}
+   */
+  public Optional<Chat> getChatByGroupId(String groupId) {
+    return chatRepository.findByGroupId(groupId);
+  }
+
   public List<ConsultantSessionResponseDTO> getChatSessionsForConsultantByIds(Set<Long> chatIds) {
     return StreamSupport.stream(chatRepository.findAllById(chatIds).spliterator(), false)
         .map(this::convertChatToConsultantSessionResponseDTO)
