@@ -172,6 +172,9 @@ public class Session implements TenantAware {
   @Column(name = "is_monitoring", columnDefinition = "tinyint(4) default '0'")
   private boolean monitoring;
 
+  @Column(nullable = false, columnDefinition = "bit default false")
+  private Boolean isConsultantDirectlySet;
+
   public boolean hasFeedbackChat() {
     return isNotBlank(feedbackGroupId);
   }

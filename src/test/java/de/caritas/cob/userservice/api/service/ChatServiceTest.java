@@ -9,6 +9,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_V2;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.INACTIVE_CHAT;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -206,6 +207,17 @@ public class ChatServiceTest {
     when(chatRepository.findById(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
 
     Optional<Chat> result = chatService.getChat(CHAT_ID);
+
+    assertThat(result, instanceOf(Optional.class));
+    assertTrue(result.isPresent());
+    assertThat(result.get(), instanceOf(Chat.class));
+  }
+
+  @Test
+  public void getChatByGroupId_Should_ReturnChatObject() {
+    when(chatRepository.findByGroupId(RC_GROUP_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
+
+    Optional<Chat> result = chatService.getChatByGroupId(RC_GROUP_ID);
 
     assertThat(result, instanceOf(Optional.class));
     assertTrue(result.isPresent());

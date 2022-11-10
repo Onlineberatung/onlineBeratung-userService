@@ -1026,10 +1026,16 @@ public class UserController implements UsersApi {
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
+  /**
+   * Assign a chat, resolved using the group id.
+   *
+   * @param groupId the rocket chat group uuid part (required)
+   * @return {@link ResponseEntity} containing {@link HttpStatus}
+   */
   @Override
-  public ResponseEntity<Void> assignChat(Long chatId) {
+  public ResponseEntity<Void> assignChat(String groupId) {
 
-    assignChatFacade.assignChat(chatId, authenticatedUser);
+    assignChatFacade.assignChat(groupId, authenticatedUser);
 
     return new ResponseEntity<>(HttpStatus.OK);
   }

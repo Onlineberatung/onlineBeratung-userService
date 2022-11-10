@@ -26,6 +26,30 @@ paths:
                 $ref: '#/components/schemas/TenantDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+    get:
+      tags:
+        - tenant-admin-controller
+      summary: 'Get all tenants'
+      operationId: getAllTenants
+      responses:
+        200:
+          description: OK - successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BasicTenantLicensingDTO'
+        204:
+          description: NO CONTENT - no content found
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
   /tenant/{id}:
@@ -51,10 +75,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TenantDTO'
-        404:
-          description: Not found
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        404:
+          description: Not found
         500:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
     put:
@@ -82,6 +108,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TenantDTO'
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
         409:
           description: CONFLICT - unique constraint validation fails
         500:
@@ -101,7 +129,7 @@ components:
         name:
           type: string
           example: "Company name AG"
-          maxLength: 100
+          maxLength: 40
         subdomain:
           type: string
           example: "companyname"
@@ -118,6 +146,33 @@ components:
         content:
           $ref:
             '#/components/schemas/Content'
+        settings:
+          $ref:
+            '#/components/schemas/Settings'
+    BasicTenantLicensingDTO:
+      type: object
+      required:
+        - id
+        - name
+        - subdomain
+      properties:
+        id:
+          type: long
+          example: 12132
+        name:
+          type: string
+          example: "Company name AG"
+          maxLength: 40
+        subdomain:
+          type: string
+          example: "companyname"
+          maxLength: 100
+        createDate:
+          type: string
+        updateDate:
+          type: string
+        licensing:
+          $ref: '#/components/schemas/Licensing'
     Licensing:
       type: object
       required:
@@ -152,9 +207,40 @@ components:
         claim:
           type: string
           example: "Llorem ipsum..."
+          maxLength: 40
         privacy:
           type: string
           example: "Llorem ipsum..."
         termsAndConditions:
           type: string
           example: "Llorem ipsum..."
+    Settings:
+      type: object
+      properties:
+        featureStatisticsEnabled:
+          type: boolean
+          example: "false"
+        featureTopicsEnabled:
+          type: boolean
+          example: "false"
+        topicsInRegistrationEnabled:
+          type: boolean
+          example: "false"
+        featureDemographicsEnabled:
+          type: boolean
+          example: "false"
+        featureAppointmentsEnabled:
+          type: boolean
+          example: "false"
+        featureGroupChatV2Enabled:
+          type: boolean
+          example: "false"
+        featureToolsEnabled:
+          type: boolean
+          example: "false"
+        featureAttachmentUploadDisabled:
+          type: boolean
+          example: "false"
+        featureToolsOICDToken:
+          type: string
+          example: "1234-1234-1234-1234"

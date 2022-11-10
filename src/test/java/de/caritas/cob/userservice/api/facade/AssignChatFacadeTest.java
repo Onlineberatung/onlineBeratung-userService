@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.facade;
 
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.ACTIVE_CHAT;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,26 +34,28 @@ class AssignChatFacadeTest {
 
   @Test
   void assignChat_Should_ThrowNotFoundException_WhenChatDoesNotExist() {
-    when(chatService.getChat(CHAT_ID)).thenReturn(Optional.empty());
+    when(chatService.getChatByGroupId(RC_GROUP_ID)).thenReturn(Optional.empty());
 
     NotFoundException exception =
         assertThrows(
-            NotFoundException.class, () -> assignChatFacade.assignChat(CHAT_ID, authenticatedUser));
+            NotFoundException.class,
+            () -> assignChatFacade.assignChat(RC_GROUP_ID, authenticatedUser));
 
-    verify(chatService).getChat(CHAT_ID);
+    verify(chatService).getChatByGroupId(RC_GROUP_ID);
     assertThat(exception.getMessage())
-        .isEqualTo(String.format("Chat with id %s not found", CHAT_ID));
+        .isEqualTo(String.format("Chat with group id %s not found", RC_GROUP_ID));
   }
 
   @Test
   void assignChat_Should_ThrowNotFoundException_WhenUserDoesNotExist() {
-    when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
+    when(chatService.getChatByGroupId(RC_GROUP_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(Optional.empty());
 
     NotFoundException exception =
         assertThrows(
-            NotFoundException.class, () -> assignChatFacade.assignChat(CHAT_ID, authenticatedUser));
+            NotFoundException.class,
+            () -> assignChatFacade.assignChat(RC_GROUP_ID, authenticatedUser));
 
     verify(userService).getUserViaAuthenticatedUser(authenticatedUser);
     assertThat(exception.getMessage())
@@ -62,10 +64,10 @@ class AssignChatFacadeTest {
 
   @Test
   void assignChat_Should_AddUserToChat() {
-    when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
+    when(chatService.getChatByGroupId(RC_GROUP_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
     when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(Optional.of(USER));
 
-    assignChatFacade.assignChat(CHAT_ID, authenticatedUser);
+    assignChatFacade.assignChat(RC_GROUP_ID, authenticatedUser);
 
     verify(chatService)
         .saveUserChatRelation(UserChat.builder().user(USER).chat(ACTIVE_CHAT).build());
