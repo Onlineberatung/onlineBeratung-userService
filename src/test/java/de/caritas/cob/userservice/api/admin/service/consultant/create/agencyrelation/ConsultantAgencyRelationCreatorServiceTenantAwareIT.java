@@ -186,6 +186,8 @@ public class ConsultantAgencyRelationCreatorServiceTenantAwareIT {
     session.setTeamSession(true);
     session.setSessionTopics(Lists.newArrayList());
     session.setLanguageCode(LanguageCode.de);
+    session.setIsConsultantDirectlySet(false);
+
     return this.sessionRepository.save(session);
   }
 }
