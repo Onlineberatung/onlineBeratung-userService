@@ -273,6 +273,8 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     session.setLanguageCode(LanguageCode.de);
     session.setTeamSession(true);
     session.setSessionTopics(Lists.newArrayList());
+    session.setIsConsultantDirectlySet(false);
+
     return this.sessionRepository.save(session);
   }
 
