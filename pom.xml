@@ -43,6 +43,7 @@
 		<javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
 		<spring-boot-starter-web.version>2.6.6</spring-boot-starter-web.version>
 		<spring-security-core.version>5.7.5</spring-security-core.version>
+		<spring-beans.version>5.3.18</spring-beans.version>
 		<json-smart.version>2.4.7</json-smart.version>
 		<springfox-swagger-ui.version>2.10.0</springfox-swagger-ui.version>
 		<spring-context-support.version>5.3.23</spring-context-support.version>
@@ -88,6 +89,11 @@
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-core</artifactId>
 			<version>${spring-security-core.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+			<version>${spring-beans.version}</version>
 		</dependency>
 
 		<dependency>
