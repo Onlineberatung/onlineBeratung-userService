@@ -14,6 +14,8 @@ public class CacheManagerConfig {
 
   public static final String AGENCY_CACHE = "agencyCache";
   public static final String CONSULTING_TYPE_CACHE = "consultingTypeCache";
+
+  public static final String APPLICATION_SETTINGS_CACHE = "applicationSettingsCache";
   public static final String TENANT_CACHE = "tenantCache";
   public static final String TENANT_ADMIN_CACHE = "tenantAdminCache";
   public static final String TOPICS_CACHE = "topicsCache";
@@ -66,6 +68,18 @@ public class CacheManagerConfig {
   @Value("${cache.topic.configuration.timeToLiveSeconds}")
   private long topicTimeToLiveSeconds;
 
+  @Value("${cache.appsettings.configuration.maxEntriesLocalHeap}")
+  private long appSettingsMaxEntriesLocalHeap;
+
+  @Value("${cache.appsettings.configuration.eternal}")
+  private boolean appSettingsEternal;
+
+  @Value("${cache.appsettings.configuration.timeToIdleSeconds}")
+  private long appSettingsTimeToIdleSeconds;
+
+  @Value("${cache.appsettings.configuration.timeToLiveSeconds}")
+  private long appSettingsTimeToLiveSeconds;
+
   @Bean
   public CacheManager cacheManager() {
     return new EhCacheCacheManager(ehCacheManager());
@@ -79,7 +93,7 @@ public class CacheManagerConfig {
     config.addCache(buildTenantCacheConfiguration());
     config.addCache(buildTenantAdminCacheConfiguration());
     config.addCache(buildTopicCacheConfiguration());
-
+    config.addCache(buildApplicationSettingsCacheConfiguration());
     return net.sf.ehcache.CacheManager.newInstance(config);
   }
 
@@ -131,5 +145,15 @@ public class CacheManagerConfig {
     topicCacheConfiguration.setTimeToIdleSeconds(topicTimeToIdleSeconds);
     topicCacheConfiguration.setTimeToLiveSeconds(topicTimeToLiveSeconds);
     return topicCacheConfiguration;
+  }
+
+  private CacheConfiguration buildApplicationSettingsCacheConfiguration() {
+    var appSettingsCacheConfiguration = new CacheConfiguration();
+    appSettingsCacheConfiguration.setName(APPLICATION_SETTINGS_CACHE);
+    appSettingsCacheConfiguration.setMaxEntriesLocalHeap(appSettingsMaxEntriesLocalHeap);
+    appSettingsCacheConfiguration.setEternal(appSettingsEternal);
+    appSettingsCacheConfiguration.setTimeToIdleSeconds(appSettingsTimeToIdleSeconds);
+    appSettingsCacheConfiguration.setTimeToLiveSeconds(appSettingsTimeToLiveSeconds);
+    return appSettingsCacheConfiguration;
   }
 }

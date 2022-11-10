@@ -6,8 +6,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
+import de.caritas.cob.userservice.api.service.consultingtype.ApplicationSettingsService;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.api.tenant.TenantData;
+import de.caritas.cob.userservice.applicationsettingsservice.generated.web.model.ApplicationSettingsDTO;
+import de.caritas.cob.userservice.applicationsettingsservice.generated.web.model.SettingDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import de.caritas.cob.userservice.tenantservice.generated.web.model.RestrictedTenantDTO;
 import java.util.List;
@@ -29,6 +32,8 @@ class TenantTemplateSupplierTest {
   @InjectMocks TenantTemplateSupplier tenantTemplateSupplier;
 
   @Mock TenantService tenantService;
+
+  @Mock ApplicationSettingsService applicationSettingsService;
 
   private final EasyRandom easyRandom = new EasyRandom();
 
@@ -106,16 +111,24 @@ class TenantTemplateSupplierTest {
     RestrictedTenantDTO mockedTenantData = easyRandom.nextObject(RestrictedTenantDTO.class);
     mockedTenantData.setSubdomain(VALID_SUBDOMAIN);
 
+    RestrictedTenantDTO mainTenantSubdomainData = easyRandom.nextObject(RestrictedTenantDTO.class);
+    mainTenantSubdomainData.setSubdomain(VALID_SUBDOMAIN);
+
+    when(applicationSettingsService.getApplicationSettings())
+        .thenReturn(
+            new ApplicationSettingsDTO()
+                .mainTenantSubdomainForSingleDomainMultitenancy(new SettingDTO().value("app")));
+    when(tenantService.getRestrictedTenantData(1L)).thenReturn(mockedTenantData);
+    when(tenantService.getRestrictedTenantData("app")).thenReturn(mainTenantSubdomainData);
+
     // when
-    when(tenantService.getRestrictedTenantData(tenantData.getTenantId()))
-        .thenReturn(mockedTenantData);
     List<TemplateDataDTO> templateAttributes = tenantTemplateSupplier.getTemplateAttributes();
 
     // then
     assertTemplateAttributesAreCorrectWithUrl(
-        mockedTenantData, templateAttributes, "https://onlineberatung.net");
+        mainTenantSubdomainData, templateAttributes, "https://onlineberatung.net");
 
-    verify(tenantService, Mockito.never()).getRestrictedTenantData(tenantData.getSubdomain());
+    verify(tenantService).getRestrictedTenantData("app");
     verify(tenantService).getRestrictedTenantData(tenantData.getTenantId());
 
     TenantContext.clear();
@@ -131,6 +144,11 @@ class TenantTemplateSupplierTest {
     assertThat(templateAttributes.get(1).getKey(), is("tenant_claim"));
     assertThat(templateAttributes.get(1).getValue(), is(mockedTenantData.getContent().getClaim()));
 
+    assertUrlTemplateAttributes(templateAttributes, expectedUrl);
+  }
+
+  private static void assertUrlTemplateAttributes(
+      List<TemplateDataDTO> templateAttributes, String expectedUrl) {
     assertThat(templateAttributes.get(2).getKey(), is("url"));
     assertThat(templateAttributes.get(2).getValue(), is(expectedUrl));
 
