@@ -325,7 +325,7 @@ public class CreateEnquiryMessageFacade {
     return createRcFeedbackGroup(session, rcGroupId, agencyList);
   }
 
-  private String createRcFeedbackGroup(
+  public String createRcFeedbackGroup(
       Session session, String rcGroupId, List<ConsultantAgency> agencyList)
       throws CreateEnquiryException {
 
