@@ -5,7 +5,6 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.NewRegistrationResponseDto;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -47,32 +46,33 @@ public class CreateUserFacade {
    *
    * @param userDTO {@link UserDTO}
    */
-  public void createUserAccountWithInitializedConsultingType(final UserDTO userDTO) {
+  public Long createUserAccountWithInitializedConsultingType(final UserDTO userDTO) {
 
     userVerifier.checkIfAllRequiredAttributesAreCorrectlyFilled(userDTO);
     userVerifier.checkIfUsernameIsAvailable(userDTO);
     agencyVerifier.checkIfConsultingTypeMatchesToAgency(userDTO);
 
     KeycloakCreateUserResponseDTO response = identityClient.createKeycloakUser(userDTO);
-    var user =
-        updateKeycloakAccountAndCreateDatabaseUserAccount(
-            response.getUserId(), userDTO, UserRole.USER);
-    NewRegistrationResponseDto newRegistrationResponseDto =
+    var user = updateIdentityAndCreateAccount(response.getUserId(), userDTO, UserRole.USER);
+    var consultingTypeSettings = obtainConsultingTypeSettings(userDTO);
+    var registration =
         createNewConsultingTypeFacade.initializeNewConsultingType(
-            userDTO, user, obtainConsultingTypeSettings(userDTO));
+            userDTO, user, consultingTypeSettings);
 
     try {
       RegistrationStatisticsEvent registrationEvent =
           new RegistrationStatisticsEvent(
               userDTO,
               user,
-              newRegistrationResponseDto.getSessionId(),
+              registration.getSessionId(),
               topicService.findTopicInternalIdentifier(userDTO.getMainTopicId()),
               topicService.findTopicsInternalAttributes(userDTO.getTopicIds()));
       statisticsService.fireEvent(registrationEvent);
     } catch (Exception e) {
       log.error("Could not create registration statistics event", e);
     }
+
+    return registration.getSessionId();
   }
 
   /**
@@ -82,8 +82,7 @@ public class CreateUserFacade {
    * @param userDTO {@link UserDTO}
    * @return {@link User}
    */
-  public User updateKeycloakAccountAndCreateDatabaseUserAccount(
-      String userId, UserDTO userDTO, UserRole role) {
+  public User updateIdentityAndCreateAccount(String userId, UserDTO userDTO, UserRole role) {
 
     User user = null;
     try {

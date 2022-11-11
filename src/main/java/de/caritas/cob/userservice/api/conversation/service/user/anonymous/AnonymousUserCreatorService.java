@@ -42,7 +42,7 @@ public class AnonymousUserCreatorService {
   public AnonymousUserCredentials createAnonymousUser(UserDTO userDto) {
 
     KeycloakCreateUserResponseDTO response = identityClient.createKeycloakUser(userDto);
-    createUserFacade.updateKeycloakAccountAndCreateDatabaseUserAccount(
+    createUserFacade.updateIdentityAndCreateAccount(
         response.getUserId(), userDto, UserRole.ANONYMOUS);
 
     KeycloakLoginResponseDTO kcLoginResponseDTO;

@@ -23,4 +23,6 @@ public interface Messaging {
   Optional<Map<String, String>> findSession(Long sessionId);
 
   boolean isInChat(String chatId, String chatUserId);
+
+  boolean markAsDirectConsultant(Long sessionId);
 }
