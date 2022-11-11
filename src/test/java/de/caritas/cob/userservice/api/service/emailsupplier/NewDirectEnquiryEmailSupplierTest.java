@@ -12,7 +12,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.model.Consultant;
@@ -76,7 +75,7 @@ public class NewDirectEnquiryEmailSupplierTest {
         new ConsultantAgency(
             0L, MAIN_CONSULTANT, AGENCY_ID, nowInUtc(), nowInUtc(), nowInUtc(), null, null);
     when(consultantAgencyRepository.findByConsultantIdAndAgencyIdAndDeleteDateIsNull(
-            eq(MAIN_CONSULTANT_ID), eq(AGENCY_ID)))
+            MAIN_CONSULTANT_ID, AGENCY_ID))
         .thenReturn(List.of(consultantAgency));
 
     var generatedMails = newDirectEnquiryEmailSupplier.generateEmails();
