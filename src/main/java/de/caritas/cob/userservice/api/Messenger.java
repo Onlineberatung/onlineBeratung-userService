@@ -146,6 +146,19 @@ public class Messenger implements Messaging {
   }
 
   @Override
+  public boolean markAsDirectConsultant(Long sessionId) {
+    return sessionRepository
+        .findById(sessionId)
+        .map(
+            session -> {
+              session.setIsConsultantDirectlySet(true);
+              var updatedSession = sessionRepository.save(session);
+              return updatedSession.getIsConsultantDirectlySet();
+            })
+        .orElse(false);
+  }
+
+  @Override
   public Optional<Map<String, String>> findSession(Long sessionId) {
     var session = sessionRepository.findById(sessionId);
 
