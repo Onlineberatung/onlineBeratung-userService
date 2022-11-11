@@ -58,6 +58,7 @@ import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.emailsupplier.AssignEnquiryEmailSupplier;
+import de.caritas.cob.userservice.api.service.emailsupplier.NewDirectEnquiryEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewEnquiryEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewFeedbackEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewMessageEmailSupplier;
@@ -432,6 +433,10 @@ public class EmailNotificationFacadeTest {
   @InjectMocks private EmailNotificationFacade emailNotificationFacade;
 
   @Mock private NewEnquiryEmailSupplier newEnquiryEmailSupplier;
+
+  @SuppressWarnings("unused")
+  @Mock
+  private NewDirectEnquiryEmailSupplier newDirectEnquiryEmailSupplier;
 
   @Spy private AssignEnquiryEmailSupplier assignEnquiryEmailSupplier;
 

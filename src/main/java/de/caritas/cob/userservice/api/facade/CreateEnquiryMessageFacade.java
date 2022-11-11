@@ -159,8 +159,16 @@ public class CreateEnquiryMessageFacade {
           rcFeedbackGroupId,
           createEnquiryExceptionInformation);
 
-      emailNotificationFacade.sendNewEnquiryEmailNotification(
-          session, TenantContext.getCurrentTenantData());
+      if (session.getIsConsultantDirectlySet()) {
+        emailNotificationFacade.sendNewDirectEnquiryEmailNotification(
+            session.getConsultant().getId(),
+            session.getAgencyId(),
+            session.getPostcode(),
+            TenantContext.getCurrentTenantData());
+      } else {
+        emailNotificationFacade.sendNewEnquiryEmailNotification(
+            session, TenantContext.getCurrentTenantData());
+      }
 
       return new CreateEnquiryMessageResponseDTO()
           .rcGroupId(rcGroupId)
