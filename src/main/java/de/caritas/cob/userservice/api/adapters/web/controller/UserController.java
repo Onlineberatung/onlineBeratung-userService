@@ -10,7 +10,6 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
-import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.web.dto.AbsenceDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ChatDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ChatInfoResponseDTO;
@@ -75,7 +74,6 @@ import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataProvider;
 import de.caritas.cob.userservice.api.facade.userdata.KeycloakUserDataProvider;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.Chat;
-import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.model.EnquiryData;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
@@ -106,7 +104,6 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -170,7 +167,6 @@ public class UserController implements UsersApi {
   private final @NonNull VideoChatConfig videoChatConfig;
   private final @NonNull KeycloakUserDataProvider keycloakUserDataProvider;
   private final @NotNull UsersStatisticsFacade usersStatisticsFacade;
-  private final @NotNull RocketChatService rocketChatService;
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
@@ -848,24 +844,6 @@ public class UserController implements UsersApi {
     var consultantToAssign = userAccountProvider.retrieveValidatedConsultantById(consultantId);
     var consultantToKeep = consultantService.getConsultant(userId).orElse(null);
     assignSessionFacade.assignSession(session.get(), consultantToAssign, consultantToKeep);
-
-    // Delete old feedback chat group and create new one
-    try {
-      Set<ConsultantAgency> agencyList = consultantToAssign.getConsultantAgencies();
-      if (consultantToKeep != null) {
-        agencyList.addAll(consultantToKeep.getConsultantAgencies());
-      }
-      String rcFeedbackGroupId =
-          createEnquiryMessageFacade.createRcFeedbackGroup(
-              session.get(), session.get().getGroupId(), List.copyOf(agencyList));
-      rocketChatService.deleteGroupAsSystemUser(session.get().getFeedbackGroupId());
-      session.get().setFeedbackGroupId(rcFeedbackGroupId);
-      sessionService.saveSession(session.get()); // TODO: Unsure if correct approach
-    } catch (Exception exception) {
-      log.error("Consultant reassignment feedback chat error: ", exception);
-      throw new de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException(
-          exception.getMessage(), exception);
-    }
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
