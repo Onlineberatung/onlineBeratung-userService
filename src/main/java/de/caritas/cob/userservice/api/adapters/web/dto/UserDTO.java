@@ -7,7 +7,9 @@ import static de.caritas.cob.userservice.api.helper.UserHelper.CONSULTING_TYPE_R
 import static de.caritas.cob.userservice.api.helper.UserHelper.STATE_REGEXP;
 import static de.caritas.cob.userservice.api.helper.UserHelper.TERMS_ACCEPTED_REGEXP;
 import static de.caritas.cob.userservice.api.helper.UserHelper.VALID_POSTCODE_REGEX;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -155,6 +157,11 @@ public class UserDTO implements UserRegistrationDTO {
     this.age = age;
     this.state = state;
     this.consultingType = consultingType;
+  }
+
+  @JsonIgnore
+  public boolean isConsultantSet() {
+    return isNotBlank(consultantId);
   }
 
   @Override

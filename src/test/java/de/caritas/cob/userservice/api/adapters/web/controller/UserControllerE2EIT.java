@@ -1380,7 +1380,7 @@ class UserControllerE2EIT {
   }
 
   @Test
-  void registerUserShouldSaveDefaultPreferredLanguage() throws Exception {
+  void registerUserShouldReturnCreatedAndSaveDefaults() throws Exception {
     givenAValidTopicServiceResponse();
     givenConsultingTypeServiceResponse();
     givenARealmResource();
@@ -1399,9 +1399,41 @@ class UserControllerE2EIT {
     var savedUser =
         StreamSupport.stream(userRepository.findAll().spliterator(), true)
             .filter(dbUser -> userDTO.getEmail().equals(dbUser.getEmail()))
-            .findFirst();
-    assertTrue(savedUser.isPresent());
-    assertEquals("de", savedUser.get().getLanguageCode().toString());
+            .findFirst()
+            .orElse(null);
+    assertNotNull(savedUser);
+    assertEquals("de", savedUser.getLanguageCode().toString());
+
+    var session = sessionRepository.findByUserUserId(savedUser.getUserId()).get(0);
+    assertFalse(session.getIsConsultantDirectlySet());
+  }
+
+  @Test
+  void registerUserShouldReturnCreatedAndMarkASetConsultant() throws Exception {
+    givenAValidTopicServiceResponse();
+    givenConsultingTypeServiceResponse();
+    givenARealmResource();
+    givenAValidConsultant();
+    givenAUserDTO(consultant.getId());
+
+    mockMvc
+        .perform(
+            post("/users/askers/new")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userDTO)))
+        .andExpect(status().isCreated());
+
+    var savedUser =
+        StreamSupport.stream(userRepository.findAll().spliterator(), true)
+            .filter(dbUser -> userDTO.getEmail().equals(dbUser.getEmail()))
+            .findFirst()
+            .orElse(null);
+    assertNotNull(savedUser);
+
+    var session = sessionRepository.findByUserUserId(savedUser.getUserId()).get(0);
+    assertTrue(session.getIsConsultantDirectlySet());
   }
 
   // FIXME: (for all registerUser tests) Currently, we cannot easily get the generated data. The API
@@ -1529,6 +1561,10 @@ class UserControllerE2EIT {
   }
 
   private void givenAUserDTO() {
+    givenAUserDTO(null);
+  }
+
+  private void givenAUserDTO(String consultantId) {
     userDTO = easyRandom.nextObject(UserDTO.class);
     userDTO.setUsername(RandomStringUtils.randomAlphabetic(5, 30));
     userDTO.setAge("17");
@@ -1536,7 +1572,7 @@ class UserControllerE2EIT {
     userDTO.setPostcode(RandomStringUtils.randomNumeric(5));
     userDTO.setTermsAccepted("true");
     userDTO.setConsultingType("1");
-    userDTO.setConsultantId(null);
+    userDTO.setConsultantId(consultantId);
     userDTO.setAgencyId(aPositiveLong());
     userDTO.setEmail(givenAValidEmail());
   }

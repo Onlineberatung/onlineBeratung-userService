@@ -177,9 +177,16 @@ public class UserController implements UsersApi {
   @Override
   public ResponseEntity<Void> registerUser(@Valid @RequestBody UserDTO user) {
     user.setNewUserAccount(true);
-    createUserFacade.createUserAccountWithInitializedConsultingType(user);
+    var sessionId = createUserFacade.createUserAccountWithInitializedConsultingType(user);
 
-    return new ResponseEntity<>(HttpStatus.CREATED);
+    HttpStatus status;
+    if (user.isConsultantSet() && !messenger.markAsDirectConsultant(sessionId)) {
+      status = HttpStatus.INTERNAL_SERVER_ERROR;
+    } else {
+      status = HttpStatus.CREATED;
+    }
+
+    return ResponseEntity.status(status).build();
   }
 
   /**
