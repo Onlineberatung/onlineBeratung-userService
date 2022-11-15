@@ -1,0 +1,89 @@
+openapi: 3.0.1
+
+info:
+  title: Definition for Application Settings API
+  description: This information will be replaced by the SpringFox config information
+  version: 0.0.1
+
+paths:
+  /settings:
+    get:
+      tags:
+        - applicationsettings-controller
+      summary: 'Get all application settings'
+      operationId: getApplicationSettings
+      responses:
+        200:
+          description: OK - successful operation
+
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationSettingsDTO'
+        204:
+          description: NO CONTENT - no content found
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+
+components:
+  schemas:
+    ApplicationSettingsDTO:
+      type: object
+      required:
+        - multitenancyWithSingleDomainEnabled
+        - multitenancyEnabled
+      properties:
+        multitenancyWithSingleDomainEnabled:
+          allOf:
+            - $ref: '#/components/schemas/FeatureToggleDTO'
+        multitenancyEnabled:
+          allOf:
+            - $ref: '#/components/schemas/FeatureToggleDTO'
+        useTenantService:
+          allOf:
+            - $ref: '#/components/schemas/FeatureToggleDTO'
+        enableWalkthrough:
+          allOf:
+            - $ref: '#/components/schemas/FeatureToggleDTO'
+        disableVideoAppointments:
+          allOf:
+            - $ref: '#/components/schemas/FeatureToggleDTO'
+        mainTenantSubdomainForSingleDomainMultitenancy:
+          allOf:
+            - $ref: '#/components/schemas/SettingDTO'
+        budibaseSSO:
+          allOf:
+            - $ref: '#/components/schemas/FeatureToggleDTO'
+        useOverviewPage:
+          allOf:
+            - $ref: '#/components/schemas/FeatureToggleDTO'
+
+
+    FeatureToggleDTO:
+      type: object
+      required:
+        - value
+        - readOnly
+      properties:
+        value:
+          type: boolean
+          example: true
+        readOnly:
+          type: boolean
+          example: false
+    SettingDTO:
+      type: object
+      required:
+        - value
+        - readOnly
+      properties:
+        value:
+          type: string
+          example: true
+        readOnly:
+          type: boolean
+          example: false

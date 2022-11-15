@@ -219,6 +219,7 @@ public class SessionService {
             .userGender(userDto.getUserGender())
             .userAge(userDto.getUserAge())
             .counsellingRelation(userDto.getCounsellingRelation())
+            .isConsultantDirectlySet(false)
             .build();
 
     session.setSessionTopics(createSessionTopics(userDto.getTopicIds(), session));

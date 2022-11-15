@@ -13,6 +13,7 @@ import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.ConsultantService;
+import de.caritas.cob.userservice.api.service.appointment.AppointmentService;
 import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class ValidatedUserAccountProvider {
 
   private final @NonNull UserService userService;
   private final @NonNull ConsultantService consultantService;
+  private final @NonNull AppointmentService appointmentService;
   private final @NonNull AuthenticatedUser authenticatedUser;
   private final @NonNull IdentityClient identityClient;
   private final @NonNull RocketChatService rocketChatService;
@@ -121,7 +123,7 @@ public class ValidatedUserAccountProvider {
     UserUpdateRequestDTO requestDTO =
         new UserUpdateRequestDTO(user.getRcUserId(), userUpdateDataDTO);
     this.rocketChatService.updateUser(requestDTO);
-
+    this.appointmentService.updateAskerEmail(user.getUserId(), email);
     user.setEmail(email);
     this.userService.saveUser(user);
   }

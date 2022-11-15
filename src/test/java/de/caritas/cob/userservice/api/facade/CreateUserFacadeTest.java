@@ -164,8 +164,7 @@ public class CreateUserFacadeTest {
         .thenReturn(CONSULTING_TYPE_SETTINGS_KREUZBUND);
     doNothing().when(keycloakService).updatePassword(anyString(), anyString());
 
-    createUserFacade.updateKeycloakAccountAndCreateDatabaseUserAccount(
-        USER_ID, USER_DTO_SUCHT, UserRole.USER);
+    createUserFacade.updateIdentityAndCreateAccount(USER_ID, USER_DTO_SUCHT, UserRole.USER);
 
     verify(keycloakService, times(1)).updateRole(any(), any(UserRole.class));
     verify(keycloakService, times(1)).updatePassword(anyString(), anyString());
@@ -177,8 +176,7 @@ public class CreateUserFacadeTest {
       updateKeycloakAccountAndCreateDatabaseUserAccount_Should_ThrowInternalServerErrorExceptionAndRollbackUserAccount_When_UpdateKeycloakPwFails() {
     doThrow(new RuntimeException()).when(keycloakService).updatePassword(anyString(), anyString());
 
-    createUserFacade.updateKeycloakAccountAndCreateDatabaseUserAccount(
-        USER_ID, USER_DTO_SUCHT, UserRole.USER);
+    createUserFacade.updateIdentityAndCreateAccount(USER_ID, USER_DTO_SUCHT, UserRole.USER);
 
     verify(rollbackFacade, times(1)).rollBackUserAccount(any());
   }
@@ -190,8 +188,7 @@ public class CreateUserFacadeTest {
         .when(keycloakService)
         .updateRole(anyString(), any(UserRole.class));
 
-    createUserFacade.updateKeycloakAccountAndCreateDatabaseUserAccount(
-        USER_ID, USER_DTO_SUCHT, UserRole.USER);
+    createUserFacade.updateIdentityAndCreateAccount(USER_ID, USER_DTO_SUCHT, UserRole.USER);
 
     verify(rollbackFacade, times(1)).rollBackUserAccount(any());
   }
@@ -205,8 +202,7 @@ public class CreateUserFacadeTest {
     when(userService.createUser(any(), any(), any(), any(), anyBoolean(), any()))
         .thenThrow(new IllegalArgumentException());
 
-    createUserFacade.updateKeycloakAccountAndCreateDatabaseUserAccount(
-        USER_ID, USER_DTO_SUCHT, UserRole.USER);
+    createUserFacade.updateIdentityAndCreateAccount(USER_ID, USER_DTO_SUCHT, UserRole.USER);
 
     verify(rollbackFacade, times(1)).rollBackUserAccount(any());
   }

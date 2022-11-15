@@ -3,7 +3,10 @@ package de.caritas.cob.userservice.api.service.emailsupplier;
 import static de.caritas.cob.userservice.api.tenant.TenantContext.getCurrentTenantData;
 
 import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
+import de.caritas.cob.userservice.api.service.consultingtype.ApplicationSettingsService;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
+import de.caritas.cob.userservice.applicationsettingsservice.generated.web.model.ApplicationSettingsDTO;
+import de.caritas.cob.userservice.applicationsettingsservice.generated.web.model.SettingDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import de.caritas.cob.userservice.tenantservice.generated.web.model.RestrictedTenantDTO;
 import java.net.URI;
@@ -24,6 +27,8 @@ public class TenantTemplateSupplier {
   private static final String HTTPS = "https://";
   private final @NonNull TenantService tenantService;
 
+  private final @NonNull ApplicationSettingsService applicationSettingsService;
+
   @Value("${app.base.url}")
   private String applicationBaseUrl;
 
@@ -32,16 +37,43 @@ public class TenantTemplateSupplier {
 
   public List<TemplateDataDTO> getTemplateAttributes() {
 
-    RestrictedTenantDTO tenantData = getRestrictedTenantDTO();
-
     List<TemplateDataDTO> templateAttributes = new ArrayList<>();
-    templateAttributes.add(getTenantName(tenantData));
-    templateAttributes.add(getTenantClaim(tenantData));
+    RestrictedTenantDTO tenantData = getRestrictedTenantDTO();
+    if (multitenancyWithSingleDomain) {
+      RestrictedTenantDTO rootDomainTenantData =
+          getRestrictedTenantDTOForSingleDomainMultitenancy();
+      templateAttributes.add(getTenantName(rootDomainTenantData));
+      templateAttributes.add(getTenantClaim(rootDomainTenantData));
+    } else {
+      templateAttributes.add(getTenantName(tenantData));
+      templateAttributes.add(getTenantClaim(tenantData));
+    }
+    addUrlBasedAttributes(tenantData, templateAttributes);
+    return templateAttributes;
+  }
+
+  private void addUrlBasedAttributes(
+      RestrictedTenantDTO tenantData, List<TemplateDataDTO> templateAttributes) {
     String tenantBaseUrl = getTenantBaseUrl(tenantData.getSubdomain());
     templateAttributes.add(new TemplateDataDTO().key("url").value(tenantBaseUrl));
     templateAttributes.add(getTenantImprintUrl(tenantBaseUrl));
     templateAttributes.add(getTanantPrivacyUrl(tenantBaseUrl));
-    return templateAttributes;
+  }
+
+  private RestrictedTenantDTO getRestrictedTenantDTOForSingleDomainMultitenancy() {
+    ApplicationSettingsDTO applicationSettings =
+        applicationSettingsService.getApplicationSettings();
+    SettingDTO mainTenantSubdomainForSingleDomainMultitenancy =
+        applicationSettings.getMainTenantSubdomainForSingleDomainMultitenancy();
+
+    if (mainTenantSubdomainForSingleDomainMultitenancy == null
+        || mainTenantSubdomainForSingleDomainMultitenancy.getValue() == null) {
+      log.error("main tenant subdomain not found in app settings");
+      throw new IllegalStateException("main tenant subdomain not found in app settings");
+    }
+
+    var mainTenantSubdomain = mainTenantSubdomainForSingleDomainMultitenancy.getValue();
+    return tenantService.getRestrictedTenantData(mainTenantSubdomain);
   }
 
   private RestrictedTenantDTO getRestrictedTenantDTO() {

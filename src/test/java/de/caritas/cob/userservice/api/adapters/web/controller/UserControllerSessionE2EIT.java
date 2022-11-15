@@ -1448,6 +1448,7 @@ class UserControllerSessionE2EIT {
     session.setAgencyId(consultant.getConsultantAgencies().iterator().next().getAgencyId());
     session.setStatus(SessionStatus.IN_PROGRESS);
     session.setTeamSession(true);
+    session.setIsConsultantDirectlySet(false);
 
     sessionRepository.save(session);
     deleteSession = true;
@@ -1466,6 +1467,7 @@ class UserControllerSessionE2EIT {
     session.setTeamSession(false);
     session.setCreateDate(LocalDateTime.now());
     session.setGroupId(RandomStringUtils.randomAlphabetic(17));
+    session.setIsConsultantDirectlySet(false);
 
     sessionRepository.save(session);
     deleteSession = true;

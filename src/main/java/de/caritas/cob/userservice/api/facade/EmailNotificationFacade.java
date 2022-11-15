@@ -20,6 +20,7 @@ import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.emailsupplier.AssignEnquiryEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.EmailSupplier;
+import de.caritas.cob.userservice.api.service.emailsupplier.NewDirectEnquiryEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewEnquiryEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewFeedbackEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewMessageEmailSupplier;
@@ -63,6 +64,7 @@ public class EmailNotificationFacade {
   private final @NonNull IdentityClient identityClient;
   private final @NonNull IdentityClientConfig identityClientConfig;
   private final @NonNull NewEnquiryEmailSupplier newEnquiryEmailSupplier;
+  private final @NonNull NewDirectEnquiryEmailSupplier newDirectEnquiryEmailSupplier;
   private final @NonNull AssignEnquiryEmailSupplier assignEnquiryEmailSupplier;
   private final @NonNull TenantTemplateSupplier tenantTemplateSupplier;
 
@@ -93,6 +95,27 @@ public class EmailNotificationFacade {
             session.getId(),
             ex);
       }
+    }
+  }
+
+  @Async
+  public void sendNewDirectEnquiryEmailNotification(
+      String consultantId, Long agencyId, String postCode, TenantData tenantData) {
+    log.info(
+        "Preparing NEW_DIRECT_ENQUIRY_EMAIL_NOTIFICATION email to consultant ({}) in "
+            + "agency ({})",
+        consultantId,
+        agencyId);
+
+    try {
+      TenantContext.setCurrentTenantData(tenantData);
+      newDirectEnquiryEmailSupplier.setAgencyId(agencyId);
+      newDirectEnquiryEmailSupplier.setConsultantId(consultantId);
+      newDirectEnquiryEmailSupplier.setPostCode(postCode);
+      sendMailTasksToMailService(newDirectEnquiryEmailSupplier);
+      TenantContext.clear();
+    } catch (Exception ex) {
+      log.error("Failed to send NEW_DIRECT_ENQUIRY_EMAIL_NOTIFICATION", ex);
     }
   }
 

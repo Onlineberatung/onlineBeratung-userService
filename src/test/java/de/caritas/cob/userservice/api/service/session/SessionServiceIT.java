@@ -185,6 +185,7 @@ class SessionServiceIT {
     session.setLanguageCode(LanguageCode.de);
     session.setPostcode("12345");
     session.setRegistrationType(RegistrationType.ANONYMOUS);
+    session.setIsConsultantDirectlySet(false);
     sessionService.saveSession(session);
     assertThrows(
         javax.ws.rs.BadRequestException.class,
