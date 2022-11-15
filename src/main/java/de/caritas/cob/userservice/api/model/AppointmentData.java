@@ -17,4 +17,5 @@ public class AppointmentData {
   private final String counselor;
   private final String date;
   private final String duration;
+  private final String note;
 }

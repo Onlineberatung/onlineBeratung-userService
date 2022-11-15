@@ -162,7 +162,8 @@ public class AppointmentController implements AppointmentsApi {
             enquiryAppointmentDTO.getUserName(),
             enquiryAppointmentDTO.getCounselorEmail(),
             enquiryAppointmentDTO.getDate(),
-            enquiryAppointmentDTO.getDuration());
+            enquiryAppointmentDTO.getDuration(),
+            enquiryAppointmentDTO.getNote());
     var enquiryData =
         new EnquiryData(
             user,

@@ -241,6 +241,9 @@ components:
         duration:
           type: string
           example: 30
+        note:
+          type: string
+          example: some note
         language:
           $ref: '#/components/schemas/LanguageCode'
         t:
