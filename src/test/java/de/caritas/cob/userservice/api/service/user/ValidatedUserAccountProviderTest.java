@@ -27,6 +27,7 @@ import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.ConsultantService;
+import de.caritas.cob.userservice.api.service.appointment.AppointmentService;
 import java.util.Optional;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
@@ -49,6 +50,7 @@ public class ValidatedUserAccountProviderTest {
   @Mock private KeycloakService keycloakService;
   @Mock private RocketChatService rocketChatService;
   @Mock private UserHelper userHelper;
+  @Mock private AppointmentService appointmentService;
 
   @Test
   public void retrieveValidatedUser_Should_ReturnUser_When_UserIsPresent() {
@@ -136,12 +138,14 @@ public class ValidatedUserAccountProviderTest {
     when(this.authenticatedUser.getUserId()).thenReturn("user");
     when(this.userService.getUser("user")).thenReturn(Optional.of(user));
 
-    this.accountProvider.changeUserAccountEmailAddress(Optional.of("newMail"));
+    final String newMail = "newMail";
+    this.accountProvider.changeUserAccountEmailAddress(Optional.of(newMail));
 
-    verify(keycloakService).changeEmailAddress("newMail");
+    verify(keycloakService).changeEmailAddress(newMail);
     verify(this.rocketChatService, times(1))
-        .updateUser(new UserUpdateRequestDTO(user.getRcUserId(), new UserUpdateDataDTO("newMail")));
-    user.setEmail("newMail");
+        .updateUser(new UserUpdateRequestDTO(user.getRcUserId(), new UserUpdateDataDTO(newMail)));
+    verify(this.appointmentService, times(1)).updateAskerEmail(user.getUserId(), newMail);
+    user.setEmail(newMail);
     verify(this.userService, times(1)).saveUser(user);
     verifyNoMoreInteractions(this.rocketChatService);
     verify(this.consultantService, times(1)).getConsultant(any());
@@ -191,6 +195,7 @@ public class ValidatedUserAccountProviderTest {
     verify(rocketChatService)
         .updateUser(
             new UserUpdateRequestDTO(user.getRcUserId(), new UserUpdateDataDTO(dummyEmail)));
+    verify(this.appointmentService, times(1)).updateAskerEmail(user.getUserId(), dummyEmail);
     user.setEmail(dummyEmail);
     verify(userService).saveUser(user);
     verifyNoMoreInteractions(rocketChatService);
