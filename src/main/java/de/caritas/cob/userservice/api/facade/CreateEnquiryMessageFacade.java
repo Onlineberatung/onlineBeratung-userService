@@ -101,7 +101,7 @@ public class CreateEnquiryMessageFacade {
                         consultantAgency
                             .getConsultant()
                             .getEmail()
-                            .equals(enquiryData.getAppointmentData().getCounselor()))
+                            .equals(enquiryData.getConsultantEmail()))
                 .collect(Collectors.toList());
       } else {
         agencyList = consultantAgencyService.findConsultantsByAgencyId(session.getAgencyId());
@@ -125,9 +125,13 @@ public class CreateEnquiryMessageFacade {
           enquiryData.getUser(),
           enquiryData.getRocketChatCredentials(),
           createEnquiryExceptionInformation);
-      MessageResponseDTO messageResponse = null;
+      MessageResponseDTO messageResponse;
 
-      if (!isAppointmentEnquiryMessage(enquiryData)) {
+      if (isAppointmentEnquiryMessage(enquiryData)) {
+        messageResponse =
+            messageServiceProvider.assignUserToRocketChatGroup(
+                rcGroupId, createEnquiryExceptionInformation);
+      } else {
         var rocketChatData =
             new RocketChatData(
                 enquiryData.getMessage(),
@@ -139,6 +143,7 @@ public class CreateEnquiryMessageFacade {
             messageServiceProvider.postEnquiryMessage(
                 rocketChatData, createEnquiryExceptionInformation);
       }
+
       messageServiceProvider.postWelcomeMessageIfConfigured(
           rcGroupId,
           enquiryData.getUser(),
@@ -168,7 +173,7 @@ public class CreateEnquiryMessageFacade {
       return new CreateEnquiryMessageResponseDTO()
           .rcGroupId(rcGroupId)
           .sessionId(enquiryData.getSessionId())
-          .t(messageResponse != null ? messageResponse.getT() : "");
+          .t(messageResponse.getT());
 
     } catch (CreateEnquiryException exception) {
       doRollback(exception.getExceptionInformation(), enquiryData.getRocketChatCredentials());
@@ -178,7 +183,7 @@ public class CreateEnquiryMessageFacade {
   }
 
   private boolean isAppointmentEnquiryMessage(EnquiryData enquiryData) {
-    return enquiryData.getAppointmentData() != null;
+    return enquiryData.getConsultantEmail() != null;
   }
 
   private void checkIfKeycloakAndRocketChatUsernamesMatch(String rcUserId, User user) {

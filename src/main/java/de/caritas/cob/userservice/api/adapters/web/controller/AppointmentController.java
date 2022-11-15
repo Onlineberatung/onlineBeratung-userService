@@ -15,7 +15,6 @@ import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
 import de.caritas.cob.userservice.api.facade.assignsession.AssignEnquiryFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.model.AppointmentData;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.EnquiryData;
 import de.caritas.cob.userservice.api.port.in.Organizing;
@@ -155,15 +154,6 @@ public class AppointmentController implements AppointmentsApi {
     var user = this.userAccountProvider.retrieveValidatedUser();
     var rocketChatCredentials =
         RocketChatCredentials.builder().rocketChatToken(rcToken).rocketChatUserId(rcUserId).build();
-
-    AppointmentData appointmentData =
-        new AppointmentData(
-            enquiryAppointmentDTO.getTitle(),
-            enquiryAppointmentDTO.getUserName(),
-            enquiryAppointmentDTO.getCounselorEmail(),
-            enquiryAppointmentDTO.getDate(),
-            enquiryAppointmentDTO.getDuration(),
-            enquiryAppointmentDTO.getNote());
     var enquiryData =
         new EnquiryData(
             user,
@@ -173,7 +163,7 @@ public class AppointmentController implements AppointmentsApi {
             rocketChatCredentials,
             enquiryAppointmentDTO.getT(),
             enquiryAppointmentDTO.getOrg(),
-            appointmentData);
+            enquiryAppointmentDTO.getCounselorEmail());
 
     var response = createEnquiryMessageFacade.createEnquiryMessage(enquiryData);
 
