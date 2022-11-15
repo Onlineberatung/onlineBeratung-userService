@@ -125,13 +125,9 @@ public class CreateEnquiryMessageFacade {
           enquiryData.getUser(),
           enquiryData.getRocketChatCredentials(),
           createEnquiryExceptionInformation);
-      MessageResponseDTO messageResponse;
+      MessageResponseDTO messageResponse = null;
 
-      if (isAppointmentEnquiryMessage(enquiryData)) {
-        messageResponse =
-            messageServiceProvider.postSendAppointmentBookedMessage(
-                rcGroupId, createEnquiryExceptionInformation, enquiryData.getAppointmentData());
-      } else {
+      if (!isAppointmentEnquiryMessage(enquiryData)) {
         var rocketChatData =
             new RocketChatData(
                 enquiryData.getMessage(),
@@ -143,7 +139,6 @@ public class CreateEnquiryMessageFacade {
             messageServiceProvider.postEnquiryMessage(
                 rocketChatData, createEnquiryExceptionInformation);
       }
-
       messageServiceProvider.postWelcomeMessageIfConfigured(
           rcGroupId,
           enquiryData.getUser(),
@@ -173,7 +168,7 @@ public class CreateEnquiryMessageFacade {
       return new CreateEnquiryMessageResponseDTO()
           .rcGroupId(rcGroupId)
           .sessionId(enquiryData.getSessionId())
-          .t(messageResponse.getT());
+          .t(messageResponse != null ? messageResponse.getT() : "");
 
     } catch (CreateEnquiryException exception) {
       doRollback(exception.getExceptionInformation(), enquiryData.getRocketChatCredentials());
