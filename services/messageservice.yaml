@@ -599,7 +599,7 @@ components:
         - "USER_MUTED"
         - "USER_UNMUTED"
         - "E2EE_ACTIVATED"
-        - "APPOINTMENT_SET"
+        - "INITIAL_APPOINTMENT_DEFINED"
 
     UserDTO:
       type: object
