@@ -164,7 +164,7 @@ public class AssignSessionFacadeTest {
   }
 
   @Test
-  public void assignSession_Should_DelteOldFeedbackChat_When_ItExists()
+  public void assignSession_Should_DeleteOldFeedbackChat_When_ItExists()
       throws CreateEnquiryException {
     Session session = new EasyRandom().nextObject(Session.class);
     session.setTeamSession(false);
