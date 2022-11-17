@@ -162,7 +162,6 @@ public class AppointmentController implements AppointmentsApi {
             null,
             rocketChatCredentials,
             enquiryAppointmentDTO.getT(),
-            enquiryAppointmentDTO.getOrg(),
             enquiryAppointmentDTO.getCounselorEmail());
 
     var response = createEnquiryMessageFacade.createEnquiryMessage(enquiryData);

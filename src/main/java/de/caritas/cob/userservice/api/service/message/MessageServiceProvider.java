@@ -69,11 +69,7 @@ public class MessageServiceProvider {
     var rcCredentials = rocketChatData.getRocketChatCredentials();
     MessageControllerApi controllerApi = messageServiceApiControllerFactory.createControllerApi();
     addDefaultHeaders(controllerApi.getApiClient());
-    var message =
-        new MessageDTO()
-            .message(rocketChatData.getMessage())
-            .org(rocketChatData.getOrg())
-            .t(rocketChatData.getType());
+    var message = new MessageDTO().message(rocketChatData.getMessage()).t(rocketChatData.getType());
     return controllerApi.createMessage(
         rcCredentials.getRocketChatToken(),
         rcCredentials.getRocketChatUserId(),
