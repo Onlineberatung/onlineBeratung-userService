@@ -335,46 +335,6 @@ class UserControllerSessionE2EIT {
   }
 
   @Test
-  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
-  void createEnquiryMessageShouldTransmitOriginalMessage() throws Exception {
-    givenAUserWithASessionNotEnquired();
-    givenValidRocketChatTechUserResponse();
-    givenValidRocketChatCreationResponse();
-    givenAnEnquiryMessageDto(false);
-    enquiryMessageDTO.setOrg("this is the original message");
-    givenASuccessfulMessageResponse("e2e");
-
-    mockMvc
-        .perform(
-            post("/users/sessions/{sessionId}/enquiry/new", session.getId())
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .header(RC_USER_ID_HEADER_PARAMETER_NAME, RC_USER_ID)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(enquiryMessageDTO))
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isCreated())
-        .andExpect(jsonPath("sessionId", is(session.getId().intValue())))
-        .andExpect(jsonPath("rcGroupId", is("rcGroupId")))
-        .andExpect(jsonPath("t", is("e2e")));
-
-    var requestMessage =
-        requestCaptor.getAllValues().stream()
-            .map(HttpEntity::getBody)
-            .filter(
-                m ->
-                    m
-                        instanceof
-                        de.caritas.cob.userservice.messageservice.generated.web.model.MessageDTO)
-            .map(m -> (de.caritas.cob.userservice.messageservice.generated.web.model.MessageDTO) m)
-            .findFirst();
-    assertTrue(requestMessage.isPresent());
-    assertEquals("this is the original message", requestMessage.get().getOrg());
-    restoreSession();
-  }
-
-  @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   void getSessionsForAuthenticatedConsultantShouldReturnGroupChats() throws Exception {
     givenAValidUser();

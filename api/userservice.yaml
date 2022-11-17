@@ -2241,9 +2241,6 @@ components:
           example: "ag89h3tjkerg94t"
         t:
           type: string
-        org:
-          type: string
-          example: "Lorem ipsum dolor sit amet, consetetur..."
 
     VideoCallMessageDTO:
       type: object
@@ -2509,9 +2506,6 @@ components:
           $ref: '#/components/schemas/LanguageCode'
         t:
           type: string
-        org:
-          type: string
-          example: "Lorem ipsum dolor sit amet, consetetur..."
 
     CreateEnquiryMessageResponseDTO:
       type: object
