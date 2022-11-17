@@ -17,6 +17,7 @@ import de.caritas.cob.userservice.appointmentservice.generated.ApiClient;
 import de.caritas.cob.userservice.appointmentservice.generated.web.AgencyApi;
 import de.caritas.cob.userservice.appointmentservice.generated.web.ConsultantApi;
 import de.caritas.cob.userservice.appointmentservice.generated.web.model.AgencyConsultantSyncRequestDTO;
+import de.caritas.cob.userservice.appointmentservice.generated.web.model.AskerDTO;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.NonNull;
@@ -184,5 +185,21 @@ public class AppointmentService {
         this.appointmentAskerServiceApiControllerFactory.createControllerApi();
     addTechnicalUserHeaders(controllerApi.getApiClient());
     controllerApi.deleteAskerData(askerId);
+  }
+
+  public void updateAskerEmail(String askerId, String email) {
+    if (!appointmentFeatureEnabled) {
+      return;
+    }
+    de.caritas.cob.userservice.appointmentservice.generated.web.AskerApi askerApi =
+        this.appointmentAskerServiceApiControllerFactory.createControllerApi();
+    addTechnicalUserHeaders(askerApi.getApiClient());
+    try {
+      de.caritas.cob.userservice.appointmentservice.generated.web.model.AskerDTO askerDTO =
+          new AskerDTO().id(askerId).email(email);
+      askerApi.updateAskerEmail(askerId, askerDTO);
+    } catch (Exception e) {
+      log.error(e.getMessage());
+    }
   }
 }
