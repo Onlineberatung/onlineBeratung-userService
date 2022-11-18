@@ -49,6 +49,7 @@
 		<json-smart.version>2.4.7</json-smart.version>
 		<springfox-swagger-ui.version>2.10.0</springfox-swagger-ui.version>
 		<spring-context-support.version>5.3.23</spring-context-support.version>
+		<ehcache.version>2.10.9.2</ehcache.version>
 	</properties>
 
 	<dependencies>
@@ -139,6 +140,11 @@
 			<version>0.2.2</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.codehaus.plexus</groupId>
+			<artifactId>plexus-utils</artifactId>
+			<version>3.3.0</version>
+		</dependency>
 		<!-- SpringFox: generate YAML file from POJOs and generate documentation -->
 		<dependency>
 			<groupId>io.springfox</groupId>
@@ -183,6 +189,12 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>com.github.jknack</groupId>
+			<artifactId>handlebars</artifactId>
+			<version>4.3.1</version>
 		</dependency>
 
 		<!-- Apache Commons Lang -->
@@ -276,6 +288,13 @@
 		<dependency>
 			<groupId>net.sf.ehcache</groupId>
 			<artifactId>ehcache</artifactId>
+			<version>${ehcache.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-databind</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>

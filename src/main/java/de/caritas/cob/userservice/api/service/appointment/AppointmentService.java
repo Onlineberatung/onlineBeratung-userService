@@ -24,6 +24,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -193,7 +194,7 @@ public class AppointmentService {
     }
     de.caritas.cob.userservice.appointmentservice.generated.web.AskerApi askerApi =
         this.appointmentAskerServiceApiControllerFactory.createControllerApi();
-    addTechnicalUserHeaders(askerApi.getApiClient());
+    addDefaultHeaders(askerApi.getApiClient());
     try {
       de.caritas.cob.userservice.appointmentservice.generated.web.model.AskerDTO askerDTO =
           new AskerDTO().id(askerId).email(email);
@@ -201,5 +202,12 @@ public class AppointmentService {
     } catch (Exception e) {
       log.error(e.getMessage());
     }
+  }
+
+  private void addDefaultHeaders(
+      de.caritas.cob.userservice.appointmentservice.generated.ApiClient apiClient) {
+    HttpHeaders headers = this.securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders();
+    tenantHeaderSupplier.addTenantHeader(headers);
+    headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
   }
 }

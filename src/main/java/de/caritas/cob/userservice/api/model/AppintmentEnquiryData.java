@@ -22,5 +22,4 @@ public class AppintmentEnquiryData {
   private final String language;
   private final RocketChatCredentials rocketChatCredentials;
   private String type;
-  private String org;
 }

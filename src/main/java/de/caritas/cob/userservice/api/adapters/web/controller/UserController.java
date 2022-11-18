@@ -275,7 +275,6 @@ public class UserController implements UsersApi {
             language,
             rocketChatCredentials,
             enquiryMessage.getT(),
-            enquiryMessage.getOrg(),
             null);
 
     var response = createEnquiryMessageFacade.createEnquiryMessage(enquiryData);

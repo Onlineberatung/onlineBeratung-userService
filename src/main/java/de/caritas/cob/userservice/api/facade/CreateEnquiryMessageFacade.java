@@ -137,8 +137,7 @@ public class CreateEnquiryMessageFacade {
                 enquiryData.getMessage(),
                 enquiryData.getRocketChatCredentials(),
                 rcGroupId,
-                enquiryData.getType(),
-                enquiryData.getOrg());
+                enquiryData.getType());
         messageResponse =
             messageServiceProvider.postEnquiryMessage(
                 rocketChatData, createEnquiryExceptionInformation);
