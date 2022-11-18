@@ -166,7 +166,6 @@ public class UserController implements UsersApi {
   private final @NonNull AskerDataProvider askerDataProvider;
   private final @NonNull VideoChatConfig videoChatConfig;
   private final @NonNull KeycloakUserDataProvider keycloakUserDataProvider;
-
   private final @NotNull UsersStatisticsFacade usersStatisticsFacade;
 
   /**
