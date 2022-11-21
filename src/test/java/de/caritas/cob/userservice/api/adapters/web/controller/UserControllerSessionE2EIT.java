@@ -1490,12 +1490,12 @@ class UserControllerSessionE2EIT {
     assertEquals(count, occurrencesOfAddTech);
   }
 
-  private void verifyRocketChatTechUserRemovedFromGroup(
+  private void verifyRocketChatTechUserLeftGroup(
       CapturedOutput logOutput, String groupId, int count) {
     int occurrencesOfRemoveTech =
         StringUtils.countOccurrencesOf(
             logOutput.getOut(),
-            "RocketChatTestConfig.removeTechnicalUserFromGroup(" + groupId + ") called");
+            "RocketChatTestConfig.leaveFromGroupAsTechnicalUser(" + groupId + ") called");
     assertEquals(count, occurrencesOfRemoveTech);
   }
 

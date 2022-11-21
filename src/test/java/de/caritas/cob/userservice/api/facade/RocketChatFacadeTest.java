@@ -34,7 +34,7 @@ public class RocketChatFacadeTest {
 
     verify(this.rocketChatService, times(1)).addTechnicalUserToGroup("group");
     verify(this.rocketChatService, times(1)).addUserToGroup("user", "group");
-    verify(this.rocketChatService, times(1)).removeTechnicalUserFromGroup("group");
+    verify(this.rocketChatService, times(1)).leaveFromGroupAsTechnicalUser("group");
   }
 
   @Test(expected = InternalServerErrorException.class)
@@ -56,7 +56,7 @@ public class RocketChatFacadeTest {
 
     verify(this.rocketChatService, times(1)).addTechnicalUserToGroup("group");
     verify(this.rocketChatService, times(1)).removeSystemMessages(eq("group"), any(), any());
-    verify(this.rocketChatService, times(1)).removeTechnicalUserFromGroup("group");
+    verify(this.rocketChatService, times(1)).leaveFromGroupAsTechnicalUser("group");
   }
 
   @Test(expected = InternalServerErrorException.class)
@@ -76,7 +76,7 @@ public class RocketChatFacadeTest {
 
     verify(this.rocketChatService, times(1)).addTechnicalUserToGroup("group");
     verify(this.rocketChatService, times(1)).getMembersOfGroup("group");
-    verify(this.rocketChatService, times(1)).removeTechnicalUserFromGroup("group");
+    verify(this.rocketChatService, times(1)).leaveFromGroupAsTechnicalUser("group");
   }
 
   @Test(expected = InternalServerErrorException.class)
@@ -109,21 +109,21 @@ public class RocketChatFacadeTest {
   }
 
   @Test
-  public void removeTechnicalUserFromGroup_Should_removeTechnicalUserFromGroup() throws Exception {
-    this.rocketChatFacade.removeTechnicalUserFromGroup("group");
+  public void leaveFromGroupAsTechnicalUser_Should_leaveFromGroupAsTechnicalUser() throws Exception {
+    this.rocketChatFacade.leaveFromGroupAsTechnicalUser("group");
 
-    verify(this.rocketChatService, times(1)).removeTechnicalUserFromGroup("group");
+    verify(this.rocketChatService, times(1)).leaveFromGroupAsTechnicalUser("group");
   }
 
   @Test(expected = InternalServerErrorException.class)
   public void
-      removeTechnicalUserFromGroup_Should_throwInternalServerErrorException_When_RocketChatRemoveUserFromGroupException()
+      leaveFromGroupAsTechnicalUser_Should_throwInternalServerErrorException_When_RocketChatRemoveUserFromGroupException()
           throws Exception {
     doThrow(new RocketChatRemoveUserFromGroupException(""))
         .when(this.rocketChatService)
-        .removeTechnicalUserFromGroup(anyString());
+        .leaveFromGroupAsTechnicalUser(anyString());
 
-    this.rocketChatFacade.removeTechnicalUserFromGroup("group");
+    this.rocketChatFacade.leaveFromGroupAsTechnicalUser("group");
   }
 
   @Test
