@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - "develop"
+      - "tsys-release"
     tags:
       - "dockerImage.v.*"
       - "v*"
