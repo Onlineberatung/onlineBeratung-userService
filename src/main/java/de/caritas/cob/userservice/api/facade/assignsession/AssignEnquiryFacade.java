@@ -105,7 +105,7 @@ public class AssignEnquiryFacade {
     };
   }
 
-  private void updateRocketChatRooms(String rcGroupId, Session session, Consultant consultant) {
+  public void updateRocketChatRooms(String rcGroupId, Session session, Consultant consultant) {
     try {
       var memberList = this.rocketChatFacade.retrieveRocketChatMembers(rcGroupId);
       removeUnauthorizedMembers(rcGroupId, session, consultant, memberList);

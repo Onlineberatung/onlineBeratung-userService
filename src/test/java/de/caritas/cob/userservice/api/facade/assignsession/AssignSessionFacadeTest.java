@@ -11,8 +11,10 @@ import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -22,8 +24,11 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatRollbackService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.exception.CreateEnquiryException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.facade.CreateEnquiryMessageFacade;
 import de.caritas.cob.userservice.api.facade.EmailNotificationFacade;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
@@ -33,12 +38,15 @@ import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.RegistrationType;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
+import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
 import de.caritas.cob.userservice.api.service.statistics.event.AssignSessionStatisticsEvent;
+import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.UserRole;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -60,6 +68,10 @@ public class AssignSessionFacadeTest {
   @Mock ConsultantService consultantService;
   @Mock RocketChatRollbackService rocketChatRollbackService;
   @Mock SessionService sessionService;
+  @Mock AssignEnquiryFacade assignEnquiryFacade;
+  @Mock RocketChatService rocketChatService;
+  @Mock CreateEnquiryMessageFacade createEnquiryMessageFacade;
+  @Mock ConsultantAgencyService consultantAgencyService;
 
   @Mock
   @SuppressWarnings("unused")
@@ -124,6 +136,11 @@ public class AssignSessionFacadeTest {
     when(this.authenticatedUser.getUserId()).thenReturn("authenticatedUserId");
     when(unauthorizedMembersProvider.obtainConsultantsToRemove(any(), any(), any(), any(), any()))
         .thenReturn(List.of(consultantToRemove));
+    ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO =
+        new ExtendedConsultingTypeResponseDTO();
+    extendedConsultingTypeResponseDTO.setInitializeFeedbackChat(true);
+    when(consultingTypeManager.getConsultingTypeSettings(anyInt()))
+        .thenReturn(extendedConsultingTypeResponseDTO);
     var consultantToKeep = new EasyRandom().nextObject(Consultant.class);
 
     assignSessionFacade.assignSession(session, consultant, consultantToKeep);
@@ -141,10 +158,77 @@ public class AssignSessionFacadeTest {
     verifyAsync(
         a ->
             verify(this.rocketChatFacade, atLeastOnce())
-                .removeUserFromGroup(
-                    consultantToRemove.getRocketChatId(), session.getFeedbackGroupId()));
+                .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getGroupId()));
     verify(this.emailNotificationFacade, times(1))
         .sendAssignEnquiryEmailNotification(any(), any(), any(), any());
+  }
+
+  @Test
+  public void assignSession_Should_DeleteOldFeedbackChat_When_ItExists()
+      throws CreateEnquiryException {
+    Session session = new EasyRandom().nextObject(Session.class);
+    session.setTeamSession(false);
+    session.setStatus(SessionStatus.NEW);
+    session.setConsultant(null);
+    session.getUser().setRcUserId("userRcId");
+    session.setRegistrationType(RegistrationType.REGISTERED);
+    session.setAgencyId(1L);
+    session.setFeedbackGroupId("oldFeedbackGroupId");
+    ConsultantAgency consultantAgency = new EasyRandom().nextObject(ConsultantAgency.class);
+    consultantAgency.setAgencyId(1L);
+    Consultant consultant = new EasyRandom().nextObject(Consultant.class);
+    consultant.setConsultantAgencies(asSet(consultantAgency));
+    consultant.setRocketChatId("newConsultantRcId");
+    Consultant consultantToRemove = new EasyRandom().nextObject(Consultant.class);
+    consultantToRemove.setRocketChatId("otherRcId");
+    when(this.authenticatedUser.getUserId()).thenReturn("authenticatedUserId");
+    ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO =
+        new ExtendedConsultingTypeResponseDTO();
+    extendedConsultingTypeResponseDTO.setInitializeFeedbackChat(true);
+    when(consultingTypeManager.getConsultingTypeSettings(anyInt()))
+        .thenReturn(extendedConsultingTypeResponseDTO);
+    when(createEnquiryMessageFacade.createRcFeedbackGroup(
+            eq(session), eq(session.getGroupId()), any()))
+        .thenReturn("newFeedbackGroupId");
+
+    this.assignSessionFacade.assignSession(session, consultant, CONSULTANT);
+
+    verify(rocketChatService, times(1)).deleteGroupAsSystemUser("oldFeedbackGroupId");
+  }
+
+  @Test
+  public void assignSession_Should_CreateNewFeedbackChat_When_ConsultingTypeHasFeedback()
+      throws CreateEnquiryException {
+    Session session = new EasyRandom().nextObject(Session.class);
+    session.setTeamSession(false);
+    session.setStatus(SessionStatus.NEW);
+    session.setConsultant(null);
+    session.getUser().setRcUserId("userRcId");
+    session.setRegistrationType(RegistrationType.REGISTERED);
+    session.setAgencyId(1L);
+    session.setFeedbackGroupId("oldFeedbackGroupId");
+    ConsultantAgency consultantAgency = new EasyRandom().nextObject(ConsultantAgency.class);
+    consultantAgency.setAgencyId(1L);
+    Consultant consultant = new EasyRandom().nextObject(Consultant.class);
+    consultant.setConsultantAgencies(asSet(consultantAgency));
+    consultant.setRocketChatId("newConsultantRcId");
+    Consultant consultantToRemove = new EasyRandom().nextObject(Consultant.class);
+    consultantToRemove.setRocketChatId("otherRcId");
+    when(this.authenticatedUser.getUserId()).thenReturn("authenticatedUserId");
+    ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO =
+        new ExtendedConsultingTypeResponseDTO();
+    extendedConsultingTypeResponseDTO.setInitializeFeedbackChat(true);
+    when(consultingTypeManager.getConsultingTypeSettings(anyInt()))
+        .thenReturn(extendedConsultingTypeResponseDTO);
+    when(createEnquiryMessageFacade.createRcFeedbackGroup(
+            eq(session), eq(session.getGroupId()), any()))
+        .thenReturn("newFeedbackGroupId");
+    when(rocketChatFacade.retrieveRocketChatMembers(any())).thenReturn(new ArrayList<>());
+
+    this.assignSessionFacade.assignSession(session, consultant, CONSULTANT);
+
+    assertThat(session.getFeedbackGroupId(), is("newFeedbackGroupId"));
+    verify(sessionService, times(2)).saveSession(session);
   }
 
   @Test
@@ -174,6 +258,11 @@ public class AssignSessionFacadeTest {
     when(this.authenticatedUser.getUserId()).thenReturn("authenticatedUserId");
     when(unauthorizedMembersProvider.obtainConsultantsToRemove(any(), any(), any(), any(), any()))
         .thenReturn(List.of(consultantToRemove));
+    ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO =
+        new ExtendedConsultingTypeResponseDTO();
+    extendedConsultingTypeResponseDTO.setInitializeFeedbackChat(true);
+    when(consultingTypeManager.getConsultingTypeSettings(anyInt()))
+        .thenReturn(extendedConsultingTypeResponseDTO);
     var consultantToKeep = new EasyRandom().nextObject(Consultant.class);
 
     assignSessionFacade.assignSession(session, consultant, consultantToKeep);
@@ -188,11 +277,6 @@ public class AssignSessionFacadeTest {
         a ->
             verify(this.rocketChatFacade, atLeastOnce())
                 .removeUserFromGroup(consultantToRemove.getRocketChatId(), session.getGroupId()));
-    verifyAsync(
-        a ->
-            verify(this.rocketChatFacade, atLeastOnce())
-                .removeUserFromGroup(
-                    consultantToRemove.getRocketChatId(), session.getFeedbackGroupId()));
     verifyAsync(
         a ->
             verify(this.rocketChatFacade, never())
@@ -232,6 +316,11 @@ public class AssignSessionFacadeTest {
     Consultant consultantToRemove = new EasyRandom().nextObject(Consultant.class);
     consultantToRemove.setRocketChatId("otherRcId");
     when(this.authenticatedUser.getUserId()).thenReturn("authenticatedUserId");
+    ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO =
+        new ExtendedConsultingTypeResponseDTO();
+    extendedConsultingTypeResponseDTO.setInitializeFeedbackChat(true);
+    when(consultingTypeManager.getConsultingTypeSettings(anyInt()))
+        .thenReturn(extendedConsultingTypeResponseDTO);
 
     this.assignSessionFacade.assignSession(session, consultant, CONSULTANT);
 

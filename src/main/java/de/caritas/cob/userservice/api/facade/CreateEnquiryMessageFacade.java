@@ -137,8 +137,7 @@ public class CreateEnquiryMessageFacade {
                 enquiryData.getMessage(),
                 enquiryData.getRocketChatCredentials(),
                 rcGroupId,
-                enquiryData.getType(),
-                enquiryData.getOrg());
+                enquiryData.getType());
         messageResponse =
             messageServiceProvider.postEnquiryMessage(
                 rocketChatData, createEnquiryExceptionInformation);
@@ -333,7 +332,7 @@ public class CreateEnquiryMessageFacade {
     return createRcFeedbackGroup(session, rcGroupId, agencyList);
   }
 
-  private String createRcFeedbackGroup(
+  public String createRcFeedbackGroup(
       Session session, String rcGroupId, List<ConsultantAgency> agencyList)
       throws CreateEnquiryException {
 
