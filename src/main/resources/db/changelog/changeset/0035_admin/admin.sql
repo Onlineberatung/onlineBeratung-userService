@@ -1,9 +1,11 @@
 CREATE TABLE `userservice`.`admin` (
     `admin_id` varchar(36) COLLATE utf8_unicode_ci NOT NULL,
+    `tenant_id` bigint(21) NULL DEFAULT NULL,
     `username` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
     `first_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
     `last_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
     `email` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+    `type` varchar(6) NOT NULL,,
     `rc_user_id` varchar(255) NULL,
     `id_old` bigint(21) NULL,
     `create_date` datetime NOT NULL DEFAULT (UTC_TIMESTAMP),

@@ -1,5 +1,8 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.AdminFilter;
+import de.caritas.cob.userservice.api.adapters.web.dto.AdminResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyAdminSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyConsultantResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyTypeDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AskerResponseDTO;
@@ -7,6 +10,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDT
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAgencyResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantFilter;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSearchResultDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.CreateAgencyAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.RootDTO;
@@ -14,7 +18,9 @@ import de.caritas.cob.userservice.api.adapters.web.dto.SessionAdminResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionFilter;
 import de.caritas.cob.userservice.api.adapters.web.dto.Sort;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAgencyAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ViolationDTO;
+import de.caritas.cob.userservice.api.admin.facade.AdminAgencyFacade;
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
 import de.caritas.cob.userservice.api.admin.facade.UserAdminFacade;
 import de.caritas.cob.userservice.api.admin.hallink.RootDTOBuilder;
@@ -44,6 +50,7 @@ public class UserAdminController implements UseradminApi {
   private final @NonNull ViolationReportGenerator violationReportGenerator;
   private final @NonNull ConsultantAdminFacade consultantAdminFacade;
   private final @NonNull UserAdminFacade userAdminFacade;
+  private final @NonNull AdminAgencyFacade adminAgencyFacade;
   private final @NonNull AppointmentService appointmentService;
 
   /**
@@ -250,5 +257,35 @@ public class UserAdminController implements UseradminApi {
   public ResponseEntity<AskerResponseDTO> getAsker(String askerId) {
     AskerResponseDTO response = this.userAdminFacade.getAsker(askerId);
     return new ResponseEntity<>(response, HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<AdminResponseDTO> createAgencyAdmin(
+      final CreateAgencyAdminDTO createAgencyAdminDTO) {
+    return ResponseEntity.ok(this.adminAgencyFacade.createNewAdminAgency(createAgencyAdminDTO));
+  }
+
+  @Override
+  public ResponseEntity<AdminResponseDTO> getAgencyAdmin(final String adminId) {
+    return new ResponseEntity<>(this.adminAgencyFacade.findAgencyAdmin(adminId), HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<AgencyAdminSearchResultDTO> getAgencyAdmins(
+      final Integer page, final Integer perPage, final AdminFilter filter, final Sort sort) {
+    return UseradminApi.super.getAgencyAdmins(page, perPage, filter, sort);
+  }
+
+  @Override
+  public ResponseEntity<Void> deleteAgencyAdmin(final String adminId) {
+    this.adminAgencyFacade.deleteAgencyAdmin(adminId);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<AdminResponseDTO> updateAgencyAdmin(
+      final String adminId, final UpdateAgencyAdminDTO updateAgencyAdminDTO) {
+    return new ResponseEntity<>(
+        this.adminAgencyFacade.updateAgencyAdmin(adminId, updateAgencyAdminDTO), HttpStatus.OK);
   }
 }

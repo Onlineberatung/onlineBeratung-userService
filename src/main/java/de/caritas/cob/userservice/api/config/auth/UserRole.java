@@ -17,7 +17,9 @@ public enum UserRole {
   GROUP_CHAT_CONSULTANT("group-chat-consultant"),
   USER_ADMIN("user-admin"),
   SINGLE_TENANT_ADMIN("single-tenant-admin"),
-  TENANT_ADMIN("tenant-admin");
+  TENANT_ADMIN("tenant-admin"),
+
+  AGENCY_ADMIN("agency-admin");
 
   private final String value;
 

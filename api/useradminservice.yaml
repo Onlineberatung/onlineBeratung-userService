@@ -133,37 +133,6 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
-  /useradmin/admins/{adminId}:
-    get:
-      tags:
-        - admin-user-controller
-      summary: 'Get a admin by given id [Authorization: Role: agency-admin, single-tenant-admin]'
-      operationId: getAdminById
-      parameters:
-        - name: adminId
-          in: path
-          description: adminId id
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: OK - admin found
-          content:
-            'application/json':
-              schema:
-                $ref: '#/components/schemas/AdminDTO'
-        204:
-          description: NO CONTENT - admin with the specific id was not found
-        400:
-          description: BAD REQUEST - invalid/incomplete request
-        401:
-          description: UNAUTHORIZED - no/invalid role/authorization
-        500:
-          description: INTERNAL SERVER ERROR - server encountered unexpected condition
-      security:
-        - Bearer: [ ]
-
   /useradmin/consultants/{consultantId}:
     get:
       tags:
@@ -516,6 +485,168 @@ paths:
       security:
         - Bearer: [ ]
 
+  /useradmin/agencyadmins:
+    get:
+      tags:
+        - admin-user-controller
+      summary: 'Returns the list of agency admins by filter query parameter. [Authorization: Role: user-admin]'
+      operationId: getAgencyAdmins
+      parameters:
+        - name: filter
+          in: query
+          description: 'The filter parameters to search for. If no filter is set all admins are
+                being returned.'
+          schema:
+            $ref: '#/components/schemas/AdminFilter'
+        - name: page
+          in: query
+          description: Number of page where to start in the query (1 = first page)
+          required: true
+          schema:
+            type: integer
+        - name: perPage
+          in: query
+          description: Number of items which are being returned per page
+          required: true
+          schema:
+            type: integer
+        - name: sort
+          in: query
+          description: The sort parameter containing field and order the response should be sorted
+          schema:
+            $ref: '#/components/schemas/Sort'
+      responses:
+        200:
+          description: OK - successfull operation
+          content:
+            'application/hal+json':
+              schema:
+                $ref: '#/components/schemas/AgencyAdminSearchResultDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+    post:
+      tags:
+        - admin-user-controller
+      summary: 'Creates a new Agency Admin [Authorization: Role: user-admin]'
+      operationId: createAgencyAdmin
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/CreateAgencyAdminDTO'
+        required: true
+      responses:
+        201:
+          description: CREATED - Agency Admin was created successfully
+          content:
+            'application/hal+json':
+              schema:
+                $ref: '#/components/schemas/AdminResponseDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        409:
+          description: CONFLICT - invalid/unavailable username or email address
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+  /useradmin/agencyadmins/{adminId}:
+    get:
+      tags:
+        - admin-user-controller
+      summary: 'Get an agency admin by given id [Authorization: Role: user-admin]'
+      operationId: getAgencyAdmin
+      parameters:
+        - name: adminId
+          in: path
+          description: admin id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - consultant found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/AdminResponseDTO'
+        204:
+          description: NO CONTENT - agency admin with the specific id was not found
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+    put:
+      tags:
+        - admin-user-controller
+      summary: 'Updates an agency admin [Authorization: Role: user-admin]'
+      operationId: updateAgencyAdmin
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/UpdateAgencyAdminDTO'
+        required: true
+      parameters:
+        - name: adminId
+          in: path
+          description: agency admin id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - agency admin was updated successfully
+          content:
+            'application/hal+json':
+              schema:
+                $ref: '#/components/schemas/AdminResponseDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+    delete:
+      tags:
+        - admin-user-controller
+      summary: 'delete an agency admin [Authorization: Role: user-admin]'
+      operationId: deleteAgencyAdmin
+      parameters:
+        - name: adminId
+          in: path
+          description: admin id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - agency admin was marked for deletion successfully
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        404:
+          description: NOT FOUND - agency admin not found
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+
 components:
   schemas:
     RootDTO:
@@ -748,6 +879,61 @@ components:
           items:
             $ref: './../services/agencyadminservice.yaml#/components/schemas/AgencyAdminResponseDTO'
 
+    CreateAgencyAdminDTO:
+      type: object
+      required:
+        - username
+        - firstname
+        - lastname
+        - email
+      properties:
+        username:
+          type: string
+          example: "max.mustermann"
+          minLength: 1
+          maxLength: 255
+        firstname:
+          type: string
+          example: "Max"
+          minLength: 1
+          maxLength: 255
+        lastname:
+          type: string
+          example: "Mustermann"
+          minLength: 1
+          maxLength: 255
+        email:
+          type: string
+          example: "max@mustermann.de"
+          minLength: 1
+          maxLength: 255
+        tenantId:
+          type: integer
+          example: "1"
+
+    UpdateAgencyAdminDTO:
+      type: object
+      required:
+        - firstname
+        - lastname
+        - email
+      properties:
+        firstname:
+          type: string
+          example: "Max"
+          minLength: 1
+          maxLength: 255
+        lastname:
+          type: string
+          example: "Mustermann"
+          minLength: 1
+          maxLength: 255
+        email:
+          type: string
+          example: "max@mustermann.de"
+          minLength: 1
+          maxLength: 255
+
     AdminDTO:
       type: object
       properties:
@@ -772,12 +958,6 @@ components:
           type: string
         deleteDate:
           type: string
-        status:
-          type: string
-        agencies:
-          type: array
-          items:
-            $ref: './../services/agencyadminservice.yaml#/components/schemas/AgencyAdminResponseDTO'
 
     AskerResponseDTO:
       type: object
@@ -839,6 +1019,38 @@ components:
         addAgency:
           $ref: '#/components/schemas/HalLink'
 
+    AdminResponseDTO:
+      type: object
+      properties:
+        _embedded:
+          $ref: '#/components/schemas/AdminDTO'
+        _links:
+          $ref: '#/components/schemas/AdminLinks'
+
+    AgencyAdminSearchResultDTO:
+      type: object
+      properties:
+        _embedded:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminResponseDTO'
+        _links:
+          $ref: '#/components/schemas/PaginationLinks'
+        total:
+          type: integer
+
+    AdminLinks:
+      type: object
+      required:
+        - self
+      properties:
+        self:
+          $ref: '#/components/schemas/HalLink'
+        update:
+          $ref: '#/components/schemas/HalLink'
+        delete:
+          $ref: '#/components/schemas/HalLink'
+
     SessionFilter:
       type: object
       properties:
@@ -865,6 +1077,16 @@ components:
           format: int64
         absent:
           type: boolean
+
+    AdminFilter:
+      type: object
+      properties:
+        username:
+          type: string
+        lastname:
+          type: string
+        email:
+          type: string
 
     Sort:
       type: object
