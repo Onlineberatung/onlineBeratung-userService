@@ -340,14 +340,12 @@ public class SessionService {
    */
   public List<ConsultantSessionResponseDTO> getActiveAndDoneSessionsForConsultant(
       Consultant consultant) {
-    List<ConsultantSessionResponseDTO> collect =
-        Stream.of(
-                getSessionsForConsultantByStatus(consultant, SessionStatus.IN_PROGRESS),
-                getSessionsForConsultantByStatus(consultant, SessionStatus.DONE))
-            .flatMap(Collection::stream)
-            .map(session -> new SessionMapper().toConsultantSessionDto(session))
-            .collect(Collectors.toList());
-    return collect;
+    return Stream.of(
+            getSessionsForConsultantByStatus(consultant, SessionStatus.IN_PROGRESS),
+            getSessionsForConsultantByStatus(consultant, SessionStatus.DONE))
+        .flatMap(Collection::stream)
+        .map(session -> new SessionMapper().toConsultantSessionDto(session))
+        .collect(Collectors.toList());
   }
 
   private List<Session> getSessionsForConsultantByStatus(
