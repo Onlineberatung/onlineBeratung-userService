@@ -347,13 +347,8 @@ public class SessionService {
             .flatMap(Collection::stream)
             .map(session -> new SessionMapper().toConsultantSessionDto(session))
             .collect(Collectors.toList());
-
-    collect.stream().forEach(this::enrichSessionWithDeletionStatus);
     return collect;
   }
-
-  private void enrichSessionWithDeletionStatus(
-      ConsultantSessionResponseDTO consultantSessionResponseDTO) {}
 
   private List<Session> getSessionsForConsultantByStatus(
       Consultant consultant, SessionStatus sessionStatus) {
