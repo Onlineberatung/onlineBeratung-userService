@@ -2435,6 +2435,8 @@ components:
         username:
           type: string
           example: max94
+        isDeleted:
+          type: boolean
         sessionData:
           type: string
           description: LinkedHashMap<String, Object>
