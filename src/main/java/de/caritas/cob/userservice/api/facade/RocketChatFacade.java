@@ -115,7 +115,7 @@ public class RocketChatFacade {
   public void leaveFromGroupAsTechnicalUser(String groupId) {
     try {
       rocketChatService.leaveFromGroupAsTechnicalUser(groupId);
-    } catch (RocketChatLeaveFromGroupException | RocketChatUserNotInitializedException e) {
+    } catch (RocketChatLeaveFromGroupException e) {
       var message =
           String.format("Could not leave from Rocket.Chat group id %s as technical user", groupId);
       throw new InternalServerErrorException(message, LogService::logInternalServerError);

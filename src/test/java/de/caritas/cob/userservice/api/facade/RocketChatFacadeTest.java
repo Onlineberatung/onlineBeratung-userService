@@ -109,7 +109,6 @@ public class RocketChatFacadeTest {
     this.rocketChatFacade.addTechnicalUserToGroup("group");
   }
 
-  // todo: test leaving
   @Test
   public void leaveFromGroupAsTechnicalUser_Should_leaveFromGroupAsTechnicalUser() throws Exception {
     this.rocketChatFacade.leaveFromGroupAsTechnicalUser("group");
