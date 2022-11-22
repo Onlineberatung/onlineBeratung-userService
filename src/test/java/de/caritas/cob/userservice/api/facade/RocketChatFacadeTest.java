@@ -14,6 +14,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLeaveFromGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -108,6 +109,7 @@ public class RocketChatFacadeTest {
     this.rocketChatFacade.addTechnicalUserToGroup("group");
   }
 
+  // todo: test leaving
   @Test
   public void leaveFromGroupAsTechnicalUser_Should_leaveFromGroupAsTechnicalUser() throws Exception {
     this.rocketChatFacade.leaveFromGroupAsTechnicalUser("group");
@@ -117,9 +119,9 @@ public class RocketChatFacadeTest {
 
   @Test(expected = InternalServerErrorException.class)
   public void
-      leaveFromGroupAsTechnicalUser_Should_throwInternalServerErrorException_When_RocketChatRemoveUserFromGroupException()
+      leaveFromGroupAsTechnicalUser_Should_throwInternalServerErrorException_When_RocketChatLeaveFromGroupException()
           throws Exception {
-    doThrow(new RocketChatRemoveUserFromGroupException(""))
+    doThrow(new RocketChatLeaveFromGroupException(""))
         .when(this.rocketChatService)
         .leaveFromGroupAsTechnicalUser(anyString());
 
