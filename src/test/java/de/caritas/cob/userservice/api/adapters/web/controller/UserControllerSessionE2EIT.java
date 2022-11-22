@@ -1471,7 +1471,7 @@ class UserControllerSessionE2EIT {
     session.setGroupId(RandomStringUtils.randomAlphabetic(17));
     session.setIsConsultantDirectlySet(false);
 
-    Session saved = sessionRepository.save(session);
+    sessionRepository.save(session);
     deleteSession = true;
   }
 
