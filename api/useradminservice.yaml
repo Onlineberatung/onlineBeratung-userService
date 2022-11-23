@@ -133,6 +133,37 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /useradmin/admins/{adminId}:
+    get:
+      tags:
+        - admin-user-controller
+      summary: 'Get a admin by given id [Authorization: Role: agency-admin, single-tenant-admin]'
+      operationId: getAdminById
+      parameters:
+        - name: adminId
+          in: path
+          description: adminId id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - admin found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/AdminDTO'
+        204:
+          description: NO CONTENT - admin with the specific id was not found
+        400:
+          description: BAD REQUEST - invalid/incomplete request
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+
   /useradmin/consultants/{consultantId}:
     get:
       tags:
@@ -704,6 +735,37 @@ components:
         absenceMessage:
           type: string
           example: "I am absent until..."
+        createDate:
+          type: string
+        updateDate:
+          type: string
+        deleteDate:
+          type: string
+        status:
+          type: string
+        agencies:
+          type: array
+          items:
+            $ref: './../services/agencyadminservice.yaml#/components/schemas/AgencyAdminResponseDTO'
+
+    AdminDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "0f2cca9c-9303-4791-a0a5-a1ce16f1524f"
+        username:
+          type: string
+          example: "max.mustermann"
+        firstname:
+          type: string
+          example: "Max"
+        lastname:
+          type: string
+          example: "Mustermann"
+        email:
+          type: string
+          example: "max@mustermann.de"
         createDate:
           type: string
         updateDate:
