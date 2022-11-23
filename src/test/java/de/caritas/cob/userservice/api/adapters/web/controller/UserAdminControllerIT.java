@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
+import de.caritas.cob.userservice.api.admin.facade.AdminAgencyFacade;
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
 import de.caritas.cob.userservice.api.admin.facade.UserAdminFacade;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
@@ -87,6 +88,8 @@ public class UserAdminControllerIT {
   @MockBean private UserAdminFacade userAdminFacade;
 
   @MockBean private AppointmentService appointmentService;
+
+  @MockBean private AdminAgencyFacade adminAgencyFacade;
 
   @Test
   public void getSessions_Should_returnBadRequest_When_requiredPaginationParamsAreMissing()

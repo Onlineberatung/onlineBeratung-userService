@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.admin.facade;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.AdminAgencyResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAgencyAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAgencyAdminDTO;
@@ -29,5 +30,10 @@ public class AdminAgencyFacade {
 
   public void deleteAgencyAdmin(final String adminId) {
     this.adminAgencyService.deleteAgencyAdmin(adminId);
+  }
+
+  public AdminAgencyResponseDTO findAdminAgencies(String adminId) {
+    // TODO Idriss implement
+    return new AdminAgencyResponseDTO();
   }
 }

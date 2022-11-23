@@ -646,7 +646,36 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /useradmin/agencyadmins/{userId}/agencies:
+    get:
+      tags:
+        - admin-user-controller
+      summary: 'Returns the list of agencies for a given admin Id. [Authorization: Role:
+        restricted-agency-admin]'
+      operationId: getAdminAgencies
+      parameters:
+        - name: userId
+          in: path
+          description: user Id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - successfull operation
+          content:
+            'application/hal+json':
+              schema:
+                $ref: '#/components/schemas/AdminAgencyResponseDTO'
 
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        404:
+          description: NOT FOUND - consultant with given id does not exist
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
 components:
   schemas:
     RootDTO:
@@ -1132,9 +1161,32 @@ components:
           items:
             $ref: './../services/agencyadminservice.yaml#/components/schemas/AgencyAdminFullResponseDTO'
         _links:
-          $ref: '#/components/schemas/ConsultantAgencyLinks'
+          $ref: '#/components/schemas/AgencyLinks'
         total:
           type: integer
+
+    AdminAgencyResponseDTO:
+      type: object
+      required:
+        - _embedded
+        - _links
+      properties:
+        _embedded:
+          type: array
+          items:
+            $ref: './../services/agencyadminservice.yaml#/components/schemas/AgencyAdminFullResponseDTO'
+        _links:
+          $ref: '#/components/schemas/AgencyLinks'
+        total:
+          type: integer
+
+    AgencyLinks:
+      type: object
+      required:
+        - self
+      properties:
+        self:
+          $ref: '#/components/schemas/HalLink'
 
     ConsultantAgencyLinks:
       type: object
