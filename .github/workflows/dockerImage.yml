@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - "develop"
-      - "*"
     tags:
       - "dockerImage.v.*"
       - "v*"
