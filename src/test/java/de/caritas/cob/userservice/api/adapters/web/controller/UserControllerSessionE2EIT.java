@@ -34,6 +34,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
@@ -388,6 +389,36 @@ class UserControllerSessionE2EIT {
         .andExpect(jsonPath("sessions[0].session.lastMessageType", is("E2EE_ACTIVATED")))
         .andExpect(jsonPath("sessions[0].session.lastMessage", is(emptyString())))
         .andExpect(jsonPath("sessions[0].chat", is(nullValue())));
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  void getSessionsForAuthenticatedConsultantShouldReturnInformationAboutDeletedUsers()
+      throws Exception {
+    givenADeletedUser(false);
+    givenAValidConsultant(true);
+    givenASessionInProgress();
+    givenAValidRocketChatGetRoomsResponse(session.getGroupId(), MessageType.E2EE_ACTIVATED, null);
+    givenAnEmptyRocketChatGetSubscriptionsResponse();
+
+    mockMvc
+        .perform(
+            get("/users/sessions/consultants")
+                .queryParam("status", "2")
+                .queryParam("count", "15")
+                .queryParam("filter", "all")
+                .queryParam("offset", "0")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("total", is(1)))
+        .andExpect(jsonPath("sessions", hasSize(1)))
+        .andExpect(jsonPath("sessions[0].session.lastMessageType", is("E2EE_ACTIVATED")))
+        .andExpect(jsonPath("sessions[0].session.lastMessage", is(emptyString())))
+        .andExpect(jsonPath("sessions[0].chat", is(nullValue())))
+        .andExpect(jsonPath("sessions[0].user.deleted", is(true)));
   }
 
   @Test
@@ -1258,6 +1289,17 @@ class UserControllerSessionE2EIT {
 
   private void givenAValidUser(boolean isAuthUser) {
     user = userRepository.findAll().iterator().next();
+    setAuthUserAttributes(isAuthUser);
+  }
+
+  private void givenADeletedUser(boolean isAuthUser) {
+    user = userRepository.findAll().iterator().next();
+    user.setDeleteDate(LocalDateTime.now());
+    userRepository.save(user);
+    setAuthUserAttributes(isAuthUser);
+  }
+
+  private void setAuthUserAttributes(boolean isAuthUser) {
     if (isAuthUser) {
       when(authenticatedUser.getUserId()).thenReturn(user.getUserId());
       when(authenticatedUser.isAdviceSeeker()).thenReturn(true);
@@ -1439,6 +1481,20 @@ class UserControllerSessionE2EIT {
 
   private void givenAUserWithSessions() {
     user = userRepository.findById("9c4057d0-05ad-4e86-a47c-dc5bdeec03b9").orElseThrow();
+    when(authenticatedUser.getUserId()).thenReturn(user.getUserId());
+    when(authenticatedUser.getRoles()).thenReturn(Set.of("user"));
+  }
+
+  private void givenADeletedUserWithSessions() throws JsonProcessingException {
+
+    user = userRepository.findById("9c4057d0-05ad-4e86-a47c-dc5bdeec03b9").orElseThrow();
+    user.setDeleteDate(LocalDateTime.now());
+    session =
+        user.getSessions().stream()
+            .filter(s -> s.getEnquiryMessageDate() != null)
+            .findFirst()
+            .orElseThrow();
+
     when(authenticatedUser.getUserId()).thenReturn(user.getUserId());
     when(authenticatedUser.getRoles()).thenReturn(Set.of("user"));
   }
