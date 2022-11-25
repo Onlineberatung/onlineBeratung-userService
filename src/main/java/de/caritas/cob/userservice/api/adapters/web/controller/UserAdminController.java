@@ -11,6 +11,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDT
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAgencyResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantFilter;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSearchResultDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminAgencyRelationDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAgencyAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
@@ -294,5 +295,25 @@ public class UserAdminController implements UseradminApi {
       final String adminId, final UpdateAgencyAdminDTO updateAgencyAdminDTO) {
     return new ResponseEntity<>(
         this.adminAgencyFacade.updateAgencyAdmin(adminId, updateAgencyAdminDTO), HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<Void> createAdminAgencyRelation(
+      final String adminId, final CreateAdminAgencyRelationDTO createAdminAgencyRelationDTO) {
+    this.adminAgencyFacade.createNewAdminAgencyRelation(adminId, createAdminAgencyRelationDTO);
+    return new ResponseEntity<>(HttpStatus.CREATED);
+  }
+
+  @Override
+  public ResponseEntity<Void> deleteAdminAgencyRelation(final String adminId, final Long agencyId) {
+    this.adminAgencyFacade.deleteAdminAgencyRelation(adminId, agencyId);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<Void> setAdminAgenciesRelation(
+      final String adminId, final List<CreateAdminAgencyRelationDTO> newAdminAgencyRelationDTOs) {
+    this.adminAgencyFacade.synchronizeAdminAgenciesRelation(adminId, newAdminAgencyRelationDTOs);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 }
