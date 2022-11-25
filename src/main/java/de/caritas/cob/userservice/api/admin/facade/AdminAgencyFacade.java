@@ -33,7 +33,6 @@ public class AdminAgencyFacade {
   }
 
   public AdminAgencyResponseDTO findAdminAgencies(String adminId) {
-    // TODO Idriss implement
-    return new AdminAgencyResponseDTO();
+    return this.adminAgencyService.findAgenciesOfAdmin(adminId);
   }
 }

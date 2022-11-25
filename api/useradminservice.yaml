@@ -987,6 +987,10 @@ components:
           type: string
         deleteDate:
           type: string
+        agencies:
+          type: array
+          items:
+            $ref: './../services/agencyadminservice.yaml#/components/schemas/AgencyAdminResponseDTO'
 
     AskerResponseDTO:
       type: object
@@ -1078,6 +1082,8 @@ components:
         update:
           $ref: '#/components/schemas/HalLink'
         delete:
+          $ref: '#/components/schemas/HalLink'
+        agencies:
           $ref: '#/components/schemas/HalLink'
 
     SessionFilter:

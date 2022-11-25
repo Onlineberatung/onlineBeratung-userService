@@ -21,7 +21,6 @@ import org.hibernate.search.annotations.Field;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
-/** Represents a consultant */
 @Entity
 @Table(name = "admin")
 @AllArgsConstructor
@@ -42,7 +41,7 @@ public class Admin implements Serializable {
   @Column(name = "admin_id", updatable = false, nullable = false)
   @Size(max = 36)
   @NonNull
-  private String adminId;
+  private String id;
 
   @Column(name = "tenant_id")
   @Field
@@ -95,11 +94,11 @@ public class Admin implements Serializable {
       return false;
     }
     Admin admin = (Admin) o;
-    return adminId.equals(admin.adminId);
+    return id.equals(admin.id);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(adminId);
+    return Objects.hash(id);
   }
 }

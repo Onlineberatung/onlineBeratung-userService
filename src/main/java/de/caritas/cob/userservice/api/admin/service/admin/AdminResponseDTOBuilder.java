@@ -28,30 +28,35 @@ public class AdminResponseDTOBuilder implements HalLinkBuilder {
     return new AdminLinks()
         .self(buildSelfLink())
         .update(buildUpdateLink())
-        .delete(buildDeleteLink());
+        .delete(buildDeleteLink())
+        .agencies(buildAgenciesLink());
   }
 
   private HalLink buildDeleteLink() {
     return buildHalLink(
-        methodOn(UseradminApi.class).deleteAgencyAdmin(this.admin.getAdminId()),
+        methodOn(UseradminApi.class).deleteAgencyAdmin(this.admin.getId()),
         HalLink.MethodEnum.DELETE);
   }
 
   private HalLink buildUpdateLink() {
     return buildHalLink(
-        methodOn(UseradminApi.class).updateAgencyAdmin(this.admin.getAdminId(), null),
+        methodOn(UseradminApi.class).updateAgencyAdmin(this.admin.getId(), null),
         HalLink.MethodEnum.PUT);
   }
 
   private HalLink buildSelfLink() {
     return buildHalLink(
-        methodOn(UseradminApi.class).getAgencyAdmin(this.admin.getAdminId()),
-        HalLink.MethodEnum.GET);
+        methodOn(UseradminApi.class).getAgencyAdmin(this.admin.getId()), HalLink.MethodEnum.GET);
+  }
+
+  private HalLink buildAgenciesLink() {
+    return buildHalLink(
+        methodOn(UseradminApi.class).getAdminAgencies(this.admin.getId()), HalLink.MethodEnum.GET);
   }
 
   private AdminDTO buildAdminDTO() {
     return new AdminDTO()
-        .id(admin.getAdminId())
+        .id(admin.getId())
         .username(admin.getUsername())
         .firstname(admin.getFirstName())
         .lastname(admin.getLastName())
