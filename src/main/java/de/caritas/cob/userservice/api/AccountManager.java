@@ -6,6 +6,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Consultant.ConsultantBase;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.in.AccountManaging;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
@@ -16,6 +17,7 @@ import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -101,10 +103,19 @@ public class AccountManager implements AccountManaging {
     var fullConsultants = consultantRepository.findAllByIdIn(consultantIds);
 
     var consultingAgencies = consultantAgencyRepository.findByConsultantIdIn(consultantIds);
+    if (!agenciesToFilterConsultants.isEmpty()) {
+      consultingAgencies = filterConsultingAgenciesByPassedAgencies(consultingAgencies, agenciesToFilterConsultants);
+    }
     var agencyIds = userServiceMapper.agencyIdsOf(consultingAgencies);
     var agencies = agencyService.getAgenciesWithoutCaching(agencyIds);
 
     return userServiceMapper.mapOf(consultantPage, fullConsultants, agencies, consultingAgencies);
+  }
+
+  private List<ConsultantAgency.ConsultantAgencyBase> filterConsultingAgenciesByPassedAgencies(List<ConsultantAgency.ConsultantAgencyBase> consultingAgencies, Collection<Long> agenciesToFilterConsultants) {
+    return consultingAgencies.stream()
+            .filter(consultingAgency -> agenciesToFilterConsultants.contains(consultingAgency.getAgencyId()))
+            .collect(Collectors.toList());
   }
 
   @Override
