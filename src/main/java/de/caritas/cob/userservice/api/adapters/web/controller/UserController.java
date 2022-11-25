@@ -7,6 +7,7 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
+import com.google.common.collect.Lists;
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
@@ -46,6 +47,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.mapping.ConsultantDtoMapper;
 import de.caritas.cob.userservice.api.adapters.web.mapping.UserDtoMapper;
+import de.caritas.cob.userservice.api.admin.facade.AdminAgencyFacade;
 import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
@@ -102,6 +104,7 @@ import de.caritas.cob.userservice.generated.api.adapters.web.controller.UsersApi
 import io.swagger.annotations.Api;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -167,6 +170,8 @@ public class UserController implements UsersApi {
   private final @NonNull VideoChatConfig videoChatConfig;
   private final @NonNull KeycloakUserDataProvider keycloakUserDataProvider;
   private final @NotNull UsersStatisticsFacade usersStatisticsFacade;
+
+  private final @NotNull AdminAgencyFacade adminAgencyFacade;
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
@@ -805,14 +810,28 @@ public class UserController implements UsersApi {
     var decodedInfix = URLDecoder.decode(query, StandardCharsets.UTF_8).trim();
     var isAscending = order.equalsIgnoreCase("asc");
     var mappedField = consultantDtoMapper.mappedFieldOf(field);
-
     var resultMap =
         accountManager.findConsultantsByInfix(
-            decodedInfix, page - 1, perPage, mappedField, isAscending);
+            decodedInfix,
+            getAgenciesToFilterConsultants(),
+            page - 1,
+            perPage,
+            mappedField,
+            isAscending);
+
     var result =
         consultantDtoMapper.consultantSearchResultOf(resultMap, query, page, perPage, field, order);
 
     return ResponseEntity.ok(result);
+  }
+
+  private Collection<Long> getAgenciesToFilterConsultants() {
+    Collection<Long> agenciesToFilterConsultants = Lists.newArrayList();
+    if (authenticatedUser.hasRestrictedAgencyPriviliges()) {
+      agenciesToFilterConsultants =
+          adminAgencyFacade.findAdminUserAgencyIds(authenticatedUser.getUserId());
+    }
+    return agenciesToFilterConsultants;
   }
 
   /**

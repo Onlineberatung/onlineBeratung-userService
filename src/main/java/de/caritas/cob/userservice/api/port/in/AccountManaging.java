@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.port.in;
 
 import de.caritas.cob.userservice.api.model.User;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
@@ -17,7 +18,12 @@ public interface AccountManaging {
   Optional<Map<String, Object>> findConsultantByUsername(String username);
 
   Map<String, Object> findConsultantsByInfix(
-      String infix, int pageNumber, int pageSize, String fieldName, boolean isAscending);
+      String infix,
+      Collection<Long> agenciesToFilterConsultants,
+      int pageNumber,
+      int pageSize,
+      String fieldName,
+      boolean isAscending);
 
   boolean isTeamAdvisedBy(Long sessionId, String consultantId);
 }
