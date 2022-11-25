@@ -6,10 +6,8 @@ import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantFilter;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.HalLink;
-import de.caritas.cob.userservice.api.adapters.web.dto.HalLink.MethodEnum;
 import de.caritas.cob.userservice.api.adapters.web.dto.PaginationLinks;
-import de.caritas.cob.userservice.api.adapters.web.dto.Sort;
-import de.caritas.cob.userservice.api.admin.hallink.HalLinkBuilder;
+import de.caritas.cob.userservice.api.admin.service.SearchResultBuilder;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.generated.api.adapters.web.controller.UseradminApi;
 import java.util.stream.Collectors;
@@ -20,16 +18,11 @@ import org.hibernate.search.jpa.FullTextQuery;
  * Builder class to generate a {@link ConsultantSearchResultDTO} containing available hal links and
  * result of {@link ConsultantDTO} elements.
  */
-public class ConsultantSearchResultBuilder implements HalLinkBuilder {
-
-  private final FullTextQuery fullTextQuery;
-  private ConsultantFilter consultantFilter;
-  private Sort sort;
-  private Integer page;
-  private Integer perPage;
+public class ConsultantSearchResultBuilder
+    extends SearchResultBuilder<ConsultantFilter, ConsultantSearchResultDTO> {
 
   private ConsultantSearchResultBuilder(FullTextQuery fullTextQuery) {
-    this.fullTextQuery = fullTextQuery;
+    super(fullTextQuery);
   }
 
   /**
@@ -43,50 +36,12 @@ public class ConsultantSearchResultBuilder implements HalLinkBuilder {
   }
 
   /**
-   * Sets the filter param.
-   *
-   * @param consultantFilter the filter value for building links
-   * @return the current {@link ConsultantSearchResultBuilder}
-   */
-  public ConsultantSearchResultBuilder withFilter(ConsultantFilter consultantFilter) {
-    this.consultantFilter = consultantFilter;
-    return this;
-  }
-
-  public ConsultantSearchResultBuilder withSort(Sort sort) {
-    this.sort = sort;
-    return this;
-  }
-
-  /**
-   * Sets the page param.
-   *
-   * @param page the page value for building links
-   * @return the current {@link ConsultantSearchResultBuilder}
-   */
-  public ConsultantSearchResultBuilder withPage(Integer page) {
-    this.page = page;
-    return this;
-  }
-
-  /**
-   * Sets the perPage param.
-   *
-   * @param perPage the amount value of results per page for building links
-   * @return the current {@link ConsultantSearchResultBuilder}
-   */
-  public ConsultantSearchResultBuilder withPerPage(Integer perPage) {
-    this.perPage = perPage;
-    return this;
-  }
-
-  /**
    * Generates the {@link ConsultantSearchResultDTO} containing all results and navigation hal
    * links.
    *
    * @return the generated {@link ConsultantSearchResultDTO}
    */
-  public ConsultantSearchResultDTO buildConsultantSearchResult() {
+  public ConsultantSearchResultDTO buildSearchResult() {
     Stream<Consultant> resultStream = fullTextQuery.getResultStream();
     var resultList =
         resultStream
@@ -107,31 +62,17 @@ public class ConsultantSearchResultBuilder implements HalLinkBuilder {
   }
 
   private HalLink buildSelfLink() {
-    return buildHalLinkForParams(this.page, this.perPage);
-  }
-
-  private HalLink buildHalLinkForParams(Integer page, Integer perPage) {
-    return buildHalLink(
-        methodOn(UseradminApi.class)
-            .getConsultants(page, perPage, this.consultantFilter, this.sort),
-        MethodEnum.GET);
+    return super.buildSelfLink(
+        methodOn(UseradminApi.class).getConsultants(page, perPage, filter, sort));
   }
 
   private HalLink buildNextLink() {
-    if (hasNextPage()) {
-      return buildHalLinkForParams(this.page + 1, this.perPage);
-    }
-    return null;
-  }
-
-  private boolean hasNextPage() {
-    return this.fullTextQuery.getResultSize() > this.page * this.perPage;
+    return super.buildNextLink(
+        methodOn(UseradminApi.class).getConsultants(page + 1, perPage, filter, sort));
   }
 
   private HalLink buildPreviousLink() {
-    if (this.page > 1) {
-      return buildHalLinkForParams(this.page - 1, this.perPage);
-    }
-    return null;
+    return buildPreviousLink(
+        methodOn(UseradminApi.class).getConsultants(page - 1, perPage, filter, sort));
   }
 }

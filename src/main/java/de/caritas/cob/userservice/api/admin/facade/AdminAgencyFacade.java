@@ -1,12 +1,18 @@
 package de.caritas.cob.userservice.api.admin.facade;
 
+import static java.util.Objects.nonNull;
+
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminAgencyResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.AdminFilter;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyAdminSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminAgencyRelationDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAgencyAdminDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.Sort;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAgencyAdminDTO;
 import de.caritas.cob.userservice.api.admin.service.admin.AdminAgencyRelationService;
 import de.caritas.cob.userservice.api.admin.service.admin.AdminAgencyService;
+import de.caritas.cob.userservice.api.admin.service.admin.search.AdminFilterService;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,6 +26,7 @@ public class AdminAgencyFacade {
 
   private final @NonNull AdminAgencyService adminAgencyService;
   private final @NonNull AdminAgencyRelationService adminAgencyRelationService;
+  private final @NonNull AdminFilterService adminFilterService;
 
   public AdminResponseDTO createNewAdminAgency(final CreateAgencyAdminDTO createAgencyAdminDTO) {
     return this.adminAgencyService.createNewAdminAgency(createAgencyAdminDTO);
@@ -59,9 +66,27 @@ public class AdminAgencyFacade {
     this.adminAgencyRelationService.deleteAdminAgencyRelation(adminId, agencyId);
   }
 
-  public void synchronizeAdminAgenciesRelation(
+  public void setAdminAgenciesRelation(
       final String adminId, final List<CreateAdminAgencyRelationDTO> newAdminAgencyRelationDTOs) {
     this.adminAgencyRelationService.synchronizeAdminAgenciesRelation(
         adminId, newAdminAgencyRelationDTOs);
+  }
+
+  public AgencyAdminSearchResultDTO findFilteredAdminsAgency(
+      final Integer page, final Integer perPage, final AdminFilter adminFilter, Sort sort) {
+    var filteredAdmins = adminFilterService.findFilteredAdmins(page, perPage, adminFilter, sort);
+    enrichAdminsWithAgencies(filteredAdmins);
+
+    return filteredAdmins;
+  }
+
+  private void enrichAdminsWithAgencies(AgencyAdminSearchResultDTO filteredAdmins) {
+    if (nonNull(filteredAdmins)) {
+      var admins =
+          filteredAdmins.getEmbedded().stream()
+              .map(AdminResponseDTO::getEmbedded)
+              .collect(Collectors.toSet());
+      adminAgencyRelationService.appendAgenciesForAdmins(admins);
+    }
   }
 }

@@ -1215,6 +1215,9 @@ components:
           type: string
         email:
           type: string
+        agencyId:
+          type: integer
+          format: int64
 
     Sort:
       type: object

@@ -281,7 +281,9 @@ public class UserAdminController implements UseradminApi {
   @Override
   public ResponseEntity<AgencyAdminSearchResultDTO> getAgencyAdmins(
       final Integer page, final Integer perPage, final AdminFilter filter, final Sort sort) {
-    return UseradminApi.super.getAgencyAdmins(page, perPage, filter, sort);
+    return new ResponseEntity<>(
+        this.adminAgencyFacade.findFilteredAdminsAgency(page, perPage, filter, sort),
+        HttpStatus.OK);
   }
 
   @Override
@@ -313,7 +315,7 @@ public class UserAdminController implements UseradminApi {
   @Override
   public ResponseEntity<Void> setAdminAgenciesRelation(
       final String adminId, final List<CreateAdminAgencyRelationDTO> newAdminAgencyRelationDTOs) {
-    this.adminAgencyFacade.synchronizeAdminAgenciesRelation(adminId, newAdminAgencyRelationDTOs);
+    this.adminAgencyFacade.setAdminAgenciesRelation(adminId, newAdminAgencyRelationDTOs);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 }

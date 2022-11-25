@@ -1,39 +1,38 @@
 package de.caritas.cob.userservice.api.admin.service.admin;
 
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.ADMIN_AGENCY_RELATION_DOES_NOT_EXIST;
-import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
-import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
-import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.AdminDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyAdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminAgencyRelationDTO;
-import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.userservice.api.admin.service.admin.create.agencyrelation.CreateAdminAgencyRelationService;
+import de.caritas.cob.userservice.api.admin.service.admin.update.agencyrelation.SynchronizeAdminAgencyRelation;
+import de.caritas.cob.userservice.api.admin.service.agency.AgencyAdminService;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
-import de.caritas.cob.userservice.api.model.Admin;
 import de.caritas.cob.userservice.api.model.AdminAgency;
 import de.caritas.cob.userservice.api.port.out.AdminAgencyRepository;
-import de.caritas.cob.userservice.api.port.out.AdminRepository;
-import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class AdminAgencyRelationService {
 
-  private final @NonNull AdminRepository adminRepository;
   private final @NonNull AdminAgencyRepository adminAgencyRepository;
-  private final @NonNull AgencyService agencyService;
+  private final @NonNull AgencyAdminService agencyAdminService;
+  private final @NonNull CreateAdminAgencyRelationService createAdminAgencyRelationService;
+  private final @NonNull SynchronizeAdminAgencyRelation synchronizeAdminAgencyRelation;
 
   public void createAdminAgencyRelation(
       final String adminId, final CreateAdminAgencyRelationDTO createAdminAgencyRelationDTO) {
-    var admin = retrieveAdmin(adminId);
-    var agency = retrieveAgency(createAdminAgencyRelationDTO.getAgencyId());
-    adminAgencyRepository.save(buildAdminAgency(admin, agency.getId()));
+    createAdminAgencyRelationService.create(adminId, createAdminAgencyRelationDTO);
   }
 
   public void deleteAdminAgencyRelation(final String adminId, final Long agencyId) {
@@ -48,59 +47,50 @@ public class AdminAgencyRelationService {
 
   public void synchronizeAdminAgenciesRelation(
       final String adminId, final List<CreateAdminAgencyRelationDTO> newAdminAgencyRelationDTOs) {
-    var admin = retrieveAdmin(adminId);
-    List<AdminAgency> existingAdminAgencyRelations = adminAgencyRepository.findByAdminId(adminId);
-    List<AdminAgency> adminAgencyRelationsToDelete =
-        emptyIfNull(existingAdminAgencyRelations).stream()
-            .filter(
-                existingRelation ->
-                    shouldBeDeleted(existingRelation.getAgencyId(), newAdminAgencyRelationDTOs))
+    this.synchronizeAdminAgencyRelation.synchronizeAdminAgenciesRelation(
+        adminId, newAdminAgencyRelationDTOs);
+  }
+
+  public void appendAgenciesForAdmins(final Set<AdminDTO> admins) {
+    var adminIds = admins.stream().map(AdminDTO::getId).collect(Collectors.toSet());
+
+    var adminAgencies = adminAgencyRepository.findByAdminIdIn(adminIds);
+
+    var agencyIds =
+        adminAgencies.stream().map(AdminAgency::getAgencyId).collect(Collectors.toSet());
+
+    var agencies =
+        this.agencyAdminService.retrieveAllAgencies().stream()
+            .filter(agency -> agencyIds.contains(agency.getId()))
+            .map(this::buildCopiedAgency)
             .collect(Collectors.toList());
-    List<AdminAgency> adminAgencyRelationsToAdd =
-        emptyIfNull(newAdminAgencyRelationDTOs).stream()
-            .filter(relation -> shouldBeAdded(relation, existingAdminAgencyRelations))
-            .map(relation -> buildAdminAgency(admin, relation.getAgencyId()))
+
+    admins.forEach(
+        admin -> admin.setAgencies(resolveAgenciesOfAdmin(admin.getId(), adminAgencies, agencies)));
+  }
+
+  private List<AgencyAdminResponseDTO> resolveAgenciesOfAdmin(
+      final String adminId,
+      final List<AdminAgency> adminAgencies,
+      final List<AgencyAdminResponseDTO> agencies) {
+    var agencyIdsOfAdmin =
+        adminAgencies.stream()
+            .filter(adminAgency -> adminId.equals(adminAgency.getAdmin().getId()))
+            .map(AdminAgency::getAgencyId)
             .collect(Collectors.toList());
 
-    adminAgencyRepository.deleteAll(adminAgencyRelationsToDelete);
-    adminAgencyRepository.saveAll(adminAgencyRelationsToAdd);
+    return agencies.stream()
+        .filter(agency -> agencyIdsOfAdmin.contains(agency.getId()))
+        .collect(Collectors.toList());
   }
 
-  private boolean shouldBeAdded(
-      final CreateAdminAgencyRelationDTO newAdminAgencyRelationDTO,
-      final List<AdminAgency> existingAdminAgencyRelations) {
-    return false;
-  }
+  @SneakyThrows
+  private AgencyAdminResponseDTO buildCopiedAgency(
+      de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO
+          agency) {
+    var result = new AgencyAdminResponseDTO();
+    BeanUtils.copyProperties(result, agency);
 
-  private boolean shouldBeDeleted(
-      final Long agencyId, final List<CreateAdminAgencyRelationDTO> newAdminAgencyRelationDTOs) {
-    return emptyIfNull(newAdminAgencyRelationDTOs).stream()
-        .noneMatch(relation -> relation.getAgencyId().equals(agencyId));
-  }
-
-  private Admin retrieveAdmin(final String adminId) {
-    return adminRepository
-        .findById(adminId)
-        .orElseThrow(
-            () ->
-                new BadRequestException(String.format("Admin with id %s does not exist", adminId)));
-  }
-
-  private AdminAgency buildAdminAgency(final Admin admin, final Long agencyId) {
-    return AdminAgency.builder()
-        .admin(admin)
-        .agencyId(agencyId)
-        .createDate(nowInUtc())
-        .updateDate(nowInUtc())
-        .build();
-  }
-
-  private AgencyDTO retrieveAgency(Long agencyId) {
-    var agencyDto = this.agencyService.getAgencyWithoutCaching(agencyId);
-    return Optional.ofNullable(agencyDto)
-        .orElseThrow(
-            () ->
-                new BadRequestException(
-                    String.format("AgencyId %s is not a valid agency", agencyId)));
+    return result;
   }
 }
