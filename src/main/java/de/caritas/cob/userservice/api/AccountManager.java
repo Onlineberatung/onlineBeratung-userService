@@ -14,6 +14,7 @@ import de.caritas.cob.userservice.api.port.out.MessageClient;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -21,6 +22,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
@@ -76,11 +78,23 @@ public class AccountManager implements AccountManaging {
   }
 
   public Map<String, Object> findConsultantsByInfix(
-      String infix, int pageNumber, int pageSize, String fieldName, boolean isAscending) {
+      String infix,
+      Collection<Long> agenciesToFilterConsultants,
+      int pageNumber,
+      int pageSize,
+      String fieldName,
+      boolean isAscending) {
 
     var direction = isAscending ? Direction.ASC : Direction.DESC;
     var pageRequest = PageRequest.of(pageNumber, pageSize, direction, fieldName);
-    var consultantPage = consultantRepository.findAllByInfix(infix, pageRequest);
+    Page<ConsultantBase> consultantPage;
+    if (agenciesToFilterConsultants.isEmpty()) {
+      consultantPage = consultantRepository.findAllByInfix(infix, pageRequest);
+    } else {
+      consultantPage =
+          consultantRepository.findAllByInfixAndAgencyIds(
+              infix, agenciesToFilterConsultants, pageRequest);
+    }
 
     var consultantIds =
         consultantPage.stream().map(ConsultantBase::getId).collect(Collectors.toList());
