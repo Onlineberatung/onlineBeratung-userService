@@ -5,7 +5,7 @@ CREATE TABLE `userservice`.`admin` (
     `first_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
     `last_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
     `email` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-    `type` varchar(6) NOT NULL,,
+    `type` varchar(6) NOT NULL,
     `rc_user_id` varchar(255) NULL,
     `id_old` bigint(21) NULL,
     `create_date` datetime NOT NULL DEFAULT (UTC_TIMESTAMP),
