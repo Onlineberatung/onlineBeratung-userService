@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -18,17 +19,27 @@ import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Indexed;
+import org.hibernate.search.annotations.SortableField;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 @Entity
-@Table(name = "admin")
+@Table(
+    name = "admin",
+    indexes = {
+      @Index(
+          columnList = "username, first_name, last_name, email",
+          name = "idx_username_first_name_last_name_email",
+          unique = true),
+    })
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @ToString
 @Builder
+@Indexed
 public class Admin implements Serializable {
 
   public enum AdminType {
@@ -50,21 +61,29 @@ public class Admin implements Serializable {
   @Column(name = "username", updatable = false, nullable = false)
   @Size(max = 255)
   @NonNull
+  @Field
+  @SortableField
   private String username;
 
   @Column(name = "first_name", updatable = false, nullable = false)
   @Size(max = 255)
   @NonNull
+  @Field
+  @SortableField
   private String firstName;
 
   @Column(name = "last_name", updatable = false, nullable = false)
   @Size(max = 255)
   @NonNull
+  @Field
+  @SortableField
   private String lastName;
 
   @Column(name = "email", nullable = false)
   @Size(max = 255)
   @NonNull
+  @Field
+  @SortableField
   private String email;
 
   @Enumerated(EnumType.STRING)

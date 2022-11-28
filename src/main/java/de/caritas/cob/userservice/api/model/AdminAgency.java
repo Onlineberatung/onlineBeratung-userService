@@ -17,6 +17,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.search.annotations.Field;
 
 @Entity
 @Table(name = "admin_agency")
@@ -37,6 +38,7 @@ public class AdminAgency implements Serializable {
   private Admin admin;
 
   @Column(name = "agency_id")
+  @Field
   private Long agencyId;
 
   @Column(name = "create_date")
