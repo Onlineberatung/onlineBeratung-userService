@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.admin.service.admin.create;
 
+import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
+
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAgencyAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
@@ -67,6 +69,8 @@ public class CreateAdminService {
         .firstName(createAgencyAdminDTO.getFirstname())
         .lastName(createAgencyAdminDTO.getLastname())
         .email(createAgencyAdminDTO.getEmail())
+        .createDate(nowInUtc())
+        .updateDate(nowInUtc())
         .build();
   }
 }
