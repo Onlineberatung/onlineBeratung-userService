@@ -30,6 +30,7 @@ public class CreateAdminService {
     final String password = userHelper.getRandomPassword();
     identityClient.updatePassword(keycloakUserId, password);
     identityClient.updateRole(keycloakUserId, UserRole.RESTRICTED_AGENCY_ADMIN);
+    identityClient.updateRole(keycloakUserId, UserRole.USER_ADMIN);
 
     return adminRepository.save(buildAdmin(createAgencyAdminDTO, keycloakUserId));
   }
