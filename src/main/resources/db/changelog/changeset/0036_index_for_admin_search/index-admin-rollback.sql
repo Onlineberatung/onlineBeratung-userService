@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS idx_username_first_name_last_name_email ON userservice.admin;
