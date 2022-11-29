@@ -43,7 +43,7 @@ public interface ConsultantRepository extends CrudRepository<Consultant, String>
 
   @Query(
       value =
-          "SELECT c.id as id, c.firstName as firstName, c.lastName as lastName, c.email as email "
+          "SELECT distinct c.id as id, c.firstName as firstName, c.lastName as lastName, c.email as email "
               + "FROM Consultant c "
               + "INNER JOIN ConsultantAgency ca ON c.id = ca.consultant.id "
               + "WHERE"
