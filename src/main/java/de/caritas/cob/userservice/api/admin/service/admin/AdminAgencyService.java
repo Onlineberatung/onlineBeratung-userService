@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.admin.service.admin;
 
-import de.caritas.cob.userservice.api.adapters.web.dto.AdminAgencyResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAgencyAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAgencyAdminDTO;
@@ -10,7 +9,7 @@ import de.caritas.cob.userservice.api.admin.service.admin.search.RetrieveAdminSe
 import de.caritas.cob.userservice.api.admin.service.admin.update.UpdateAdminService;
 import de.caritas.cob.userservice.api.admin.service.agency.AgencyAdminService;
 import de.caritas.cob.userservice.api.model.Admin;
-import java.util.stream.Collectors;
+import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -45,17 +44,8 @@ public class AdminAgencyService {
     this.deleteAdminService.deleteAgencyAdmin(adminId);
   }
 
-  public AdminAgencyResponseDTO findAgenciesOfAdmin(final String adminId) {
+  public List<Long> findAgenciesOfAdmin(final String adminId) {
     var adminAgencyIds = retrieveAdminService.findAgencyIdsOfAdmin(adminId);
-
-    var agencyList =
-        this.agencyService.retrieveAllAgencies().stream()
-            .filter(agency -> adminAgencyIds.contains(agency.getId()))
-            .collect(Collectors.toList());
-
-    return AdminAgencyResponseDTOBuilder.getInstance()
-        .withAdminId(adminId)
-        .withAgencies(agencyList)
-        .build();
+    return adminAgencyIds;
   }
 }

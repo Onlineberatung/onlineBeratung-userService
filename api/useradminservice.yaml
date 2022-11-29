@@ -662,11 +662,14 @@ paths:
             type: string
       responses:
         200:
-          description: OK - successfull operation
+          description: OK - successful operation
           content:
-            'application/hal+json':
+            'application/json':
               schema:
-                $ref: '#/components/schemas/AdminAgencyResponseDTO'
+                type: array
+                items:
+                  type: integer
+                  format: int64
 
         401:
           description: UNAUTHORIZED - no/invalid role/authorization

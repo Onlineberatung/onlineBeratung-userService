@@ -2,7 +2,6 @@ package de.caritas.cob.userservice.api.admin.facade;
 
 import static java.util.Objects.nonNull;
 
-import de.caritas.cob.userservice.api.adapters.web.dto.AdminAgencyResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminFilter;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyAdminSearchResultDTO;
@@ -13,7 +12,6 @@ import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAgencyAdminDTO;
 import de.caritas.cob.userservice.api.admin.service.admin.AdminAgencyRelationService;
 import de.caritas.cob.userservice.api.admin.service.admin.AdminAgencyService;
 import de.caritas.cob.userservice.api.admin.service.admin.search.AdminFilterService;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.NonNull;
@@ -45,15 +43,8 @@ public class AdminAgencyFacade {
     this.adminAgencyService.deleteAgencyAdmin(adminId);
   }
 
-  public AdminAgencyResponseDTO findAdminAgencies(String adminId) {
-    return this.adminAgencyService.findAgenciesOfAdmin(adminId);
-  }
-
-  public Collection<Long> findAdminUserAgencyIds(String userId) {
-    var adminAgencies = findAdminAgencies(userId).getEmbedded();
-    return adminAgencies.stream()
-        .map(agency -> agency.getEmbedded().getId())
-        .collect(Collectors.toList());
+  public List<Long> findAdminUserAgencyIds(String userId) {
+    return this.adminAgencyService.findAgenciesOfAdmin(userId);
   }
 
   public void createNewAdminAgencyRelation(

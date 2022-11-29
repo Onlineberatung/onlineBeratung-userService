@@ -32,6 +32,7 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserInfoRespo
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.LanguageResponseDTO;
+import de.caritas.cob.userservice.api.admin.facade.AdminAgencyFacade;
 import de.caritas.cob.userservice.api.admin.service.agency.AgencyAdminService;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
 import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiControllerFactory;
@@ -150,6 +151,8 @@ class UserControllerConsultantE2EIT {
   @MockBean private TopicServiceApiControllerFactory topicServiceApiControllerFactory;
 
   @MockBean private AgencyAdminService agencyAdminService;
+
+  @MockBean private AdminAgencyFacade adminAgencyFacade;
 
   private User user;
   private Consultant consultant;
@@ -523,12 +526,8 @@ class UserControllerConsultantE2EIT {
     when(authenticatedUser.hasRestrictedAgencyPriviliges()).thenReturn(true);
     when(authenticatedUser.getUserId()).thenReturn("d42c2e5e-143c-4db1-a90f-7cccf82fbb15");
     long agencyIdToSearchFor = 2L;
-    when(agencyAdminService.retrieveAllAgencies())
-        .thenReturn(
-            Lists.newArrayList(
-                new de.caritas.cob.userservice.agencyadminserivce.generated.web.model
-                        .AgencyAdminResponseDTO()
-                    .id(agencyIdToSearchFor)));
+    when(adminAgencyFacade.findAdminUserAgencyIds(authenticatedUser.getUserId()))
+        .thenReturn(Lists.newArrayList(agencyIdToSearchFor));
     givenAnInfix();
 
     var numMatching = 24;

@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
-import de.caritas.cob.userservice.api.adapters.web.dto.AdminAgencyResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminFilter;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyAdminSearchResultDTO;
@@ -273,8 +272,8 @@ public class UserAdminController implements UseradminApi {
   }
 
   @Override
-  public ResponseEntity<AdminAgencyResponseDTO> getAdminAgencies(@PathVariable String adminId) {
-    var adminAgencies = this.adminAgencyFacade.findAdminAgencies(adminId);
+  public ResponseEntity<List<Long>> getAdminAgencies(@PathVariable String adminId) {
+    var adminAgencies = this.adminAgencyFacade.findAdminUserAgencyIds(adminId);
     return ResponseEntity.ok(adminAgencies);
   }
 
