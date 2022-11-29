@@ -38,7 +38,8 @@ class AccountManagerTest {
         .thenReturn(page);
 
     // when
-    accountManager.findConsultantsByInfix("infix", Lists.newArrayList(), 1, 10, "email", true);
+    accountManager.findConsultantsByInfix(
+        "infix", false, Lists.newArrayList(), 1, 10, "email", true);
 
     // then
     Mockito.verify(consultantRepository)
@@ -54,7 +55,8 @@ class AccountManagerTest {
         .thenReturn(page);
 
     // when
-    accountManager.findConsultantsByInfix("infix", Lists.newArrayList(1L), 1, 10, "email", true);
+    accountManager.findConsultantsByInfix(
+        "infix", true, Lists.newArrayList(1L), 1, 10, "email", true);
 
     // then
     Mockito.verify(consultantRepository)

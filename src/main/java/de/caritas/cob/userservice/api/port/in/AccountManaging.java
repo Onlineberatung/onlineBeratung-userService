@@ -19,6 +19,7 @@ public interface AccountManaging {
 
   Map<String, Object> findConsultantsByInfix(
       String infix,
+      boolean shouldFilterByAgencies,
       Collection<Long> agenciesToFilterConsultants,
       int pageNumber,
       int pageSize,

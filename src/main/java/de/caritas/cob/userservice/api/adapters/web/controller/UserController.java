@@ -12,9 +12,11 @@ import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
 import de.caritas.cob.userservice.api.adapters.web.dto.AbsenceDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyAdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ChatDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ChatInfoResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ChatMembersResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionDTO;
@@ -108,6 +110,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.InternalServerErrorException;
@@ -813,6 +816,7 @@ public class UserController implements UsersApi {
     var resultMap =
         accountManager.findConsultantsByInfix(
             decodedInfix,
+            authenticatedUser.hasRestrictedAgencyPriviliges(),
             getAgenciesToFilterConsultants(),
             page - 1,
             perPage,
@@ -822,7 +826,26 @@ public class UserController implements UsersApi {
     var result =
         consultantDtoMapper.consultantSearchResultOf(resultMap, query, page, perPage, field, order);
 
+    if (authenticatedUser.hasRestrictedAgencyPriviliges()) {
+      if (result.getEmbedded() != null) {
+        result.getEmbedded().stream()
+            .forEach(
+                response ->
+                    removeAgenciesWithoutAccessRight(response, getAgenciesToFilterConsultants()));
+      }
+    }
+
     return ResponseEntity.ok(result);
+  }
+
+  private void removeAgenciesWithoutAccessRight(
+      ConsultantAdminResponseDTO response, Collection<Long> agenciesToFilterConsultants) {
+    List<AgencyAdminResponseDTO> agencies = response.getEmbedded().getAgencies();
+    List<AgencyAdminResponseDTO> filteredAgencies =
+        agencies.stream()
+            .filter(agency -> agenciesToFilterConsultants.contains(agency.getId()))
+            .collect(Collectors.toList());
+    response.getEmbedded().setAgencies(filteredAgencies);
   }
 
   private Collection<Long> getAgenciesToFilterConsultants() {

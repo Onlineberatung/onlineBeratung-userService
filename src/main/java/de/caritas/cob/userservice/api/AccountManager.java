@@ -79,6 +79,7 @@ public class AccountManager implements AccountManaging {
 
   public Map<String, Object> findConsultantsByInfix(
       String infix,
+      boolean shouldFilterByAgencies,
       Collection<Long> agenciesToFilterConsultants,
       int pageNumber,
       int pageSize,
@@ -88,7 +89,7 @@ public class AccountManager implements AccountManaging {
     var direction = isAscending ? Direction.ASC : Direction.DESC;
     var pageRequest = PageRequest.of(pageNumber, pageSize, direction, fieldName);
     Page<ConsultantBase> consultantPage;
-    if (agenciesToFilterConsultants.isEmpty()) {
+    if (!shouldFilterByAgencies) {
       consultantPage = consultantRepository.findAllByInfix(infix, pageRequest);
     } else {
       consultantPage =
