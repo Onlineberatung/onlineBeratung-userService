@@ -102,6 +102,9 @@ public class ConsultantCreatorService {
   private void assignCurrentTenantContext(CreateConsultantDTO createConsultantDTO) {
     if (multiTenancyEnabled) {
       createConsultantDTO.setTenantId(TenantContext.getCurrentTenant().intValue());
+    } else {
+      // TODO: replace this quick fix
+      createConsultantDTO.setTenantId(1);
     }
   }
 
