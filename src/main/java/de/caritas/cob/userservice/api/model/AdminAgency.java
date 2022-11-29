@@ -63,4 +63,13 @@ public class AdminAgency implements Serializable {
   public int hashCode() {
     return Objects.hash(id);
   }
+
+  public interface AdminAgencyBase {
+
+    Long getId();
+
+    Long getAgencyId();
+
+    String getAdminId();
+  }
 }

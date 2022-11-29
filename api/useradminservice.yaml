@@ -558,6 +558,68 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+
+  /useradmin/agencyadmins/search:
+    get:
+      tags:
+        - admin-user-controller
+      summary: 'Get Agency admins matching the given query [Auth: user-admin]'
+      operationId: searchAgencyAdmins
+      parameters:
+        - name: query
+          in: query
+          description: URL-encoded infix to search for in first name, last name, or email.
+            A non-encoded star symbol searches for all.
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - name: page
+          in: query
+          description: Page number (first page = 1)
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: perPage
+          in: query
+          description: Number of items returned per page
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+        - name: field
+          in: query
+          description: field to sort by
+          schema:
+            type: string
+            enum: [ FIRSTNAME, LASTNAME, EMAIL ]
+            default: FIRSTNAME
+            pattern: '^(FIRSTNAME|LASTNAME|EMAIL)$'
+        - name: order
+          in: query
+          description: sort order
+          schema:
+            type: string
+            enum: [ ASC, DESC ]
+            default: ASC
+            pattern: '^(ASC|DESC)$'
+      responses:
+        200:
+          description: OK - successful operation
+          content:
+            'application/hal+json':
+              schema:
+                $ref: '#/components/schemas/AgencyAdminSearchResultDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
+
   /useradmin/agencyadmins/{adminId}:
     get:
       tags:
@@ -1180,6 +1242,8 @@ components:
         delete:
           $ref: '#/components/schemas/HalLink'
         agencies:
+          $ref: '#/components/schemas/HalLink'
+        addAgency:
           $ref: '#/components/schemas/HalLink'
 
     SessionFilter:

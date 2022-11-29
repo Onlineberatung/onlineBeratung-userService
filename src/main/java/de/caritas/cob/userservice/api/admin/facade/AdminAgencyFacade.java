@@ -13,9 +13,12 @@ import de.caritas.cob.userservice.api.admin.service.admin.AdminAgencyRelationSer
 import de.caritas.cob.userservice.api.admin.service.admin.AdminAgencyService;
 import de.caritas.cob.userservice.api.admin.service.admin.search.AdminFilterService;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -79,5 +82,17 @@ public class AdminAgencyFacade {
               .collect(Collectors.toSet());
       adminAgencyRelationService.appendAgenciesForAdmins(admins);
     }
+  }
+
+  public Map<String, Object> findAgencyAdminsByInfix(
+      final String infix,
+      final String adminId,
+      final int pageNumber,
+      final int pageSize,
+      final String fieldName,
+      final boolean isAscending) {
+    var direction = isAscending ? Direction.ASC : Direction.DESC;
+    var pageRequest = PageRequest.of(pageNumber, pageSize, direction, fieldName);
+    return this.adminAgencyService.findAgencyAdminsByInfix(infix, adminId, pageRequest);
   }
 }

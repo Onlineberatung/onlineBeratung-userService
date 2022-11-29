@@ -22,6 +22,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantAgencyDTO
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAgencyAdminDTO;
+import de.caritas.cob.userservice.api.adapters.web.mapping.AdminAgencyDtoMapper;
 import de.caritas.cob.userservice.api.admin.facade.AdminAgencyFacade;
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
 import de.caritas.cob.userservice.api.admin.facade.UserAdminFacade;
@@ -29,6 +30,7 @@ import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenera
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.config.auth.RoleAuthorizationAuthorityMapper;
 import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
+import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.service.appointment.AppointmentService;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -98,6 +100,10 @@ public class UserAdminControllerIT {
   @MockBean private AppointmentService appointmentService;
 
   @MockBean private AdminAgencyFacade adminAgencyFacade;
+
+  @MockBean private AdminAgencyDtoMapper adminAgencyDtoMapper;
+
+  @MockBean private AuthenticatedUser authenticatedUser;
 
   @Test
   public void getSessions_Should_returnBadRequest_When_requiredPaginationParamsAreMissing()
