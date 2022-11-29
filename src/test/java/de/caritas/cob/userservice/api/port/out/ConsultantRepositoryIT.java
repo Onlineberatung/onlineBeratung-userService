@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.google.api.client.util.Sets;
 import com.google.common.collect.Lists;
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.model.Appointment;
@@ -454,16 +455,32 @@ class ConsultantRepositoryIT {
     while (count-- > 0) {
       Consultant consultant = givenConsultantMatchingEmail(infix);
       Consultant savedConsultant = underTest.save(consultant);
-      var consultantAgency = new ConsultantAgency();
-      int index = easyRandom.nextInt(agencyIds.size());
-      consultantAgency.setAgencyId(agencyIds.get(index));
-      consultantAgency.setConsultant(savedConsultant);
-
-      ConsultantAgency saved = consultantAgencyRepository.save(consultantAgency);
-      consultant.getConsultantAgencies().add(saved);
+      var agencyIdsCopy = Lists.newArrayList(agencyIds);
+      Long agencyId = pickRandomAndRemove(agencyIdsCopy);
+      saveConsultantAgency(savedConsultant, agencyId);
+      saveConsultantAgency(savedConsultant, agencyId);
       savedConsultant = underTest.save(consultant);
       matchingIds.add(savedConsultant.getId());
     }
+  }
+
+  private void saveConsultantAgency(Consultant savedConsultant, Long agencyId) {
+    var consultantAgency = new ConsultantAgency();
+    consultantAgency.setAgencyId(agencyId);
+    consultantAgency.setConsultant(savedConsultant);
+
+    ConsultantAgency saved = consultantAgencyRepository.save(consultantAgency);
+    if (savedConsultant.getConsultantAgencies() == null) {
+      savedConsultant.setConsultantAgencies(Sets.newHashSet());
+    }
+    savedConsultant.getConsultantAgencies().add(saved);
+  }
+
+  private static Long pickRandomAndRemove(List<Long> agencyIds) {
+    int index = easyRandom.nextInt(agencyIds.size());
+    Long agencyId = agencyIds.get(index);
+    agencyIds.remove(agencyId);
+    return agencyId;
   }
 
   private Consultant givenConsultantMatchingEmail(String infix) {
