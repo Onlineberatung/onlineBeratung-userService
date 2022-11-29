@@ -12,13 +12,18 @@ import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Admin;
 import de.caritas.cob.userservice.api.port.out.AdminRepository;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
+import de.caritas.cob.userservice.api.tenant.TenantContext;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class CreateAdminService {
+
+  @Value("${multitenancy.enabled}")
+  private boolean multiTenancyEnabled;
 
   private final @NonNull IdentityClient identityClient;
   private final @NonNull UserAccountInputValidator userAccountInputValidator;
@@ -31,6 +36,7 @@ public class CreateAdminService {
     identityClient.updatePassword(keycloakUserId, password);
     identityClient.updateRole(keycloakUserId, UserRole.RESTRICTED_AGENCY_ADMIN);
     identityClient.updateRole(keycloakUserId, UserRole.USER_ADMIN);
+    assignCurrentTenantContext(createAgencyAdminDTO);
 
     return adminRepository.save(buildAdmin(createAgencyAdminDTO, keycloakUserId));
   }
@@ -73,5 +79,11 @@ public class CreateAdminService {
         .createDate(nowInUtc())
         .updateDate(nowInUtc())
         .build();
+  }
+
+  private void assignCurrentTenantContext(CreateAgencyAdminDTO createAgencyAdminDTO) {
+    if (multiTenancyEnabled) {
+      createAgencyAdminDTO.setTenantId(TenantContext.getCurrentTenant().intValue());
+    }
   }
 }
