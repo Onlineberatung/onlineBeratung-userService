@@ -25,7 +25,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.access.AccessDeniedException;
 
 @ExtendWith(MockitoExtension.class)
 class ConsultantAdminFacadeTest {
@@ -160,7 +159,7 @@ class ConsultantAdminFacadeTest {
     when(authenticatedUser.hasRestrictedAgencyPriviliges()).thenReturn(true);
 
     assertThrows(
-            ForbiddenException.class,
+        ForbiddenException.class,
         () ->
             consultantAdminFacade.checkPermissionsToAssignedAgencies(
                 Lists.newArrayList(new CreateConsultantAgencyDTO().agencyId(4L))));

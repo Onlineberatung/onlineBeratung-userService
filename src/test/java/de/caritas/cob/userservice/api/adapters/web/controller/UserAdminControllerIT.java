@@ -14,7 +14,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminAgencyRelationDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAgencyAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantAgencyDTO;
@@ -46,7 +45,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.hateoas.client.LinkDiscoverers;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -106,7 +104,6 @@ public class UserAdminControllerIT {
   @MockBean private AdminAgencyDtoMapper adminAgencyDtoMapper;
 
   @MockBean private AuthenticatedUser authenticatedUser;
-
 
   @Test
   public void getSessions_Should_returnBadRequest_When_requiredPaginationParamsAreMissing()
@@ -263,7 +260,7 @@ public class UserAdminControllerIT {
   }
 
   @Test
-  public void setConsultantAgenciesShouldReturnOkWhenRequiredParamsAreGiven() throws Exception {
+  public void setConsultantAgencies_ShouldReturnOk_When_RequiredParamsAreGiven() throws Exception {
     var consultantId = UUID.randomUUID().toString();
     var agencies = givenAgenciesToSet();
 
@@ -278,6 +275,24 @@ public class UserAdminControllerIT {
     verify(consultantAdminFacade).prepareConsultantAgencyRelation(any(), anyList());
     verify(consultantAdminFacade).completeConsultantAgencyAssigment(any(), anyList());
     verify(this.appointmentService).syncAgencies(any(), anyList());
+  }
+
+  @Test
+  public void
+      setConsultantAgencies_Should_ReturnForbiddenIfUserDoesNotHavePermissionsToTheRequestedAgency()
+          throws Exception {
+    var consultantId = UUID.randomUUID().toString();
+
+    doThrow(new ForbiddenException(""))
+        .when(consultantAdminFacade)
+        .checkPermissionsToAssignedAgencies(Mockito.anyList());
+    var agencies = givenAgenciesToSet();
+
+    mvc.perform(
+            put("/useradmin/consultants/{consultantId}/agencies", consultantId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(agencies)))
+        .andExpect(status().isForbidden());
   }
 
   @Test

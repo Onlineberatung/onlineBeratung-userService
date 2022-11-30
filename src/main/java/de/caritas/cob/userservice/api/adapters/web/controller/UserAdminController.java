@@ -61,8 +61,6 @@ public class UserAdminController implements UseradminApi {
   private final @NonNull AdminAgencyDtoMapper adminAgencyDtoMapper;
   private final @NotNull AuthenticatedUser authenticatedUser;
 
-  private final @NotNull AuthenticatedUser authenticatedUser;
-
   /**
    * Creates the root hal based navigation entity.
    *
