@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
+import com.google.common.collect.Lists;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminFilter;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyAdminSearchResultDTO;
@@ -27,6 +28,7 @@ import de.caritas.cob.userservice.api.admin.facade.UserAdminFacade;
 import de.caritas.cob.userservice.api.admin.hallink.RootDTOBuilder;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
+import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.service.appointment.AppointmentService;
 import de.caritas.cob.userservice.generated.api.adapters.web.controller.UseradminApi;
 import io.swagger.annotations.Api;
@@ -53,6 +55,8 @@ public class UserAdminController implements UseradminApi {
   private final @NonNull UserAdminFacade userAdminFacade;
   private final @NonNull AdminAgencyFacade adminAgencyFacade;
   private final @NonNull AppointmentService appointmentService;
+
+  private final @NotNull AuthenticatedUser authenticatedUser;
 
   /**
    * Creates the root hal based navigation entity.
@@ -116,6 +120,8 @@ public class UserAdminController implements UseradminApi {
   public ResponseEntity<Void> createConsultantAgency(
       @PathVariable String consultantId,
       @Valid CreateConsultantAgencyDTO createConsultantAgencyDTO) {
+    consultantAdminFacade.checkPermissionsToAssignedAgencies(
+        Lists.newArrayList(createConsultantAgencyDTO));
     this.consultantAdminFacade.createNewConsultantAgency(consultantId, createConsultantAgencyDTO);
     return new ResponseEntity<>(HttpStatus.CREATED);
   }
@@ -124,6 +130,7 @@ public class UserAdminController implements UseradminApi {
   public ResponseEntity<Void> setConsultantAgencies(
       String consultantId, List<CreateConsultantAgencyDTO> agencyList) {
     var notFilteredAgencyList = new ArrayList<>(agencyList);
+    consultantAdminFacade.checkPermissionsToAssignedAgencies(agencyList);
     appointmentService.syncAgencies(consultantId, notFilteredAgencyList);
     var agencyIdsForDeletions =
         consultantAdminFacade.filterAgencyListForDeletion(consultantId, agencyList);

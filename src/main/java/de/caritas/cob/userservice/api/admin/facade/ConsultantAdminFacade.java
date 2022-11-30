@@ -23,6 +23,8 @@ import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFi
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.CreateConsultantAgencyDTOInputAdapter;
+import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
+import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.service.LogService;
@@ -32,11 +34,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 /** Facade to encapsulate admin functions for consultants. */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ConsultantAdminFacade {
 
   private final @NonNull ConsultantAdminService consultantAdminService;
@@ -44,6 +49,10 @@ public class ConsultantAdminFacade {
   private final @NonNull ConsultantAgencyAdminService consultantAgencyAdminService;
   private final @NonNull ConsultantAgencyRelationCreatorService
       consultantAgencyRelationCreatorService;
+
+  private final @NonNull AdminAgencyFacade adminAgencyFacade;
+
+  private final @NonNull AuthenticatedUser authenticatedUser;
 
   /**
    * Finds a consultant by given consultant id.
@@ -276,5 +285,25 @@ public class ConsultantAdminFacade {
             .collect(Collectors.toList());
     newList.clear();
     newList.addAll(filteredList);
+  }
+
+  public void checkPermissionsToAssignedAgencies(List<CreateConsultantAgencyDTO> agencyList) {
+    if (authenticatedUser.hasRestrictedAgencyPriviliges()) {
+      List<Long> adminUserAgencyIds =
+          adminAgencyFacade.findAdminUserAgencyIds(authenticatedUser.getUserId());
+      List<Long> agencyIdsFromTheRequest =
+          agencyList.stream()
+              .map(createConsultantAgencyDTO -> createConsultantAgencyDTO.getAgencyId())
+              .collect(Collectors.toList());
+
+      if (!adminUserAgencyIds.containsAll(agencyIdsFromTheRequest)) {
+        log.warn(
+            "User does not have access to some of the agencies. Admin agencies {}, requested agencies to  update: {}",
+            adminUserAgencyIds,
+            agencyIdsFromTheRequest);
+        throw new ForbiddenException(
+            "Does not have permissions to update some of the agencies from the request");
+      }
+    }
   }
 }
