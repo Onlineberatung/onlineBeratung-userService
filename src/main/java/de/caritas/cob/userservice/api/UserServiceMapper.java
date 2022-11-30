@@ -7,6 +7,9 @@ import com.google.api.client.util.ArrayMap;
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
+import de.caritas.cob.userservice.api.model.Admin;
+import de.caritas.cob.userservice.api.model.Admin.AdminBase;
+import de.caritas.cob.userservice.api.model.AdminAgency.AdminAgencyBase;
 import de.caritas.cob.userservice.api.model.Appointment;
 import de.caritas.cob.userservice.api.model.Appointment.AppointmentStatus;
 import de.caritas.cob.userservice.api.model.Consultant;
@@ -121,6 +124,40 @@ public class UserServiceMapper {
         consultants);
   }
 
+  public Map<String, Object> mapOfAdmin(
+      Page<AdminBase> adminsPage,
+      List<Admin> fullAdmins,
+      List<AgencyDTO> agencyDTOs,
+      List<AdminAgencyBase> agenciesOfAdmin) {
+    var agencyLookupMap =
+        agencyDTOs.stream().collect(Collectors.toMap(AgencyDTO::getId, Function.identity()));
+
+    var fullAdminLookupMap =
+        fullAdmins.stream().collect(Collectors.toMap(Admin::getId, Function.identity()));
+
+    var adminAgencyLookupMap =
+        agenciesOfAdmin.stream().collect(Collectors.groupingBy(AdminAgencyBase::getAdminId));
+
+    var admins = new ArrayList<Map<String, Object>>();
+    adminsPage.forEach(
+        adminBase -> {
+          var fullAdmin = fullAdminLookupMap.get(adminBase.getId());
+          var agencies = mapOfAdmin(fullAdmin, agencyLookupMap, adminAgencyLookupMap);
+          var consultantMap = mapOfAdmin(adminBase, fullAdmin, agencies);
+          admins.add(consultantMap);
+        });
+
+    return Map.of(
+        "totalElements",
+        (int) adminsPage.getTotalElements(),
+        "isFirstPage",
+        adminsPage.isFirst(),
+        "isLastPage",
+        adminsPage.isLast(),
+        "admins",
+        admins);
+  }
+
   private List<Map<String, Object>> mapOf(
       Consultant consultant,
       Map<Long, AgencyDTO> agencyLookupMap,
@@ -136,6 +173,31 @@ public class UserServiceMapper {
                 var agencyId = coAgency.getAgencyId();
                 if (agencyLookupMap.containsKey(agencyId)
                     && isDeletionConsistent(consultant, coAgency)
+                    && isAgencyUnique(agencyIdsAdded, agencyId)) {
+                  var agencyDTO = agencyLookupMap.get(agencyId);
+                  agencies.add(mapOf(agencyDTO));
+                  agencyIdsAdded.add(agencyId);
+                }
+              });
+    }
+
+    return agencies;
+  }
+
+  private List<Map<String, Object>> mapOfAdmin(
+      Admin admin,
+      Map<Long, AgencyDTO> agencyLookupMap,
+      Map<String, List<AdminAgencyBase>> aaLookupMap) {
+    var agencies = new ArrayList<Map<String, Object>>();
+    var agencyIdsAdded = new HashSet<Long>();
+
+    if (aaLookupMap.containsKey(admin.getId())) {
+      aaLookupMap
+          .get(admin.getId())
+          .forEach(
+              adminAgency -> {
+                var agencyId = adminAgency.getAgencyId();
+                if (agencyLookupMap.containsKey(agencyId)
                     && isAgencyUnique(agencyIdsAdded, agencyId)) {
                   var agencyDTO = agencyLookupMap.get(agencyId);
                   agencies.add(mapOf(agencyDTO));
@@ -190,6 +252,26 @@ public class UserServiceMapper {
     map.put(
         "deletedAt",
         nonNull(fullConsultant.getDeleteDate()) ? fullConsultant.getDeleteDate().toString() : null);
+    map.put("agencies", agencies);
+
+    return map;
+  }
+
+  public Map<String, Object> mapOfAdmin(
+      AdminBase adminBase, Admin fullAdmin, List<Map<String, Object>> agencies) {
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("id", adminBase.getId());
+    map.put("email", adminBase.getEmail());
+    map.put("firstName", adminBase.getFirstName());
+    map.put("lastName", adminBase.getLastName());
+    map.put("username", fullAdmin.getUsername());
+    map.put(
+        "createdAt",
+        nonNull(fullAdmin.getCreateDate()) ? fullAdmin.getCreateDate().toString() : null);
+    map.put(
+        "updatedAt",
+        nonNull(fullAdmin.getUpdateDate()) ? fullAdmin.getUpdateDate().toString() : null);
     map.put("agencies", agencies);
 
     return map;

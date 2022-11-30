@@ -11,6 +11,7 @@ import de.caritas.cob.userservice.api.admin.service.admin.update.agencyrelation.
 import de.caritas.cob.userservice.api.admin.service.agency.AgencyAdminService;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.model.AdminAgency;
+import de.caritas.cob.userservice.api.model.AdminAgency.AdminAgencyBase;
 import de.caritas.cob.userservice.api.port.out.AdminAgencyRepository;
 import java.util.List;
 import java.util.Set;
@@ -57,7 +58,7 @@ public class AdminAgencyRelationService {
     var adminAgencies = adminAgencyRepository.findByAdminIdIn(adminIds);
 
     var agencyIds =
-        adminAgencies.stream().map(AdminAgency::getAgencyId).collect(Collectors.toSet());
+        adminAgencies.stream().map(AdminAgencyBase::getAgencyId).collect(Collectors.toSet());
 
     var agencies =
         this.agencyAdminService.retrieveAllAgencies().stream()
@@ -71,12 +72,12 @@ public class AdminAgencyRelationService {
 
   private List<AgencyAdminResponseDTO> resolveAgenciesOfAdmin(
       final String adminId,
-      final List<AdminAgency> adminAgencies,
+      final List<AdminAgencyBase> adminAgencies,
       final List<AgencyAdminResponseDTO> agencies) {
     var agencyIdsOfAdmin =
         adminAgencies.stream()
-            .filter(adminAgency -> adminId.equals(adminAgency.getAdmin().getId()))
-            .map(AdminAgency::getAgencyId)
+            .filter(adminAgency -> adminId.equals(adminAgency.getAdminId()))
+            .map(AdminAgencyBase::getAgencyId)
             .collect(Collectors.toList());
 
     return agencies.stream()

@@ -120,4 +120,15 @@ public class Admin implements Serializable {
   public int hashCode() {
     return Objects.hash(id);
   }
+
+  public interface AdminBase {
+
+    String getId();
+
+    String getFirstName();
+
+    String getLastName();
+
+    String getEmail();
+  }
 }

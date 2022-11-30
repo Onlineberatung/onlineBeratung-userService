@@ -9,7 +9,6 @@ import de.caritas.cob.userservice.api.adapters.web.dto.Sort.FieldEnum;
 import de.caritas.cob.userservice.api.admin.service.admin.AdminSearchResultBuilder;
 import de.caritas.cob.userservice.api.admin.service.admin.search.querybuilder.AdminFilterQueryBuilder;
 import de.caritas.cob.userservice.api.model.Admin;
-import de.caritas.cob.userservice.api.model.Consultant;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import javax.persistence.EntityManagerFactory;
@@ -54,11 +53,7 @@ public class AdminFilterService {
       AdminFilter adminFilter, FullTextEntityManager fullTextEntityManager) {
 
     var queryBuilder =
-        fullTextEntityManager
-            .getSearchFactory()
-            .buildQueryBuilder()
-            .forEntity(Consultant.class)
-            .get();
+        fullTextEntityManager.getSearchFactory().buildQueryBuilder().forEntity(Admin.class).get();
 
     var query =
         AdminFilterQueryBuilder.getInstance(queryBuilder).onAdminFilter(adminFilter).buildQuery();

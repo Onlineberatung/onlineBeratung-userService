@@ -22,6 +22,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.Sort;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAgencyAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ViolationDTO;
+import de.caritas.cob.userservice.api.adapters.web.mapping.AdminAgencyDtoMapper;
 import de.caritas.cob.userservice.api.admin.facade.AdminAgencyFacade;
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
 import de.caritas.cob.userservice.api.admin.facade.UserAdminFacade;
@@ -32,6 +33,8 @@ import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.service.appointment.AppointmentService;
 import de.caritas.cob.userservice.generated.api.adapters.web.controller.UseradminApi;
 import io.swagger.annotations.Api;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import javax.validation.Valid;
@@ -55,6 +58,8 @@ public class UserAdminController implements UseradminApi {
   private final @NonNull UserAdminFacade userAdminFacade;
   private final @NonNull AdminAgencyFacade adminAgencyFacade;
   private final @NonNull AppointmentService appointmentService;
+  private final @NonNull AdminAgencyDtoMapper adminAgencyDtoMapper;
+  private final @NotNull AuthenticatedUser authenticatedUser;
 
   private final @NotNull AuthenticatedUser authenticatedUser;
 
@@ -323,5 +328,26 @@ public class UserAdminController implements UseradminApi {
       final String adminId, final List<CreateAdminAgencyRelationDTO> newAdminAgencyRelationDTOs) {
     this.adminAgencyFacade.setAdminAgenciesRelation(adminId, newAdminAgencyRelationDTOs);
     return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<AgencyAdminSearchResultDTO> searchAgencyAdmins(
+      String query, Integer page, Integer perPage, String field, String order) {
+    var decodedInfix = URLDecoder.decode(query, StandardCharsets.UTF_8).trim();
+    var isAscending = order.equalsIgnoreCase("asc");
+    var mappedField = adminAgencyDtoMapper.mappedFieldOf(field);
+    var resultMap =
+        adminAgencyFacade.findAgencyAdminsByInfix(
+            decodedInfix,
+            authenticatedUser.getUserId(),
+            page - 1,
+            perPage,
+            mappedField,
+            isAscending);
+    var result =
+        adminAgencyDtoMapper.agencyAdminSearchResultOf(
+            resultMap, query, page, perPage, field, order);
+
+    return ResponseEntity.ok(result);
   }
 }

@@ -21,6 +21,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantAgencyDTO
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAgencyAdminDTO;
+import de.caritas.cob.userservice.api.adapters.web.mapping.AdminAgencyDtoMapper;
 import de.caritas.cob.userservice.api.admin.facade.AdminAgencyFacade;
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
 import de.caritas.cob.userservice.api.admin.facade.UserAdminFacade;
@@ -102,7 +103,10 @@ public class UserAdminControllerIT {
 
   @MockBean private AdminAgencyFacade adminAgencyFacade;
 
+  @MockBean private AdminAgencyDtoMapper adminAgencyDtoMapper;
+
   @MockBean private AuthenticatedUser authenticatedUser;
+
 
   @Test
   public void getSessions_Should_returnBadRequest_When_requiredPaginationParamsAreMissing()
@@ -274,20 +278,6 @@ public class UserAdminControllerIT {
     verify(consultantAdminFacade).prepareConsultantAgencyRelation(any(), anyList());
     verify(consultantAdminFacade).completeConsultantAgencyAssigment(any(), anyList());
     verify(this.appointmentService).syncAgencies(any(), anyList());
-  }
-
-  @Test
-  public void setConsultantAgencies_Should_ReturnForbiddenIfUserDoesNotHavePermissionsToTheRequestedAgency() throws Exception {
-    var consultantId = UUID.randomUUID().toString();
-
-    doThrow(new ForbiddenException("")).when(consultantAdminFacade).checkPermissionsToAssignedAgencies(Mockito.anyList());
-    var agencies = givenAgenciesToSet();
-
-    mvc.perform(
-                    put("/useradmin/consultants/{consultantId}/agencies", consultantId)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(agencies)))
-            .andExpect(status().isForbidden());
   }
 
   @Test
