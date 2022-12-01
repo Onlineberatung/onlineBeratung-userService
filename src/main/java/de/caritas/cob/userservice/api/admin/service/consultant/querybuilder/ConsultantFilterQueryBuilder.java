@@ -3,13 +3,13 @@ package de.caritas.cob.userservice.api.admin.service.consultant.querybuilder;
 import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantFilter;
-import org.apache.commons.lang3.StringUtils;
+import de.caritas.cob.userservice.api.admin.service.FilterQueryBuilder;
 import org.apache.lucene.search.Query;
 import org.hibernate.search.query.dsl.BooleanJunction;
 import org.hibernate.search.query.dsl.QueryBuilder;
 
 /** Builder for the filter based query used by hibernate search. */
-public class ConsultantFilterQueryBuilder {
+public class ConsultantFilterQueryBuilder extends FilterQueryBuilder {
 
   private static final String FIELD_USERNAME = "username";
   private static final String FIELD_LAST_NAME = "lastName";
@@ -18,10 +18,9 @@ public class ConsultantFilterQueryBuilder {
   private static final String FIELD_AGENCY_IDS = "consultantAgencies.agencyId";
 
   private ConsultantFilter consultantFilter;
-  private final QueryBuilder queryBuilder;
 
   private ConsultantFilterQueryBuilder(QueryBuilder queryBuilder) {
-    this.queryBuilder = queryBuilder;
+    super(queryBuilder);
   }
 
   /**
@@ -57,7 +56,7 @@ public class ConsultantFilterQueryBuilder {
         : this.queryBuilder.all().createQuery();
   }
 
-  private Query buildFilteredQuery() {
+  protected Query buildFilteredQuery() {
     BooleanJunction<BooleanJunction> junction = this.queryBuilder.bool();
 
     addStringFilterCondition(this.consultantFilter.getUsername(), FIELD_USERNAME, junction);
@@ -67,25 +66,5 @@ public class ConsultantFilterQueryBuilder {
     addObjectFilterCondition(this.consultantFilter.getAgencyId(), FIELD_AGENCY_IDS, junction);
 
     return junction.isEmpty() ? this.queryBuilder.all().createQuery() : junction.createQuery();
-  }
-
-  private void addStringFilterCondition(
-      String filterValue, String targetField, BooleanJunction<BooleanJunction> junction) {
-    if (StringUtils.isNotBlank(filterValue)) {
-      addFilterCondition(filterValue, targetField, junction);
-    }
-  }
-
-  private void addFilterCondition(
-      Object filterValue, String targetField, BooleanJunction<BooleanJunction> junction) {
-    junction.must(
-        this.queryBuilder.keyword().onField(targetField).matching(filterValue).createQuery());
-  }
-
-  private void addObjectFilterCondition(
-      Object filterValue, String targetField, BooleanJunction<BooleanJunction> junction) {
-    if (nonNull(filterValue)) {
-      addFilterCondition(filterValue, targetField, junction);
-    }
   }
 }
