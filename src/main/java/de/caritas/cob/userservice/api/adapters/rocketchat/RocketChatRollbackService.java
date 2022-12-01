@@ -2,7 +2,6 @@ package de.caritas.cob.userservice.api.adapters.rocketchat;
 
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLeaveFromGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import java.util.List;

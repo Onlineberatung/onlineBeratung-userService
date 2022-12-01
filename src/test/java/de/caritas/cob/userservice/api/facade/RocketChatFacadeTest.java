@@ -13,8 +13,8 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLeaveFromGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -110,7 +110,8 @@ public class RocketChatFacadeTest {
   }
 
   @Test
-  public void leaveFromGroupAsTechnicalUser_Should_leaveFromGroupAsTechnicalUser() throws Exception {
+  public void leaveFromGroupAsTechnicalUser_Should_leaveFromGroupAsTechnicalUser()
+      throws Exception {
     this.rocketChatFacade.leaveFromGroupAsTechnicalUser("group");
 
     verify(this.rocketChatService, times(1)).leaveFromGroupAsTechnicalUser("group");

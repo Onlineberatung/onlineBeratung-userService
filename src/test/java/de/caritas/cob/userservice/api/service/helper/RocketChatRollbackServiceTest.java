@@ -15,6 +15,7 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLeaveFromGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Before;

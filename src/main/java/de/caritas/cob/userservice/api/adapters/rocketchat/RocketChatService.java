@@ -15,9 +15,9 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupCreateB
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupDeleteBodyDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupDeleteResponseDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupLeaveBodyDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberResponseDTO;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupLeaveBodyDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupRemoveUserBodyDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupsListAllResponseDTO;
@@ -46,9 +46,9 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteUserE
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupsListAllException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetUserIdException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLeaveFromGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLeaveFromGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.port.out.MessageClient;
@@ -602,7 +602,6 @@ public class RocketChatService implements MessageClient {
       return false;
     }
   }
-
 
   /**
    * Get all standard members (all users except system user and technical user) of a rocket chat
