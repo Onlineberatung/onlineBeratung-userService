@@ -6,10 +6,6 @@
     <sqlFile
       path="db/changelog/changeset/0035_admin/admin.sql"
       stripComments="true"/>
-    <sqlFile
-      endDelimiter="//"
-      path="db/changelog/changeset/0035_admin/admin-trigger.sql"
-      stripComments="true"/>
     <rollback>
       <sqlFile
         path="db/changelog/changeset/0035_admin/admin-rollback.sql"

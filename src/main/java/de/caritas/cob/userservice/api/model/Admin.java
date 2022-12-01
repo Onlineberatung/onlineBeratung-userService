@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
@@ -23,6 +24,7 @@ import org.hibernate.search.annotations.Indexed;
 import org.hibernate.search.annotations.SortableField;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(
@@ -40,6 +42,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 @ToString
 @Builder
 @Indexed
+@EntityListeners(AuditingEntityListener.class)
 public class Admin implements Serializable {
 
   public enum AdminType {
