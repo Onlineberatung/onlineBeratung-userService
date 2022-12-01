@@ -16,9 +16,7 @@ import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminCo
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -700,8 +698,9 @@ public class UserAdminControllerAuthorizationIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
-  public void deleteConsultant_Should_ReturnCreatedAndCallConsultantAdmin_When_userAdminAuthority()
-      throws Exception {
+  public void
+      deleteConsultant_Should_MarkConsultantForDeletionAndCallConsultantAdmin_When_userAdminAuthority()
+          throws Exception {
     mvc.perform(
             delete(DELETE_CONSULTANT_PATH)
                 .cookie(CSRF_COOKIE)
@@ -710,6 +709,20 @@ public class UserAdminControllerAuthorizationIT {
         .andExpect(status().isOk());
 
     verify(this.consultantAdminFacade, times(1)).markConsultantForDeletion(any());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.RESTRICTED_AGENCY_ADMIN})
+  public void deleteConsultant_Should_ReturnForbidden_When_userDoesNotHaveUserAdminAuthority()
+      throws Exception {
+    mvc.perform(
+            delete(DELETE_CONSULTANT_PATH)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+
+    verifyNoInteractions(consultantAdminFacade);
   }
 
   @Test

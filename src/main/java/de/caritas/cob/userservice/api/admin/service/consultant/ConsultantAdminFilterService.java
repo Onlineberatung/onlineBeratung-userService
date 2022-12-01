@@ -52,7 +52,7 @@ public class ConsultantAdminFilterService {
             .withSort(sort)
             .withPage(page)
             .withPerPage(perPage)
-            .buildConsultantSearchResult();
+            .buildSearchResult();
 
     fullTextEntityManager.close();
     return searchResultDTO;
