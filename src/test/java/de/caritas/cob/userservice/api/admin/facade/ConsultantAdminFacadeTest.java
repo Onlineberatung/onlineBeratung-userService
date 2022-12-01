@@ -2,18 +2,24 @@ package de.caritas.cob.userservice.api.admin.facade;
 
 import static de.caritas.cob.userservice.api.adapters.web.dto.AgencyTypeDTO.AgencyTypeEnum.DEFAULT_AGENCY;
 import static de.caritas.cob.userservice.api.adapters.web.dto.AgencyTypeDTO.AgencyTypeEnum.TEAM_AGENCY;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import com.google.common.collect.Lists;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyTypeDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantFilter;
+import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.Sort;
 import de.caritas.cob.userservice.api.adapters.web.dto.Sort.FieldEnum;
 import de.caritas.cob.userservice.api.admin.service.agency.ConsultantAgencyAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFilterService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
+import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
+import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,6 +38,10 @@ class ConsultantAdminFacadeTest {
   @Mock private ConsultantAgencyAdminService consultantAgencyAdminService;
 
   @Mock private ConsultantAgencyRelationCreatorService relationCreatorService;
+
+  @Mock private AuthenticatedUser authenticatedUser;
+
+  @Mock private AdminAgencyFacade adminAgencyFacade;
 
   @Test
   void findConsultant_Should_useConsultantAdminService() {
@@ -120,5 +130,38 @@ class ConsultantAdminFacadeTest {
     this.consultantAdminFacade.findConsultantsForAgency("1");
 
     verify(this.consultantAgencyAdminService).findConsultantsForAgency(1L);
+  }
+
+  @Test
+  void checkPermissionsToUpdateAgencies_Should_PassIfUserDoesntHaveRestrictedPermissions() {
+    consultantAdminFacade.checkPermissionsToAssignedAgencies(
+        Lists.newArrayList(new CreateConsultantAgencyDTO().agencyId(1L)));
+
+    verify(authenticatedUser).hasRestrictedAgencyPriviliges();
+  }
+
+  @Test
+  void
+      checkPermissionsToUpdateAgencies_Should_PassIfUserHasRestrictedPermissionsAndHasPermissionsForTheGivenAgency() {
+    when(adminAgencyFacade.findAdminUserAgencyIds(authenticatedUser.getUserId()))
+        .thenReturn(Lists.newArrayList(1L, 2L, 3L));
+    when(authenticatedUser.hasRestrictedAgencyPriviliges()).thenReturn(true);
+    consultantAdminFacade.checkPermissionsToAssignedAgencies(
+        Lists.newArrayList(new CreateConsultantAgencyDTO().agencyId(1L)));
+    verify(authenticatedUser).hasRestrictedAgencyPriviliges();
+  }
+
+  @Test
+  void
+      checkPermissionsToUpdateAgencies_Should_ThrowForbiddenExceptionIfUserHasRestrictedPermissionsAndDoesntHavePermissionsForTheGivenAgency() {
+    when(adminAgencyFacade.findAdminUserAgencyIds(authenticatedUser.getUserId()))
+        .thenReturn(Lists.newArrayList(1L, 2L, 3L));
+    when(authenticatedUser.hasRestrictedAgencyPriviliges()).thenReturn(true);
+
+    assertThrows(
+        ForbiddenException.class,
+        () ->
+            consultantAdminFacade.checkPermissionsToAssignedAgencies(
+                Lists.newArrayList(new CreateConsultantAgencyDTO().agencyId(4L))));
   }
 }

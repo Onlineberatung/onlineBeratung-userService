@@ -38,4 +38,6 @@
 	<include file="db/changelog/changeset/0032_chat_consulting_type_optional/0032_changeSet.xml"/>
 	<include file="db/changelog/changeset/0033_chat_add_user_chat_relation/0033_changeSet.xml"/>
 	<include file="db/changelog/changeset/0034_add_consultant_directly_set/0034_changeSet.xml"/>
+	<include file="db/changelog/changeset/0035_admin/0035_changeSet.xml"/>
+	<include file="db/changelog/changeset/0036_index_for_admin_search/0036_changeSet.xml"/>
 </databaseChangeLog>
