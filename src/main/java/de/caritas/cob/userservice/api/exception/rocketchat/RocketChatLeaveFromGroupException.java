@@ -9,10 +9,6 @@ public class RocketChatLeaveFromGroupException extends Exception {
    *
    * @param ex
    */
-  public RocketChatLeaveFromGroupException(Exception ex) {
-    super(ex);
-  }
-
   public RocketChatLeaveFromGroupException(String message) {
     super(message);
   }

@@ -101,7 +101,7 @@ public class RocketChatRollbackServiceTest {
       rollbackRemoveUsersFromRocketChatGroup_Should_LogInternalServerError_WhenAddUserToGroupFails()
           throws Exception {
 
-    doThrow(new RocketChatRemoveUserFromGroupException("error"))
+    doThrow(new RocketChatLeaveFromGroupException("error"))
         .when(rocketChatService)
         .leaveFromGroupAsTechnicalUser(anyString());
     when(rocketChatService.getMembersOfGroup(Mockito.anyString()))
