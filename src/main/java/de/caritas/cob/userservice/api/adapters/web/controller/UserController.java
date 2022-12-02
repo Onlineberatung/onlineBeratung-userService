@@ -826,13 +826,12 @@ public class UserController implements UsersApi {
     var result =
         consultantDtoMapper.consultantSearchResultOf(resultMap, query, page, perPage, field, order);
 
-    if (authenticatedUser.hasRestrictedAgencyPriviliges()) {
-      if (result.getEmbedded() != null) {
-        result.getEmbedded().stream()
-            .forEach(
-                response ->
-                    removeAgenciesWithoutAccessRight(response, getAgenciesToFilterConsultants()));
-      }
+    if (authenticatedUser.hasRestrictedAgencyPriviliges() && result.getEmbedded() != null) {
+      result
+          .getEmbedded()
+          .forEach(
+              response ->
+                  removeAgenciesWithoutAccessRight(response, getAgenciesToFilterConsultants()));
     }
 
     return ResponseEntity.ok(result);

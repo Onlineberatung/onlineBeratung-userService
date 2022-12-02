@@ -91,6 +91,5 @@ public enum Authority {
     public static final String SINGLE_TENANT_ADMIN = PREFIX + "SINGLE_TENANT_ADMIN";
     public static final String TENANT_ADMIN = PREFIX + "TENANT_ADMIN";
     public static final String RESTRICTED_AGENCY_ADMIN = PREFIX + "RESTRICTED_AGENCY_ADMIN";
-    ;
   }
 }

@@ -33,8 +33,7 @@ public class RetrieveAdminServiceIT {
 
   private final String VALID_ADMIN_ID = "164be67d-4d1b-4d80-bb6b-0ee057a1c59e";
 
-  @Autowired
-  private RetrieveAdminService retrieveAdminService;
+  @Autowired private RetrieveAdminService retrieveAdminService;
 
   @Test
   public void findAgencyAdmin_Should_returnCorrectAdmin_When_correctIdIsProvided() {

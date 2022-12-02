@@ -35,14 +35,10 @@ public class CreateAdminAgencyRelationServiceIT {
 
   private final String VALID_ADMIN_ID = "164be67d-4d1b-4d80-bb6b-0ee057a1c59e";
 
-  @Autowired
-  private CreateAdminAgencyRelationService createAdminAgencyRelationService;
-  @Autowired
-  private AdminAgencyRepository adminAgencyRepository;
-  @Autowired
-  private AdminRepository adminRepository;
-  @MockBean
-  private AgencyService agencyService;
+  @Autowired private CreateAdminAgencyRelationService createAdminAgencyRelationService;
+  @Autowired private AdminAgencyRepository adminAgencyRepository;
+  @Autowired private AdminRepository adminRepository;
+  @MockBean private AgencyService agencyService;
 
   EasyRandom easyRandom = new EasyRandom();
 
@@ -67,13 +63,12 @@ public class CreateAdminAgencyRelationServiceIT {
   }
 
   @Test(expected = NoContentException.class)
-  public void
-  create_Should_throwNoContentException_When_adminDoesNotExist() {
+  public void create_Should_throwNoContentException_When_adminDoesNotExist() {
     // given
-    CreateAdminAgencyRelationDTO createAdminAgencyRelationDTO = easyRandom.nextObject(
-        CreateAdminAgencyRelationDTO.class);
+    CreateAdminAgencyRelationDTO createAdminAgencyRelationDTO =
+        easyRandom.nextObject(CreateAdminAgencyRelationDTO.class);
 
-    //then
+    // then
     this.createAdminAgencyRelationService.create("invalid", createAdminAgencyRelationDTO);
   }
 
@@ -83,8 +78,8 @@ public class CreateAdminAgencyRelationServiceIT {
     CreateAdminAgencyRelationDTO createAdminAgencyRelationDTO = new CreateAdminAgencyRelationDTO();
     long agencyId = 99L;
     createAdminAgencyRelationDTO.setAgencyId(agencyId);
-    when(agencyService.getAgencyWithoutCaching(agencyId)).thenThrow(
-        new BadRequestException("Agency not found"));
+    when(agencyService.getAgencyWithoutCaching(agencyId))
+        .thenThrow(new BadRequestException("Agency not found"));
 
     // then
     createAdminAgencyRelationService.create(VALID_ADMIN_ID, createAdminAgencyRelationDTO);

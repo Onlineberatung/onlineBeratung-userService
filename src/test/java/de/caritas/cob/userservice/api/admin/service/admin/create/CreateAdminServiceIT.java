@@ -40,26 +40,24 @@ public class CreateAdminServiceIT {
   private static final String VALID_USERNAME = "validUsername";
   private static final String VALID_EMAIL_ADDRESS = "valid@emailaddress.de";
 
-  @Autowired
-  private CreateAdminService createAdminService;
-  @MockBean
-  private IdentityClient identityClient;
+  @Autowired private CreateAdminService createAdminService;
+  @MockBean private IdentityClient identityClient;
   private final EasyRandom easyRandom = new EasyRandom();
 
   @Test
   public void createNewAdminAgency_Should_returnExpectedCreatedAdmin_When_inputDataIsCorrect() {
-    //given
+    // given
     when(identityClient.createKeycloakUser(any(), anyString(), any()))
         .thenReturn(easyRandom.nextObject(KeycloakCreateUserResponseDTO.class));
-    CreateAgencyAdminDTO createAgencyAdminDTO = this.easyRandom.nextObject(
-        CreateAgencyAdminDTO.class);
+    CreateAgencyAdminDTO createAgencyAdminDTO =
+        this.easyRandom.nextObject(CreateAgencyAdminDTO.class);
     createAgencyAdminDTO.setUsername(VALID_USERNAME);
     createAgencyAdminDTO.setEmail(VALID_EMAIL_ADDRESS);
 
-    //when
+    // when
     Admin admin = this.createAdminService.createNewAdminAgency(createAgencyAdminDTO);
 
-    //then
+    // then
     verify(identityClient).updatePassword(anyString(), anyString());
     verify(identityClient).updateRole(anyString(), eq(RESTRICTED_AGENCY_ADMIN));
     verify(identityClient).updateRole(anyString(), eq(USER_ADMIN));
@@ -78,15 +76,14 @@ public class CreateAdminServiceIT {
 
   @Test(expected = CustomValidationHttpStatusException.class)
   public void
-  createNewAdminAgency_Should_throwCustomValidationHttpStatusException_When_keycloakIdIsMissing() {
+      createNewAdminAgency_Should_throwCustomValidationHttpStatusException_When_keycloakIdIsMissing() {
     // given
     KeycloakCreateUserResponseDTO keycloakResponse =
         easyRandom.nextObject(KeycloakCreateUserResponseDTO.class);
     keycloakResponse.setUserId(null);
-    when(identityClient.createKeycloakUser(any(), anyString(), any()))
-        .thenReturn(keycloakResponse);
-    CreateAgencyAdminDTO createAgencyAdminDTO = this.easyRandom.nextObject(
-        CreateAgencyAdminDTO.class);
+    when(identityClient.createKeycloakUser(any(), anyString(), any())).thenReturn(keycloakResponse);
+    CreateAgencyAdminDTO createAgencyAdminDTO =
+        this.easyRandom.nextObject(CreateAgencyAdminDTO.class);
 
     // when
     this.createAdminService.createNewAdminAgency(createAgencyAdminDTO);
@@ -95,8 +92,8 @@ public class CreateAdminServiceIT {
   @Test
   public void createNewAdminAgency_Should_throwExpectedException_When_emailIsInvalid() {
     // given
-    CreateAgencyAdminDTO createAgencyAdminDTO = this.easyRandom.nextObject(
-        CreateAgencyAdminDTO.class);
+    CreateAgencyAdminDTO createAgencyAdminDTO =
+        this.easyRandom.nextObject(CreateAgencyAdminDTO.class);
     createAgencyAdminDTO.setEmail("invalid");
 
     try {
@@ -110,6 +107,5 @@ public class CreateAdminServiceIT {
       assertThat(e.getCustomHttpHeader(), notNullValue());
       assertThat(e.getCustomHttpHeader().get("X-Reason").get(0), is(EMAIL_NOT_VALID.name()));
     }
-
   }
 }

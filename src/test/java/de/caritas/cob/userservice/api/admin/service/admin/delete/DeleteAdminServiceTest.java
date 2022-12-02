@@ -6,24 +6,20 @@ import de.caritas.cob.userservice.api.port.out.AdminAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.AdminRepository;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import org.junit.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class DeleteAdminServiceTest {
 
   private final String VALID_ADMIN_ID = "164be67d-4d1b-4d80-bb6b-0ee057a1c59e";
 
-  @InjectMocks
-  private DeleteAdminService deleteAdminService;
-  @Mock
-  private AdminRepository adminRepository;
-  @Mock
-  private AdminAgencyRepository adminAgencyRepository;
-  @Mock
-  private IdentityClient identityClient;
+  @InjectMocks private DeleteAdminService deleteAdminService;
+  @Mock private AdminRepository adminRepository;
+  @Mock private AdminAgencyRepository adminAgencyRepository;
+  @Mock private IdentityClient identityClient;
 
   @Test
   public void deleteAgencyAdmin_Should_deleteAdminAndRelation_When_adminIdIsProvided() {

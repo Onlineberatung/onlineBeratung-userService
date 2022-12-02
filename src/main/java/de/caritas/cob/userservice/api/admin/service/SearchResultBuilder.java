@@ -6,11 +6,12 @@ import de.caritas.cob.userservice.api.admin.hallink.HalLinkBuilder;
 import org.hibernate.search.jpa.FullTextQuery;
 import org.springframework.http.ResponseEntity;
 
-public abstract class SearchResultBuilder<FILTER, SEARCH_RESULT_DTO> implements HalLinkBuilder {
-  protected final FullTextQuery fullTextQuery;
-  protected FILTER filter;
+public abstract class SearchResultBuilder<F, S> implements HalLinkBuilder {
 
-  protected SEARCH_RESULT_DTO searchResultDto;
+  protected final FullTextQuery fullTextQuery;
+  protected F filter;
+
+  protected S searchResultDto;
   protected Sort sort;
   protected Integer page;
   protected Integer perPage;
@@ -19,37 +20,37 @@ public abstract class SearchResultBuilder<FILTER, SEARCH_RESULT_DTO> implements 
     this.fullTextQuery = fullTextQuery;
   }
 
-  public SearchResultBuilder<FILTER, SEARCH_RESULT_DTO> withFilter(FILTER filter) {
+  public SearchResultBuilder<F, S> withFilter(F filter) {
     this.filter = filter;
     return this;
   }
 
-  public SearchResultBuilder<FILTER, SEARCH_RESULT_DTO> withSort(Sort sort) {
+  public SearchResultBuilder<F, S> withSort(Sort sort) {
     this.sort = sort;
     return this;
   }
 
-  public SearchResultBuilder<FILTER, SEARCH_RESULT_DTO> withPage(Integer page) {
+  public SearchResultBuilder<F, S> withPage(Integer page) {
     this.page = page;
     return this;
   }
 
-  public SearchResultBuilder<FILTER, SEARCH_RESULT_DTO> withPerPage(Integer perPage) {
+  public SearchResultBuilder<F, S> withPerPage(Integer perPage) {
     this.perPage = perPage;
     return this;
   }
 
-  public abstract SEARCH_RESULT_DTO buildSearchResult();
+  public abstract S buildSearchResult();
 
-  protected HalLink buildSelfLink(final ResponseEntity<SEARCH_RESULT_DTO> responseEntity) {
+  protected HalLink buildSelfLink(final ResponseEntity<S> responseEntity) {
     return buildHalLinkForParams(responseEntity);
   }
 
-  protected HalLink buildHalLinkForParams(final ResponseEntity<SEARCH_RESULT_DTO> responseEntity) {
+  protected HalLink buildHalLinkForParams(final ResponseEntity<S> responseEntity) {
     return buildHalLink(responseEntity, HalLink.MethodEnum.GET);
   }
 
-  protected HalLink buildNextLink(final ResponseEntity<SEARCH_RESULT_DTO> results) {
+  protected HalLink buildNextLink(final ResponseEntity<S> results) {
     if (hasNextPage()) {
       return buildHalLinkForParams(results);
     }
@@ -60,7 +61,7 @@ public abstract class SearchResultBuilder<FILTER, SEARCH_RESULT_DTO> implements 
     return this.fullTextQuery.getResultSize() > this.page * this.perPage;
   }
 
-  protected HalLink buildPreviousLink(final ResponseEntity<SEARCH_RESULT_DTO> results) {
+  protected HalLink buildPreviousLink(final ResponseEntity<S> results) {
     if (this.page > 1) {
       return buildHalLinkForParams(results);
     }

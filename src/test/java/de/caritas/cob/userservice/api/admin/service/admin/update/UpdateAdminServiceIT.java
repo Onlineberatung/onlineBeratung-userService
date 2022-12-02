@@ -29,10 +29,8 @@ public class UpdateAdminServiceIT {
 
   private final String VALID_ADMIN_ID = "164be67d-4d1b-4d80-bb6b-0ee057a1c59e";
 
-  @Autowired
-  private UpdateAdminService updateAdminService;
-  @MockBean
-  private IdentityClient identityClient;
+  @Autowired private UpdateAdminService updateAdminService;
+  @MockBean private IdentityClient identityClient;
 
   @Test
   public void updateAgencyAdmin_Should_returnUpdatedPersistedAdmin_When_inputDataIsValid() {
@@ -70,6 +68,5 @@ public class UpdateAdminServiceIT {
     } catch (CustomValidationHttpStatusException e) {
       assertThat(e.getCustomHttpHeader().get("X-Reason").get(0), is(EMAIL_NOT_VALID.name()));
     }
-
   }
 }
