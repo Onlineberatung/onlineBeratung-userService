@@ -5,7 +5,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -67,6 +70,7 @@ public class UserAdminControllerIT {
   protected static final String DELETE_CONSULTANT_AGENCY_PATH =
       ROOT_PATH + "/consultants/%s" + "/agencies/%s";
   protected static final String AGENCY_ADMIN_PATH = ROOT_PATH + "/agencyadmins/";
+  protected static final String SEARCH_AGENCY_ADMIN_PATH = AGENCY_ADMIN_PATH + "/search/";
   protected static final String DELETE_AGENCY_ADMIN_PATH = AGENCY_ADMIN_PATH + "%s";
   protected static final String AGENCIES_OF_ADMIN_PATH = ROOT_PATH + "/agencyadmins/%s/agencies";
   protected static final String DELETE_ADMIN_AGENCY_PATH = AGENCIES_OF_ADMIN_PATH + "/%s";
@@ -359,25 +363,25 @@ public class UserAdminControllerIT {
   @Test
   public void getAgencyAdmins_Should_returnOk_When_requiredPaginationParamsAreGiven()
       throws Exception {
-    // Arrange
-    // Act
+    // given
+    // when
     this.mvc
         .perform(get(AGENCY_ADMIN_PATH).param(PAGE_PARAM, "0").param(PER_PAGE_PARAM, "1"))
         .andExpect(status().isOk());
 
-    // Assert
+    // then
     verify(this.adminAgencyFacade, times(1)).findFilteredAdminsAgency(eq(0), eq(1), any(), any());
   }
 
   @Test
   public void getAgencyAdmin_Should_returnOk_When_requiredAdminIdParamIsGiven() throws Exception {
-    // Arrange
+    // given
     String adminId = "adminId";
 
-    // Act
+    // when
     this.mvc.perform(get(AGENCY_ADMIN_PATH + adminId)).andExpect(status().isOk());
 
-    // Assert
+    // then
     verify(this.adminAgencyFacade, times(1)).findAgencyAdmin(adminId);
   }
 
@@ -385,25 +389,25 @@ public class UserAdminControllerIT {
   public void getAgencyAdmin_Should_returnNoContent_When_requiredAdminDoesNotExist()
       throws Exception {
 
-    // Arrange
+    // given
     when(this.consultantAdminFacade.findConsultant(any())).thenThrow(new NoContentException(""));
 
-    // Act
+    // when
     this.mvc
         .perform(get(GET_CONSULTANT_PATH + "consultantId"))
 
-        // Assert
+        // then
         .andExpect(status().isNoContent());
   }
 
   @Test
   public void createNewAdminAgency_Should_returnOk_When_requiredCreateAgencyAdminIsGiven()
       throws Exception {
-    // Arrange
+    // given
     CreateAgencyAdminDTO createAgencyAdminDTO =
         new EasyRandom().nextObject(CreateAgencyAdminDTO.class);
 
-    // Act
+    // when
     this.mvc
         .perform(
             post(AGENCY_ADMIN_PATH)
@@ -411,29 +415,29 @@ public class UserAdminControllerIT {
                 .content(objectMapper.writeValueAsString(createAgencyAdminDTO)))
         .andExpect(status().isOk());
 
-    // Assert
+    // then
     verify(this.adminAgencyFacade, times(1)).createNewAdminAgency(any());
   }
 
   @Test
   public void createAgencyAdmin_Should_returnBadRequest_When_requiredCreateAgencyAdminIsMissing()
       throws Exception {
-    // Arrange
-    // Act
+    // given
+    // when
     this.mvc
         .perform(post(AGENCY_ADMIN_PATH).contentType(MediaType.APPLICATION_JSON))
-        // Assert
+        // then
         .andExpect(status().isBadRequest());
   }
 
   @Test
   public void updateAgencyAdmin_Should_returnOk_When_requiredCreateAgencyAdminIsGiven()
       throws Exception {
-    // Arrange
+    // given
     UpdateAgencyAdminDTO updateAgencyAdminDTO =
         new EasyRandom().nextObject(UpdateAgencyAdminDTO.class);
 
-    // Act
+    // when
     this.mvc
         .perform(
             put(AGENCY_ADMIN_PATH + "adminId")
@@ -441,18 +445,18 @@ public class UserAdminControllerIT {
                 .content(objectMapper.writeValueAsString(updateAgencyAdminDTO)))
         .andExpect(status().isOk());
 
-    // Assert
+    // then
     verify(this.adminAgencyFacade, times(1)).updateAgencyAdmin(anyString(), any());
   }
 
   @Test
   public void updateAgencyAdmin_Should_returnBadRequest_When_requiredParamsAreMissing()
       throws Exception {
-    // Arrange
-    // Act
+    // given
+    // when
     this.mvc
         .perform(put(AGENCY_ADMIN_PATH + "adminId").contentType(MediaType.APPLICATION_JSON))
-        // Assert
+        // then
         .andExpect(status().isBadRequest());
   }
 
@@ -461,13 +465,13 @@ public class UserAdminControllerIT {
       throws Exception {
     String adminId = "1da238c6-cd46-4162-80f1-bff74eafeAAA";
 
-    // Arrange
+    // given
     String adminAgencyPath = String.format(AGENCIES_OF_ADMIN_PATH, adminId);
 
     CreateAdminAgencyRelationDTO createAdminAgencyRelationDTO = new CreateAdminAgencyRelationDTO();
     createAdminAgencyRelationDTO.setAgencyId(15L);
 
-    // Act
+    // when
     this.mvc
         .perform(
             post(adminAgencyPath)
@@ -475,58 +479,58 @@ public class UserAdminControllerIT {
                 .content(objectMapper.writeValueAsString(createAdminAgencyRelationDTO)))
         .andExpect(status().isCreated());
 
-    // Assert
+    // then
     verify(this.adminAgencyFacade, times(1))
         .createNewAdminAgencyRelation(adminId, createAdminAgencyRelationDTO);
   }
 
   @Test
   public void setAdminAgencies_Should_return_ok_When_RequiredParams_Are_Given() throws Exception {
-    // Arrange
+    // given
     var adminId = UUID.randomUUID().toString();
     var agencies = givenAgenciesToSet();
 
-    // Act
+    // when
     mvc.perform(
             put(AGENCIES_OF_ADMIN_PATH, adminId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(agencies)))
         .andExpect(status().isOk());
 
-    // Assert
+    // then
     verify(adminAgencyFacade).setAdminAgenciesRelation(any(), anyList());
   }
 
   @Test
   public void deleteAdminAgency_Should_return_Ok_When_requiredParamsAreGiven() throws Exception {
-    // Arrange
+    // given
     String adminId = "1da238c6-cd46-4162-80f1-bff74eafeAAA";
     Long agencyId = 1L;
 
-    // Act
+    // when
     this.mvc
         .perform(
             delete(String.format(DELETE_ADMIN_AGENCY_PATH, adminId, agencyId))
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    // Assert
+    // then
     verify(this.adminAgencyFacade, times(1)).deleteAdminAgencyRelation(adminId, agencyId);
   }
 
   @Test
   public void deleteAgencyAdmin_Should_returnOk_When_requiredParamIsGiven() throws Exception {
-    // Arrange
+    // given
     String adminId = "1234";
 
-    // Act
+    // when
     this.mvc
         .perform(
             delete(String.format(DELETE_AGENCY_ADMIN_PATH, adminId))
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    // Assert
+    // then
     verify(this.adminAgencyFacade, times(1)).deleteAgencyAdmin(adminId);
   }
 

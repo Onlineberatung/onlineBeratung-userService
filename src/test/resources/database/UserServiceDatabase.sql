@@ -1,6 +1,7 @@
 ALTER SEQUENCE sequence_session RESTART WITH 100000;
 ALTER SEQUENCE sequence_session_topic RESTART WITH 100000;
 ALTER SEQUENCE sequence_consultant_agency RESTART WITH 100000;
+ALTER SEQUENCE sequence_admin_agency RESTART WITH 100000;
 INSERT INTO user (`user_id`, `id_old`, `delete_date`, `username`, `email`, `rc_user_id`,
                   `language_formal`, `create_date`, `update_date`)
 VALUES ('015d013d-95e7-4e91-85b5-12cdb3d317f3', 0, NULL, 'enc.OBSXEZTPOJWWC3TDMUWWC43LMVZC2NZS',
@@ -1188,7 +1189,7 @@ INSERT INTO admin (`admin_id`, `username`, `first_name`, `last_name`, `email`,
 VALUES ('d42c2e5e-143c-4db1-a90f-7cccf82fbb15', 'ofarragher0', 'Olvan', 'Farragher',
         'ofarragher0@vk.com', 'AGENCY', 'z4TkzduI', 0, '2021-12-21 23:14:03',
         '2021-12-02 16:15:56'),
-       ('7ad454de-cf29-4557-b8b3-1bf986524de2', 'apau1', 'Abram', 'Pau', 'apau1@nymag.com',
+       ('7ad454de-cf29-4557-b8b3-1bf986524de2', 'apau1', 'Jeffy', 'Pau', 'apau1@nymag.com',
         'AGENCY', 'xKAefvo', 0, '2022-01-24 23:11:29', '2022-04-10 22:47:34'),
        ('6d15b3ff-2394-4d9f-9ea5-e958afe6a65c', 'rstickells2', 'Ricky', 'Stickells',
         'rstickells2@eventbrite.com', 'TENANT', 'nbaKmMyzG', 0, '2022-01-01 22:52:43',
@@ -1470,7 +1471,7 @@ VALUES ('d42c2e5e-143c-4db1-a90f-7cccf82fbb15', 'ofarragher0', 'Olvan', 'Farragh
         'mdoctor2r@bizjournals.com', 'TENANT', 'tu6LtD02vd0M', 0, '2022-01-17 22:54:12',
         '2022-01-20 21:10:33');
 
-INSERT INTO admin_agency (id, admin_id, agency_id, create_date, update_date)
+INSERT INTO admin_agency (`id`, `admin_id`, `agency_id`, `create_date`, `update_date`)
 VALUES (1, 'd42c2e5e-143c-4db1-a90f-7cccf82fbb15', 1, '2022-05-16 21:25:20', '2022-01-26 21:31:21'),
        (2, '7f987f11-255a-4455-b24a-e3766d6c3696', 2, '2022-01-14 06:50:43', '2022-11-22 02:24:46'),
        (3, '96fc748c-aeb3-45db-a50d-114c07feacce', 3, '2022-05-01 21:42:36', '2022-01-03 06:30:35'),
