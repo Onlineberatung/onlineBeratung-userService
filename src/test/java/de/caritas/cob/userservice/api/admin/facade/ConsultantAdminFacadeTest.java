@@ -20,6 +20,7 @@ import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminSe
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
+import java.util.ArrayList;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -158,10 +159,10 @@ class ConsultantAdminFacadeTest {
         .thenReturn(Lists.newArrayList(1L, 2L, 3L));
     when(authenticatedUser.hasRestrictedAgencyPriviliges()).thenReturn(true);
 
+    ArrayList<CreateConsultantAgencyDTO> agencyList =
+        Lists.newArrayList(new CreateConsultantAgencyDTO().agencyId(4L));
     assertThrows(
         ForbiddenException.class,
-        () ->
-            consultantAdminFacade.checkPermissionsToAssignedAgencies(
-                Lists.newArrayList(new CreateConsultantAgencyDTO().agencyId(4L))));
+        () -> consultantAdminFacade.checkPermissionsToAssignedAgencies(agencyList));
   }
 }
