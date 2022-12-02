@@ -1,4 +1,4 @@
-CREATE TABLE `userservice`.`admin` (
+CREATE TABLE IF NOT EXISTS `userservice`.`admin` (
     `admin_id` varchar(36) COLLATE utf8_unicode_ci NOT NULL,
     `tenant_id` bigint(21) NULL DEFAULT NULL,
     `username` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
@@ -14,7 +14,7 @@ PRIMARY KEY (`admin_id`),
 UNIQUE `username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE `userservice`.`admin_agency` (
+CREATE TABLE IF NOT EXISTS `userservice`.`admin_agency` (
     `id` bigint(21) unsigned NOT NULL,
     `admin_id` varchar(36) COLLATE utf8_unicode_ci NOT NULL,
     `agency_id` bigint(21) unsigned NOT NULL,
@@ -24,7 +24,7 @@ CREATE TABLE `userservice`.`admin_agency` (
     KEY `admin_id` (`admin_id`),
     CONSTRAINT `admin_agency_ibfk_1` FOREIGN KEY (`admin_id`) REFERENCES `admin` (`admin_id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-CREATE SEQUENCE `userservice`.`sequence_admin_agency`
+CREATE SEQUENCE IF NOT EXISTS `userservice`.`sequence_admin_agency`
     INCREMENT BY 1
     MINVALUE = 0
 NOMAXVALUE
