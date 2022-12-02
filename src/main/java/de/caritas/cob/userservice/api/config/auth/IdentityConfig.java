@@ -80,23 +80,8 @@ public class IdentityConfig implements IdentityClientConfig {
   public boolean isOtpAllowed(@NotNull Set<String> roles) {
     return roles.contains(UserRole.USER.getValue()) && otpAllowedForUsers
         || roles.contains(UserRole.CONSULTANT.getValue()) && otpAllowedForConsultants
-        || isMultitenancyEnabledAndOtpAllowed(roles);
-  }
-
-  private boolean isMultitenancyEnabledAndOtpAllowed(Set<String> roles) {
-    return multiTenancyEnabled && isAnyTenantAdminAndOtpIsAllowed(roles);
-  }
-
-  private boolean isAnyTenantAdminAndOtpIsAllowed(Set<String> roles) {
-    return isSingleTenantAdminAndOtpIsAllowed(roles) || isTenantSuperAdminAndOtpIsAllowed(roles);
-  }
-
-  private boolean isTenantSuperAdminAndOtpIsAllowed(Set<String> roles) {
-    return roles.contains(UserRole.TENANT_ADMIN.getValue()) && otpAllowedForTenantSuperAdmins;
-  }
-
-  private boolean isSingleTenantAdminAndOtpIsAllowed(Set<String> roles) {
-    return roles.contains(UserRole.SINGLE_TENANT_ADMIN.getValue())
-        && otpAllowedForSingleTenantAdmins;
+        || roles.contains(UserRole.TENANT_ADMIN.getValue()) && otpAllowedForTenantSuperAdmins
+        || roles.contains(UserRole.SINGLE_TENANT_ADMIN.getValue())
+            && otpAllowedForSingleTenantAdmins;
   }
 }
