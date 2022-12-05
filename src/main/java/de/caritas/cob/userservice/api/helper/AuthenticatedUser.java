@@ -29,6 +29,21 @@ public class AuthenticatedUser {
   private Set<String> grantedAuthorities;
 
   @JsonIgnore
+  public boolean isRestrictedAgencyAdmin() {
+    return nonNull(roles) && roles.contains(UserRole.RESTRICTED_AGENCY_ADMIN.getValue());
+  }
+
+  @JsonIgnore
+  public boolean isAgencySuperAdmin() {
+    return nonNull(roles) && roles.contains(UserRole.AGENCY_ADMIN.getValue());
+  }
+
+  @JsonIgnore
+  public boolean hasRestrictedAgencyPriviliges() {
+    return isRestrictedAgencyAdmin() && !isAgencySuperAdmin();
+  }
+
+  @JsonIgnore
   public boolean isAdviceSeeker() {
     return nonNull(roles) && roles.contains(UserRole.USER.getValue());
   }

@@ -32,6 +32,8 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserInfoRespo
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.LanguageResponseDTO;
+import de.caritas.cob.userservice.api.admin.facade.AdminAgencyFacade;
+import de.caritas.cob.userservice.api.admin.service.agency.AgencyAdminService;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
 import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.apiclient.TopicServiceApiControllerFactory;
@@ -147,6 +149,10 @@ class UserControllerConsultantE2EIT {
   @MockBean private AgencyServiceApiControllerFactory agencyServiceApiControllerFactory;
 
   @MockBean private TopicServiceApiControllerFactory topicServiceApiControllerFactory;
+
+  @MockBean private AgencyAdminService agencyAdminService;
+
+  @MockBean private AdminAgencyFacade adminAgencyFacade;
 
   private User user;
   private Consultant consultant;
@@ -514,6 +520,103 @@ class UserControllerConsultantE2EIT {
   }
 
   @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_ADMIN, AuthorityValue.RESTRICTED_AGENCY_ADMIN})
+  void searchConsultantsShouldRespondOkAndFilterConsultantsByRestrictedAdminAgencies()
+      throws Exception {
+    when(authenticatedUser.hasRestrictedAgencyPriviliges()).thenReturn(true);
+    when(authenticatedUser.getUserId()).thenReturn("d42c2e5e-143c-4db1-a90f-7cccf82fbb15");
+    long agencyIdToSearchFor = 2L;
+    when(adminAgencyFacade.findAdminUserAgencyIds(authenticatedUser.getUserId()))
+        .thenReturn(Lists.newArrayList(agencyIdToSearchFor));
+    givenAnInfix();
+
+    var numMatching = 24;
+
+    givenConsultantsMatching(numMatching, infix, Lists.newArrayList(agencyIdToSearchFor));
+
+    var pageUrlPrefix = "http://localhost/users/consultants/search?";
+    var consultantUrlPrefix = "http://localhost/useradmin/consultants/";
+    var response =
+        mockMvc
+            .perform(
+                get("/users/consultants/search")
+                    .cookie(CSRF_COOKIE)
+                    .header(CSRF_HEADER, CSRF_VALUE)
+                    .accept("application/hal+json")
+                    .param("query", URLEncoder.encode(infix, StandardCharsets.UTF_8))
+                    .param("page", "3")
+                    .param("perPage", "11")
+                    .param("field", "LASTNAME")
+                    .param("order", "DESC"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("total", is(numMatching)))
+            .andExpect(jsonPath("_embedded", hasSize(2)))
+            .andExpect(jsonPath("_embedded[*]._embedded.id", not(contains(nullValue()))))
+            .andExpect(jsonPath("_embedded[*]._embedded.firstname", not(contains(nullValue()))))
+            .andExpect(jsonPath("_embedded[0]._embedded.lastname", containsString(infix)))
+            .andExpect(jsonPath("_embedded[*]._embedded.username", not(contains(nullValue()))))
+            .andExpect(jsonPath("_embedded[*]._embedded.email", not(contains(nullValue()))))
+            .andExpect(jsonPath("_embedded[0]._embedded.agencies", hasSize(1)))
+            .andExpect(
+                jsonPath("_embedded[0]._embedded.agencies[0].id", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[0]._embedded.agencies[0].name", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[0]._embedded.agencies[0].postcode", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[1]._embedded.agencies[0].id", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[1]._embedded.agencies[0].name", not(contains(nullValue()))))
+            .andExpect(
+                jsonPath("_embedded[1]._embedded.agencies[0].postcode", not(contains(nullValue()))))
+            .andExpect(jsonPath("_embedded[0]._embedded.status", is("CREATED")))
+            .andExpect(jsonPath("_embedded[1]._embedded.status", is("CREATED")))
+            .andExpect(jsonPath("_embedded[0]._links.self.href", startsWith(consultantUrlPrefix)))
+            .andExpect(jsonPath("_embedded[0]._links.self.method", is("GET")))
+            .andExpect(jsonPath("_embedded[0]._links.self.templated", is(false)))
+            .andExpect(jsonPath("_embedded[0]._links.update.href", startsWith(consultantUrlPrefix)))
+            .andExpect(jsonPath("_embedded[0]._links.update.method", is("PUT")))
+            .andExpect(jsonPath("_embedded[0]._links.update.templated", is(false)))
+            .andExpect(jsonPath("_embedded[0]._links.delete.href", startsWith(consultantUrlPrefix)))
+            .andExpect(jsonPath("_embedded[0]._links.delete.method", is("DELETE")))
+            .andExpect(jsonPath("_embedded[0]._links.delete.templated", is(false)))
+            .andExpect(
+                jsonPath("_embedded[0]._links.agencies.href", startsWith(consultantUrlPrefix)))
+            .andExpect(
+                jsonPath("_embedded[0]._links.agencies.href", Matchers.endsWith("/agencies")))
+            .andExpect(jsonPath("_embedded[0]._links.agencies.method", is("GET")))
+            .andExpect(jsonPath("_embedded[0]._links.agencies.templated", is(false)))
+            .andExpect(
+                jsonPath("_embedded[0]._links.addAgency.href", startsWith(consultantUrlPrefix)))
+            .andExpect(
+                jsonPath("_embedded[0]._links.addAgency.href", Matchers.endsWith("/agencies")))
+            .andExpect(jsonPath("_embedded[0]._links.addAgency.method", is("POST")))
+            .andExpect(jsonPath("_embedded[0]._links.addAgency.templated", is(false)))
+            .andExpect(jsonPath("_links.self.href", startsWith(pageUrlPrefix)))
+            .andExpect(jsonPath("_links.self.method", is("GET")))
+            .andExpect(jsonPath("_links.self.templated", is(false)))
+            .andExpect(jsonPath("_links.previous.href", startsWith(pageUrlPrefix)))
+            .andExpect(jsonPath("_links.previous.method", is("GET")))
+            .andExpect(jsonPath("_links.previous.templated", is(false)))
+            .andExpect(jsonPath("_links.next", is(nullValue())))
+            .andReturn()
+            .getResponse();
+
+    var searchResult =
+        objectMapper.readValue(response.getContentAsString(), ConsultantSearchResultDTO.class);
+    var foundConsultants = searchResult.getEmbedded();
+
+    for (var foundConsultant : foundConsultants) {
+      var embedded = foundConsultant.getEmbedded();
+      var agencies =
+          embedded.getAgencies().stream()
+              .map(agency -> agency.getId())
+              .collect(Collectors.toList());
+      assertTrue(agencies.contains(agencyIdToSearchFor));
+    }
+  }
+
+  @Test
   @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
   void searchConsultantsShouldRespondOkAndPayloadIfStarQueryIsGiven() throws Exception {
     givenAnInfix();
@@ -601,7 +704,7 @@ class UserControllerConsultantE2EIT {
   void searchConsultantsShouldContainAgenciesMarkedForDeletionIfConsultantDeleted()
       throws Exception {
     givenAnInfix();
-    givenConsultantsMatching(1, infix, true, true);
+    givenConsultantsMatching(1, infix, true, true, Lists.newArrayList());
     givenAgencyServiceReturningDummyAgencies();
     var consultantsMarkedAsDeleted = consultantRepository.findAllByDeleteDateNotNull();
     assertEquals(1, consultantsMarkedAsDeleted.size());
@@ -634,7 +737,7 @@ class UserControllerConsultantE2EIT {
       throws Exception {
     givenAnInfix();
     var numMatching = easyRandom.nextInt(20) + 1;
-    givenConsultantsMatching(numMatching, infix, true, false);
+    givenConsultantsMatching(numMatching, infix, true, false, Lists.newArrayList());
     givenAgencyServiceReturningDummyAgencies();
 
     var response =
@@ -902,14 +1005,21 @@ class UserControllerConsultantE2EIT {
   }
 
   private void givenConsultantsMatching(@PositiveOrZero int count, @NotBlank String infix) {
-    givenConsultantsMatching(count, infix, false, false);
+    givenConsultantsMatching(count, infix, false, false, Lists.newArrayList());
+  }
+
+  private void givenConsultantsMatching(
+      @PositiveOrZero int count, @NotBlank String infix, List<Long> agencyIds) {
+    givenConsultantsMatching(count, infix, false, false, agencyIds);
   }
 
   private void givenConsultantsMatching(
       @PositiveOrZero int count,
       @NotBlank String infix,
       boolean includingAgenciesMarkedAsDeleted,
-      boolean markedAsDeleted) {
+      boolean markedAsDeleted,
+      List<Long> agenciesIdsToAssign) {
+    List<Consultant> savedConsultants = Lists.newArrayList();
     while (count-- > 0) {
       var dbConsultant = consultantRepository.findAll().iterator().next();
       var consultant = new Consultant();
@@ -934,8 +1044,20 @@ class UserControllerConsultantE2EIT {
       consultantRepository.save(consultant);
       consultantIdsToDelete.add(consultant.getId());
 
-      var consultantAgency =
-          ConsultantAgency.builder().consultant(consultant).agencyId(aPositiveLong()).build();
+      ConsultantAgency consultantAgency;
+
+      if (!agenciesIdsToAssign.isEmpty()) {
+        var index = easyRandom.nextInt(agenciesIdsToAssign.size());
+        consultantAgency =
+            ConsultantAgency.builder()
+                .consultant(consultant)
+                .agencyId(agenciesIdsToAssign.get(index))
+                .build();
+      } else {
+        consultantAgency =
+            ConsultantAgency.builder().consultant(consultant).agencyId(aPositiveLong()).build();
+      }
+
       if (includingAgenciesMarkedAsDeleted) {
         var deleteDate = easyRandom.nextBoolean() ? null : LocalDateTime.now();
         consultantAgency.setDeleteDate(deleteDate);
@@ -943,7 +1065,8 @@ class UserControllerConsultantE2EIT {
       consultantAgencyRepository.save(consultantAgency);
       consultantAgencies.add(consultantAgency);
       consultant.setConsultantAgencies(Set.of(consultantAgency));
-      consultantRepository.save(consultant);
+      var saved = consultantRepository.save(consultant);
+      savedConsultants.add(saved);
     }
   }
 

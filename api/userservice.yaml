@@ -2241,6 +2241,10 @@ components:
           example: "ag89h3tjkerg94t"
         t:
           type: string
+        org:
+          type: string
+          example: "Lorem ipsum dolor sit amet, consetetur..."
+          description: "Legacy fallback for stringified messages"
 
     VideoCallMessageDTO:
       type: object

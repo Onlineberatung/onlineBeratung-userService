@@ -1,13 +1,10 @@
 package de.caritas.cob.userservice.api.adapters.web.mapping;
 
-import static java.util.Objects.isNull;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import de.caritas.cob.userservice.api.adapters.web.controller.UserController;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyAdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.AgencyResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantLinks;
@@ -15,8 +12,6 @@ import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.HalLink;
 import de.caritas.cob.userservice.api.adapters.web.dto.HalLink.MethodEnum;
-import de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode;
-import de.caritas.cob.userservice.api.adapters.web.dto.LanguageResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PaginationLinks;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
@@ -25,13 +20,12 @@ import de.caritas.cob.userservice.generated.api.adapters.web.controller.Useradmi
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ConsultantDtoMapper {
+public class ConsultantDtoMapper implements DtoMapperUtils {
 
   public UpdateAdminConsultantDTO updateAdminConsultantOf(
       UpdateConsultantDTO updateConsultantDTO, Consultant consultant) {
@@ -59,38 +53,6 @@ public class ConsultantDtoMapper {
     }
 
     return consultantResponseDto;
-  }
-
-  public String languageOf(LanguageCode languageCode) {
-    return isNull(languageCode) ? null : languageCode.getValue();
-  }
-
-  public List<String> languageStringsOf(List<LanguageCode> languages) {
-    return isNull(languages)
-        ? null
-        : languages.stream().map(this::languageOf).collect(Collectors.toList());
-  }
-
-  public AgencyResponseDTO agencyResponseDtoOf(AgencyDTO agencyDTO) {
-    return new AgencyResponseDTO()
-        .id(agencyDTO.getId())
-        .city(agencyDTO.getCity())
-        .consultingType(agencyDTO.getConsultingType())
-        .postcode(agencyDTO.getPostcode())
-        .name(agencyDTO.getName())
-        .description(agencyDTO.getDescription())
-        .teamAgency(agencyDTO.getTeamAgency())
-        .offline(agencyDTO.getOffline());
-  }
-
-  public LanguageResponseDTO languageResponseDtoOf(Set<String> languageCodes) {
-    var languages =
-        languageCodes.stream().sorted().map(LanguageCode::fromValue).collect(Collectors.toList());
-
-    var dto = new LanguageResponseDTO();
-    dto.setLanguages(languages);
-
-    return dto;
   }
 
   @SuppressWarnings("unchecked")
@@ -210,33 +172,5 @@ public class ConsultantDtoMapper {
         methodOn(UserController.class).searchConsultants(query, page, perPage, field, order);
 
     return halLinkOf(httpEntity, MethodEnum.GET);
-  }
-
-  public HalLink halLinkOf(HttpEntity<?> httpEntity, MethodEnum method) {
-    var link = linkTo(httpEntity).withSelfRel();
-
-    return new HalLink().href(link.getHref()).method(method).templated(link.isTemplated());
-  }
-
-  public String mappedFieldOf(String field) {
-    switch (field) {
-      case "FIRSTNAME":
-        return "firstName";
-      case "LASTNAME":
-        return "lastName";
-      case "EMAIL":
-        return "email";
-      default:
-    }
-
-    throw new IllegalArgumentException("Mapping of field '" + field + "' not supported.");
-  }
-
-  public String chatIdOf(Map<String, String> sessionMap) {
-    if (sessionMap.containsKey("chatId")) {
-      return sessionMap.get("chatId");
-    }
-
-    return null;
   }
 }
