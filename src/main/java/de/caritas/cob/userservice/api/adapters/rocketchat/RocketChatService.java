@@ -92,7 +92,7 @@ public class RocketChatService implements MessageClient {
   private static final String ENDPOINT_GROUP_DELETE = "/groups.delete";
   private static final String ENDPOINT_GROUP_INVITE = "/groups.invite";
   private static final String ENDPOINT_GROUP_KICK = "/groups.kick";
-  private static final String ENDPOINT_GROUP_LEAVE = "/groups.leave";
+  private static final String ENDPOINT_ROOM_LEAVE = "/rooms.leave";
   private static final String ENDPOINT_GROUP_MEMBERS = "/groups.members";
   private static final String ENDPOINT_GROUP_READ_ONLY = "/groups.setReadOnly";
   private static final String ENDPOINT_GROUP_KEY_UPDATE = "/e2e.updateGroupKey";
@@ -542,7 +542,7 @@ public class RocketChatService implements MessageClient {
       var body = new GroupLeaveBodyDTO(rcGroupId);
       HttpEntity<GroupLeaveBodyDTO> request = new HttpEntity<>(body, header);
 
-      var url = rocketChatConfig.getApiUrl(ENDPOINT_GROUP_LEAVE);
+      var url = rocketChatConfig.getApiUrl(ENDPOINT_ROOM_LEAVE);
       response = restTemplate.postForObject(url, request, GroupResponseDTO.class);
 
     } catch (Exception ex) {
