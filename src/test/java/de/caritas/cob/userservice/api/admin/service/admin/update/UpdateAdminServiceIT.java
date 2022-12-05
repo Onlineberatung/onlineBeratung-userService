@@ -8,6 +8,7 @@ import static org.junit.Assert.fail;
 
 import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAgencyAdminDTO;
+import de.caritas.cob.userservice.api.admin.service.admin.search.RetrieveAdminService;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.model.Admin;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
@@ -31,6 +32,7 @@ public class UpdateAdminServiceIT {
 
   @Autowired private UpdateAdminService updateAdminService;
   @MockBean private IdentityClient identityClient;
+  @Autowired private RetrieveAdminService retrieveAdminService;
 
   @Test
   public void updateAgencyAdmin_Should_returnUpdatedPersistedAdmin_When_inputDataIsValid() {
@@ -45,12 +47,18 @@ public class UpdateAdminServiceIT {
 
     // when
     Admin updatedAdmin = updateAdminService.updateAgencyAdmin(VALID_ADMIN_ID, updateAgencyAdminDTO);
+    Admin admin = retrieveAdminService.findAgencyAdmin(VALID_ADMIN_ID);
 
     // then
     assertThat(updatedAdmin, notNullValue());
     assertThat(updatedAdmin.getFirstName(), is(newFirstname));
     assertThat(updatedAdmin.getLastName(), is(newLastname));
     assertThat(updatedAdmin.getEmail(), is(newEmail));
+
+    assertThat(admin, notNullValue());
+    assertThat(admin.getFirstName(), is(newFirstname));
+    assertThat(admin.getLastName(), is(newLastname));
+    assertThat(admin.getEmail(), is(newEmail));
   }
 
   @Test
