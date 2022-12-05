@@ -9,7 +9,5 @@ import lombok.Setter;
 @Getter
 @AllArgsConstructor
 public class GroupLeaveBodyDTO {
-
-  private String userId;
   private String roomId;
 }

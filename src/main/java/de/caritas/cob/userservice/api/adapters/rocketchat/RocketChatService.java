@@ -537,9 +537,9 @@ public class RocketChatService implements MessageClient {
 
     GroupResponseDTO response;
     try {
-      RocketChatCredentials technicalUser = rcCredentialHelper.getTechnicalUser();
+      var technicalUser = rcCredentialHelper.getTechnicalUser();
       var header = getStandardHttpHeaders(technicalUser);
-      var body = new GroupLeaveBodyDTO(technicalUser.getRocketChatUserId(), rcGroupId);
+      var body = new GroupLeaveBodyDTO(rcGroupId);
       HttpEntity<GroupLeaveBodyDTO> request = new HttpEntity<>(body, header);
 
       var url = rocketChatConfig.getApiUrl(ENDPOINT_GROUP_LEAVE);
