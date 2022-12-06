@@ -77,14 +77,14 @@ public class Admin implements TenantAware {
   @SortableField
   private String username;
 
-  @Column(name = "first_name", updatable = false, nullable = false)
+  @Column(name = "first_name", nullable = false)
   @Size(max = 255)
   @NonNull
   @Field
   @SortableField
   private String firstName;
 
-  @Column(name = "last_name", updatable = false, nullable = false)
+  @Column(name = "last_name", nullable = false)
   @Size(max = 255)
   @NonNull
   @Field
