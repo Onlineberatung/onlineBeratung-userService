@@ -1185,14 +1185,14 @@ VALUES (1, 1200, 1, '2020-10-08 09:03:45', '2020-10-08 09:03:45'),
        (4, 1216, 2, '2020-10-08 09:03:45', '2020-10-08 09:03:45');
 
 INSERT INTO admin (`admin_id`, `username`, `first_name`, `last_name`, `email`,
-                   `type`, `rc_user_id`, `id_old`, `create_date`, `update_date`)
+                   `type`, `rc_user_id`, `tenant_id`, `create_date`, `update_date`)
 VALUES ('d42c2e5e-143c-4db1-a90f-7cccf82fbb15', 'ofarragher0', 'Olvan', 'Farragher',
         'ofarragher0@vk.com', 'AGENCY', 'z4TkzduI', 0, '2021-12-21 23:14:03',
         '2021-12-02 16:15:56'),
        ('7ad454de-cf29-4557-b8b3-1bf986524de2', 'apau1', 'Jeffy', 'Pau', 'apau1@nymag.com',
-        'AGENCY', 'xKAefvo', 0, '2022-01-24 23:11:29', '2022-04-10 22:47:34'),
-       ('6d15b3ff-2394-4d9f-9ea5-e958afe6a65c', 'rstickells2', 'Ricky', 'Stickells',
-        'rstickells2@eventbrite.com', 'TENANT', 'nbaKmMyzG', 0, '2022-01-01 22:52:43',
+        'AGENCY', 'xKAefvo', 1, '2022-01-24 23:11:29', '2022-04-10 22:47:34'),
+       ('6d15b3ff-2394-4d9f-9ea5-e958afe6a65c', 'rstickells2', 'Jeffy', 'Stickells',
+        'rstickells2@eventbrite.com', 'AGENCY', 'nbaKmMyzG', 0, '2022-01-01 22:52:43',
         '2021-12-21 23:17:05'),
        ('164be67d-4d1b-4d80-bb6b-0ee057a1c59e', 'byarnold3', 'Bernardo', 'Yarnold',
         'byarnold3@discuz.net', 'TENANT', 'CemSiLyUrKzX', 0, '2022-01-11 16:02:30',

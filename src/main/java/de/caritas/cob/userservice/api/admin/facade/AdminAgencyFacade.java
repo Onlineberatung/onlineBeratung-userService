@@ -86,13 +86,12 @@ public class AdminAgencyFacade {
 
   public Map<String, Object> findAgencyAdminsByInfix(
       final String infix,
-      final String adminId,
       final int pageNumber,
       final int pageSize,
       final String fieldName,
       final boolean isAscending) {
     var direction = isAscending ? Direction.ASC : Direction.DESC;
     var pageRequest = PageRequest.of(pageNumber, pageSize, direction, fieldName);
-    return this.adminAgencyService.findAgencyAdminsByInfix(infix, adminId, pageRequest);
+    return this.adminAgencyService.findAgencyAdminsByInfix(infix, pageRequest);
   }
 }

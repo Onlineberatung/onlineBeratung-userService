@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.model;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import javax.persistence.Column;
@@ -19,6 +18,10 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
+import org.hibernate.search.annotations.Analyzer;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Indexed;
 import org.hibernate.search.annotations.SortableField;
@@ -43,7 +46,13 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Builder
 @Indexed
 @EntityListeners(AuditingEntityListener.class)
-public class Admin implements Serializable {
+@FilterDef(
+    name = "tenantFilter",
+    parameters = {@ParamDef(name = "tenantId", type = "long")})
+@Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
+public class Admin implements TenantAware {
+
+  protected static final String EMAIL_ANALYZER = "emailAnalyzer";
 
   public enum AdminType {
     AGENCY,
@@ -86,6 +95,7 @@ public class Admin implements Serializable {
   @Size(max = 255)
   @NonNull
   @Field
+  @Analyzer(definition = EMAIL_ANALYZER)
   @SortableField
   private String email;
 
