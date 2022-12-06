@@ -77,7 +77,7 @@ public class RetrieveAdminServiceIT {
 
     // then
     assertThat(admins, notNullValue());
-    assertThat(admins.getTotalElements(), is(3L));
+    assertThat(admins.getTotalElements(), is(4L));
   }
 
   @Test

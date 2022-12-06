@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
@@ -14,9 +15,10 @@ import de.caritas.cob.userservice.api.tenant.TenantContext;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.After;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -24,10 +26,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = UserServiceApplication.class)
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -39,9 +41,14 @@ public class RetrieveAdminServiceTenantAwareIT {
 
   @Autowired private RetrieveAdminService retrieveAdminService;
 
-  @Before
-  public void beforeTests() {
+  @BeforeEach
+  public void beforeTest() {
     TenantContext.setCurrentTenant(1L);
+  }
+
+  @After
+  public void afterTests() {
+    TenantContext.clear();
   }
 
   @Test
@@ -55,11 +62,11 @@ public class RetrieveAdminServiceTenantAwareIT {
     assertThat(admin.getId(), is(VALID_ADMIN_ID));
   }
 
-  @Test(expected = NoContentException.class)
+  @Test
   public void findAgencyAdmin_Should_throwNoContentException_When_incorrectIdIsProvided() {
     // given
     // when
-    retrieveAdminService.findAgencyAdmin("invalid");
+    assertThrows(NoContentException.class, () -> retrieveAdminService.findAgencyAdmin("invalid"));
   }
 
   @Test
@@ -87,6 +94,19 @@ public class RetrieveAdminServiceTenantAwareIT {
     // then
     assertThat(admins, notNullValue());
     assertThat(admins.getTotalElements(), is(1L));
+  }
+
+  @Test
+  public void findAllByInfix_Should_returnCorrectAdminsOfTenant_When_correctIdInfix() {
+    // given
+    PageRequest pageable = PageRequest.of(0, 10);
+    TenantContext.setCurrentTenant(2L);
+    // when
+    Page<AdminBase> admins = retrieveAdminService.findAllByInfix("Jeffy", pageable);
+
+    // then
+    assertThat(admins, notNullValue());
+    assertThat(admins.getTotalElements(), is(3L));
   }
 
   @Test

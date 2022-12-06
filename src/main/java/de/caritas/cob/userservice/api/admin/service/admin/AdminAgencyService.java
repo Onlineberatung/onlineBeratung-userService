@@ -33,7 +33,7 @@ public class AdminAgencyService {
   private final @NonNull AgencyService agencyService;
 
   public AdminResponseDTO createNewAdminAgency(final CreateAgencyAdminDTO createAgencyAdminDTO) {
-    final Admin newAdmin = createAdminService.createNewAdminAgency(createAgencyAdminDTO);
+    final Admin newAdmin = createAdminService.createNewAdmin(createAgencyAdminDTO);
     return AdminResponseDTOBuilder.getInstance(newAdmin).buildResponseDTO();
   }
 
