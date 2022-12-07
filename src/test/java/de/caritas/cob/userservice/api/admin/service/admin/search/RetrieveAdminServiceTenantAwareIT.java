@@ -15,7 +15,7 @@ import de.caritas.cob.userservice.api.tenant.TenantContext;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,7 +46,7 @@ public class RetrieveAdminServiceTenantAwareIT {
     TenantContext.setCurrentTenant(1L);
   }
 
-  @After
+  @AfterEach
   public void afterTests() {
     TenantContext.clear();
   }
