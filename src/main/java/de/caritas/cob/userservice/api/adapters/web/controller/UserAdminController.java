@@ -29,7 +29,6 @@ import de.caritas.cob.userservice.api.admin.facade.UserAdminFacade;
 import de.caritas.cob.userservice.api.admin.hallink.RootDTOBuilder;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
-import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.service.appointment.AppointmentService;
 import de.caritas.cob.userservice.generated.api.adapters.web.controller.UseradminApi;
 import io.swagger.annotations.Api;
@@ -59,7 +58,6 @@ public class UserAdminController implements UseradminApi {
   private final @NonNull AdminAgencyFacade adminAgencyFacade;
   private final @NonNull AppointmentService appointmentService;
   private final @NonNull AdminAgencyDtoMapper adminAgencyDtoMapper;
-  private final @NotNull AuthenticatedUser authenticatedUser;
 
   /**
    * Creates the root hal based navigation entity.
@@ -336,12 +334,7 @@ public class UserAdminController implements UseradminApi {
     var mappedField = adminAgencyDtoMapper.mappedFieldOf(field);
     var resultMap =
         adminAgencyFacade.findAgencyAdminsByInfix(
-            decodedInfix,
-            authenticatedUser.getUserId(),
-            page - 1,
-            perPage,
-            mappedField,
-            isAscending);
+            decodedInfix, page - 1, perPage, mappedField, isAscending);
     var result =
         adminAgencyDtoMapper.agencyAdminSearchResultOf(
             resultMap, query, page, perPage, field, order);
