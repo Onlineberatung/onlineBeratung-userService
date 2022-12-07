@@ -381,12 +381,12 @@ public class UserServiceMapper {
       var preferredLanguage = (String) patchMap.get("preferredLanguage");
       adviceSeeker.setLanguageCode(LanguageCode.valueOf(preferredLanguage));
     }
-    if (patchMap.containsKey("termsAndConditionsConfirmation") && ((Boolean) patchMap
-        .get("termsAndConditionsConfirmation"))) {
+    if (patchMap.containsKey("termsAndConditionsConfirmation")
+        && ((Boolean) patchMap.get("termsAndConditionsConfirmation"))) {
       adviceSeeker.setTermsAndConditionsConfirmation(LocalDateTime.now());
     }
-    if (patchMap.containsKey("dataPrivacyConfirmation") && ((Boolean) patchMap
-        .get("dataPrivacyConfirmation"))) {
+    if (patchMap.containsKey("dataPrivacyConfirmation")
+        && ((Boolean) patchMap.get("dataPrivacyConfirmation"))) {
       adviceSeeker.setDataPrivacyConfirmation(LocalDateTime.now());
     }
 
