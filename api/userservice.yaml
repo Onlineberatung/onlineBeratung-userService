@@ -2622,7 +2622,12 @@ components:
         appointmentFeatureEnabled:
           type: boolean
           example: true
-
+        termsAndConditionsConfirmation:
+          type: string
+          example: true
+        dataPrivacyConfirmation:
+          type: string
+          example: true
     PatchUserDTO:
       type: object
       description: at least one property must be set
