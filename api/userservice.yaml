@@ -2624,10 +2624,12 @@ components:
           example: true
         termsAndConditionsConfirmation:
           type: string
-          example: true
+          example: 2022-12-07T11:51:01
+          description: "Datetime stamp when the user accepted terms and condition"
         dataPrivacyConfirmation:
           type: string
-          example: true
+          example: 2022-12-07T11:51:01
+          description: "Datetime stamp when the user accepted data privacy"
     PatchUserDTO:
       type: object
       description: at least one property must be set
