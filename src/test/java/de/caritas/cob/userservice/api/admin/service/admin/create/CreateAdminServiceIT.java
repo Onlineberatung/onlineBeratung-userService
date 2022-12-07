@@ -55,7 +55,7 @@ public class CreateAdminServiceIT {
     createAgencyAdminDTO.setEmail(VALID_EMAIL_ADDRESS);
 
     // when
-    Admin admin = this.createAdminService.createNewAdminAgency(createAgencyAdminDTO);
+    Admin admin = this.createAdminService.createNewAdmin(createAgencyAdminDTO);
 
     // then
     verify(identityClient).updatePassword(anyString(), anyString());
@@ -86,7 +86,7 @@ public class CreateAdminServiceIT {
         this.easyRandom.nextObject(CreateAgencyAdminDTO.class);
 
     // when
-    this.createAdminService.createNewAdminAgency(createAgencyAdminDTO);
+    this.createAdminService.createNewAdmin(createAgencyAdminDTO);
   }
 
   @Test
@@ -99,7 +99,7 @@ public class CreateAdminServiceIT {
     try {
 
       // when
-      this.createAdminService.createNewAdminAgency(createAgencyAdminDTO);
+      this.createAdminService.createNewAdmin(createAgencyAdminDTO);
       fail("Exception should be thrown");
 
       // then

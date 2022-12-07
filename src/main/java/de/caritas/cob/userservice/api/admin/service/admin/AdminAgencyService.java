@@ -33,7 +33,7 @@ public class AdminAgencyService {
   private final @NonNull AgencyService agencyService;
 
   public AdminResponseDTO createNewAdminAgency(final CreateAgencyAdminDTO createAgencyAdminDTO) {
-    final Admin newAdmin = createAdminService.createNewAdminAgency(createAgencyAdminDTO);
+    final Admin newAdmin = createAdminService.createNewAdmin(createAgencyAdminDTO);
     return AdminResponseDTOBuilder.getInstance(newAdmin).buildResponseDTO();
   }
 
@@ -56,8 +56,7 @@ public class AdminAgencyService {
     return retrieveAdminService.findAgencyIdsOfAdmin(adminId);
   }
 
-  public Map<String, Object> findAgencyAdminsByInfix(
-      String infix, String adminId, PageRequest pageRequest) {
+  public Map<String, Object> findAgencyAdminsByInfix(String infix, PageRequest pageRequest) {
     Page<AdminBase> adminsPage = retrieveAdminService.findAllByInfix(infix, pageRequest);
     var adminIds = adminsPage.stream().map(AdminBase::getId).collect(Collectors.toSet());
     var fullAdmins = retrieveAdminService.findAllById(adminIds);
