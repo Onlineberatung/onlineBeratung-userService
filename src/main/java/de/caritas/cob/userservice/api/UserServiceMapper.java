@@ -19,6 +19,7 @@ import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.User;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -379,6 +380,14 @@ public class UserServiceMapper {
     if (patchMap.containsKey("preferredLanguage")) {
       var preferredLanguage = (String) patchMap.get("preferredLanguage");
       adviceSeeker.setLanguageCode(LanguageCode.valueOf(preferredLanguage));
+    }
+    if (patchMap.containsKey("termsAndConditionsConfirmation") && ((Boolean) patchMap
+        .get("termsAndConditionsConfirmation"))) {
+      adviceSeeker.setTermsAndConditionsConfirmation(LocalDateTime.now());
+    }
+    if (patchMap.containsKey("dataPrivacyConfirmation") && ((Boolean) patchMap
+        .get("dataPrivacyConfirmation"))) {
+      adviceSeeker.setDataPrivacyConfirmation(LocalDateTime.now());
     }
 
     return adviceSeeker;

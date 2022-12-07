@@ -562,7 +562,9 @@ public class TestConstants {
           null,
           nowInUtc(),
           null,
-          LanguageCode.de);
+          LanguageCode.de,
+          null,
+          null);
   public static final User USER_NO_RC_USER_ID =
       new User(
           USER_ID,
@@ -580,7 +582,9 @@ public class TestConstants {
           null,
           nowInUtc(),
           null,
-          LanguageCode.de);
+          LanguageCode.de,
+          null,
+          null);
   public static final User USER_NO_RC_USER_ID_2 =
       new User(
           USER_ID_2,
@@ -598,7 +602,9 @@ public class TestConstants {
           null,
           nowInUtc(),
           null,
-          LanguageCode.de);
+          LanguageCode.de,
+          null,
+          null);
   public static final String ACCESS_TOKEN = "DASDLAJS835u83hKSAJDF";
   public static final AuthenticatedUser AUTHENTICATED_USER =
       new AuthenticatedUser(USER_ID, USERNAME, null, ACCESS_TOKEN, null);
@@ -1010,7 +1016,9 @@ public class TestConstants {
           null,
           nowInUtc(),
           null,
-          LanguageCode.de);
+          LanguageCode.de,
+          null,
+          null);
 
   public static final SessionDTO SESSION_DTO_SUCHT =
       new SessionDTO()
