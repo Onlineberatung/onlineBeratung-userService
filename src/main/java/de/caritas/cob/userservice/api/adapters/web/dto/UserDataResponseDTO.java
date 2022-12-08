@@ -85,4 +85,6 @@ public class UserDataResponseDTO {
   private LocalDateTime termsAndConditionsConfirmation;
 
   private LocalDateTime dataPrivacyConfirmation;
+
+  private Boolean available;
 }
