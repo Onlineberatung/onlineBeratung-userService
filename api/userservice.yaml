@@ -2241,6 +2241,10 @@ components:
           example: "ag89h3tjkerg94t"
         t:
           type: string
+        org:
+          type: string
+          example: "Lorem ipsum dolor sit amet, consetetur..."
+          description: "Legacy fallback for stringified messages"
 
     VideoCallMessageDTO:
       type: object
@@ -2435,6 +2439,8 @@ components:
         username:
           type: string
           example: max94
+        isDeleted:
+          type: boolean
         sessionData:
           type: string
           description: LinkedHashMap<String, Object>
@@ -2616,7 +2622,14 @@ components:
         appointmentFeatureEnabled:
           type: boolean
           example: true
-
+        termsAndConditionsConfirmation:
+          type: string
+          example: 2022-12-07T11:51:01
+          description: "Datetime stamp when the user accepted terms and condition"
+        dataPrivacyConfirmation:
+          type: string
+          example: 2022-12-07T11:51:01
+          description: "Datetime stamp when the user accepted data privacy"
     PatchUserDTO:
       type: object
       description: at least one property must be set
@@ -2640,6 +2653,14 @@ components:
             $ref: '#/components/schemas/EmailToggle'
         preferredLanguage:
           $ref: '#/components/schemas/LanguageCode'
+        termsAndConditionsConfirmation:
+          type: boolean
+          example: true
+          description: Flag that indicates has the user accepted new terms and conditions text
+        dataPrivacyConfirmation:
+          type: boolean
+          example: true
+          description: Flag that indicates does the user accepted new data privacy text
 
     UpdateConsultantDTO:
       type: object
