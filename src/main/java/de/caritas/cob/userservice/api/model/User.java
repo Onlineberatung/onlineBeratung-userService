@@ -105,6 +105,12 @@ public class User implements TenantAware {
   @Column(length = 2, nullable = false, columnDefinition = "varchar(2) default 'de'")
   private LanguageCode languageCode;
 
+  @Column(name = "terms_and_conditions_confirmation", columnDefinition = "datetime")
+  private LocalDateTime termsAndConditionsConfirmation;
+
+  @Column(name = "data_privacy_confirmation", columnDefinition = "datetime")
+  private LocalDateTime dataPrivacyConfirmation;
+
   public User(
       @Size(max = 36) @NonNull String userId,
       Long oldId,
@@ -118,6 +124,8 @@ public class User implements TenantAware {
     this.languageFormal = languageFormal;
     setEncourage2fa(true);
     setLanguageCode(LanguageCode.de);
+    this.termsAndConditionsConfirmation = LocalDateTime.now();
+    this.dataPrivacyConfirmation = LocalDateTime.now();
   }
 
   @Override

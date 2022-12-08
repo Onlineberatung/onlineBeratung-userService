@@ -41,4 +41,5 @@
   <include file="db/changelog/changeset/0034_add_consultant_directly_set/0034_changeSet.xml"/>
   <include file="db/changelog/changeset/0035_admin/0035_changeSet.xml"/>
   <include file="db/changelog/changeset/0036_index_for_admin_search/0036_changeSet.xml"/>
+  <include file="db/changelog/changeset/0037_user_confirmation_fields/0037_changeSet.xml"/>
 </databaseChangeLog>
