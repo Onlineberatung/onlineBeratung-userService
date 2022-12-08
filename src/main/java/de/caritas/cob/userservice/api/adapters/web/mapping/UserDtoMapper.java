@@ -86,7 +86,7 @@ public class UserDtoMapper {
   }
 
   public Optional<Boolean> availableOf(PatchUserDTO patchUserDTO) {
-      return Optional.ofNullable(patchUserDTO.getAvailable());
+    return Optional.ofNullable(patchUserDTO.getAvailable());
   }
 
   public Optional<Map<String, Object>> mapOf(PatchUserDTO patchUserDTO, AuthenticatedUser user) {
