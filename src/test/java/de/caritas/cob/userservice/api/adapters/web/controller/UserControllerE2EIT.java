@@ -52,6 +52,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.PasswordDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PatchUserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ReassignmentNotificationDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.RegistrationStatisticsListResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.RegistrationStatisticsResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
@@ -173,7 +174,9 @@ class UserControllerE2EIT {
 
   @Autowired private UserAgencyRepository userAgencyRepository;
 
-  @Autowired private ConsultingTypeControllerApi consultingTypeControllerApi;
+  @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+  @Autowired
+  private ConsultingTypeControllerApi consultingTypeControllerApi;
 
   @Autowired private VideoChatConfig videoChatConfig;
 
@@ -648,7 +651,7 @@ class UserControllerE2EIT {
   private void assertGender(RegistrationStatisticsListResponseDTO response) {
     var resultList =
         response.getRegistrationStatistics().stream()
-            .map(registration -> registration.getGender())
+            .map(RegistrationStatisticsResponseDTO::getGender)
             .distinct()
             .collect(Collectors.toList());
 
@@ -658,7 +661,7 @@ class UserControllerE2EIT {
   private void assertAge(RegistrationStatisticsListResponseDTO response) {
     var resultList =
         response.getRegistrationStatistics().stream()
-            .map(registration -> registration.getAge())
+            .map(RegistrationStatisticsResponseDTO::getAge)
             .distinct()
             .collect(Collectors.toList());
 
