@@ -9,7 +9,7 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.PresenceDTO.
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.Test;
 
-public class PresenceDTOTest {
+class PresenceDTOTest {
 
   private final ObjectMapper objectMapper = new ObjectMapper();
 
