@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.config.auth;
 
+import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.*;
+
 import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.HttpTenantFilter;
 import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.StatelessCsrfFilter;
 import de.caritas.cob.userservice.api.config.CsrfSecurityProperties;
@@ -24,8 +26,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.security.web.csrf.CsrfFilter;
-
-import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.*;
 
 /** Provides the Keycloak/Spring Security configuration. */
 @KeycloakConfiguration
