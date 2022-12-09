@@ -85,8 +85,8 @@ public class RocketChatTestConfig {
       }
 
       @Override
-      public void removeTechnicalUserFromGroup(String rcGroupId) {
-        log.info("RocketChatTestConfig.removeTechnicalUserFromGroup({}) called", rcGroupId);
+      public void leaveFromGroupAsTechnicalUser(String rcGroupId) {
+        log.info("RocketChatTestConfig.leaveFromGroupAsTechnicalUser({}) called", rcGroupId);
       }
 
       @Override

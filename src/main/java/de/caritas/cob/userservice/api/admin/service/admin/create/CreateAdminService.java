@@ -30,7 +30,7 @@ public class CreateAdminService {
   private final @NonNull UserHelper userHelper;
   private final @NonNull AdminRepository adminRepository;
 
-  public Admin createNewAdminAgency(final CreateAgencyAdminDTO createAgencyAdminDTO) {
+  public Admin createNewAdmin(final CreateAgencyAdminDTO createAgencyAdminDTO) {
     final String keycloakUserId = createKeycloakUser(createAgencyAdminDTO);
     final String password = userHelper.getRandomPassword();
     identityClient.updatePassword(keycloakUserId, password);

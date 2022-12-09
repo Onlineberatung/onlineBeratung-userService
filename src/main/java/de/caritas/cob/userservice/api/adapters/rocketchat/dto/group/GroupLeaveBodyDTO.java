@@ -4,12 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-// Body object for Rocket.Chat API Call for creating a group
+// Body object for Rocket.Chat API Call for leaving a group
 @Setter
 @Getter
 @AllArgsConstructor
-public class GroupCreateBodyDTO {
-
-  private String name;
-  private boolean readOnly;
+public class GroupLeaveBodyDTO {
+  private String roomId;
 }
