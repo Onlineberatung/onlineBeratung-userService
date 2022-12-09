@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.PresenceDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.PresenceDTO.PresenceStatus;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.port.out.MessageClient;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -50,10 +51,11 @@ class RocketChatServiceIT {
   }
 
   @Test
-  void isLoggedInShouldReturnPositiveStatus() throws RocketChatUserNotInitializedException {
+  void isLoggedInShouldReturnPositiveStatusWhenOnline()
+      throws RocketChatUserNotInitializedException {
     givenAValidRocketChatSystemUser();
     givenAValidChatUserId();
-    givenAValidPresenceResponse(true);
+    givenAValidPresenceResponse(PresenceStatus.ONLINE);
 
     var isLoggedIn = underTest.isLoggedIn(chatUserId).orElseThrow();
 
@@ -61,10 +63,33 @@ class RocketChatServiceIT {
   }
 
   @Test
-  void isLoggedInShouldReturnNegativeStatus() throws RocketChatUserNotInitializedException {
+  void isLoggedInShouldReturnPositiveStatusWhenBusy() throws RocketChatUserNotInitializedException {
     givenAValidRocketChatSystemUser();
     givenAValidChatUserId();
-    givenAValidPresenceResponse(false);
+    givenAValidPresenceResponse(PresenceStatus.BUSY);
+
+    var isLoggedIn = underTest.isLoggedIn(chatUserId).orElseThrow();
+
+    assertTrue(isLoggedIn);
+  }
+
+  @Test
+  void isLoggedInShouldReturnPositiveStatusWhenAway() throws RocketChatUserNotInitializedException {
+    givenAValidRocketChatSystemUser();
+    givenAValidChatUserId();
+    givenAValidPresenceResponse(PresenceStatus.AWAY);
+
+    var isLoggedIn = underTest.isLoggedIn(chatUserId).orElseThrow();
+
+    assertTrue(isLoggedIn);
+  }
+
+  @Test
+  void isLoggedInShouldReturnNegativeStatusWhenOffline()
+      throws RocketChatUserNotInitializedException {
+    givenAValidRocketChatSystemUser();
+    givenAValidChatUserId();
+    givenAValidPresenceResponse(PresenceStatus.OFFLINE);
 
     var isLoggedIn = underTest.isLoggedIn(chatUserId).orElseThrow();
 
@@ -94,10 +119,9 @@ class RocketChatServiceIT {
     assertTrue(isLoggedIn.isEmpty());
   }
 
-  private void givenAValidPresenceResponse(boolean present) {
+  private void givenAValidPresenceResponse(PresenceStatus present) {
     presenceDto = new PresenceDTO();
-    var status = present ? "online" : "offline";
-    presenceDto.setPresence(status);
+    presenceDto.setPresence(present);
     presenceDto.setSuccess(true);
 
     whenPresenceIsRequested().thenReturn(ResponseEntity.ok(presenceDto));

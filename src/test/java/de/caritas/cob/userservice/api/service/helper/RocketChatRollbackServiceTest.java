@@ -14,7 +14,7 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatRollbackServ
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLeaveFromGroupException;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Before;
@@ -78,14 +78,14 @@ public class RocketChatRollbackServiceTest {
 
   @Test
   public void
-      rollbackRemoveUsersFromRocketChatGroup_Should_LogInternalServerError_WhenTechUserRemoveFromGroupFails()
+      rollbackRemoveUsersFromRocketChatGroup_Should_LogInternalServerError_WhenTechUserLeaveFromGroupFails()
           throws Exception {
 
     when(rocketChatService.getMembersOfGroup(Mockito.anyString()))
         .thenReturn(GROUP_MEMBER_DTO_LIST);
-    doThrow(new RocketChatRemoveUserFromGroupException("error"))
+    doThrow(new RocketChatLeaveFromGroupException("error"))
         .when(rocketChatService)
-        .removeTechnicalUserFromGroup(anyString());
+        .leaveFromGroupAsTechnicalUser(anyString());
 
     when(rcCredentialHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
@@ -100,9 +100,9 @@ public class RocketChatRollbackServiceTest {
       rollbackRemoveUsersFromRocketChatGroup_Should_LogInternalServerError_WhenAddUserToGroupFails()
           throws Exception {
 
-    doThrow(new RocketChatRemoveUserFromGroupException("error"))
+    doThrow(new RocketChatLeaveFromGroupException("error"))
         .when(rocketChatService)
-        .removeTechnicalUserFromGroup(anyString());
+        .leaveFromGroupAsTechnicalUser(anyString());
     when(rocketChatService.getMembersOfGroup(Mockito.anyString()))
         .thenReturn(CURRENT_GROUP_MEMBER_DTO_LIST);
 
