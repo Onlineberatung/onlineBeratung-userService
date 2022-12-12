@@ -2122,7 +2122,8 @@ class UserControllerE2EIT {
     var stringifiedMessage = methodCall.getMessage();
     var message = objectMapper.readValue(stringifiedMessage, MethodMessageWithParamList.class);
     assertEquals(message.getParams().size(), 1);
-    assertEquals(patchUserDTO.getAvailable() ? "online" : "busy", message.getParams().get(0));
+    var expectedStatus = patchUserDTO.getAvailable() ? "online" : "busy";
+    assertEquals(expectedStatus, message.getParams().get(0));
     assertEquals("UserPresence:setDefaultStatus", message.getMethod());
     assertEquals("method", message.getMsg());
     var chatUserIds = methodCallCaptor.getValue().getHeaders().get("X-User-Id");
