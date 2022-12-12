@@ -44,6 +44,18 @@ public class Messenger implements Messaging {
   }
 
   @Override
+  public void unbanUsersInChat(Long chatId, String consultantId) {
+    findChatMetaInfo(chatId, consultantId)
+        .ifPresent(
+            chatMetaInfoMap -> {
+              var chat = chatRepository.findById(chatId).orElseThrow();
+              mapper
+                  .bannedUsernamesOfMap(chatMetaInfoMap)
+                  .forEach(username -> messageClient.unmuteUserInChat(username, chat.getGroupId()));
+            });
+  }
+
+  @Override
   public void setAvailability(String consultantId, boolean available) {
     var consultant = consultantRepository.findByIdAndDeleteDateIsNull(consultantId).orElseThrow();
     var status = mapper.statusOf(available);
@@ -58,18 +70,6 @@ public class Messenger implements Messaging {
     var chatUserId = consultant.getRocketChatId();
 
     return messageClient.isAvailable(chatUserId).orElse(false);
-  }
-
-  @Override
-  public void unbanUsersInChat(Long chatId, String consultantId) {
-    findChatMetaInfo(chatId, consultantId)
-        .ifPresent(
-            chatMetaInfoMap -> {
-              var chat = chatRepository.findById(chatId).orElseThrow();
-              mapper
-                  .bannedUsernamesOfMap(chatMetaInfoMap)
-                  .forEach(username -> messageClient.unmuteUserInChat(username, chat.getGroupId()));
-            });
   }
 
   @Override
