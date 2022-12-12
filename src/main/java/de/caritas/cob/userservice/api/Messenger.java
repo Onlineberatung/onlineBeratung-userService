@@ -44,6 +44,14 @@ public class Messenger implements Messaging {
   }
 
   @Override
+  public void setAvailability(String userId, boolean available) {}
+
+  @Override
+  public boolean getAvailability(String userId) {
+    return false;
+  }
+
+  @Override
   public void unbanUsersInChat(Long chatId, String consultantId) {
     findChatMetaInfo(chatId, consultantId)
         .ifPresent(
