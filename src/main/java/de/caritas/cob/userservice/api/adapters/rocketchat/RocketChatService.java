@@ -111,7 +111,6 @@ public class RocketChatService implements MessageClient {
   private static final String ENDPOINT_USER_LOGIN = "/login";
   private static final String ENDPOINT_USER_LOGOUT = "/logout";
   private static final String ENDPOINT_USER_PRESENCE_GET = "/users.getPresence?userId=";
-
   private static final String ENDPOINT_USER_PRESENCE_SET = "/method.call/UserPresence";
 
   private static final String ERROR_MESSAGE =
