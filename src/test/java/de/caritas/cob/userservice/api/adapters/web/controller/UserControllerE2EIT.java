@@ -2121,7 +2121,7 @@ class UserControllerE2EIT {
     assertNotNull(methodCall);
     var stringifiedMessage = methodCall.getMessage();
     var message = objectMapper.readValue(stringifiedMessage, MethodMessageWithParamList.class);
-    assertEquals(message.getParams().size(), 1);
+    assertEquals(1, message.getParams().size());
     var expectedStatus = patchUserDTO.getAvailable() ? "online" : "busy";
     assertEquals(expectedStatus, message.getParams().get(0));
     assertEquals("UserPresence:setDefaultStatus", message.getMethod());
