@@ -217,6 +217,16 @@ public class RocketChatService implements MessageClient {
 
   @Override
   public Optional<Boolean> isLoggedIn(String chatUserId) {
+    return getUserPresence(chatUserId).flatMap(presenceDTO -> Optional.of(presenceDTO.isPresent()));
+  }
+
+  @Override
+  public Optional<Boolean> isAvailable(String chatUserId) {
+    return getUserPresence(chatUserId)
+        .flatMap(presenceDTO -> Optional.of(presenceDTO.isAvailable()));
+  }
+
+  private Optional<PresenceDTO> getUserPresence(String chatUserId) {
     var url = rocketChatConfig.getApiUrl(ENDPOINT_USER_PRESENCE + chatUserId);
 
     try {
@@ -224,7 +234,7 @@ public class RocketChatService implements MessageClient {
       if (isNull(body)) {
         log.warn("Presence check inconclusive (user \"{}\".)", chatUserId);
       } else {
-        return Optional.of(body.isPresent());
+        return Optional.of(body);
       }
     } catch (HttpClientErrorException exception) {
       log.error("Presence check failed.", exception);
