@@ -512,6 +512,7 @@ public class UserController implements UsersApi {
         .ifPresent(lang -> identityManager.changeLanguage(userId, lang));
     userDtoMapper
         .availableOf(patchUserDTO)
+        .filter(available -> authenticatedUser.isConsultant())
         .ifPresent(available -> messenger.setAvailability(userId, available));
 
     return ResponseEntity.noContent().build();

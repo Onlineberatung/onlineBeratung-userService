@@ -26,7 +26,7 @@ public interface Messaging {
 
   boolean markAsDirectConsultant(Long sessionId);
 
-  void setAvailability(String userId, boolean available);
+  void setAvailability(String consultantId, boolean available);
 
-  boolean getAvailability(String userId);
+  boolean getAvailability(String consultantId);
 }

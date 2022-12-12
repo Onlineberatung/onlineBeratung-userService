@@ -44,11 +44,20 @@ public class Messenger implements Messaging {
   }
 
   @Override
-  public void setAvailability(String userId, boolean available) {}
+  public void setAvailability(String consultantId, boolean available) {
+    var consultant = consultantRepository.findByIdAndDeleteDateIsNull(consultantId).orElseThrow();
+    var status = mapper.statusOf(available);
+    var userChatId = consultant.getRocketChatId();
+
+    messageClient.setUserPresence(userChatId, status);
+  }
 
   @Override
-  public boolean getAvailability(String userId) {
-    return false;
+  public boolean getAvailability(String consultantId) {
+    var consultant = consultantRepository.findByIdAndDeleteDateIsNull(consultantId).orElseThrow();
+    var chatUserId = consultant.getRocketChatId();
+
+    return messageClient.isAvailable(chatUserId).orElse(false);
   }
 
   @Override
