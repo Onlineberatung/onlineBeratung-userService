@@ -1,7 +1,24 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
 import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.ANONYMOUS_DEFAULT;
+import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY;
+import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.ASSIGN_CONSULTANT_TO_PEER_SESSION;
+import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION;
+import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.CONSULTANT_DEFAULT;
+import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.CREATE_NEW_CHAT;
+import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.RESTRICTED_AGENCY_ADMIN;
+import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.SINGLE_TENANT_ADMIN;
+import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.START_CHAT;
+import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.STOP_CHAT;
+import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.TECHNICAL_DEFAULT;
+import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.TENANT_ADMIN;
+import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.UPDATE_CHAT;
+import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.USER_ADMIN;
 import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.USER_DEFAULT;
+import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.USE_FEEDBACK;
+import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.VIEW_AGENCY_CONSULTANTS;
+import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS;
+import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.VIEW_ALL_PEER_SESSIONS;
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.ANONYMOUS_ENQUIRY;
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.REGISTERED_ENQUIRY;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_TOKEN;
@@ -10,6 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,13 +48,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 @RunWith(SpringRunner.class)
-@TestPropertySource(properties = "spring.profiles.active=testing")
+@ActiveProfiles("testing")
 @SpringBootTest
 @AutoConfigureMockMvc
 public class ConversationControllerAuthorizationIT {
@@ -56,7 +74,9 @@ public class ConversationControllerAuthorizationIT {
 
   @MockBean private FinishAnonymousConversationFacade finishAnonymousConversationFacade;
 
-  @MockBean private UsernameTranscoder usernameTranscoder;
+  @MockBean
+  @SuppressWarnings("unused")
+  private UsernameTranscoder usernameTranscoder;
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
@@ -64,7 +84,7 @@ public class ConversationControllerAuthorizationIT {
       throws Exception {
     this.mvc
         .perform(
-            MockMvcRequestBuilders.get(ConversationControllerIT.GET_ANONYMOUS_ENQUIRIES_PATH)
+            get(ConversationControllerIT.GET_ANONYMOUS_ENQUIRIES_PATH)
                 .cookie(csrfCookie)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
@@ -83,7 +103,7 @@ public class ConversationControllerAuthorizationIT {
           throws Exception {
     this.mvc
         .perform(
-            MockMvcRequestBuilders.get(ConversationControllerIT.GET_ANONYMOUS_ENQUIRIES_PATH)
+            get(ConversationControllerIT.GET_ANONYMOUS_ENQUIRIES_PATH)
                 .cookie(csrfCookie)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -115,7 +135,7 @@ public class ConversationControllerAuthorizationIT {
           throws Exception {
     this.mvc
         .perform(
-            MockMvcRequestBuilders.get(ConversationControllerIT.GET_ANONYMOUS_ENQUIRIES_PATH)
+            get(ConversationControllerIT.GET_ANONYMOUS_ENQUIRIES_PATH)
                 .cookie(csrfCookie)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -131,7 +151,7 @@ public class ConversationControllerAuthorizationIT {
       throws Exception {
     this.mvc
         .perform(
-            MockMvcRequestBuilders.get(ConversationControllerIT.GET_ANONYMOUS_ENQUIRIES_PATH)
+            get(ConversationControllerIT.GET_ANONYMOUS_ENQUIRIES_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
@@ -146,7 +166,7 @@ public class ConversationControllerAuthorizationIT {
           throws Exception {
     this.mvc
         .perform(
-            MockMvcRequestBuilders.get(ConversationControllerIT.GET_REGISTERED_ENQUIRIES_PATH)
+            get(ConversationControllerIT.GET_REGISTERED_ENQUIRIES_PATH)
                 .cookie(csrfCookie)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
@@ -165,7 +185,7 @@ public class ConversationControllerAuthorizationIT {
           throws Exception {
     this.mvc
         .perform(
-            MockMvcRequestBuilders.get(ConversationControllerIT.GET_REGISTERED_ENQUIRIES_PATH)
+            get(ConversationControllerIT.GET_REGISTERED_ENQUIRIES_PATH)
                 .cookie(csrfCookie)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -197,7 +217,7 @@ public class ConversationControllerAuthorizationIT {
           throws Exception {
     this.mvc
         .perform(
-            MockMvcRequestBuilders.get(ConversationControllerIT.GET_REGISTERED_ENQUIRIES_PATH)
+            get(ConversationControllerIT.GET_REGISTERED_ENQUIRIES_PATH)
                 .cookie(csrfCookie)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -213,7 +233,7 @@ public class ConversationControllerAuthorizationIT {
       throws Exception {
     this.mvc
         .perform(
-            MockMvcRequestBuilders.get(ConversationControllerIT.GET_REGISTERED_ENQUIRIES_PATH)
+            get(ConversationControllerIT.GET_REGISTERED_ENQUIRIES_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
@@ -361,5 +381,61 @@ public class ConversationControllerAuthorizationIT {
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(finishAnonymousConversationFacade);
+  }
+
+  @Test
+  public void getAnonymousEnquiryDetails_Should_ReturnUnauthorized_When_NoKeycloakAuthorization()
+      throws Exception {
+    mvc.perform(
+            get("/conversations/anonymous/1")
+                .cookie(csrfCookie)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  @WithMockUser(
+      authorities = {
+        USER_DEFAULT,
+        CONSULTANT_DEFAULT,
+        USE_FEEDBACK,
+        VIEW_ALL_FEEDBACK_SESSIONS,
+        VIEW_ALL_PEER_SESSIONS,
+        ASSIGN_CONSULTANT_TO_SESSION,
+        ASSIGN_CONSULTANT_TO_ENQUIRY,
+        ASSIGN_CONSULTANT_TO_PEER_SESSION,
+        VIEW_AGENCY_CONSULTANTS,
+        TECHNICAL_DEFAULT,
+        CREATE_NEW_CHAT,
+        UPDATE_CHAT,
+        START_CHAT,
+        STOP_CHAT,
+        USER_ADMIN,
+        SINGLE_TENANT_ADMIN,
+        TENANT_ADMIN,
+        RESTRICTED_AGENCY_ADMIN
+      })
+  public void getAnonymousEnquiryDetails_Should_ReturnForbidden_When_NoAnonymousAuthority()
+      throws Exception {
+    mvc.perform(
+            get("/conversations/anonymous/1")
+                .cookie(csrfCookie)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  @WithMockUser(authorities = ANONYMOUS_DEFAULT)
+  public void getAnonymousEnquiryDetails_Should_ReturnForbidden_When_NoCsrfToken()
+      throws Exception {
+    mvc.perform(
+            get("/conversations/anonymous/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
   }
 }

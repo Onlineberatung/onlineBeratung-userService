@@ -153,6 +153,18 @@ class ConversationControllerE2EIT {
         .andExpect(jsonPath("sessions[0].session.topic.status", is(FIRST_TOPIC_STATUS)));
   }
 
+  @Test
+  @WithMockUser(authorities = AuthorityValue.ANONYMOUS_DEFAULT)
+  void getAnonymousEnquiryDetailsShouldRespondWithNotImplemented() throws Exception {
+    mockMvc
+        .perform(
+            get("/conversations/anonymous/1")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN))
+        .andExpect(status().isNotImplemented());
+  }
+
   private void givenAValidTopicServiceResponse() {
     var roomsGetDTO = new RoomsGetDTO();
     roomsGetDTO.setUpdate(new RoomsUpdateDTO[] {});

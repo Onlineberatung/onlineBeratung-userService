@@ -89,6 +89,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
             "/users/consultants/{consultantId:" + UUID_PATTERN + "}",
             "/users/consultants/languages")
         .permitAll()
+        .antMatchers(HttpMethod.GET, "/conversations/anonymous/{sessionId:[0-9]+}")
+        .hasAnyAuthority(ANONYMOUS_DEFAULT)
         .antMatchers("/users/data")
         .hasAnyAuthority(
             ANONYMOUS_DEFAULT,
