@@ -7,7 +7,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupUpdateKeyDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.PresenceDTO.PresenceStatus;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.Message;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.MethodCall;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.MethodMessageWithParamList;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomResponse;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomSettingsDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.subscriptions.SubscriptionsGetDTO;
@@ -33,6 +36,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class RocketChatMapper {
 
+  @SuppressWarnings("java:S2245")
+  // Using pseudorandom number generators (PRNGs) is security-sensitive
+  private static final Random random = new Random();
+
   private final ObjectMapper mapper;
 
   public MuteUnmuteUser muteUserOf(@NonNull String username, @NonNull String roomId) {
@@ -48,7 +55,7 @@ public class RocketChatMapper {
 
     var message = new Message();
     message.setParams(List.of(params));
-    message.setId(new Random().nextInt(100));
+    message.setId(random.nextInt(100));
     message.setMsg("method");
     var methodName = mute ? "muteUserInRoom" : "unmuteUserInRoom";
     message.setMethod(methodName);
@@ -62,6 +69,25 @@ public class RocketChatMapper {
     }
 
     return muteUnmuteUser;
+  }
+
+  public MethodCall setUserPresenceOf(String status) {
+    PresenceStatus.valueOf(status.toUpperCase());
+
+    var message = new MethodMessageWithParamList();
+    message.setParams(List.of(status));
+    message.setId(random.nextInt(100));
+    message.setMethod("UserPresence:setDefaultStatus");
+
+    var setUserPresence = new MethodCall();
+    try {
+      var messageString = mapper.writeValueAsString(message);
+      setUserPresence.setMessage(messageString);
+    } catch (JsonProcessingException e) {
+      log.error("Serializing {} did not work.", message);
+    }
+
+    return setUserPresence;
   }
 
   public Optional<Map<String, Object>> mapOfRoomResponse(ResponseEntity<RoomResponse> response) {

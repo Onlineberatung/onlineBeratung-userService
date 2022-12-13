@@ -19,9 +19,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.endsWith;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,6 +40,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.PresenceDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.PresenceDTO.PresenceStatus;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.MessageResponse;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.MethodCall;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.MethodMessageWithParamList;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsGetDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsUpdateDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.subscriptions.SubscriptionsGetDTO;
@@ -52,6 +59,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.PasswordDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PatchUserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ReassignmentNotificationDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.RegistrationStatisticsListResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.RegistrationStatisticsResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
@@ -173,7 +181,9 @@ class UserControllerE2EIT {
 
   @Autowired private UserAgencyRepository userAgencyRepository;
 
-  @Autowired private ConsultingTypeControllerApi consultingTypeControllerApi;
+  @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+  @Autowired
+  private ConsultingTypeControllerApi consultingTypeControllerApi;
 
   @Autowired private VideoChatConfig videoChatConfig;
 
@@ -219,6 +229,8 @@ class UserControllerE2EIT {
   @MockBean private Keycloak keycloak;
 
   @Captor private ArgumentCaptor<HttpEntity<UpdateUser>> updateUserCaptor;
+
+  @Captor private ArgumentCaptor<HttpEntity<MethodCall>> methodCallCaptor;
 
   private User user;
   private Consultant consultant;
@@ -298,6 +310,7 @@ class UserControllerE2EIT {
     givenKeycloakRespondsOtpByAppHasBeenSetup(consultant.getUsername());
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
+    givenAValidRocketChatUserPresenceResponse(PresenceStatus.OFFLINE);
 
     var consultantAgency = consultant.getConsultantAgencies().iterator().next();
     var displayName = usernameTranscoder.decodeUsername(userInfoResponse.getUser().getName());
@@ -343,6 +356,7 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("twoFactorAuth.type", is("APP")))
         .andExpect(jsonPath("twoFactorAuth.isToEncourage", is(consultant.getEncourage2fa())))
         .andExpect(jsonPath("absent", is(consultant.isAbsent())))
+        .andExpect(jsonPath("available", is(false)))
         .andExpect(jsonPath("formalLanguage", is(consultant.isLanguageFormal())))
         .andExpect(jsonPath("e2eEncryptionEnabled", is(false)))
         .andExpect(jsonPath("emailToggles", hasSize(3)))
@@ -405,6 +419,8 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("e2eEncryptionEnabled", is(false)))
         .andExpect(jsonPath("emailToggles", is(nullValue())))
         .andExpect(jsonPath("inTeamAgency", is(false)));
+
+    verifyRocketChatNeverGetsUserPresence();
   }
 
   @Test
@@ -416,6 +432,7 @@ class UserControllerE2EIT {
     givenKeycloakRespondsOtpByEmailHasBeenSetup(consultant.getUsername());
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
+    givenAValidRocketChatUserPresenceResponse(PresenceStatus.ONLINE);
 
     var consultantAgency = consultant.getConsultantAgencies().iterator().next();
     var displayName = usernameTranscoder.decodeUsername(userInfoResponse.getUser().getName());
@@ -461,6 +478,7 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("twoFactorAuth.type", is("EMAIL")))
         .andExpect(jsonPath("twoFactorAuth.isToEncourage", is(consultant.getEncourage2fa())))
         .andExpect(jsonPath("absent", is(consultant.isAbsent())))
+        .andExpect(jsonPath("available", is(true)))
         .andExpect(jsonPath("formalLanguage", is(consultant.isLanguageFormal())))
         .andExpect(jsonPath("e2eEncryptionEnabled", is(false)))
         .andExpect(jsonPath("emailToggles", hasSize(3)))
@@ -523,6 +541,8 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("e2eEncryptionEnabled", is(false)))
         .andExpect(jsonPath("emailToggles", is(nullValue())))
         .andExpect(jsonPath("inTeamAgency", is(false)));
+
+    verifyRocketChatNeverGetsUserPresence();
   }
 
   @Test
@@ -648,7 +668,7 @@ class UserControllerE2EIT {
   private void assertGender(RegistrationStatisticsListResponseDTO response) {
     var resultList =
         response.getRegistrationStatistics().stream()
-            .map(registration -> registration.getGender())
+            .map(RegistrationStatisticsResponseDTO::getGender)
             .distinct()
             .collect(Collectors.toList());
 
@@ -658,7 +678,7 @@ class UserControllerE2EIT {
   private void assertAge(RegistrationStatisticsListResponseDTO response) {
     var resultList =
         response.getRegistrationStatistics().stream()
-            .map(registration -> registration.getAge())
+            .map(RegistrationStatisticsResponseDTO::getAge)
             .distinct()
             .collect(Collectors.toList());
 
@@ -674,6 +694,7 @@ class UserControllerE2EIT {
     givenKeycloakRespondsOtpHasNotBeenSetup(consultant.getUsername());
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
+    givenAValidRocketChatUserPresenceResponse(PresenceStatus.BUSY);
 
     var consultantAgency = consultant.getConsultantAgencies().iterator().next();
     var displayName = usernameTranscoder.decodeUsername(userInfoResponse.getUser().getName());
@@ -718,7 +739,9 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("twoFactorAuth.qrCode", is(notNullValue())))
         .andExpect(jsonPath("twoFactorAuth.type", is(nullValue())))
         .andExpect(jsonPath("twoFactorAuth.isToEncourage", is(consultant.getEncourage2fa())))
+        .andExpect(jsonPath("available", is(false)))
         .andExpect(jsonPath("absent", is(consultant.isAbsent())))
+        .andExpect(jsonPath("available", is(false)))
         .andExpect(jsonPath("formalLanguage", is(consultant.isLanguageFormal())))
         .andExpect(jsonPath("preferredLanguage", is(consultant.getLanguageCode().toString())))
         .andExpect(jsonPath("e2eEncryptionEnabled", is(false)))
@@ -776,6 +799,7 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("twoFactorAuth.qrCode", is(notNullValue())))
         .andExpect(jsonPath("twoFactorAuth.type", is(nullValue())))
         .andExpect(jsonPath("twoFactorAuth.isToEncourage", is(user.getEncourage2fa())))
+        .andExpect(jsonPath("available", is(nullValue())))
         .andExpect(jsonPath("absent", is(false)))
         .andExpect(jsonPath("formalLanguage", is(user.isLanguageFormal())))
         .andExpect(jsonPath("preferredLanguage", is(user.getLanguageCode().toString())))
@@ -796,6 +820,7 @@ class UserControllerE2EIT {
     givenEnabledE2EEncryption();
     givenDisplayNameAllowedForConsultants();
     givenConsultantIsNotToNotifyAboutNewEnquiries();
+    givenAValidRocketChatUserPresenceResponse(PresenceStatus.OFFLINE);
 
     mockMvc
         .perform(
@@ -826,6 +851,7 @@ class UserControllerE2EIT {
     givenEnabledE2EEncryption();
     givenDisplayNameAllowedForConsultants();
     givenConsultantIsNotToNotifyAboutNewFollowUps();
+    givenAValidRocketChatUserPresenceResponse(PresenceStatus.OFFLINE);
 
     mockMvc
         .perform(
@@ -869,6 +895,8 @@ class UserControllerE2EIT {
     verify(userResource).update(userRepCaptor.capture());
     var locale = userRepCaptor.getValue().getAttributes().get("locale");
     assertEquals(patchUserDTO.getPreferredLanguage().toString(), locale.get(0));
+
+    verifyRocketChatNeverSetsUserPresence();
   }
 
   @Test
@@ -878,6 +906,7 @@ class UserControllerE2EIT {
     givenAFullPatchDto();
     givenAValidRocketChatUpdateUserResponse();
     givenAValidKeycloakUpdateLocaleResponse(consultant.getId());
+    givenAValidRocketChatUserPresenceSetResponse();
 
     mockMvc
         .perform(
@@ -910,6 +939,8 @@ class UserControllerE2EIT {
     var user = updateUser.getData();
     assertTrue(user.getName().startsWith("enc."));
     assertTrue(user.getName().length() > 4);
+
+    verifyRocketChatSetsUserPresence();
   }
 
   @Test
@@ -919,6 +950,7 @@ class UserControllerE2EIT {
     givenAFullPatchDto(false);
     givenAValidRocketChatUpdateUserResponse();
     givenAValidKeycloakUpdateLocaleResponse(consultant.getId());
+    givenAValidRocketChatUserPresenceSetResponse();
 
     mockMvc
         .perform(
@@ -939,6 +971,8 @@ class UserControllerE2EIT {
     verify(userResource).update(userRepCaptor.capture());
     var locale = userRepCaptor.getValue().getAttributes().get("locale");
     assertEquals(patchUserDTO.getPreferredLanguage().toString(), locale.get(0));
+
+    verifyRocketChatSetsUserPresence();
   }
 
   @Test
@@ -953,6 +987,7 @@ class UserControllerE2EIT {
     givenAFullPatchDto(false);
     givenAValidRocketChatUpdateUserResponse();
     givenAValidKeycloakUpdateLocaleResponse(consultant.getId());
+    givenAValidRocketChatUserPresenceSetResponse();
 
     mockMvc
         .perform(
@@ -1049,6 +1084,8 @@ class UserControllerE2EIT {
                 .content(objectMapper.writeValueAsString(patchDto))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
+
+    verifyRocketChatNeverSetsUserPresence();
   }
 
   @Test
@@ -1074,6 +1111,24 @@ class UserControllerE2EIT {
   void patchUserDataShouldRespondWithBadRequestOnUnknownPreferredLanguage() throws Exception {
     givenAValidConsultant();
     var patchDtoMap = givenAnUnknownPreferredLanguagePatchDto();
+
+    mockMvc
+        .perform(
+            patch("/users/data")
+                .cookie(CSRF_COOKIE)
+                .cookie(RC_TOKEN_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchDtoMap))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  void patchUserDataShouldRespondWithBadRequestOnUnknownAvailability() throws Exception {
+    givenAValidConsultant();
+    var patchDtoMap = givenAnUnknownAvailabilityPatchDto();
 
     mockMvc
         .perform(
@@ -1703,6 +1758,18 @@ class UserControllerE2EIT {
         .thenReturn(ResponseEntity.ok(userInfoResponse));
   }
 
+  private void givenAValidRocketChatUserPresenceResponse(PresenceStatus presenceStatus) {
+    var urlSuffix = "/api/v1/users.getPresence?userId=" + consultant.getRocketChatId();
+    var userPresence = easyRandom.nextObject(PresenceDTO.class);
+    userPresence.setSuccess(true);
+    userPresence.setPresence(presenceStatus);
+
+    when(rocketChatRestTemplate.exchange(
+            endsWith(urlSuffix), eq(HttpMethod.GET),
+            any(HttpEntity.class), eq(PresenceDTO.class)))
+        .thenReturn(ResponseEntity.ok(userPresence));
+  }
+
   private void givenAValidRocketChatRoomsResponse() {
     var roomsGetDTO = new RoomsGetDTO();
     roomsGetDTO.setUpdate(new RoomsUpdateDTO[] {});
@@ -1756,6 +1823,18 @@ class UserControllerE2EIT {
     when(rocketChatRestTemplate.postForEntity(
             endsWith(urlSuffix), any(HttpEntity.class), eq(Void.class)))
         .thenReturn(ResponseEntity.ok(updateUserResponse));
+  }
+
+  private void givenAValidRocketChatUserPresenceSetResponse() {
+    var setUserPresenceResponse = new MessageResponse();
+    setUserPresenceResponse.setSuccess(true);
+    setUserPresenceResponse.setMessage("{\\\"msg\\\":\\\"result\\\",\\\"id\\\":\\\"42\\\"}");
+
+    var urlSuffix = "/method.call/UserPresence";
+
+    when(rocketChatRestTemplate.postForEntity(
+            endsWith(urlSuffix), any(HttpEntity.class), eq(MessageResponse.class)))
+        .thenReturn(ResponseEntity.ok(setUserPresenceResponse));
   }
 
   @NonNull
@@ -1884,6 +1963,13 @@ class UserControllerE2EIT {
   private HashMap<String, Object> givenAnUnknownPreferredLanguagePatchDto() {
     var patchDtoAsMap = new HashMap<String, Object>(1);
     patchDtoAsMap.put("preferredLanguage", "xx");
+
+    return patchDtoAsMap;
+  }
+
+  private HashMap<String, Object> givenAnUnknownAvailabilityPatchDto() {
+    var patchDtoAsMap = new HashMap<String, Object>(1);
+    patchDtoAsMap.put("available", "online");
 
     return patchDtoAsMap;
   }
@@ -2024,5 +2110,37 @@ class UserControllerE2EIT {
 
   private void givenDisplayNameAllowedForConsultants() {
     identityConfig.setDisplayNameAllowedForConsultants(true);
+  }
+
+  private void verifyRocketChatSetsUserPresence() throws JsonProcessingException {
+    var urlSuffix = "/api/v1/method.call/UserPresence";
+    verify(rocketChatRestTemplate)
+        .postForEntity(endsWith(urlSuffix), methodCallCaptor.capture(), eq(MessageResponse.class));
+
+    var methodCall = methodCallCaptor.getValue().getBody();
+    assertNotNull(methodCall);
+    var stringifiedMessage = methodCall.getMessage();
+    var message = objectMapper.readValue(stringifiedMessage, MethodMessageWithParamList.class);
+    assertEquals(1, message.getParams().size());
+    var expectedStatus = patchUserDTO.getAvailable() ? "online" : "busy";
+    assertEquals(expectedStatus, message.getParams().get(0));
+    assertEquals("UserPresence:setDefaultStatus", message.getMethod());
+    assertEquals("method", message.getMsg());
+    var chatUserIds = methodCallCaptor.getValue().getHeaders().get("X-User-Id");
+    assertNotNull(chatUserIds);
+    assertEquals(1, chatUserIds.size());
+    assertEquals(consultant.getRocketChatId(), chatUserIds.get(0));
+  }
+
+  private void verifyRocketChatNeverSetsUserPresence() {
+    var urlSuffix = "/api/v1/method.call/UserPresence";
+    verify(rocketChatRestTemplate, never())
+        .postForEntity(endsWith(urlSuffix), any(HttpEntity.class), eq(MessageResponse.class));
+  }
+
+  private void verifyRocketChatNeverGetsUserPresence() {
+    var urlSuffix = "users.getPresence";
+    verify(rocketChatRestTemplate, never())
+        .postForEntity(contains(urlSuffix), any(HttpEntity.class), eq(MessageResponse.class));
   }
 }

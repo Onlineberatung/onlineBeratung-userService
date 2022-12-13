@@ -25,4 +25,8 @@ public interface Messaging {
   boolean isInChat(String chatId, String chatUserId);
 
   boolean markAsDirectConsultant(Long sessionId);
+
+  void setAvailability(String consultantId, boolean available);
+
+  boolean getAvailability(String consultantId);
 }

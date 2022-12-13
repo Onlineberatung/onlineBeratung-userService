@@ -15,6 +15,7 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupCreateB
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupDeleteBodyDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupDeleteResponseDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupLeaveBodyDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupRemoveUserBodyDTO;
@@ -45,6 +46,7 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteUserE
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupsListAllException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetUserIdException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLeaveFromGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
@@ -90,6 +92,7 @@ public class RocketChatService implements MessageClient {
   private static final String ENDPOINT_GROUP_DELETE = "/groups.delete";
   private static final String ENDPOINT_GROUP_INVITE = "/groups.invite";
   private static final String ENDPOINT_GROUP_KICK = "/groups.kick";
+  private static final String ENDPOINT_ROOM_LEAVE = "/rooms.leave";
   private static final String ENDPOINT_GROUP_MEMBERS = "/groups.members";
   private static final String ENDPOINT_GROUP_READ_ONLY = "/groups.setReadOnly";
   private static final String ENDPOINT_GROUP_KEY_UPDATE = "/e2e.updateGroupKey";
@@ -107,7 +110,8 @@ public class RocketChatService implements MessageClient {
   private static final String ENDPOINT_USER_LIST = "/users.list";
   private static final String ENDPOINT_USER_LOGIN = "/login";
   private static final String ENDPOINT_USER_LOGOUT = "/logout";
-  private static final String ENDPOINT_USER_PRESENCE = "/users.getPresence?userId=";
+  private static final String ENDPOINT_USER_PRESENCE_GET = "/users.getPresence?userId=";
+  private static final String ENDPOINT_USER_PRESENCE_SET = "/method.call/UserPresence";
 
   private static final String ERROR_MESSAGE =
       "Error during rollback: Rocket.Chat group with id " + "%s could not be deleted";
@@ -214,20 +218,51 @@ public class RocketChatService implements MessageClient {
 
   @Override
   public Optional<Boolean> isLoggedIn(String chatUserId) {
-    var url = rocketChatConfig.getApiUrl(ENDPOINT_USER_PRESENCE + chatUserId);
+    return getUserPresence(chatUserId).flatMap(presenceDTO -> Optional.of(presenceDTO.isPresent()));
+  }
+
+  @Override
+  public Optional<Boolean> isAvailable(String chatUserId) {
+    return getUserPresence(chatUserId)
+        .flatMap(presenceDTO -> Optional.of(presenceDTO.isAvailable()));
+  }
+
+  private Optional<PresenceDTO> getUserPresence(String chatUserId) {
+    var url = rocketChatConfig.getApiUrl(ENDPOINT_USER_PRESENCE_GET + chatUserId);
 
     try {
       var body = rocketChatClient.getForEntity(url, PresenceDTO.class).getBody();
       if (isNull(body)) {
         log.warn("Presence check inconclusive (user \"{}\".)", chatUserId);
       } else {
-        return Optional.of(body.isPresent());
+        return Optional.of(body);
       }
     } catch (HttpClientErrorException exception) {
       log.error("Presence check failed.", exception);
     }
 
     return Optional.empty();
+  }
+
+  @Override
+  public boolean setUserPresence(String username, String status) {
+    var url = rocketChatConfig.getApiUrl(ENDPOINT_USER_PRESENCE_SET);
+    var userPresence = mapper.setUserPresenceOf(status);
+
+    try {
+      var response =
+          rocketChatClient.postForEntity(url, username, userPresence, MessageResponse.class);
+      return isSuccessful(response);
+    } catch (HttpClientErrorException exception) {
+      log.error("Setting user presence failed.", exception);
+      return false;
+    }
+  }
+
+  private boolean isSuccessful(ResponseEntity<MessageResponse> response) {
+    var body = response.getBody();
+
+    return nonNull(body) && body.getSuccess() && !body.getMessage().contains("\"error\"");
   }
 
   @Override
@@ -524,6 +559,37 @@ public class RocketChatService implements MessageClient {
   }
 
   /**
+   * Leave from the Rocket.Chat group with given groupId as the technical user.
+   *
+   * @param rcGroupId Rocket.Chat roomId
+   * @throws RocketChatLeaveFromGroupException on failure
+   */
+  public void leaveFromGroupAsTechnicalUser(String rcGroupId)
+      throws RocketChatLeaveFromGroupException {
+
+    GroupResponseDTO response;
+    try {
+      var technicalUser = rcCredentialHelper.getTechnicalUser();
+      var header = getStandardHttpHeaders(technicalUser);
+      var body = new GroupLeaveBodyDTO(rcGroupId);
+      HttpEntity<GroupLeaveBodyDTO> request = new HttpEntity<>(body, header);
+
+      var url = rocketChatConfig.getApiUrl(ENDPOINT_ROOM_LEAVE);
+      response = restTemplate.postForObject(url, request, GroupResponseDTO.class);
+
+    } catch (Exception ex) {
+      throw new RocketChatLeaveFromGroupException(
+          String.format(
+              "Could not leave as technical user from Rocket.Chat group with id %s", rcGroupId));
+    }
+
+    if (response != null && !response.isSuccess()) {
+      var error = "Could not leave as technical user from Rocket.Chat group with id %s";
+      throw new RocketChatLeaveFromGroupException(String.format(error, rcGroupId));
+    }
+  }
+
+  /**
    * Removes the provided user from the Rocket.Chat group with given groupId.
    *
    * @param rcUserId Rocket.Chat userId
@@ -559,7 +625,7 @@ public class RocketChatService implements MessageClient {
     try {
       addTechnicalUserToGroup(chatId);
       removeUserFromGroup(chatUserId, chatId);
-      removeTechnicalUserFromGroup(chatId);
+      leaveFromGroupAsTechnicalUser(chatId);
 
       return true;
     } catch (Exception exception) {
@@ -567,17 +633,6 @@ public class RocketChatService implements MessageClient {
 
       return false;
     }
-  }
-
-  /**
-   * Removes the technical user from the given Rocket.Chat group id.
-   *
-   * @param rcGroupId the rocket chat group id
-   */
-  public void removeTechnicalUserFromGroup(String rcGroupId)
-      throws RocketChatRemoveUserFromGroupException, RocketChatUserNotInitializedException {
-    this.removeUserFromGroup(
-        rcCredentialHelper.getTechnicalUser().getRocketChatUserId(), rcGroupId);
   }
 
   /**

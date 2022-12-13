@@ -18,6 +18,10 @@ public interface MessageClient {
 
   Optional<Boolean> isLoggedIn(String chatUserId);
 
+  Optional<Boolean> isAvailable(String chatUserId);
+
+  boolean setUserPresence(String username, String status);
+
   Optional<Map<String, Object>> findUser(String chatUserId);
 
   Optional<List<Map<String, String>>> findAllChats(String chatUserId);

@@ -471,6 +471,7 @@ public class UserController implements UsersApi {
           .ifPresent(
               consultantMap ->
                   partialUserData.setDisplayName(userDtoMapper.displayNameOf(consultantMap)));
+      partialUserData.setAvailable(messenger.getAvailability(authenticatedUser.getUserId()));
     } else if (isTenantAdmin()) {
       partialUserData = keycloakUserDataProvider.retrieveAuthenticatedUserData();
     } else {
@@ -498,17 +499,21 @@ public class UserController implements UsersApi {
 
   @Override
   public ResponseEntity<Void> patchUser(PatchUserDTO patchUserDTO) {
+    var userId = authenticatedUser.getUserId();
     var patchMap =
         userDtoMapper
             .mapOf(patchUserDTO, authenticatedUser)
             .orElseThrow(
-                () ->
-                    new BadRequestException("Invalid payload: at least one property must be set"));
+                () -> new BadRequestException("Invalid payload: at least one property expected"));
 
     accountManager.patchUser(patchMap).orElseThrow();
     userDtoMapper
         .preferredLanguageOf(patchUserDTO)
-        .ifPresent(lang -> identityManager.changeLanguage(authenticatedUser.getUserId(), lang));
+        .ifPresent(lang -> identityManager.changeLanguage(userId, lang));
+    userDtoMapper
+        .availableOf(patchUserDTO)
+        .filter(available -> authenticatedUser.isConsultant())
+        .ifPresent(available -> messenger.setAvailability(userId, available));
 
     return ResponseEntity.noContent().build();
   }

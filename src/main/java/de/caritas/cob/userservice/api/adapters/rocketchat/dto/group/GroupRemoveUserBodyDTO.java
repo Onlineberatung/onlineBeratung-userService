@@ -4,10 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * Body object for Rocket.Chat API Call for removing a user to a group
- * https://rocket.chat/docs/developer-guides/rest-api/groups/kick/
- */
+// Body object for Rocket.Chat API Call for removing a user to a group
 @Setter
 @Getter
 @AllArgsConstructor
