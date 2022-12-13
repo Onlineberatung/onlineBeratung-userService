@@ -419,4 +419,8 @@ public class UserServiceMapper {
   public List<String> chatUserIdOf(List<Map<String, String>> groupMembers) {
     return groupMembers.stream().map(map -> map.get("chatUserId")).collect(Collectors.toList());
   }
+
+  public String statusOf(boolean available) {
+    return available ? "online" : "busy";
+  }
 }

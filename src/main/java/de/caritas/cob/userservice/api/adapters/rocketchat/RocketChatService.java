@@ -110,7 +110,8 @@ public class RocketChatService implements MessageClient {
   private static final String ENDPOINT_USER_LIST = "/users.list";
   private static final String ENDPOINT_USER_LOGIN = "/login";
   private static final String ENDPOINT_USER_LOGOUT = "/logout";
-  private static final String ENDPOINT_USER_PRESENCE = "/users.getPresence?userId=";
+  private static final String ENDPOINT_USER_PRESENCE_GET = "/users.getPresence?userId=";
+  private static final String ENDPOINT_USER_PRESENCE_SET = "/method.call/UserPresence";
 
   private static final String ERROR_MESSAGE =
       "Error during rollback: Rocket.Chat group with id " + "%s could not be deleted";
@@ -217,20 +218,51 @@ public class RocketChatService implements MessageClient {
 
   @Override
   public Optional<Boolean> isLoggedIn(String chatUserId) {
-    var url = rocketChatConfig.getApiUrl(ENDPOINT_USER_PRESENCE + chatUserId);
+    return getUserPresence(chatUserId).flatMap(presenceDTO -> Optional.of(presenceDTO.isPresent()));
+  }
+
+  @Override
+  public Optional<Boolean> isAvailable(String chatUserId) {
+    return getUserPresence(chatUserId)
+        .flatMap(presenceDTO -> Optional.of(presenceDTO.isAvailable()));
+  }
+
+  private Optional<PresenceDTO> getUserPresence(String chatUserId) {
+    var url = rocketChatConfig.getApiUrl(ENDPOINT_USER_PRESENCE_GET + chatUserId);
 
     try {
       var body = rocketChatClient.getForEntity(url, PresenceDTO.class).getBody();
       if (isNull(body)) {
         log.warn("Presence check inconclusive (user \"{}\".)", chatUserId);
       } else {
-        return Optional.of(body.isPresent());
+        return Optional.of(body);
       }
     } catch (HttpClientErrorException exception) {
       log.error("Presence check failed.", exception);
     }
 
     return Optional.empty();
+  }
+
+  @Override
+  public boolean setUserPresence(String username, String status) {
+    var url = rocketChatConfig.getApiUrl(ENDPOINT_USER_PRESENCE_SET);
+    var userPresence = mapper.setUserPresenceOf(status);
+
+    try {
+      var response =
+          rocketChatClient.postForEntity(url, username, userPresence, MessageResponse.class);
+      return isSuccessful(response);
+    } catch (HttpClientErrorException exception) {
+      log.error("Setting user presence failed.", exception);
+      return false;
+    }
+  }
+
+  private boolean isSuccessful(ResponseEntity<MessageResponse> response) {
+    var body = response.getBody();
+
+    return nonNull(body) && body.getSuccess() && !body.getMessage().contains("\"error\"");
   }
 
   @Override

@@ -28,4 +28,9 @@ public class PresenceDTO {
   public boolean isPresent() {
     return nonNull(presence) && !presence.equals(PresenceStatus.OFFLINE);
   }
+
+  @JsonIgnore
+  public boolean isAvailable() {
+    return nonNull(presence) && presence.equals(PresenceStatus.ONLINE);
+  }
 }

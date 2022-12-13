@@ -119,6 +119,77 @@ class RocketChatServiceIT {
     assertTrue(isLoggedIn.isEmpty());
   }
 
+  @Test
+  void isAvailableShouldReturnPositiveStatusWhenOnline()
+      throws RocketChatUserNotInitializedException {
+    givenAValidRocketChatSystemUser();
+    givenAValidChatUserId();
+    givenAValidPresenceResponse(PresenceStatus.ONLINE);
+
+    var isAvailable = underTest.isAvailable(chatUserId).orElseThrow();
+
+    assertTrue(isAvailable);
+  }
+
+  @Test
+  void isAvailableShouldReturnNegativeStatusWhenBusy()
+      throws RocketChatUserNotInitializedException {
+    givenAValidRocketChatSystemUser();
+    givenAValidChatUserId();
+    givenAValidPresenceResponse(PresenceStatus.BUSY);
+
+    var isAvailable = underTest.isAvailable(chatUserId).orElseThrow();
+
+    assertFalse(isAvailable);
+  }
+
+  @Test
+  void isAvailableShouldReturnNegativeStatusWhenAway()
+      throws RocketChatUserNotInitializedException {
+    givenAValidRocketChatSystemUser();
+    givenAValidChatUserId();
+    givenAValidPresenceResponse(PresenceStatus.AWAY);
+
+    var isAvailable = underTest.isAvailable(chatUserId).orElseThrow();
+
+    assertFalse(isAvailable);
+  }
+
+  @Test
+  void isAvailableShouldReturnNegativeStatusWhenOffline()
+      throws RocketChatUserNotInitializedException {
+    givenAValidRocketChatSystemUser();
+    givenAValidChatUserId();
+    givenAValidPresenceResponse(PresenceStatus.OFFLINE);
+
+    var isAvailable = underTest.isAvailable(chatUserId).orElseThrow();
+
+    assertFalse(isAvailable);
+  }
+
+  @Test
+  void isAvailableShouldReturnEmptyOnClientError() throws RocketChatUserNotInitializedException {
+    givenAValidRocketChatSystemUser();
+    givenAValidChatUserId();
+    givenAnErroneousPresenceResponse();
+
+    var isAvailable = underTest.isAvailable(chatUserId);
+
+    assertTrue(isAvailable.isEmpty());
+  }
+
+  @Test
+  void isAvailableShouldReturnEmptyOnRemoteServerError()
+      throws RocketChatUserNotInitializedException {
+    givenAValidRocketChatSystemUser();
+    givenAValidChatUserId();
+    givenAnInvalidPresenceResponse();
+
+    var isAvailable = underTest.isAvailable(chatUserId);
+
+    assertTrue(isAvailable.isEmpty());
+  }
+
   private void givenAValidPresenceResponse(PresenceStatus present) {
     presenceDto = new PresenceDTO();
     presenceDto.setPresence(present);
