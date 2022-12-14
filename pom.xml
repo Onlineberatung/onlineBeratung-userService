@@ -43,7 +43,7 @@
 		<javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
 		<spring-boot-starter-web.version>2.6.6</spring-boot-starter-web.version>
 		<spring-security-core.version>5.7.5</spring-security-core.version>
-		<spring-beans.version>5.2.20.RELEASE</spring-beans.version>
+		<spring-beans.version>5.2.21.RELEASE</spring-beans.version>
 		<spring-webmvc.version>5.2.20.RELEASE</spring-webmvc.version>
 		<spring-core.version>5.2.20.RELEASE</spring-core.version>
 		<json-smart.version>2.4.7</json-smart.version>
