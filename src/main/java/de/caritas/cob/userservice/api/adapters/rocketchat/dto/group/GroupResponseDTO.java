@@ -5,7 +5,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-// Response object for Rocket.Chat API Call for creating a group
+/**
+ * Response object for Rocket.Chat API Call for creating a group
+ * https://rocket.chat/docs/developer-guides/rest-api/groups/create/
+ */
 @Setter
 @Getter
 @AllArgsConstructor
