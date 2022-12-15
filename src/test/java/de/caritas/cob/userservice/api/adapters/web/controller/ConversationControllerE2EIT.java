@@ -23,10 +23,17 @@ import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.model.Session.RegistrationType;
+import de.caritas.cob.userservice.api.model.Session.SessionStatus;
+import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
+import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.topicservice.generated.web.TopicControllerApi;
+import java.time.LocalDateTime;
+import java.util.Set;
 import javax.servlet.http.Cookie;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.assertj.core.util.Lists;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
@@ -65,6 +72,8 @@ class ConversationControllerE2EIT {
 
   @Autowired private SessionRepository sessionRepository;
 
+  @Autowired private UserRepository userRepository;
+
   @MockBean private AuthenticatedUser authenticatedUser;
 
   @MockBean
@@ -83,12 +92,22 @@ class ConversationControllerE2EIT {
 
   private LanguageCode initialLanguageCode;
 
+  private boolean deleteSession;
+
+  private User user;
+
   @AfterEach
   public void deleteAndRestore() {
     consultant = null;
+    user = null;
     if (nonNull(session)) {
-      session.setLanguageCode(initialLanguageCode);
-      sessionRepository.save(session);
+      if (deleteSession) {
+        sessionRepository.delete(session);
+        deleteSession = false;
+      } else {
+        session.setLanguageCode(initialLanguageCode);
+        sessionRepository.save(session);
+      }
       session = null;
     }
     initialLanguageCode = null;
@@ -97,7 +116,7 @@ class ConversationControllerE2EIT {
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   void getRegisteredEnquiriesShouldExposeDefaultLanguageAndRespondWithOk() throws Exception {
-    givenAConsultantWithMultipleAgencies();
+    givenAnAuthenticatedConsultantWithMultipleAgencies();
     givenRocketChatSubscriptionUpdate();
     givenRocketChatRoomsGet();
     givenAValidTopicServiceResponse();
@@ -126,7 +145,7 @@ class ConversationControllerE2EIT {
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   void getRegisteredEnquiriesShouldExposeSetLanguageAndRespondWithOk() throws Exception {
-    givenAConsultantWithMultipleAgencies();
+    givenAnAuthenticatedConsultantWithMultipleAgencies();
     givenASessionWithASetLanguage();
     givenRocketChatSubscriptionUpdate();
     givenRocketChatRoomsGet();
@@ -155,14 +174,33 @@ class ConversationControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.ANONYMOUS_DEFAULT)
-  void getAnonymousEnquiryDetailsShouldRespondWithNotImplemented() throws Exception {
+  void getAnonymousEnquiryDetailsShouldRespondWithNotFoundIfSessionDoesNotExist() throws Exception {
+    var sessionId = givenAnUnknownSessionId();
+
+    mockMvc
+        .perform(
+            get("/conversations/anonymous/{sessionId}", sessionId)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.ANONYMOUS_DEFAULT)
+  void getAnonymousEnquiryDetailsShouldRespondWithForbiddenIfAuthenticatedUserNotFromSession()
+      throws Exception {
+    givenAnAnonymousAuthenticatedUser();
+    givenAConsultantWithMultipleAgencies();
+    givenANewAnonymousSession();
+
     mockMvc
         .perform(
             get("/conversations/anonymous/1")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN))
-        .andExpect(status().isNotImplemented());
+        .andExpect(status().isForbidden());
   }
 
   private void givenAValidTopicServiceResponse() {
@@ -186,10 +224,15 @@ class ConversationControllerE2EIT {
     when(topicControllerApi.getAllTopics()).thenReturn(Lists.newArrayList(firstTopic, secondTopic));
   }
 
-  private void givenAConsultantWithMultipleAgencies() {
+  private void givenAnAuthenticatedConsultantWithMultipleAgencies() {
     consultant =
         consultantRepository.findById("45816eb6-984b-411f-a818-996cd16e1f2a").orElseThrow();
     when(authenticatedUser.getUserId()).thenReturn(consultant.getId());
+  }
+
+  private void givenAConsultantWithMultipleAgencies() {
+    consultant =
+        consultantRepository.findById("45816eb6-984b-411f-a818-996cd16e1f2a").orElseThrow();
   }
 
   private void givenRocketChatRoomsGet() {
@@ -216,5 +259,39 @@ class ConversationControllerE2EIT {
     initialLanguageCode = session.getLanguageCode();
     session.setLanguageCode(easyRandom.nextObject(LanguageCode.class));
     sessionRepository.save(session);
+  }
+
+  private void givenAnAnonymousAuthenticatedUser() {
+    user = userRepository.findById("9c4057d0-05ad-4e86-a47c-dc5bdeec03b9").orElseThrow();
+    when(authenticatedUser.getUserId()).thenReturn(user.getUserId());
+    when(authenticatedUser.getRoles()).thenReturn(Set.of("anonymous"));
+  }
+
+  private void givenANewAnonymousSession() {
+    session = new Session();
+    session.setUser(user);
+    session.setConsultant(consultant);
+    session.setConsultingTypeId(1);
+    session.setRegistrationType(RegistrationType.ANONYMOUS);
+    session.setLanguageCode(LanguageCode.de);
+    session.setPostcode(RandomStringUtils.randomNumeric(5));
+    session.setAgencyId(consultant.getConsultantAgencies().iterator().next().getAgencyId());
+    session.setStatus(SessionStatus.NEW);
+    session.setTeamSession(false);
+    session.setCreateDate(LocalDateTime.now());
+    session.setGroupId(RandomStringUtils.randomAlphabetic(17));
+    session.setIsConsultantDirectlySet(false);
+
+    sessionRepository.save(session);
+    deleteSession = true;
+  }
+
+  private Long givenAnUnknownSessionId() {
+    Long sessionId;
+    do {
+      sessionId = (long) easyRandom.nextInt(1000);
+    } while (sessionRepository.existsById(sessionId));
+
+    return sessionId;
   }
 }

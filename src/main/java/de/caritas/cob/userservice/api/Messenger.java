@@ -73,6 +73,11 @@ public class Messenger implements Messaging {
   }
 
   @Override
+  public int findAvailableConsultants(Integer consultingTypeId) {
+    return 0;
+  }
+
+  @Override
   public Boolean updateE2eKeys(String chatUserId, String publicKey) {
     var allUpdated = new AtomicReference<>(true);
 
@@ -176,7 +181,7 @@ public class Messenger implements Messaging {
   }
 
   @Override
-  public Optional<Map<String, String>> findSession(Long sessionId) {
+  public Optional<Map<String, Object>> findSession(Long sessionId) {
     var session = sessionRepository.findById(sessionId);
 
     return mapper.mapOf(session);

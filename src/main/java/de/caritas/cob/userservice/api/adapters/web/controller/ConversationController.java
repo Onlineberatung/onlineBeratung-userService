@@ -9,10 +9,15 @@ import de.caritas.cob.userservice.api.adapters.web.dto.AnonymousEnquiry;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAnonymousEnquiryDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAnonymousEnquiryResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.mapping.ConversationDtoMapper;
 import de.caritas.cob.userservice.api.conversation.facade.AcceptAnonymousEnquiryFacade;
 import de.caritas.cob.userservice.api.conversation.facade.CreateAnonymousEnquiryFacade;
 import de.caritas.cob.userservice.api.conversation.facade.FinishAnonymousConversationFacade;
 import de.caritas.cob.userservice.api.conversation.service.ConversationListResolver;
+import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
+import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
+import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
+import de.caritas.cob.userservice.api.port.in.Messaging;
 import de.caritas.cob.userservice.generated.api.conversation.controller.ConversationsApi;
 import io.swagger.annotations.Api;
 import javax.validation.Valid;
@@ -34,6 +39,9 @@ public class ConversationController implements ConversationsApi {
   private final @NonNull CreateAnonymousEnquiryFacade createAnonymousEnquiryFacade;
   private final @NonNull AcceptAnonymousEnquiryFacade acceptAnonymousEnquiryFacade;
   private final @NonNull FinishAnonymousConversationFacade finishAnonymousConversationFacade;
+  private final ConversationDtoMapper conversationDtoMapper;
+  private final Messaging messenger;
+  private final AuthenticatedUser authenticatedUser;
 
   /**
    * Entry point to retrieve all anonymous enquiries for current authenticated consultant.
@@ -138,7 +146,21 @@ public class ConversationController implements ConversationsApi {
 
   @Override
   public ResponseEntity<AnonymousEnquiry> getAnonymousEnquiryDetails(Long sessionId) {
-    return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    var sessionMap =
+        messenger
+            .findSession(sessionId)
+            .orElseThrow(() -> new NotFoundException("Session (%s) not found", sessionId));
+
+    if (!conversationDtoMapper.adviceSeekerIdOf(sessionMap).equals(authenticatedUser.getUserId())) {
+      throw new ForbiddenException(
+          "Access to session (%s) is limited to its advice seeker.", sessionId);
+    }
+
+    var consultingTypeId = conversationDtoMapper.consultingTypeIdOf(sessionMap);
+    int numConsultants = messenger.findAvailableConsultants(consultingTypeId);
+    var anonymousEnquiry = conversationDtoMapper.anonymousEnquiryOf(sessionMap, numConsultants);
+
+    return ResponseEntity.ok(anonymousEnquiry);
   }
 
   /**

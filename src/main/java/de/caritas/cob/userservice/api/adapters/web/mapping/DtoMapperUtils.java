@@ -69,9 +69,9 @@ public interface DtoMapperUtils {
     throw new IllegalArgumentException("Mapping of field '" + field + "' not supported.");
   }
 
-  default String chatIdOf(Map<String, String> sessionMap) {
+  default String chatIdOf(Map<String, Object> sessionMap) {
     if (sessionMap.containsKey("chatId")) {
-      return sessionMap.get("chatId");
+      return (String) sessionMap.get("chatId");
     }
 
     return null;
