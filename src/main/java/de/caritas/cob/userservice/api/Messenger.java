@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api;
 
 import static java.util.Objects.isNull;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session;
@@ -13,10 +14,13 @@ import de.caritas.cob.userservice.api.port.out.MessageClient;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.service.StringConverter;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,6 +38,7 @@ public class Messenger implements Messaging {
   private final UserServiceMapper mapper;
   private final StringConverter stringConverter;
   private final IdentityManaging identityManager;
+  private final AgencyService agencyService;
 
   @Override
   public boolean banUserFromChat(String adviceSeekerId, long chatId) {
@@ -73,8 +78,20 @@ public class Messenger implements Messaging {
   }
 
   @Override
-  public int findAvailableConsultants(Integer consultingTypeId) {
-    return 0;
+  public List<String> findAvailableConsultants(int consultingTypeId) {
+    var presentUserIds = messageClient.findAllLoggedInUserIds();
+
+    if (!presentUserIds.isEmpty()) {
+      var agencyIds =
+          agencyService.getAgenciesByConsultingType(consultingTypeId).stream()
+              .map(AgencyDTO::getId)
+              .collect(Collectors.toList());
+
+      var consultantIdsInType = consultantRepository.findAllByAgencyIds(agencyIds);
+      presentUserIds.retainAll(consultantIdsInType);
+    }
+
+    return presentUserIds;
   }
 
   @Override

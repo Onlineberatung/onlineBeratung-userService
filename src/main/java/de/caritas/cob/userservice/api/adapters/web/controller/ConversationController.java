@@ -39,7 +39,7 @@ public class ConversationController implements ConversationsApi {
   private final @NonNull CreateAnonymousEnquiryFacade createAnonymousEnquiryFacade;
   private final @NonNull AcceptAnonymousEnquiryFacade acceptAnonymousEnquiryFacade;
   private final @NonNull FinishAnonymousConversationFacade finishAnonymousConversationFacade;
-  private final ConversationDtoMapper conversationDtoMapper;
+  private final ConversationDtoMapper mapper;
   private final Messaging messenger;
   private final AuthenticatedUser authenticatedUser;
 
@@ -151,14 +151,14 @@ public class ConversationController implements ConversationsApi {
             .findSession(sessionId)
             .orElseThrow(() -> new NotFoundException("Session (%s) not found", sessionId));
 
-    if (!conversationDtoMapper.adviceSeekerIdOf(sessionMap).equals(authenticatedUser.getUserId())) {
+    if (!mapper.adviceSeekerIdOf(sessionMap).equals(authenticatedUser.getUserId())) {
       throw new ForbiddenException(
           "Access to session (%s) is limited to its advice seeker.", sessionId);
     }
 
-    var consultingTypeId = conversationDtoMapper.consultingTypeIdOf(sessionMap);
-    int numConsultants = messenger.findAvailableConsultants(consultingTypeId);
-    var anonymousEnquiry = conversationDtoMapper.anonymousEnquiryOf(sessionMap, numConsultants);
+    var consultingTypeId = mapper.consultingTypeIdOf(sessionMap);
+    var consultants = messenger.findAvailableConsultants(consultingTypeId);
+    var anonymousEnquiry = mapper.anonymousEnquiryOf(sessionMap, consultants);
 
     return ResponseEntity.ok(anonymousEnquiry);
   }

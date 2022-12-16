@@ -219,6 +219,11 @@ public class RocketChatService implements MessageClient {
   }
 
   @Override
+  public List<String> findAllLoggedInUserIds() {
+    return List.of();
+  }
+
+  @Override
   public Optional<Boolean> isAvailable(String chatUserId) {
     return getUserPresence(chatUserId)
         .flatMap(presenceDTO -> Optional.of(presenceDTO.isAvailable()));

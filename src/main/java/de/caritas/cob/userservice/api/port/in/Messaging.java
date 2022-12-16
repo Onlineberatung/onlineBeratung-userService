@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.port.in;
 
 import de.caritas.cob.userservice.api.model.Chat;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -30,5 +31,5 @@ public interface Messaging {
 
   boolean getAvailability(String consultantId);
 
-  int findAvailableConsultants(Integer consultingTypeId);
+  List<String> findAvailableConsultants(int consultingTypeId);
 }

@@ -60,4 +60,13 @@ public interface ConsultantRepository extends CrudRepository<Consultant, String>
       String infix, Collection<Long> agencyIds, Pageable pageable);
 
   long countByDeleteDateIsNull();
+
+  @Query(
+      value =
+          "SELECT DISTINCT c.rocketChatId "
+              + "FROM Consultant c "
+              + "INNER JOIN ConsultantAgency ca ON c.id = ca.consultant.id "
+              + "WHERE ca.agencyId IN (?1) "
+              + "AND ca.deleteDate IS NULL")
+  List<String> findAllByAgencyIds(List<Long> agencyIds);
 }

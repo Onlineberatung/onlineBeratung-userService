@@ -13,6 +13,7 @@ import de.caritas.cob.userservice.api.model.Appointment;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.model.Language;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -313,7 +314,7 @@ class ConsultantRepositoryIT {
           var consultantAgency = consultantAgencyRepository.findByConsultantId(consultant.getId());
           List<Long> agencyIds =
               consultantAgency.stream()
-                  .map(consulantAgency -> consulantAgency.getAgencyId())
+                  .map(ConsultantAgency::getAgencyId)
                   .collect(Collectors.toList());
           Set<Long> intersection =
               agencyIds.stream()
@@ -407,6 +408,40 @@ class ConsultantRepositoryIT {
     assertEquals(allMatching, consultantPage.getTotalElements());
   }
 
+  @Test
+  void findAllByAgencyIdsShouldFindChatIds() {
+    var agencyId1 = givenANewAgencyId();
+    givenConsultantsWithAgencyId(2, agencyId1);
+    var agencyId2 = givenANewAgencyId();
+    givenConsultantsWithAgencyId(3, agencyId2);
+    var agencyId3 = givenANewAgencyId();
+    givenConsultantsWithAgencyId(4, agencyId3);
+    var agencyIds = List.of(agencyId1, agencyId2);
+
+    var cChatIds = underTest.findAllByAgencyIds(agencyIds);
+
+    var cAgencies = consultantAgencyRepository.findByAgencyIdInAndDeleteDateIsNull(agencyIds);
+    assertEquals(cAgencies.size(), cChatIds.size());
+    cAgencies.forEach(
+        cAgency -> assertTrue(cChatIds.contains(cAgency.getConsultant().getRocketChatId())));
+  }
+
+  @Test
+  void findAllByAgencyIdsShouldIgnoreConsultantAgenciesMarkedForDeletion() {
+    var agencyId1 = givenANewAgencyId();
+    givenConsultantsWithAgencyId(2, agencyId1);
+    var cAgencies = consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(agencyId1);
+    cAgencies.forEach(
+        cAgency -> {
+          cAgency.setDeleteDate(LocalDateTime.now());
+          consultantAgencyRepository.save(cAgency);
+        });
+
+    var consultantChatIds = underTest.findAllByAgencyIds(List.of(agencyId1));
+
+    assertEquals(0, consultantChatIds.size());
+  }
+
   private void givenConsultantsMatchingFirstName(
       @PositiveOrZero int count, @NotBlank String infix) {
     while (count-- > 0) {
@@ -450,6 +485,11 @@ class ConsultantRepositoryIT {
     }
   }
 
+  private void givenConsultantsWithAgencyId(@PositiveOrZero int count, long agencyId) {
+    givenConsultantsMatchingEmailAndAgencyId(
+        count, List.of(agencyId), RandomStringUtils.randomAlphanumeric(8));
+  }
+
   private void givenConsultantsMatchingEmailAndAgencyId(
       @PositiveOrZero int count, List<Long> agencyIds, @NotBlank String infix) {
     while (count-- > 0) {
@@ -457,7 +497,6 @@ class ConsultantRepositoryIT {
       Consultant savedConsultant = underTest.save(consultant);
       var agencyIdsCopy = Lists.newArrayList(agencyIds);
       Long agencyId = pickRandomAndRemove(agencyIdsCopy);
-      saveConsultantAgency(savedConsultant, agencyId);
       saveConsultantAgency(savedConsultant, agencyId);
       savedConsultant = underTest.save(consultant);
       matchingIds.add(savedConsultant.getId());
@@ -575,6 +614,10 @@ class ConsultantRepositoryIT {
 
   private String aStringWithInfix(String infix) {
     return RandomStringUtils.randomAlphabetic(4) + infix + RandomStringUtils.randomAlphabetic(4);
+  }
+
+  private static long givenANewAgencyId() {
+    return (long) 10000 + easyRandom.nextInt(1000);
   }
 
   private void givenAnExistingConsultantSpeaking(LanguageCode... languageCodes) {

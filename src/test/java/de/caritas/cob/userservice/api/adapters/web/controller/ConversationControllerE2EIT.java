@@ -203,6 +203,22 @@ class ConversationControllerE2EIT {
         .andExpect(status().isForbidden());
   }
 
+  @Test
+  @WithMockUser(authorities = AuthorityValue.ANONYMOUS_DEFAULT)
+  void getAnonymousEnquiryDetailsShouldRespondWithDetails() throws Exception {
+    givenAnAnonymousAuthenticatedUser();
+    givenAConsultantWithMultipleAgencies();
+    givenANewAnonymousSession();
+
+    mockMvc
+        .perform(
+            get("/conversations/anonymous/{sessionId}", session.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN))
+        .andExpect(status().isOk());
+  }
+
   private void givenAValidTopicServiceResponse() {
     var roomsGetDTO = new RoomsGetDTO();
     roomsGetDTO.setUpdate(new RoomsUpdateDTO[] {});
