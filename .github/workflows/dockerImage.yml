@@ -3,7 +3,9 @@ name: Publish Docker image
 on:
   push:
     branches:
-      - "develop"
+      - 'release'
+      - 'staging'
+      - 'develop'
       - "tsys-release"
     tags:
       - "dockerImage.v.*"

@@ -5,6 +5,7 @@ import static de.caritas.cob.userservice.api.conversation.model.ConversationList
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.ARCHIVED_TEAM_SESSION;
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.REGISTERED_ENQUIRY;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.AnonymousEnquiry;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAnonymousEnquiryDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAnonymousEnquiryResponseDTO;
@@ -133,6 +134,11 @@ public class ConversationController implements ConversationsApi {
         createAnonymousEnquiryFacade.createAnonymousEnquiry(createAnonymousEnquiryDTO);
 
     return new ResponseEntity<>(createAnonymousEnquiryResponseDTO, HttpStatus.CREATED);
+  }
+
+  @Override
+  public ResponseEntity<AnonymousEnquiry> getAnonymousEnquiryDetails(Long sessionId) {
+    return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
   }
 
   /**

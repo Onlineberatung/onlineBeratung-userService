@@ -8,7 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-// Rocket.Chat group object
+/*
+ * Rocket.Chat group object
+ */
 @Setter
 @Getter
 @AllArgsConstructor
