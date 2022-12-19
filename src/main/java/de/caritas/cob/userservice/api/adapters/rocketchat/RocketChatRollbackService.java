@@ -2,7 +2,7 @@ package de.caritas.cob.userservice.api.adapters.rocketchat;
 
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLeaveFromGroupException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -56,12 +56,12 @@ public class RocketChatRollbackService {
           }
         }
 
-        // Leave from Rocket.Chat group as technical user
+        // Remove technical user from Rocket.Chat group
         try {
-          rocketChatService.leaveFromGroupAsTechnicalUser(groupId);
-        } catch (RocketChatLeaveFromGroupException e) {
+          rocketChatService.removeTechnicalUserFromGroup(groupId);
+        } catch (RocketChatRemoveUserFromGroupException e) {
           log.error(
-              "Internal Server Error: Could not leave from Rocket.Chat group as technical user "
+              "Internal Server Error: Could not remove technical user from Rocket.Chat group "
                   + "id {} during roll back.",
               groupId);
         }
