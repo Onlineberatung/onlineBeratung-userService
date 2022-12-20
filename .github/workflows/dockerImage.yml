@@ -106,3 +106,30 @@ jobs:
           exit-code: '1'
           vuln-type: 'os,library'
           severity: 'CRITICAL'
+      - name: Microsoft Teams Fail Card
+        if: ${{ (matrix.registry == 'ghcr.io') && (failure() || cancelled()) }}
+        uses: toko-bifrost/ms-teams-deploy-card@3.1.2
+        with:
+          github-token: ${{ github.token }}
+          webhook-uri: ${{ secrets.MS_TEAMS_FAIL_WEBHOOK_URI }}
+          show-on-start: false
+          environment: ${{ github.ref_name }}
+          custom-actions: |
+            - text: View CI
+              url: "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+      - name: Microsoft Teams Image Card
+        if: ${{ (matrix.registry == 'ghcr.io') && success() }}
+        uses: toko-bifrost/ms-teams-deploy-card@3.1.2
+        with:
+          github-token: ${{ github.token }}
+          webhook-uri: ${{ secrets.MS_TEAMS_IMAGE_WEBHOOK_URI }}
+          show-on-start: false
+          environment: ${{ github.ref_name }}
+          custom-facts: |
+            - name: Registry
+              value: ${{ env.DOCKER_REGISTRY }}/${{ env.REPO_NAME_WITHOUT_PREFIX }}
+            - name: Tag
+              value: ${{ env.DOCKER_IMAGE_TAG }}
+          custom-actions: |
+            - text: View CI
+              url: "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
