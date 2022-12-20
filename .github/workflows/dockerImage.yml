@@ -116,6 +116,10 @@ jobs:
           github-token: ${{ github.token }}
           webhook-uri: ${{ secrets.MS_TEAMS_FAIL_WEBHOOK_URI }}
           show-on-start: false
+          show-on-exit: true
+          show-on-failure: true
+          card-layout-exit: complete
+          enable-view-status: false
           environment: ${{ github.ref_name }}
           custom-actions: |
             - text: View CI
@@ -127,6 +131,10 @@ jobs:
           github-token: ${{ github.token }}
           webhook-uri: ${{ secrets.MS_TEAMS_IMAGE_WEBHOOK_URI }}
           show-on-start: false
+          show-on-exit: true
+          show-on-failure: false
+          card-layout-exit: complete
+          enable-view-status: false
           environment: ${{ github.ref_name }}
           custom-facts: |
             - name: Registry
