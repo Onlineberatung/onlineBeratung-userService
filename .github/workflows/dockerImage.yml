@@ -14,6 +14,8 @@ jobs:
   test:
     name: Build and run unit tests
     runs-on: ubuntu-latest
+    env:
+      FAIL_WEBHOOK_EXISTS: ${{ (secrets.MS_TEAMS_FAIL_WEBHOOK_URI != '') }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -40,6 +42,21 @@ jobs:
         with:
           name: targetfiles
           path: target/*.jar
+      - name: Microsoft Teams Fail Card
+        if: ${{ env.FAIL_WEBHOOK_EXISTS && (failure() || cancelled()) }}
+        uses: toko-bifrost/ms-teams-deploy-card@3.1.2
+        with:
+          github-token: ${{ github.token }}
+          webhook-uri: ${{ secrets.MS_TEAMS_FAIL_WEBHOOK_URI }}
+          show-on-start: false
+          show-on-exit: true
+          show-on-failure: true
+          card-layout-exit: complete
+          enable-view-status: false
+          environment: ${{ github.ref_name }}
+          custom-actions: |
+            - text: View CI
+              url: "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
   push_to_registry:
     strategy:
       matrix:
