@@ -47,6 +47,9 @@ jobs:
     needs: [test]
     name: Push Docker image to GitHub Packages
     runs-on: ubuntu-latest
+    env:
+      IMAGE_WEBHOOK_EXISTS: ${{ (secrets.MS_TEAMS_IMAGE_WEBHOOK_URI != '') }}
+      FAIL_WEBHOOK_EXISTS: ${{ (secrets.MS_TEAMS_FAIL_WEBHOOK_URI != '') }}
     steps:
       - uses: actions/checkout@v2
       - name: Download buildfiles artifact
@@ -107,7 +110,7 @@ jobs:
           vuln-type: 'os,library'
           severity: 'CRITICAL'
       - name: Microsoft Teams Fail Card
-        if: ${{ (matrix.registry == 'ghcr.io') && (failure() || cancelled()) }}
+        if: ${{ env.FAIL_WEBHOOK_EXISTS && (matrix.registry == 'ghcr.io') && (failure() || cancelled()) }}
         uses: toko-bifrost/ms-teams-deploy-card@3.1.2
         with:
           github-token: ${{ github.token }}
@@ -118,7 +121,7 @@ jobs:
             - text: View CI
               url: "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
       - name: Microsoft Teams Image Card
-        if: ${{ (matrix.registry == 'ghcr.io') && success() }}
+        if: ${{ env.IMAGE_WEBHOOK_EXISTS && (matrix.registry == 'ghcr.io') && success() }}
         uses: toko-bifrost/ms-teams-deploy-card@3.1.2
         with:
           github-token: ${{ github.token }}
