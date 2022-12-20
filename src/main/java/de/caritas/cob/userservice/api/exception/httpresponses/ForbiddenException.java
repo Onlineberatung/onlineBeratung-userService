@@ -16,6 +16,10 @@ public class ForbiddenException extends CustomHttpStatusException {
     super(message, LogService::logForbidden);
   }
 
+  public ForbiddenException(String message, Long arg) {
+    this(String.format(message, arg));
+  }
+
   /**
    * Forbidden exception.
    *
