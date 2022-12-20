@@ -15,9 +15,9 @@ import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.service.StringConverter;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -78,14 +78,14 @@ public class Messenger implements Messaging {
   }
 
   @Override
-  public List<String> findAvailableConsultants(int consultingTypeId) {
-    var presentUserIds = messageClient.findAllLoggedInUserIds();
+  public Set<String> findAvailableConsultants(int consultingTypeId) {
+    var presentUserIds = messageClient.findAllAvailableUserIds();
 
     if (!presentUserIds.isEmpty()) {
       var agencyIds =
           agencyService.getAgenciesByConsultingType(consultingTypeId).stream()
               .map(AgencyDTO::getId)
-              .collect(Collectors.toList());
+              .collect(Collectors.toSet());
 
       var consultantIdsInType = consultantRepository.findAllByAgencyIds(agencyIds);
       presentUserIds.retainAll(consultantIdsInType);

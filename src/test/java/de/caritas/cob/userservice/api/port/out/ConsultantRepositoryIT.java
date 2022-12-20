@@ -416,7 +416,7 @@ class ConsultantRepositoryIT {
     givenConsultantsWithAgencyId(3, agencyId2);
     var agencyId3 = givenANewAgencyId();
     givenConsultantsWithAgencyId(4, agencyId3);
-    var agencyIds = List.of(agencyId1, agencyId2);
+    var agencyIds = Set.of(agencyId1, agencyId2);
 
     var cChatIds = underTest.findAllByAgencyIds(agencyIds);
 
@@ -437,7 +437,7 @@ class ConsultantRepositoryIT {
           consultantAgencyRepository.save(cAgency);
         });
 
-    var consultantChatIds = underTest.findAllByAgencyIds(List.of(agencyId1));
+    var consultantChatIds = underTest.findAllByAgencyIds(Set.of(agencyId1));
 
     assertEquals(0, consultantChatIds.size());
   }

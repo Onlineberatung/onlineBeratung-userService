@@ -23,6 +23,7 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupsListAl
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.LdapLoginDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.PresenceDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.PresenceListDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.logout.LogoutResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.MessageResponse;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomResponse;
@@ -59,6 +60,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import javax.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.NonNull;
@@ -109,6 +111,7 @@ public class RocketChatService implements MessageClient {
   private static final String ENDPOINT_USER_LOGOUT = "/logout";
   private static final String ENDPOINT_USER_PRESENCE_GET = "/users.getPresence?userId=";
   private static final String ENDPOINT_USER_PRESENCE_SET = "/method.call/UserPresence";
+  private static final String ENDPOINT_USER_PRESENCE_LIST = "/users.presence";
 
   private static final String ERROR_MESSAGE =
       "Error during rollback: Rocket.Chat group with id " + "%s could not be deleted";
@@ -214,13 +217,26 @@ public class RocketChatService implements MessageClient {
   }
 
   @Override
-  public Optional<Boolean> isLoggedIn(String chatUserId) {
-    return getUserPresence(chatUserId).flatMap(presenceDTO -> Optional.of(presenceDTO.isPresent()));
+  public Set<String> findAllAvailableUserIds() {
+    var url = rocketChatConfig.getApiUrl(ENDPOINT_USER_PRESENCE_LIST);
+
+    try {
+      var presentList = rocketChatClient.getForEntity(url, PresenceListDTO.class).getBody();
+      if (isNull(presentList)) {
+        log.warn("Present user search inconclusive");
+      } else {
+        return mapper.mapAvailableOf(presentList);
+      }
+    } catch (HttpClientErrorException exception) {
+      log.error("Present user search failed.", exception);
+    }
+
+    return Set.of();
   }
 
   @Override
-  public List<String> findAllLoggedInUserIds() {
-    return List.of();
+  public Optional<Boolean> isLoggedIn(String chatUserId) {
+    return getUserPresence(chatUserId).flatMap(presenceDTO -> Optional.of(presenceDTO.isPresent()));
   }
 
   @Override
