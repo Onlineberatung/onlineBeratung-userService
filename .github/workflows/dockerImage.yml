@@ -17,6 +17,11 @@ jobs:
     env:
       FAIL_WEBHOOK_EXISTS: ${{ (secrets.MS_TEAMS_FAIL_WEBHOOK_URI != '') }}
     steps:
+      - name: Prepare environment variables
+        run: |
+          raw=$(git branch -r --contains ${{ github.ref }})
+          branch=${raw/origin\/}
+          echo BRANCH_NAME=$(echo -n "${branch}") >> $GITHUB_ENV
       - name: Checkout
         uses: actions/checkout@v2
 
@@ -52,11 +57,10 @@ jobs:
           show-on-exit: true
           show-on-failure: true
           card-layout-exit: complete
-          enable-view-status: false
-          environment: ${{ github.ref_name }}
+          environment: ${{ env.BRANCH_NAME }}
           custom-actions: |
             - text: View CI
-              url: "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+              url: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
   push_to_registry:
     strategy:
       matrix:
@@ -81,6 +85,9 @@ jobs:
           format: "YYYYMMDD[_]HHmmss"
       - name: Prepare environment variables
         run: |
+          raw=$(git branch -r --contains ${{ github.ref }})
+          branch=${raw/origin\/}
+          echo BRANCH_NAME=$(echo -n "${branch}") >> $GITHUB_ENV
           echo "DOCKER_REGISTRY=$(echo "${{ matrix.registry }}/${{ github.repository }}" | awk '{print tolower($0)}')" >> $GITHUB_ENV
           echo "DOCKER_IMAGE=$(echo "${{ github.repository }}" | awk -F / '{print tolower($2)}')" >> $GITHUB_ENV
           echo "REPO_NAME_WITHOUT_PREFIX"=$(echo "${{ github.repository }}" | sed "s/.*\///" | awk -F / '{print tolower($0)}') >> $GITHUB_ENV
@@ -103,7 +110,10 @@ jobs:
           password: ${{ secrets.GH_PACKAGE_RELEASE_TOKEN }}
           registry: ${{ env.DOCKER_REGISTRY }}
           repository: ${{ env.DOCKER_IMAGE }}
-          tags: ${{ env.DOCKER_IMAGE_TAG}}, ${{ (env.CLEAN_REF == 'develop' || env.CLEAN_REF == 'staging' || env.CLEAN_REF == 'release') && env.CLEAN_REF || 'latest' }}
+          tags: |
+            latest
+            ${{ env.DOCKER_IMAGE_TAG}}
+            ${{ (env.BRANCH_NAME == 'develop' || env.BRANCH_NAME == 'staging' || env.BRANCH_NAME == 'release') && env.BRANCH_NAME || '' }}
       - name: Hint about the Docker Image Tag if successfull
         if: ${{ success() }}
         run: |
@@ -137,10 +147,10 @@ jobs:
           show-on-failure: true
           card-layout-exit: complete
           enable-view-status: false
-          environment: ${{ github.ref_name }}
+          environment: ${{ env.BRANCH_NAME }}
           custom-actions: |
             - text: View CI
-              url: "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+              url: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
       - name: Microsoft Teams Image Card
         if: ${{ env.IMAGE_WEBHOOK_EXISTS && (matrix.registry == 'ghcr.io') && success() }}
         uses: toko-bifrost/ms-teams-deploy-card@3.1.2
@@ -151,8 +161,7 @@ jobs:
           show-on-exit: true
           show-on-failure: false
           card-layout-exit: complete
-          enable-view-status: false
-          environment: ${{ github.ref_name }}
+          environment: ${{ env.BRANCH_NAME }}
           custom-facts: |
             - name: Registry
               value: ${{ env.DOCKER_REGISTRY }}/${{ env.REPO_NAME_WITHOUT_PREFIX }}
@@ -160,4 +169,4 @@ jobs:
               value: ${{ env.DOCKER_IMAGE_TAG }}
           custom-actions: |
             - text: View CI
-              url: "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+              url: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
