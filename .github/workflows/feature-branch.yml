@@ -3,8 +3,9 @@ name: Feature Branch
 on:
   push:
     branches-ignore:
-      - "master"
-      - "develop"
+      - 'release'
+      - 'staging'
+      - 'develop'
 
 jobs:
   test:
