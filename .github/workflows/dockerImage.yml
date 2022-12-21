@@ -120,6 +120,7 @@ jobs:
       - name: Push to GitHub Packages
         uses: docker/build-push-action@v3
         with:
+          context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
