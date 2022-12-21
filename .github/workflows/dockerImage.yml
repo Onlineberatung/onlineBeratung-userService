@@ -102,16 +102,27 @@ jobs:
         if: ${{ env.TYPE == 'tag' }}
         run: echo DOCKER_IMAGE_TAG=$(echo "${{ env.CLEAN_REF }}") >> $GITHUB_ENV
         shell: bash
-      - name: Push to GitHub Packages
-        uses: docker/build-push-action@v1.1.1
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
         with:
+          images: '${{ env.DOCKER_REGISTRY }}/${{ env.REPO_NAME_WITHOUT_PREFIX }}'
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=raw,value=${{ env.DOCKER_IMAGE_TAG}}
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
           username: ${{ secrets.GH_PACKAGE_RELEASE_USER }}
           password: ${{ secrets.GH_PACKAGE_RELEASE_TOKEN }}
-          registry: ${{ env.DOCKER_REGISTRY }}
-          repository: ${{ env.DOCKER_IMAGE }}
-          tags: |
-            ${{ env.DOCKER_IMAGE_TAG}}
-            ${{ (env.BRANCH_NAME == 'develop' || env.BRANCH_NAME == 'staging' || env.BRANCH_NAME == 'release') && env.BRANCH_NAME || '' }}
+      - name: Push to GitHub Packages
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
       - name: Hint about the Docker Image Tag if successfull
         if: ${{ success() }}
         run: |
