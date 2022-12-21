@@ -17,14 +17,13 @@ jobs:
     env:
       FAIL_WEBHOOK_EXISTS: ${{ (secrets.MS_TEAMS_FAIL_WEBHOOK_URI != '') }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
       - name: Prepare environment variables
         run: |
           raw=$(git branch -r --contains ${{ github.ref }})
           branch=${raw/origin\/}
           echo BRANCH_NAME=$(echo -n "${branch}") >> $GITHUB_ENV
-      - name: Checkout
-        uses: actions/checkout@v2
-
       - name: Setup JVM
         uses: actions/setup-java@v1
         with:
@@ -111,7 +110,6 @@ jobs:
           registry: ${{ env.DOCKER_REGISTRY }}
           repository: ${{ env.DOCKER_IMAGE }}
           tags: |
-            latest
             ${{ env.DOCKER_IMAGE_TAG}}
             ${{ (env.BRANCH_NAME == 'develop' || env.BRANCH_NAME == 'staging' || env.BRANCH_NAME == 'release') && env.BRANCH_NAME || '' }}
       - name: Hint about the Docker Image Tag if successfull
