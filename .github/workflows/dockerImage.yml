@@ -22,7 +22,7 @@ jobs:
       - name: Prepare environment variables
         run: |
           raw=$(git branch -r --contains ${{ github.ref }})
-          branch=${raw/origin\/}
+          branch=${raw##*/}
           echo BRANCH_NAME=$(echo -n "${branch}") >> $GITHUB_ENV
       - name: Setup JVM
         uses: actions/setup-java@v1
@@ -85,7 +85,7 @@ jobs:
       - name: Prepare environment variables
         run: |
           raw=$(git branch -r --contains ${{ github.ref }})
-          branch=${raw/origin\/}
+          branch=${raw##*/}
           echo BRANCH_NAME=$(echo -n "${branch}") >> $GITHUB_ENV
           echo "DOCKER_REGISTRY=$(echo "${{ matrix.registry }}/${{ github.repository }}" | awk '{print tolower($0)}')" >> $GITHUB_ENV
           echo "DOCKER_IMAGE=$(echo "${{ github.repository }}" | awk -F / '{print tolower($2)}')" >> $GITHUB_ENV
