@@ -110,7 +110,6 @@ jobs:
           registry: ${{ env.DOCKER_REGISTRY }}
           repository: ${{ env.DOCKER_IMAGE }}
           tags: |
-            latest
             ${{ env.DOCKER_IMAGE_TAG}}
             ${{ (env.BRANCH_NAME == 'develop' || env.BRANCH_NAME == 'staging' || env.BRANCH_NAME == 'release') && env.BRANCH_NAME || '' }}
       - name: Hint about the Docker Image Tag if successfull
