@@ -1,7 +1,8 @@
 package de.caritas.cob.userservice.api.model;
 
-import java.util.UUID;
-import javax.persistence.EntityManagerFactory;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import de.caritas.cob.userservice.api.port.out.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -27,7 +28,7 @@ public class LiquibaseHibernateIT {
   static MariaDBContainer<?> DB =
       new MariaDBContainer<>("mariadb:10.5.10").withDatabaseName("userservice");
 
-  @Autowired EntityManagerFactory entityManagerFactory;
+  @Autowired UserRepository userRepository;
 
   @DynamicPropertySource
   static void registerMySQLProperties(DynamicPropertyRegistry registry) {
@@ -38,11 +39,6 @@ public class LiquibaseHibernateIT {
 
   @Test
   void databaseAndEntityMappingsShouldBeInSync() {
-    var entityManager = entityManagerFactory.createEntityManager();
-    try {
-      entityManager.find(User.class, UUID.randomUUID().toString());
-    } finally {
-      entityManager.close();
-    }
+    assertTrue(userRepository.count() > -1);
   }
 }
