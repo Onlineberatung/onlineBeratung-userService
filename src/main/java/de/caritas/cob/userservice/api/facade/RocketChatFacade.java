@@ -10,6 +10,7 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberD
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLeaveFromGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
@@ -36,7 +37,7 @@ public class RocketChatFacade {
     try {
       addTechnicalUserToGroup(groupId);
       rocketChatService.addUserToGroup(rcUserId, groupId);
-      removeTechnicalUserFromGroup(groupId);
+      leaveFromGroupAsTechnicalUser(groupId);
     } catch (RocketChatAddUserToGroupException addUserEx) {
       var message =
           String.format(
@@ -57,7 +58,7 @@ public class RocketChatFacade {
       addTechnicalUserToGroup(groupId);
       rocketChatService.removeSystemMessages(
           groupId, nowInUtc().minusHours(ONE_DAY_IN_HOURS), nowInUtc());
-      removeTechnicalUserFromGroup(groupId);
+      leaveFromGroupAsTechnicalUser(groupId);
     } catch (RocketChatRemoveSystemMessagesException | RocketChatUserNotInitializedException e) {
       var message =
           String.format("Could not remove system messages from Rocket.Chat group id %s", groupId);
@@ -78,7 +79,7 @@ public class RocketChatFacade {
     try {
       addTechnicalUserToGroup(rcGroupId);
       List<GroupMemberDTO> memberList = rocketChatService.getMembersOfGroup(rcGroupId);
-      removeTechnicalUserFromGroup(rcGroupId);
+      leaveFromGroupAsTechnicalUser(rcGroupId);
       return memberList;
     } catch (RocketChatGetGroupMembersException getGroupMembersEx) {
       var message =
@@ -107,16 +108,16 @@ public class RocketChatFacade {
   }
 
   /**
-   * Removes the technical user from the given Rocket.Chat group id.
+   * Leaves group from the given Rocket.Chat group id as the technical user.
    *
    * @param groupId the rocket chat group id
    */
-  public void removeTechnicalUserFromGroup(String groupId) {
+  public void leaveFromGroupAsTechnicalUser(String groupId) {
     try {
-      rocketChatService.removeTechnicalUserFromGroup(groupId);
-    } catch (RocketChatRemoveUserFromGroupException | RocketChatUserNotInitializedException e) {
+      rocketChatService.leaveFromGroupAsTechnicalUser(groupId);
+    } catch (RocketChatLeaveFromGroupException e) {
       var message =
-          String.format("Could not remove technical user from Rocket.Chat group id %s", groupId);
+          String.format("Could not leave from Rocket.Chat group id %s as technical user", groupId);
       throw new InternalServerErrorException(message, LogService::logInternalServerError);
     }
   }
