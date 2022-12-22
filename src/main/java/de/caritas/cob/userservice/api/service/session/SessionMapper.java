@@ -81,6 +81,7 @@ public class SessionMapper {
       sessionUserDto.setUsername(
           new UsernameTranscoder().decodeUsername(session.getUser().getUsername()));
       sessionUserDto.setSessionData(buildSessionDataMapFromSession(session));
+      sessionUserDto.setDeleted(session.getUser().getDeleteDate() != null);
       return sessionUserDto;
     }
     return null;

@@ -6,15 +6,20 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.google.api.client.util.Sets;
+import com.google.common.collect.Lists;
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.model.Appointment;
 import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.model.Language;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.PositiveOrZero;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -26,6 +31,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -47,6 +53,8 @@ class ConsultantRepositoryIT {
 
   @Autowired private ConsultantRepository underTest;
 
+  @Autowired private ConsultantAgencyRepository consultantAgencyRepository;
+
   @Autowired private AppointmentRepository appointmentRepository;
 
   @BeforeEach
@@ -59,6 +67,7 @@ class ConsultantRepositoryIT {
     underTest.save(originalConsultant);
     consultant = null;
     originalConsultant = null;
+    consultantAgencyRepository.deleteAll();
     matchingIds.forEach(id -> underTest.deleteById(id));
     matchingIds = new ArrayList<>();
     nonMatchingIds.forEach(id -> underTest.deleteById(id));
@@ -246,6 +255,77 @@ class ConsultantRepositoryIT {
   }
 
   @Test
+  void findAllByInfixAndAgencyId_ShouldFindNothing_IfAgencyListIsEmpty() {
+    var infix = RandomStringUtils.randomAlphanumeric(16);
+    var pageSize = easyRandom.nextInt(100) + 1;
+    givenConsultantsMatchingEmail(pageSize + 1, infix);
+
+    var pageRequest = PageRequest.of(0, pageSize);
+    var consultantPage =
+        underTest.findAllByInfixAndAgencyIds(infix, Lists.newArrayList(), pageRequest);
+
+    assertEquals(0, consultantPage.getNumberOfElements());
+  }
+
+  @Test
+  void
+      findAllByInfixAndAgencyId_ShouldFindOnlyMatchingConsultants_IfAgencyListIsMatchesConsultantAgencies() {
+    var infix = RandomStringUtils.randomAlphanumeric(16);
+    var pageSize = easyRandom.nextInt(100) + 1;
+    givenConsultantsMatchingEmailAndAgencyId(
+        pageSize + 1, Lists.newArrayList(1L, 2L, 5L, 7L), infix);
+
+    var pageRequest = PageRequest.of(0, pageSize);
+    var consultantPage =
+        underTest.findAllByInfixAndAgencyIds(
+            infix, Lists.newArrayList(1L, 2L, 5L, 7L), pageRequest);
+
+    assertEquals(pageSize, consultantPage.getNumberOfElements());
+    assertEquals(2, consultantPage.getTotalPages());
+    assertEquals(pageSize + 1, consultantPage.getTotalElements());
+    assertEquals(pageSize + 1, matchingIds.size());
+    consultantPage.forEach(consultant -> assertTrue(matchingIds.contains(consultant.getId())));
+  }
+
+  @Test
+  void
+      findAllByInfixAndAgencyId_ShouldFindOnlyMatchingConsultants_IfAgencyListsIsMoreLimitingThanAvailableConsultantAgencies() {
+    // given
+    var infix = RandomStringUtils.randomAlphanumeric(16);
+    var pageSize = easyRandom.nextInt(100) + 1;
+    givenConsultantsMatchingEmailAndAgencyId(
+        pageSize + 1, Lists.newArrayList(1L, 2L, 5L, 7L), infix);
+    var pageRequest = PageRequest.of(0, pageSize);
+    ArrayList<Long> filteredAgencyIds = Lists.newArrayList(1L, 2L);
+
+    // when
+    var consultantPage =
+        underTest.findAllByInfixAndAgencyIds(infix, filteredAgencyIds, pageRequest);
+
+    // then
+    assertTrue(pageSize >= consultantPage.getNumberOfElements());
+    assertAllConsultantsContainFilteredAgencies(consultantPage, filteredAgencyIds);
+  }
+
+  private void assertAllConsultantsContainFilteredAgencies(
+      Page<Consultant.ConsultantBase> consultantPage, ArrayList<Long> filteredAgencyIds) {
+    consultantPage.forEach(
+        consultant -> {
+          var consultantAgency = consultantAgencyRepository.findByConsultantId(consultant.getId());
+          List<Long> agencyIds =
+              consultantAgency.stream()
+                  .map(ConsultantAgency::getAgencyId)
+                  .collect(Collectors.toList());
+          Set<Long> intersection =
+              agencyIds.stream()
+                  .distinct()
+                  .filter(filteredAgencyIds::contains)
+                  .collect(Collectors.toSet());
+          assertFalse(intersection.isEmpty());
+        });
+  }
+
+  @Test
   void findAllByInfixShouldBeSortedByLastNameDescIfSortGiven() {
     var infix = RandomStringUtils.randomAlphanumeric(16);
     var pageSize = easyRandom.nextInt(100) + 1;
@@ -328,6 +408,40 @@ class ConsultantRepositoryIT {
     assertEquals(allMatching, consultantPage.getTotalElements());
   }
 
+  @Test
+  void findAllByAgencyIdsShouldFindChatIds() {
+    var agencyId1 = givenANewAgencyId();
+    givenConsultantsWithAgencyId(2, agencyId1);
+    var agencyId2 = givenANewAgencyId();
+    givenConsultantsWithAgencyId(3, agencyId2);
+    var agencyId3 = givenANewAgencyId();
+    givenConsultantsWithAgencyId(4, agencyId3);
+    var agencyIds = Set.of(agencyId1, agencyId2);
+
+    var cChatIds = underTest.findAllByAgencyIds(agencyIds);
+
+    var cAgencies = consultantAgencyRepository.findByAgencyIdInAndDeleteDateIsNull(agencyIds);
+    assertEquals(cAgencies.size(), cChatIds.size());
+    cAgencies.forEach(
+        cAgency -> assertTrue(cChatIds.contains(cAgency.getConsultant().getRocketChatId())));
+  }
+
+  @Test
+  void findAllByAgencyIdsShouldIgnoreConsultantAgenciesMarkedForDeletion() {
+    var agencyId1 = givenANewAgencyId();
+    givenConsultantsWithAgencyId(2, agencyId1);
+    var cAgencies = consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(agencyId1);
+    cAgencies.forEach(
+        cAgency -> {
+          cAgency.setDeleteDate(LocalDateTime.now());
+          consultantAgencyRepository.save(cAgency);
+        });
+
+    var consultantChatIds = underTest.findAllByAgencyIds(Set.of(agencyId1));
+
+    assertEquals(0, consultantChatIds.size());
+  }
+
   private void givenConsultantsMatchingFirstName(
       @PositiveOrZero int count, @NotBlank String infix) {
     while (count-- > 0) {
@@ -365,19 +479,60 @@ class ConsultantRepositoryIT {
 
   private void givenConsultantsMatchingEmail(@PositiveOrZero int count, @NotBlank String infix) {
     while (count-- > 0) {
-      var dbConsultant = underTest.findAll().iterator().next();
-      var consultant = new Consultant();
-      BeanUtils.copyProperties(dbConsultant, consultant);
-      consultant.setId(UUID.randomUUID().toString());
-      consultant.setUsername(RandomStringUtils.randomAlphabetic(8));
-      consultant.setRocketChatId(RandomStringUtils.randomAlphabetic(8));
-      consultant.setFirstName(aStringWithoutInfix(infix));
-      consultant.setLastName(aStringWithoutInfix(infix));
-      consultant.setEmail(aValidEmailWithInfix(infix));
-
+      Consultant consultant = givenConsultantMatchingEmail(infix);
       underTest.save(consultant);
       matchingIds.add(consultant.getId());
     }
+  }
+
+  private void givenConsultantsWithAgencyId(@PositiveOrZero int count, long agencyId) {
+    givenConsultantsMatchingEmailAndAgencyId(
+        count, List.of(agencyId), RandomStringUtils.randomAlphanumeric(8));
+  }
+
+  private void givenConsultantsMatchingEmailAndAgencyId(
+      @PositiveOrZero int count, List<Long> agencyIds, @NotBlank String infix) {
+    while (count-- > 0) {
+      Consultant consultant = givenConsultantMatchingEmail(infix);
+      Consultant savedConsultant = underTest.save(consultant);
+      var agencyIdsCopy = Lists.newArrayList(agencyIds);
+      Long agencyId = pickRandomAndRemove(agencyIdsCopy);
+      saveConsultantAgency(savedConsultant, agencyId);
+      savedConsultant = underTest.save(consultant);
+      matchingIds.add(savedConsultant.getId());
+    }
+  }
+
+  private void saveConsultantAgency(Consultant savedConsultant, Long agencyId) {
+    var consultantAgency = new ConsultantAgency();
+    consultantAgency.setAgencyId(agencyId);
+    consultantAgency.setConsultant(savedConsultant);
+
+    ConsultantAgency saved = consultantAgencyRepository.save(consultantAgency);
+    if (savedConsultant.getConsultantAgencies() == null) {
+      savedConsultant.setConsultantAgencies(Sets.newHashSet());
+    }
+    savedConsultant.getConsultantAgencies().add(saved);
+  }
+
+  private static Long pickRandomAndRemove(List<Long> agencyIds) {
+    int index = easyRandom.nextInt(agencyIds.size());
+    Long agencyId = agencyIds.get(index);
+    agencyIds.remove(agencyId);
+    return agencyId;
+  }
+
+  private Consultant givenConsultantMatchingEmail(String infix) {
+    var dbConsultant = underTest.findAll().iterator().next();
+    var consultant = new Consultant();
+    BeanUtils.copyProperties(dbConsultant, consultant);
+    consultant.setId(UUID.randomUUID().toString());
+    consultant.setUsername(RandomStringUtils.randomAlphabetic(8));
+    consultant.setRocketChatId(RandomStringUtils.randomAlphabetic(8));
+    consultant.setFirstName(aStringWithoutInfix(infix));
+    consultant.setLastName(aStringWithoutInfix(infix));
+    consultant.setEmail(aValidEmailWithInfix(infix));
+    return consultant;
   }
 
   private void givenConsultantsNotMatching(@PositiveOrZero int count, @NotBlank String infix) {
@@ -459,6 +614,10 @@ class ConsultantRepositoryIT {
 
   private String aStringWithInfix(String infix) {
     return RandomStringUtils.randomAlphabetic(4) + infix + RandomStringUtils.randomAlphabetic(4);
+  }
+
+  private static long givenANewAgencyId() {
+    return (long) 10000 + easyRandom.nextInt(1000);
   }
 
   private void givenAnExistingConsultantSpeaking(LanguageCode... languageCodes) {

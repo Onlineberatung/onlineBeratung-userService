@@ -1,20 +1,6 @@
 package de.caritas.cob.userservice.api.config.auth;
 
-import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.ANONYMOUS_DEFAULT;
-import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY;
-import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION;
-import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.CONSULTANT_DEFAULT;
-import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.CREATE_NEW_CHAT;
-import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.SINGLE_TENANT_ADMIN;
-import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.START_CHAT;
-import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.STOP_CHAT;
-import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.TECHNICAL_DEFAULT;
-import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.TENANT_ADMIN;
-import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.UPDATE_CHAT;
-import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.USER_ADMIN;
-import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.USER_DEFAULT;
-import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.USE_FEEDBACK;
-import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.VIEW_AGENCY_CONSULTANTS;
+import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.*;
 
 import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.HttpTenantFilter;
 import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.StatelessCsrfFilter;
@@ -103,9 +89,16 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
             "/users/consultants/{consultantId:" + UUID_PATTERN + "}",
             "/users/consultants/languages")
         .permitAll()
+        .antMatchers(HttpMethod.GET, "/conversations/anonymous/{sessionId:[0-9]+}")
+        .hasAnyAuthority(ANONYMOUS_DEFAULT)
         .antMatchers("/users/data")
         .hasAnyAuthority(
-            ANONYMOUS_DEFAULT, USER_DEFAULT, CONSULTANT_DEFAULT, SINGLE_TENANT_ADMIN, TENANT_ADMIN)
+            ANONYMOUS_DEFAULT,
+            USER_DEFAULT,
+            CONSULTANT_DEFAULT,
+            SINGLE_TENANT_ADMIN,
+            TENANT_ADMIN,
+            RESTRICTED_AGENCY_ADMIN)
         .antMatchers(HttpMethod.GET, APPOINTMENTS_APPOINTMENT_ID + UUID_PATTERN + "}")
         .permitAll()
         .antMatchers("/users/sessions/askers")
@@ -199,6 +192,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT)
         .antMatchers("/userstatistics", "/userstatistics/**")
         .permitAll()
+        .antMatchers(HttpMethod.DELETE, "/useradmin/consultants/{consultantId:[0-9]+}/delete")
+        .hasAuthority(USER_ADMIN)
         .anyRequest()
         .denyAll();
   }

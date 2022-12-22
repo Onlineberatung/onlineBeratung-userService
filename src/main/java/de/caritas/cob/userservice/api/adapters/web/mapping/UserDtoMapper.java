@@ -85,12 +85,19 @@ public class UserDtoMapper {
     return Optional.empty();
   }
 
+  public Optional<Boolean> availableOf(PatchUserDTO patchUserDTO) {
+    return Optional.ofNullable(patchUserDTO.getAvailable());
+  }
+
   public Optional<Map<String, Object>> mapOf(PatchUserDTO patchUserDTO, AuthenticatedUser user) {
     if (isNull(patchUserDTO.getEncourage2fa())
         && isNull(patchUserDTO.getDisplayName())
         && isNull(patchUserDTO.getWalkThroughEnabled())
         && isNull(patchUserDTO.getEmailToggles())
-        && isNull(patchUserDTO.getPreferredLanguage())) {
+        && isNull(patchUserDTO.getPreferredLanguage())
+        && isNull(patchUserDTO.getDataPrivacyConfirmation())
+        && isNull(patchUserDTO.getTermsAndConditionsConfirmation())
+        && isNull(patchUserDTO.getAvailable())) {
       return Optional.empty();
     }
 
@@ -115,7 +122,15 @@ public class UserDtoMapper {
               .collect(Collectors.toMap(this::mapEmailType, EmailToggle::getState));
       map.putAll(emailToggleMap);
     }
-
+    if (nonNull(patchUserDTO.getTermsAndConditionsConfirmation())) {
+      map.put("termsAndConditionsConfirmation", patchUserDTO.getTermsAndConditionsConfirmation());
+    }
+    if (nonNull(patchUserDTO.getDataPrivacyConfirmation())) {
+      map.put("dataPrivacyConfirmation", patchUserDTO.getDataPrivacyConfirmation());
+    }
+    if (nonNull(patchUserDTO.getAvailable())) {
+      map.put("available", patchUserDTO.getAvailable());
+    }
     return Optional.of(map);
   }
 

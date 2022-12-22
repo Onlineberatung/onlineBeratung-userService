@@ -7,13 +7,16 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
+import com.google.common.collect.Lists;
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
 import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
 import de.caritas.cob.userservice.api.adapters.web.dto.AbsenceDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyAdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ChatDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ChatInfoResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ChatMembersResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionDTO;
@@ -46,6 +49,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.mapping.ConsultantDtoMapper;
 import de.caritas.cob.userservice.api.adapters.web.mapping.UserDtoMapper;
+import de.caritas.cob.userservice.api.admin.facade.AdminAgencyFacade;
 import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
@@ -102,9 +106,11 @@ import de.caritas.cob.userservice.generated.api.adapters.web.controller.UsersApi
 import io.swagger.annotations.Api;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.InternalServerErrorException;
@@ -167,6 +173,8 @@ public class UserController implements UsersApi {
   private final @NonNull VideoChatConfig videoChatConfig;
   private final @NonNull KeycloakUserDataProvider keycloakUserDataProvider;
   private final @NotNull UsersStatisticsFacade usersStatisticsFacade;
+
+  private final @NotNull AdminAgencyFacade adminAgencyFacade;
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
@@ -463,6 +471,7 @@ public class UserController implements UsersApi {
           .ifPresent(
               consultantMap ->
                   partialUserData.setDisplayName(userDtoMapper.displayNameOf(consultantMap)));
+      partialUserData.setAvailable(messenger.getAvailability(authenticatedUser.getUserId()));
     } else if (isTenantAdmin()) {
       partialUserData = keycloakUserDataProvider.retrieveAuthenticatedUserData();
     } else {
@@ -490,17 +499,21 @@ public class UserController implements UsersApi {
 
   @Override
   public ResponseEntity<Void> patchUser(PatchUserDTO patchUserDTO) {
+    var userId = authenticatedUser.getUserId();
     var patchMap =
         userDtoMapper
             .mapOf(patchUserDTO, authenticatedUser)
             .orElseThrow(
-                () ->
-                    new BadRequestException("Invalid payload: at least one property must be set"));
+                () -> new BadRequestException("Invalid payload: at least one property expected"));
 
     accountManager.patchUser(patchMap).orElseThrow();
     userDtoMapper
         .preferredLanguageOf(patchUserDTO)
-        .ifPresent(lang -> identityManager.changeLanguage(authenticatedUser.getUserId(), lang));
+        .ifPresent(lang -> identityManager.changeLanguage(userId, lang));
+    userDtoMapper
+        .availableOf(patchUserDTO)
+        .filter(available -> authenticatedUser.isConsultant())
+        .ifPresent(available -> messenger.setAvailability(userId, available));
 
     return ResponseEntity.noContent().build();
   }
@@ -805,14 +818,47 @@ public class UserController implements UsersApi {
     var decodedInfix = URLDecoder.decode(query, StandardCharsets.UTF_8).trim();
     var isAscending = order.equalsIgnoreCase("asc");
     var mappedField = consultantDtoMapper.mappedFieldOf(field);
-
     var resultMap =
         accountManager.findConsultantsByInfix(
-            decodedInfix, page - 1, perPage, mappedField, isAscending);
+            decodedInfix,
+            authenticatedUser.hasRestrictedAgencyPriviliges(),
+            getAgenciesToFilterConsultants(),
+            page - 1,
+            perPage,
+            mappedField,
+            isAscending);
+
     var result =
         consultantDtoMapper.consultantSearchResultOf(resultMap, query, page, perPage, field, order);
 
+    if (authenticatedUser.hasRestrictedAgencyPriviliges() && result.getEmbedded() != null) {
+      result
+          .getEmbedded()
+          .forEach(
+              response ->
+                  removeAgenciesWithoutAccessRight(response, getAgenciesToFilterConsultants()));
+    }
+
     return ResponseEntity.ok(result);
+  }
+
+  private void removeAgenciesWithoutAccessRight(
+      ConsultantAdminResponseDTO response, Collection<Long> agenciesToFilterConsultants) {
+    List<AgencyAdminResponseDTO> agencies = response.getEmbedded().getAgencies();
+    List<AgencyAdminResponseDTO> filteredAgencies =
+        agencies.stream()
+            .filter(agency -> agenciesToFilterConsultants.contains(agency.getId()))
+            .collect(Collectors.toList());
+    response.getEmbedded().setAgencies(filteredAgencies);
+  }
+
+  private Collection<Long> getAgenciesToFilterConsultants() {
+    Collection<Long> agenciesToFilterConsultants = Lists.newArrayList();
+    if (authenticatedUser.hasRestrictedAgencyPriviliges()) {
+      agenciesToFilterConsultants =
+          adminAgencyFacade.findAdminUserAgencyIds(authenticatedUser.getUserId());
+    }
+    return agenciesToFilterConsultants;
   }
 
   /**

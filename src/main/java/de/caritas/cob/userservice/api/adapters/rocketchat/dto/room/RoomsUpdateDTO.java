@@ -31,7 +31,7 @@ public class RoomsUpdateDTO {
   private boolean readOnly;
 
   @JsonProperty("sysMes")
-  private boolean systemMessages;
+  private Object systemMessages;
 
   @JsonProperty("_updatedAt")
   private Date updatedAt;

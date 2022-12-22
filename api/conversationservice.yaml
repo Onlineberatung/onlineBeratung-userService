@@ -184,7 +184,7 @@ paths:
     post:
       tags:
         - conversation-controller
-      summary: 'Creates an anonymous conversation enquiry. [Authorization: none]'
+      summary: 'Creates an anonymous conversation enquiry. [Authorization: all]'
       operationId: createAnonymousEnquiry
       requestBody:
         content:
@@ -269,6 +269,37 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /conversations/anonymous/{sessionId}:
+    get:
+      tags:
+        - conversation-controller
+      summary: 'Process details like number of available consultants [Auth: anonymous]'
+      operationId: getAnonymousEnquiryDetails
+      parameters:
+        - name: sessionId
+          in: path
+          description: Session Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK - successful operation
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/AnonymousEnquiry'
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid CSRF token
+        404:
+          description: NOT FOUND - session unknown
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
 
 components:
   schemas:
@@ -331,6 +362,21 @@ components:
           type: string
           example: 7shdJkasdj3(...)
           description: The Rocket.Chat group ID for this anonymous conversation
+
+    AnonymousEnquiry:
+      type: object
+      properties:
+        numAvailableConsultants:
+          type: integer
+          minimum: 0
+        status:
+          type: string
+          enum:
+            - INITIAL
+            - NEW
+            - IN_PROGRESS
+            - DONE
+            - IN_ARCHIVE
 
   securitySchemes:
     Bearer:

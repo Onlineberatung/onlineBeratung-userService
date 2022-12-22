@@ -5,13 +5,19 @@ import static de.caritas.cob.userservice.api.conversation.model.ConversationList
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.ARCHIVED_TEAM_SESSION;
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.REGISTERED_ENQUIRY;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.AnonymousEnquiry;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAnonymousEnquiryDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAnonymousEnquiryResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.mapping.ConversationDtoMapper;
 import de.caritas.cob.userservice.api.conversation.facade.AcceptAnonymousEnquiryFacade;
 import de.caritas.cob.userservice.api.conversation.facade.CreateAnonymousEnquiryFacade;
 import de.caritas.cob.userservice.api.conversation.facade.FinishAnonymousConversationFacade;
 import de.caritas.cob.userservice.api.conversation.service.ConversationListResolver;
+import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
+import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
+import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
+import de.caritas.cob.userservice.api.port.in.Messaging;
 import de.caritas.cob.userservice.generated.api.conversation.controller.ConversationsApi;
 import io.swagger.annotations.Api;
 import javax.validation.Valid;
@@ -33,6 +39,9 @@ public class ConversationController implements ConversationsApi {
   private final @NonNull CreateAnonymousEnquiryFacade createAnonymousEnquiryFacade;
   private final @NonNull AcceptAnonymousEnquiryFacade acceptAnonymousEnquiryFacade;
   private final @NonNull FinishAnonymousConversationFacade finishAnonymousConversationFacade;
+  private final ConversationDtoMapper mapper;
+  private final Messaging messenger;
+  private final AuthenticatedUser authenticatedUser;
 
   /**
    * Entry point to retrieve all anonymous enquiries for current authenticated consultant.
@@ -133,6 +142,25 @@ public class ConversationController implements ConversationsApi {
         createAnonymousEnquiryFacade.createAnonymousEnquiry(createAnonymousEnquiryDTO);
 
     return new ResponseEntity<>(createAnonymousEnquiryResponseDTO, HttpStatus.CREATED);
+  }
+
+  @Override
+  public ResponseEntity<AnonymousEnquiry> getAnonymousEnquiryDetails(Long sessionId) {
+    var sessionMap =
+        messenger
+            .findSession(sessionId)
+            .orElseThrow(() -> new NotFoundException("Session (%s) not found", sessionId));
+
+    if (!mapper.adviceSeekerIdOf(sessionMap).equals(authenticatedUser.getUserId())) {
+      throw new ForbiddenException(
+          "Access to session (%s) is limited to its advice seeker.", sessionId);
+    }
+
+    var consultingTypeId = mapper.consultingTypeIdOf(sessionMap);
+    var consultants = messenger.findAvailableConsultants(consultingTypeId);
+    var anonymousEnquiry = mapper.anonymousEnquiryOf(sessionMap, consultants);
+
+    return ResponseEntity.ok(anonymousEnquiry);
   }
 
   /**
