@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupUpdateKeyDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.PresenceDTO.PresenceStatus;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.PresenceListDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.PresenceOtherDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.Message;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.MethodCall;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.MethodMessageWithParamList;
@@ -24,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -179,5 +182,12 @@ public class RocketChatMapper {
     map.put("encrypted", roomSettings.isEncrypted());
 
     return map;
+  }
+
+  public Set<String> mapAvailableOf(PresenceListDTO presenceList) {
+    return presenceList.getUsers().stream()
+        .filter(PresenceOtherDTO::isAvailable)
+        .map(PresenceOtherDTO::getId)
+        .collect(Collectors.toSet());
   }
 }

@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.port.in;
 import de.caritas.cob.userservice.api.model.Chat;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public interface Messaging {
 
@@ -20,7 +21,7 @@ public interface Messaging {
 
   boolean removeUserFromSession(String chatUserId, String chatId);
 
-  Optional<Map<String, String>> findSession(Long sessionId);
+  Optional<Map<String, Object>> findSession(Long sessionId);
 
   boolean isInChat(String chatId, String chatUserId);
 
@@ -29,4 +30,6 @@ public interface Messaging {
   void setAvailability(String consultantId, boolean available);
 
   boolean getAvailability(String consultantId);
+
+  Set<String> findAvailableConsultants(int consultingTypeId);
 }
