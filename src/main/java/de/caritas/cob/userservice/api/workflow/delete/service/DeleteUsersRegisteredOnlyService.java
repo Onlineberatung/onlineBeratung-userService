@@ -1,7 +1,5 @@
 package de.caritas.cob.userservice.api.workflow.delete.service;
 
-import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
-import static de.caritas.cob.userservice.api.workflow.delete.model.DeletionSourceType.ASKER;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
@@ -9,22 +7,22 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetUserIdEx
 import de.caritas.cob.userservice.api.helper.CustomLocalDateTime;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
-import de.caritas.cob.userservice.api.workflow.delete.model.DeletionTargetType;
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /** Service to trigger deletion of askers with no running sessions. */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class DeleteUsersRegisteredOnlyService {
 
   private final @NonNull UserRepository userRepository;
@@ -68,14 +66,7 @@ public class DeleteUsersRegisteredOnlyService {
     try {
       user.setRcUserId(rocketChatService.getRocketChatUserIdByUsername(user.getUsername()));
     } catch (RocketChatGetUserIdException ex) {
-      return Collections.singletonList(
-          DeletionWorkflowError.builder()
-              .deletionSourceType(ASKER)
-              .deletionTargetType(DeletionTargetType.ALL)
-              .identifier(user.getUserId() + "/" + user.getUsername())
-              .reason(ex.getMessage())
-              .timestamp(nowInUtc())
-              .build());
+      log.warn("User with id {} not found in Rocket.chat", user.getUserId(), ex);
     }
 
     return deleteUserAccountService.performUserDeletion(user);

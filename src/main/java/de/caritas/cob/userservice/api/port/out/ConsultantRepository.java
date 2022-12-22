@@ -5,6 +5,7 @@ import de.caritas.cob.userservice.api.model.Consultant.ConsultantBase;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -60,4 +61,13 @@ public interface ConsultantRepository extends CrudRepository<Consultant, String>
       String infix, Collection<Long> agencyIds, Pageable pageable);
 
   long countByDeleteDateIsNull();
+
+  @Query(
+      value =
+          "SELECT DISTINCT c.rocketChatId "
+              + "FROM Consultant c "
+              + "INNER JOIN ConsultantAgency ca ON c.id = ca.consultant.id "
+              + "WHERE ca.agencyId IN (?1) "
+              + "AND ca.deleteDate IS NULL")
+  Set<String> findAllByAgencyIds(Set<Long> agencyIds);
 }
