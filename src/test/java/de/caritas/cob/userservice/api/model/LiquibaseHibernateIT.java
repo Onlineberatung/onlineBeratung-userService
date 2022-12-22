@@ -21,7 +21,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
       "identity.technical-user.username=tech-user",
       "identity.technical-user.password=tech-pass"
     })
-public class LiquibaseHibernateTest {
+public class LiquibaseHibernateIT {
   @Container
   @SuppressWarnings("resource")
   static MariaDBContainer<?> DB =
