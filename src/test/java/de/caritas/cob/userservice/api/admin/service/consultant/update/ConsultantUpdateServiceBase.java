@@ -12,6 +12,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
+import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
@@ -33,6 +34,7 @@ public class ConsultantUpdateServiceBase {
     updateConsultantDTO.setLastname("new last name");
     updateConsultantDTO.setEmail("newemail@address.de");
     updateConsultantDTO.formalLanguage(true);
+    updateConsultantDTO.setDataPrivacyConfirmation(true);
 
     Consultant updatedConsultant =
         this.consultantUpdateService.updateConsultant(getValidConsultantId(), updateConsultantDTO);
@@ -44,6 +46,9 @@ public class ConsultantUpdateServiceBase {
     assertThat(updatedConsultant.getLastName(), is("new last name"));
     assertThat(updatedConsultant.getEmail(), is("newemail@address.de"));
     assertThat(updatedConsultant.isLanguageFormal(), is(true));
+    assertThat(
+        updatedConsultant.getDataPrivacyConfirmation().getDayOfMonth(),
+        is(LocalDateTime.now().getDayOfMonth()));
   }
 
   public void updateConsultant_Should_throwCustomResponseException_When_absenceIsInvalid() {
