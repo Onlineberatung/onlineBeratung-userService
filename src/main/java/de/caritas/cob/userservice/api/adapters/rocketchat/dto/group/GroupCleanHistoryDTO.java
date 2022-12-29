@@ -4,10 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * Body object for Rocket.Chat API Call for cleaning up a room (remove specific messages)
- * https://rocket.chat/docs/developer-guides/rest-api/rooms/cleanhistory/
- */
+// Body object for Rocket.Chat API Call for cleaning up a room (remove specific messages)
 @Setter
 @Getter
 @AllArgsConstructor
