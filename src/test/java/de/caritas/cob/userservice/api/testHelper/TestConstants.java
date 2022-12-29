@@ -468,7 +468,9 @@ public class TestConstants {
           null,
           ConsultantStatus.CREATED,
           false,
-          LanguageCode.de);
+          LanguageCode.de,
+          null,
+          null);
   public static final Consultant CONSULTANT_2 =
       new Consultant(
           CONSULTANT_ID_2,
@@ -497,7 +499,9 @@ public class TestConstants {
           null,
           ConsultantStatus.CREATED,
           false,
-          LanguageCode.de);
+          LanguageCode.de,
+          null,
+          null);
   public static final Consultant MAIN_CONSULTANT =
       new Consultant(
           MAIN_CONSULTANT_ID,
@@ -526,7 +530,9 @@ public class TestConstants {
           null,
           ConsultantStatus.CREATED,
           false,
-          LanguageCode.de);
+          LanguageCode.de,
+          null,
+          null);
   public static final SessionConsultantForUserDTO CONSULTANT_DTO =
       new SessionConsultantForUserDTO();
   public static final GroupSessionConsultantDTO GROUP_SESSION_CONSULTANT_DTO =
@@ -746,7 +752,9 @@ public class TestConstants {
           null,
           ConsultantStatus.CREATED,
           false,
-          LanguageCode.de);
+          LanguageCode.de,
+          null,
+          null);
   public static final Consultant CONSULTANT_WITH_AGENCY_2 =
       new Consultant(
           CONSULTANT_ID_2,
@@ -775,7 +783,9 @@ public class TestConstants {
           null,
           ConsultantStatus.CREATED,
           false,
-          LanguageCode.de);
+          LanguageCode.de,
+          null,
+          null);
   /** UserAgency */
   public static final UserAgency USER_AGENCY = new UserAgency(USER, AGENCY_ID);
 

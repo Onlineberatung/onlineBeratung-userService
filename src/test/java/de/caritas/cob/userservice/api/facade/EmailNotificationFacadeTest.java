@@ -124,7 +124,9 @@ public class EmailNotificationFacadeTest {
           null,
           ConsultantStatus.CREATED,
           false,
-          LanguageCode.de);
+          LanguageCode.de,
+          null,
+          null);
   private final Consultant CONSULTANT_WITHOUT_MAIL =
       new Consultant(
           CONSULTANT_ID,
@@ -153,7 +155,9 @@ public class EmailNotificationFacadeTest {
           null,
           ConsultantStatus.CREATED,
           false,
-          LanguageCode.de);
+          LanguageCode.de,
+          null,
+          null);
   private final Consultant CONSULTANT2 =
       new Consultant(
           CONSULTANT_ID_2,
@@ -182,7 +186,9 @@ public class EmailNotificationFacadeTest {
           null,
           ConsultantStatus.CREATED,
           false,
-          LanguageCode.de);
+          LanguageCode.de,
+          null,
+          null);
   private final Consultant CONSULTANT3 =
       new Consultant(
           CONSULTANT_ID_3,
@@ -211,7 +217,9 @@ public class EmailNotificationFacadeTest {
           null,
           ConsultantStatus.CREATED,
           false,
-          LanguageCode.de);
+          LanguageCode.de,
+          null,
+          null);
   private final Consultant CONSULTANT_NO_EMAIL =
       new Consultant(
           CONSULTANT_ID,
@@ -240,7 +248,9 @@ public class EmailNotificationFacadeTest {
           null,
           ConsultantStatus.CREATED,
           false,
-          LanguageCode.de);
+          LanguageCode.de,
+          null,
+          null);
   private final Consultant ABSENT_CONSULTANT =
       new Consultant(
           "XXX",
@@ -269,7 +279,9 @@ public class EmailNotificationFacadeTest {
           null,
           ConsultantStatus.CREATED,
           false,
-          LanguageCode.de);
+          LanguageCode.de,
+          null,
+          null);
   private final User USER = new User(USER_ID, null, USERNAME_ENCODED, "email@email.de", false);
   private final User USER_NO_EMAIL = new User(USER_ID, null, "username", "", false);
   private final ConsultantAgency CONSULTANT_AGENCY =
