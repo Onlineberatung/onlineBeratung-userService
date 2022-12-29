@@ -297,7 +297,9 @@ public class UserControllerIT {
           null,
           ConsultantStatus.CREATED,
           false,
-          LanguageCode.de);
+          LanguageCode.de,
+          null,
+          null);
   private final Set<String> ROLES_WITH_USER =
       new HashSet<>(Arrays.asList("dummyRoleA", UserRole.USER.getValue(), "dummyRoleB"));
   private final SessionDTO SESSION_DTO =

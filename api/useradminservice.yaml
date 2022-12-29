@@ -1022,6 +1022,15 @@ components:
             type: string
             description: each an ISO 639-1 code
             example: de, en
+        termsAndConditionsConfirmation:
+          type: boolean
+          example: true
+          description: Flag that indicates has the user accepted new terms and conditions text
+        dataPrivacyConfirmation:
+          type: boolean
+          example: true
+          description: Flag that indicates does the user accepted new data privacy text
+
 
     ConsultantDTO:
       type: object
