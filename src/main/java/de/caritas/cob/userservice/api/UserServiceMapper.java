@@ -355,6 +355,14 @@ public class UserServiceMapper {
       var notify = (Boolean) patchMap.get("notifyNewFeedbackMessageFromAdviceSeeker");
       consultant.setNotifyNewFeedbackMessageFromAdviceSeeker(notify);
     }
+    if (patchMap.containsKey("termsAndConditionsConfirmation")
+        && (Boolean) patchMap.get("termsAndConditionsConfirmation")) {
+      consultant.setTermsAndConditionsConfirmation(LocalDateTime.now());
+    }
+    if (patchMap.containsKey("dataPrivacyConfirmation")
+        && (Boolean) patchMap.get("dataPrivacyConfirmation")) {
+      consultant.setDataPrivacyConfirmation(LocalDateTime.now());
+    }
 
     return consultant;
   }

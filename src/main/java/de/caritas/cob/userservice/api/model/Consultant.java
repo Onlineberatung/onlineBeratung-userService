@@ -194,6 +194,12 @@ public class Consultant implements TenantAware {
   @Column(length = 2, nullable = false, columnDefinition = "varchar(2) default 'de'")
   private LanguageCode languageCode;
 
+  @Column(name = "terms_and_conditions_confirmation", columnDefinition = "datetime")
+  private LocalDateTime termsAndConditionsConfirmation;
+
+  @Column(name = "data_privacy_confirmation", columnDefinition = "datetime")
+  private LocalDateTime dataPrivacyConfirmation;
+
   @JsonIgnore
   public String getFullName() {
     return (this.firstName + " " + this.lastName).trim();
