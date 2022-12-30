@@ -913,12 +913,12 @@ class UserControllerSessionE2EIT {
     verifyRocketChatTechUserAddedToGroup(logOutput, session.getGroupId(), 0);
     verifyRocketChatUserRemovedFromGroup(
         logOutput, session.getGroupId(), session.getConsultant().getRocketChatId(), 0);
-    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getGroupId(), 0);
+    verifyRocketChatTechUserLeftGroup(logOutput, session.getGroupId(), 0);
 
     verifyRocketChatTechUserAddedToGroup(logOutput, session.getFeedbackGroupId(), 0);
     verifyRocketChatUserRemovedFromGroup(
         logOutput, session.getFeedbackGroupId(), consultant.getRocketChatId(), 0);
-    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(), 0);
+    verifyRocketChatTechUserLeftGroup(logOutput, session.getFeedbackGroupId(), 0);
   }
 
   @Test
@@ -947,12 +947,12 @@ class UserControllerSessionE2EIT {
     verifyRocketChatTechUserAddedToGroup(logOutput, session.getGroupId(), 0);
     verifyRocketChatUserRemovedFromGroup(
         logOutput, session.getGroupId(), session.getConsultant().getRocketChatId(), 0);
-    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getGroupId(), 0);
+    verifyRocketChatTechUserLeftGroup(logOutput, session.getGroupId(), 0);
 
     verifyRocketChatTechUserAddedToGroup(logOutput, session.getFeedbackGroupId(), 0);
     verifyRocketChatUserRemovedFromGroup(
         logOutput, session.getFeedbackGroupId(), consultant.getRocketChatId(), 0);
-    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(), 0);
+    verifyRocketChatTechUserLeftGroup(logOutput, session.getFeedbackGroupId(), 0);
   }
 
   @Test
@@ -981,12 +981,12 @@ class UserControllerSessionE2EIT {
     verifyRocketChatTechUserAddedToGroup(logOutput, session.getGroupId(), 1);
     verifyRocketChatUserRemovedFromGroup(
         logOutput, session.getGroupId(), consultant.getRocketChatId(), 1);
-    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getGroupId(), 1);
+    verifyRocketChatTechUserLeftGroup(logOutput, session.getGroupId(), 1);
 
     verifyRocketChatTechUserAddedToGroup(logOutput, session.getFeedbackGroupId(), 0);
     verifyRocketChatUserRemovedFromGroup(
         logOutput, session.getFeedbackGroupId(), consultant.getRocketChatId(), 0);
-    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(), 0);
+    verifyRocketChatTechUserLeftGroup(logOutput, session.getFeedbackGroupId(), 0);
   }
 
   @Test
@@ -1016,12 +1016,12 @@ class UserControllerSessionE2EIT {
     verifyRocketChatTechUserAddedToGroup(logOutput, session.getGroupId(), 1);
     verifyRocketChatUserRemovedFromGroup(
         logOutput, session.getGroupId(), consultant.getRocketChatId(), 1);
-    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getGroupId(), 1);
+    verifyRocketChatTechUserLeftGroup(logOutput, session.getGroupId(), 1);
 
     verifyRocketChatTechUserAddedToGroup(logOutput, session.getFeedbackGroupId(), 1);
     verifyRocketChatUserRemovedFromGroup(
         logOutput, session.getFeedbackGroupId(), consultant.getRocketChatId(), 1);
-    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(), 1);
+    verifyRocketChatTechUserLeftGroup(logOutput, session.getFeedbackGroupId(), 1);
   }
 
   @Test
@@ -1048,12 +1048,12 @@ class UserControllerSessionE2EIT {
     verifyRocketChatTechUserAddedToGroup(logOutput, session.getGroupId(), 0);
     verifyRocketChatUserRemovedFromGroup(
         logOutput, session.getGroupId(), session.getConsultant().getRocketChatId(), 0);
-    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getGroupId(), 0);
+    verifyRocketChatTechUserLeftGroup(logOutput, session.getGroupId(), 0);
 
     verifyRocketChatTechUserAddedToGroup(logOutput, session.getFeedbackGroupId(), 0);
     verifyRocketChatUserRemovedFromGroup(
         logOutput, session.getFeedbackGroupId(), consultant.getRocketChatId(), 0);
-    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(), 0);
+    verifyRocketChatTechUserLeftGroup(logOutput, session.getFeedbackGroupId(), 0);
   }
 
   @Test
@@ -1546,13 +1546,13 @@ class UserControllerSessionE2EIT {
     assertEquals(count, occurrencesOfAddTech);
   }
 
-  private void verifyRocketChatTechUserRemovedFromGroup(
+  private void verifyRocketChatTechUserLeftGroup(
       CapturedOutput logOutput, String groupId, int count) {
-    int occurrencesOfRemoveTech =
+    int occurrencesOfTechLeaving =
         StringUtils.countOccurrencesOf(
             logOutput.getOut(),
-            "RocketChatTestConfig.removeTechnicalUserFromGroup(" + groupId + ") called");
-    assertEquals(count, occurrencesOfRemoveTech);
+            "RocketChatTestConfig.leaveFromGroupAsTechnicalUser(" + groupId + ") called");
+    assertEquals(count, occurrencesOfTechLeaving);
   }
 
   private void verifyRocketChatUserRemovedFromGroup(
