@@ -17,11 +17,13 @@ import de.caritas.cob.userservice.api.service.appointment.AppointmentService;
 import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /** Service class to provide methods to access and modify the currently validated user account. */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ValidatedUserAccountProvider {
 
   private final @NonNull UserService userService;
@@ -122,7 +124,12 @@ public class ValidatedUserAccountProvider {
     UserUpdateDataDTO userUpdateDataDTO = new UserUpdateDataDTO(email, true);
     UserUpdateRequestDTO requestDTO =
         new UserUpdateRequestDTO(user.getRcUserId(), userUpdateDataDTO);
-    this.rocketChatService.updateUser(requestDTO);
+    if (user.getRcUserId() != null) {
+      this.rocketChatService.updateUser(requestDTO);
+    } else {
+      log.warn(
+          "Skip update user email in RocketChat because user does not have rcUserId (maybe a newly registered user?)");
+    }
     this.appointmentService.updateAskerEmail(user.getUserId(), email);
     user.setEmail(email);
     this.userService.saveUser(user);
