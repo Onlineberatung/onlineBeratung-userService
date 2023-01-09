@@ -10,11 +10,11 @@ import de.caritas.cob.userservice.api.adapters.web.dto.AdminFilter;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminAgencyRelationDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.CreateAgencyAdminDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.Sort;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAgencyAdminDTO;
 import de.caritas.cob.userservice.api.admin.service.admin.AdminAgencyRelationService;
-import de.caritas.cob.userservice.api.admin.service.admin.AdminAgencyService;
+import de.caritas.cob.userservice.api.admin.service.admin.AgencyAdminUserService;
 import de.caritas.cob.userservice.api.admin.service.admin.search.AdminFilterService;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +27,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class AdminAgencyFacadeTest {
 
-  @InjectMocks private AdminAgencyFacade adminAgencyFacade;
-  @Mock private AdminAgencyService adminAgencyService;
+  @InjectMocks private AdminUserFacade adminUserFacade;
+  @Mock private AgencyAdminUserService agencyAdminUserService;
   @Mock private AdminAgencyRelationService adminAgencyRelationService;
   @Mock private AdminFilterService adminFilterService;
 
@@ -36,18 +36,18 @@ class AdminAgencyFacadeTest {
   void findAgencyAdmin_Should_useAdminAgencyService() {
     final String adminId = "123";
 
-    this.adminAgencyFacade.findAgencyAdmin(adminId);
+    this.adminUserFacade.findAgencyAdmin(adminId);
 
-    verify(this.adminAgencyService).findAgencyAdmin(adminId);
+    verify(this.agencyAdminUserService).findAgencyAdmin(adminId);
   }
 
   @Test
   void createNewAdminAgency_Should_useAdminAgencyService() {
-    CreateAgencyAdminDTO createAgencyAdminDTO = mock(CreateAgencyAdminDTO.class);
+    CreateAdminDTO createAgencyAdminDTO = mock(CreateAdminDTO.class);
 
-    this.adminAgencyFacade.createNewAdminAgency(createAgencyAdminDTO);
+    this.adminUserFacade.createNewAgencyAdmin(createAgencyAdminDTO);
 
-    verify(this.adminAgencyService).createNewAdminAgency(createAgencyAdminDTO);
+    verify(this.agencyAdminUserService).createNewAgencyAdmin(createAgencyAdminDTO);
   }
 
   @Test
@@ -55,27 +55,27 @@ class AdminAgencyFacadeTest {
     String adminId = "123";
     UpdateAgencyAdminDTO updateAgencyAdminDTO = mock(UpdateAgencyAdminDTO.class);
 
-    this.adminAgencyFacade.updateAgencyAdmin(adminId, updateAgencyAdminDTO);
+    this.adminUserFacade.updateAgencyAdmin(adminId, updateAgencyAdminDTO);
 
-    verify(this.adminAgencyService).updateAgencyAdmin(adminId, updateAgencyAdminDTO);
+    verify(this.agencyAdminUserService).updateAgencyAdmin(adminId, updateAgencyAdminDTO);
   }
 
   @Test
   void deleteAgencyAdmin_Should_useAdminAgencyService() {
     String adminId = "123";
 
-    this.adminAgencyFacade.deleteAgencyAdmin(adminId);
+    this.adminUserFacade.deleteAgencyAdmin(adminId);
 
-    verify(this.adminAgencyService).deleteAgencyAdmin(adminId);
+    verify(this.agencyAdminUserService).deleteAgencyAdmin(adminId);
   }
 
   @Test
   void findAdminUserAgencyIds_Should_useAdminAgencyService() {
     String adminId = "123";
 
-    this.adminAgencyFacade.findAdminUserAgencyIds(adminId);
+    this.adminUserFacade.findAdminUserAgencyIds(adminId);
 
-    verify(this.adminAgencyService).findAgenciesOfAdmin(adminId);
+    verify(this.agencyAdminUserService).findAgenciesOfAdmin(adminId);
   }
 
   @Test
@@ -84,7 +84,7 @@ class AdminAgencyFacadeTest {
     CreateAdminAgencyRelationDTO createAdminAgencyRelationDTO =
         mock(CreateAdminAgencyRelationDTO.class);
 
-    this.adminAgencyFacade.createNewAdminAgencyRelation(adminId, createAdminAgencyRelationDTO);
+    this.adminUserFacade.createNewAdminAgencyRelation(adminId, createAdminAgencyRelationDTO);
 
     verify(this.adminAgencyRelationService)
         .createAdminAgencyRelation(adminId, createAdminAgencyRelationDTO);
@@ -95,7 +95,7 @@ class AdminAgencyFacadeTest {
     String adminId = "123";
     long agencyId = 2L;
 
-    this.adminAgencyFacade.deleteAdminAgencyRelation(adminId, agencyId);
+    this.adminUserFacade.deleteAdminAgencyRelation(adminId, agencyId);
 
     verify(this.adminAgencyRelationService).deleteAdminAgencyRelation(adminId, agencyId);
   }
@@ -105,7 +105,7 @@ class AdminAgencyFacadeTest {
     String adminId = "123";
     List<CreateAdminAgencyRelationDTO> newAdminAgencyRelationDTOS = new ArrayList<>();
 
-    this.adminAgencyFacade.setAdminAgenciesRelation(adminId, newAdminAgencyRelationDTOS);
+    this.adminUserFacade.setAdminAgenciesRelation(adminId, newAdminAgencyRelationDTOS);
 
     verify(this.adminAgencyRelationService)
         .synchronizeAdminAgenciesRelation(adminId, newAdminAgencyRelationDTOS);
@@ -125,7 +125,7 @@ class AdminAgencyFacadeTest {
     when(adminFilterService.findFilteredAdmins(page, perPage, adminFilter, sort))
         .thenReturn(agencyAdminSearchResultDTO);
 
-    this.adminAgencyFacade.findFilteredAdminsAgency(page, perPage, adminFilter, sort);
+    this.adminUserFacade.findFilteredAdminsAgency(page, perPage, adminFilter, sort);
 
     verify(this.adminFilterService).findFilteredAdmins(page, perPage, adminFilter, sort);
     verify(this.adminAgencyRelationService).appendAgenciesForAdmins(anySet());

@@ -55,7 +55,7 @@ public class RetrieveAdminServiceTenantAwareIT {
   public void findAgencyAdmin_Should_returnCorrectAdmin_When_correctIdIsProvided() {
     // given
     // when
-    Admin admin = retrieveAdminService.findAgencyAdmin(VALID_ADMIN_ID);
+    Admin admin = retrieveAdminService.findAdmin(VALID_ADMIN_ID, Admin.AdminType.AGENCY);
 
     // then
     assertThat(admin, notNullValue());
@@ -66,7 +66,9 @@ public class RetrieveAdminServiceTenantAwareIT {
   public void findAgencyAdmin_Should_throwNoContentException_When_incorrectIdIsProvided() {
     // given
     // when
-    assertThrows(NoContentException.class, () -> retrieveAdminService.findAgencyAdmin("invalid"));
+    assertThrows(
+        NoContentException.class,
+        () -> retrieveAdminService.findAdmin("invalid", Admin.AdminType.AGENCY));
   }
 
   @Test

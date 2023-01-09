@@ -15,7 +15,7 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.CreateAgencyAdminDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.model.Admin;
 import de.caritas.cob.userservice.api.model.Admin.AdminType;
@@ -45,17 +45,16 @@ public class CreateAdminServiceIT {
   private final EasyRandom easyRandom = new EasyRandom();
 
   @Test
-  public void createNewAdminAgency_Should_returnExpectedCreatedAdmin_When_inputDataIsCorrect() {
+  public void createNewAgencyAdmin_Should_returnExpectedCreatedAdmin_When_inputDataIsCorrect() {
     // given
     when(identityClient.createKeycloakUser(any(), anyString(), any()))
         .thenReturn(easyRandom.nextObject(KeycloakCreateUserResponseDTO.class));
-    CreateAgencyAdminDTO createAgencyAdminDTO =
-        this.easyRandom.nextObject(CreateAgencyAdminDTO.class);
-    createAgencyAdminDTO.setUsername(VALID_USERNAME);
-    createAgencyAdminDTO.setEmail(VALID_EMAIL_ADDRESS);
+    CreateAdminDTO createAdminDTO = this.easyRandom.nextObject(CreateAdminDTO.class);
+    createAdminDTO.setUsername(VALID_USERNAME);
+    createAdminDTO.setEmail(VALID_EMAIL_ADDRESS);
 
     // when
-    Admin admin = this.createAdminService.createNewAdmin(createAgencyAdminDTO);
+    Admin admin = this.createAdminService.createNewAdmin(createAdminDTO, AdminType.AGENCY);
 
     // then
     verify(identityClient).updatePassword(anyString(), anyString());
@@ -82,24 +81,22 @@ public class CreateAdminServiceIT {
         easyRandom.nextObject(KeycloakCreateUserResponseDTO.class);
     keycloakResponse.setUserId(null);
     when(identityClient.createKeycloakUser(any(), anyString(), any())).thenReturn(keycloakResponse);
-    CreateAgencyAdminDTO createAgencyAdminDTO =
-        this.easyRandom.nextObject(CreateAgencyAdminDTO.class);
+    CreateAdminDTO createAgencyAdminDTO = this.easyRandom.nextObject(CreateAdminDTO.class);
 
     // when
-    this.createAdminService.createNewAdmin(createAgencyAdminDTO);
+    this.createAdminService.createNewAdmin(createAgencyAdminDTO, AdminType.AGENCY);
   }
 
   @Test
   public void createNewAdminAgency_Should_throwExpectedException_When_emailIsInvalid() {
     // given
-    CreateAgencyAdminDTO createAgencyAdminDTO =
-        this.easyRandom.nextObject(CreateAgencyAdminDTO.class);
+    CreateAdminDTO createAgencyAdminDTO = this.easyRandom.nextObject(CreateAdminDTO.class);
     createAgencyAdminDTO.setEmail("invalid");
 
     try {
 
       // when
-      this.createAdminService.createNewAdmin(createAgencyAdminDTO);
+      this.createAdminService.createNewAdmin(createAgencyAdminDTO, AdminType.AGENCY);
       fail("Exception should be thrown");
 
       // then

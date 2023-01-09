@@ -35,7 +35,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ConsultantAgencyAdminServiceTest {
+public class ConsultantAgencyAdminUserServiceTest {
 
   @InjectMocks private ConsultantAgencyAdminService consultantAgencyAdminService;
 

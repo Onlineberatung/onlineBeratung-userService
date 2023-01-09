@@ -39,7 +39,7 @@ public class RetrieveAdminServiceIT {
   public void findAgencyAdmin_Should_returnCorrectAdmin_When_correctIdIsProvided() {
     // given
     // when
-    Admin admin = retrieveAdminService.findAgencyAdmin(VALID_ADMIN_ID);
+    Admin admin = retrieveAdminService.findAdmin(VALID_ADMIN_ID, Admin.AdminType.AGENCY);
 
     // then
     assertThat(admin, notNullValue());
@@ -50,7 +50,7 @@ public class RetrieveAdminServiceIT {
   public void findAgencyAdmin_Should_throwNoContentException_When_incorrectIdIsProvided() {
     // given
     // when
-    retrieveAdminService.findAgencyAdmin("invalid");
+    retrieveAdminService.findAdmin("invalid", Admin.AdminType.AGENCY);
   }
 
   @Test

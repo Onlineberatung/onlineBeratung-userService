@@ -2,8 +2,8 @@ package de.caritas.cob.userservice.api.admin.service.admin;
 
 import de.caritas.cob.userservice.api.UserServiceMapper;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.CreateAgencyAdminDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAgencyAdminDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UpdateTenantAdminDTO;
 import de.caritas.cob.userservice.api.admin.service.admin.create.CreateAdminService;
 import de.caritas.cob.userservice.api.admin.service.admin.delete.DeleteAdminService;
 import de.caritas.cob.userservice.api.admin.service.admin.search.RetrieveAdminService;
@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class AdminAgencyService {
+public class TenantAdminUserService {
 
   private final @NonNull RetrieveAdminService retrieveAdminService;
   private final @NonNull CreateAdminService createAdminService;
@@ -32,19 +32,19 @@ public class AdminAgencyService {
   private final @NonNull UserServiceMapper userServiceMapper;
   private final @NonNull AgencyService agencyService;
 
-  public AdminResponseDTO createNewAdminAgency(final CreateAgencyAdminDTO createAgencyAdminDTO) {
-    final Admin newAdmin = createAdminService.createNewAdmin(createAgencyAdminDTO);
+  public AdminResponseDTO createNewTenantAdmin(final CreateAdminDTO createAgencyAdminDTO) {
+    final Admin newAdmin = createAdminService.createNewTenantAdmin(createAgencyAdminDTO);
     return AdminResponseDTOBuilder.getInstance(newAdmin).buildResponseDTO();
   }
 
-  public AdminResponseDTO findAgencyAdmin(final String adminId) {
-    final Admin admin = retrieveAdminService.findAgencyAdmin(adminId);
+  public AdminResponseDTO findTenantAdmin(final String adminId) {
+    final Admin admin = retrieveAdminService.findAdmin(adminId, Admin.AdminType.TENANT);
     return AdminResponseDTOBuilder.getInstance(admin).buildResponseDTO();
   }
 
-  public AdminResponseDTO updateAgencyAdmin(
-      final String adminId, final UpdateAgencyAdminDTO updateAgencyAdminDTO) {
-    final Admin updatedAdmin = updateAdminService.updateAgencyAdmin(adminId, updateAgencyAdminDTO);
+  public AdminResponseDTO updateTenantAdmin(
+      final String adminId, final UpdateTenantAdminDTO updateTenantAdminDTO) {
+    final Admin updatedAdmin = updateAdminService.updateTenantAdmin(adminId, updateTenantAdminDTO);
     return AdminResponseDTOBuilder.getInstance(updatedAdmin).buildResponseDTO();
   }
 

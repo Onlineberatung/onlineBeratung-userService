@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.port.out;
 import de.caritas.cob.userservice.api.model.Admin;
 import de.caritas.cob.userservice.api.model.Admin.AdminBase;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +24,8 @@ public interface AdminRepository extends CrudRepository<Admin, String> {
               + "    OR UPPER(a.email) LIKE CONCAT('%', UPPER(?1), '%')"
               + "  )")
   Page<AdminBase> findAllByInfix(String infix, Pageable pageable);
+
+  Optional<Admin> findByIdAndType(String adminId, Admin.AdminType adminType);
 
   List<Admin> findAllByIdIn(Set<String> adminIds);
 }

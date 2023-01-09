@@ -52,7 +52,7 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 @TestPropertySource(properties = "multitenancy.enabled=true")
 @Transactional
-public class ConsultantAgencyAdminServiceTenantAwareIT {
+public class ConsultantAgencyAdminUserServiceTenantAwareIT {
 
   public static final String CONSULTANT1_ID = "0b3b1cc6-be98-4787-aa56-212259d811b8";
   public static final String CONSULTANT2_ID = "0b3b1cc6-be98-4787-aa56-212259d811b7";

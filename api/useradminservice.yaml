@@ -539,7 +539,7 @@ paths:
         content:
           'application/json':
             schema:
-              $ref: '#/components/schemas/CreateAgencyAdminDTO'
+              $ref: '#/components/schemas/CreateAdminDTO'
         required: true
       responses:
         201:
@@ -889,7 +889,7 @@ paths:
           content:
             'application/json':
               schema:
-                $ref: '#/components/schemas/CreateAgencyAdminDTO'
+                $ref: '#/components/schemas/CreateAdminDTO'
           required: true
         responses:
           201:
@@ -1299,7 +1299,7 @@ components:
           items:
             $ref: './../services/agencyadminservice.yaml#/components/schemas/AgencyAdminResponseDTO'
 
-    CreateAgencyAdminDTO:
+    CreateAdminDTO:
       type: object
       required:
         - username
@@ -1377,6 +1377,9 @@ components:
           example: "max@mustermann.de"
           minLength: 1
           maxLength: 255
+        tenantId:
+          type: integer
+          example: "1"
 
 
     AdminDTO:

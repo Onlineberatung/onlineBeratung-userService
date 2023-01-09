@@ -42,7 +42,7 @@ class ConsultantAdminFacadeTest {
 
   @Mock private AuthenticatedUser authenticatedUser;
 
-  @Mock private AdminAgencyFacade adminAgencyFacade;
+  @Mock private AdminUserFacade adminUserFacade;
 
   @Test
   void findConsultant_Should_useConsultantAdminService() {
@@ -144,7 +144,7 @@ class ConsultantAdminFacadeTest {
   @Test
   void
       checkPermissionsToUpdateAgencies_Should_PassIfUserHasRestrictedPermissionsAndHasPermissionsForTheGivenAgency() {
-    when(adminAgencyFacade.findAdminUserAgencyIds(authenticatedUser.getUserId()))
+    when(adminUserFacade.findAdminUserAgencyIds(authenticatedUser.getUserId()))
         .thenReturn(Lists.newArrayList(1L, 2L, 3L));
     when(authenticatedUser.hasRestrictedAgencyPriviliges()).thenReturn(true);
     consultantAdminFacade.checkPermissionsToAssignedAgencies(
@@ -155,7 +155,7 @@ class ConsultantAdminFacadeTest {
   @Test
   void
       checkPermissionsToUpdateAgencies_Should_ThrowForbiddenExceptionIfUserHasRestrictedPermissionsAndDoesntHavePermissionsForTheGivenAgency() {
-    when(adminAgencyFacade.findAdminUserAgencyIds(authenticatedUser.getUserId()))
+    when(adminUserFacade.findAdminUserAgencyIds(authenticatedUser.getUserId()))
         .thenReturn(Lists.newArrayList(1L, 2L, 3L));
     when(authenticatedUser.hasRestrictedAgencyPriviliges()).thenReturn(true);
 

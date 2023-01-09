@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 /** Wrapper facade to provide admin operations on asker accounts. */
 @Service
 @RequiredArgsConstructor
-public class UserAdminFacade {
+public class AskerUserAdminFacade {
 
   private final @NonNull IdentityClient identityClient;
   private final @NonNull UserService userService;

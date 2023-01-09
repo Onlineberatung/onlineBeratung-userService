@@ -23,9 +23,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class UserAdminFacadeTest {
+public class AskerUserAdminFacadeTest {
 
-  @InjectMocks private UserAdminFacade userAdminFacade;
+  @InjectMocks private AskerUserAdminFacade askerUserAdminFacade;
 
   @Mock private KeycloakService keycloakService;
 
@@ -37,7 +37,7 @@ public class UserAdminFacadeTest {
   public void markAskerForDeletion_Should_throwNotFoundException_When_askerDoesNotExist() {
     when(this.userService.getUser(any())).thenReturn(Optional.empty());
 
-    this.userAdminFacade.markAskerForDeletion("user id");
+    this.askerUserAdminFacade.markAskerForDeletion("user id");
   }
 
   @Test(expected = ConflictException.class)
@@ -47,7 +47,7 @@ public class UserAdminFacadeTest {
     user.setDeleteDate(nowInUtc());
     when(this.userService.getUser(any())).thenReturn(Optional.of(user));
 
-    this.userAdminFacade.markAskerForDeletion("user id");
+    this.askerUserAdminFacade.markAskerForDeletion("user id");
   }
 
   @Test
@@ -56,7 +56,7 @@ public class UserAdminFacadeTest {
     User user = new User();
     when(this.userService.getUser(any())).thenReturn(Optional.of(user));
 
-    this.userAdminFacade.markAskerForDeletion("user id");
+    this.askerUserAdminFacade.markAskerForDeletion("user id");
 
     verify(this.keycloakService, times(1)).deactivateUser("user id");
     ArgumentCaptor<User> argumentCaptor = ArgumentCaptor.forClass(User.class);

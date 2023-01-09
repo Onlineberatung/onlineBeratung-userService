@@ -26,9 +26,9 @@ public class RetrieveAdminService {
   private final @NonNull AdminRepository adminRepository;
   private final @NonNull AdminAgencyRepository adminAgencyRepository;
 
-  public Admin findAgencyAdmin(final String adminId) {
+  public Admin findAdmin(final String adminId, Admin.AdminType adminType) {
     return this.adminRepository
-        .findById(adminId)
+        .findByIdAndType(adminId, adminType)
         .orElseThrow(
             () -> new NoContentException(String.format(AGENCY_ADMIN_WITH_ID_S_NOT_FOUND, adminId)));
   }
