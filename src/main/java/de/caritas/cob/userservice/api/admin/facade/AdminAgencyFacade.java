@@ -4,7 +4,7 @@ import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminFilter;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.AgencyAdminSearchResultDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.AdminSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminAgencyRelationDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAgencyAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.Sort;
@@ -66,7 +66,7 @@ public class AdminAgencyFacade {
         adminId, newAdminAgencyRelationDTOs);
   }
 
-  public AgencyAdminSearchResultDTO findFilteredAdminsAgency(
+  public AdminSearchResultDTO findFilteredAdminsAgency(
       final Integer page, final Integer perPage, final AdminFilter adminFilter, Sort sort) {
     var filteredAdmins = adminFilterService.findFilteredAdmins(page, perPage, adminFilter, sort);
     enrichAdminsWithAgencies(filteredAdmins);
@@ -74,7 +74,7 @@ public class AdminAgencyFacade {
     return filteredAdmins;
   }
 
-  private void enrichAdminsWithAgencies(AgencyAdminSearchResultDTO filteredAdmins) {
+  private void enrichAdminsWithAgencies(AdminSearchResultDTO filteredAdmins) {
     if (nonNull(filteredAdmins)) {
       var admins =
           filteredAdmins.getEmbedded().stream()

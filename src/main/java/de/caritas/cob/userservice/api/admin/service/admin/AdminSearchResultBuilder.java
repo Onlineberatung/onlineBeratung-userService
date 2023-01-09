@@ -3,7 +3,7 @@ package de.caritas.cob.userservice.api.admin.service.admin;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminFilter;
-import de.caritas.cob.userservice.api.adapters.web.dto.AgencyAdminSearchResultDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.AdminSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.HalLink;
 import de.caritas.cob.userservice.api.adapters.web.dto.PaginationLinks;
 import de.caritas.cob.userservice.api.admin.service.SearchResultBuilder;
@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 import org.hibernate.search.jpa.FullTextQuery;
 
 public class AdminSearchResultBuilder
-    extends SearchResultBuilder<AdminFilter, AgencyAdminSearchResultDTO> {
+    extends SearchResultBuilder<AdminFilter, AdminSearchResultDTO> {
   private AdminSearchResultBuilder(FullTextQuery fullTextQuery) {
     super(fullTextQuery);
   }
@@ -23,7 +23,7 @@ public class AdminSearchResultBuilder
     return new AdminSearchResultBuilder(fullTextQuery);
   }
 
-  public AgencyAdminSearchResultDTO buildSearchResult() {
+  public AdminSearchResultDTO buildSearchResult() {
     Stream<Admin> resultStream = fullTextQuery.getResultStream();
     var resultList =
         resultStream
@@ -37,7 +37,7 @@ public class AdminSearchResultBuilder
             .next(buildNextLink())
             .previous(buildPreviousLink());
 
-    return new AgencyAdminSearchResultDTO()
+    return new AdminSearchResultDTO()
         .embedded(resultList)
         .links(paginationLinks)
         .total(fullTextQuery.getResultSize());

@@ -3,7 +3,7 @@ package de.caritas.cob.userservice.api.adapters.web.controller;
 import com.google.common.collect.Lists;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminFilter;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.AgencyAdminSearchResultDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.AdminSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyConsultantResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyTypeDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AskerResponseDTO;
@@ -286,7 +286,7 @@ public class UserAdminController implements UseradminApi {
   }
 
   @Override
-  public ResponseEntity<AgencyAdminSearchResultDTO> getAgencyAdmins(
+  public ResponseEntity<AdminSearchResultDTO> getAgencyAdmins(
       final Integer page, final Integer perPage, final AdminFilter filter, final Sort sort) {
     return new ResponseEntity<>(
         this.adminAgencyFacade.findFilteredAdminsAgency(page, perPage, filter, sort),
@@ -327,7 +327,7 @@ public class UserAdminController implements UseradminApi {
   }
 
   @Override
-  public ResponseEntity<AgencyAdminSearchResultDTO> searchAgencyAdmins(
+  public ResponseEntity<AdminSearchResultDTO> searchAgencyAdmins(
       String query, Integer page, Integer perPage, String field, String order) {
     var decodedInfix = URLDecoder.decode(query, StandardCharsets.UTF_8).trim();
     var isAscending = order.equalsIgnoreCase("asc");
@@ -336,8 +336,7 @@ public class UserAdminController implements UseradminApi {
         adminAgencyFacade.findAgencyAdminsByInfix(
             decodedInfix, page - 1, perPage, mappedField, isAscending);
     var result =
-        adminAgencyDtoMapper.agencyAdminSearchResultOf(
-            resultMap, query, page, perPage, field, order);
+        adminAgencyDtoMapper.adminSearchResultOf(resultMap, query, page, perPage, field, order);
 
     return ResponseEntity.ok(result);
   }

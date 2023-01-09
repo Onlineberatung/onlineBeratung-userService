@@ -8,7 +8,7 @@ import static org.mockito.Mockito.when;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminFilter;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.AgencyAdminSearchResultDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.AdminSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminAgencyRelationDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAgencyAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.Sort;
@@ -117,7 +117,7 @@ class AdminAgencyFacadeTest {
     Integer perPage = 10;
     AdminFilter adminFilter = mock(AdminFilter.class);
     Sort sort = mock(Sort.class);
-    AgencyAdminSearchResultDTO agencyAdminSearchResultDTO = mock(AgencyAdminSearchResultDTO.class);
+    AdminSearchResultDTO agencyAdminSearchResultDTO = mock(AdminSearchResultDTO.class);
     AdminResponseDTO adminResponseDTO = mock(AdminResponseDTO.class);
     when(adminResponseDTO.getEmbedded()).thenReturn(mock(AdminDTO.class));
     when(agencyAdminSearchResultDTO.getEmbedded()).thenReturn(List.of(adminResponseDTO));

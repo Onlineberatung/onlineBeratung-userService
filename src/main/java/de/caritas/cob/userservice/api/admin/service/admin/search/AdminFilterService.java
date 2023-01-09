@@ -3,7 +3,7 @@ package de.caritas.cob.userservice.api.admin.service.admin.search;
 import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminFilter;
-import de.caritas.cob.userservice.api.adapters.web.dto.AgencyAdminSearchResultDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.AdminSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.Sort;
 import de.caritas.cob.userservice.api.adapters.web.dto.Sort.FieldEnum;
 import de.caritas.cob.userservice.api.admin.service.admin.AdminSearchResultBuilder;
@@ -26,7 +26,7 @@ public class AdminFilterService {
 
   private final @NonNull EntityManagerFactory entityManagerFactory;
 
-  public AgencyAdminSearchResultDTO findFilteredAdmins(
+  public AdminSearchResultDTO findFilteredAdmins(
       final Integer page, final Integer perPage, final AdminFilter adminFilter, Sort sort) {
     var fullTextEntityManager =
         Search.getFullTextEntityManager(entityManagerFactory.createEntityManager());
