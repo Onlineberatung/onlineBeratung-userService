@@ -22,7 +22,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
       "identity.technical-user.username=tech-user",
       "identity.technical-user.password=tech-pass"
     })
-public class LiquibaseHibernateIT {
+class LiquibaseHibernateIT {
   @Container
   @SuppressWarnings("resource")
   static MariaDBContainer<?> DB =
