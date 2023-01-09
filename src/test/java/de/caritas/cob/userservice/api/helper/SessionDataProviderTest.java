@@ -91,7 +91,9 @@ public class SessionDataProviderTest {
           null,
           ConsultantStatus.CREATED,
           false,
-          LanguageCode.de);
+          LanguageCode.de,
+          null,
+          null);
   private final Session INITIALIZED_SESSION_SUCHT =
       Session.builder()
           .id(1L)

@@ -74,11 +74,13 @@ public class ConsultantAgencyServiceTest {
           null,
           ConsultantStatus.CREATED,
           false,
-          LanguageCode.de);
+          LanguageCode.de,
+          null,
+          null);
   private final ConsultantAgency CONSULTANT_AGENCY =
       new ConsultantAgency(
           AGENCY_ID, CONSULTANT, 1L, nowInUtc(), nowInUtc(), nowInUtc(), null, null);
-  private final List<ConsultantAgency> CONSULTANT_AGENY_LIST = Arrays.asList(CONSULTANT_AGENCY);
+  private final List<ConsultantAgency> CONSULTANT_AGENCY_LIST = Arrays.asList(CONSULTANT_AGENCY);
   private final ConsultantAgency NULL_CONSULTANT_AGENCY = null;
   private final List<ConsultantAgency> CONSULTANT_AGENCY_NULL_LIST =
       Arrays.asList(NULL_CONSULTANT_AGENCY);
@@ -118,7 +120,7 @@ public class ConsultantAgencyServiceTest {
   public void findConsultantsByAgencyId_Should_ReturnListOfConsultantAgency_WhenAgencyFound() {
 
     when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(Mockito.anyLong()))
-        .thenReturn(CONSULTANT_AGENY_LIST);
+        .thenReturn(CONSULTANT_AGENCY_LIST);
 
     assertThat(
         consultantAgencyService.findConsultantsByAgencyId(AGENCY_ID),
@@ -163,7 +165,7 @@ public class ConsultantAgencyServiceTest {
 
     when(consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNullOrderByConsultantFirstNameAsc(
             Mockito.anyLong()))
-        .thenReturn(CONSULTANT_AGENY_LIST);
+        .thenReturn(CONSULTANT_AGENCY_LIST);
 
     assertThat(
         consultantAgencyService.getConsultantsOfAgency(AGENCY_ID),

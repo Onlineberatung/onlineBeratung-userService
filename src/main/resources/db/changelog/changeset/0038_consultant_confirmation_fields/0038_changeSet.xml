@@ -1,0 +1,15 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+  <changeSet author="aalicic" id="VIC-2252">
+    <sqlFile
+      path="db/changelog/changeset/0038_consultant_confirmation_fields/confirmation_fields.sql"
+      stripComments="true"/>
+    <rollback>
+      <sqlFile
+        path="db/changelog/changeset/0038_consultant_confirmation_fields/confirmation_fields-rollback.sql"
+        stripComments="true"/>
+    </rollback>
+  </changeSet>
+</databaseChangeLog>
