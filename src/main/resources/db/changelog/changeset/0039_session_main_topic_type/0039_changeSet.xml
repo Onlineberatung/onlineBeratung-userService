@@ -4,10 +4,10 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
   <changeSet author="OBI" id="sessionMainTopicType">
     <rollback>
-      <sqlFile path="db/changelog/changeset/0038_session_main_topic_type/session-main-topic-type-rollback.sql"
+      <sqlFile path="db/changelog/changeset/0039_session_main_topic_type/session-main-topic-type-rollback.sql"
         stripComments="true"/>
     </rollback>
-    <sqlFile path="db/changelog/changeset/0038_session_main_topic_type/session-main-topic-type.sql"
+    <sqlFile path="db/changelog/changeset/0039_session_main_topic_type/session-main-topic-type.sql"
       stripComments="true"/>
   </changeSet>
 </databaseChangeLog>
