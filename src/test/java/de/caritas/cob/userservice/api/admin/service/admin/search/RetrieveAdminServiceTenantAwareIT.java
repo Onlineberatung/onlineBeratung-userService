@@ -37,7 +37,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class RetrieveAdminServiceTenantAwareIT {
 
-  private final String VALID_ADMIN_ID = "164be67d-4d1b-4d80-bb6b-0ee057a1c59e";
+  private final String VALID_AGENCY_ADMIN_ID = "164be67d-4d1b-4d80-bb6b-0ee057a1c59e";
+
+  private final String VALID_TENANT_ADMIN_ID = "6584f4a9-a7f0-42f0-b929-ab5c99c0802d";
 
   @Autowired private RetrieveAdminService retrieveAdminService;
 
@@ -55,11 +57,42 @@ public class RetrieveAdminServiceTenantAwareIT {
   public void findAgencyAdmin_Should_returnCorrectAdmin_When_correctIdIsProvided() {
     // given
     // when
-    Admin admin = retrieveAdminService.findAdmin(VALID_ADMIN_ID, Admin.AdminType.AGENCY);
+    Admin admin = retrieveAdminService.findAdmin(VALID_AGENCY_ADMIN_ID, Admin.AdminType.AGENCY);
 
     // then
     assertThat(admin, notNullValue());
-    assertThat(admin.getId(), is(VALID_ADMIN_ID));
+    assertThat(admin.getId(), is(VALID_AGENCY_ADMIN_ID));
+  }
+
+  @Test
+  public void
+      findAgencyAdmin_Should_throwNoContentException_When_validAgencyAdminIsProvidedButTypeDoesNotMatch() {
+    // given
+    // when
+    assertThrows(
+        NoContentException.class,
+        () -> retrieveAdminService.findAdmin(VALID_AGENCY_ADMIN_ID, Admin.AdminType.TENANT));
+  }
+
+  @Test
+  public void findAgencyAdmin_Should_returnCorrectTenantAdmin_When_correctIdIsProvided() {
+    // given
+    // when
+    Admin admin = retrieveAdminService.findAdmin(VALID_TENANT_ADMIN_ID, Admin.AdminType.TENANT);
+
+    // then
+    assertThat(admin, notNullValue());
+    assertThat(admin.getId(), is(VALID_TENANT_ADMIN_ID));
+  }
+
+  @Test
+  public void
+      findAgencyAdmin_Should_throwNoContentException_When_validTenantAdminIsProvidedButTypeDoesNotMatch() {
+    // given
+    // when
+    assertThrows(
+        NoContentException.class,
+        () -> retrieveAdminService.findAdmin(VALID_TENANT_ADMIN_ID, Admin.AdminType.AGENCY));
   }
 
   @Test
@@ -77,7 +110,7 @@ public class RetrieveAdminServiceTenantAwareIT {
     long expectedAgencyId = 90L;
 
     // when
-    List<Long> agencyIdsOfAdmin = retrieveAdminService.findAgencyIdsOfAdmin(VALID_ADMIN_ID);
+    List<Long> agencyIdsOfAdmin = retrieveAdminService.findAgencyIdsOfAdmin(VALID_AGENCY_ADMIN_ID);
 
     // then
     assertThat(agencyIdsOfAdmin, notNullValue());

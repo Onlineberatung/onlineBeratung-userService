@@ -9,8 +9,10 @@ import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminAgencyRelation
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.Sort;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAgencyAdminDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UpdateTenantAdminDTO;
 import de.caritas.cob.userservice.api.admin.service.admin.AdminAgencyRelationService;
 import de.caritas.cob.userservice.api.admin.service.admin.AgencyAdminUserService;
+import de.caritas.cob.userservice.api.admin.service.admin.TenantAdminUserService;
 import de.caritas.cob.userservice.api.admin.service.admin.search.AdminFilterService;
 import java.util.List;
 import java.util.Map;
@@ -26,11 +28,13 @@ import org.springframework.stereotype.Service;
 public class AdminUserFacade {
 
   private final @NonNull AgencyAdminUserService agencyAdminUserService;
+
+  private final @NonNull TenantAdminUserService tenantAdminUserService;
   private final @NonNull AdminAgencyRelationService adminAgencyRelationService;
   private final @NonNull AdminFilterService adminFilterService;
 
   public AdminResponseDTO createNewTenantAdmin(final CreateAdminDTO createAgencyAdminDTO) {
-    return this.agencyAdminUserService.createNewAgencyAdmin(createAgencyAdminDTO);
+    return this.tenantAdminUserService.createNewTenantAdmin(createAgencyAdminDTO);
   }
 
   public AdminResponseDTO createNewAgencyAdmin(final CreateAdminDTO createAgencyAdminDTO) {
@@ -41,6 +45,15 @@ public class AdminUserFacade {
     return this.agencyAdminUserService.findAgencyAdmin(adminId);
   }
 
+  public AdminResponseDTO findTenantAdmin(final String adminId) {
+    return this.tenantAdminUserService.findTenantAdmin(adminId);
+  }
+
+  public AdminResponseDTO updateTenantAdmin(
+      final String adminId, final UpdateTenantAdminDTO updateTenantAdminDTO) {
+    return this.tenantAdminUserService.updateTenantAdmin(adminId, updateTenantAdminDTO);
+  }
+
   public AdminResponseDTO updateAgencyAdmin(
       final String adminId, final UpdateAgencyAdminDTO updateAgencyAdminDTO) {
     return this.agencyAdminUserService.updateAgencyAdmin(adminId, updateAgencyAdminDTO);
@@ -48,6 +61,10 @@ public class AdminUserFacade {
 
   public void deleteAgencyAdmin(final String adminId) {
     this.agencyAdminUserService.deleteAgencyAdmin(adminId);
+  }
+
+  public void deleteTenantAdmin(final String adminId) {
+    this.tenantAdminUserService.deleteTenantAdmin(adminId);
   }
 
   public List<Long> findAdminUserAgencyIds(String userId) {

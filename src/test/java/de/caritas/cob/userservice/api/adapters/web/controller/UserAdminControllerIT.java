@@ -70,6 +70,8 @@ public class UserAdminControllerIT {
   protected static final String DELETE_CONSULTANT_AGENCY_PATH =
       ROOT_PATH + "/consultants/%s" + "/agencies/%s";
   protected static final String AGENCY_ADMIN_PATH = ROOT_PATH + "/agencyadmins/";
+
+  protected static final String TENANT_ADMIN_PATH = ROOT_PATH + "/tenantadmins/";
   protected static final String SEARCH_AGENCY_ADMIN_PATH = AGENCY_ADMIN_PATH + "/search/";
   protected static final String DELETE_AGENCY_ADMIN_PATH = AGENCY_ADMIN_PATH + "%s";
   protected static final String AGENCIES_OF_ADMIN_PATH = ROOT_PATH + "/agencyadmins/%s/agencies";
@@ -419,6 +421,24 @@ public class UserAdminControllerIT {
   }
 
   @Test
+  public void createNewTenantAdmin_Should_returnOk_When_requiredCreateTenantAdminIsGiven()
+      throws Exception {
+    // given
+    CreateAdminDTO createAdminDTO = new EasyRandom().nextObject(CreateAdminDTO.class);
+
+    // when
+    this.mvc
+        .perform(
+            post(TENANT_ADMIN_PATH)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createAdminDTO)))
+        .andExpect(status().isOk());
+
+    // then
+    verify(this.adminUserFacade, times(1)).createNewTenantAdmin(any());
+  }
+
+  @Test
   public void createAgencyAdmin_Should_returnBadRequest_When_requiredCreateAgencyAdminIsMissing()
       throws Exception {
     // given
@@ -446,6 +466,25 @@ public class UserAdminControllerIT {
 
     // then
     verify(this.adminUserFacade, times(1)).updateAgencyAdmin(anyString(), any());
+  }
+
+  @Test
+  public void updateTenantAdmin_Should_returnOk_When_requiredCreateTenantAdminIsGiven()
+      throws Exception {
+    // given
+    UpdateAgencyAdminDTO updateAgencyAdminDTO =
+        new EasyRandom().nextObject(UpdateAgencyAdminDTO.class);
+
+    // when
+    this.mvc
+        .perform(
+            put(TENANT_ADMIN_PATH + "adminId")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateAgencyAdminDTO)))
+        .andExpect(status().isOk());
+
+    // then
+    verify(this.adminUserFacade, times(1)).updateTenantAdmin(anyString(), any());
   }
 
   @Test

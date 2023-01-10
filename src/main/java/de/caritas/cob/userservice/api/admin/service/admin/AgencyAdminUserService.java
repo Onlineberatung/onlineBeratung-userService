@@ -4,6 +4,7 @@ import de.caritas.cob.userservice.api.UserServiceMapper;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAgencyAdminDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UpdateTenantAdminDTO;
 import de.caritas.cob.userservice.api.admin.service.admin.create.CreateAdminService;
 import de.caritas.cob.userservice.api.admin.service.admin.delete.DeleteAdminService;
 import de.caritas.cob.userservice.api.admin.service.admin.search.RetrieveAdminService;
@@ -45,6 +46,12 @@ public class AgencyAdminUserService {
   public AdminResponseDTO updateAgencyAdmin(
       final String adminId, final UpdateAgencyAdminDTO updateAgencyAdminDTO) {
     final Admin updatedAdmin = updateAdminService.updateAgencyAdmin(adminId, updateAgencyAdminDTO);
+    return AdminResponseDTOBuilder.getInstance(updatedAdmin).buildResponseDTO();
+  }
+
+  public AdminResponseDTO updateTenantAdmin(
+      final String adminId, final UpdateTenantAdminDTO updateTenantAdminDTO) {
+    final Admin updatedAdmin = updateAdminService.updateTenantAdmin(adminId, updateTenantAdminDTO);
     return AdminResponseDTOBuilder.getInstance(updatedAdmin).buildResponseDTO();
   }
 

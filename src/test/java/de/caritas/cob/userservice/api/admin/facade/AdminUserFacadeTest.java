@@ -13,8 +13,10 @@ import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminAgencyRelation
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.Sort;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAgencyAdminDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UpdateTenantAdminDTO;
 import de.caritas.cob.userservice.api.admin.service.admin.AdminAgencyRelationService;
 import de.caritas.cob.userservice.api.admin.service.admin.AgencyAdminUserService;
+import de.caritas.cob.userservice.api.admin.service.admin.TenantAdminUserService;
 import de.caritas.cob.userservice.api.admin.service.admin.search.AdminFilterService;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,12 +27,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class AdminAgencyFacadeTest {
+class AdminUserFacadeTest {
 
   @InjectMocks private AdminUserFacade adminUserFacade;
   @Mock private AgencyAdminUserService agencyAdminUserService;
   @Mock private AdminAgencyRelationService adminAgencyRelationService;
   @Mock private AdminFilterService adminFilterService;
+
+  @Mock private TenantAdminUserService tenantAdminUserService;
 
   @Test
   void findAgencyAdmin_Should_useAdminAgencyService() {
@@ -51,6 +55,15 @@ class AdminAgencyFacadeTest {
   }
 
   @Test
+  void createNewTenantAdmin_Should_useAdminAgencyService() {
+    CreateAdminDTO createAdminDTO = mock(CreateAdminDTO.class);
+
+    this.adminUserFacade.createNewTenantAdmin(createAdminDTO);
+
+    verify(this.tenantAdminUserService).createNewTenantAdmin(createAdminDTO);
+  }
+
+  @Test
   void updateAgencyAdmin_Should_useAdminAgencyService() {
     String adminId = "123";
     UpdateAgencyAdminDTO updateAgencyAdminDTO = mock(UpdateAgencyAdminDTO.class);
@@ -61,12 +74,31 @@ class AdminAgencyFacadeTest {
   }
 
   @Test
+  void updateTenantAdmin_Should_useTenantAdminUserService() {
+    String adminId = "123";
+    UpdateTenantAdminDTO updateTenantAdminDTO = mock(UpdateTenantAdminDTO.class);
+
+    this.adminUserFacade.updateTenantAdmin(adminId, updateTenantAdminDTO);
+
+    verify(this.tenantAdminUserService).updateTenantAdmin(adminId, updateTenantAdminDTO);
+  }
+
+  @Test
   void deleteAgencyAdmin_Should_useAdminAgencyService() {
     String adminId = "123";
 
     this.adminUserFacade.deleteAgencyAdmin(adminId);
 
     verify(this.agencyAdminUserService).deleteAgencyAdmin(adminId);
+  }
+
+  @Test
+  void deleteTenantAdmin_Should_useAdminAgencyService() {
+    String adminId = "123";
+
+    this.adminUserFacade.deleteTenantAdmin(adminId);
+
+    verify(this.tenantAdminUserService).deleteTenantAdmin(adminId);
   }
 
   @Test

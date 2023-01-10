@@ -12,7 +12,6 @@ import de.caritas.cob.userservice.api.model.Admin;
 import de.caritas.cob.userservice.api.model.Admin.AdminBase;
 import de.caritas.cob.userservice.api.model.AdminAgency.AdminAgencyBase;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.NonNull;
@@ -48,12 +47,8 @@ public class TenantAdminUserService {
     return AdminResponseDTOBuilder.getInstance(updatedAdmin).buildResponseDTO();
   }
 
-  public void deleteAgencyAdmin(final String adminId) {
-    this.deleteAdminService.deleteAgencyAdmin(adminId);
-  }
-
-  public List<Long> findAgenciesOfAdmin(final String adminId) {
-    return retrieveAdminService.findAgencyIdsOfAdmin(adminId);
+  public void deleteTenantAdmin(final String adminId) {
+    this.deleteAdminService.deleteTenantAdmin(adminId);
   }
 
   public Map<String, Object> findAgencyAdminsByInfix(String infix, PageRequest pageRequest) {

@@ -21,6 +21,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.SessionFilter;
 import de.caritas.cob.userservice.api.adapters.web.dto.Sort;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAgencyAdminDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UpdateTenantAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ViolationDTO;
 import de.caritas.cob.userservice.api.adapters.web.mapping.AdminAgencyDtoMapper;
 import de.caritas.cob.userservice.api.admin.facade.AdminUserFacade;
@@ -285,6 +286,11 @@ public class UserAdminController implements UseradminApi {
   }
 
   @Override
+  public ResponseEntity<AdminResponseDTO> getTenantAdmin(final String adminId) {
+    return new ResponseEntity<>(this.adminUserFacade.findTenantAdmin(adminId), HttpStatus.OK);
+  }
+
+  @Override
   public ResponseEntity<List<Long>> getAdminAgencies(@PathVariable String adminId) {
     var adminAgencies = this.adminUserFacade.findAdminUserAgencyIds(adminId);
     return ResponseEntity.ok(adminAgencies);
@@ -304,10 +310,23 @@ public class UserAdminController implements UseradminApi {
   }
 
   @Override
+  public ResponseEntity<Void> deleteTenantAdmin(final String adminId) {
+    this.adminUserFacade.deleteTenantAdmin(adminId);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
   public ResponseEntity<AdminResponseDTO> updateAgencyAdmin(
       final String adminId, final UpdateAgencyAdminDTO updateAgencyAdminDTO) {
     return new ResponseEntity<>(
         this.adminUserFacade.updateAgencyAdmin(adminId, updateAgencyAdminDTO), HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<AdminResponseDTO> updateTenantAdmin(
+      final String adminId, final UpdateTenantAdminDTO updateTenantAdminDTO) {
+    return new ResponseEntity<>(
+        this.adminUserFacade.updateTenantAdmin(adminId, updateTenantAdminDTO), HttpStatus.OK);
   }
 
   @Override
