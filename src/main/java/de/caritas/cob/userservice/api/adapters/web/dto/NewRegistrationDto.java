@@ -58,7 +58,7 @@ public class NewRegistrationDto implements UserRegistrationDTO {
 
   @ApiModelProperty(required = false, example = "\"2\"")
   @JsonProperty("mainTopicId")
-  private Integer mainTopicId;
+  private Long mainTopicId;
 
   @ApiModelProperty(required = false, example = "\"MALE\"")
   @JsonProperty("gender")
@@ -75,7 +75,7 @@ public class NewRegistrationDto implements UserRegistrationDTO {
 
   @ApiModelProperty(required = false, example = "\"[1,5]\"")
   @JsonProperty("topicIds")
-  private Collection<Integer> topicIds;
+  private Collection<Long> topicIds;
 
   @ApiModelProperty(required = false, example = "\"RELATIVE_COUNSELLING\"")
   @JsonProperty("counsellingRelation")

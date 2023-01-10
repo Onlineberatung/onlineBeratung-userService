@@ -1671,12 +1671,12 @@ class UserControllerE2EIT {
 
   private void givenAUserDTOWithMainTopic() {
     givenAUserDTO();
-    userDTO.setMainTopicId(0);
+    userDTO.setMainTopicId(0L);
   }
 
   private void givenAUserDTOWithTopics() {
     givenAUserDTO();
-    userDTO.setTopicIds(List.of(0, 1));
+    userDTO.setTopicIds(List.of(0L, 1L));
   }
 
   private long aPositiveLong() {

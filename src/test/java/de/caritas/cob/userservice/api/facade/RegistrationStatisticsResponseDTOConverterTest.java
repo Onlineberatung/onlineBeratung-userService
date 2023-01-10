@@ -132,14 +132,16 @@ class RegistrationStatisticsResponseDTOConverterTest {
 
   private Session getRandomSessionWithTopics() {
     Session session = easyRandom.nextObject(Session.class);
-    session.setMainTopicId(1);
+    session.setMainTopicId(1L);
     session.setSessionTopics(
         Lists.newArrayList(
-            getSessionTopic(session, 1), getSessionTopic(session, 2), getSessionTopic(session, 3)));
+            getSessionTopic(session, 1L),
+            getSessionTopic(session, 2L),
+            getSessionTopic(session, 3L)));
     return session;
   }
 
-  private static SessionTopic getSessionTopic(Session session, Integer topicId) {
+  private static SessionTopic getSessionTopic(Session session, Long topicId) {
     return SessionTopic.builder().topicId(topicId).session(session).build();
   }
 }

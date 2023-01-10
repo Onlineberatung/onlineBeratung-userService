@@ -49,14 +49,13 @@ public class RegistrationStatisticsResponseDTOConverter {
         .collect(Collectors.toList());
   }
 
-  private String findTopicInternalIdentifier(Integer topicId) {
+  private String findTopicInternalIdentifier(Long topicId) {
     return topicId == null ? "" : findTopicInternalIdentifierInTopicsMap(topicId).orElse("");
   }
 
-  private Optional<String> findTopicInternalIdentifierInTopicsMap(Integer topicId) {
-    Long key = Long.valueOf(topicId);
-    if (allTopicsMap.containsKey(key)) {
-      return Optional.ofNullable(allTopicsMap.get(key).getInternalIdentifier());
+  private Optional<String> findTopicInternalIdentifierInTopicsMap(Long topicId) {
+    if (allTopicsMap.containsKey(topicId)) {
+      return Optional.ofNullable(allTopicsMap.get(topicId).getInternalIdentifier());
     } else {
       log.warn("No topic found for a given topicId in all topics map {}", topicId);
       return Optional.empty();

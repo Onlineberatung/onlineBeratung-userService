@@ -14,13 +14,13 @@ public interface UserRegistrationDTO {
 
   String getConsultantId();
 
-  Integer getMainTopicId();
+  Long getMainTopicId();
 
   String getUserGender();
 
   Integer getUserAge();
 
-  Collection<Integer> getTopicIds();
+  Collection<Long> getTopicIds();
 
   String getCounsellingRelation();
 }
