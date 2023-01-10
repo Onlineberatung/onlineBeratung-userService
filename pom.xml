@@ -16,7 +16,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.3.12.RELEASE</version>
+		<version>3.0.0</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 
@@ -45,7 +45,6 @@
 		<spring-security-core.version>5.7.5</spring-security-core.version>
 		<spring-beans.version>5.2.20.RELEASE</spring-beans.version>
 		<spring-webmvc.version>5.2.20.RELEASE</spring-webmvc.version>
-		<spring-web.version>6.0.3</spring-web.version>
 		<spring-core.version>5.2.20.RELEASE</spring-core.version>
 		<json-smart.version>2.4.7</json-smart.version>
 		<springfox-swagger-ui.version>2.10.0</springfox-swagger-ui.version>
@@ -104,11 +103,6 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
 			<version>${spring-webmvc.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-web</artifactId>
-			<version>${spring-web.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
