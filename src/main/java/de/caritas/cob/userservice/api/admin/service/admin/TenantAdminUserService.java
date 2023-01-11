@@ -9,6 +9,7 @@ import de.caritas.cob.userservice.api.admin.service.admin.create.CreateAdminServ
 import de.caritas.cob.userservice.api.admin.service.admin.delete.DeleteAdminService;
 import de.caritas.cob.userservice.api.admin.service.admin.search.RetrieveAdminService;
 import de.caritas.cob.userservice.api.admin.service.admin.update.UpdateAdminService;
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.model.Admin;
 import de.caritas.cob.userservice.api.model.Admin.AdminBase;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
@@ -29,11 +30,30 @@ public class TenantAdminUserService {
   private final @NonNull UpdateAdminService updateAdminService;
   private final @NonNull DeleteAdminService deleteAdminService;
   private final @NonNull UserServiceMapper userServiceMapper;
+
   private final @NonNull AgencyService agencyService;
 
-  public AdminResponseDTO createNewTenantAdmin(final CreateAdminDTO createAgencyAdminDTO) {
-    final Admin newAdmin = createAdminService.createNewTenantAdmin(createAgencyAdminDTO);
+  public AdminResponseDTO createNewTenantAdmin(final CreateAdminDTO createTenantAdminDTO) {
+    final Admin newAdmin = createAdminService.createNewTenantAdmin(createTenantAdminDTO);
+    validateCreateAdmin(createTenantAdminDTO);
     return AdminResponseDTOBuilder.getInstance(newAdmin).buildAgencyAdminResponseDTO();
+  }
+
+  private void validateCreateAdmin(CreateAdminDTO createTenantAdminDTO) {
+    validateTenantId(createTenantAdminDTO.getTenantId());
+  }
+
+  private void validateUpdateAdmin(UpdateTenantAdminDTO updateTenantAdminDTO) {
+    validateTenantId(updateTenantAdminDTO.getTenantId());
+  }
+
+  private void validateTenantId(Integer inputTenantId) {
+    if (inputTenantId == null) {
+      throw new BadRequestException("Tenant id must be provided");
+    }
+    if (inputTenantId.equals(0)) {
+      throw new BadRequestException("Tenant id cannot be equal to 0");
+    }
   }
 
   public AdminResponseDTO findTenantAdmin(final String adminId) {
@@ -43,6 +63,7 @@ public class TenantAdminUserService {
 
   public AdminResponseDTO updateTenantAdmin(
       final String adminId, final UpdateTenantAdminDTO updateTenantAdminDTO) {
+    validateUpdateAdmin(updateTenantAdminDTO);
     final Admin updatedAdmin = updateAdminService.updateTenantAdmin(adminId, updateTenantAdminDTO);
     return AdminResponseDTOBuilder.getInstance(updatedAdmin).buildAgencyAdminResponseDTO();
   }
