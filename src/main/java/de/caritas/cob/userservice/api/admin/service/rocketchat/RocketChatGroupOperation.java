@@ -64,6 +64,9 @@ abstract class RocketChatGroupOperation {
 
   private void removeConsultantsFromRocketChatGroup(
       String rcGroupId, List<Consultant> consultants) {
+    if (rcGroupId == null) {
+      return;
+    }
     List<String> groupMemberList = obtainRocketChatGroupMemberIds(rcGroupId);
 
     rocketChatFacade.addTechnicalUserToGroup(rcGroupId);
