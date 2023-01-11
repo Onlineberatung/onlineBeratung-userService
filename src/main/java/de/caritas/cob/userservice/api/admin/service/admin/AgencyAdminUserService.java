@@ -35,24 +35,24 @@ public class AgencyAdminUserService {
 
   public AdminResponseDTO createNewAgencyAdmin(final CreateAdminDTO createAgencyAdminDTO) {
     final Admin newAdmin = createAdminService.createNewAgencyAdmin(createAgencyAdminDTO);
-    return AdminResponseDTOBuilder.getInstance(newAdmin).buildResponseDTO();
+    return AdminResponseDTOBuilder.getInstance(newAdmin).buildAgencyAdminResponseDTO();
   }
 
   public AdminResponseDTO findAgencyAdmin(final String adminId) {
     final Admin admin = retrieveAdminService.findAdmin(adminId, Admin.AdminType.AGENCY);
-    return AdminResponseDTOBuilder.getInstance(admin).buildResponseDTO();
+    return AdminResponseDTOBuilder.getInstance(admin).buildAgencyAdminResponseDTO();
   }
 
   public AdminResponseDTO updateAgencyAdmin(
       final String adminId, final UpdateAgencyAdminDTO updateAgencyAdminDTO) {
     final Admin updatedAdmin = updateAdminService.updateAgencyAdmin(adminId, updateAgencyAdminDTO);
-    return AdminResponseDTOBuilder.getInstance(updatedAdmin).buildResponseDTO();
+    return AdminResponseDTOBuilder.getInstance(updatedAdmin).buildAgencyAdminResponseDTO();
   }
 
   public AdminResponseDTO updateTenantAdmin(
       final String adminId, final UpdateTenantAdminDTO updateTenantAdminDTO) {
     final Admin updatedAdmin = updateAdminService.updateTenantAdmin(adminId, updateTenantAdminDTO);
-    return AdminResponseDTOBuilder.getInstance(updatedAdmin).buildResponseDTO();
+    return AdminResponseDTOBuilder.getInstance(updatedAdmin).buildAgencyAdminResponseDTO();
   }
 
   public void deleteAgencyAdmin(final String adminId) {

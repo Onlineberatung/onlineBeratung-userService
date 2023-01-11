@@ -28,7 +28,7 @@ public class AdminSearchResultBuilder
     var resultList =
         resultStream
             .map(AdminResponseDTOBuilder::getInstance)
-            .map(AdminResponseDTOBuilder::buildResponseDTO)
+            .map(AdminResponseDTOBuilder::buildAgencyAdminResponseDTO)
             .collect(Collectors.toList());
 
     var paginationLinks =
