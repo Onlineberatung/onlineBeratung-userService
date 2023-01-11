@@ -27,7 +27,7 @@ class SessionTopicEnrichmentServiceTest {
   void enrichSessionWithTopicData_Should_EnrichSessionWithTopicDataFromTopicService() {
     // given
     givenAllTopicsMap();
-    var session = new SessionDTO().topic(new SessionTopicDTO().id(1));
+    var session = new SessionDTO().topic(new SessionTopicDTO().id(1L));
 
     // when
     sessionTopicEnrichmentService.enrichSessionWithTopicData(session);
@@ -42,7 +42,7 @@ class SessionTopicEnrichmentServiceTest {
       enrichSessionWithTopicData_Should_NotEnrichSessionWithTopicDataFromTopicServiceIfNoMatchingTopicFound() {
     // given
     givenAllTopicsMap();
-    var session = new SessionDTO().topic(new SessionTopicDTO().id(3));
+    var session = new SessionDTO().topic(new SessionTopicDTO().id(3L));
 
     // when
     sessionTopicEnrichmentService.enrichSessionWithTopicData(session);

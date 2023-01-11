@@ -189,7 +189,7 @@ public class Session implements TenantAware {
   private Long tenantId;
 
   @Column(name = "main_topic_id")
-  private Integer mainTopicId;
+  private Long mainTopicId;
 
   @Column(name = "user_gender")
   private String userGender;

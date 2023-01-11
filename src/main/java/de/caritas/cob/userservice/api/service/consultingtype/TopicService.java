@@ -67,7 +67,7 @@ public class TopicService {
     return allTopics.stream().collect(Collectors.toMap(TopicDTO::getId, Function.identity()));
   }
 
-  public List<String> findTopicsInternalAttributes(Collection<Integer> topicsList) {
+  public List<String> findTopicsInternalAttributes(Collection<Long> topicsList) {
     if (topicsList == null) {
       return Lists.newArrayList();
     } else {
@@ -77,15 +77,14 @@ public class TopicService {
     }
   }
 
-  public String findTopicInternalIdentifier(Integer topicId) {
+  public String findTopicInternalIdentifier(Long topicId) {
     return topicId == null ? "" : findTopicInternalIdentifierInTopicsMap(topicId).orElse("");
   }
 
-  private Optional<String> findTopicInternalIdentifierInTopicsMap(Integer topicId) {
+  private Optional<String> findTopicInternalIdentifierInTopicsMap(Long topicId) {
     Map<Long, TopicDTO> allTopicsMap = this.getAllActiveTopicsMap();
-    Long key = Long.valueOf(topicId);
-    if (allTopicsMap.containsKey(key)) {
-      return Optional.ofNullable(allTopicsMap.get(key).getInternalIdentifier());
+    if (allTopicsMap.containsKey(topicId)) {
+      return Optional.ofNullable(allTopicsMap.get(topicId).getInternalIdentifier());
     } else {
       log.warn("No topic found for a given topicId in all topics map {}", topicId);
       return Optional.empty();

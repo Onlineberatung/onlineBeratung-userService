@@ -30,7 +30,7 @@ class ConsultantSessionTopicEnrichmentServiceTest {
   void enrichSessionWithMainTopicData_Should_EnrichSessionWithTopicDataFromTopicService() {
     // given
     givenAllTopicsMap();
-    var session = new ConsultantSessionDTO().mainTopic(new SessionTopicDTO().id(1));
+    var session = new ConsultantSessionDTO().mainTopic(new SessionTopicDTO().id(1L));
 
     // when
     sessionTopicEnrichmentService.enrichSessionWithMainTopicData(session);
@@ -46,7 +46,7 @@ class ConsultantSessionTopicEnrichmentServiceTest {
       enrichSessionWithMainTopicData_Should_NotEnrichSessionWithTopicDataFromTopicServiceIfNoMatchingTopicFound() {
     // given
     givenAllTopicsMap();
-    var session = new ConsultantSessionDTO().mainTopic(new SessionTopicDTO().id(3));
+    var session = new ConsultantSessionDTO().mainTopic(new SessionTopicDTO().id(3L));
 
     // when
     sessionTopicEnrichmentService.enrichSessionWithMainTopicData(session);
@@ -91,7 +91,7 @@ class ConsultantSessionTopicEnrichmentServiceTest {
     givenAllTopicsMap();
     var session =
         new ConsultantSessionDTO()
-            .topics(List.of(new SessionTopicDTO().id(1), new SessionTopicDTO().id(2)));
+            .topics(List.of(new SessionTopicDTO().id(1L), new SessionTopicDTO().id(2L)));
 
     // when
     sessionTopicEnrichmentService.enrichSessionWithTopicsData(session);
@@ -115,9 +115,9 @@ class ConsultantSessionTopicEnrichmentServiceTest {
         new ConsultantSessionDTO()
             .topics(
                 List.of(
-                    new SessionTopicDTO().id(1),
-                    new SessionTopicDTO().id(2),
-                    new SessionTopicDTO().id(3)));
+                    new SessionTopicDTO().id(1L),
+                    new SessionTopicDTO().id(2L),
+                    new SessionTopicDTO().id(3L)));
 
     // when
     sessionTopicEnrichmentService.enrichSessionWithTopicsData(session);
