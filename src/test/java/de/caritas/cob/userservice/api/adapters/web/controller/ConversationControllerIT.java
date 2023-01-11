@@ -13,11 +13,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAnonymousEnquiryDTO;
+import de.caritas.cob.userservice.api.adapters.web.mapping.ConversationDtoMapper;
 import de.caritas.cob.userservice.api.config.auth.RoleAuthorizationAuthorityMapper;
 import de.caritas.cob.userservice.api.conversation.facade.AcceptAnonymousEnquiryFacade;
 import de.caritas.cob.userservice.api.conversation.facade.CreateAnonymousEnquiryFacade;
 import de.caritas.cob.userservice.api.conversation.facade.FinishAnonymousConversationFacade;
 import de.caritas.cob.userservice.api.conversation.service.ConversationListResolver;
+import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
+import de.caritas.cob.userservice.api.port.in.Messaging;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,6 +60,18 @@ public class ConversationControllerIT {
   @MockBean private AcceptAnonymousEnquiryFacade acceptAnonymousEnquiryFacade;
 
   @MockBean private FinishAnonymousConversationFacade finishAnonymousConversationFacade;
+
+  @SuppressWarnings("unused")
+  @MockBean
+  private ConversationDtoMapper conversationDtoMapper;
+
+  @SuppressWarnings("unused")
+  @MockBean
+  private Messaging messaging;
+
+  @SuppressWarnings("unused")
+  @MockBean
+  private AuthenticatedUser authenticatedUser;
 
   @Test
   public void getAnonymousEnquiries_Should_returnOk_When_requestParamsAreValid() throws Exception {

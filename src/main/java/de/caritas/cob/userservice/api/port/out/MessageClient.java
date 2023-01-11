@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.port.out;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public interface MessageClient {
 
@@ -17,6 +18,12 @@ public interface MessageClient {
   boolean updateUser(String chatUserId, String displayName);
 
   Optional<Boolean> isLoggedIn(String chatUserId);
+
+  Set<String> findAllAvailableUserIds();
+
+  Optional<Boolean> isAvailable(String chatUserId);
+
+  boolean setUserPresence(String username, String status);
 
   Optional<Map<String, Object>> findUser(String chatUserId);
 

@@ -43,7 +43,9 @@ public class ConsultantTest {
           null,
           ConsultantStatus.CREATED,
           false,
-          LanguageCode.de);
+          LanguageCode.de,
+          null,
+          null);
 
   @Test
   public void getFullName_Should_Return_FirstnameAndLastname() {

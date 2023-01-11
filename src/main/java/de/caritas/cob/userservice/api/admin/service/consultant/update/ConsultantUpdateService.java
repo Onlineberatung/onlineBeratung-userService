@@ -17,6 +17,7 @@ import de.caritas.cob.userservice.api.model.Language;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.appointment.AppointmentService;
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.NonNull;
@@ -81,7 +82,8 @@ public class ConsultantUpdateService {
 
   private UserUpdateRequestDTO buildUserUpdateRequestDTO(
       String rcUserId, UpdateAdminConsultantDTO updateConsultantDTO) {
-    UserUpdateDataDTO userUpdateDataDTO = new UserUpdateDataDTO(updateConsultantDTO.getEmail());
+    UserUpdateDataDTO userUpdateDataDTO =
+        new UserUpdateDataDTO(updateConsultantDTO.getEmail(), true);
     return new UserUpdateRequestDTO(rcUserId, userUpdateDataDTO);
   }
 
@@ -95,6 +97,14 @@ public class ConsultantUpdateService {
     consultant.setAbsent(updateConsultantDTO.getAbsent());
     consultant.setAbsenceMessage(updateConsultantDTO.getAbsenceMessage());
     consultant.setUpdateDate(nowInUtc());
+    if (updateConsultantDTO.getTermsAndConditionsConfirmation() != null
+        && updateConsultantDTO.getTermsAndConditionsConfirmation()) {
+      consultant.setTermsAndConditionsConfirmation(LocalDateTime.now());
+    }
+    if (updateConsultantDTO.getDataPrivacyConfirmation() != null
+        && updateConsultantDTO.getDataPrivacyConfirmation()) {
+      consultant.setDataPrivacyConfirmation(LocalDateTime.now());
+    }
 
     return this.consultantService.saveConsultant(consultant);
   }

@@ -519,8 +519,7 @@ paths:
       tags:
         - user-controller
       summary: 'Partially updates account properties of the currently authenticated user'
-      description: 'Supported fields so far are encourage2fa and displayName 
-        [Authorization: Role: consultant, user]'
+      description: 'For supported fields see PatchUserDTO [Auth: consultant, user]'
       operationId: patchUser
       requestBody:
         required: true
@@ -2559,7 +2558,11 @@ components:
           type: string
           format: email
           example: maxmuster@mann.com
-        isAbsent:
+        available:
+          description: consultants can mark themselves as not available for one-on-one chats
+          type: boolean
+        absent:
+          description: consultants can mark themselves as absent
           type: boolean
           example: false
         isFormalLanguage:
@@ -2661,6 +2664,9 @@ components:
           type: boolean
           example: true
           description: Flag that indicates does the user accepted new data privacy text
+        available:
+          description: mark consultant as (not) available for one-on-one chats, no effect on others
+          type: boolean
 
     UpdateConsultantDTO:
       type: object
@@ -2688,6 +2694,14 @@ components:
           example: de, en
           items:
             $ref: '#/components/schemas/LanguageCode'
+        termsAndConditionsConfirmation:
+          type: boolean
+          example: true
+          description: Flag that indicates has the user accepted new terms and conditions text
+        dataPrivacyConfirmation:
+          type: boolean
+          example: true
+          description: Flag that indicates does the user accepted new data privacy text
 
     LanguageCode:
       type: string

@@ -122,7 +122,7 @@ public class ValidatedUserAccountProviderTest {
     verify(this.rocketChatService, times(1))
         .updateUser(
             new UserUpdateRequestDTO(
-                consultant.getRocketChatId(), new UserUpdateDataDTO("newMail")));
+                consultant.getRocketChatId(), new UserUpdateDataDTO("newMail", true)));
     consultant.setEmail("newMail");
     verify(this.consultantService, times(1)).saveConsultant(consultant);
     verifyNoMoreInteractions(this.rocketChatService);
@@ -143,7 +143,32 @@ public class ValidatedUserAccountProviderTest {
 
     verify(keycloakService).changeEmailAddress(newMail);
     verify(this.rocketChatService, times(1))
-        .updateUser(new UserUpdateRequestDTO(user.getRcUserId(), new UserUpdateDataDTO(newMail)));
+        .updateUser(
+            new UserUpdateRequestDTO(user.getRcUserId(), new UserUpdateDataDTO(newMail, true)));
+    verify(this.appointmentService, times(1)).updateAskerEmail(user.getUserId(), newMail);
+    user.setEmail(newMail);
+    verify(this.userService, times(1)).saveUser(user);
+    verifyNoMoreInteractions(this.rocketChatService);
+    verify(this.consultantService, times(1)).getConsultant(any());
+    verifyNoMoreInteractions(this.consultantService);
+    verifyNoInteractions(userHelper);
+  }
+
+  @Test
+  public void
+      changeUserAccountEmailAddress_Should_changeNonEmptyAddressInKeycloakUserRepositoryButNotInRocketChat_When_authenticatedUserIsUserWithoutRocketChatUserId() {
+    User user = EASY_RANDOM.nextObject(User.class);
+    user.setRcUserId(null);
+    when(this.authenticatedUser.getUserId()).thenReturn("user");
+    when(this.userService.getUser("user")).thenReturn(Optional.of(user));
+
+    final String newMail = "newMail";
+    this.accountProvider.changeUserAccountEmailAddress(Optional.of(newMail));
+
+    verify(keycloakService).changeEmailAddress(newMail);
+    verify(this.rocketChatService, never())
+        .updateUser(
+            new UserUpdateRequestDTO(user.getRcUserId(), new UserUpdateDataDTO(newMail, true)));
     verify(this.appointmentService, times(1)).updateAskerEmail(user.getUserId(), newMail);
     user.setEmail(newMail);
     verify(this.userService, times(1)).saveUser(user);
@@ -170,7 +195,7 @@ public class ValidatedUserAccountProviderTest {
     verify(rocketChatService)
         .updateUser(
             new UserUpdateRequestDTO(
-                consultant.getRocketChatId(), new UserUpdateDataDTO(dummyEmail)));
+                consultant.getRocketChatId(), new UserUpdateDataDTO(dummyEmail, true)));
     consultant.setEmail(dummyEmail);
     verify(consultantService).saveConsultant(consultant);
     verifyNoMoreInteractions(rocketChatService);
@@ -194,7 +219,7 @@ public class ValidatedUserAccountProviderTest {
     verify(keycloakService, never()).changeEmailAddress(anyString());
     verify(rocketChatService)
         .updateUser(
-            new UserUpdateRequestDTO(user.getRcUserId(), new UserUpdateDataDTO(dummyEmail)));
+            new UserUpdateRequestDTO(user.getRcUserId(), new UserUpdateDataDTO(dummyEmail, true)));
     verify(this.appointmentService, times(1)).updateAskerEmail(user.getUserId(), dummyEmail);
     user.setEmail(dummyEmail);
     verify(userService).saveUser(user);

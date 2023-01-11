@@ -278,16 +278,19 @@ public class UserServiceMapper {
     return map;
   }
 
-  public Optional<Map<String, String>> mapOf(Optional<Session> optionalSession) {
+  public Optional<Map<String, Object>> mapOf(Optional<Session> optionalSession) {
     if (optionalSession.isEmpty()) {
       return Optional.empty();
     }
 
     var session = optionalSession.get();
-    var map = new ArrayMap<String, String>();
+    var map = new ArrayMap<String, Object>();
     if (nonNull(session.getGroupId())) {
       map.put("chatId", session.getGroupId());
     }
+    map.put("adviceSeekerId", session.getUser().getUserId());
+    map.put("status", session.getStatus().toString());
+    map.put("consultingTypeId", session.getConsultingTypeId());
 
     return Optional.of(map);
   }
@@ -355,6 +358,14 @@ public class UserServiceMapper {
       var notify = (Boolean) patchMap.get("notifyNewFeedbackMessageFromAdviceSeeker");
       consultant.setNotifyNewFeedbackMessageFromAdviceSeeker(notify);
     }
+    if (patchMap.containsKey("termsAndConditionsConfirmation")
+        && (Boolean) patchMap.get("termsAndConditionsConfirmation")) {
+      consultant.setTermsAndConditionsConfirmation(LocalDateTime.now());
+    }
+    if (patchMap.containsKey("dataPrivacyConfirmation")
+        && (Boolean) patchMap.get("dataPrivacyConfirmation")) {
+      consultant.setDataPrivacyConfirmation(LocalDateTime.now());
+    }
 
     return consultant;
   }
@@ -418,5 +429,9 @@ public class UserServiceMapper {
 
   public List<String> chatUserIdOf(List<Map<String, String>> groupMembers) {
     return groupMembers.stream().map(map -> map.get("chatUserId")).collect(Collectors.toList());
+  }
+
+  public String statusOf(boolean available) {
+    return available ? "online" : "busy";
   }
 }
