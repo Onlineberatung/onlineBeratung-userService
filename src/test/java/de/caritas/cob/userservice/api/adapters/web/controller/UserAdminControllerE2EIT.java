@@ -2,7 +2,7 @@ package de.caritas.cob.userservice.api.adapters.web.controller;
 
 import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.TENANT_ADMIN_PATH;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.*;
-import static java.util.Objects.nonNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -17,7 +17,6 @@ import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserRe
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateTenantAdminDTO;
-import de.caritas.cob.userservice.api.config.VideoChatConfig;
 import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.apiclient.ConsultingTypeServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.apiclient.MailServiceApiControllerFactory;
@@ -25,31 +24,17 @@ import de.caritas.cob.userservice.api.config.apiclient.TopicServiceApiController
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.helper.UserVerifier;
-import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
-import de.caritas.cob.userservice.api.model.Chat;
-import de.caritas.cob.userservice.api.model.ChatAgency;
-import de.caritas.cob.userservice.api.model.Consultant;
-import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.Admin;
 import de.caritas.cob.userservice.api.model.User;
-import de.caritas.cob.userservice.api.model.UserAgency;
-import de.caritas.cob.userservice.api.port.out.ChatAgencyRepository;
-import de.caritas.cob.userservice.api.port.out.ChatRepository;
-import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
-import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
+import de.caritas.cob.userservice.api.port.out.AdminRepository;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
-import de.caritas.cob.userservice.api.port.out.SessionRepository;
-import de.caritas.cob.userservice.api.port.out.UserAgencyRepository;
-import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.testConfig.TestAgencyControllerApi;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.ConsultingTypeControllerApi;
 import de.caritas.cob.userservice.mailservice.generated.web.MailsControllerApi;
 import de.caritas.cob.userservice.topicservice.generated.web.TopicControllerApi;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.LinkedHashMap;
 import javax.servlet.http.Cookie;
+import net.minidev.json.JSONArray;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -82,35 +67,18 @@ class UserAdminControllerE2EIT {
   private static final String CSRF_HEADER = "csrfHeader";
   private static final String CSRF_VALUE = "test";
   private static final Cookie CSRF_COOKIE = new Cookie("csrfCookie", CSRF_VALUE);
+  public static final int PAGE_SIZE = 10;
   @Autowired private MockMvc mockMvc;
 
   @Autowired private ObjectMapper objectMapper;
-
-  @Autowired private UsernameTranscoder usernameTranscoder;
-
-  @Autowired private ConsultantRepository consultantRepository;
-
-  @Autowired private ConsultantAgencyRepository consultantAgencyRepository;
-
-  @Autowired private UserRepository userRepository;
-
-  @Autowired private ChatRepository chatRepository;
-
-  @Autowired private ChatAgencyRepository chatAgencyRepository;
-
-  @Autowired private UserAgencyRepository userAgencyRepository;
 
   @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
   private ConsultingTypeControllerApi consultingTypeControllerApi;
 
-  @Autowired private VideoChatConfig videoChatConfig;
-
   @Autowired private IdentityConfig identityConfig;
 
-  @Autowired private SessionRepository sessionRepository;
-
-  @Autowired private UserVerifier userVerifier;
+  @Autowired private AdminRepository adminRepository;
 
   @MockBean private AuthenticatedUser authenticatedUser;
 
@@ -150,46 +118,9 @@ class UserAdminControllerE2EIT {
   @MockBean IdentityClient identityClient;
 
   private User user;
-  private Set<Consultant> consultantsToReset = new HashSet<>();
-  private List<ConsultantAgency> consultantAgencies = new ArrayList<>();
-  private Chat chat;
-  private ChatAgency chatAgency;
-  private UserAgency userAgency;
 
   @AfterEach
   void reset() {
-    if (nonNull(user)) {
-      user.setDeleteDate(null);
-      userRepository.save(user);
-      user = null;
-    }
-
-    consultantsToReset.forEach(
-        consultantToReset -> {
-          consultantToReset.setLanguages(null);
-          consultantToReset.setNotifyEnquiriesRepeating(true);
-          consultantToReset.setNotifyNewChatMessageFromAdviceSeeker(true);
-          consultantToReset.setNotifyNewFeedbackMessageFromAdviceSeeker(true);
-          consultantRepository.save(consultantToReset);
-        });
-    consultantsToReset = new HashSet<>();
-    consultantAgencyRepository.deleteAll(consultantAgencies);
-    consultantAgencies = new ArrayList<>();
-
-    if (nonNull(chat) && chatRepository.existsById(chat.getId())) {
-      chatRepository.deleteById(chat.getId());
-    }
-    chat = null;
-    if (nonNull(chatAgency) && chatAgencyRepository.existsById(chatAgency.getId())) {
-      chatAgencyRepository.deleteById(chatAgency.getId());
-    }
-    chatAgency = null;
-    if (nonNull(userAgency) && userAgencyRepository.existsById(userAgency.getId())) {
-      userAgencyRepository.deleteById(userAgency.getId());
-    }
-    userAgency = null;
-    videoChatConfig.setE2eEncryptionEnabled(false);
-
     identityConfig.setDisplayNameAllowedForConsultants(false);
   }
 
@@ -318,6 +249,39 @@ class UserAdminControllerE2EIT {
         .andExpect(jsonPath("_embedded.firstname", is("Ceil")))
         .andExpect(jsonPath("_embedded.lastname", is("Genney")))
         .andExpect(jsonPath("_embedded.email", is("cgenney5@imageshack.us")));
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.TENANT_ADMIN})
+  public void searchTenantAdmin_Should_returnOk_When_attemptedToGetTenantWithTenantAdminAuthority()
+      throws Exception {
+    // when, then
+    MvcResult mvcResult =
+        this.mockMvc
+            .perform(
+                get(
+                    "/useradmin/tenantadmins/search?query=*&page=1&perPage=10&order=ASC&field=FIRSTNAME"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("_embedded", hasSize(PAGE_SIZE)))
+            .andReturn();
+
+    String contentAsString = mvcResult.getResponse().getContentAsString();
+    JSONArray embedded = JsonPath.read(contentAsString, "_embedded");
+
+    assertAllElementsAreOfAdminTypeTenant(embedded);
+  }
+
+  private void assertAllElementsAreOfAdminTypeTenant(JSONArray embedded) {
+    for (int i = 0; i < PAGE_SIZE; i++) {
+      String tenantId = extractTenantWithOrderInList(embedded, i).get("id");
+      assertThat(adminRepository.findByIdAndType(tenantId, Admin.AdminType.TENANT).isPresent())
+          .isTrue();
+    }
+  }
+
+  private static LinkedHashMap<String, String> extractTenantWithOrderInList(
+      JSONArray embedded, int i) {
+    return (LinkedHashMap<String, String>) ((LinkedHashMap) embedded.get(i)).get("_embedded");
   }
 
   @Test

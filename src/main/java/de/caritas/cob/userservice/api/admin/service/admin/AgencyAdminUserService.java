@@ -64,7 +64,8 @@ public class AgencyAdminUserService {
   }
 
   public Map<String, Object> findAgencyAdminsByInfix(String infix, PageRequest pageRequest) {
-    Page<AdminBase> adminsPage = retrieveAdminService.findAllByInfix(infix, pageRequest);
+    Page<AdminBase> adminsPage =
+        retrieveAdminService.findAllByInfix(infix, Admin.AdminType.AGENCY, pageRequest);
     var adminIds = adminsPage.stream().map(AdminBase::getId).collect(Collectors.toSet());
     var fullAdmins = retrieveAdminService.findAllById(adminIds);
 

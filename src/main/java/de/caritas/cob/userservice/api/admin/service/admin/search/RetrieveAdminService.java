@@ -27,7 +27,7 @@ public class RetrieveAdminService {
   private final @NonNull AdminAgencyRepository adminAgencyRepository;
 
   public Admin findAdmin(final String adminId, Admin.AdminType adminType) {
-    Optional<Admin> byId = this.adminRepository.findById(adminId);
+    Optional<Admin> byId = this.adminRepository.findByIdAndType(adminId, adminType);
     return byId.filter(admin -> admin.getType().equals(adminType))
         .orElseThrow(
             () -> new NoContentException(String.format(AGENCY_ADMIN_WITH_ID_S_NOT_FOUND, adminId)));
@@ -44,8 +44,9 @@ public class RetrieveAdminService {
         .collect(Collectors.toList());
   }
 
-  public Page<AdminBase> findAllByInfix(String infix, PageRequest pageRequest) {
-    return adminRepository.findAllByInfix(infix, pageRequest);
+  public Page<AdminBase> findAllByInfix(
+      String infix, Admin.AdminType adminType, PageRequest pageRequest) {
+    return adminRepository.findAllByInfix(infix, adminType, pageRequest);
   }
 
   public List<Admin> findAllById(Set<String> adminIds) {

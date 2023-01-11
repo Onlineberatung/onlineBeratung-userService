@@ -23,7 +23,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAgencyAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateTenantAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ViolationDTO;
-import de.caritas.cob.userservice.api.adapters.web.mapping.AdminAgencyDtoMapper;
+import de.caritas.cob.userservice.api.adapters.web.mapping.AdminDtoMapper;
 import de.caritas.cob.userservice.api.admin.facade.AdminUserFacade;
 import de.caritas.cob.userservice.api.admin.facade.AskerUserAdminFacade;
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
@@ -58,7 +58,7 @@ public class UserAdminController implements UseradminApi {
   private final @NonNull AskerUserAdminFacade askerUserAdminFacade;
   private final @NonNull AdminUserFacade adminUserFacade;
   private final @NonNull AppointmentService appointmentService;
-  private final @NonNull AdminAgencyDtoMapper adminAgencyDtoMapper;
+  private final @NonNull AdminDtoMapper adminDtoMapper;
 
   /**
    * Creates the root hal based navigation entity.
@@ -354,12 +354,25 @@ public class UserAdminController implements UseradminApi {
       String query, Integer page, Integer perPage, String field, String order) {
     var decodedInfix = URLDecoder.decode(query, StandardCharsets.UTF_8).trim();
     var isAscending = order.equalsIgnoreCase("asc");
-    var mappedField = adminAgencyDtoMapper.mappedFieldOf(field);
+    var mappedField = adminDtoMapper.mappedFieldOf(field);
     var resultMap =
         adminUserFacade.findAgencyAdminsByInfix(
             decodedInfix, page - 1, perPage, mappedField, isAscending);
-    var result =
-        adminAgencyDtoMapper.adminSearchResultOf(resultMap, query, page, perPage, field, order);
+    var result = adminDtoMapper.adminSearchResultOf(resultMap, query, page, perPage, field, order);
+
+    return ResponseEntity.ok(result);
+  }
+
+  @Override
+  public ResponseEntity<AdminSearchResultDTO> searchTenantAdmins(
+      String query, Integer page, Integer perPage, String field, String order) {
+    var decodedInfix = URLDecoder.decode(query, StandardCharsets.UTF_8).trim();
+    var isAscending = order.equalsIgnoreCase("asc");
+    var mappedField = adminDtoMapper.mappedFieldOf(field);
+    var resultMap =
+        adminUserFacade.findTenantAdminsByInfix(
+            decodedInfix, page - 1, perPage, mappedField, isAscending);
+    var result = adminDtoMapper.adminSearchResultOf(resultMap, query, page, perPage, field, order);
 
     return ResponseEntity.ok(result);
   }

@@ -19,7 +19,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AdminAgencyDtoMapper implements DtoMapperUtils {
+public class AdminDtoMapper implements DtoMapperUtils {
 
   public AdminSearchResultDTO adminSearchResultOf(
       Map<String, Object> resultMap,

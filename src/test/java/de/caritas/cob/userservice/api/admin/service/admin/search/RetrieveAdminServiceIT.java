@@ -68,16 +68,31 @@ public class RetrieveAdminServiceIT {
   }
 
   @Test
-  public void findAllByInfix_Should_returnCorrectAdmin_When_correctIdInfix() {
+  public void findAllByInfix_Should_returnCorrectAgencyAdmin_When_correctIdInfix() {
     // given
     PageRequest pageable = PageRequest.of(0, 10);
 
     // when
-    Page<AdminBase> admins = retrieveAdminService.findAllByInfix("Jeffy", pageable);
+    Page<AdminBase> admins =
+        retrieveAdminService.findAllByInfix("Jeffy", Admin.AdminType.AGENCY, pageable);
 
     // then
     assertThat(admins, notNullValue());
-    assertThat(admins.getTotalElements(), is(4L));
+    assertThat(admins.getTotalElements(), is(3L));
+  }
+
+  @Test
+  public void findAllByInfix_Should_returnCorrectTenantAdmin_When_correctIdInfix() {
+    // given
+    PageRequest pageable = PageRequest.of(0, 10);
+
+    // when
+    Page<AdminBase> admins =
+        retrieveAdminService.findAllByInfix("Jeffy", Admin.AdminType.TENANT, pageable);
+
+    // then
+    assertThat(admins, notNullValue());
+    assertThat(admins.getTotalElements(), is(1L));
   }
 
   @Test

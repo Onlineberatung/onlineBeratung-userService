@@ -56,6 +56,7 @@ public class RetrieveAdminServiceTenantAwareIT {
   @Test
   public void findAgencyAdmin_Should_returnCorrectAdmin_When_correctIdIsProvided() {
     // given
+    TenantContext.setCurrentTenant(2L);
     // when
     Admin admin = retrieveAdminService.findAdmin(VALID_AGENCY_ADMIN_ID, Admin.AdminType.AGENCY);
 
@@ -69,6 +70,7 @@ public class RetrieveAdminServiceTenantAwareIT {
       findAgencyAdmin_Should_throwNoContentException_When_validAgencyAdminIsProvidedButTypeDoesNotMatch() {
     // given
     // when
+    TenantContext.setCurrentTenant(2L);
     assertThrows(
         NoContentException.class,
         () -> retrieveAdminService.findAdmin(VALID_AGENCY_ADMIN_ID, Admin.AdminType.TENANT));
@@ -77,6 +79,7 @@ public class RetrieveAdminServiceTenantAwareIT {
   @Test
   public void findAgencyAdmin_Should_returnCorrectTenantAdmin_When_correctIdIsProvided() {
     // given
+    TenantContext.setCurrentTenant(0L);
     // when
     Admin admin = retrieveAdminService.findAdmin(VALID_TENANT_ADMIN_ID, Admin.AdminType.TENANT);
 
@@ -89,6 +92,7 @@ public class RetrieveAdminServiceTenantAwareIT {
   public void
       findAgencyAdmin_Should_throwNoContentException_When_validTenantAdminIsProvidedButTypeDoesNotMatch() {
     // given
+    TenantContext.setCurrentTenant(0L);
     // when
     assertThrows(
         NoContentException.class,
@@ -124,7 +128,8 @@ public class RetrieveAdminServiceTenantAwareIT {
     PageRequest pageable = PageRequest.of(0, 10);
 
     // when
-    Page<AdminBase> admins = retrieveAdminService.findAllByInfix("Jeffy", pageable);
+    Page<AdminBase> admins =
+        retrieveAdminService.findAllByInfix("Jeffy", Admin.AdminType.AGENCY, pageable);
 
     // then
     assertThat(admins, notNullValue());
@@ -137,11 +142,12 @@ public class RetrieveAdminServiceTenantAwareIT {
     PageRequest pageable = PageRequest.of(0, 10);
     TenantContext.setCurrentTenant(2L);
     // when
-    Page<AdminBase> admins = retrieveAdminService.findAllByInfix("Jeffy", pageable);
+    Page<AdminBase> admins =
+        retrieveAdminService.findAllByInfix("Jeffy", Admin.AdminType.AGENCY, pageable);
 
     // then
     assertThat(admins, notNullValue());
-    assertThat(admins.getTotalElements(), is(3L));
+    assertThat(admins.getTotalElements(), is(2L));
   }
 
   @Test

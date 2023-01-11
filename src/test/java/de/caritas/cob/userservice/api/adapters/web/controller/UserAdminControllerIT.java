@@ -23,7 +23,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantAgencyDTO
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAgencyAdminDTO;
-import de.caritas.cob.userservice.api.adapters.web.mapping.AdminAgencyDtoMapper;
+import de.caritas.cob.userservice.api.adapters.web.mapping.AdminDtoMapper;
 import de.caritas.cob.userservice.api.admin.facade.AdminUserFacade;
 import de.caritas.cob.userservice.api.admin.facade.AskerUserAdminFacade;
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
@@ -72,7 +72,6 @@ public class UserAdminControllerIT {
   protected static final String AGENCY_ADMIN_PATH = ROOT_PATH + "/agencyadmins/";
 
   protected static final String TENANT_ADMIN_PATH = ROOT_PATH + "/tenantadmins/";
-  protected static final String SEARCH_AGENCY_ADMIN_PATH = AGENCY_ADMIN_PATH + "/search/";
   protected static final String DELETE_AGENCY_ADMIN_PATH = AGENCY_ADMIN_PATH + "%s";
   protected static final String AGENCIES_OF_ADMIN_PATH = ROOT_PATH + "/agencyadmins/%s/agencies";
   protected static final String DELETE_ADMIN_AGENCY_PATH = AGENCIES_OF_ADMIN_PATH + "/%s";
@@ -107,7 +106,7 @@ public class UserAdminControllerIT {
 
   @MockBean private AdminUserFacade adminUserFacade;
 
-  @MockBean private AdminAgencyDtoMapper adminAgencyDtoMapper;
+  @MockBean private AdminDtoMapper adminDtoMapper;
 
   @MockBean private AuthenticatedUser authenticatedUser;
 

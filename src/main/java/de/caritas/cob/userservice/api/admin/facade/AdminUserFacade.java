@@ -115,4 +115,15 @@ public class AdminUserFacade {
     var pageRequest = PageRequest.of(pageNumber, pageSize, direction, fieldName);
     return this.agencyAdminUserService.findAgencyAdminsByInfix(infix, pageRequest);
   }
+
+  public Map<String, Object> findTenantAdminsByInfix(
+      final String infix,
+      final int pageNumber,
+      final int pageSize,
+      final String fieldName,
+      final boolean isAscending) {
+    var direction = isAscending ? Direction.ASC : Direction.DESC;
+    var pageRequest = PageRequest.of(pageNumber, pageSize, direction, fieldName);
+    return this.tenantAdminUserService.findTenantAdminsByInfix(infix, pageRequest);
+  }
 }

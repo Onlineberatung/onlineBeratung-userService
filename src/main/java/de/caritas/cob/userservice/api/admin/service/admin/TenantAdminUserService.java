@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.admin.service.admin;
 
+import com.google.common.collect.Lists;
 import de.caritas.cob.userservice.api.UserServiceMapper;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminDTO;
@@ -10,7 +11,6 @@ import de.caritas.cob.userservice.api.admin.service.admin.search.RetrieveAdminSe
 import de.caritas.cob.userservice.api.admin.service.admin.update.UpdateAdminService;
 import de.caritas.cob.userservice.api.model.Admin;
 import de.caritas.cob.userservice.api.model.Admin.AdminBase;
-import de.caritas.cob.userservice.api.model.AdminAgency.AdminAgencyBase;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -51,20 +51,13 @@ public class TenantAdminUserService {
     this.deleteAdminService.deleteTenantAdmin(adminId);
   }
 
-  public Map<String, Object> findAgencyAdminsByInfix(String infix, PageRequest pageRequest) {
-    Page<AdminBase> adminsPage = retrieveAdminService.findAllByInfix(infix, pageRequest);
+  public Map<String, Object> findTenantAdminsByInfix(String infix, PageRequest pageRequest) {
+    Page<AdminBase> adminsPage =
+        retrieveAdminService.findAllByInfix(infix, Admin.AdminType.TENANT, pageRequest);
     var adminIds = adminsPage.stream().map(AdminBase::getId).collect(Collectors.toSet());
     var fullAdmins = retrieveAdminService.findAllById(adminIds);
 
-    var agenciesOfAdmin = retrieveAdminService.agenciesOfAdmin(adminIds);
-    var agencyIds =
-        agenciesOfAdmin.stream()
-            .map(AdminAgencyBase::getAgencyId)
-            .distinct()
-            .collect(Collectors.toList());
-
-    var agencies = agencyService.getAgenciesWithoutCaching(agencyIds);
-
-    return userServiceMapper.mapOfAdmin(adminsPage, fullAdmins, agencies, agenciesOfAdmin);
+    return userServiceMapper.mapOfAdmin(
+        adminsPage, fullAdmins, Lists.newArrayList(), Lists.newArrayList());
   }
 }
