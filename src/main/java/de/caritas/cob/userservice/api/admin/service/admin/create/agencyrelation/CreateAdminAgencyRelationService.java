@@ -25,7 +25,7 @@ public class CreateAdminAgencyRelationService {
 
   public void create(
       final String adminId, final CreateAdminAgencyRelationDTO createAdminAgencyRelationDTO) {
-    var admin = retrieveAdminService.findAgencyAdmin(adminId);
+    var admin = retrieveAdminService.findAdmin(adminId, Admin.AdminType.AGENCY);
     var agency = retrieveAgency(createAdminAgencyRelationDTO.getAgencyId());
     adminAgencyRepository.save(buildAdminAgency(admin, agency.getId()));
   }

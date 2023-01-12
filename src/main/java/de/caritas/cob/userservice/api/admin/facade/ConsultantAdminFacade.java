@@ -49,7 +49,7 @@ public class ConsultantAdminFacade {
   private final @NonNull ConsultantAgencyRelationCreatorService
       consultantAgencyRelationCreatorService;
 
-  private final @NonNull AdminAgencyFacade adminAgencyFacade;
+  private final @NonNull AdminUserFacade adminUserFacade;
 
   private final @NonNull AuthenticatedUser authenticatedUser;
 
@@ -289,7 +289,7 @@ public class ConsultantAdminFacade {
   public void checkPermissionsToAssignedAgencies(List<CreateConsultantAgencyDTO> agencyList) {
     if (authenticatedUser.hasRestrictedAgencyPriviliges()) {
       List<Long> adminUserAgencyIds =
-          adminAgencyFacade.findAdminUserAgencyIds(authenticatedUser.getUserId());
+          adminUserFacade.findAdminUserAgencyIds(authenticatedUser.getUserId());
       List<Long> agencyIdsFromTheRequest =
           agencyList.stream()
               .map(createConsultantAgencyDTO -> createConsultantAgencyDTO.getAgencyId())

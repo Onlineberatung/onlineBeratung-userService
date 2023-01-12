@@ -6,8 +6,8 @@ import de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControlle
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminLinks;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.AdminSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyAdminResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.AgencyAdminSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.HalLink;
 import de.caritas.cob.userservice.api.adapters.web.dto.HalLink.MethodEnum;
 import de.caritas.cob.userservice.api.adapters.web.dto.PaginationLinks;
@@ -19,9 +19,9 @@ import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AdminAgencyDtoMapper implements DtoMapperUtils {
+public class AdminDtoMapper implements DtoMapperUtils {
 
-  public AgencyAdminSearchResultDTO agencyAdminSearchResultOf(
+  public AdminSearchResultDTO adminSearchResultOf(
       Map<String, Object> resultMap,
       String query,
       Integer page,
@@ -39,7 +39,7 @@ public class AdminAgencyDtoMapper implements DtoMapperUtils {
           admins.add(response);
         });
 
-    var result = new AgencyAdminSearchResultDTO();
+    var result = new AdminSearchResultDTO();
     result.setTotal((Integer) resultMap.get("totalElements"));
     result.setEmbedded(admins);
 
