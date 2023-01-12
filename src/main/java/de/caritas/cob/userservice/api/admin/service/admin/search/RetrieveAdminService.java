@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class RetrieveAdminService {
 
-  public static final String AGENCY_ADMIN_WITH_ID_S_NOT_FOUND = "Agency Admin with id %s not found";
+  public static final String ADMIN_WITH_ID_S_NOT_FOUND = "Admin with id %s not found";
   private final @NonNull AdminRepository adminRepository;
   private final @NonNull AdminAgencyRepository adminAgencyRepository;
 
@@ -30,13 +30,13 @@ public class RetrieveAdminService {
     Optional<Admin> byId = this.adminRepository.findByIdAndType(adminId, adminType);
     return byId.filter(admin -> admin.getType().equals(adminType))
         .orElseThrow(
-            () -> new NoContentException(String.format(AGENCY_ADMIN_WITH_ID_S_NOT_FOUND, adminId)));
+            () -> new NoContentException(String.format(ADMIN_WITH_ID_S_NOT_FOUND, adminId)));
   }
 
   public List<Long> findAgencyIdsOfAdmin(final String adminId) {
     final Optional<Admin> admin = adminRepository.findById(adminId);
     if (admin.isEmpty()) {
-      throw new BadRequestException(String.format(AGENCY_ADMIN_WITH_ID_S_NOT_FOUND, adminId));
+      throw new BadRequestException(String.format(ADMIN_WITH_ID_S_NOT_FOUND, adminId));
     }
 
     return adminAgencyRepository.findByAdminId(adminId).stream()
