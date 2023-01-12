@@ -56,8 +56,15 @@ public class CreateAdminService {
     identityClient.updatePassword(keycloakUserId, password);
     getDefaultRoles(adminType).stream()
         .forEach(role -> identityClient.updateRole(keycloakUserId, role));
-    assignCurrentTenantContext(createAdminDTO);
+    assignCurrentTenantContextForAgencyAdmins(createAdminDTO, adminType);
     return adminRepository.save(buildAdmin(createAdminDTO, adminType, keycloakUserId));
+  }
+
+  private void assignCurrentTenantContextForAgencyAdmins(
+      CreateAdminDTO createAdminDTO, Admin.AdminType adminType) {
+    if (adminType == Admin.AdminType.AGENCY) {
+      assignCurrentTenantContext(createAdminDTO);
+    }
   }
 
   private String createKeycloakUser(final CreateAdminDTO createAgencyAdminDTO) {
@@ -103,8 +110,12 @@ public class CreateAdminService {
   }
 
   private void assignCurrentTenantContext(CreateAdminDTO createAgencyAdminDTO) {
-    if (multiTenancyEnabled) {
+    if (multiTenancyEnabled && !isTechnicalTenant(TenantContext.getCurrentTenant())) {
       createAgencyAdminDTO.setTenantId(TenantContext.getCurrentTenant().intValue());
     }
+  }
+
+  private boolean isTechnicalTenant(Long tenantId) {
+    return tenantId != null && tenantId.equals(0L);
   }
 }
