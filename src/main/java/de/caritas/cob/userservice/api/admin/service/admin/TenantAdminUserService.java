@@ -34,8 +34,8 @@ public class TenantAdminUserService {
   private final @NonNull AgencyService agencyService;
 
   public AdminResponseDTO createNewTenantAdmin(final CreateAdminDTO createTenantAdminDTO) {
-    final Admin newAdmin = createAdminService.createNewTenantAdmin(createTenantAdminDTO);
     validateCreateAdmin(createTenantAdminDTO);
+    final Admin newAdmin = createAdminService.createNewTenantAdmin(createTenantAdminDTO);
     return AdminResponseDTOBuilder.getInstance(newAdmin).buildAgencyAdminResponseDTO();
   }
 
