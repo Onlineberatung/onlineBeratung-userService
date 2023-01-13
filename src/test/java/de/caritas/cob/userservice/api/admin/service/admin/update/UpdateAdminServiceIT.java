@@ -47,7 +47,7 @@ public class UpdateAdminServiceIT {
 
     // when
     Admin updatedAdmin = updateAdminService.updateAgencyAdmin(VALID_ADMIN_ID, updateAgencyAdminDTO);
-    Admin admin = retrieveAdminService.findAgencyAdmin(VALID_ADMIN_ID);
+    Admin admin = retrieveAdminService.findAdmin(VALID_ADMIN_ID, Admin.AdminType.AGENCY);
 
     // then
     assertThat(updatedAdmin, notNullValue());

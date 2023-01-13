@@ -2,8 +2,9 @@ package de.caritas.cob.userservice.api.admin.service.admin.create;
 
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 
+import com.google.common.collect.Lists;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.CreateAgencyAdminDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
@@ -13,6 +14,7 @@ import de.caritas.cob.userservice.api.model.Admin;
 import de.caritas.cob.userservice.api.port.out.AdminRepository;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
+import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,18 +32,42 @@ public class CreateAdminService {
   private final @NonNull UserHelper userHelper;
   private final @NonNull AdminRepository adminRepository;
 
-  public Admin createNewAdmin(final CreateAgencyAdminDTO createAgencyAdminDTO) {
-    final String keycloakUserId = createKeycloakUser(createAgencyAdminDTO);
-    final String password = userHelper.getRandomPassword();
-    identityClient.updatePassword(keycloakUserId, password);
-    identityClient.updateRole(keycloakUserId, UserRole.RESTRICTED_AGENCY_ADMIN);
-    identityClient.updateRole(keycloakUserId, UserRole.USER_ADMIN);
-    assignCurrentTenantContext(createAgencyAdminDTO);
-
-    return adminRepository.save(buildAdmin(createAgencyAdminDTO, keycloakUserId));
+  public Admin createNewAgencyAdmin(CreateAdminDTO createAgencyAdminDTO) {
+    return createNewAdmin(createAgencyAdminDTO, Admin.AdminType.AGENCY);
   }
 
-  private String createKeycloakUser(final CreateAgencyAdminDTO createAgencyAdminDTO) {
+  public Admin createNewTenantAdmin(CreateAdminDTO createAgencyAdminDTO) {
+    return createNewAdmin(createAgencyAdminDTO, Admin.AdminType.TENANT);
+  }
+
+  List<UserRole> getDefaultRoles(Admin.AdminType adminType) {
+    if (Admin.AdminType.AGENCY.equals(adminType)) {
+      return Lists.newArrayList(UserRole.RESTRICTED_AGENCY_ADMIN, UserRole.USER_ADMIN);
+    }
+    if (Admin.AdminType.TENANT.equals(adminType)) {
+      return Lists.newArrayList(UserRole.USER_ADMIN, UserRole.SINGLE_TENANT_ADMIN);
+    }
+    return Lists.newArrayList();
+  }
+
+  public Admin createNewAdmin(final CreateAdminDTO createAdminDTO, Admin.AdminType adminType) {
+    final String keycloakUserId = createKeycloakUser(createAdminDTO);
+    final String password = userHelper.getRandomPassword();
+    identityClient.updatePassword(keycloakUserId, password);
+    getDefaultRoles(adminType).stream()
+        .forEach(role -> identityClient.updateRole(keycloakUserId, role));
+    assignCurrentTenantContextForAgencyAdmins(createAdminDTO, adminType);
+    return adminRepository.save(buildAdmin(createAdminDTO, adminType, keycloakUserId));
+  }
+
+  private void assignCurrentTenantContextForAgencyAdmins(
+      CreateAdminDTO createAdminDTO, Admin.AdminType adminType) {
+    if (adminType == Admin.AdminType.AGENCY) {
+      assignCurrentTenantContext(createAdminDTO);
+    }
+  }
+
+  private String createKeycloakUser(final CreateAdminDTO createAgencyAdminDTO) {
     final UserDTO userDto = buildValidatedUserDTO(createAgencyAdminDTO);
 
     final KeycloakCreateUserResponseDTO response =
@@ -52,7 +78,7 @@ public class CreateAdminService {
     return response.getUserId();
   }
 
-  private UserDTO buildValidatedUserDTO(final CreateAgencyAdminDTO createAgencyAdminDTO) {
+  private UserDTO buildValidatedUserDTO(final CreateAdminDTO createAgencyAdminDTO) {
     UserDTO userDto = new UserDTO();
     userDto.setUsername(
         new UsernameTranscoder().encodeUsername(createAgencyAdminDTO.getUsername()));
@@ -66,11 +92,13 @@ public class CreateAdminService {
   }
 
   private Admin buildAdmin(
-      final CreateAgencyAdminDTO createAgencyAdminDTO, final String keycloakUserId) {
+      final CreateAdminDTO createAgencyAdminDTO,
+      Admin.AdminType adminType,
+      final String keycloakUserId) {
     final Integer tenantId = createAgencyAdminDTO.getTenantId();
     return Admin.builder()
         .id(keycloakUserId)
-        .type(Admin.AdminType.AGENCY)
+        .type(adminType)
         .tenantId(tenantId == null ? null : Long.valueOf(tenantId))
         .username(createAgencyAdminDTO.getUsername())
         .firstName(createAgencyAdminDTO.getFirstname())
@@ -81,9 +109,13 @@ public class CreateAdminService {
         .build();
   }
 
-  private void assignCurrentTenantContext(CreateAgencyAdminDTO createAgencyAdminDTO) {
-    if (multiTenancyEnabled) {
+  private void assignCurrentTenantContext(CreateAdminDTO createAgencyAdminDTO) {
+    if (multiTenancyEnabled && !isTechnicalTenant(TenantContext.getCurrentTenant())) {
       createAgencyAdminDTO.setTenantId(TenantContext.getCurrentTenant().intValue());
     }
+  }
+
+  private boolean isTechnicalTenant(Long tenantId) {
+    return tenantId != null && tenantId.equals(0L);
   }
 }

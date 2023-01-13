@@ -27,8 +27,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
+import de.caritas.cob.userservice.api.admin.facade.AskerUserAdminFacade;
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
-import de.caritas.cob.userservice.api.admin.facade.UserAdminFacade;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
@@ -73,7 +73,7 @@ public class UserAdminControllerAuthorizationIT {
 
   @MockBean private ConsultantAdminFacade consultantAdminFacade;
 
-  @MockBean private UserAdminFacade userAdminFacade;
+  @MockBean private AskerUserAdminFacade askerUserAdminFacade;
 
   @Test
   public void
@@ -732,7 +732,7 @@ public class UserAdminControllerAuthorizationIT {
     mvc.perform(delete(DELETE_ASKER_PATH).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
-    verifyNoMoreInteractions(userAdminFacade);
+    verifyNoMoreInteractions(askerUserAdminFacade);
   }
 
   @Test
@@ -754,7 +754,7 @@ public class UserAdminControllerAuthorizationIT {
     mvc.perform(delete(DELETE_ASKER_PATH).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(userAdminFacade);
+    verifyNoMoreInteractions(askerUserAdminFacade);
   }
 
   @Test
@@ -764,7 +764,7 @@ public class UserAdminControllerAuthorizationIT {
     mvc.perform(delete(DELETE_ASKER_PATH).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(this.userAdminFacade, times(1)).markAskerForDeletion(any());
+    verify(this.askerUserAdminFacade, times(1)).markAskerForDeletion(any());
   }
 
   @Test

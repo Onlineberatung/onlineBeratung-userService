@@ -4,13 +4,15 @@ import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminFilter;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.AgencyAdminSearchResultDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.AdminSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminAgencyRelationDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.CreateAgencyAdminDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.Sort;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAgencyAdminDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UpdateTenantAdminDTO;
 import de.caritas.cob.userservice.api.admin.service.admin.AdminAgencyRelationService;
-import de.caritas.cob.userservice.api.admin.service.admin.AdminAgencyService;
+import de.caritas.cob.userservice.api.admin.service.admin.AgencyAdminUserService;
+import de.caritas.cob.userservice.api.admin.service.admin.TenantAdminUserService;
 import de.caritas.cob.userservice.api.admin.service.admin.search.AdminFilterService;
 import java.util.List;
 import java.util.Map;
@@ -23,31 +25,50 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class AdminAgencyFacade {
+public class AdminUserFacade {
 
-  private final @NonNull AdminAgencyService adminAgencyService;
+  private final @NonNull AgencyAdminUserService agencyAdminUserService;
+
+  private final @NonNull TenantAdminUserService tenantAdminUserService;
   private final @NonNull AdminAgencyRelationService adminAgencyRelationService;
   private final @NonNull AdminFilterService adminFilterService;
 
-  public AdminResponseDTO createNewAdminAgency(final CreateAgencyAdminDTO createAgencyAdminDTO) {
-    return this.adminAgencyService.createNewAdminAgency(createAgencyAdminDTO);
+  public AdminResponseDTO createNewTenantAdmin(final CreateAdminDTO createAgencyAdminDTO) {
+    return this.tenantAdminUserService.createNewTenantAdmin(createAgencyAdminDTO);
+  }
+
+  public AdminResponseDTO createNewAgencyAdmin(final CreateAdminDTO createAgencyAdminDTO) {
+    return this.agencyAdminUserService.createNewAgencyAdmin(createAgencyAdminDTO);
   }
 
   public AdminResponseDTO findAgencyAdmin(final String adminId) {
-    return this.adminAgencyService.findAgencyAdmin(adminId);
+    return this.agencyAdminUserService.findAgencyAdmin(adminId);
+  }
+
+  public AdminResponseDTO findTenantAdmin(final String adminId) {
+    return this.tenantAdminUserService.findTenantAdmin(adminId);
+  }
+
+  public AdminResponseDTO updateTenantAdmin(
+      final String adminId, final UpdateTenantAdminDTO updateTenantAdminDTO) {
+    return this.tenantAdminUserService.updateTenantAdmin(adminId, updateTenantAdminDTO);
   }
 
   public AdminResponseDTO updateAgencyAdmin(
       final String adminId, final UpdateAgencyAdminDTO updateAgencyAdminDTO) {
-    return this.adminAgencyService.updateAgencyAdmin(adminId, updateAgencyAdminDTO);
+    return this.agencyAdminUserService.updateAgencyAdmin(adminId, updateAgencyAdminDTO);
   }
 
   public void deleteAgencyAdmin(final String adminId) {
-    this.adminAgencyService.deleteAgencyAdmin(adminId);
+    this.agencyAdminUserService.deleteAgencyAdmin(adminId);
+  }
+
+  public void deleteTenantAdmin(final String adminId) {
+    this.tenantAdminUserService.deleteTenantAdmin(adminId);
   }
 
   public List<Long> findAdminUserAgencyIds(String userId) {
-    return this.adminAgencyService.findAgenciesOfAdmin(userId);
+    return this.agencyAdminUserService.findAgenciesOfAdmin(userId);
   }
 
   public void createNewAdminAgencyRelation(
@@ -66,7 +87,7 @@ public class AdminAgencyFacade {
         adminId, newAdminAgencyRelationDTOs);
   }
 
-  public AgencyAdminSearchResultDTO findFilteredAdminsAgency(
+  public AdminSearchResultDTO findFilteredAdminsAgency(
       final Integer page, final Integer perPage, final AdminFilter adminFilter, Sort sort) {
     var filteredAdmins = adminFilterService.findFilteredAdmins(page, perPage, adminFilter, sort);
     enrichAdminsWithAgencies(filteredAdmins);
@@ -74,7 +95,7 @@ public class AdminAgencyFacade {
     return filteredAdmins;
   }
 
-  private void enrichAdminsWithAgencies(AgencyAdminSearchResultDTO filteredAdmins) {
+  private void enrichAdminsWithAgencies(AdminSearchResultDTO filteredAdmins) {
     if (nonNull(filteredAdmins)) {
       var admins =
           filteredAdmins.getEmbedded().stream()
@@ -92,6 +113,17 @@ public class AdminAgencyFacade {
       final boolean isAscending) {
     var direction = isAscending ? Direction.ASC : Direction.DESC;
     var pageRequest = PageRequest.of(pageNumber, pageSize, direction, fieldName);
-    return this.adminAgencyService.findAgencyAdminsByInfix(infix, pageRequest);
+    return this.agencyAdminUserService.findAgencyAdminsByInfix(infix, pageRequest);
+  }
+
+  public Map<String, Object> findTenantAdminsByInfix(
+      final String infix,
+      final int pageNumber,
+      final int pageSize,
+      final String fieldName,
+      final boolean isAscending) {
+    var direction = isAscending ? Direction.ASC : Direction.DESC;
+    var pageRequest = PageRequest.of(pageNumber, pageSize, direction, fieldName);
+    return this.tenantAdminUserService.findTenantAdminsByInfix(infix, pageRequest);
   }
 }

@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.admin.service.admin.update;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAgencyAdminDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UpdateTenantAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.admin.service.admin.search.RetrieveAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
@@ -22,7 +23,7 @@ public class UpdateAdminService {
 
   public Admin updateAgencyAdmin(
       final String adminId, final UpdateAgencyAdminDTO updateAgencyAdminDTO) {
-    final Admin admin = retrieveAdminService.findAgencyAdmin(adminId);
+    final Admin admin = retrieveAdminService.findAdmin(adminId, Admin.AdminType.AGENCY);
     final UserDTO userDTO = buildValidatedUserDTO(updateAgencyAdminDTO, admin);
     this.identityClient.updateUserData(
         admin.getId(),
@@ -43,10 +44,40 @@ public class UpdateAdminService {
     return userDTO;
   }
 
+  private UserDTO buildValidatedUserDTO(
+      final UpdateTenantAdminDTO updateTenantAdminDTO, final Admin admin) {
+    UserDTO userDTO = new UserDTO();
+    userDTO.setEmail(updateTenantAdminDTO.getEmail());
+    userDTO.setUsername(admin.getUsername());
+
+    this.userAccountInputValidator.validateUserDTO(userDTO);
+    return userDTO;
+  }
+
   private Admin buildAdmin(final UpdateAgencyAdminDTO updateAgencyAdminDTO, final Admin admin) {
     admin.setLastName(updateAgencyAdminDTO.getLastname());
     admin.setFirstName(updateAgencyAdminDTO.getFirstname());
     admin.setEmail(updateAgencyAdminDTO.getEmail());
     return admin;
+  }
+
+  private Admin buildAdmin(final UpdateTenantAdminDTO updateTenantAdminDTO, final Admin admin) {
+    admin.setLastName(updateTenantAdminDTO.getLastname());
+    admin.setFirstName(updateTenantAdminDTO.getFirstname());
+    admin.setEmail(updateTenantAdminDTO.getEmail());
+    admin.setTenantId(Long.valueOf(updateTenantAdminDTO.getTenantId()));
+    return admin;
+  }
+
+  public Admin updateTenantAdmin(String adminId, UpdateTenantAdminDTO updateTenantAdminDTO) {
+    final Admin admin = retrieveAdminService.findAdmin(adminId, Admin.AdminType.TENANT);
+    final UserDTO userDTO = buildValidatedUserDTO(updateTenantAdminDTO, admin);
+    this.identityClient.updateUserData(
+        admin.getId(),
+        userDTO,
+        updateTenantAdminDTO.getFirstname(),
+        updateTenantAdminDTO.getLastname());
+
+    return this.adminRepository.save(buildAdmin(updateTenantAdminDTO, admin));
   }
 }

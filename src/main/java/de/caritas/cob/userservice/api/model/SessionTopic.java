@@ -41,7 +41,7 @@ public class SessionTopic {
 
   @Column(name = "topic_id")
   @NonNull
-  private Integer topicId;
+  private Long topicId;
 
   @Column(name = "create_date")
   private LocalDateTime createDate;
