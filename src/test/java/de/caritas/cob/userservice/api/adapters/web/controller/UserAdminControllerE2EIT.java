@@ -14,6 +14,7 @@ import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserRe
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateTenantAdminDTO;
+import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
 import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.apiclient.ConsultingTypeServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.apiclient.MailServiceApiControllerFactory;
@@ -27,6 +28,7 @@ import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.testConfig.TestAgencyControllerApi;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.ConsultingTypeControllerApi;
 import de.caritas.cob.userservice.mailservice.generated.web.MailsControllerApi;
+import de.caritas.cob.userservice.tenantservice.generated.web.model.RestrictedTenantDTO;
 import de.caritas.cob.userservice.topicservice.generated.web.TopicControllerApi;
 import java.util.LinkedHashMap;
 import javax.servlet.http.Cookie;
@@ -112,6 +114,8 @@ class UserAdminControllerE2EIT {
   @MockBean private Keycloak keycloak;
 
   @MockBean IdentityClient identityClient;
+
+  @MockBean TenantService tenantService;
 
   private User user;
 
@@ -215,6 +219,9 @@ class UserAdminControllerE2EIT {
     updateAdminDTO.setLastname("changedLastname");
     updateAdminDTO.setEmail("changed@email.com");
     updateAdminDTO.setTenantId(1);
+
+    when(tenantService.getRestrictedTenantData(Mockito.anyLong()))
+        .thenReturn(new RestrictedTenantDTO().subdomain("subdomain"));
 
     // when, then
     this.mockMvc
