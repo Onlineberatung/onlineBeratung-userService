@@ -14,10 +14,10 @@ import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserRe
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateTenantAdminDTO;
+import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
 import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.apiclient.ConsultingTypeServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.apiclient.MailServiceApiControllerFactory;
-import de.caritas.cob.userservice.api.config.apiclient.TopicServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
@@ -28,6 +28,7 @@ import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.testConfig.TestAgencyControllerApi;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.ConsultingTypeControllerApi;
 import de.caritas.cob.userservice.mailservice.generated.web.MailsControllerApi;
+import de.caritas.cob.userservice.tenantservice.generated.web.model.RestrictedTenantDTO;
 import de.caritas.cob.userservice.topicservice.generated.web.TopicControllerApi;
 import java.util.LinkedHashMap;
 import javax.servlet.http.Cookie;
@@ -50,13 +51,15 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("testing")
 @AutoConfigureTestDatabase
-@TestPropertySource(properties = "feature.topics.enabled=true")
+@TestPropertySource(properties = {"feature.topics.enabled=true", "multitenancy.enabled=false"})
+@Transactional
 class UserAdminControllerE2EIT {
 
   private static final EasyRandom easyRandom = new EasyRandom();
@@ -102,8 +105,6 @@ class UserAdminControllerE2EIT {
   @Qualifier("topicControllerApiPrimary")
   private TopicControllerApi topicControllerApi;
 
-  @MockBean private TopicServiceApiControllerFactory topicServiceApiControllerFactory;
-
   @MockBean
   @Qualifier("mailsControllerApi")
   private MailsControllerApi mailsControllerApi;
@@ -113,6 +114,8 @@ class UserAdminControllerE2EIT {
   @MockBean private Keycloak keycloak;
 
   @MockBean IdentityClient identityClient;
+
+  @MockBean TenantService tenantService;
 
   private User user;
 
@@ -216,6 +219,9 @@ class UserAdminControllerE2EIT {
     updateAdminDTO.setLastname("changedLastname");
     updateAdminDTO.setEmail("changed@email.com");
     updateAdminDTO.setTenantId(1);
+
+    when(tenantService.getRestrictedTenantData(Mockito.anyLong()))
+        .thenReturn(new RestrictedTenantDTO().subdomain("subdomain"));
 
     // when, then
     this.mockMvc

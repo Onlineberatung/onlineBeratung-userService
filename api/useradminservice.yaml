@@ -1406,6 +1406,10 @@ components:
           type: string
         deleteDate:
           type: string
+        tenantId:
+          type: string
+        tenantSubdomain:
+          type: string
         agencies:
           type: array
           items:

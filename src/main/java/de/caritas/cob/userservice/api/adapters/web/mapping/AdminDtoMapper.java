@@ -11,15 +11,26 @@ import de.caritas.cob.userservice.api.adapters.web.dto.AgencyAdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.HalLink;
 import de.caritas.cob.userservice.api.adapters.web.dto.HalLink.MethodEnum;
 import de.caritas.cob.userservice.api.adapters.web.dto.PaginationLinks;
+import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
 import de.caritas.cob.userservice.generated.api.adapters.web.controller.UseradminApi;
+import de.caritas.cob.userservice.tenantservice.generated.web.model.RestrictedTenantDTO;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class AdminDtoMapper implements DtoMapperUtils {
+
+  private final @NonNull TenantService tenantService;
+
+  @Value("${multitenancy.enabled}")
+  private boolean multiTenancyEnabled;
 
   public AdminSearchResultDTO adminSearchResultOf(
       Map<String, Object> resultMap,
@@ -102,18 +113,22 @@ public class AdminDtoMapper implements DtoMapperUtils {
     return halLinkOf(httpEntity, method);
   }
 
-  private AdminDTO adminDtoOf(Map<String, Object> consultantMap) {
+  private AdminDTO adminDtoOf(Map<String, Object> adminUserMap) {
     var adminDTO = new AdminDTO();
-    adminDTO.setId((String) consultantMap.get("id"));
-    adminDTO.setEmail((String) consultantMap.get("email"));
-    adminDTO.setFirstname((String) consultantMap.get("firstName"));
-    adminDTO.setLastname((String) consultantMap.get("lastName"));
-    adminDTO.setUsername((String) consultantMap.get("username"));
-    adminDTO.setCreateDate((String) consultantMap.get("createdAt"));
-    adminDTO.setUpdateDate((String) consultantMap.get("updatedAt"));
+    adminDTO.setId((String) adminUserMap.get("id"));
+    adminDTO.setEmail((String) adminUserMap.get("email"));
+    adminDTO.setFirstname((String) adminUserMap.get("firstName"));
+    adminDTO.setLastname((String) adminUserMap.get("lastName"));
+    adminDTO.setUsername((String) adminUserMap.get("username"));
+    adminDTO.setCreateDate((String) adminUserMap.get("createdAt"));
+    adminDTO.setUpdateDate((String) adminUserMap.get("updatedAt"));
+
+    if (multiTenancyEnabled) {
+      enrichResponseWithTenantInformation(adminUserMap, adminDTO);
+    }
 
     var agencies = new ArrayList<AgencyAdminResponseDTO>();
-    var agencyMaps = (ArrayList<Map<String, Object>>) consultantMap.get("agencies");
+    var agencyMaps = (ArrayList<Map<String, Object>>) adminUserMap.get("agencies");
     agencyMaps.forEach(
         agencyMap -> {
           var agency = new AgencyAdminResponseDTO();
@@ -130,5 +145,19 @@ public class AdminDtoMapper implements DtoMapperUtils {
     adminDTO.setAgencies(agencies);
 
     return adminDTO;
+  }
+
+  private void enrichResponseWithTenantInformation(
+      Map<String, Object> adminUserMap, AdminDTO adminDTO) {
+    Long tenantId = (Long) adminUserMap.get("tenantId");
+    adminDTO.setTenantId(String.valueOf(tenantId));
+    if (tenantId != null) {
+      enrichWithTenantSubdomain(adminDTO, tenantId);
+    }
+  }
+
+  private void enrichWithTenantSubdomain(AdminDTO adminDTO, Long tenantId) {
+    RestrictedTenantDTO restrictedTenantData = tenantService.getRestrictedTenantData(tenantId);
+    adminDTO.setTenantSubdomain(restrictedTenantData.getSubdomain());
   }
 }
