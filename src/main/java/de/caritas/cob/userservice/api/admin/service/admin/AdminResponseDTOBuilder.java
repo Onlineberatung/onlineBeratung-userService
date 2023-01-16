@@ -86,6 +86,7 @@ public class AdminResponseDTOBuilder implements HalLinkBuilder {
         .firstname(admin.getFirstName())
         .lastname(admin.getLastName())
         .email(admin.getEmail())
+        .tenantId(String.valueOf(admin.getTenantId()))
         .createDate(String.valueOf(admin.getCreateDate()))
         .updateDate(String.valueOf(admin.getUpdateDate()));
   }
