@@ -291,6 +291,11 @@ public class UserAdminController implements UseradminApi {
   }
 
   @Override
+  public ResponseEntity<List<AdminResponseDTO>> getTenantAdmins(final Integer tenantId) {
+    return new ResponseEntity<>(this.adminUserFacade.findTenantAdmins(tenantId), HttpStatus.OK);
+  }
+
+  @Override
   public ResponseEntity<List<Long>> getAdminAgencies(@PathVariable String adminId) {
     var adminAgencies = this.adminUserFacade.findAdminUserAgencyIds(adminId);
     return ResponseEntity.ok(adminAgencies);

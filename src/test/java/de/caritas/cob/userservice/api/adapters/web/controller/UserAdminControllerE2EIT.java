@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
 import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.TENANT_ADMIN_PATH;
+import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.TENANT_ADMIN_PATH_WITHOUT_SLASH;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
@@ -274,6 +275,52 @@ class UserAdminControllerE2EIT {
         .andExpect(jsonPath("_embedded.firstname", is("Ceil")))
         .andExpect(jsonPath("_embedded.lastname", is("Genney")))
         .andExpect(jsonPath("_embedded.email", is("cgenney5@imageshack.us")));
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.TENANT_ADMIN})
+  public void
+      getTenantAdmins_Should_returnOkAndFilterByTenantId_When_attemptedToGetTenantWithTenantAdminAuthority()
+          throws Exception {
+
+    // when, then
+    this.mockMvc
+        .perform(get(TENANT_ADMIN_PATH_WITHOUT_SLASH + "?tenantId=2"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.size()", is(1)))
+        .andExpect(jsonPath("$.[0]._embedded.tenantId", is("2")))
+        .andReturn();
+
+    this.mockMvc
+        .perform(get(TENANT_ADMIN_PATH_WITHOUT_SLASH + "?tenantId=1"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.size()", is(0)))
+        .andReturn();
+  }
+
+  @Test
+  @WithMockUser(
+      authorities = {
+        AuthorityValue.SINGLE_TENANT_ADMIN,
+        AuthorityValue.USER_ADMIN,
+        AuthorityValue.RESTRICTED_AGENCY_ADMIN
+      })
+  public void
+      getTenantAdmins_Should_returnForbidden_When_attemptedToGetTenantAdminsWithNonSuperTenantAdminAuthority()
+          throws Exception {
+
+    // when, then
+    this.mockMvc
+        .perform(get(TENANT_ADMIN_PATH_WITHOUT_SLASH + "?tenantId=2"))
+        .andExpect(status().isForbidden());
+
+    this.mockMvc
+        .perform(get(TENANT_ADMIN_PATH_WITHOUT_SLASH + "?tenantId=1"))
+        .andExpect(status().isForbidden());
+
+    this.mockMvc
+        .perform(get(TENANT_ADMIN_PATH_WITHOUT_SLASH + "?tenantId=0"))
+        .andExpect(status().isForbidden());
   }
 
   @Test
