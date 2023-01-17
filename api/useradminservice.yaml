@@ -842,36 +842,21 @@ paths:
         summary: 'Returns the list of tenant admins by filter query parameter. [Authorization: Role: user-admin]'
         operationId: getTenantAdmins
         parameters:
-          - name: filter
+          - name: tenantId
             in: query
-            description: 'The filter parameters to search for. If no filter is set all admins are
-                  being returned.'
-            schema:
-              $ref: '#/components/schemas/AdminFilter'
-          - name: page
-            in: query
-            description: Number of page where to start in the query (1 = first page)
+            description: tenant id
             required: true
             schema:
               type: integer
-          - name: perPage
-            in: query
-            description: Number of items which are being returned per page
-            required: true
-            schema:
-              type: integer
-          - name: sort
-            in: query
-            description: The sort parameter containing field and order the response should be sorted
-            schema:
-              $ref: '#/components/schemas/Sort'
         responses:
           200:
-            description: OK - successfull operation
+            description: OK - successful operation
             content:
-              'application/hal+json':
+              'application/json':
                 schema:
-                  $ref: '#/components/schemas/AdminSearchResultDTO'
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/AdminResponseDTO'
           400:
             description: BAD REQUEST - invalid/incomplete request or body object
           401:

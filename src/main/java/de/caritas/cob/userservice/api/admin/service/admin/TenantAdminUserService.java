@@ -14,6 +14,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestExceptio
 import de.caritas.cob.userservice.api.model.Admin;
 import de.caritas.cob.userservice.api.model.Admin.AdminBase;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.NonNull;
@@ -97,5 +98,15 @@ public class TenantAdminUserService {
 
     return userServiceMapper.mapOfAdmin(
         adminsPage, fullAdmins, Lists.newArrayList(), Lists.newArrayList());
+  }
+
+  public List<AdminResponseDTO> findTenantAdmins(Long tenantId) {
+    var admins = retrieveAdminService.findTenantAdminsByTenantId(tenantId);
+    if (admins != null) {
+      return admins.stream()
+          .map(admin -> AdminResponseDTOBuilder.getInstance(admin).buildAgencyAdminResponseDTO())
+          .collect(Collectors.toList());
+    }
+    return Lists.newArrayList();
   }
 }
