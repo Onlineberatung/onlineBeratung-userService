@@ -71,7 +71,8 @@ public class UserAdminControllerIT {
       ROOT_PATH + "/consultants/%s" + "/agencies/%s";
   protected static final String AGENCY_ADMIN_PATH = ROOT_PATH + "/agencyadmins/";
 
-  protected static final String TENANT_ADMIN_PATH = ROOT_PATH + "/tenantadmins/";
+  protected static final String TENANT_ADMIN_PATH_WITHOUT_SLASH = ROOT_PATH + "/tenantadmins";
+  protected static final String TENANT_ADMIN_PATH = TENANT_ADMIN_PATH_WITHOUT_SLASH + "/";
   protected static final String DELETE_AGENCY_ADMIN_PATH = AGENCY_ADMIN_PATH + "%s";
   protected static final String AGENCIES_OF_ADMIN_PATH = ROOT_PATH + "/agencyadmins/%s/agencies";
   protected static final String DELETE_ADMIN_AGENCY_PATH = AGENCIES_OF_ADMIN_PATH + "/%s";

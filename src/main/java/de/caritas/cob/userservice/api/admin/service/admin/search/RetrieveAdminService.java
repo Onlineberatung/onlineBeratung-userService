@@ -4,6 +4,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestExceptio
 import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
 import de.caritas.cob.userservice.api.model.Admin;
 import de.caritas.cob.userservice.api.model.Admin.AdminBase;
+import de.caritas.cob.userservice.api.model.Admin.AdminType;
 import de.caritas.cob.userservice.api.model.AdminAgency;
 import de.caritas.cob.userservice.api.model.AdminAgency.AdminAgencyBase;
 import de.caritas.cob.userservice.api.port.out.AdminAgencyRepository;
@@ -55,5 +56,9 @@ public class RetrieveAdminService {
 
   public List<AdminAgencyBase> agenciesOfAdmin(Set<String> adminIds) {
     return adminAgencyRepository.findByAdminIdIn(adminIds);
+  }
+
+  public List<Admin> findTenantAdminsByTenantId(Long tenantId) {
+    return this.adminRepository.findByTenantIdAndType(tenantId, AdminType.TENANT);
   }
 }

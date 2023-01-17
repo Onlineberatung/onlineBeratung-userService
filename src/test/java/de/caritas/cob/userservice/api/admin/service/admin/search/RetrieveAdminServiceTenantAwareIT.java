@@ -77,7 +77,7 @@ public class RetrieveAdminServiceTenantAwareIT {
   }
 
   @Test
-  public void findAgencyAdmin_Should_returnCorrectTenantAdmin_When_correctIdIsProvided() {
+  public void findAdmin_Should_returnCorrectTenantAdmin_When_correctIdIsProvided() {
     // given
     TenantContext.setCurrentTenant(0L);
     // when
@@ -89,8 +89,20 @@ public class RetrieveAdminServiceTenantAwareIT {
   }
 
   @Test
+  public void findTenantAdminsByTenantId_Should_returnCorrectTenantAdmin_When_tenantIdIsProvided() {
+    // given
+    TenantContext.setCurrentTenant(0L);
+    // when
+    List<Admin> tenantAdminsWithTenantIdZero = retrieveAdminService.findTenantAdminsByTenantId(0L);
+    List<Admin> tenantAdminsWithTenantIdTwo = retrieveAdminService.findTenantAdminsByTenantId(2L);
+    // then
+    assertThat(tenantAdminsWithTenantIdZero, hasSize(35));
+    assertThat(tenantAdminsWithTenantIdTwo, hasSize(1));
+  }
+
+  @Test
   public void
-      findAgencyAdmin_Should_throwNoContentException_When_validTenantAdminIsProvidedButTypeDoesNotMatch() {
+      findAdmin_Should_throwNoContentException_When_validTenantAdminIsProvidedButTypeDoesNotMatch() {
     // given
     TenantContext.setCurrentTenant(0L);
     // when

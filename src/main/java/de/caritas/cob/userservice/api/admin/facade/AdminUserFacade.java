@@ -126,4 +126,8 @@ public class AdminUserFacade {
     var pageRequest = PageRequest.of(pageNumber, pageSize, direction, fieldName);
     return this.tenantAdminUserService.findTenantAdminsByInfix(infix, pageRequest);
   }
+
+  public List<AdminResponseDTO> findTenantAdmins(Integer tenantId) {
+    return tenantAdminUserService.findTenantAdmins(Long.valueOf(tenantId));
+  }
 }
