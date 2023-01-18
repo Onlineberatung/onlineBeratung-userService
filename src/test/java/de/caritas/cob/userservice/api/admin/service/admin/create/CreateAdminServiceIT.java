@@ -67,7 +67,6 @@ public class CreateAdminServiceIT {
     assertThat(admin.getId()).isNotNull();
     assertThat(admin.getType()).isEqualTo(AdminType.AGENCY);
     assertThat(admin.getUsername()).isNotNull();
-    ;
     assertThat(admin.getFirstName()).isNotNull();
     assertThat(admin.getLastName()).isNotNull();
     assertThat(admin.getEmail()).isNotNull();
