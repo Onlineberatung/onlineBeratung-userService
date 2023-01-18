@@ -102,11 +102,8 @@ public class TenantAdminUserService {
 
   public List<AdminResponseDTO> findTenantAdmins(Long tenantId) {
     var admins = retrieveAdminService.findTenantAdminsByTenantId(tenantId);
-    if (admins != null) {
-      return admins.stream()
-          .map(admin -> AdminResponseDTOBuilder.getInstance(admin).buildAgencyAdminResponseDTO())
-          .collect(Collectors.toList());
-    }
-    return Lists.newArrayList();
+    return admins.stream()
+        .map(admin -> AdminResponseDTOBuilder.getInstance(admin).buildAgencyAdminResponseDTO())
+        .collect(Collectors.toList());
   }
 }
