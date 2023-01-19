@@ -24,6 +24,7 @@ public interface AdminRepository extends CrudRepository<Admin, String> {
               + "    UPPER(a.firstName) LIKE CONCAT('%', UPPER(?1), '%')"
               + "    OR UPPER(a.lastName) LIKE CONCAT('%', UPPER(?1), '%')"
               + "    OR UPPER(a.email) LIKE CONCAT('%', UPPER(?1), '%')"
+              + "    OR CONVERT(a.tenantId,char) LIKE CONCAT('%', UPPER(?1), '%')"
               + "  )"
               + " )")
   Page<AdminBase> findAllByInfix(String infix, Admin.AdminType type, Pageable pageable);

@@ -63,6 +63,8 @@ public interface DtoMapperUtils {
         return "lastName";
       case "EMAIL":
         return "email";
+      case "TENANT_ID":
+        return "tenantId";
       default:
     }
 

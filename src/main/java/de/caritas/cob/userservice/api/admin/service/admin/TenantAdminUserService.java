@@ -13,7 +13,6 @@ import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.model.Admin;
 import de.caritas.cob.userservice.api.model.Admin.AdminBase;
-import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -33,9 +32,6 @@ public class TenantAdminUserService {
   private final @NonNull UpdateAdminService updateAdminService;
   private final @NonNull DeleteAdminService deleteAdminService;
   private final @NonNull UserServiceMapper userServiceMapper;
-
-  private final @NonNull AgencyService agencyService;
-
   private final @NonNull TenantService tenantService;
 
   @Value("${multitenancy.enabled}")
