@@ -903,7 +903,7 @@ paths:
         parameters:
           - name: query
             in: query
-            description: URL-encoded infix to search for in first name, last name, or email.
+            description: URL-encoded infix to search for in first name, last name, email or tenant id.
               A non-encoded star symbol searches for all.
             required: true
             schema:
@@ -928,9 +928,9 @@ paths:
             description: field to sort by
             schema:
               type: string
-              enum: [ FIRSTNAME, LASTNAME, EMAIL ]
+              enum: [ FIRSTNAME, LASTNAME, EMAIL, TENANT_ID ]
               default: FIRSTNAME
-              pattern: '^(FIRSTNAME|LASTNAME|EMAIL)$'
+              pattern: '^(FIRSTNAME|LASTNAME|EMAIL|TENANT_ID)$'
           - name: order
             in: query
             description: sort order
