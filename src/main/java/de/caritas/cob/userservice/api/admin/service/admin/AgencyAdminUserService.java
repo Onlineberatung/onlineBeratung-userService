@@ -9,6 +9,7 @@ import de.caritas.cob.userservice.api.admin.service.admin.create.CreateAdminServ
 import de.caritas.cob.userservice.api.admin.service.admin.delete.DeleteAdminService;
 import de.caritas.cob.userservice.api.admin.service.admin.search.RetrieveAdminService;
 import de.caritas.cob.userservice.api.admin.service.admin.update.UpdateAdminService;
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.model.Admin;
 import de.caritas.cob.userservice.api.model.Admin.AdminBase;
 import de.caritas.cob.userservice.api.model.AdminAgency.AdminAgencyBase;
@@ -34,8 +35,22 @@ public class AgencyAdminUserService {
   private final @NonNull AgencyService agencyService;
 
   public AdminResponseDTO createNewAgencyAdmin(final CreateAdminDTO createAgencyAdminDTO) {
+    validateCreateAdmin(createAgencyAdminDTO);
     final Admin newAdmin = createAdminService.createNewAgencyAdmin(createAgencyAdminDTO);
     return AdminResponseDTOBuilder.getInstance(newAdmin).buildAgencyAdminResponseDTO();
+  }
+
+  private void validateCreateAdmin(CreateAdminDTO createAgencyAdminDTO) {
+    validateTenantId(createAgencyAdminDTO.getTenantId());
+  }
+
+  private void validateTenantId(Integer inputTenantId) {
+    if (inputTenantId == null) {
+      throw new BadRequestException("Tenant id must be provided");
+    }
+    if (inputTenantId.equals(0)) {
+      throw new BadRequestException("Tenant id cannot be equal to 0");
+    }
   }
 
   public AdminResponseDTO findAgencyAdmin(final String adminId) {

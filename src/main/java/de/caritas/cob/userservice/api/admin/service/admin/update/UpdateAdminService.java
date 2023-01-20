@@ -39,6 +39,7 @@ public class UpdateAdminService {
     UserDTO userDTO = new UserDTO();
     userDTO.setEmail(updateAgencyAdminDTO.getEmail());
     userDTO.setUsername(admin.getUsername());
+    userDTO.setTenantId(admin.getTenantId());
 
     this.userAccountInputValidator.validateUserDTO(userDTO);
     return userDTO;
@@ -49,6 +50,7 @@ public class UpdateAdminService {
     UserDTO userDTO = new UserDTO();
     userDTO.setEmail(updateTenantAdminDTO.getEmail());
     userDTO.setUsername(admin.getUsername());
+    userDTO.setTenantId(Long.valueOf(updateTenantAdminDTO.getTenantId()));
 
     this.userAccountInputValidator.validateUserDTO(userDTO);
     return userDTO;
