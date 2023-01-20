@@ -38,6 +38,7 @@ public class UpdateAdminService {
     UserDTO userDTO = new UserDTO();
     userDTO.setEmail(updateAgencyAdminDTO.getEmail());
     userDTO.setUsername(admin.getUsername());
+    userDTO.setTenantId(admin.getTenantId());
 
     this.userAccountInputValidator.validateUserDTO(userDTO);
     return userDTO;
