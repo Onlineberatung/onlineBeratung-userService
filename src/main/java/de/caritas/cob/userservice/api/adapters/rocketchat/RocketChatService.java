@@ -1029,7 +1029,7 @@ public class RocketChatService implements MessageClient {
     var url = rocketChatConfig.getApiUrl(ENDPOINT_USER_DELETE);
     var response = restTemplate.exchange(url, HttpMethod.POST, request, UserInfoResponseDTO.class);
 
-    if (isResponseNotSuccess(response)) {
+    if (isResponseNotSuccess(response) && !isUserAlreadyDeleted(response)) {
       throw new InternalServerErrorException(
           String.format(
               "Could not delete Rocket.Chat user with user id %s.%n Status: %s.%n error: %s.%n "
@@ -1040,6 +1040,15 @@ public class RocketChatService implements MessageClient {
               response.getBody().getErrorType()),
           LogService::logRocketChatError);
     }
+  }
+
+  private boolean isUserAlreadyDeleted(ResponseEntity<UserInfoResponseDTO> response) {
+    var b = response.getBody();
+
+    return response.getStatusCode().is4xxClientError()
+        && nonNull(b)
+        && nonNull(b.getError())
+        && b.getError().contains("error-invalid-user");
   }
 
   /**

@@ -950,6 +950,26 @@ public class RocketChatServiceTest {
             eq(RC_URL_CHAT_USER_DELETE), eq(HttpMethod.POST), any(), eq(UserInfoResponseDTO.class));
   }
 
+  @Test
+  public void deleteUser_Should_performRocketDeleteUserOnAlreadyDeletedResponse() throws Exception {
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
+    var response =
+        new UserInfoResponseDTO(
+            null,
+            false,
+            "The required \"userId\" or \"username\" param provided does not match any users [error-invalid-user]",
+            "error-invalid-user");
+    when(restTemplate.exchange(
+            eq(RC_URL_CHAT_USER_DELETE), eq(HttpMethod.POST), any(), eq(UserInfoResponseDTO.class)))
+        .thenReturn(new ResponseEntity<>(response, HttpStatus.BAD_REQUEST));
+
+    rocketChatService.deleteUser("");
+
+    verify(restTemplate)
+        .exchange(
+            eq(RC_URL_CHAT_USER_DELETE), eq(HttpMethod.POST), any(), eq(UserInfoResponseDTO.class));
+  }
+
   @Test(expected = RocketChatDeleteUserException.class)
   public void deleteUser_Should_throwRocketChatDeleteUserException_When_responseIsNotSuccess()
       throws Exception {
