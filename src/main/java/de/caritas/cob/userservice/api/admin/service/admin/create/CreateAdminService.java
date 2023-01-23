@@ -31,12 +31,13 @@ public class CreateAdminService {
   private final @NonNull AdminRepository adminRepository;
 
   public Admin createNewAdmin(final CreateAgencyAdminDTO createAgencyAdminDTO) {
+    createAgencyAdminDTO.setTenantId(null);
+    assignCurrentTenantContext(createAgencyAdminDTO);
     final String keycloakUserId = createKeycloakUser(createAgencyAdminDTO);
     final String password = userHelper.getRandomPassword();
     identityClient.updatePassword(keycloakUserId, password);
     identityClient.updateRole(keycloakUserId, UserRole.RESTRICTED_AGENCY_ADMIN);
     identityClient.updateRole(keycloakUserId, UserRole.USER_ADMIN);
-    assignCurrentTenantContext(createAgencyAdminDTO);
 
     return adminRepository.save(buildAdmin(createAgencyAdminDTO, keycloakUserId));
   }
