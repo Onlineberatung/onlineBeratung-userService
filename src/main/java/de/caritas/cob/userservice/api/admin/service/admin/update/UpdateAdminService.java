@@ -24,6 +24,7 @@ public class UpdateAdminService {
   public Admin updateAgencyAdmin(
       final String adminId, final UpdateAgencyAdminDTO updateAgencyAdminDTO) {
     final Admin admin = retrieveAdminService.findAdmin(adminId, Admin.AdminType.AGENCY);
+    assertAdminHasTenantIdNotNullAndNotZero(admin);
     final UserDTO userDTO = buildValidatedUserDTO(updateAgencyAdminDTO, admin);
     this.identityClient.updateUserData(
         admin.getId(),
@@ -32,6 +33,12 @@ public class UpdateAdminService {
         updateAgencyAdminDTO.getLastname());
 
     return this.adminRepository.save(buildAdmin(updateAgencyAdminDTO, admin));
+  }
+
+  private void assertAdminHasTenantIdNotNullAndNotZero(Admin admin) {
+    if (admin.getTenantId() != null && admin.getTenantId() == 0) {
+      throw new IllegalArgumentException("Admin has tenant id 0");
+    }
   }
 
   private UserDTO buildValidatedUserDTO(
