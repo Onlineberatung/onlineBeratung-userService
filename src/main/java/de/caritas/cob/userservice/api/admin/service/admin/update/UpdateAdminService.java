@@ -24,6 +24,7 @@ public class UpdateAdminService {
   public Admin updateAgencyAdmin(
       final String adminId, final UpdateAgencyAdminDTO updateAgencyAdminDTO) {
     final Admin admin = retrieveAdminService.findAdmin(adminId, Admin.AdminType.AGENCY);
+    assertAdminHasTenantIdNotNullAndNotZero(admin);
     final UserDTO userDTO = buildValidatedUserDTO(updateAgencyAdminDTO, admin);
     this.identityClient.updateUserData(
         admin.getId(),
@@ -34,11 +35,18 @@ public class UpdateAdminService {
     return this.adminRepository.save(buildAdmin(updateAgencyAdminDTO, admin));
   }
 
+  private void assertAdminHasTenantIdNotNullAndNotZero(Admin admin) {
+    if (admin.getTenantId() != null && admin.getTenantId() == 0) {
+      throw new IllegalArgumentException("Admin has tenant id 0");
+    }
+  }
+
   private UserDTO buildValidatedUserDTO(
       final UpdateAgencyAdminDTO updateAgencyAdminDTO, final Admin admin) {
     UserDTO userDTO = new UserDTO();
     userDTO.setEmail(updateAgencyAdminDTO.getEmail());
     userDTO.setUsername(admin.getUsername());
+    userDTO.setTenantId(admin.getTenantId());
 
     this.userAccountInputValidator.validateUserDTO(userDTO);
     return userDTO;
@@ -49,6 +57,7 @@ public class UpdateAdminService {
     UserDTO userDTO = new UserDTO();
     userDTO.setEmail(updateTenantAdminDTO.getEmail());
     userDTO.setUsername(admin.getUsername());
+    userDTO.setTenantId(Long.valueOf(updateTenantAdminDTO.getTenantId()));
 
     this.userAccountInputValidator.validateUserDTO(userDTO);
     return userDTO;

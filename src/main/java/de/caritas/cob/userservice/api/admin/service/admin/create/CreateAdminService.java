@@ -36,12 +36,14 @@ public class CreateAdminService {
   private final @NonNull UserHelper userHelper;
   private final @NonNull AdminRepository adminRepository;
 
-  public Admin createNewAgencyAdmin(CreateAdminDTO createAgencyAdminDTO) {
-    return createNewAdmin(createAgencyAdminDTO, Admin.AdminType.AGENCY);
+  public Admin createNewAgencyAdmin(CreateAdminDTO createAdminDTO) {
+    createAdminDTO.setTenantId(null);
+    assignCurrentTenantContext(createAdminDTO);
+    return createNewAdmin(createAdminDTO, Admin.AdminType.AGENCY);
   }
 
-  public Admin createNewTenantAdmin(CreateAdminDTO createAgencyAdminDTO) {
-    return createNewAdmin(createAgencyAdminDTO, Admin.AdminType.TENANT);
+  public Admin createNewTenantAdmin(CreateAdminDTO createAdminDTO) {
+    return createNewAdmin(createAdminDTO, Admin.AdminType.TENANT);
   }
 
   List<UserRole> getDefaultRoles(Admin.AdminType adminType) {
@@ -67,21 +69,13 @@ public class CreateAdminService {
     }
   }
 
-  public Admin createNewAdmin(final CreateAdminDTO createAdminDTO, Admin.AdminType adminType) {
+  private Admin createNewAdmin(final CreateAdminDTO createAdminDTO, Admin.AdminType adminType) {
     final String keycloakUserId = createKeycloakUser(createAdminDTO);
     final String password = userHelper.getRandomPassword();
     identityClient.updatePassword(keycloakUserId, password);
     getDefaultRoles(adminType).stream()
         .forEach(role -> identityClient.updateRole(keycloakUserId, role));
-    assignCurrentTenantContextForAgencyAdmins(createAdminDTO, adminType);
     return adminRepository.save(buildAdmin(createAdminDTO, adminType, keycloakUserId));
-  }
-
-  private void assignCurrentTenantContextForAgencyAdmins(
-      CreateAdminDTO createAdminDTO, Admin.AdminType adminType) {
-    if (adminType == Admin.AdminType.AGENCY) {
-      assignCurrentTenantContext(createAdminDTO);
-    }
   }
 
   private String createKeycloakUser(final CreateAdminDTO createAgencyAdminDTO) {

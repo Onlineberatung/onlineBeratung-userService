@@ -96,7 +96,7 @@ public class RetrieveAdminServiceTenantAwareIT {
     List<Admin> tenantAdminsWithTenantIdZero = retrieveAdminService.findTenantAdminsByTenantId(0L);
     List<Admin> tenantAdminsWithTenantIdTwo = retrieveAdminService.findTenantAdminsByTenantId(2L);
     // then
-    assertThat(tenantAdminsWithTenantIdZero, hasSize(35));
+    assertThat(tenantAdminsWithTenantIdZero, hasSize(34));
     assertThat(tenantAdminsWithTenantIdTwo, hasSize(1));
   }
 
