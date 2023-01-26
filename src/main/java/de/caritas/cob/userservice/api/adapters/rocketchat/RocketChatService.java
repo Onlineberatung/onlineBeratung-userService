@@ -65,13 +65,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import javax.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.Document;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -741,21 +740,26 @@ public class RocketChatService implements MessageClient {
    * @return all members of the group
    */
   public List<GroupMemberDTO> getChatUsers(String chatId) {
-    var users =
+    var subscriptions =
         mongoClient
             .getDatabase(MONGO_DATABASE_NAME)
             .getCollection(MONGO_COLLECTION_SUBSCRIPTION)
-            .find(Filters.eq("rid", chatId))
-            .map(
-                subscription -> {
-                  var member = new GroupMemberDTO();
-                  member.set_id((String) subscription.get("u._id"));
-                  member.setName((String) subscription.get("u.name"));
-                  member.setUsername((String) subscription.get("u.username"));
-                  return member;
-                });
+            .find(Filters.eq("rid", chatId));
 
-    return StreamSupport.stream(users.spliterator(), false).collect(Collectors.toList());
+    var members = new ArrayList<GroupMemberDTO>();
+    try (var cursor = subscriptions.iterator()) {
+      while (cursor.hasNext()) {
+        var subscription = cursor.next();
+        var member = new GroupMemberDTO();
+        var user = (Document) subscription.get("u");
+        member.set_id(user.getString("_id"));
+        member.setName(user.getString("name"));
+        member.setUsername(user.getString("username"));
+        members.add(member);
+      }
+    }
+
+    return members;
   }
 
   /**
