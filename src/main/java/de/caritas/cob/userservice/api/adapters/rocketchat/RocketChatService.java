@@ -7,6 +7,8 @@ import static org.apache.commons.lang3.ArrayUtils.isNotEmpty;
 
 import com.mongodb.DBObject;
 import com.mongodb.QueryBuilder;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.model.Filters;
 import de.caritas.cob.userservice.api.adapters.rocketchat.config.RocketChatConfig;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.StandardResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupAddUserBodyDTO;
@@ -63,6 +65,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import javax.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.NonNull;
@@ -116,6 +120,9 @@ public class RocketChatService implements MessageClient {
   private static final String ENDPOINT_USER_PRESENCE_SET = "/method.call/UserPresence";
   private static final String ENDPOINT_USER_PRESENCE_LIST = "/users.presence";
 
+  private static final String MONGO_DATABASE_NAME = "rocketchat";
+  private static final String MONGO_COLLECTION_SUBSCRIPTION = "rocketchat_subscription";
+
   private static final String ERROR_MESSAGE =
       "Error during rollback: Rocket.Chat group with id " + "%s could not be deleted";
   private static final String RC_DATE_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
@@ -133,6 +140,8 @@ public class RocketChatService implements MessageClient {
   private final @NonNull RocketChatCredentialsProvider rcCredentialHelper;
 
   private final RocketChatClient rocketChatClient;
+
+  private final MongoClient mongoClient;
 
   private final RocketChatConfig rocketChatConfig;
 
@@ -725,10 +734,36 @@ public class RocketChatService implements MessageClient {
   }
 
   /**
+   * Get users of a given chat. Replaces getMembersOfGroup due to <a
+   * href="https://github.com/RocketChat/Rocket.Chat/issues/25728">Rocket.Chat bug 25728</a>.
+   *
+   * @param chatId rocket chat id
+   * @return all members of the group
+   */
+  public List<GroupMemberDTO> getChatUsers(String chatId) {
+    var users =
+        mongoClient
+            .getDatabase(MONGO_DATABASE_NAME)
+            .getCollection(MONGO_COLLECTION_SUBSCRIPTION)
+            .find(Filters.eq("rid", chatId))
+            .map(
+                subscription -> {
+                  var member = new GroupMemberDTO();
+                  member.set_id((String) subscription.get("u._id"));
+                  member.setName((String) subscription.get("u.name"));
+                  member.setUsername((String) subscription.get("u.username"));
+                  return member;
+                });
+
+    return StreamSupport.stream(users.spliterator(), false).collect(Collectors.toList());
+  }
+
+  /**
    * Returns the group/room members of the given Rocket.Chat group id.
    *
    * @param rcGroupId the rocket chat id
    * @return al members of the group
+   * @deprecated use getChatUsers
    */
   public List<GroupMemberDTO> getMembersOfGroup(String rcGroupId)
       throws RocketChatGetGroupMembersException {

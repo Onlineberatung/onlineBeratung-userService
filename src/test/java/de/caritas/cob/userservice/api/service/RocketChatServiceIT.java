@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import com.mongodb.client.MongoClient;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.PresenceDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.PresenceDTO.PresenceStatus;
@@ -40,6 +41,10 @@ class RocketChatServiceIT {
   private RestTemplate restTemplate;
 
   @MockBean private RocketChatCredentialsProvider rcCredentialsProvider;
+
+  @SuppressWarnings("unused")
+  @Autowired
+  private MongoClient mockedMongoClient;
 
   private String chatUserId;
   private PresenceDTO presenceDto;
