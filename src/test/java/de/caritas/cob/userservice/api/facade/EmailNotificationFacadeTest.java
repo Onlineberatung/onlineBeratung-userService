@@ -751,12 +751,10 @@ public class EmailNotificationFacadeTest {
   /** Method: sendNewFeedbackMessageNotification */
   @Test
   public void
-      sendNewFeedbackMessageNotification_Should_SendEmailToAllFeedbackChatGroupMembersWithDecodedUsernames_WhenAssignedConsultantWroteAFeedbackMessage()
-          throws Exception {
-
+      sendNewFeedbackMessageNotification_Should_SendEmailToAllFeedbackChatGroupMembersWithDecodedUsernames_WhenAssignedConsultantWroteAFeedbackMessage() {
     when(consultantService.getConsultant(CONSULTANT_ID)).thenReturn(Optional.of(CONSULTANT));
     when(sessionService.getSessionByFeedbackGroupId(RC_FEEDBACK_GROUP_ID)).thenReturn(SESSION);
-    when(rocketChatService.getMembersOfGroup(RC_FEEDBACK_GROUP_ID)).thenReturn(GROUP_MEMBERS);
+    when(rocketChatService.getChatUsers(RC_FEEDBACK_GROUP_ID)).thenReturn(GROUP_MEMBERS);
     when(consultantService.getConsultantByRcUserId(GROUP_MEMBER_1_RC_ID))
         .thenReturn(Optional.of(CONSULTANT2));
     when(consultantService.getConsultantByRcUserId(GROUP_MEMBER_2_RC_ID))
