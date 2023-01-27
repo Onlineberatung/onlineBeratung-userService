@@ -7,6 +7,8 @@ import static org.apache.commons.lang3.ArrayUtils.isNotEmpty;
 
 import com.mongodb.DBObject;
 import com.mongodb.QueryBuilder;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.model.Filters;
 import de.caritas.cob.userservice.api.adapters.rocketchat.config.RocketChatConfig;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.StandardResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupAddUserBodyDTO;
@@ -68,6 +70,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.Document;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -116,6 +119,9 @@ public class RocketChatService implements MessageClient {
   private static final String ENDPOINT_USER_PRESENCE_SET = "/method.call/UserPresence";
   private static final String ENDPOINT_USER_PRESENCE_LIST = "/users.presence";
 
+  private static final String MONGO_DATABASE_NAME = "rocketchat";
+  private static final String MONGO_COLLECTION_SUBSCRIPTION = "rocketchat_subscription";
+
   private static final String ERROR_MESSAGE =
       "Error during rollback: Rocket.Chat group with id " + "%s could not be deleted";
   private static final String RC_DATE_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
@@ -133,6 +139,8 @@ public class RocketChatService implements MessageClient {
   private final @NonNull RocketChatCredentialsProvider rcCredentialHelper;
 
   private final RocketChatClient rocketChatClient;
+
+  private final MongoClient mongoClient;
 
   private final RocketChatConfig rocketChatConfig;
 
@@ -725,10 +733,41 @@ public class RocketChatService implements MessageClient {
   }
 
   /**
+   * Get users of a given chat. Replaces getMembersOfGroup due to <a
+   * href="https://github.com/RocketChat/Rocket.Chat/issues/25728">Rocket.Chat bug 25728</a>.
+   *
+   * @param chatId rocket chat id
+   * @return all members of the group
+   */
+  public List<GroupMemberDTO> getChatUsers(String chatId) {
+    var subscriptions =
+        mongoClient
+            .getDatabase(MONGO_DATABASE_NAME)
+            .getCollection(MONGO_COLLECTION_SUBSCRIPTION)
+            .find(Filters.eq("rid", chatId));
+
+    var members = new ArrayList<GroupMemberDTO>();
+    try (var cursor = subscriptions.iterator()) {
+      while (cursor.hasNext()) {
+        var subscription = cursor.next();
+        var member = new GroupMemberDTO();
+        var user = (Document) subscription.get("u");
+        member.set_id(user.getString("_id"));
+        member.setName(user.getString("name"));
+        member.setUsername(user.getString("username"));
+        members.add(member);
+      }
+    }
+
+    return members;
+  }
+
+  /**
    * Returns the group/room members of the given Rocket.Chat group id.
    *
    * @param rcGroupId the rocket chat id
    * @return al members of the group
+   * @deprecated use getChatUsers
    */
   public List<GroupMemberDTO> getMembersOfGroup(String rcGroupId)
       throws RocketChatGetGroupMembersException {
@@ -1029,7 +1068,7 @@ public class RocketChatService implements MessageClient {
     var url = rocketChatConfig.getApiUrl(ENDPOINT_USER_DELETE);
     var response = restTemplate.exchange(url, HttpMethod.POST, request, UserInfoResponseDTO.class);
 
-    if (isResponseNotSuccess(response)) {
+    if (isResponseNotSuccess(response) && !isUserAlreadyDeleted(response)) {
       throw new InternalServerErrorException(
           String.format(
               "Could not delete Rocket.Chat user with user id %s.%n Status: %s.%n error: %s.%n "
@@ -1040,6 +1079,15 @@ public class RocketChatService implements MessageClient {
               response.getBody().getErrorType()),
           LogService::logRocketChatError);
     }
+  }
+
+  private boolean isUserAlreadyDeleted(ResponseEntity<UserInfoResponseDTO> response) {
+    var b = response.getBody();
+
+    return response.getStatusCode().is4xxClientError()
+        && nonNull(b)
+        && nonNull(b.getError())
+        && b.getError().contains("error-invalid-user");
   }
 
   /**

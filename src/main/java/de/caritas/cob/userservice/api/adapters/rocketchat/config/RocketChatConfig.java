@@ -4,6 +4,10 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import java.util.Arrays;
@@ -42,6 +46,8 @@ public class RocketChatConfig {
 
   @NotBlank private String credentialCron;
 
+  @NotBlank private String mongoUrl;
+
   @Bean("rocketChatRestTemplate")
   public RestTemplate rocketChatRestTemplate(RestTemplateBuilder restTemplateBuilder) {
     return restTemplateBuilder
@@ -58,6 +64,14 @@ public class RocketChatConfig {
         .rocketChatToken(rcToken())
         .rocketChatUserId(rcUserId)
         .build();
+  }
+
+  @Bean
+  public MongoClient mongoClient() {
+    var connectionString = new ConnectionString(mongoUrl);
+    var settings = MongoClientSettings.builder().applyConnectionString(connectionString).build();
+
+    return MongoClients.create(settings);
   }
 
   private String rcToken() {

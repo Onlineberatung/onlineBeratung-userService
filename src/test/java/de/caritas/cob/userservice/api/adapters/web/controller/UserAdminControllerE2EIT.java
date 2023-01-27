@@ -4,9 +4,14 @@ import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminCo
 import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.TENANT_ADMIN_PATH;
 import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.TENANT_ADMIN_PATH_WITHOUT_SLASH;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -476,6 +481,11 @@ class UserAdminControllerE2EIT {
                     "/useradmin/tenantadmins/search?query=*&page=1&perPage=10&order=ASC&field=FIRSTNAME"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("_embedded", hasSize(PAGE_SIZE)))
+            .andExpect(jsonPath("_embedded[0]._embedded.id").exists())
+            .andExpect(jsonPath("_embedded[0]._embedded.username").exists())
+            .andExpect(jsonPath("_embedded[0]._embedded.firstname").exists())
+            .andExpect(jsonPath("_embedded[0]._embedded.lastname").exists())
+            .andExpect(jsonPath("_embedded[0]._embedded.email").exists())
             .andReturn();
 
     String contentAsString = mvcResult.getResponse().getContentAsString();
@@ -507,6 +517,44 @@ class UserAdminControllerE2EIT {
 
   private void assertAllElementsAreOfAdminType(JSONArray embedded, AdminType adminType) {
     for (int i = 0; i < PAGE_SIZE; i++) {
+    assertAllElementsAreOfAdminTypeTenant(embedded, PAGE_SIZE);
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.TENANT_ADMIN})
+  public void searchTenantAdmin_Should_returnCorrectResult_When_tenantIdIsProvided()
+      throws Exception {
+    final String tenantId = "102";
+    final String expectedAdminId = "6584f4a9-a7f0-42f0-b929-ab5c99c0802d";
+    final String expectedUsername = "cgenney5";
+    final String expectedFirstname = "Ceil";
+    final String expectedLastname = "Genney";
+    final String expectedEmail = "cgenney5@imageshack.us";
+    // when, then
+    MvcResult mvcResult =
+        this.mockMvc
+            .perform(
+                get(
+                    "/useradmin/tenantadmins/search?query="
+                        + tenantId
+                        + "&page=1&perPage=10&order=ASC&field=FIRSTNAME"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("_embedded", hasSize(1)))
+            .andExpect(jsonPath("_embedded[0]._embedded.id").value(expectedAdminId))
+            .andExpect(jsonPath("_embedded[0]._embedded.username").value(expectedUsername))
+            .andExpect(jsonPath("_embedded[0]._embedded.firstname").value(expectedFirstname))
+            .andExpect(jsonPath("_embedded[0]._embedded.lastname").value(expectedLastname))
+            .andExpect(jsonPath("_embedded[0]._embedded.email").value(expectedEmail))
+            .andReturn();
+
+    String contentAsString = mvcResult.getResponse().getContentAsString();
+    JSONArray embedded = JsonPath.read(contentAsString, "_embedded");
+
+    assertAllElementsAreOfAdminTypeTenant(embedded, 1);
+  }
+
+  private void assertAllElementsAreOfAdminTypeTenant(JSONArray embedded, int pageSize) {
+    for (int i = 0; i < pageSize; i++) {
       String tenantId = extractTenantWithOrderInList(embedded, i).get("id");
       assertThat(adminRepository.findByIdAndType(tenantId, adminType).isPresent()).isTrue();
     }
