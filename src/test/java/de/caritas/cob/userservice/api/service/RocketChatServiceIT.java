@@ -58,9 +58,7 @@ class RocketChatServiceIT {
 
   @MockBean private RocketChatCredentialsProvider rcCredentialsProvider;
 
-  @SuppressWarnings("unused")
-  @Autowired
-  private MongoClient mockedMongoClient;
+  @Autowired private MongoClient mockedMongoClient;
 
   @Mock private MongoDatabase mongoDatabase;
 

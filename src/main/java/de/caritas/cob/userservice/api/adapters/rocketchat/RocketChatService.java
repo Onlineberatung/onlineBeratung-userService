@@ -674,9 +674,10 @@ public class RocketChatService implements MessageClient {
   public List<GroupMemberDTO> getStandardMembersOfGroup(String rcGroupId)
       throws RocketChatGetGroupMembersException, RocketChatUserNotInitializedException {
 
-    List<GroupMemberDTO> groupMemberList = new ArrayList<>(getMembersOfGroup(rcGroupId));
-
-    if (groupMemberList.isEmpty()) {
+    List<GroupMemberDTO> groupMemberList;
+    try {
+      groupMemberList = getChatUsers(rcGroupId);
+    } catch (Exception exception) {
       throw new RocketChatGetGroupMembersException(
           String.format("Group member list from group with id %s is empty", rcGroupId));
     }
@@ -705,7 +706,7 @@ public class RocketChatService implements MessageClient {
   public void removeAllStandardUsersFromGroup(String rcGroupId)
       throws RocketChatGetGroupMembersException, RocketChatRemoveUserFromGroupException,
           RocketChatUserNotInitializedException {
-    List<GroupMemberDTO> groupMemberList = getMembersOfGroup(rcGroupId);
+    List<GroupMemberDTO> groupMemberList = getChatUsers(rcGroupId);
 
     if (groupMemberList.isEmpty()) {
       throw new RocketChatGetGroupMembersException(
@@ -722,14 +723,10 @@ public class RocketChatService implements MessageClient {
 
   @Override
   public Optional<List<Map<String, String>>> findMembers(String chatId) {
-    try {
-      var members = getMembersOfGroup(chatId);
-      var memberMaps = mapper.mapOf(members);
+    var members = getChatUsers(chatId);
+    var memberMaps = mapper.mapOf(members);
 
-      return Optional.of(memberMaps);
-    } catch (RocketChatGetGroupMembersException exception) {
-      return Optional.empty();
-    }
+    return Optional.of(memberMaps);
   }
 
   /**
