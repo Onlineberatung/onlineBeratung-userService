@@ -674,9 +674,10 @@ public class RocketChatService implements MessageClient {
   public List<GroupMemberDTO> getStandardMembersOfGroup(String rcGroupId)
       throws RocketChatGetGroupMembersException, RocketChatUserNotInitializedException {
 
-    List<GroupMemberDTO> groupMemberList = new ArrayList<>(getMembersOfGroup(rcGroupId));
-
-    if (groupMemberList.isEmpty()) {
+    List<GroupMemberDTO> groupMemberList;
+    try {
+      groupMemberList = getChatUsers(rcGroupId);
+    } catch (Exception exception) {
       throw new RocketChatGetGroupMembersException(
           String.format("Group member list from group with id %s is empty", rcGroupId));
     }

@@ -21,7 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.endsWith;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -36,6 +35,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
@@ -81,6 +85,7 @@ import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -89,6 +94,8 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.servlet.http.Cookie;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -103,6 +110,7 @@ import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -165,6 +173,16 @@ class UserControllerSessionE2EIT {
   @MockBean private RocketChatCredentialsProvider rocketChatCredentialsProvider;
 
   @MockBean private ConsultantDataFacade consultantDataFacade;
+
+  @Autowired private MongoClient mockedMongoClient;
+
+  @Mock private MongoDatabase mongoDatabase;
+
+  @Mock private MongoCollection<Document> mongoCollection;
+
+  @Mock private MongoCursor<Document> mongoCursor;
+
+  @Mock private FindIterable<Document> findIterable;
 
   @MockBean
   @Qualifier("restTemplate")
@@ -1235,16 +1253,29 @@ class UserControllerSessionE2EIT {
   }
 
   private void givenOnlyEmptyRocketChatGroupMemberResponses() {
-    groupMemberResponseDTO = new GroupMemberResponseDTO();
-    groupMemberResponseDTO.setSuccess(true);
-    GroupMemberDTO[] groupMembers = {};
-    groupMemberResponseDTO.setMembers(groupMembers);
+    givenMongoResponseWith(null);
+  }
 
-    var urlInfix = "/api/v1/groups.members?roomId=";
-    when(restTemplate.exchange(
-            contains(urlInfix), eq(HttpMethod.GET),
-            any(HttpEntity.class), eq(GroupMemberResponseDTO.class)))
-        .thenReturn(ResponseEntity.ok(groupMemberResponseDTO));
+  @SuppressWarnings("SameParameterValue")
+  private void givenMongoResponseWith(Document doc, Document... docs) {
+    if (nonNull(doc)) {
+      when(mongoCursor.next()).thenReturn(doc, docs);
+    }
+    var booleanList = new LinkedList<Boolean>();
+    var numExtraDocs = docs.length;
+    while (numExtraDocs-- > 0) {
+      booleanList.add(true);
+    }
+    booleanList.add(false);
+    if (nonNull(doc)) {
+      when(mongoCursor.hasNext()).thenReturn(true, booleanList.toArray(new Boolean[0]));
+    } else {
+      when(mongoCursor.hasNext()).thenReturn(false);
+    }
+    when(findIterable.iterator()).thenReturn(mongoCursor);
+    when(mongoCollection.find(any(Bson.class))).thenReturn(findIterable);
+    when(mockedMongoClient.getDatabase("rocketchat")).thenReturn(mongoDatabase);
+    when(mongoDatabase.getCollection("rocketchat_subscription")).thenReturn(mongoCollection);
   }
 
   private void givenAnEmptyRocketChatGetSubscriptionsResponse() {

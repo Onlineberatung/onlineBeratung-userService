@@ -25,6 +25,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.ROCKET_CHA
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_INFO_RESPONSE_DTO;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_INFO_RESPONSE_DTO_FAILED;
+import static java.util.Objects.nonNull;
 import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
@@ -32,7 +33,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -49,6 +49,13 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.config.RocketChatConfig;
@@ -86,8 +93,13 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserF
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
@@ -178,10 +190,20 @@ public class RocketChatServiceTest {
   private final String PASSWORD = "password";
   private final RocketChatConfig rocketChatConfig =
       new RocketChatConfig(new MockHttpServletRequest());
+  private final ObjectMapper objectMapper = new ObjectMapper();
   @Mock Logger logger;
   @Mock RocketChatCredentialsProvider rcCredentialsHelper;
   @InjectMocks private RocketChatService rocketChatService;
   @Mock private RestTemplate restTemplate;
+  @Mock private MongoClient mockedMongoClient;
+
+  @Mock private MongoDatabase mongoDatabase;
+
+  @Mock private MongoCollection<Document> mongoCollection;
+
+  @Mock private MongoCursor<Document> mongoCursor;
+
+  @Mock private FindIterable<Document> findIterable;
 
   @Before
   public void setup() {
@@ -781,14 +803,7 @@ public class RocketChatServiceTest {
 
     Exception exception = new RuntimeException(MESSAGE);
 
-    when(restTemplate.exchange(
-            ArgumentMatchers.anyString(),
-            any(),
-            any(),
-            ArgumentMatchers.<Class<GroupMemberResponseDTO>>any()))
-        .thenThrow(exception);
-
-    when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
+    when(mockedMongoClient.getDatabase(anyString())).thenThrow(exception);
 
     try {
       rocketChatService.getStandardMembersOfGroup(GROUP_ID);
@@ -802,16 +817,6 @@ public class RocketChatServiceTest {
   public void
       getStandardMembersOfGroup_Should_ThrowRocketChatGetGroupMembersException_WhenAPIResponseIsUnSuccessful()
           throws Exception {
-
-    when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
-
-    when(restTemplate.exchange(
-            ArgumentMatchers.anyString(),
-            any(),
-            any(),
-            ArgumentMatchers.<Class<GroupMemberResponseDTO>>any()))
-        .thenReturn(GROUP_MEMBER_RESPONSE_ENTITY_NOT_OK);
-
     try {
       rocketChatService.getStandardMembersOfGroup(GROUP_ID);
       fail("Expected exception: RocketChatGetGroupMembersException");
@@ -825,21 +830,19 @@ public class RocketChatServiceTest {
       getStandardMembersOfGroup_Should_ReturnListFilteredOfGroupMemberDTO_WhenAPICallIsSuccessful()
           throws Exception {
 
-    when(restTemplate.exchange(
-            ArgumentMatchers.anyString(),
-            any(),
-            any(),
-            ArgumentMatchers.<Class<GroupMemberResponseDTO>>any()))
-        .thenReturn(GROUP_MEMBER_RESPONSE_ENTITY);
-
+    var doc1 = givenSubscription(RC_CREDENTIALS_SYSTEM_A.getRocketChatUserId(), "s", null);
+    givenMongoResponseWith(doc1);
+    var doc2 = givenSubscription(RC_CREDENTIALS_TECHNICAL_A.getRocketChatUserId(), "t", null);
+    givenMongoResponseWith(doc2);
+    var doc3 = givenSubscription("a", "t", null);
+    givenMongoResponseWith(doc3);
     when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
     List<GroupMemberDTO> result = rocketChatService.getStandardMembersOfGroup(GROUP_ID);
 
     assertEquals(1, result.size());
-    assertNotSame(result.get(0).get_id(), RC_CREDENTIALS_TECHNICAL_A.getRocketChatUserId());
-    assertNotSame(result.get(0).get_id(), RC_CREDENTIALS_SYSTEM_A.getRocketChatUserId());
+    assertEquals(result.get(0).get_id(), "a");
   }
 
   /** Method: getUserInfo */
@@ -1321,5 +1324,47 @@ public class RocketChatServiceTest {
     String result = this.rocketChatService.getRocketChatUserIdByUsername(USERNAME);
 
     assertThat(result, is(USERS_LIST_RESPONSE_DTO.getUsers()[0].getId()));
+  }
+
+  private void givenMongoResponseWith(Document doc, Document... docs) {
+    if (nonNull(doc)) {
+      when(mongoCursor.next()).thenReturn(doc, docs);
+    }
+    var booleanList = new LinkedList<Boolean>();
+    var numExtraDocs = docs.length;
+    while (numExtraDocs-- > 0) {
+      booleanList.add(true);
+    }
+    booleanList.add(false);
+    if (nonNull(doc)) {
+      when(mongoCursor.hasNext()).thenReturn(true, booleanList.toArray(new Boolean[0]));
+    } else {
+      when(mongoCursor.hasNext()).thenReturn(false);
+    }
+    when(findIterable.iterator()).thenReturn(mongoCursor);
+    when(mongoCollection.find(any(Bson.class))).thenReturn(findIterable);
+    when(mockedMongoClient.getDatabase("rocketchat")).thenReturn(mongoDatabase);
+    when(mongoDatabase.getCollection("rocketchat_subscription")).thenReturn(mongoCollection);
+  }
+
+  private Document givenSubscription(String chatUserId, String username, String name)
+      throws JsonProcessingException {
+    var doc = new LinkedHashMap<String, Object>();
+    doc.put("_id", RandomStringUtils.randomAlphanumeric(17));
+    doc.put("rid", RandomStringUtils.randomAlphanumeric(17));
+    doc.put("name", RandomStringUtils.randomAlphanumeric(17));
+
+    var user = new LinkedHashMap<>();
+    user.put("_id", chatUserId);
+    user.put("username", username);
+    if (nonNull(name)) {
+      user.put("name", name);
+    }
+
+    doc.put("u", user);
+
+    var json = objectMapper.writeValueAsString(doc);
+
+    return Document.parse(json);
   }
 }
