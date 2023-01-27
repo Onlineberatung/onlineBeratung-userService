@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
+import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.AGENCY_ADMIN_PATH;
 import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.TENANT_ADMIN_PATH;
 import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.TENANT_ADMIN_PATH_WITHOUT_SLASH;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,6 +20,7 @@ import com.jayway.jsonpath.JsonPath;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAgencyAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateTenantAdminDTO;
 import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
 import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiControllerFactory;
@@ -27,7 +29,7 @@ import de.caritas.cob.userservice.api.config.apiclient.MailServiceApiControllerF
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import de.caritas.cob.userservice.api.model.Admin;
+import de.caritas.cob.userservice.api.model.Admin.AdminType;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.AdminRepository;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
@@ -148,6 +150,58 @@ class UserAdminControllerE2EIT {
   }
 
   @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
+  public void createNewAgencyAdmin_Should_returnOk_When_requiredCreateAgencyAdminIsGiven()
+      throws Exception {
+    givenNewAgencyAdminIsCreated();
+  }
+
+  private String givenNewAgencyAdminIsCreated() throws Exception {
+    // given
+    CreateAdminDTO createAdminDTO = new EasyRandom().nextObject(CreateAdminDTO.class);
+    createAdminDTO.setEmail("agencyadmin@email.com");
+
+    // when
+
+    MvcResult mvcResult =
+        this.mockMvc
+            .perform(
+                post(AGENCY_ADMIN_PATH)
+                    .cookie(CSRF_COOKIE)
+                    .header(CSRF_HEADER, CSRF_VALUE)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(createAdminDTO)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("_embedded.id", notNullValue()))
+            .andExpect(jsonPath("_embedded.username", notNullValue()))
+            .andExpect(jsonPath("_embedded.lastname", notNullValue()))
+            .andExpect(jsonPath("_embedded.email", is("agencyadmin@email.com")))
+            .andReturn();
+    String content = mvcResult.getResponse().getContentAsString();
+    return JsonPath.read(content, "_embedded.id");
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.SINGLE_TENANT_ADMIN})
+  public void createNewAgencyAdmin_Should_returnForbidden_When_calledNotAsUserAdmin()
+      throws Exception {
+    // given
+    CreateAdminDTO createAdminDTO = new EasyRandom().nextObject(CreateAdminDTO.class);
+    createAdminDTO.setEmail("agencyadmin@email.com");
+
+    // when
+
+    this.mockMvc
+        .perform(
+            post(AGENCY_ADMIN_PATH)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createAdminDTO)))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
   @WithMockUser(authorities = {AuthorityValue.TENANT_ADMIN})
   public void createNewTenantAdmin_Should_returnOk_When_requiredCreateTenantAdminIsGiven()
       throws Exception {
@@ -214,6 +268,59 @@ class UserAdminControllerE2EIT {
   }
 
   @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
+  public void updateAgencyAdmin_Should_returnOk_When_updateAttemptAsUserAdmin() throws Exception {
+    // given
+    String adminId = givenNewAgencyAdminIsCreated();
+
+    UpdateTenantAdminDTO updateAdminDTO = new EasyRandom().nextObject(UpdateTenantAdminDTO.class);
+
+    updateAdminDTO.setFirstname("changedFirstname");
+    updateAdminDTO.setLastname("changedLastname");
+    updateAdminDTO.setEmail("changed@email.com");
+    updateAdminDTO.setTenantId(1);
+
+    when(tenantService.getRestrictedTenantData(Mockito.anyLong()))
+        .thenReturn(new RestrictedTenantDTO().subdomain("subdomain"));
+
+    // when, then
+    this.mockMvc
+        .perform(
+            put(AGENCY_ADMIN_PATH + adminId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateAdminDTO)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("_embedded.id", is(adminId)))
+        .andExpect(jsonPath("_embedded.firstname", is("changedFirstname")))
+        .andExpect(jsonPath("_embedded.lastname", is("changedLastname")))
+        .andExpect(jsonPath("_embedded.email", is("changed@email.com")));
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.SINGLE_TENANT_ADMIN})
+  public void updateAgencyAdmin_Should_returnForbidden_When_UpdateAttemptAsNonUserAdmin()
+      throws Exception {
+    // given
+    String adminId = "5606179b-77e7-4056-aedc-68ddc769890c";
+
+    UpdateAgencyAdminDTO updateAdminDTO = new UpdateAgencyAdminDTO();
+    updateAdminDTO.setFirstname("changedFirstname");
+    updateAdminDTO.setLastname("changedLastname");
+    updateAdminDTO.setEmail("changed@email.com");
+
+    when(tenantService.getRestrictedTenantData(Mockito.anyLong()))
+        .thenReturn(new RestrictedTenantDTO().subdomain("subdomain"));
+
+    // when, then
+    this.mockMvc
+        .perform(
+            put(AGENCY_ADMIN_PATH + adminId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateAdminDTO)))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
   @WithMockUser(authorities = {AuthorityValue.TENANT_ADMIN})
   public void updateTenantAdmin_Should_returnOk_When_updateAttemptAsTenantAdmin() throws Exception {
     // given
@@ -265,9 +372,42 @@ class UserAdminControllerE2EIT {
   }
 
   @Test
-  @WithMockUser(authorities = {AuthorityValue.TENANT_ADMIN})
-  public void getTenantAdmin_Should_returnOk_When_attemptedToGetTenantWithTenantAdminAuthority()
+  @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
+  public void getAgencydmin_Should_returnOk_When_attemptedToGetAgencyAdminWithTenantAdminAuthority()
       throws Exception {
+    // given
+    var existingAdminId = "5606179b-77e7-4056-aedc-68ddc769890c";
+
+    // when, then
+    this.mockMvc
+        .perform(get(AGENCY_ADMIN_PATH + existingAdminId))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("_embedded.id", is(existingAdminId)))
+        .andExpect(jsonPath("_embedded.username", is("bmachin1j")))
+        .andExpect(jsonPath("_embedded.firstname", is("Barn")))
+        .andExpect(jsonPath("_embedded.lastname", is("Machin")))
+        .andExpect(jsonPath("_embedded.email", is("bmachin1j@senate.gov")));
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.SINGLE_TENANT_ADMIN})
+  public void
+      getAgencydmin_Should_returnForbidden_When_attemptedToGetAgencyAdminWithoutUserAdminAuthority()
+          throws Exception {
+    // given
+    var existingAdminId = "5606179b-77e7-4056-aedc-68ddc769890c";
+
+    // when, then
+    this.mockMvc
+        .perform(get(AGENCY_ADMIN_PATH + existingAdminId))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.TENANT_ADMIN})
+  public void
+      getTenantAdmin_Should_returnOk_When_attemptedToGetTenantAdminWithTenantAdminAuthority()
+          throws Exception {
     // given
     var existingAdminId = "6584f4a9-a7f0-42f0-b929-ab5c99c0802d";
 
@@ -330,8 +470,9 @@ class UserAdminControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.TENANT_ADMIN})
-  public void searchTenantAdmin_Should_returnOk_When_attemptedToGetTenantWithTenantAdminAuthority()
-      throws Exception {
+  public void
+      searchTenantAdmin_Should_returnOk_When_attemptedToSearchTenantsWithTenantAdminAuthority()
+          throws Exception {
     // when, then
     MvcResult mvcResult =
         this.mockMvc
@@ -350,7 +491,34 @@ class UserAdminControllerE2EIT {
     String contentAsString = mvcResult.getResponse().getContentAsString();
     JSONArray embedded = JsonPath.read(contentAsString, "_embedded");
 
-    assertAllElementsAreOfAdminTypeTenant(embedded, PAGE_SIZE);
+    assertAllElementsAreOfAdminType(embedded, AdminType.TENANT);
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
+  public void
+      searchAgencyAdmins_Should_returnOk_When_attemptedToSearchTenantsWithUserAdminAuthority()
+          throws Exception {
+    // when, then
+    MvcResult mvcResult =
+        this.mockMvc
+            .perform(
+                get(
+                    "/useradmin/agencyadmins/search?query=*&page=1&perPage=10&order=ASC&field=FIRSTNAME"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("_embedded", hasSize(PAGE_SIZE)))
+            .andReturn();
+
+    String contentAsString = mvcResult.getResponse().getContentAsString();
+    JSONArray embedded = JsonPath.read(contentAsString, "_embedded");
+
+    assertAllElementsAreOfAdminType(embedded, AdminType.AGENCY);
+  }
+
+  private void assertAllElementsAreOfAdminType(JSONArray embedded, AdminType adminType) {
+    for (int i = 0; i < PAGE_SIZE; i++) {
+      assertAllElementsAreOfAdminType(embedded, PAGE_SIZE, adminType);
+    }
   }
 
   @Test
@@ -383,14 +551,14 @@ class UserAdminControllerE2EIT {
     String contentAsString = mvcResult.getResponse().getContentAsString();
     JSONArray embedded = JsonPath.read(contentAsString, "_embedded");
 
-    assertAllElementsAreOfAdminTypeTenant(embedded, 1);
+    assertAllElementsAreOfAdminType(embedded, 1, AdminType.TENANT);
   }
 
-  private void assertAllElementsAreOfAdminTypeTenant(JSONArray embedded, int pageSize) {
+  private void assertAllElementsAreOfAdminType(
+      JSONArray embedded, int pageSize, AdminType adminType) {
     for (int i = 0; i < pageSize; i++) {
       String tenantId = extractTenantWithOrderInList(embedded, i).get("id");
-      assertThat(adminRepository.findByIdAndType(tenantId, Admin.AdminType.TENANT).isPresent())
-          .isTrue();
+      assertThat(adminRepository.findByIdAndType(tenantId, adminType).isPresent()).isTrue();
     }
   }
 
