@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.testConfig;
 
+import com.mongodb.client.MongoClient;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatClient;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
@@ -26,18 +28,22 @@ public class RocketChatTestConfig {
   public static final String AUTH_TOKEN =
       "auth-token configured in " + RocketChatTestConfig.class.getName();
 
+  @MockBean MongoClient mongoClient;
+
   @Bean
   public RocketChatService rocketChatService(
       RestTemplate restTemplate,
       RocketChatCredentialsProvider rocketChatCredentialsProvider,
       RocketChatConfig rocketChatConfig,
       RocketChatClient rocketChatClient,
+      MongoClient mongoClient,
       RocketChatMapper rocketChatMapper,
       RocketChatCredentials rocketChatCredentials) {
     return new RocketChatService(
         restTemplate,
         rocketChatCredentialsProvider,
         rocketChatClient,
+        mongoClient,
         rocketChatConfig,
         rocketChatMapper,
         rocketChatCredentials) {
