@@ -517,7 +517,8 @@ class UserAdminControllerE2EIT {
 
   private void assertAllElementsAreOfAdminType(JSONArray embedded, AdminType adminType) {
     for (int i = 0; i < PAGE_SIZE; i++) {
-    assertAllElementsAreOfAdminTypeTenant(embedded, PAGE_SIZE);
+      assertAllElementsAreOfAdminType(embedded, PAGE_SIZE, adminType);
+    }
   }
 
   @Test
@@ -550,10 +551,11 @@ class UserAdminControllerE2EIT {
     String contentAsString = mvcResult.getResponse().getContentAsString();
     JSONArray embedded = JsonPath.read(contentAsString, "_embedded");
 
-    assertAllElementsAreOfAdminTypeTenant(embedded, 1);
+    assertAllElementsAreOfAdminType(embedded, 1, AdminType.TENANT);
   }
 
-  private void assertAllElementsAreOfAdminTypeTenant(JSONArray embedded, int pageSize) {
+  private void assertAllElementsAreOfAdminType(
+      JSONArray embedded, int pageSize, AdminType adminType) {
     for (int i = 0; i < pageSize; i++) {
       String tenantId = extractTenantWithOrderInList(embedded, i).get("id");
       assertThat(adminRepository.findByIdAndType(tenantId, adminType).isPresent()).isTrue();
