@@ -1,10 +1,7 @@
 package de.caritas.cob.userservice.api.service.liveevents;
 
-import static java.util.Collections.emptyList;
-
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.ConsultantService;
@@ -35,17 +32,7 @@ public class RelevantUserAccountIdsByChatProvider implements UserIdsProvider {
    */
   @Override
   public List<String> collectUserIds(String rcGroupId) {
-    try {
-      return extractDependentUserIds(rcGroupId);
-    } catch (RocketChatGetGroupMembersException e) {
-      log.error("Rocket.Chat Error: Unable to collect rc members for group id {}", rcGroupId);
-    }
-    return emptyList();
-  }
-
-  private List<String> extractDependentUserIds(String rcGroupId)
-      throws RocketChatGetGroupMembersException {
-    return this.rocketChatService.getMembersOfGroup(rcGroupId).parallelStream()
+    return this.rocketChatService.getChatUsers(rcGroupId).parallelStream()
         .map(GroupMemberDTO::get_id)
         .map(this::toUserAccountId)
         .filter(Objects::nonNull)
