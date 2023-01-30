@@ -19,7 +19,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AgencyAdminUserServiceTest {
+public class AgencyAdminServiceTest {
 
   @InjectMocks private AgencyAdminService agencyAdminService;
   @Mock private SecurityHeaderSupplier securityHeaderSupplier;

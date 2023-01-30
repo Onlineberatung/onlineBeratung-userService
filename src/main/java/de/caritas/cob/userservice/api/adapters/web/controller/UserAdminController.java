@@ -15,6 +15,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminAgencyRelation
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.PatchAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.RootDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionAdminResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionFilter;
@@ -355,6 +356,12 @@ public class UserAdminController implements UseradminApi {
   }
 
   @Override
+  public ResponseEntity<AdminResponseDTO> patchAdminData(PatchAdminDTO patchAdminDTO) {
+    AdminResponseDTO adminResponseDTO = this.adminUserFacade.patchAdminUserData(patchAdminDTO);
+    return new ResponseEntity<>(adminResponseDTO, HttpStatus.OK);
+  }
+
+  @Override
   public ResponseEntity<AdminSearchResultDTO> searchAgencyAdmins(
       String query, Integer page, Integer perPage, String field, String order) {
     var decodedInfix = URLDecoder.decode(query, StandardCharsets.UTF_8).trim();
@@ -378,7 +385,6 @@ public class UserAdminController implements UseradminApi {
         adminUserFacade.findTenantAdminsByInfix(
             decodedInfix, page - 1, perPage, mappedField, isAscending);
     var result = adminDtoMapper.adminSearchResultOf(resultMap, query, page, perPage, field, order);
-
     return ResponseEntity.ok(result);
   }
 }
