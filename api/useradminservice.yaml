@@ -521,7 +521,7 @@ paths:
           content:
             'application/hal+json':
               schema:
-                $ref: '#/components/schemas/AgencyAdminSearchResultDTO'
+                $ref: '#/components/schemas/AdminSearchResultDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -539,7 +539,7 @@ paths:
         content:
           'application/json':
             schema:
-              $ref: '#/components/schemas/CreateAgencyAdminDTO'
+              $ref: '#/components/schemas/CreateAdminDTO'
         required: true
       responses:
         201:
@@ -610,7 +610,7 @@ paths:
           content:
             'application/hal+json':
               schema:
-                $ref: '#/components/schemas/AgencyAdminSearchResultDTO'
+                $ref: '#/components/schemas/AdminSearchResultDTO'
         400:
           description: BAD REQUEST - invalid/incomplete request or body object
         401:
@@ -834,6 +834,215 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+
+  /useradmin/tenantadmins:
+      get:
+        tags:
+          - admin-user-controller
+        summary: 'Returns the list of tenant admins by filter query parameter. [Authorization: Role: user-admin]'
+        operationId: getTenantAdmins
+        parameters:
+          - name: tenantId
+            in: query
+            description: tenant id
+            required: true
+            schema:
+              type: integer
+        responses:
+          200:
+            description: OK - successful operation
+            content:
+              'application/json':
+                schema:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/AdminResponseDTO'
+          400:
+            description: BAD REQUEST - invalid/incomplete request or body object
+          401:
+            description: UNAUTHORIZED - no/invalid role/authorization
+          500:
+            description: INTERNAL SERVER ERROR - server encountered unexpected condition
+        security:
+          - Bearer: [ ]
+      post:
+        tags:
+          - admin-user-controller
+        summary: 'Creates a new Tenant Admin [Authorization: Role: tenant-admin]'
+        operationId: createTenantAdmin
+        requestBody:
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/CreateAdminDTO'
+          required: true
+        responses:
+          201:
+            description: CREATED - Agency Admin was created successfully
+            content:
+              'application/hal+json':
+                schema:
+                  $ref: '#/components/schemas/AdminResponseDTO'
+          400:
+            description: BAD REQUEST - invalid/incomplete request or body object
+          401:
+            description: UNAUTHORIZED - no/invalid role/authorization
+          409:
+            description: CONFLICT - invalid/unavailable username or email address
+          500:
+            description: INTERNAL SERVER ERROR - server encountered unexpected condition
+        security:
+          - Bearer: [ ]
+
+  /useradmin/tenantadmins/search:
+      get:
+        tags:
+          - admin-user-controller
+        summary: 'Get tenant admins matching the given query [Auth: tenant-admin]'
+        operationId: searchTenantAdmins
+        parameters:
+          - name: query
+            in: query
+            description: URL-encoded infix to search for in first name, last name, email or tenant id.
+              A non-encoded star symbol searches for all.
+            required: true
+            schema:
+              type: string
+              minLength: 1
+          - name: page
+            in: query
+            description: Page number (first page = 1)
+            schema:
+              type: integer
+              default: 1
+              minimum: 1
+          - name: perPage
+            in: query
+            description: Number of items returned per page
+            schema:
+              type: integer
+              default: 10
+              minimum: 1
+          - name: field
+            in: query
+            description: field to sort by
+            schema:
+              type: string
+              enum: [ FIRSTNAME, LASTNAME, EMAIL, TENANT_ID ]
+              default: FIRSTNAME
+              pattern: '^(FIRSTNAME|LASTNAME|EMAIL|TENANT_ID)$'
+          - name: order
+            in: query
+            description: sort order
+            schema:
+              type: string
+              enum: [ ASC, DESC ]
+              default: ASC
+              pattern: '^(ASC|DESC)$'
+        responses:
+          200:
+            description: OK - successful operation
+            content:
+              'application/hal+json':
+                schema:
+                  $ref: '#/components/schemas/AdminSearchResultDTO'
+          400:
+            description: BAD REQUEST - invalid/incomplete request or body object
+          401:
+            description: UNAUTHORIZED - no/invalid role/authorization
+          500:
+            description: INTERNAL SERVER ERROR - server encountered unexpected condition
+        security:
+          - Bearer: [ ]
+
+  /useradmin/tenantadmins/{adminId}:
+      get:
+        tags:
+          - admin-user-controller
+        summary: 'Get a tenant admin by given id [Authorization: Role: tenant-admin]'
+        operationId: getTenantAdmin
+        parameters:
+          - name: adminId
+            in: path
+            description: admin id
+            required: true
+            schema:
+              type: string
+        responses:
+          200:
+            description: OK - consultant found
+            content:
+              'application/json':
+                schema:
+                  $ref: '#/components/schemas/AdminResponseDTO'
+          204:
+            description: NO CONTENT - agency admin with the specific id was not found
+          400:
+            description: BAD REQUEST - invalid/incomplete request
+          401:
+            description: UNAUTHORIZED - no/invalid role/authorization
+          500:
+            description: INTERNAL SERVER ERROR - server encountered unexpected condition
+        security:
+          - Bearer: [ ]
+      put:
+        tags:
+          - admin-user-controller
+        summary: 'Updates a tenant admin [Authorization: Role: tenant-admin]'
+        operationId: updateTenantAdmin
+        requestBody:
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/UpdateTenantAdminDTO'
+          required: true
+        parameters:
+          - name: adminId
+            in: path
+            description: agency admin id
+            required: true
+            schema:
+              type: string
+        responses:
+          200:
+            description: OK - agency admin was updated successfully
+            content:
+              'application/hal+json':
+                schema:
+                  $ref: '#/components/schemas/AdminResponseDTO'
+          400:
+            description: BAD REQUEST - invalid/incomplete request
+          401:
+            description: UNAUTHORIZED - no/invalid role/authorization
+          500:
+            description: INTERNAL SERVER ERROR - server encountered unexpected condition
+        security:
+          - Bearer: [ ]
+      delete:
+        tags:
+          - admin-user-controller
+        summary: 'delete tenant admin [Authorization: Role: tenant-admin]'
+        operationId: deleteTenantAdmin
+        parameters:
+          - name: adminId
+            in: path
+            description: admin id
+            required: true
+            schema:
+              type: string
+        responses:
+          200:
+            description: OK - agency admin was marked for deletion successfully
+          400:
+            description: BAD REQUEST - invalid/incomplete request
+          401:
+            description: UNAUTHORIZED - no/invalid role/authorization
+          404:
+            description: NOT FOUND - agency admin not found
+          500:
+            description: INTERNAL SERVER ERROR - server encountered unexpected condition
+        security:
+          - Bearer: [ ]
 components:
   schemas:
     RootDTO:
@@ -1075,7 +1284,7 @@ components:
           items:
             $ref: './../services/agencyadminservice.yaml#/components/schemas/AgencyAdminResponseDTO'
 
-    CreateAgencyAdminDTO:
+    CreateAdminDTO:
       type: object
       required:
         - username
@@ -1130,6 +1339,34 @@ components:
           minLength: 1
           maxLength: 255
 
+
+    UpdateTenantAdminDTO:
+      type: object
+      required:
+        - firstname
+        - lastname
+        - email
+      properties:
+        firstname:
+          type: string
+          example: "Max"
+          minLength: 1
+          maxLength: 255
+        lastname:
+          type: string
+          example: "Mustermann"
+          minLength: 1
+          maxLength: 255
+        email:
+          type: string
+          example: "max@mustermann.de"
+          minLength: 1
+          maxLength: 255
+        tenantId:
+          type: integer
+          example: "1"
+
+
     AdminDTO:
       type: object
       properties:
@@ -1153,6 +1390,10 @@ components:
         updateDate:
           type: string
         deleteDate:
+          type: string
+        tenantId:
+          type: string
+        tenantSubdomain:
           type: string
         agencies:
           type: array
@@ -1227,7 +1468,7 @@ components:
         _links:
           $ref: '#/components/schemas/AdminLinks'
 
-    AgencyAdminSearchResultDTO:
+    AdminSearchResultDTO:
       type: object
       properties:
         _embedded:

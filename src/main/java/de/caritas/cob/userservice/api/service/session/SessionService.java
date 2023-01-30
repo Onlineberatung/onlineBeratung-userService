@@ -227,7 +227,7 @@ public class SessionService {
   }
 
   private List<SessionTopic> createSessionTopics(
-      Collection<Integer> topicsOfInterest, Session session) {
+      Collection<Long> topicsOfInterest, Session session) {
     if (topicsOfInterest != null) {
       return topicsOfInterest.stream()
           .map(topicId -> createNewSessionTopic(session, topicId))
@@ -237,7 +237,7 @@ public class SessionService {
     }
   }
 
-  private SessionTopic createNewSessionTopic(Session session, Integer topicId) {
+  private SessionTopic createNewSessionTopic(Session session, Long topicId) {
     return SessionTopic.builder()
         .topicId(topicId)
         .session(session)

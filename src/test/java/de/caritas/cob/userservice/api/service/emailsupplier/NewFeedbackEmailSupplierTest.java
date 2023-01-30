@@ -135,7 +135,7 @@ public class NewFeedbackEmailSupplierTest {
     when(session.getConsultant()).thenReturn(CONSULTANT);
     setField(newFeedbackEmailSupplier, "userId", CONSULTANT.getId());
     when(consultantService.getConsultant(anyString())).thenReturn(Optional.of(CONSULTANT));
-    when(rocketChatService.getMembersOfGroup(anyString())).thenReturn(GROUP_MEMBER_DTO_LIST);
+    when(rocketChatService.getChatUsers(anyString())).thenReturn(GROUP_MEMBER_DTO_LIST);
 
     List<MailDTO> generatedMails = newFeedbackEmailSupplier.generateEmails();
 
@@ -151,7 +151,7 @@ public class NewFeedbackEmailSupplierTest {
     when(session.getConsultant()).thenReturn(CONSULTANT);
     setField(newFeedbackEmailSupplier, "userId", CONSULTANT.getId());
     when(consultantService.getConsultant(anyString())).thenReturn(Optional.of(CONSULTANT));
-    when(rocketChatService.getMembersOfGroup(anyString())).thenReturn(GROUP_MEMBER_DTO_LIST);
+    when(rocketChatService.getChatUsers(anyString())).thenReturn(GROUP_MEMBER_DTO_LIST);
     when(consultantService.getConsultantByRcUserId(anyString()))
         .thenReturn(Optional.of(CONSULTANT_2));
 
@@ -183,7 +183,7 @@ public class NewFeedbackEmailSupplierTest {
     when(session.getConsultant()).thenReturn(CONSULTANT);
     setField(newFeedbackEmailSupplier, "userId", CONSULTANT.getId());
     when(consultantService.getConsultant(anyString())).thenReturn(Optional.of(CONSULTANT));
-    when(rocketChatService.getMembersOfGroup(anyString())).thenReturn(List.of(GROUP_MEMBER_USER_1));
+    when(rocketChatService.getChatUsers(anyString())).thenReturn(List.of(GROUP_MEMBER_USER_1));
     var consultant = mock(Consultant.class);
     when(consultant.getId()).thenReturn(UUID.randomUUID().toString());
     when(consultant.getEmail()).thenReturn("a@b.com");
@@ -206,7 +206,7 @@ public class NewFeedbackEmailSupplierTest {
     when(session.getConsultant()).thenReturn(CONSULTANT);
     setField(newFeedbackEmailSupplier, "userId", CONSULTANT.getId());
     when(consultantService.getConsultant(anyString())).thenReturn(Optional.of(CONSULTANT));
-    when(rocketChatService.getMembersOfGroup(anyString())).thenReturn(List.of(GROUP_MEMBER_USER_1));
+    when(rocketChatService.getChatUsers(anyString())).thenReturn(List.of(GROUP_MEMBER_USER_1));
     var consultant = mock(Consultant.class);
     when(consultant.getId()).thenReturn(UUID.randomUUID().toString());
     when(consultant.getEmail()).thenReturn("a@b.com");
@@ -229,7 +229,7 @@ public class NewFeedbackEmailSupplierTest {
     when(session.getConsultant()).thenReturn(CONSULTANT);
     setField(newFeedbackEmailSupplier, "userId", CONSULTANT.getId());
     when(consultantService.getConsultant(anyString())).thenReturn(Optional.of(CONSULTANT));
-    when(rocketChatService.getMembersOfGroup(anyString())).thenReturn(List.of(GROUP_MEMBER_USER_1));
+    when(rocketChatService.getChatUsers(anyString())).thenReturn(List.of(GROUP_MEMBER_USER_1));
     var consultant = mock(Consultant.class);
     when(consultant.getId()).thenReturn(UUID.randomUUID().toString());
     when(consultant.getEmail()).thenReturn("a@b.com");
@@ -253,7 +253,7 @@ public class NewFeedbackEmailSupplierTest {
     when(session.getConsultant()).thenReturn(CONSULTANT);
     setField(newFeedbackEmailSupplier, "userId", CONSULTANT.getId());
     when(consultantService.getConsultant(anyString())).thenReturn(Optional.of(CONSULTANT));
-    when(rocketChatService.getMembersOfGroup(anyString())).thenReturn(List.of(GROUP_MEMBER_USER_1));
+    when(rocketChatService.getChatUsers(anyString())).thenReturn(List.of(GROUP_MEMBER_USER_1));
     var consultant = mock(Consultant.class);
     when(consultant.getId()).thenReturn(UUID.randomUUID().toString());
     when(consultant.getEmail()).thenReturn("a@b.com");
@@ -375,7 +375,7 @@ public class NewFeedbackEmailSupplierTest {
     when(session.getConsultant()).thenReturn(consultant);
     setField(newFeedbackEmailSupplier, "userId", consultant.getId());
     when(consultantService.getConsultant(anyString())).thenReturn(Optional.of(consultant));
-    when(rocketChatService.getMembersOfGroup(anyString())).thenReturn(GROUP_MEMBER_DTO_LIST);
+    when(rocketChatService.getChatUsers(anyString())).thenReturn(GROUP_MEMBER_DTO_LIST);
     when(consultantService.getConsultantByRcUserId(anyString()))
         .thenReturn(Optional.of(CONSULTANT_2));
 
@@ -394,7 +394,7 @@ public class NewFeedbackEmailSupplierTest {
     when(session.getConsultant()).thenReturn(consultant);
     setField(newFeedbackEmailSupplier, "userId", consultant.getId());
     when(consultantService.getConsultant(anyString())).thenReturn(Optional.of(consultant));
-    when(rocketChatService.getMembersOfGroup(anyString())).thenReturn(GROUP_MEMBER_DTO_LIST);
+    when(rocketChatService.getChatUsers(anyString())).thenReturn(GROUP_MEMBER_DTO_LIST);
     when(consultantService.getConsultantByRcUserId(anyString()))
         .thenReturn(Optional.of(CONSULTANT_2));
 
@@ -412,7 +412,7 @@ public class NewFeedbackEmailSupplierTest {
     when(session.getConsultant()).thenReturn(consultant);
     setField(newFeedbackEmailSupplier, "userId", consultant.getId());
     when(consultantService.getConsultant(anyString())).thenReturn(Optional.of(consultant));
-    when(rocketChatService.getMembersOfGroup(anyString())).thenReturn(GROUP_MEMBER_DTO_LIST);
+    when(rocketChatService.getChatUsers(anyString())).thenReturn(GROUP_MEMBER_DTO_LIST);
     when(consultantService.getConsultantByRcUserId(anyString()))
         .thenReturn(Optional.of(CONSULTANT_2));
 

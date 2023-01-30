@@ -74,7 +74,7 @@ abstract class RocketChatGroupOperation {
         .map(Consultant::getRocketChatId)
         .filter(groupMemberList::contains)
         .forEach(rcUserId -> rocketChatFacade.removeUserFromGroup(rcUserId, rcGroupId));
-    rocketChatFacade.removeTechnicalUserFromGroup(rcGroupId);
+    rocketChatFacade.leaveFromGroupAsTechnicalUser(rcGroupId);
   }
 
   private List<String> obtainRocketChatGroupMemberIds(String groupId) {

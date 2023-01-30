@@ -23,7 +23,7 @@ public class SynchronizeAdminAgencyRelation {
 
   public void synchronizeAdminAgenciesRelation(
       final String adminId, final List<CreateAdminAgencyRelationDTO> newAdminAgencyRelationDTOs) {
-    var admin = retrieveAdminService.findAgencyAdmin(adminId);
+    var admin = retrieveAdminService.findAdmin(adminId, Admin.AdminType.AGENCY);
     List<AdminAgency> existingAdminAgencyRelations = adminAgencyRepository.findByAdminId(adminId);
     List<AdminAgency> adminAgencyRelationsToDelete =
         emptyIfNull(existingAdminAgencyRelations).stream()

@@ -82,7 +82,8 @@ public class ConsultantUpdateService {
 
   private UserUpdateRequestDTO buildUserUpdateRequestDTO(
       String rcUserId, UpdateAdminConsultantDTO updateConsultantDTO) {
-    UserUpdateDataDTO userUpdateDataDTO = new UserUpdateDataDTO(updateConsultantDTO.getEmail());
+    UserUpdateDataDTO userUpdateDataDTO =
+        new UserUpdateDataDTO(updateConsultantDTO.getEmail(), true);
     return new UserUpdateRequestDTO(rcUserId, userUpdateDataDTO);
   }
 

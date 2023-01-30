@@ -21,7 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.endsWith;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -36,10 +35,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsGetDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsUpdateDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.subscriptions.SubscriptionsGetDTO;
@@ -81,6 +83,8 @@ import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -89,6 +93,8 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.servlet.http.Cookie;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -103,6 +109,7 @@ import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -164,7 +171,19 @@ class UserControllerSessionE2EIT {
 
   @MockBean private RocketChatCredentialsProvider rocketChatCredentialsProvider;
 
-  @MockBean private ConsultantDataFacade consultantDataFacade;
+  @SuppressWarnings("unused")
+  @MockBean
+  private ConsultantDataFacade consultantDataFacade;
+
+  @Autowired private MongoClient mockedMongoClient;
+
+  @Mock private MongoDatabase mongoDatabase;
+
+  @Mock private MongoCollection<Document> mongoCollection;
+
+  @Mock private MongoCursor<Document> mongoCursor;
+
+  @Mock private FindIterable<Document> findIterable;
 
   @MockBean
   @Qualifier("restTemplate")
@@ -190,7 +209,6 @@ class UserControllerSessionE2EIT {
   private ChatAgency chatAgency;
   private UserAgency userAgency;
   private UserInfoResponseDTO userInfoResponse;
-  private GroupMemberResponseDTO groupMemberResponseDTO;
   private SubscriptionsGetDTO subscriptionsGetResponse;
   private MonitoringDTO monitoringDTO;
   private Consultant consultantToAssign;
@@ -893,8 +911,7 @@ class UserControllerSessionE2EIT {
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
     givenAValidSession();
-    givenAnEmptyRocketChatGroupMemberResponse(session.getGroupId());
-    givenAnEmptyRocketChatGroupMemberResponse(session.getFeedbackGroupId());
+    givenOnlyEmptyRocketChatGroupMemberResponses();
     givenKeycloakUserRoles(consultant.getId(), "consultant");
 
     mockMvc
@@ -911,12 +928,12 @@ class UserControllerSessionE2EIT {
     verifyRocketChatTechUserAddedToGroup(logOutput, session.getGroupId(), 0);
     verifyRocketChatUserRemovedFromGroup(
         logOutput, session.getGroupId(), session.getConsultant().getRocketChatId(), 0);
-    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getGroupId(), 0);
+    verifyRocketChatTechUserLeftGroup(logOutput, session.getGroupId(), 0);
 
     verifyRocketChatTechUserAddedToGroup(logOutput, session.getFeedbackGroupId(), 0);
     verifyRocketChatUserRemovedFromGroup(
         logOutput, session.getFeedbackGroupId(), consultant.getRocketChatId(), 0);
-    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(), 0);
+    verifyRocketChatTechUserLeftGroup(logOutput, session.getFeedbackGroupId(), 0);
   }
 
   @Test
@@ -927,8 +944,7 @@ class UserControllerSessionE2EIT {
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
     givenAValidSession();
-    givenAnEmptyRocketChatGroupMemberResponse(session.getGroupId());
-    givenAnEmptyRocketChatGroupMemberResponse(session.getFeedbackGroupId());
+    givenOnlyEmptyRocketChatGroupMemberResponses();
     givenKeycloakUserRoles(consultant.getId(), "consultant");
 
     mockMvc
@@ -945,12 +961,12 @@ class UserControllerSessionE2EIT {
     verifyRocketChatTechUserAddedToGroup(logOutput, session.getGroupId(), 0);
     verifyRocketChatUserRemovedFromGroup(
         logOutput, session.getGroupId(), session.getConsultant().getRocketChatId(), 0);
-    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getGroupId(), 0);
+    verifyRocketChatTechUserLeftGroup(logOutput, session.getGroupId(), 0);
 
     verifyRocketChatTechUserAddedToGroup(logOutput, session.getFeedbackGroupId(), 0);
     verifyRocketChatUserRemovedFromGroup(
         logOutput, session.getFeedbackGroupId(), consultant.getRocketChatId(), 0);
-    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(), 0);
+    verifyRocketChatTechUserLeftGroup(logOutput, session.getFeedbackGroupId(), 0);
   }
 
   @Test
@@ -961,8 +977,8 @@ class UserControllerSessionE2EIT {
     givenAValidRocketChatSystemUser();
     givenAValidRocketChatInfoUserResponse();
     givenAValidSession();
-    givenAPositiveRocketChatGroupMemberResponse(session.getGroupId(), consultant.getRocketChatId());
-    givenAnEmptyRocketChatGroupMemberResponse(session.getFeedbackGroupId());
+    var doc = givenSubscription(consultant.getRocketChatId(), "c", null);
+    givenMongoResponseWith(doc);
     givenKeycloakUserRoles(consultant.getId(), "consultant");
 
     mockMvc
@@ -979,47 +995,12 @@ class UserControllerSessionE2EIT {
     verifyRocketChatTechUserAddedToGroup(logOutput, session.getGroupId(), 1);
     verifyRocketChatUserRemovedFromGroup(
         logOutput, session.getGroupId(), consultant.getRocketChatId(), 1);
-    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getGroupId(), 1);
+    verifyRocketChatTechUserLeftGroup(logOutput, session.getGroupId(), 1);
 
     verifyRocketChatTechUserAddedToGroup(logOutput, session.getFeedbackGroupId(), 0);
     verifyRocketChatUserRemovedFromGroup(
         logOutput, session.getFeedbackGroupId(), consultant.getRocketChatId(), 0);
-    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(), 0);
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
-  void removeFromSessionShouldReturnNoContentAndRemoveConsultantFromSessionAndFeedbackChat(
-      CapturedOutput logOutput) throws Exception {
-    givenAValidConsultant(true);
-    givenAValidRocketChatSystemUser();
-    givenAValidRocketChatInfoUserResponse();
-    givenAValidSession();
-    givenAPositiveRocketChatGroupMemberResponse(session.getGroupId(), consultant.getRocketChatId());
-    givenAPositiveRocketChatGroupMemberResponse(
-        session.getFeedbackGroupId(), consultant.getRocketChatId());
-    givenKeycloakUserRoles(consultant.getId(), "consultant");
-
-    mockMvc
-        .perform(
-            delete(
-                    "/users/sessions/{sessionId}/consultant/{consultantId}",
-                    session.getId(),
-                    consultant.getId())
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNoContent());
-
-    verifyRocketChatTechUserAddedToGroup(logOutput, session.getGroupId(), 1);
-    verifyRocketChatUserRemovedFromGroup(
-        logOutput, session.getGroupId(), consultant.getRocketChatId(), 1);
-    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getGroupId(), 1);
-
-    verifyRocketChatTechUserAddedToGroup(logOutput, session.getFeedbackGroupId(), 1);
-    verifyRocketChatUserRemovedFromGroup(
-        logOutput, session.getFeedbackGroupId(), consultant.getRocketChatId(), 1);
-    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(), 1);
+    verifyRocketChatTechUserLeftGroup(logOutput, session.getFeedbackGroupId(), 0);
   }
 
   @Test
@@ -1046,12 +1027,12 @@ class UserControllerSessionE2EIT {
     verifyRocketChatTechUserAddedToGroup(logOutput, session.getGroupId(), 0);
     verifyRocketChatUserRemovedFromGroup(
         logOutput, session.getGroupId(), session.getConsultant().getRocketChatId(), 0);
-    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getGroupId(), 0);
+    verifyRocketChatTechUserLeftGroup(logOutput, session.getGroupId(), 0);
 
     verifyRocketChatTechUserAddedToGroup(logOutput, session.getFeedbackGroupId(), 0);
     verifyRocketChatUserRemovedFromGroup(
         logOutput, session.getFeedbackGroupId(), consultant.getRocketChatId(), 0);
-    verifyRocketChatTechUserRemovedFromGroup(logOutput, session.getFeedbackGroupId(), 0);
+    verifyRocketChatTechUserLeftGroup(logOutput, session.getFeedbackGroupId(), 0);
   }
 
   @Test
@@ -1203,48 +1184,52 @@ class UserControllerSessionE2EIT {
         .thenReturn(ResponseEntity.ok(userInfoResponse));
   }
 
-  private void givenAPositiveRocketChatGroupMemberResponse(String chatId, String chatUserId) {
-    groupMemberResponseDTO = new GroupMemberResponseDTO();
-    groupMemberResponseDTO.setSuccess(true);
-
-    var groupMember = easyRandom.nextObject(GroupMemberDTO.class);
-    if (nonNull(chatUserId)) {
-      groupMember.set_id(chatUserId);
-    }
-    GroupMemberDTO[] groupMembers = {groupMember};
-    groupMemberResponseDTO.setMembers(groupMembers);
-
-    var urlSuffix = "/api/v1/groups.members?roomId=" + chatId + "&count=0";
-    when(restTemplate.exchange(
-            endsWith(urlSuffix), eq(HttpMethod.GET),
-            any(HttpEntity.class), eq(GroupMemberResponseDTO.class)))
-        .thenReturn(ResponseEntity.ok(groupMemberResponseDTO));
-  }
-
-  private void givenAnEmptyRocketChatGroupMemberResponse(String chatId) {
-    groupMemberResponseDTO = new GroupMemberResponseDTO();
-    groupMemberResponseDTO.setSuccess(true);
-    GroupMemberDTO[] groupMembers = {};
-    groupMemberResponseDTO.setMembers(groupMembers);
-
-    var urlSuffix = "/api/v1/groups.members?roomId=" + chatId + "&count=0";
-    when(restTemplate.exchange(
-            endsWith(urlSuffix), eq(HttpMethod.GET),
-            any(HttpEntity.class), eq(GroupMemberResponseDTO.class)))
-        .thenReturn(ResponseEntity.ok(groupMemberResponseDTO));
-  }
-
   private void givenOnlyEmptyRocketChatGroupMemberResponses() {
-    groupMemberResponseDTO = new GroupMemberResponseDTO();
-    groupMemberResponseDTO.setSuccess(true);
-    GroupMemberDTO[] groupMembers = {};
-    groupMemberResponseDTO.setMembers(groupMembers);
+    givenMongoResponseWith(null);
+  }
 
-    var urlInfix = "/api/v1/groups.members?roomId=";
-    when(restTemplate.exchange(
-            contains(urlInfix), eq(HttpMethod.GET),
-            any(HttpEntity.class), eq(GroupMemberResponseDTO.class)))
-        .thenReturn(ResponseEntity.ok(groupMemberResponseDTO));
+  @SuppressWarnings("SameParameterValue")
+  private void givenMongoResponseWith(Document doc, Document... docs) {
+    if (nonNull(doc)) {
+      when(mongoCursor.next()).thenReturn(doc, docs);
+    }
+    var booleanList = new LinkedList<Boolean>();
+    var numExtraDocs = docs.length;
+    while (numExtraDocs-- > 0) {
+      booleanList.add(true);
+    }
+    booleanList.add(false);
+    if (nonNull(doc)) {
+      when(mongoCursor.hasNext()).thenReturn(true, booleanList.toArray(new Boolean[0]));
+    } else {
+      when(mongoCursor.hasNext()).thenReturn(false);
+    }
+    when(findIterable.iterator()).thenReturn(mongoCursor);
+    when(mongoCollection.find(any(Bson.class))).thenReturn(findIterable).thenReturn(findIterable);
+    when(mockedMongoClient.getDatabase("rocketchat")).thenReturn(mongoDatabase);
+    when(mongoDatabase.getCollection("rocketchat_subscription")).thenReturn(mongoCollection);
+  }
+
+  @SuppressWarnings("SameParameterValue")
+  private Document givenSubscription(String chatUserId, String username, String name)
+      throws JsonProcessingException {
+    var doc = new LinkedHashMap<String, Object>();
+    doc.put("_id", RandomStringUtils.randomAlphanumeric(17));
+    doc.put("rid", RandomStringUtils.randomAlphanumeric(17));
+    doc.put("name", RandomStringUtils.randomAlphanumeric(17));
+
+    var user = new LinkedHashMap<>();
+    user.put("_id", chatUserId);
+    user.put("username", username);
+    if (nonNull(name)) {
+      user.put("name", name);
+    }
+
+    doc.put("u", user);
+
+    var json = objectMapper.writeValueAsString(doc);
+
+    return Document.parse(json);
   }
 
   private void givenAnEmptyRocketChatGetSubscriptionsResponse() {
@@ -1544,13 +1529,13 @@ class UserControllerSessionE2EIT {
     assertEquals(count, occurrencesOfAddTech);
   }
 
-  private void verifyRocketChatTechUserRemovedFromGroup(
+  private void verifyRocketChatTechUserLeftGroup(
       CapturedOutput logOutput, String groupId, int count) {
-    int occurrencesOfRemoveTech =
+    int occurrencesOfTechLeaving =
         StringUtils.countOccurrencesOf(
             logOutput.getOut(),
-            "RocketChatTestConfig.removeTechnicalUserFromGroup(" + groupId + ") called");
-    assertEquals(count, occurrencesOfRemoveTech);
+            "RocketChatTestConfig.leaveFromGroupAsTechnicalUser(" + groupId + ") called");
+    assertEquals(count, occurrencesOfTechLeaving);
   }
 
   private void verifyRocketChatUserRemovedFromGroup(

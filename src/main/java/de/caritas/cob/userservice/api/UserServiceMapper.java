@@ -267,6 +267,7 @@ public class UserServiceMapper {
     map.put("firstName", adminBase.getFirstName());
     map.put("lastName", adminBase.getLastName());
     map.put("username", fullAdmin.getUsername());
+    map.put("tenantId", fullAdmin.getTenantId());
     map.put(
         "createdAt",
         nonNull(fullAdmin.getCreateDate()) ? fullAdmin.getCreateDate().toString() : null);
@@ -278,16 +279,19 @@ public class UserServiceMapper {
     return map;
   }
 
-  public Optional<Map<String, String>> mapOf(Optional<Session> optionalSession) {
+  public Optional<Map<String, Object>> mapOf(Optional<Session> optionalSession) {
     if (optionalSession.isEmpty()) {
       return Optional.empty();
     }
 
     var session = optionalSession.get();
-    var map = new ArrayMap<String, String>();
+    var map = new ArrayMap<String, Object>();
     if (nonNull(session.getGroupId())) {
       map.put("chatId", session.getGroupId());
     }
+    map.put("adviceSeekerId", session.getUser().getUserId());
+    map.put("status", session.getStatus().toString());
+    map.put("consultingTypeId", session.getConsultingTypeId());
 
     return Optional.of(map);
   }

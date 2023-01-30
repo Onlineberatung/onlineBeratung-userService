@@ -9,10 +9,12 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.mongodb.MongoClientException;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLeaveFromGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
 import org.junit.Test;
@@ -34,7 +36,7 @@ public class RocketChatFacadeTest {
 
     verify(this.rocketChatService, times(1)).addTechnicalUserToGroup("group");
     verify(this.rocketChatService, times(1)).addUserToGroup("user", "group");
-    verify(this.rocketChatService, times(1)).removeTechnicalUserFromGroup("group");
+    verify(this.rocketChatService, times(1)).leaveFromGroupAsTechnicalUser("group");
   }
 
   @Test(expected = InternalServerErrorException.class)
@@ -56,7 +58,7 @@ public class RocketChatFacadeTest {
 
     verify(this.rocketChatService, times(1)).addTechnicalUserToGroup("group");
     verify(this.rocketChatService, times(1)).removeSystemMessages(eq("group"), any(), any());
-    verify(this.rocketChatService, times(1)).removeTechnicalUserFromGroup("group");
+    verify(this.rocketChatService, times(1)).leaveFromGroupAsTechnicalUser("group");
   }
 
   @Test(expected = InternalServerErrorException.class)
@@ -75,17 +77,14 @@ public class RocketChatFacadeTest {
     this.rocketChatFacade.retrieveRocketChatMembers("group");
 
     verify(this.rocketChatService, times(1)).addTechnicalUserToGroup("group");
-    verify(this.rocketChatService, times(1)).getMembersOfGroup("group");
-    verify(this.rocketChatService, times(1)).removeTechnicalUserFromGroup("group");
+    verify(this.rocketChatService, times(1)).getChatUsers("group");
+    verify(this.rocketChatService, times(1)).leaveFromGroupAsTechnicalUser("group");
   }
 
   @Test(expected = InternalServerErrorException.class)
   public void
-      retrieveRocketChatMembers_Should_throwInternalServerErrorException_When_RocketChatGetGroupMembersException()
-          throws Exception {
-    doThrow(new RocketChatGetGroupMembersException(""))
-        .when(this.rocketChatService)
-        .getMembersOfGroup(anyString());
+      retrieveRocketChatMembers_Should_throwInternalServerErrorException_When_RocketChatGetGroupMembersException() {
+    doThrow(new MongoClientException("")).when(this.rocketChatService).getChatUsers(anyString());
 
     this.rocketChatFacade.retrieveRocketChatMembers("group");
   }
@@ -109,21 +108,22 @@ public class RocketChatFacadeTest {
   }
 
   @Test
-  public void removeTechnicalUserFromGroup_Should_removeTechnicalUserFromGroup() throws Exception {
-    this.rocketChatFacade.removeTechnicalUserFromGroup("group");
+  public void leaveFromGroupAsTechnicalUser_Should_leaveFromGroupAsTechnicalUser()
+      throws Exception {
+    this.rocketChatFacade.leaveFromGroupAsTechnicalUser("group");
 
-    verify(this.rocketChatService, times(1)).removeTechnicalUserFromGroup("group");
+    verify(this.rocketChatService, times(1)).leaveFromGroupAsTechnicalUser("group");
   }
 
   @Test(expected = InternalServerErrorException.class)
   public void
-      removeTechnicalUserFromGroup_Should_throwInternalServerErrorException_When_RocketChatRemoveUserFromGroupException()
+      leaveFromGroupAsTechnicalUser_Should_throwInternalServerErrorException_When_RocketChatLeaveFromGroupException()
           throws Exception {
-    doThrow(new RocketChatRemoveUserFromGroupException(""))
+    doThrow(new RocketChatLeaveFromGroupException(""))
         .when(this.rocketChatService)
-        .removeTechnicalUserFromGroup(anyString());
+        .leaveFromGroupAsTechnicalUser(anyString());
 
-    this.rocketChatFacade.removeTechnicalUserFromGroup("group");
+    this.rocketChatFacade.leaveFromGroupAsTechnicalUser("group");
   }
 
   @Test

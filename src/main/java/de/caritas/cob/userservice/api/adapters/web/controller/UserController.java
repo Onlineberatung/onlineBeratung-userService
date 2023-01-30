@@ -49,7 +49,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.mapping.ConsultantDtoMapper;
 import de.caritas.cob.userservice.api.adapters.web.mapping.UserDtoMapper;
-import de.caritas.cob.userservice.api.admin.facade.AdminAgencyFacade;
+import de.caritas.cob.userservice.api.admin.facade.AdminUserFacade;
 import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
@@ -174,7 +174,7 @@ public class UserController implements UsersApi {
   private final @NonNull KeycloakUserDataProvider keycloakUserDataProvider;
   private final @NotNull UsersStatisticsFacade usersStatisticsFacade;
 
-  private final @NotNull AdminAgencyFacade adminAgencyFacade;
+  private final @NotNull AdminUserFacade adminUserFacade;
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
@@ -856,7 +856,7 @@ public class UserController implements UsersApi {
     Collection<Long> agenciesToFilterConsultants = Lists.newArrayList();
     if (authenticatedUser.hasRestrictedAgencyPriviliges()) {
       agenciesToFilterConsultants =
-          adminAgencyFacade.findAdminUserAgencyIds(authenticatedUser.getUserId());
+          adminUserFacade.findAdminUserAgencyIds(authenticatedUser.getUserId());
     }
     return agenciesToFilterConsultants;
   }

@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.ConsultantService;
@@ -39,22 +38,10 @@ public class RelevantUserAccountIdsByChatProviderTest {
   @Mock private ConsultantService consultantService;
 
   @Test
-  public void collectUserIds_Should_returnEmptyList_When_rocketChatServiceThrowsException()
-      throws RocketChatGetGroupMembersException {
-    when(this.rocketChatService.getMembersOfGroup(any()))
-        .thenThrow(new RocketChatGetGroupMembersException(""));
-
-    List<String> collectedUserIds = this.byChatProvider.collectUserIds("groupId");
-
-    assertThat(collectedUserIds, hasSize(0));
-  }
-
-  @Test
-  public void collectUserIds_Should_returnAllMergedDependingIds_When_rcGroupHasMembers()
-      throws RocketChatGetGroupMembersException {
+  public void collectUserIds_Should_returnAllMergedDependingIds_When_rcGroupHasMembers() {
     List<GroupMemberDTO> groupMembers =
         asList(memberDTOWithRcId("rc1"), memberDTOWithRcId("rc2"), memberDTOWithRcId("rc3"));
-    when(this.rocketChatService.getMembersOfGroup(any())).thenReturn(groupMembers);
+    when(this.rocketChatService.getChatUsers(any())).thenReturn(groupMembers);
     when(this.consultantService.getConsultantByRcUserId(eq("rc1")))
         .thenReturn(Optional.of(consultantWithId("consultant1")));
     when(this.userService.findUserByRcUserId(eq("rc2")))
@@ -95,11 +82,10 @@ public class RelevantUserAccountIdsByChatProviderTest {
 
   @Test
   public void
-      collectUserIds_Should_returnAllMergedDependingIdsInsteadOfNotAvailableUser_When_rcGroupHasMembers()
-          throws RocketChatGetGroupMembersException {
+      collectUserIds_Should_returnAllMergedDependingIdsInsteadOfNotAvailableUser_When_rcGroupHasMembers() {
     List<GroupMemberDTO> groupMembers =
         asList(memberDTOWithRcId("rc1"), memberDTOWithRcId("rc2"), memberDTOWithRcId("rc3"));
-    when(this.rocketChatService.getMembersOfGroup(any())).thenReturn(groupMembers);
+    when(this.rocketChatService.getChatUsers(any())).thenReturn(groupMembers);
     when(this.consultantService.getConsultantByRcUserId(eq("rc1")))
         .thenReturn(Optional.of(consultantWithId("consultant1")));
     when(this.userService.findUserByRcUserId(eq("rc3")))

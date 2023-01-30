@@ -1,11 +1,10 @@
 package de.caritas.cob.userservice.api.admin.service.admin.create;
 
 import static de.caritas.cob.userservice.api.config.auth.UserRole.RESTRICTED_AGENCY_ADMIN;
+import static de.caritas.cob.userservice.api.config.auth.UserRole.TOPIC_ADMIN;
 import static de.caritas.cob.userservice.api.config.auth.UserRole.USER_ADMIN;
 import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.EMAIL_NOT_VALID;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -18,19 +17,22 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.CreateAgencyAdminDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
+import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.model.Admin;
 import de.caritas.cob.userservice.api.model.Admin.AdminType;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
+import java.util.List;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.powermock.reflect.Whitebox;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -61,18 +63,17 @@ public class CreateAdminServiceIT {
 
   @Test
   public void
-      createNewAdminAgency_Should_returnExpectedCreatedAdmin_When_inputDataIsCorrectAndMultitenancyDisabled() {
+  createNewAdminAgency_Should_returnExpectedCreatedAdmin_When_inputDataIsCorrectAndMultitenancyDisabled() {
     // given
     ReflectionTestUtils.setField(createAdminService, "multiTenancyEnabled", false);
     when(identityClient.createKeycloakUser(any(), anyString(), any()))
         .thenReturn(easyRandom.nextObject(KeycloakCreateUserResponseDTO.class));
-    CreateAgencyAdminDTO createAgencyAdminDTO =
-        this.easyRandom.nextObject(CreateAgencyAdminDTO.class);
-    createAgencyAdminDTO.setUsername(VALID_USERNAME);
-    createAgencyAdminDTO.setEmail(VALID_EMAIL_ADDRESS);
+    CreateAdminDTO createAdminDTO = this.easyRandom.nextObject(CreateAdminDTO.class);
+    createAdminDTO.setUsername(VALID_USERNAME);
+    createAdminDTO.setEmail(VALID_EMAIL_ADDRESS);
 
     // when
-    Admin admin = this.createAdminService.createNewAdmin(createAgencyAdminDTO);
+    Admin admin = this.createAdminService.createNewAgencyAdmin(createAdminDTO);
 
     // then
     verify(identityClient)
@@ -83,32 +84,32 @@ public class CreateAdminServiceIT {
     verify(identityClient).updateRole(anyString(), eq(RESTRICTED_AGENCY_ADMIN));
     verify(identityClient).updateRole(anyString(), eq(USER_ADMIN));
 
-    assertThat(admin, notNullValue());
-    assertThat(admin.getId(), notNullValue());
-    assertThat(admin.getType(), is(AdminType.AGENCY));
-    assertThat(admin.getUsername(), notNullValue());
-    assertThat(admin.getFirstName(), notNullValue());
-    assertThat(admin.getLastName(), notNullValue());
-    assertThat(admin.getEmail(), notNullValue());
-    assertThat(admin.getCreateDate(), notNullValue());
-    assertThat(admin.getUpdateDate(), notNullValue());
+    assertThat(admin).isNotNull();
+    assertThat(admin.getId()).isNotNull();
+    assertThat(admin.getType()).isEqualTo(AdminType.AGENCY);
+    assertThat(admin.getUsername()).isNotNull();
+    assertThat(admin.getFirstName()).isNotNull();
+    assertThat(admin.getLastName()).isNotNull();
+    assertThat(admin.getEmail()).isNotNull();
+    assertThat(admin.getCreateDate()).isNotNull();
+    assertThat(admin.getUpdateDate()).isNotNull();
+    assertThat(admin.getTenantId()).isNotNull();
   }
 
   @Test
   public void
-      createNewAdminAgency_Should_returnExpectedCreatedAdmin_When_inputDataIsCorrectAndMultitenancyEnabled() {
+  createNewAdminAgency_Should_returnExpectedCreatedAdmin_When_inputDataIsCorrectAndMultitenancyEnabled() {
     // given
     ReflectionTestUtils.setField(createAdminService, "multiTenancyEnabled", true);
     TenantContext.setCurrentTenant(1L);
     when(identityClient.createKeycloakUser(any(), anyString(), any()))
         .thenReturn(easyRandom.nextObject(KeycloakCreateUserResponseDTO.class));
-    CreateAgencyAdminDTO createAgencyAdminDTO =
-        this.easyRandom.nextObject(CreateAgencyAdminDTO.class);
-    createAgencyAdminDTO.setUsername(VALID_USERNAME);
-    createAgencyAdminDTO.setEmail(VALID_EMAIL_ADDRESS);
+    CreateAdminDTO createAdminDTO = this.easyRandom.nextObject(CreateAdminDTO.class);
+    createAdminDTO.setUsername(VALID_USERNAME);
+    createAdminDTO.setEmail(VALID_EMAIL_ADDRESS);
 
     // when
-    Admin admin = this.createAdminService.createNewAdmin(createAgencyAdminDTO);
+    Admin admin = this.createAdminService.createNewAgencyAdmin(createAdminDTO);
 
     // then
     verify(identityClient)
@@ -120,50 +121,66 @@ public class CreateAdminServiceIT {
     verify(identityClient).updateRole(anyString(), eq(RESTRICTED_AGENCY_ADMIN));
     verify(identityClient).updateRole(anyString(), eq(USER_ADMIN));
 
-    assertThat(admin, notNullValue());
-    assertThat(admin.getId(), notNullValue());
-    assertThat(admin.getType(), is(AdminType.AGENCY));
-    assertThat(admin.getUsername(), notNullValue());
-    assertThat(admin.getFirstName(), notNullValue());
-    assertThat(admin.getLastName(), notNullValue());
-    assertThat(admin.getEmail(), notNullValue());
-    assertThat(admin.getCreateDate(), notNullValue());
-    assertThat(admin.getUpdateDate(), notNullValue());
-    assertThat(admin.getTenantId(), notNullValue());
+    assertThat(admin).isNotNull();
+    assertThat(admin.getId()).isNotNull();
+    assertThat(admin.getType()).isEqualTo(AdminType.AGENCY);
+    assertThat(admin.getUsername()).isNotNull();
+    assertThat(admin.getFirstName()).isNotNull();
+    assertThat(admin.getLastName()).isNotNull();
+    assertThat(admin.getEmail()).isNotNull();
+    assertThat(admin.getCreateDate()).isNotNull();
+    assertThat(admin.getUpdateDate()).isNotNull();
+    assertThat(admin.getTenantId()).isNotNull();
+  }
+
+  @Test
+  public void getUserRolesForTenantAdmin_ShouldGetProperDefaultRoles_ForSingleDomainMultitenancy() {
+    Whitebox.setInternalState(createAdminService, "multitenancyWithSingleDomain", true);
+    List<UserRole> defaultRoles = this.createAdminService.getDefaultRoles(AdminType.TENANT);
+
+    assertThat(defaultRoles)
+        .containsOnly(UserRole.AGENCY_ADMIN, UserRole.SINGLE_TENANT_ADMIN, USER_ADMIN);
+  }
+
+  @Test
+  public void getUserRolesForTenantAdmin_ShouldGetProperDefaultRoles_ForMultidomainMultitenancy() {
+    Whitebox.setInternalState(createAdminService, "multitenancyWithSingleDomain", false);
+    List<UserRole> defaultRoles = this.createAdminService.getDefaultRoles(AdminType.TENANT);
+
+    assertThat(defaultRoles)
+        .containsOnly(UserRole.AGENCY_ADMIN, UserRole.SINGLE_TENANT_ADMIN, USER_ADMIN, TOPIC_ADMIN);
   }
 
   @Test(expected = CustomValidationHttpStatusException.class)
   public void
-      createNewAdminAgency_Should_throwCustomValidationHttpStatusException_When_keycloakIdIsMissing() {
+  createNewAdminAgency_Should_throwCustomValidationHttpStatusException_When_keycloakIdIsMissing() {
     // given
     KeycloakCreateUserResponseDTO keycloakResponse =
         easyRandom.nextObject(KeycloakCreateUserResponseDTO.class);
     keycloakResponse.setUserId(null);
     when(identityClient.createKeycloakUser(any(), anyString(), any())).thenReturn(keycloakResponse);
-    CreateAgencyAdminDTO createAgencyAdminDTO =
-        this.easyRandom.nextObject(CreateAgencyAdminDTO.class);
+    CreateAdminDTO createAgencyAdminDTO = this.easyRandom.nextObject(CreateAdminDTO.class);
 
     // when
-    this.createAdminService.createNewAdmin(createAgencyAdminDTO);
+    this.createAdminService.createNewAgencyAdmin(createAgencyAdminDTO);
   }
 
   @Test
   public void createNewAdminAgency_Should_throwExpectedException_When_emailIsInvalid() {
     // given
-    CreateAgencyAdminDTO createAgencyAdminDTO =
-        this.easyRandom.nextObject(CreateAgencyAdminDTO.class);
+    CreateAdminDTO createAgencyAdminDTO = this.easyRandom.nextObject(CreateAdminDTO.class);
     createAgencyAdminDTO.setEmail("invalid");
 
     try {
 
       // when
-      this.createAdminService.createNewAdmin(createAgencyAdminDTO);
+      this.createAdminService.createNewAgencyAdmin(createAgencyAdminDTO);
       fail("Exception should be thrown");
 
       // then
     } catch (CustomValidationHttpStatusException e) {
-      assertThat(e.getCustomHttpHeader(), notNullValue());
-      assertThat(e.getCustomHttpHeader().get("X-Reason").get(0), is(EMAIL_NOT_VALID.name()));
+      assertThat(e.getCustomHttpHeader()).isNotNull();
+      assertThat(e.getCustomHttpHeader().get("X-Reason").get(0)).isEqualTo(EMAIL_NOT_VALID.name());
     }
   }
 }
