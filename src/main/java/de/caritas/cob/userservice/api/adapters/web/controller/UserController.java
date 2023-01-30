@@ -1218,7 +1218,8 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<Void> updateEmailAddress(@Valid String emailAddress) {
-    userAccountProvider.changeUserAccountEmailAddress(Optional.of(emailAddress));
+    var lowerCaseEmail = Optional.of(emailAddress.toLowerCase());
+    userAccountProvider.changeUserAccountEmailAddress(lowerCaseEmail);
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
@@ -1321,7 +1322,7 @@ public class UserController implements UsersApi {
   @Override
   public ResponseEntity<Void> startTwoFactorAuthByEmailSetup(EmailDTO emailDTO) {
     var username = authenticatedUser.getUsername();
-    var email = emailDTO.getEmail();
+    var email = emailDTO.getEmail().toLowerCase();
 
     if (!identityManager.isEmailAvailableOrOwn(username, email)) {
       return new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);

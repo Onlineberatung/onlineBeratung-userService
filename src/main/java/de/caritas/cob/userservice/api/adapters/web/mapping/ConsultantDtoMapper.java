@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.adapters.web.mapping;
 
+import static java.util.Objects.isNull;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import de.caritas.cob.userservice.api.adapters.web.controller.UserController;
@@ -29,9 +30,10 @@ public class ConsultantDtoMapper implements DtoMapperUtils {
 
   public UpdateAdminConsultantDTO updateAdminConsultantOf(
       UpdateConsultantDTO updateConsultantDTO, Consultant consultant) {
+    var email = updateConsultantDTO.getEmail();
 
     return new UpdateAdminConsultantDTO()
-        .email(updateConsultantDTO.getEmail())
+        .email(isNull(email) ? null : email.toLowerCase())
         .firstname(updateConsultantDTO.getFirstname())
         .lastname(updateConsultantDTO.getLastname())
         .formalLanguage(consultant.isLanguageFormal())
