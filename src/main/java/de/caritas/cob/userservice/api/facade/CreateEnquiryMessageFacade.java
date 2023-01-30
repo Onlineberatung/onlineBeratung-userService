@@ -89,7 +89,8 @@ public class CreateEnquiryMessageFacade {
 
       var extendedConsultingTypeResponseDTO =
           consultingTypeManager.getConsultingTypeSettings(session.getConsultingTypeId());
-      List<ConsultantAgency> agencyList = consultantAgencyService.findConsultantsByAgencyId(session.getAgencyId());
+      List<ConsultantAgency> agencyList =
+          consultantAgencyService.findConsultantsByAgencyId(session.getAgencyId());
       String rcGroupId =
           createRocketChatRoomAndAddUsers(
               session, agencyList, enquiryData.getRocketChatCredentials());
