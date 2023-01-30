@@ -366,11 +366,15 @@ class UserAdminControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   public void patchAdminData_Should_returnForbidden_When_patchAttemptAsNonAdminUser()
       throws Exception {
+    patchAdminAndExpectForbidden();
+  }
+
+  private void patchAdminAndExpectForbidden() throws Exception {
     // given
     String adminId = "6584f4a9-a7f0-42f0-b929-ab5c99c0802d";
     when(authenticatedUser.getUserId()).thenReturn(adminId);
     when(authenticatedUser.isRestrictedAgencyAdmin()).thenReturn(false);
-    when(authenticatedUser.isSingleTenantAdmin()).thenReturn(true);
+    when(authenticatedUser.isSingleTenantAdmin()).thenReturn(false);
 
     PatchAdminDTO patchAdminDTO = new EasyRandom().nextObject(PatchAdminDTO.class);
 
@@ -388,6 +392,14 @@ class UserAdminControllerE2EIT {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(patchAdminDTO)))
         .andExpect(status().isForbidden());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
+  public void
+      patchAdminData_Should_returnForbidden_When_patchAttemptAsUserAdminButNotSingleTenantAdminOrRestrictedAgencyAdmin()
+          throws Exception {
+    patchAdminAndExpectForbidden();
   }
 
   @Test
