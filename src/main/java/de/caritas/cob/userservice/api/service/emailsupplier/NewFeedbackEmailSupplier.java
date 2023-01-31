@@ -103,9 +103,8 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
     return userId.equals(consultant.getId());
   }
 
-  private List<MailDTO> buildNotificationMailsForAllOtherConsultants(Consultant sendingConsultant)
-      throws RocketChatGetGroupMembersException {
-    List<GroupMemberDTO> groupMembers = rocketChatService.getMembersOfGroup(rcFeedbackGroupId);
+  private List<MailDTO> buildNotificationMailsForAllOtherConsultants(Consultant sendingConsultant) {
+    List<GroupMemberDTO> groupMembers = rocketChatService.getChatUsers(rcFeedbackGroupId);
     if (isNotEmpty(groupMembers)) {
       return buildMailsForAllDueConsultants(sendingConsultant, groupMembers);
     }

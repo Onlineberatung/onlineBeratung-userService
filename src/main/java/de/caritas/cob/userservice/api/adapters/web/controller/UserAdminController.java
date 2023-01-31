@@ -15,6 +15,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminAgencyRelation
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.PatchAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.RootDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionAdminResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionFilter;
@@ -98,7 +99,10 @@ public class UserAdminController implements UseradminApi {
   @Override
   public ResponseEntity<ConsultantAdminResponseDTO> createConsultant(
       @Valid CreateConsultantDTO createConsultantDTO) {
-    return ResponseEntity.ok(this.consultantAdminFacade.createNewConsultant(createConsultantDTO));
+    createConsultantDTO.setEmail(createConsultantDTO.getEmail().toLowerCase());
+    var consultant = consultantAdminFacade.createNewConsultant(createConsultantDTO);
+
+    return ResponseEntity.ok(consultant);
   }
 
   /**
@@ -176,8 +180,10 @@ public class UserAdminController implements UseradminApi {
   @Override
   public ResponseEntity<ConsultantAdminResponseDTO> updateConsultant(
       @PathVariable String consultantId, @Valid UpdateAdminConsultantDTO updateConsultantDTO) {
-    return ResponseEntity.ok(
-        this.consultantAdminFacade.updateConsultant(consultantId, updateConsultantDTO));
+    updateConsultantDTO.setEmail(updateConsultantDTO.getEmail().toLowerCase());
+    var consultant = consultantAdminFacade.updateConsultant(consultantId, updateConsultantDTO);
+
+    return ResponseEntity.ok(consultant);
   }
 
   /**
@@ -270,9 +276,11 @@ public class UserAdminController implements UseradminApi {
   }
 
   @Override
-  public ResponseEntity<AdminResponseDTO> createTenantAdmin(
-      final CreateAdminDTO createAgencyAdminDTO) {
-    return ResponseEntity.ok(this.adminUserFacade.createNewTenantAdmin(createAgencyAdminDTO));
+  public ResponseEntity<AdminResponseDTO> createTenantAdmin(CreateAdminDTO createAgencyAdminDTO) {
+    createAgencyAdminDTO.setEmail(createAgencyAdminDTO.getEmail().toLowerCase());
+    var admin = adminUserFacade.createNewTenantAdmin(createAgencyAdminDTO);
+
+    return ResponseEntity.ok(admin);
   }
 
   @Override
@@ -322,16 +330,20 @@ public class UserAdminController implements UseradminApi {
 
   @Override
   public ResponseEntity<AdminResponseDTO> updateAgencyAdmin(
-      final String adminId, final UpdateAgencyAdminDTO updateAgencyAdminDTO) {
-    return new ResponseEntity<>(
-        this.adminUserFacade.updateAgencyAdmin(adminId, updateAgencyAdminDTO), HttpStatus.OK);
+      final String adminId, UpdateAgencyAdminDTO updateAgencyAdminDTO) {
+    updateAgencyAdminDTO.setEmail(updateAgencyAdminDTO.getEmail().toLowerCase());
+    var admin = adminUserFacade.updateAgencyAdmin(adminId, updateAgencyAdminDTO);
+
+    return new ResponseEntity<>(admin, HttpStatus.OK);
   }
 
   @Override
   public ResponseEntity<AdminResponseDTO> updateTenantAdmin(
-      final String adminId, final UpdateTenantAdminDTO updateTenantAdminDTO) {
-    return new ResponseEntity<>(
-        this.adminUserFacade.updateTenantAdmin(adminId, updateTenantAdminDTO), HttpStatus.OK);
+      final String adminId, UpdateTenantAdminDTO updateTenantAdminDTO) {
+    updateTenantAdminDTO.setEmail(updateTenantAdminDTO.getEmail().toLowerCase());
+    var admin = adminUserFacade.updateTenantAdmin(adminId, updateTenantAdminDTO);
+
+    return new ResponseEntity<>(admin, HttpStatus.OK);
   }
 
   @Override
@@ -352,6 +364,12 @@ public class UserAdminController implements UseradminApi {
       final String adminId, final List<CreateAdminAgencyRelationDTO> newAdminAgencyRelationDTOs) {
     this.adminUserFacade.setAdminAgenciesRelation(adminId, newAdminAgencyRelationDTOs);
     return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<AdminResponseDTO> patchAdminData(PatchAdminDTO patchAdminDTO) {
+    AdminResponseDTO adminResponseDTO = this.adminUserFacade.patchAdminUserData(patchAdminDTO);
+    return new ResponseEntity<>(adminResponseDTO, HttpStatus.OK);
   }
 
   @Override
@@ -378,7 +396,6 @@ public class UserAdminController implements UseradminApi {
         adminUserFacade.findTenantAdminsByInfix(
             decodedInfix, page - 1, perPage, mappedField, isAscending);
     var result = adminDtoMapper.adminSearchResultOf(resultMap, query, page, perPage, field, order);
-
     return ResponseEntity.ok(result);
   }
 }

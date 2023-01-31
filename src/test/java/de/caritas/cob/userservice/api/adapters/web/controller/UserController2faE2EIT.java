@@ -188,7 +188,7 @@ class UserController2faE2EIT {
 
     var otpSetupDTO = otpSetupCaptor.getValue().getBody();
     assertNotNull(otpSetupDTO);
-    assertEquals(emailDTO.getEmail(), otpSetupDTO.getEmail());
+    assertEquals(emailDTO.getEmail().toLowerCase(), otpSetupDTO.getEmail());
   }
 
   @Test
@@ -753,11 +753,11 @@ class UserController2faE2EIT {
     var userRepresentation = new UserRepresentation();
     var username = usernameTranscoder.encodeUsername(RandomStringUtils.randomAlphabetic(8, 16));
     userRepresentation.setUsername(username);
-    userRepresentation.setEmail(emailDTO.getEmail());
+    userRepresentation.setEmail(emailDTO.getEmail().toLowerCase());
     var userRepresentationList = new ArrayList<UserRepresentation>(1);
     userRepresentationList.add(userRepresentation);
     var usersResource = mock(UsersResource.class);
-    when(usersResource.search(eq(emailDTO.getEmail()), anyInt(), anyInt()))
+    when(usersResource.search(eq(emailDTO.getEmail().toLowerCase()), anyInt(), anyInt()))
         .thenReturn(userRepresentationList);
     var realmResource = mock(RealmResource.class);
     when(realmResource.users()).thenReturn(usersResource);

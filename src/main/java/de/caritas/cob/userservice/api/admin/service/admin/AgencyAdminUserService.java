@@ -3,8 +3,8 @@ package de.caritas.cob.userservice.api.admin.service.admin;
 import de.caritas.cob.userservice.api.UserServiceMapper;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.PatchAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAgencyAdminDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.UpdateTenantAdminDTO;
 import de.caritas.cob.userservice.api.admin.service.admin.create.CreateAdminService;
 import de.caritas.cob.userservice.api.admin.service.admin.delete.DeleteAdminService;
 import de.caritas.cob.userservice.api.admin.service.admin.search.RetrieveAdminService;
@@ -49,12 +49,6 @@ public class AgencyAdminUserService {
     return AdminResponseDTOBuilder.getInstance(updatedAdmin).buildAgencyAdminResponseDTO();
   }
 
-  public AdminResponseDTO updateTenantAdmin(
-      final String adminId, final UpdateTenantAdminDTO updateTenantAdminDTO) {
-    final Admin updatedAdmin = updateAdminService.updateTenantAdmin(adminId, updateTenantAdminDTO);
-    return AdminResponseDTOBuilder.getInstance(updatedAdmin).buildAgencyAdminResponseDTO();
-  }
-
   public void deleteAgencyAdmin(final String adminId) {
     this.deleteAdminService.deleteAgencyAdmin(adminId);
   }
@@ -79,5 +73,11 @@ public class AgencyAdminUserService {
     var agencies = agencyService.getAgenciesWithoutCaching(agencyIds);
 
     return userServiceMapper.mapOfAdmin(adminsPage, fullAdmins, agencies, agenciesOfAdmin);
+  }
+
+  public AdminResponseDTO patchAgencyAdmin(String adminId, PatchAdminDTO patchAdminDTO) {
+
+    final Admin updatedAdmin = updateAdminService.patchAgencyAdmin(adminId, patchAdminDTO);
+    return AdminResponseDTOBuilder.getInstance(updatedAdmin).buildAgencyAdminResponseDTO();
   }
 }

@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import de.caritas.cob.userservice.api.UserServiceMapper;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.PatchAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateTenantAdminDTO;
 import de.caritas.cob.userservice.api.admin.service.admin.create.CreateAdminService;
 import de.caritas.cob.userservice.api.admin.service.admin.delete.DeleteAdminService;
@@ -101,5 +102,14 @@ public class TenantAdminUserService {
     return admins.stream()
         .map(admin -> AdminResponseDTOBuilder.getInstance(admin).buildAgencyAdminResponseDTO())
         .collect(Collectors.toList());
+  }
+
+  public AdminResponseDTO patchTenantAdmin(String adminId, PatchAdminDTO patchAdminDTO) {
+
+    final Admin updatedAdmin = updateAdminService.patchTenantAdmin(adminId, patchAdminDTO);
+    var responseDTO =
+        AdminResponseDTOBuilder.getInstance(updatedAdmin).buildAgencyAdminResponseDTO();
+    enrichResponseWithSubdomain(updatedAdmin, responseDTO);
+    return responseDTO;
   }
 }

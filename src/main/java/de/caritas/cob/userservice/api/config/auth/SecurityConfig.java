@@ -176,6 +176,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .hasAuthority(UPDATE_CHAT)
         .antMatchers("/useradmin/tenantadmins/", "/useradmin/tenantadmins/**")
         .hasAuthority(TENANT_ADMIN)
+        .antMatchers("/useradmin/data/*")
+        .hasAnyAuthority(SINGLE_TENANT_ADMIN, RESTRICTED_AGENCY_ADMIN)
         .antMatchers("/useradmin", "/useradmin/**")
         .hasAnyAuthority(USER_ADMIN, TECHNICAL_DEFAULT)
         .antMatchers("/users/consultants/search")

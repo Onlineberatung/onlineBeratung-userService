@@ -31,12 +31,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.StandardResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupDeleteResponseDTO;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
-import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.message.MessageResponse;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomResponse;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.room.RoomsGetDTO;
@@ -71,6 +75,8 @@ import de.caritas.cob.userservice.api.testConfig.TestAgencyControllerApi;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -78,11 +84,14 @@ import java.util.stream.StreamSupport;
 import javax.servlet.http.Cookie;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -151,6 +160,16 @@ class UserControllerChatE2EIT {
   @Qualifier("rocketChatRestTemplate")
   private RestTemplate rocketChatRestTemplate;
 
+  @Autowired private MongoClient mockedMongoClient;
+
+  @Mock private MongoDatabase mongoDatabase;
+
+  @Mock private MongoCollection<Document> mongoCollection;
+
+  @Mock private MongoCursor<Document> mongoCursor;
+
+  @Mock private FindIterable<Document> findIterable;
+
   private User user;
   private Consultant consultant;
   private E2eKeyDTO e2eKeyDTO;
@@ -159,7 +178,6 @@ class UserControllerChatE2EIT {
   private UserAgency userAgency;
   private UserInfoResponseDTO userInfoResponse;
   private GroupDeleteResponseDTO groupDeleteResponse;
-  private GroupMemberResponseDTO groupMemberResponseDTO;
   private SubscriptionsGetDTO subscriptionsGetResponse;
 
   @AfterEach
@@ -548,7 +566,7 @@ class UserControllerChatE2EIT {
     givenAValidChat(false);
     givenAValidRocketChatSystemUser();
     givenValidRocketChatTechUserResponse();
-    givenAnOnlyTechUserRocketChatGroupMemberResponse(chat.getGroupId());
+    givenAnOnlyTechUserRocketChatGroupMemberResponse();
     givenAValidRocketChatInfoUserResponse();
     givenAValidRocketChatGroupDeleteResponse();
 
@@ -580,7 +598,7 @@ class UserControllerChatE2EIT {
     givenAValidRocketChatSystemUser();
     givenValidRocketChatTechUserResponse();
     var chatUserId = RandomStringUtils.randomAlphanumeric(17);
-    givenAPositiveRocketChatGroupMemberResponse(chat.getGroupId(), chatUserId);
+    givenAPositiveRocketChatGroupMemberResponse(chatUserId);
     givenAValidRocketChatInfoUserResponse();
 
     mockMvc
@@ -610,7 +628,7 @@ class UserControllerChatE2EIT {
     givenAValidChat(true);
     givenAValidRocketChatSystemUser();
     givenValidRocketChatTechUserResponse();
-    givenAnOnlyTechUserRocketChatGroupMemberResponse(chat.getGroupId());
+    givenAnOnlyTechUserRocketChatGroupMemberResponse();
     givenAValidRocketChatInfoUserResponse();
     givenAValidRocketChatGroupDeleteResponse();
 
@@ -674,7 +692,7 @@ class UserControllerChatE2EIT {
     givenAValidRocketChatSystemUser();
     givenValidRocketChatTechUserResponse();
     var chatUserId = RandomStringUtils.randomAlphanumeric(17);
-    givenAPositiveRocketChatGroupMemberResponse(chat.getGroupId(), chatUserId);
+    givenAPositiveRocketChatGroupMemberResponse(chatUserId);
     givenAValidRocketChatInfoUserResponse();
 
     mockMvc
@@ -1205,41 +1223,58 @@ class UserControllerChatE2EIT {
         .thenReturn(groupDeleteResponse);
   }
 
-  private void givenAPositiveRocketChatGroupMemberResponse(String chatId, String chatUserId) {
-    groupMemberResponseDTO = new GroupMemberResponseDTO();
-    groupMemberResponseDTO.setSuccess(true);
-
-    var groupMember = easyRandom.nextObject(GroupMemberDTO.class);
-    if (nonNull(chatUserId)) {
-      groupMember.set_id(chatUserId);
-    }
-    GroupMemberDTO[] groupMembers = {groupMember};
-    groupMemberResponseDTO.setMembers(groupMembers);
-
-    var urlSuffix = "/api/v1/groups.members?roomId=" + chatId + "&count=0";
-    when(restTemplate.exchange(
-            endsWith(urlSuffix), eq(HttpMethod.GET),
-            any(HttpEntity.class), eq(GroupMemberResponseDTO.class)))
-        .thenReturn(ResponseEntity.ok(groupMemberResponseDTO));
+  private void givenAPositiveRocketChatGroupMemberResponse(String chatUserId)
+      throws JsonProcessingException {
+    var doc1 = givenSubscription(RC_CREDENTIALS_TECHNICAL_A.getRocketChatUserId(), "t", null);
+    var doc2 = givenSubscription(chatUserId, "b", "c");
+    givenMongoResponseWith(doc1, doc2);
   }
 
-  private void givenAnOnlyTechUserRocketChatGroupMemberResponse(String chatId) {
-    groupMemberResponseDTO = new GroupMemberResponseDTO();
-    groupMemberResponseDTO.setSuccess(true);
+  private void givenAnOnlyTechUserRocketChatGroupMemberResponse() throws JsonProcessingException {
+    var doc = givenSubscription(RC_CREDENTIALS_TECHNICAL_A.getRocketChatUserId(), "t", null);
+    givenMongoResponseWith(doc);
+  }
 
-    var groupMember = easyRandom.nextObject(GroupMemberDTO.class);
-    var chatUserId = RC_CREDENTIALS_TECHNICAL_A.getRocketChatUserId();
-    if (nonNull(chatUserId)) {
-      groupMember.set_id(chatUserId);
+  private void givenMongoResponseWith(Document doc, Document... docs) {
+    if (nonNull(doc)) {
+      when(mongoCursor.next()).thenReturn(doc, docs);
     }
-    GroupMemberDTO[] groupMembers = {groupMember};
-    groupMemberResponseDTO.setMembers(groupMembers);
+    var booleanList = new LinkedList<Boolean>();
+    var numExtraDocs = docs.length;
+    while (numExtraDocs-- > 0) {
+      booleanList.add(true);
+    }
+    booleanList.add(false);
+    if (nonNull(doc)) {
+      when(mongoCursor.hasNext()).thenReturn(true, booleanList.toArray(new Boolean[0]));
+    } else {
+      when(mongoCursor.hasNext()).thenReturn(false);
+    }
+    when(findIterable.iterator()).thenReturn(mongoCursor);
+    when(mongoCollection.find(any(Bson.class))).thenReturn(findIterable);
+    when(mockedMongoClient.getDatabase("rocketchat")).thenReturn(mongoDatabase);
+    when(mongoDatabase.getCollection("rocketchat_subscription")).thenReturn(mongoCollection);
+  }
 
-    var urlSuffix = "/api/v1/groups.members?roomId=" + chatId + "&count=0";
-    when(restTemplate.exchange(
-            endsWith(urlSuffix), eq(HttpMethod.GET),
-            any(HttpEntity.class), eq(GroupMemberResponseDTO.class)))
-        .thenReturn(ResponseEntity.ok(groupMemberResponseDTO));
+  private Document givenSubscription(String chatUserId, String username, String name)
+      throws JsonProcessingException {
+    var doc = new LinkedHashMap<String, Object>();
+    doc.put("_id", RandomStringUtils.randomAlphanumeric(17));
+    doc.put("rid", RandomStringUtils.randomAlphanumeric(17));
+    doc.put("name", RandomStringUtils.randomAlphanumeric(17));
+
+    var user = new LinkedHashMap<>();
+    user.put("_id", chatUserId);
+    user.put("username", username);
+    if (nonNull(name)) {
+      user.put("name", name);
+    }
+
+    doc.put("u", user);
+
+    var json = objectMapper.writeValueAsString(doc);
+
+    return Document.parse(json);
   }
 
   private void givenAValidRocketChatGetSubscriptionsResponse(int subscriptionSize, boolean isE2e) {

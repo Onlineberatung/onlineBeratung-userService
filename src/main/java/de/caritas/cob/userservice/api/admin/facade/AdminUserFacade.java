@@ -7,6 +7,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.AdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminAgencyRelationDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.PatchAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.Sort;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAgencyAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateTenantAdminDTO;
@@ -14,6 +15,7 @@ import de.caritas.cob.userservice.api.admin.service.admin.AdminAgencyRelationSer
 import de.caritas.cob.userservice.api.admin.service.admin.AgencyAdminUserService;
 import de.caritas.cob.userservice.api.admin.service.admin.TenantAdminUserService;
 import de.caritas.cob.userservice.api.admin.service.admin.search.AdminFilterService;
+import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -21,6 +23,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -32,6 +35,8 @@ public class AdminUserFacade {
   private final @NonNull TenantAdminUserService tenantAdminUserService;
   private final @NonNull AdminAgencyRelationService adminAgencyRelationService;
   private final @NonNull AdminFilterService adminFilterService;
+
+  private final @NonNull AuthenticatedUser authenticatedUser;
 
   public AdminResponseDTO createNewTenantAdmin(final CreateAdminDTO createAgencyAdminDTO) {
     return this.tenantAdminUserService.createNewTenantAdmin(createAgencyAdminDTO);
@@ -129,5 +134,18 @@ public class AdminUserFacade {
 
   public List<AdminResponseDTO> findTenantAdmins(Integer tenantId) {
     return tenantAdminUserService.findTenantAdmins(Long.valueOf(tenantId));
+  }
+
+  public AdminResponseDTO patchAdminUserData(PatchAdminDTO patchAdminDTO) {
+    var adminId = authenticatedUser.getUserId();
+
+    if (authenticatedUser.isRestrictedAgencyAdmin() && !authenticatedUser.isSingleTenantAdmin()) {
+
+      return agencyAdminUserService.patchAgencyAdmin(adminId, patchAdminDTO);
+    } else if (authenticatedUser.isSingleTenantAdmin()) {
+      return tenantAdminUserService.patchTenantAdmin(adminId, patchAdminDTO);
+    } else {
+      throw new AccessDeniedException("User does not have permissions change admin data");
+    }
   }
 }
