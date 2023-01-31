@@ -162,8 +162,7 @@ class AdminUserFacadeTest {
             .lastname("updated lastname")
             .email("updated email"));
 
-    ArgumentCaptor<PatchAdminDTO> captor =
-        ArgumentCaptor.forClass(PatchAdminDTO.class);
+    ArgumentCaptor<PatchAdminDTO> captor = ArgumentCaptor.forClass(PatchAdminDTO.class);
     verify(this.agencyAdminUserService).patchAgencyAdmin(eq("adminId"), captor.capture());
 
     PatchAdminDTO value = captor.getValue();
