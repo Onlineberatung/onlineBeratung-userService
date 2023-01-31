@@ -2530,7 +2530,7 @@ public class UserControllerIT {
     verify(consultantUpdateService).updateConsultant(any(), captor.capture());
 
     var updateAdminConsultantDTO = captor.getValue();
-    assertEquals(updateConsultantDTO.getEmail(), updateAdminConsultantDTO.getEmail());
+    assertEquals(updateConsultantDTO.getEmail().toLowerCase(), updateAdminConsultantDTO.getEmail());
     assertEquals(updateConsultantDTO.getFirstname(), updateAdminConsultantDTO.getFirstname());
     assertEquals(updateConsultantDTO.getLastname(), updateAdminConsultantDTO.getLastname());
     assertEquals(consultant.isAbsent(), updateAdminConsultantDTO.getAbsent());
