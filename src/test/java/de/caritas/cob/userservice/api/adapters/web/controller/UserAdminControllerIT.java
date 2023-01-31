@@ -457,6 +457,7 @@ public class UserAdminControllerIT {
     // given
     UpdateAgencyAdminDTO updateAgencyAdminDTO =
         new EasyRandom().nextObject(UpdateAgencyAdminDTO.class);
+    updateAgencyAdminDTO.setEmail("test@test.com");
 
     // when
     this.mvc
@@ -476,6 +477,7 @@ public class UserAdminControllerIT {
     // given
     UpdateAgencyAdminDTO updateAgencyAdminDTO =
         new EasyRandom().nextObject(UpdateAgencyAdminDTO.class);
+    updateAgencyAdminDTO.setEmail("test@test.com");
 
     // when
     this.mvc
