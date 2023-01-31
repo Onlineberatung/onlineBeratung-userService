@@ -148,20 +148,4 @@ public class AdminUserFacade {
       throw new AccessDeniedException("User does not have permissions change admin data");
     }
   }
-
-  //  private UpdateAgencyAdminDTO getUpdateAgencyAdminDTO(PatchAdminDTO patchAdminDTO) {
-  //    UpdateAgencyAdminDTO updateAgencyAdminDTO = new UpdateAgencyAdminDTO();
-  //    updateAgencyAdminDTO.setEmail(patchAdminDTO.getEmail());
-  //    updateAgencyAdminDTO.setFirstname(patchAdminDTO.getFirstname());
-  //    updateAgencyAdminDTO.setLastname(patchAdminDTO.getLastname());
-  //    return updateAgencyAdminDTO;
-  //  }
-  //
-  //  private UpdateTenantAdminDTO getUpdateTenantAdminDTO(PatchAdminDTO patchAdminDTO) {
-  //    UpdateTenantAdminDTO updateTenantAdminDTO = new UpdateTenantAdminDTO();
-  //    updateTenantAdminDTO.setEmail(patchAdminDTO.getEmail());
-  //    updateTenantAdminDTO.setFirstname(patchAdminDTO.getFirstname());
-  //    updateTenantAdminDTO.setLastname(patchAdminDTO.getLastname());
-  //    return updateTenantAdminDTO;
-  //  }
 }

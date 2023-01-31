@@ -151,7 +151,7 @@ class AdminUserFacadeTest {
   }
 
   @Test
-  void patchAdminData_Should_agencyAdminForAgencies() {
+  void patchAdminData_Should_patchAgencyAdminForAgencies() {
     when(authenticatedUser.getUserId()).thenReturn("adminId");
     when(authenticatedUser.isRestrictedAgencyAdmin()).thenReturn(true);
     when(authenticatedUser.isSingleTenantAdmin()).thenReturn(false);
@@ -162,11 +162,11 @@ class AdminUserFacadeTest {
             .lastname("updated lastname")
             .email("updated email"));
 
-    ArgumentCaptor<UpdateAgencyAdminDTO> captor =
-        ArgumentCaptor.forClass(UpdateAgencyAdminDTO.class);
-    verify(this.agencyAdminUserService).updateAgencyAdmin(eq("adminId"), captor.capture());
+    ArgumentCaptor<PatchAdminDTO> captor =
+        ArgumentCaptor.forClass(PatchAdminDTO.class);
+    verify(this.agencyAdminUserService).patchAgencyAdmin(eq("adminId"), captor.capture());
 
-    UpdateAgencyAdminDTO value = captor.getValue();
+    PatchAdminDTO value = captor.getValue();
     assertThat(value.getFirstname()).isEqualTo("updated firstname");
     assertThat(value.getLastname()).isEqualTo("updated lastname");
     assertThat(value.getEmail()).isEqualTo("updated email");
