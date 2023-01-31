@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
+import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.ADMIN_DATA_PATH;
 import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.AGENCY_ADMIN_PATH;
 import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.TENANT_ADMIN_PATH;
 import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.TENANT_ADMIN_PATH_WITHOUT_SLASH;
@@ -10,6 +11,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -20,6 +22,7 @@ import com.jayway.jsonpath.JsonPath;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.PatchAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAgencyAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateTenantAdminDTO;
 import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
@@ -273,12 +276,11 @@ class UserAdminControllerE2EIT {
     // given
     String adminId = givenNewAgencyAdminIsCreated();
 
-    UpdateTenantAdminDTO updateAdminDTO = new EasyRandom().nextObject(UpdateTenantAdminDTO.class);
+    UpdateAgencyAdminDTO updateAdminDTO = new EasyRandom().nextObject(UpdateAgencyAdminDTO.class);
 
     updateAdminDTO.setFirstname("changedFirstname");
     updateAdminDTO.setLastname("changedLastname");
     updateAdminDTO.setEmail("changed@email.com");
-    updateAdminDTO.setTenantId(1);
 
     when(tenantService.getRestrictedTenantData(Mockito.anyLong()))
         .thenReturn(new RestrictedTenantDTO().subdomain("subdomain"));
@@ -294,6 +296,110 @@ class UserAdminControllerE2EIT {
         .andExpect(jsonPath("_embedded.firstname", is("changedFirstname")))
         .andExpect(jsonPath("_embedded.lastname", is("changedLastname")))
         .andExpect(jsonPath("_embedded.email", is("changed@email.com")));
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.RESTRICTED_AGENCY_ADMIN})
+  public void patchAdminData_Should_returnOk_When_patchAttemptAsRestrictedAgencyAdmin()
+      throws Exception {
+    // given
+    String adminId = "6d15b3ff-2394-4d9f-9ea5-e958afe6a65c";
+    when(authenticatedUser.getUserId()).thenReturn(adminId);
+    when(authenticatedUser.isRestrictedAgencyAdmin()).thenReturn(true);
+    when(authenticatedUser.isSingleTenantAdmin()).thenReturn(false);
+
+    PatchAdminDTO patchAdminDTO = new EasyRandom().nextObject(PatchAdminDTO.class);
+
+    patchAdminDTO.setFirstname("changedFirstname");
+    patchAdminDTO.setLastname("changedLastname");
+    patchAdminDTO.setEmail("changed@email.com");
+
+    when(tenantService.getRestrictedTenantData(Mockito.anyLong()))
+        .thenReturn(new RestrictedTenantDTO().subdomain("subdomain"));
+
+    // when, then
+    this.mockMvc
+        .perform(
+            patch(ADMIN_DATA_PATH)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchAdminDTO)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("_embedded.id", is(adminId)))
+        .andExpect(jsonPath("_embedded.firstname", is("changedFirstname")))
+        .andExpect(jsonPath("_embedded.lastname", is("changedLastname")))
+        .andExpect(jsonPath("_embedded.email", is("changed@email.com")));
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.SINGLE_TENANT_ADMIN})
+  public void patchAdminData_Should_returnOk_When_patchAttemptAsSingleTenantAdmin()
+      throws Exception {
+    // given
+    String adminId = "6584f4a9-a7f0-42f0-b929-ab5c99c0802d";
+    when(authenticatedUser.getUserId()).thenReturn(adminId);
+    when(authenticatedUser.isRestrictedAgencyAdmin()).thenReturn(false);
+    when(authenticatedUser.isSingleTenantAdmin()).thenReturn(true);
+
+    PatchAdminDTO patchAdminDTO = new EasyRandom().nextObject(PatchAdminDTO.class);
+
+    patchAdminDTO.setFirstname("changedFirstname");
+    patchAdminDTO.setLastname("changedLastname");
+    patchAdminDTO.setEmail("changed@email.com");
+
+    when(tenantService.getRestrictedTenantData(Mockito.anyLong()))
+        .thenReturn(new RestrictedTenantDTO().subdomain("subdomain"));
+
+    // when, then
+    this.mockMvc
+        .perform(
+            patch(ADMIN_DATA_PATH)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchAdminDTO)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("_embedded.id", is(adminId)))
+        .andExpect(jsonPath("_embedded.firstname", is("changedFirstname")))
+        .andExpect(jsonPath("_embedded.lastname", is("changedLastname")))
+        .andExpect(jsonPath("_embedded.email", is("changed@email.com")));
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  public void patchAdminData_Should_returnForbidden_When_patchAttemptAsNonAdminUser()
+      throws Exception {
+    patchAdminAndExpectForbidden();
+  }
+
+  private void patchAdminAndExpectForbidden() throws Exception {
+    // given
+    String adminId = "6584f4a9-a7f0-42f0-b929-ab5c99c0802d";
+    when(authenticatedUser.getUserId()).thenReturn(adminId);
+    when(authenticatedUser.isRestrictedAgencyAdmin()).thenReturn(false);
+    when(authenticatedUser.isSingleTenantAdmin()).thenReturn(false);
+
+    PatchAdminDTO patchAdminDTO = new EasyRandom().nextObject(PatchAdminDTO.class);
+
+    patchAdminDTO.setFirstname("changedFirstname");
+    patchAdminDTO.setLastname("changedLastname");
+    patchAdminDTO.setEmail("changed@email.com");
+
+    when(tenantService.getRestrictedTenantData(Mockito.anyLong()))
+        .thenReturn(new RestrictedTenantDTO().subdomain("subdomain"));
+
+    // when, then
+    this.mockMvc
+        .perform(
+            patch(ADMIN_DATA_PATH)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchAdminDTO)))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
+  public void
+      patchAdminData_Should_returnForbidden_When_patchAttemptAsUserAdminButNotSingleTenantAdminOrRestrictedAgencyAdmin()
+          throws Exception {
+    patchAdminAndExpectForbidden();
   }
 
   @Test

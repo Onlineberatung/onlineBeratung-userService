@@ -1,6 +1,8 @@
 package de.caritas.cob.userservice.api.admin.facade;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,6 +13,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.AdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminAgencyRelationDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.PatchAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.Sort;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAgencyAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateTenantAdminDTO;
@@ -18,10 +21,12 @@ import de.caritas.cob.userservice.api.admin.service.admin.AdminAgencyRelationSer
 import de.caritas.cob.userservice.api.admin.service.admin.AgencyAdminUserService;
 import de.caritas.cob.userservice.api.admin.service.admin.TenantAdminUserService;
 import de.caritas.cob.userservice.api.admin.service.admin.search.AdminFilterService;
+import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -35,6 +40,8 @@ class AdminUserFacadeTest {
   @Mock private AdminFilterService adminFilterService;
 
   @Mock private TenantAdminUserService tenantAdminUserService;
+
+  @Mock private AuthenticatedUser authenticatedUser;
 
   @Test
   void findAgencyAdmin_Should_useAdminAgencyService() {
@@ -141,6 +148,27 @@ class AdminUserFacadeTest {
 
     verify(this.adminAgencyRelationService)
         .synchronizeAdminAgenciesRelation(adminId, newAdminAgencyRelationDTOS);
+  }
+
+  @Test
+  void patchAdminData_Should_patchAgencyAdminForAgencies() {
+    when(authenticatedUser.getUserId()).thenReturn("adminId");
+    when(authenticatedUser.isRestrictedAgencyAdmin()).thenReturn(true);
+    when(authenticatedUser.isSingleTenantAdmin()).thenReturn(false);
+
+    this.adminUserFacade.patchAdminUserData(
+        new PatchAdminDTO()
+            .firstname("updated firstname")
+            .lastname("updated lastname")
+            .email("updated email"));
+
+    ArgumentCaptor<PatchAdminDTO> captor = ArgumentCaptor.forClass(PatchAdminDTO.class);
+    verify(this.agencyAdminUserService).patchAgencyAdmin(eq("adminId"), captor.capture());
+
+    PatchAdminDTO value = captor.getValue();
+    assertThat(value.getFirstname()).isEqualTo("updated firstname");
+    assertThat(value.getLastname()).isEqualTo("updated lastname");
+    assertThat(value.getEmail()).isEqualTo("updated email");
   }
 
   @Test
