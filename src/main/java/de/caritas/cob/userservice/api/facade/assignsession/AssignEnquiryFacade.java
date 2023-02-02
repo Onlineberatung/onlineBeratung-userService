@@ -70,6 +70,7 @@ public class AssignEnquiryFacade {
                       consultant.getId(), UserRole.CONSULTANT, session.getId());
               event.setRequestUri(requestURI);
               event.setRequestReferer(requestReferer);
+              event.setRequestUserId(consultant.getId());
 
               statisticsService.fireEvent(event);
             });

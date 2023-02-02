@@ -148,6 +148,8 @@ components:
           type: string
         requestReferer:
           type: string
+        requestUserId:
+          type: string
 
     AssignSessionStatisticsEventMessage:
       type: object

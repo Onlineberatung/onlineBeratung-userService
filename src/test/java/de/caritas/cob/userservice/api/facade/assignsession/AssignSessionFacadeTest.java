@@ -344,5 +344,6 @@ public class AssignSessionFacadeTest {
 
     assertEquals(httpServletRequest.getRequestURI(), event.getRequestUri());
     assertEquals(httpServletRequest.getHeader("Referer"), event.getRequestReferer());
+    assertEquals(authenticatedUser.getUserId(), event.getRequestUserId());
   }
 }

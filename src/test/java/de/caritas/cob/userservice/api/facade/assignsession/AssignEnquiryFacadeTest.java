@@ -130,6 +130,7 @@ class AssignEnquiryFacadeTest {
     assertThat(sessionId, is(FEEDBACKSESSION_WITHOUT_CONSULTANT.getId()));
     assertEquals(httpServletRequest.getRequestURI(), event.getRequestUri());
     assertEquals(httpServletRequest.getHeader("Referer"), event.getRequestReferer());
+    assertEquals(CONSULTANT_WITH_AGENCY.getId(), event.getRequestUserId());
   }
 
   private void verifyConsultantAndSessionHaveBeenChecked(Session session, Consultant consultant) {

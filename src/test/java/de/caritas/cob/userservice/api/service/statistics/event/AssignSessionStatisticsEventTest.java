@@ -60,6 +60,7 @@ public class AssignSessionStatisticsEventTest {
     assertThat(result.isPresent(), is(true));
     assertThat(
         result.get(),
-        jsonEquals(expectedJson).whenIgnoringPaths("timestamp", "requestReferer", "requestUri"));
+        jsonEquals(expectedJson)
+            .whenIgnoringPaths("timestamp", "requestReferer", "requestUri", "requestUserId"));
   }
 }

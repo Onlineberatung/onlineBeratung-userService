@@ -27,6 +27,7 @@ public class AssignSessionStatisticsEvent implements StatisticsEvent {
   private final @NonNull Long sessionId;
   @Getter @Setter private String requestUri;
   @Getter @Setter private String requestReferer;
+  @Getter @Setter private String requestUserId;
 
   public AssignSessionStatisticsEvent(
       @NonNull String userId, @NonNull UserRole userRole, @NonNull Long sessionId) {
@@ -53,6 +54,7 @@ public class AssignSessionStatisticsEvent implements StatisticsEvent {
             .sessionId(sessionId)
             .requestUri(requestUri)
             .requestReferer(requestReferer)
+            .requestUserId(requestUserId)
             .timestamp(OffsetDateTime.now(ZoneOffset.UTC));
 
     try {

@@ -85,6 +85,7 @@ public class AssignSessionFacade {
             consultantToAssign.getId(), UserRole.CONSULTANT, session.getId());
     event.setRequestUri(httpServletRequest.getRequestURI());
     event.setRequestReferer(httpServletRequest.getHeader(HttpHeaders.REFERER));
+    event.setRequestUserId(authenticatedUser.getUserId());
     statisticsService.fireEvent(event);
   }
 
