@@ -26,6 +26,7 @@ import java.util.function.Supplier;
 import javax.servlet.http.HttpServletRequest;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
 /**
@@ -58,6 +59,8 @@ public class AssignEnquiryFacade {
    * @param consultant the consultant to assign
    */
   public void assignRegisteredEnquiry(Session session, Consultant consultant) {
+    var requestURI = httpServletRequest.getRequestURI();
+    var requestReferer = httpServletRequest.getHeader(HttpHeaders.REFERER);
     assignEnquiry(session, consultant);
     supplyAsync(updateRocketChatRooms(session, consultant, TenantContext.getCurrentTenant()))
         .thenRun(
@@ -65,8 +68,8 @@ public class AssignEnquiryFacade {
               var event =
                   new AssignSessionStatisticsEvent(
                       consultant.getId(), UserRole.CONSULTANT, session.getId());
-              event.setRequestUri(httpServletRequest.getRequestURI());
-              event.setRequestReferer(httpServletRequest.getHeader("referer"));
+              event.setRequestUri(requestURI);
+              event.setRequestReferer(requestReferer);
 
               statisticsService.fireEvent(event);
             });
