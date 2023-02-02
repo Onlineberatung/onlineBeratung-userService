@@ -19,6 +19,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -130,6 +131,28 @@ class AssignEnquiryFacadeTest {
     assertThat(sessionId, is(FEEDBACKSESSION_WITHOUT_CONSULTANT.getId()));
     assertEquals(httpServletRequest.getRequestURI(), event.getRequestUri());
     assertEquals(httpServletRequest.getHeader("Referer"), event.getRequestReferer());
+    assertEquals(CONSULTANT_WITH_AGENCY.getId(), event.getRequestUserId());
+  }
+
+  @Test
+  void assignEnquiry_Should_FireAssignSessionStatisticsEventWithoutOptionalArgs() {
+    assignEnquiryFacade.assignRegisteredEnquiry(
+        FEEDBACKSESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
+
+    verifyAsync(e -> verify(statisticsService).fireEvent(any(AssignSessionStatisticsEvent.class)));
+
+    var captor = ArgumentCaptor.forClass(AssignSessionStatisticsEvent.class);
+    verify(statisticsService).fireEvent(captor.capture());
+    var event = captor.getValue();
+
+    var userId = requireNonNull(getField(event, "userId")).toString();
+    assertThat(userId, is(CONSULTANT_WITH_AGENCY.getId()));
+    var userRole = requireNonNull(getField(event, "userRole")).toString();
+    assertThat(userRole, is(UserRole.CONSULTANT.toString()));
+    var sessionId = Long.valueOf(requireNonNull(getField(event, "sessionId")).toString());
+    assertThat(sessionId, is(FEEDBACKSESSION_WITHOUT_CONSULTANT.getId()));
+    assertNull(event.getRequestUri());
+    assertNull(event.getRequestReferer());
     assertEquals(CONSULTANT_WITH_AGENCY.getId(), event.getRequestUserId());
   }
 
