@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -117,7 +118,7 @@ class AssignEnquiryFacadeTest {
     assignEnquiryFacade.assignRegisteredEnquiry(
         FEEDBACKSESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
 
-    verifyAsync(e -> verify(statisticsService).fireEvent(any(AssignSessionStatisticsEvent.class)));
+    verify(statisticsService, timeout(5000)).fireEvent(any(AssignSessionStatisticsEvent.class));
 
     var captor = ArgumentCaptor.forClass(AssignSessionStatisticsEvent.class);
     verify(statisticsService).fireEvent(captor.capture());
@@ -139,7 +140,7 @@ class AssignEnquiryFacadeTest {
     assignEnquiryFacade.assignRegisteredEnquiry(
         FEEDBACKSESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
 
-    verifyAsync(e -> verify(statisticsService).fireEvent(any(AssignSessionStatisticsEvent.class)));
+    verify(statisticsService, timeout(5000)).fireEvent(any(AssignSessionStatisticsEvent.class));
 
     var captor = ArgumentCaptor.forClass(AssignSessionStatisticsEvent.class);
     verify(statisticsService).fireEvent(captor.capture());

@@ -9,7 +9,7 @@ import java.util.function.Consumer;
 /** Test methods to provide asynchronus method testing. */
 public class AsyncVerification {
 
-  private static final int MAX_TIMEOUT = 10;
+  private static final int MAX_TIMEOUT = 5;
 
   /**
    * Verifies if the passed verify function has been called during the given max timeout range.
