@@ -12,6 +12,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Optional;
 import lombok.NonNull;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -23,6 +24,8 @@ public class AssignSessionStatisticsEvent implements StatisticsEvent {
   private final @NonNull String userId;
   private final @NonNull UserRole userRole;
   private final @NonNull Long sessionId;
+  @Setter private String requestUri;
+  @Setter private String requestReferer;
 
   public AssignSessionStatisticsEvent(
       @NonNull String userId, @NonNull UserRole userRole, @NonNull Long sessionId) {
@@ -47,6 +50,8 @@ public class AssignSessionStatisticsEvent implements StatisticsEvent {
             .userId(userId)
             .userRole(userRole)
             .sessionId(sessionId)
+            .requestUri(requestUri)
+            .requestReferer(requestReferer)
             .timestamp(OffsetDateTime.now(ZoneOffset.UTC));
 
     try {

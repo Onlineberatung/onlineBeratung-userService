@@ -58,6 +58,8 @@ public class AssignSessionStatisticsEventTest {
     Optional<String> result = assignSessionStatisticsEvent.getPayload();
 
     assertThat(result.isPresent(), is(true));
-    assertThat(result.get(), jsonEquals(expectedJson).whenIgnoringPaths("timestamp"));
+    assertThat(
+        result.get(),
+        jsonEquals(expectedJson).whenIgnoringPaths("timestamp", "requestReferer", "requestUri"));
   }
 }

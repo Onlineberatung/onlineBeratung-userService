@@ -50,6 +50,7 @@ import de.caritas.cob.userservice.api.tenant.TenantContextProvider;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.UserRole;
 import java.util.List;
 import java.util.Objects;
+import javax.servlet.http.HttpServletRequest;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -85,6 +86,7 @@ class AssignEnquiryFacadeTest {
   @Mock UnauthorizedMembersProvider unauthorizedMembersProvider;
   @Mock StatisticsService statisticsService;
   @Mock TenantContextProvider tenantContextProvider;
+  @Mock HttpServletRequest httpServletRequest;
 
   @BeforeEach
   public void setup() {
@@ -112,7 +114,7 @@ class AssignEnquiryFacadeTest {
     assignEnquiryFacade.assignRegisteredEnquiry(
         FEEDBACKSESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
 
-    verify(statisticsService, times(1)).fireEvent(any(AssignSessionStatisticsEvent.class));
+    verifyAsync(e -> verify(statisticsService).fireEvent(any(AssignSessionStatisticsEvent.class)));
 
     ArgumentCaptor<AssignSessionStatisticsEvent> captor =
         ArgumentCaptor.forClass(AssignSessionStatisticsEvent.class);
