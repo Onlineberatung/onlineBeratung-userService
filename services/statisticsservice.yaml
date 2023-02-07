@@ -144,6 +144,12 @@ components:
           format: date-time
           description: "Timestamp of event"
           example: "2021-01-30T08:30:00Z"
+        requestUri:
+          type: string
+        requestReferer:
+          type: string
+        requestUserId:
+          type: string
 
     AssignSessionStatisticsEventMessage:
       type: object

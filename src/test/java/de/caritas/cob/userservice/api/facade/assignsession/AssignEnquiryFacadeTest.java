@@ -14,9 +14,12 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.ROCKET_CHA
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.SESSION_WITHOUT_CONSULTANT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.U25_SESSION_WITHOUT_CONSULTANT;
 import static java.util.Arrays.asList;
+import static java.util.Objects.requireNonNull;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -24,15 +27,16 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
+import static org.springframework.test.util.ReflectionTestUtils.getField;
 
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
-import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.facade.RocketChatFacade;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.Consultant;
@@ -40,7 +44,6 @@ import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.RegistrationType;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
-import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
@@ -49,7 +52,8 @@ import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.api.tenant.TenantContextProvider;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.UserRole;
 import java.util.List;
-import java.util.Objects;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,13 +65,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
-import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class AssignEnquiryFacadeTest {
-
-  static final RocketChatAddUserToGroupException RC_ADD_USER_TO_GROUP_EXC =
-      new RocketChatAddUserToGroupException(new Exception());
   public static final long CURRENT_TENANT_ID = 1L;
 
   @InjectMocks AssignEnquiryFacade assignEnquiryFacade;
@@ -78,13 +78,16 @@ class AssignEnquiryFacadeTest {
   @SuppressWarnings("unused")
   KeycloakService keycloakService;
 
-  @Mock ConsultingTypeManager consultingTypeManager;
-  @Mock ConsultantService consultantService;
+  @SuppressWarnings("unused")
+  @Mock
+  ConsultingTypeManager consultingTypeManager;
+
   @Mock SessionToConsultantVerifier sessionToConsultantVerifier;
   @Mock Logger logger;
   @Mock UnauthorizedMembersProvider unauthorizedMembersProvider;
   @Mock StatisticsService statisticsService;
   @Mock TenantContextProvider tenantContextProvider;
+  @Mock HttpServletRequest httpServletRequest;
 
   @BeforeEach
   public void setup() {
@@ -108,28 +111,50 @@ class AssignEnquiryFacadeTest {
 
   @Test
   void assignEnquiry_Should_FireAssignSessionStatisticsEvent() {
+    when(httpServletRequest.getRequestURI()).thenReturn(RandomStringUtils.randomAlphanumeric(32));
+    when(httpServletRequest.getHeader("Referer"))
+        .thenReturn(RandomStringUtils.randomAlphanumeric(32));
 
     assignEnquiryFacade.assignRegisteredEnquiry(
         FEEDBACKSESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
 
-    verify(statisticsService, times(1)).fireEvent(any(AssignSessionStatisticsEvent.class));
+    verify(statisticsService, timeout(5000)).fireEvent(any(AssignSessionStatisticsEvent.class));
 
-    ArgumentCaptor<AssignSessionStatisticsEvent> captor =
-        ArgumentCaptor.forClass(AssignSessionStatisticsEvent.class);
-    verify(statisticsService, times(1)).fireEvent(captor.capture());
-    String userId =
-        Objects.requireNonNull(ReflectionTestUtils.getField(captor.getValue(), "userId"))
-            .toString();
+    var captor = ArgumentCaptor.forClass(AssignSessionStatisticsEvent.class);
+    verify(statisticsService).fireEvent(captor.capture());
+    var event = captor.getValue();
+
+    var userId = requireNonNull(getField(event, "userId")).toString();
     assertThat(userId, is(CONSULTANT_WITH_AGENCY.getId()));
-    String userRole =
-        Objects.requireNonNull(ReflectionTestUtils.getField(captor.getValue(), "userRole"))
-            .toString();
+    var userRole = requireNonNull(getField(event, "userRole")).toString();
     assertThat(userRole, is(UserRole.CONSULTANT.toString()));
-    Long sessionId =
-        Long.valueOf(
-            Objects.requireNonNull(ReflectionTestUtils.getField(captor.getValue(), "sessionId"))
-                .toString());
+    var sessionId = Long.valueOf(requireNonNull(getField(event, "sessionId")).toString());
     assertThat(sessionId, is(FEEDBACKSESSION_WITHOUT_CONSULTANT.getId()));
+    assertEquals(httpServletRequest.getRequestURI(), event.getRequestUri());
+    assertEquals(httpServletRequest.getHeader("Referer"), event.getRequestReferer());
+    assertEquals(CONSULTANT_WITH_AGENCY.getId(), event.getRequestUserId());
+  }
+
+  @Test
+  void assignEnquiry_Should_FireAssignSessionStatisticsEventWithoutOptionalArgs() {
+    assignEnquiryFacade.assignRegisteredEnquiry(
+        FEEDBACKSESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
+
+    verify(statisticsService, timeout(5000)).fireEvent(any(AssignSessionStatisticsEvent.class));
+
+    var captor = ArgumentCaptor.forClass(AssignSessionStatisticsEvent.class);
+    verify(statisticsService).fireEvent(captor.capture());
+    var event = captor.getValue();
+
+    var userId = requireNonNull(getField(event, "userId")).toString();
+    assertThat(userId, is(CONSULTANT_WITH_AGENCY.getId()));
+    var userRole = requireNonNull(getField(event, "userRole")).toString();
+    assertThat(userRole, is(UserRole.CONSULTANT.toString()));
+    var sessionId = Long.valueOf(requireNonNull(getField(event, "sessionId")).toString());
+    assertThat(sessionId, is(FEEDBACKSESSION_WITHOUT_CONSULTANT.getId()));
+    assertNull(event.getRequestUri());
+    assertNull(event.getRequestReferer());
+    assertEquals(CONSULTANT_WITH_AGENCY.getId(), event.getRequestUserId());
   }
 
   private void verifyConsultantAndSessionHaveBeenChecked(Session session, Consultant consultant) {
