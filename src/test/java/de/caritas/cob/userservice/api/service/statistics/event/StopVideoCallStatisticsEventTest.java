@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.service.statistics.event;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -26,6 +27,31 @@ class StopVideoCallStatisticsEventTest {
   void setup() {
     userId = null;
     videoCallId = null;
+  }
+
+  @Test
+  @SuppressWarnings("ConstantConditions")
+  void constructorShouldThrowExceptionIfUserIdNull() {
+    givenAVideoCallId();
+
+    var thrown =
+        assertThrows(
+            NullPointerException.class, () -> new StopVideoCallStatisticsEvent(null, videoCallId));
+
+    assertTrue(thrown.getMessage().contentEquals("userId is marked non-null but is null"));
+  }
+
+  @Test
+  @SuppressWarnings("ConstantConditions")
+  void constructorShouldThrowExceptionIfVideoCallIdNull() {
+    givenAUserId();
+
+    var thrown =
+        assertThrows(
+            NullPointerException.class,
+            () -> new StopVideoCallStatisticsEvent(userId.toString(), null));
+
+    assertTrue(thrown.getMessage().contentEquals("videoCallId is marked non-null but is null"));
   }
 
   @Test
