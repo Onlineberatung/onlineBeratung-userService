@@ -45,11 +45,12 @@ class StartVideoCallStatisticsEventTest {
   @SuppressWarnings("ConstantConditions")
   void constructorShouldThrowExceptionIfVideoCallIdNull() {
     givenAUserId();
+    var userIdStr = userId.toString();
+    assert userIdStr != null;
 
     var thrown =
         assertThrows(
-            NullPointerException.class,
-            () -> new StartVideoCallStatisticsEvent(userId.toString(), null));
+            NullPointerException.class, () -> new StartVideoCallStatisticsEvent(userIdStr, null));
 
     assertTrue(thrown.getMessage().contentEquals("videoCallUuid is marked non-null but is null"));
   }
