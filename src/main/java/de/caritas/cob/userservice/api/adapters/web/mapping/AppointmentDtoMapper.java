@@ -4,9 +4,13 @@ import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.Appointment;
 import de.caritas.cob.userservice.api.adapters.web.dto.AppointmentStatus;
+import de.caritas.cob.userservice.api.service.statistics.event.StartVideoCallStatisticsEvent;
+import de.caritas.cob.userservice.api.service.statistics.event.StatisticsEvent;
+import de.caritas.cob.userservice.api.service.statistics.event.StopVideoCallStatisticsEvent;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -48,5 +52,18 @@ public class AppointmentDtoMapper {
     }
 
     return appointment;
+  }
+
+  public Optional<StatisticsEvent> eventOf(UUID id, AppointmentStatus status, String userId) {
+    StatisticsEvent event;
+    if (status == AppointmentStatus.STARTED) {
+      event = new StartVideoCallStatisticsEvent(userId, id);
+    } else if (status == AppointmentStatus.PAUSED) {
+      event = new StopVideoCallStatisticsEvent(userId, id);
+    } else {
+      event = null;
+    }
+
+    return Optional.ofNullable(event);
   }
 }
