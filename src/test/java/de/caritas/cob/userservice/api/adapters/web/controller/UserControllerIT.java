@@ -1408,6 +1408,35 @@ public class UserControllerIT {
         .andExpect(status().is(HttpStatus.OK.value()));
   }
 
+  @Test
+  public void getUserData_ForAgencySuperAdmin_Should_ReturnUserDataFromKeycloak() throws Exception {
+    when(authenticatedUser.isAgencySuperAdmin()).thenReturn(true);
+    when(keycloakUserDataProvider.retrieveAuthenticatedUserData())
+        .thenReturn(new UserDataResponseDTO());
+
+    mvc.perform(
+            get(PATH_USER_DATA)
+                .contentType(MediaType.APPLICATION_JSON)
+                .cookie(RC_TOKEN_COOKIE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().is(HttpStatus.OK.value()));
+  }
+
+  @Test
+  public void getUserData_ForRestrictedAgencyAdmin_Should_ReturnUserDataFromKeycloak()
+      throws Exception {
+    when(authenticatedUser.isRestrictedAgencyAdmin()).thenReturn(true);
+    when(keycloakUserDataProvider.retrieveAuthenticatedUserData())
+        .thenReturn(new UserDataResponseDTO());
+
+    mvc.perform(
+            get(PATH_USER_DATA)
+                .contentType(MediaType.APPLICATION_JSON)
+                .cookie(RC_TOKEN_COOKIE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().is(HttpStatus.OK.value()));
+  }
+
   /** Method: getTeamSessionsForAuthenticatedConsultant (role: consultant) */
   @Test
   public void
