@@ -472,7 +472,7 @@ public class UserController implements UsersApi {
               consultantMap ->
                   partialUserData.setDisplayName(userDtoMapper.displayNameOf(consultantMap)));
       partialUserData.setAvailable(messenger.getAvailability(authenticatedUser.getUserId()));
-    } else if (isTenantAdmin()) {
+    } else if (isTenantAdmin() || isAgencyAdmin()) {
       partialUserData = keycloakUserDataProvider.retrieveAuthenticatedUserData();
     } else {
       var user = userAccountProvider.retrieveValidatedUser();
@@ -491,6 +491,10 @@ public class UserController implements UsersApi {
             identityClientConfig.getDisplayNameAllowedForConsultants());
 
     return new ResponseEntity<>(fullUserData, HttpStatus.OK);
+  }
+
+  private boolean isAgencyAdmin() {
+    return authenticatedUser.isAgencySuperAdmin() || authenticatedUser.isRestrictedAgencyAdmin();
   }
 
   private boolean isTenantAdmin() {
