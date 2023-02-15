@@ -63,7 +63,7 @@ public class CreateAdminServiceIT {
 
   @Test
   public void
-      createNewAdminAgency_Should_returnExpectedCreatedAdmin_When_inputDataIsCorrectAndMultitenancyDisabled() {
+  createNewAdminAgency_Should_returnExpectedCreatedAdmin_When_inputDataIsCorrectAndMultitenancyDisabled() {
     // given
     ReflectionTestUtils.setField(createAdminService, "multiTenancyEnabled", false);
     when(identityClient.createKeycloakUser(any(), anyString(), any()))
@@ -98,7 +98,7 @@ public class CreateAdminServiceIT {
 
   @Test
   public void
-      createNewAdminAgency_Should_returnExpectedCreatedAdmin_When_inputDataIsCorrectAndMultitenancyEnabled() {
+  createNewAdminAgency_Should_returnExpectedCreatedAdmin_When_inputDataIsCorrectAndMultitenancyEnabled() {
     // given
     ReflectionTestUtils.setField(createAdminService, "multiTenancyEnabled", true);
     TenantContext.setCurrentTenant(1L);
@@ -153,7 +153,7 @@ public class CreateAdminServiceIT {
 
   @Test(expected = CustomValidationHttpStatusException.class)
   public void
-      createNewAdminAgency_Should_throwCustomValidationHttpStatusException_When_keycloakIdIsMissing() {
+  createNewAdminAgency_Should_throwCustomValidationHttpStatusException_When_keycloakIdIsMissing() {
     // given
     KeycloakCreateUserResponseDTO keycloakResponse =
         easyRandom.nextObject(KeycloakCreateUserResponseDTO.class);
