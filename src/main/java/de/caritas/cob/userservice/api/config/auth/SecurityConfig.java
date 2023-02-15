@@ -106,7 +106,6 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .antMatchers(
             "/users/email",
             "/users/mails/messages/new",
-            "/users/password/change",
             "/users/chat/{chatId:[0-9]+}",
             "/users/chat/e2e",
             "/users/chat/{chatId:[0-9]+}/join",
@@ -115,6 +114,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
             "/users/chat/{groupId:[\\dA-Za-z-,]+}/assign",
             "/users/consultants/toggleWalkThrough")
         .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT)
+        .antMatchers("/users/password/change")
+        .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT, SINGLE_TENANT_ADMIN, TENANT_ADMIN)
         .antMatchers("/users/twoFactorAuth", "/users/2fa/**", "/users/mobile/app/token")
         .hasAnyAuthority(SINGLE_TENANT_ADMIN, TENANT_ADMIN, USER_DEFAULT, CONSULTANT_DEFAULT)
         .antMatchers("/users/statistics/registration")
@@ -173,6 +174,10 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
             "/users/chat/{chatId:[0-9]+}/update",
             "/users/{chatUserId:[0-9A-Za-z]+}/chat/{chatId:[0-9]+}/ban")
         .hasAuthority(UPDATE_CHAT)
+        .antMatchers("/useradmin/tenantadmins/", "/useradmin/tenantadmins/**")
+        .hasAuthority(TENANT_ADMIN)
+        .antMatchers("/useradmin/data/*")
+        .hasAnyAuthority(SINGLE_TENANT_ADMIN, RESTRICTED_AGENCY_ADMIN)
         .antMatchers("/useradmin", "/useradmin/**")
         .hasAnyAuthority(USER_ADMIN, TECHNICAL_DEFAULT)
         .antMatchers("/users/consultants/search")

@@ -44,7 +44,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest(classes = UserServiceApplication.class)
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class ConsultantAgencyAdminServiceIT {
+public class ConsultantAgencyAdminUserServiceIT {
 
   @Autowired private ConsultantAgencyAdminService consultantAgencyAdminService;
 

@@ -49,7 +49,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.mapping.ConsultantDtoMapper;
 import de.caritas.cob.userservice.api.adapters.web.mapping.UserDtoMapper;
-import de.caritas.cob.userservice.api.admin.facade.AdminAgencyFacade;
+import de.caritas.cob.userservice.api.admin.facade.AdminUserFacade;
 import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
@@ -174,7 +174,7 @@ public class UserController implements UsersApi {
   private final @NonNull KeycloakUserDataProvider keycloakUserDataProvider;
   private final @NotNull UsersStatisticsFacade usersStatisticsFacade;
 
-  private final @NotNull AdminAgencyFacade adminAgencyFacade;
+  private final @NotNull AdminUserFacade adminUserFacade;
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
@@ -472,7 +472,7 @@ public class UserController implements UsersApi {
               consultantMap ->
                   partialUserData.setDisplayName(userDtoMapper.displayNameOf(consultantMap)));
       partialUserData.setAvailable(messenger.getAvailability(authenticatedUser.getUserId()));
-    } else if (isTenantAdmin()) {
+    } else if (isTenantAdmin() || isAgencyAdmin()) {
       partialUserData = keycloakUserDataProvider.retrieveAuthenticatedUserData();
     } else {
       var user = userAccountProvider.retrieveValidatedUser();
@@ -491,6 +491,10 @@ public class UserController implements UsersApi {
             identityClientConfig.getDisplayNameAllowedForConsultants());
 
     return new ResponseEntity<>(fullUserData, HttpStatus.OK);
+  }
+
+  private boolean isAgencyAdmin() {
+    return authenticatedUser.isAgencySuperAdmin() || authenticatedUser.isRestrictedAgencyAdmin();
   }
 
   private boolean isTenantAdmin() {
@@ -856,7 +860,7 @@ public class UserController implements UsersApi {
     Collection<Long> agenciesToFilterConsultants = Lists.newArrayList();
     if (authenticatedUser.hasRestrictedAgencyPriviliges()) {
       agenciesToFilterConsultants =
-          adminAgencyFacade.findAdminUserAgencyIds(authenticatedUser.getUserId());
+          adminUserFacade.findAdminUserAgencyIds(authenticatedUser.getUserId());
     }
     return agenciesToFilterConsultants;
   }
@@ -1218,7 +1222,8 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<Void> updateEmailAddress(@Valid String emailAddress) {
-    userAccountProvider.changeUserAccountEmailAddress(Optional.of(emailAddress));
+    var lowerCaseEmail = Optional.of(emailAddress.toLowerCase());
+    userAccountProvider.changeUserAccountEmailAddress(lowerCaseEmail);
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
@@ -1321,7 +1326,7 @@ public class UserController implements UsersApi {
   @Override
   public ResponseEntity<Void> startTwoFactorAuthByEmailSetup(EmailDTO emailDTO) {
     var username = authenticatedUser.getUsername();
-    var email = emailDTO.getEmail();
+    var email = emailDTO.getEmail().toLowerCase();
 
     if (!identityManager.isEmailAvailableOrOwn(username, email)) {
       return new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);

@@ -11,7 +11,9 @@ import de.caritas.cob.userservice.statisticsservice.generated.web.model.UserRole
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Optional;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -23,6 +25,9 @@ public class AssignSessionStatisticsEvent implements StatisticsEvent {
   private final @NonNull String userId;
   private final @NonNull UserRole userRole;
   private final @NonNull Long sessionId;
+  @Getter @Setter private String requestUri;
+  @Getter @Setter private String requestReferer;
+  @Getter @Setter private String requestUserId;
 
   public AssignSessionStatisticsEvent(
       @NonNull String userId, @NonNull UserRole userRole, @NonNull Long sessionId) {
@@ -47,6 +52,9 @@ public class AssignSessionStatisticsEvent implements StatisticsEvent {
             .userId(userId)
             .userRole(userRole)
             .sessionId(sessionId)
+            .requestUri(requestUri)
+            .requestReferer(requestReferer)
+            .requestUserId(requestUserId)
             .timestamp(OffsetDateTime.now(ZoneOffset.UTC));
 
     try {

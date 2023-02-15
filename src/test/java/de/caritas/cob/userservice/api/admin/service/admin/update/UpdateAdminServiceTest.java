@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -15,6 +16,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.admin.service.admin.search.RetrieveAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.model.Admin;
+import de.caritas.cob.userservice.api.model.Admin.AdminType;
 import de.caritas.cob.userservice.api.port.out.AdminRepository;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,7 +50,7 @@ class UpdateAdminServiceTest {
     // given
     Admin admin = mock(Admin.class);
     when(admin.getTenantId()).thenReturn(0L);
-    when(retrieveAdminService.findAgencyAdmin(anyString())).thenReturn(admin);
+    when(retrieveAdminService.findAdmin(anyString(), eq(AdminType.AGENCY))).thenReturn(admin);
 
     // when, then
     Exception exception =
@@ -67,7 +69,7 @@ class UpdateAdminServiceTest {
     UpdateAgencyAdminDTO updateAgencyAdminDTO = mock(UpdateAgencyAdminDTO.class);
     Admin admin = mock(Admin.class);
     when(admin.getTenantId()).thenReturn(null);
-    when(retrieveAdminService.findAgencyAdmin(anyString())).thenReturn(admin);
+    when(retrieveAdminService.findAdmin(anyString(), eq(AdminType.AGENCY))).thenReturn(admin);
 
     // when
     updateAdminService.updateAgencyAdmin("adminId", updateAgencyAdminDTO);
@@ -84,7 +86,7 @@ class UpdateAdminServiceTest {
     UpdateAgencyAdminDTO updateAgencyAdminDTO = mock(UpdateAgencyAdminDTO.class);
     Admin admin = mock(Admin.class);
     when(admin.getTenantId()).thenReturn(2L);
-    when(retrieveAdminService.findAgencyAdmin(anyString())).thenReturn(admin);
+    when(retrieveAdminService.findAdmin(anyString(), eq(AdminType.AGENCY))).thenReturn(admin);
 
     // when
     updateAdminService.updateAgencyAdmin("adminId", updateAgencyAdminDTO);

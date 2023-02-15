@@ -3,7 +3,7 @@ package de.caritas.cob.userservice.api.adapters.web.controller;
 import com.google.common.collect.Lists;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminFilter;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.AgencyAdminSearchResultDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.AdminSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyConsultantResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyTypeDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AskerResponseDTO;
@@ -12,20 +12,22 @@ import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAgencyResponseD
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantFilter;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSearchResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminAgencyRelationDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.CreateAgencyAdminDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.PatchAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.RootDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionAdminResultDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionFilter;
 import de.caritas.cob.userservice.api.adapters.web.dto.Sort;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAgencyAdminDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UpdateTenantAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ViolationDTO;
-import de.caritas.cob.userservice.api.adapters.web.mapping.AdminAgencyDtoMapper;
-import de.caritas.cob.userservice.api.admin.facade.AdminAgencyFacade;
+import de.caritas.cob.userservice.api.adapters.web.mapping.AdminDtoMapper;
+import de.caritas.cob.userservice.api.admin.facade.AdminUserFacade;
+import de.caritas.cob.userservice.api.admin.facade.AskerUserAdminFacade;
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
-import de.caritas.cob.userservice.api.admin.facade.UserAdminFacade;
 import de.caritas.cob.userservice.api.admin.hallink.RootDTOBuilder;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
@@ -54,10 +56,10 @@ public class UserAdminController implements UseradminApi {
   private final @NonNull SessionAdminService sessionAdminService;
   private final @NonNull ViolationReportGenerator violationReportGenerator;
   private final @NonNull ConsultantAdminFacade consultantAdminFacade;
-  private final @NonNull UserAdminFacade userAdminFacade;
-  private final @NonNull AdminAgencyFacade adminAgencyFacade;
+  private final @NonNull AskerUserAdminFacade askerUserAdminFacade;
+  private final @NonNull AdminUserFacade adminUserFacade;
   private final @NonNull AppointmentService appointmentService;
-  private final @NonNull AdminAgencyDtoMapper adminAgencyDtoMapper;
+  private final @NonNull AdminDtoMapper adminDtoMapper;
 
   /**
    * Creates the root hal based navigation entity.
@@ -97,7 +99,10 @@ public class UserAdminController implements UseradminApi {
   @Override
   public ResponseEntity<ConsultantAdminResponseDTO> createConsultant(
       @Valid CreateConsultantDTO createConsultantDTO) {
-    return ResponseEntity.ok(this.consultantAdminFacade.createNewConsultant(createConsultantDTO));
+    createConsultantDTO.setEmail(createConsultantDTO.getEmail().toLowerCase());
+    var consultant = consultantAdminFacade.createNewConsultant(createConsultantDTO);
+
+    return ResponseEntity.ok(consultant);
   }
 
   /**
@@ -175,8 +180,10 @@ public class UserAdminController implements UseradminApi {
   @Override
   public ResponseEntity<ConsultantAdminResponseDTO> updateConsultant(
       @PathVariable String consultantId, @Valid UpdateAdminConsultantDTO updateConsultantDTO) {
-    return ResponseEntity.ok(
-        this.consultantAdminFacade.updateConsultant(consultantId, updateConsultantDTO));
+    updateConsultantDTO.setEmail(updateConsultantDTO.getEmail().toLowerCase());
+    var consultant = consultantAdminFacade.updateConsultant(consultantId, updateConsultantDTO);
+
+    return ResponseEntity.ok(consultant);
   }
 
   /**
@@ -258,87 +265,137 @@ public class UserAdminController implements UseradminApi {
    */
   @Override
   public ResponseEntity<Void> markAskerForDeletion(String askerId) {
-    this.userAdminFacade.markAskerForDeletion(askerId);
+    this.askerUserAdminFacade.markAskerForDeletion(askerId);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @Override
   public ResponseEntity<AskerResponseDTO> getAsker(String askerId) {
-    AskerResponseDTO response = this.userAdminFacade.getAsker(askerId);
+    AskerResponseDTO response = this.askerUserAdminFacade.getAsker(askerId);
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
   @Override
-  public ResponseEntity<AdminResponseDTO> createAgencyAdmin(
-      final CreateAgencyAdminDTO createAgencyAdminDTO) {
-    return ResponseEntity.ok(this.adminAgencyFacade.createNewAdminAgency(createAgencyAdminDTO));
+  public ResponseEntity<AdminResponseDTO> createTenantAdmin(CreateAdminDTO createAgencyAdminDTO) {
+    createAgencyAdminDTO.setEmail(createAgencyAdminDTO.getEmail().toLowerCase());
+    var admin = adminUserFacade.createNewTenantAdmin(createAgencyAdminDTO);
+
+    return ResponseEntity.ok(admin);
+  }
+
+  @Override
+  public ResponseEntity<AdminResponseDTO> createAgencyAdmin(final CreateAdminDTO createAdminDTO) {
+    return ResponseEntity.ok(this.adminUserFacade.createNewAgencyAdmin(createAdminDTO));
   }
 
   @Override
   public ResponseEntity<AdminResponseDTO> getAgencyAdmin(final String adminId) {
-    return new ResponseEntity<>(this.adminAgencyFacade.findAgencyAdmin(adminId), HttpStatus.OK);
+    return new ResponseEntity<>(this.adminUserFacade.findAgencyAdmin(adminId), HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<AdminResponseDTO> getTenantAdmin(final String adminId) {
+    return new ResponseEntity<>(this.adminUserFacade.findTenantAdmin(adminId), HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<List<AdminResponseDTO>> getTenantAdmins(final Integer tenantId) {
+    return new ResponseEntity<>(this.adminUserFacade.findTenantAdmins(tenantId), HttpStatus.OK);
   }
 
   @Override
   public ResponseEntity<List<Long>> getAdminAgencies(@PathVariable String adminId) {
-    var adminAgencies = this.adminAgencyFacade.findAdminUserAgencyIds(adminId);
+    var adminAgencies = this.adminUserFacade.findAdminUserAgencyIds(adminId);
     return ResponseEntity.ok(adminAgencies);
   }
 
   @Override
-  public ResponseEntity<AgencyAdminSearchResultDTO> getAgencyAdmins(
+  public ResponseEntity<AdminSearchResultDTO> getAgencyAdmins(
       final Integer page, final Integer perPage, final AdminFilter filter, final Sort sort) {
     return new ResponseEntity<>(
-        this.adminAgencyFacade.findFilteredAdminsAgency(page, perPage, filter, sort),
-        HttpStatus.OK);
+        this.adminUserFacade.findFilteredAdminsAgency(page, perPage, filter, sort), HttpStatus.OK);
   }
 
   @Override
   public ResponseEntity<Void> deleteAgencyAdmin(final String adminId) {
-    this.adminAgencyFacade.deleteAgencyAdmin(adminId);
+    this.adminUserFacade.deleteAgencyAdmin(adminId);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<Void> deleteTenantAdmin(final String adminId) {
+    this.adminUserFacade.deleteTenantAdmin(adminId);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @Override
   public ResponseEntity<AdminResponseDTO> updateAgencyAdmin(
-      final String adminId, final UpdateAgencyAdminDTO updateAgencyAdminDTO) {
-    return new ResponseEntity<>(
-        this.adminAgencyFacade.updateAgencyAdmin(adminId, updateAgencyAdminDTO), HttpStatus.OK);
+      final String adminId, UpdateAgencyAdminDTO updateAgencyAdminDTO) {
+    updateAgencyAdminDTO.setEmail(updateAgencyAdminDTO.getEmail().toLowerCase());
+    var admin = adminUserFacade.updateAgencyAdmin(adminId, updateAgencyAdminDTO);
+
+    return new ResponseEntity<>(admin, HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<AdminResponseDTO> updateTenantAdmin(
+      final String adminId, UpdateTenantAdminDTO updateTenantAdminDTO) {
+    updateTenantAdminDTO.setEmail(updateTenantAdminDTO.getEmail().toLowerCase());
+    var admin = adminUserFacade.updateTenantAdmin(adminId, updateTenantAdminDTO);
+
+    return new ResponseEntity<>(admin, HttpStatus.OK);
   }
 
   @Override
   public ResponseEntity<Void> createAdminAgencyRelation(
       final String adminId, final CreateAdminAgencyRelationDTO createAdminAgencyRelationDTO) {
-    this.adminAgencyFacade.createNewAdminAgencyRelation(adminId, createAdminAgencyRelationDTO);
+    this.adminUserFacade.createNewAdminAgencyRelation(adminId, createAdminAgencyRelationDTO);
     return new ResponseEntity<>(HttpStatus.CREATED);
   }
 
   @Override
   public ResponseEntity<Void> deleteAdminAgencyRelation(final String adminId, final Long agencyId) {
-    this.adminAgencyFacade.deleteAdminAgencyRelation(adminId, agencyId);
+    this.adminUserFacade.deleteAdminAgencyRelation(adminId, agencyId);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @Override
   public ResponseEntity<Void> setAdminAgenciesRelation(
       final String adminId, final List<CreateAdminAgencyRelationDTO> newAdminAgencyRelationDTOs) {
-    this.adminAgencyFacade.setAdminAgenciesRelation(adminId, newAdminAgencyRelationDTOs);
+    this.adminUserFacade.setAdminAgenciesRelation(adminId, newAdminAgencyRelationDTOs);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @Override
-  public ResponseEntity<AgencyAdminSearchResultDTO> searchAgencyAdmins(
+  public ResponseEntity<AdminResponseDTO> patchAdminData(PatchAdminDTO patchAdminDTO) {
+    AdminResponseDTO adminResponseDTO = this.adminUserFacade.patchAdminUserData(patchAdminDTO);
+    return new ResponseEntity<>(adminResponseDTO, HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<AdminSearchResultDTO> searchAgencyAdmins(
       String query, Integer page, Integer perPage, String field, String order) {
     var decodedInfix = URLDecoder.decode(query, StandardCharsets.UTF_8).trim();
     var isAscending = order.equalsIgnoreCase("asc");
-    var mappedField = adminAgencyDtoMapper.mappedFieldOf(field);
+    var mappedField = adminDtoMapper.mappedFieldOf(field);
     var resultMap =
-        adminAgencyFacade.findAgencyAdminsByInfix(
+        adminUserFacade.findAgencyAdminsByInfix(
             decodedInfix, page - 1, perPage, mappedField, isAscending);
-    var result =
-        adminAgencyDtoMapper.agencyAdminSearchResultOf(
-            resultMap, query, page, perPage, field, order);
+    var result = adminDtoMapper.adminSearchResultOf(resultMap, query, page, perPage, field, order);
 
+    return ResponseEntity.ok(result);
+  }
+
+  @Override
+  public ResponseEntity<AdminSearchResultDTO> searchTenantAdmins(
+      String query, Integer page, Integer perPage, String field, String order) {
+    var decodedInfix = URLDecoder.decode(query, StandardCharsets.UTF_8).trim();
+    var isAscending = order.equalsIgnoreCase("asc");
+    var mappedField = adminDtoMapper.mappedFieldOf(field);
+    var resultMap =
+        adminUserFacade.findTenantAdminsByInfix(
+            decodedInfix, page - 1, perPage, mappedField, isAscending);
+    var result = adminDtoMapper.adminSearchResultOf(resultMap, query, page, perPage, field, order);
     return ResponseEntity.ok(result);
   }
 }

@@ -20,4 +20,9 @@ public class DeleteAdminService {
     this.identityClient.deleteUser(adminId);
     this.adminRepository.deleteById(adminId);
   }
+
+  public void deleteTenantAdmin(String adminId) {
+    this.identityClient.deleteUser(adminId);
+    this.adminRepository.deleteById(adminId);
+  }
 }

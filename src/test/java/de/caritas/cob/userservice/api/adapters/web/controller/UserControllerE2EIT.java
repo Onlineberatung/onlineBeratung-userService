@@ -1255,6 +1255,44 @@ class UserControllerE2EIT {
   }
 
   @Test
+  @WithMockUser(authorities = AuthorityValue.SINGLE_TENANT_ADMIN)
+  void updatePasswordShouldUpdatePasswordAsSingleTenantAdminAndRespondWithOkIf2faIsOff()
+      throws Exception {
+    givenAValidUser();
+    givenAPasswordDto();
+    givenAValidKeycloakLoginResponse();
+
+    mockMvc
+        .perform(
+            put("/users/password/change")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(passwordDto))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.TENANT_ADMIN)
+  void updatePasswordShouldUpdatePasswordAsTenantAdminAndRespondWithOkIf2faIsOff()
+      throws Exception {
+    givenAValidUser();
+    givenAPasswordDto();
+    givenAValidKeycloakLoginResponse();
+
+    mockMvc
+        .perform(
+            put("/users/password/change")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(passwordDto))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+  }
+
+  @Test
   @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
   void updatePasswordShouldUpdatePasswordAndRespondWithOkIf2faIsOn() throws Exception {
     givenAValidUser();
@@ -1671,12 +1709,12 @@ class UserControllerE2EIT {
 
   private void givenAUserDTOWithMainTopic() {
     givenAUserDTO();
-    userDTO.setMainTopicId(0);
+    userDTO.setMainTopicId(0L);
   }
 
   private void givenAUserDTOWithTopics() {
     givenAUserDTO();
-    userDTO.setTopicIds(List.of(0, 1));
+    userDTO.setTopicIds(List.of(0L, 1L));
   }
 
   private long aPositiveLong() {

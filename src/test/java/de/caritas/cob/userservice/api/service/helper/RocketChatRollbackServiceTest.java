@@ -62,7 +62,7 @@ public class RocketChatRollbackServiceTest {
       rollbackRemoveUsersFromRocketChatGroup_Should_LogInternalServerError_WhenTechUserAddToGroupFails()
           throws Exception {
 
-    when(rocketChatService.getMembersOfGroup(Mockito.anyString()))
+    when(rocketChatService.getChatUsers(Mockito.anyString()))
         .thenReturn(CURRENT_GROUP_MEMBER_DTO_LIST);
     doThrow(new RocketChatAddUserToGroupException("error"))
         .when(rocketChatService)
@@ -81,8 +81,7 @@ public class RocketChatRollbackServiceTest {
       rollbackRemoveUsersFromRocketChatGroup_Should_LogInternalServerError_WhenTechUserLeaveFromGroupFails()
           throws Exception {
 
-    when(rocketChatService.getMembersOfGroup(Mockito.anyString()))
-        .thenReturn(GROUP_MEMBER_DTO_LIST);
+    when(rocketChatService.getChatUsers(Mockito.anyString())).thenReturn(GROUP_MEMBER_DTO_LIST);
     doThrow(new RocketChatLeaveFromGroupException("error"))
         .when(rocketChatService)
         .leaveFromGroupAsTechnicalUser(anyString());
@@ -103,7 +102,7 @@ public class RocketChatRollbackServiceTest {
     doThrow(new RocketChatLeaveFromGroupException("error"))
         .when(rocketChatService)
         .leaveFromGroupAsTechnicalUser(anyString());
-    when(rocketChatService.getMembersOfGroup(Mockito.anyString()))
+    when(rocketChatService.getChatUsers(Mockito.anyString()))
         .thenReturn(CURRENT_GROUP_MEMBER_DTO_LIST);
 
     when(rcCredentialHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
@@ -119,7 +118,7 @@ public class RocketChatRollbackServiceTest {
       rollbackRemoveUsersFromRocketChatGroup_Should_AddMissingUserToGroup_WhenUserWasRemovedBeforeRollback()
           throws Exception {
 
-    when(rocketChatService.getMembersOfGroup(Mockito.anyString()))
+    when(rocketChatService.getChatUsers(Mockito.anyString()))
         .thenReturn(CURRENT_GROUP_MEMBER_DTO_LIST);
     doThrow(RC_EXCEPTION)
         .when(rocketChatService)

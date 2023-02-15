@@ -18,15 +18,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminAgencyRelationDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.CreateAgencyAdminDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAgencyAdminDTO;
-import de.caritas.cob.userservice.api.adapters.web.mapping.AdminAgencyDtoMapper;
-import de.caritas.cob.userservice.api.admin.facade.AdminAgencyFacade;
+import de.caritas.cob.userservice.api.adapters.web.mapping.AdminDtoMapper;
+import de.caritas.cob.userservice.api.admin.facade.AdminUserFacade;
+import de.caritas.cob.userservice.api.admin.facade.AskerUserAdminFacade;
 import de.caritas.cob.userservice.api.admin.facade.ConsultantAdminFacade;
-import de.caritas.cob.userservice.api.admin.facade.UserAdminFacade;
 import de.caritas.cob.userservice.api.admin.report.service.ViolationReportGenerator;
 import de.caritas.cob.userservice.api.admin.service.session.SessionAdminService;
 import de.caritas.cob.userservice.api.config.auth.RoleAuthorizationAuthorityMapper;
@@ -70,7 +70,11 @@ public class UserAdminControllerIT {
   protected static final String DELETE_CONSULTANT_AGENCY_PATH =
       ROOT_PATH + "/consultants/%s" + "/agencies/%s";
   protected static final String AGENCY_ADMIN_PATH = ROOT_PATH + "/agencyadmins/";
-  protected static final String SEARCH_AGENCY_ADMIN_PATH = AGENCY_ADMIN_PATH + "/search/";
+
+  protected static final String ADMIN_DATA_PATH = ROOT_PATH + "/data/";
+
+  protected static final String TENANT_ADMIN_PATH_WITHOUT_SLASH = ROOT_PATH + "/tenantadmins";
+  protected static final String TENANT_ADMIN_PATH = TENANT_ADMIN_PATH_WITHOUT_SLASH + "/";
   protected static final String DELETE_AGENCY_ADMIN_PATH = AGENCY_ADMIN_PATH + "%s";
   protected static final String AGENCIES_OF_ADMIN_PATH = ROOT_PATH + "/agencyadmins/%s/agencies";
   protected static final String DELETE_ADMIN_AGENCY_PATH = AGENCIES_OF_ADMIN_PATH + "/%s";
@@ -99,13 +103,13 @@ public class UserAdminControllerIT {
   @SuppressWarnings("unused")
   private RoleAuthorizationAuthorityMapper roleAuthorizationAuthorityMapper;
 
-  @MockBean private UserAdminFacade userAdminFacade;
+  @MockBean private AskerUserAdminFacade askerUserAdminFacade;
 
   @MockBean private AppointmentService appointmentService;
 
-  @MockBean private AdminAgencyFacade adminAgencyFacade;
+  @MockBean private AdminUserFacade adminUserFacade;
 
-  @MockBean private AdminAgencyDtoMapper adminAgencyDtoMapper;
+  @MockBean private AdminDtoMapper adminDtoMapper;
 
   @MockBean private AuthenticatedUser authenticatedUser;
 
@@ -340,7 +344,7 @@ public class UserAdminControllerIT {
         .perform(delete(DELETE_ASKER_PATH).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(this.userAdminFacade, times(1)).markAskerForDeletion("1234");
+    verify(this.askerUserAdminFacade, times(1)).markAskerForDeletion("1234");
   }
 
   @Test
@@ -370,7 +374,7 @@ public class UserAdminControllerIT {
         .andExpect(status().isOk());
 
     // then
-    verify(this.adminAgencyFacade, times(1)).findFilteredAdminsAgency(eq(0), eq(1), any(), any());
+    verify(this.adminUserFacade, times(1)).findFilteredAdminsAgency(eq(0), eq(1), any(), any());
   }
 
   @Test
@@ -382,7 +386,7 @@ public class UserAdminControllerIT {
     this.mvc.perform(get(AGENCY_ADMIN_PATH + adminId)).andExpect(status().isOk());
 
     // then
-    verify(this.adminAgencyFacade, times(1)).findAgencyAdmin(adminId);
+    verify(this.adminUserFacade, times(1)).findAgencyAdmin(adminId);
   }
 
   @Test
@@ -404,8 +408,7 @@ public class UserAdminControllerIT {
   public void createNewAdminAgency_Should_returnOk_When_requiredCreateAgencyAdminIsGiven()
       throws Exception {
     // given
-    CreateAgencyAdminDTO createAgencyAdminDTO =
-        new EasyRandom().nextObject(CreateAgencyAdminDTO.class);
+    CreateAdminDTO createAgencyAdminDTO = new EasyRandom().nextObject(CreateAdminDTO.class);
 
     // when
     this.mvc
@@ -416,7 +419,25 @@ public class UserAdminControllerIT {
         .andExpect(status().isOk());
 
     // then
-    verify(this.adminAgencyFacade, times(1)).createNewAdminAgency(any());
+    verify(this.adminUserFacade, times(1)).createNewAgencyAdmin(any());
+  }
+
+  @Test
+  public void createNewTenantAdmin_Should_returnOk_When_requiredCreateTenantAdminIsGiven()
+      throws Exception {
+    // given
+    CreateAdminDTO createAdminDTO = new EasyRandom().nextObject(CreateAdminDTO.class);
+
+    // when
+    this.mvc
+        .perform(
+            post(TENANT_ADMIN_PATH)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createAdminDTO)))
+        .andExpect(status().isOk());
+
+    // then
+    verify(this.adminUserFacade, times(1)).createNewTenantAdmin(any());
   }
 
   @Test
@@ -436,6 +457,7 @@ public class UserAdminControllerIT {
     // given
     UpdateAgencyAdminDTO updateAgencyAdminDTO =
         new EasyRandom().nextObject(UpdateAgencyAdminDTO.class);
+    updateAgencyAdminDTO.setEmail("test@test.com");
 
     // when
     this.mvc
@@ -446,7 +468,27 @@ public class UserAdminControllerIT {
         .andExpect(status().isOk());
 
     // then
-    verify(this.adminAgencyFacade, times(1)).updateAgencyAdmin(anyString(), any());
+    verify(this.adminUserFacade, times(1)).updateAgencyAdmin(anyString(), any());
+  }
+
+  @Test
+  public void updateTenantAdmin_Should_returnOk_When_requiredCreateTenantAdminIsGiven()
+      throws Exception {
+    // given
+    UpdateAgencyAdminDTO updateAgencyAdminDTO =
+        new EasyRandom().nextObject(UpdateAgencyAdminDTO.class);
+    updateAgencyAdminDTO.setEmail("test@test.com");
+
+    // when
+    this.mvc
+        .perform(
+            put(TENANT_ADMIN_PATH + "adminId")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateAgencyAdminDTO)))
+        .andExpect(status().isOk());
+
+    // then
+    verify(this.adminUserFacade, times(1)).updateTenantAdmin(anyString(), any());
   }
 
   @Test
@@ -480,7 +522,7 @@ public class UserAdminControllerIT {
         .andExpect(status().isCreated());
 
     // then
-    verify(this.adminAgencyFacade, times(1))
+    verify(this.adminUserFacade, times(1))
         .createNewAdminAgencyRelation(adminId, createAdminAgencyRelationDTO);
   }
 
@@ -498,7 +540,7 @@ public class UserAdminControllerIT {
         .andExpect(status().isOk());
 
     // then
-    verify(adminAgencyFacade).setAdminAgenciesRelation(any(), anyList());
+    verify(adminUserFacade).setAdminAgenciesRelation(any(), anyList());
   }
 
   @Test
@@ -515,7 +557,7 @@ public class UserAdminControllerIT {
         .andExpect(status().isOk());
 
     // then
-    verify(this.adminAgencyFacade, times(1)).deleteAdminAgencyRelation(adminId, agencyId);
+    verify(this.adminUserFacade, times(1)).deleteAdminAgencyRelation(adminId, agencyId);
   }
 
   @Test
@@ -531,7 +573,7 @@ public class UserAdminControllerIT {
         .andExpect(status().isOk());
 
     // then
-    verify(this.adminAgencyFacade, times(1)).deleteAgencyAdmin(adminId);
+    verify(this.adminUserFacade, times(1)).deleteAgencyAdmin(adminId);
   }
 
   private ArrayList<CreateConsultantAgencyDTO> givenAgenciesToSet() {

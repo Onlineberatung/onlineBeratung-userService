@@ -9,6 +9,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.mongodb.MongoClientException;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
@@ -76,17 +77,14 @@ public class RocketChatFacadeTest {
     this.rocketChatFacade.retrieveRocketChatMembers("group");
 
     verify(this.rocketChatService, times(1)).addTechnicalUserToGroup("group");
-    verify(this.rocketChatService, times(1)).getMembersOfGroup("group");
+    verify(this.rocketChatService, times(1)).getChatUsers("group");
     verify(this.rocketChatService, times(1)).leaveFromGroupAsTechnicalUser("group");
   }
 
   @Test(expected = InternalServerErrorException.class)
   public void
-      retrieveRocketChatMembers_Should_throwInternalServerErrorException_When_RocketChatGetGroupMembersException()
-          throws Exception {
-    doThrow(new RocketChatGetGroupMembersException(""))
-        .when(this.rocketChatService)
-        .getMembersOfGroup(anyString());
+      retrieveRocketChatMembers_Should_throwInternalServerErrorException_When_RocketChatGetGroupMembersException() {
+    doThrow(new MongoClientException("")).when(this.rocketChatService).getChatUsers(anyString());
 
     this.rocketChatFacade.retrieveRocketChatMembers("group");
   }

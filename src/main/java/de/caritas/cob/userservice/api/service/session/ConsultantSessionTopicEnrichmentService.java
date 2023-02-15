@@ -80,8 +80,8 @@ public class ConsultantSessionTopicEnrichmentService {
     }
   }
 
-  private SessionTopicDTO getTopicData(Map<Long, TopicDTO> availableTopics, Integer topicId) {
-    var topicData = availableTopics.get(Long.valueOf(topicId));
+  private SessionTopicDTO getTopicData(Map<Long, TopicDTO> availableTopics, Long topicId) {
+    var topicData = availableTopics.get(topicId);
     if (topicData != null) {
       return convertToSessionTopicDTO(topicData);
     } else {
@@ -92,14 +92,10 @@ public class ConsultantSessionTopicEnrichmentService {
 
   private SessionTopicDTO convertToSessionTopicDTO(TopicDTO source) {
     SessionTopicDTO sessionTopicDTO = new SessionTopicDTO();
-    sessionTopicDTO.setId(getIdAsInteger(source));
+    sessionTopicDTO.setId(source.getId());
     sessionTopicDTO.setDescription(source.getDescription());
     sessionTopicDTO.setName(source.getName());
     sessionTopicDTO.setStatus(source.getStatus());
     return sessionTopicDTO;
-  }
-
-  private Integer getIdAsInteger(TopicDTO source) {
-    return source.getId() != null ? source.getId().intValue() : null;
   }
 }

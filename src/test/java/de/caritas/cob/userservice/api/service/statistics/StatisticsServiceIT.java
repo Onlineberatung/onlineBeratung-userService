@@ -70,7 +70,8 @@ public class StatisticsServiceIT {
 
     assertThat(
         extractBodyFromAmpQMessage(message),
-        jsonEquals(expectedJson).whenIgnoringPaths("timestamp"));
+        jsonEquals(expectedJson)
+            .whenIgnoringPaths("timestamp", "requestReferer", "requestUri", "requestUserId"));
   }
 
   private String extractBodyFromAmpQMessage(Message message) throws IOException {

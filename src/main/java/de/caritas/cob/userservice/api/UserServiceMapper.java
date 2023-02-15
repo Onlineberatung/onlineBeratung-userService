@@ -267,6 +267,7 @@ public class UserServiceMapper {
     map.put("firstName", adminBase.getFirstName());
     map.put("lastName", adminBase.getLastName());
     map.put("username", fullAdmin.getUsername());
+    map.put("tenantId", fullAdmin.getTenantId());
     map.put(
         "createdAt",
         nonNull(fullAdmin.getCreateDate()) ? fullAdmin.getCreateDate().toString() : null);

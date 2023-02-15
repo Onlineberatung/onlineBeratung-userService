@@ -21,6 +21,7 @@ import de.caritas.cob.userservice.api.port.in.Organizing;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
+import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import de.caritas.cob.userservice.generated.api.adapters.web.controller.AppointmentsApi;
 import io.swagger.annotations.Api;
@@ -62,6 +63,8 @@ public class AppointmentController implements AppointmentsApi {
 
   private final @NotNull ConsultantRepository consultantRepository;
 
+  private final StatisticsService statisticsService;
+
   @Override
   public ResponseEntity<Appointment> getAppointment(UUID id) {
     var appointmentMap =
@@ -83,9 +86,14 @@ public class AppointmentController implements AppointmentsApi {
         organizer
             .findAppointment(id.toString())
             .orElseThrow(() -> new NotFoundException("Appointment (%s) not found.", id.toString()));
+
     var updatedAppointmentMap = mapper.mapOf(savedAppointmentMap, appointment);
     var savedMap = organizer.upsertAppointment(updatedAppointmentMap);
     var savedAppointment = mapper.appointmentOf(savedMap, true);
+
+    mapper
+        .eventOf(id, appointment.getStatus(), currentUser.getUserId())
+        .ifPresent(statisticsService::fireEvent);
 
     return ResponseEntity.ok(savedAppointment);
   }

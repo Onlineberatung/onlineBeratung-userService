@@ -112,7 +112,7 @@ public class UserDTO implements UserRegistrationDTO {
 
   @ApiModelProperty(required = false, example = "\"2\"", position = 13)
   @JsonProperty("mainTopicId")
-  private Integer mainTopicId;
+  private Long mainTopicId;
 
   @ApiModelProperty(required = false, example = "\"MALE\"", position = 14)
   @JsonProperty("gender")
@@ -120,7 +120,7 @@ public class UserDTO implements UserRegistrationDTO {
 
   @ApiModelProperty(required = false, example = "\"[1,5]\"")
   @JsonProperty("topicIds")
-  private Collection<Integer> topicIds = Lists.newArrayList();
+  private Collection<Long> topicIds = Lists.newArrayList();
 
   @ApiModelProperty(required = false, example = "\"RELATIVE_COUNSELLING\"")
   @JsonProperty("counsellingRelation")

@@ -87,6 +87,7 @@ public class CreateAdminAgencyRelationServiceIT {
 
   private Admin createAdminWithoutAgency() {
     Admin admin = easyRandom.nextObject(Admin.class);
+    admin.setType(Admin.AdminType.AGENCY);
     return this.adminRepository.save(admin);
   }
 }

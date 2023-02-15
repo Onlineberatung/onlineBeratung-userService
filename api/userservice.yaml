@@ -2189,6 +2189,7 @@ components:
       properties:
         id:
           type: integer
+          format: int64
           example: 12132
         name:
           type: string
@@ -2951,6 +2952,7 @@ components:
           type: array
           items:
             type: integer
+            format: int64
           example: [ 12,15 ]
         counsellingRelation:
           type: string

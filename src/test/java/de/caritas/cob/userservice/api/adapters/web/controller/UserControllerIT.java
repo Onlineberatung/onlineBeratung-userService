@@ -162,7 +162,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.validation.MandatoryFieldsProvider;
 import de.caritas.cob.userservice.api.adapters.web.mapping.ConsultantDtoMapper;
 import de.caritas.cob.userservice.api.adapters.web.mapping.UserDtoMapper;
-import de.caritas.cob.userservice.api.admin.facade.AdminAgencyFacade;
+import de.caritas.cob.userservice.api.admin.facade.AdminUserFacade;
 import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
 import de.caritas.cob.userservice.api.config.auth.Authority;
@@ -533,7 +533,7 @@ public class UserControllerIT {
   @SuppressWarnings("unused")
   private VideoChatConfig videoChatConfig;
 
-  @MockBean private AdminAgencyFacade adminAgencyFacade;
+  @MockBean private AdminUserFacade adminUserFacade;
 
   @Mock private Logger logger;
 
@@ -1397,6 +1397,35 @@ public class UserControllerIT {
   @Test
   public void getUserData_ForTenantSuperAdmin_Should_ReturnUserDataFromKeycloak() throws Exception {
     when(authenticatedUser.isTenantSuperAdmin()).thenReturn(true);
+    when(keycloakUserDataProvider.retrieveAuthenticatedUserData())
+        .thenReturn(new UserDataResponseDTO());
+
+    mvc.perform(
+            get(PATH_USER_DATA)
+                .contentType(MediaType.APPLICATION_JSON)
+                .cookie(RC_TOKEN_COOKIE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().is(HttpStatus.OK.value()));
+  }
+
+  @Test
+  public void getUserData_ForAgencySuperAdmin_Should_ReturnUserDataFromKeycloak() throws Exception {
+    when(authenticatedUser.isAgencySuperAdmin()).thenReturn(true);
+    when(keycloakUserDataProvider.retrieveAuthenticatedUserData())
+        .thenReturn(new UserDataResponseDTO());
+
+    mvc.perform(
+            get(PATH_USER_DATA)
+                .contentType(MediaType.APPLICATION_JSON)
+                .cookie(RC_TOKEN_COOKIE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().is(HttpStatus.OK.value()));
+  }
+
+  @Test
+  public void getUserData_ForRestrictedAgencyAdmin_Should_ReturnUserDataFromKeycloak()
+      throws Exception {
+    when(authenticatedUser.isRestrictedAgencyAdmin()).thenReturn(true);
     when(keycloakUserDataProvider.retrieveAuthenticatedUserData())
         .thenReturn(new UserDataResponseDTO());
 
@@ -2530,7 +2559,7 @@ public class UserControllerIT {
     verify(consultantUpdateService).updateConsultant(any(), captor.capture());
 
     var updateAdminConsultantDTO = captor.getValue();
-    assertEquals(updateConsultantDTO.getEmail(), updateAdminConsultantDTO.getEmail());
+    assertEquals(updateConsultantDTO.getEmail().toLowerCase(), updateAdminConsultantDTO.getEmail());
     assertEquals(updateConsultantDTO.getFirstname(), updateAdminConsultantDTO.getFirstname());
     assertEquals(updateConsultantDTO.getLastname(), updateAdminConsultantDTO.getLastname());
     assertEquals(consultant.isAbsent(), updateAdminConsultantDTO.getAbsent());
