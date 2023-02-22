@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation;
 
-import static de.caritas.cob.userservice.api.testHelper.AsyncVerification.verifyAsync;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
@@ -8,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -130,8 +128,7 @@ public class ConsultantAgencyRelationCreatorServiceTenantAwareIT {
 
     verify(rocketChatFacade, timeout(10000))
         .addUserToRocketChatGroup(
-            consultant.getRocketChatId(),
-            enquirySessionWithoutConsultant.getFeedbackGroupId());
+            consultant.getRocketChatId(), enquirySessionWithoutConsultant.getFeedbackGroupId());
 
     List<ConsultantAgency> result =
         this.consultantAgencyRepository.findByConsultantIdAndDeleteDateIsNull(consultant.getId());
