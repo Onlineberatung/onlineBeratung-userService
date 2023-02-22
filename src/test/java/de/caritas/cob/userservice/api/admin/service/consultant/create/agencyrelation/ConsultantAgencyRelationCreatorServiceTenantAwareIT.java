@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -123,17 +124,15 @@ public class ConsultantAgencyRelationCreatorServiceTenantAwareIT {
     this.consultantAgencyRelationCreatorService.createNewConsultantAgency(
         consultant.getId(), createConsultantAgencyDTO);
 
-    verifyAsync(
-        (a) ->
-            verify(rocketChatFacade, times(1))
-                .addUserToRocketChatGroup(
-                    consultant.getRocketChatId(), enquirySessionWithoutConsultant.getGroupId()));
-    verifyAsync(
-        (a) ->
-            verify(rocketChatFacade, times(1))
-                .addUserToRocketChatGroup(
-                    consultant.getRocketChatId(),
-                    enquirySessionWithoutConsultant.getFeedbackGroupId()));
+    verify(rocketChatFacade, timeout(10000))
+        .addUserToRocketChatGroup(
+            consultant.getRocketChatId(), enquirySessionWithoutConsultant.getGroupId());
+
+    verify(rocketChatFacade, timeout(10000))
+        .addUserToRocketChatGroup(
+            consultant.getRocketChatId(),
+            enquirySessionWithoutConsultant.getFeedbackGroupId());
+
     List<ConsultantAgency> result =
         this.consultantAgencyRepository.findByConsultantIdAndDeleteDateIsNull(consultant.getId());
 
