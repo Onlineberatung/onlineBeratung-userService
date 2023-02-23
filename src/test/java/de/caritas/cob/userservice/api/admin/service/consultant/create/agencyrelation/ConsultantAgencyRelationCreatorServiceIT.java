@@ -10,6 +10,7 @@ import static org.hibernate.search.util.impl.CollectionHelper.asSet;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -160,18 +161,13 @@ public class ConsultantAgencyRelationCreatorServiceIT {
     this.consultantAgencyRelationCreatorService.createNewConsultantAgency(
         consultant.getId(), createConsultantAgencyDTO);
 
-    verifyAsync(
-        (a) ->
-            verify(rocketChatFacade, times(1))
-                .addUserToRocketChatGroup(
-                    consultant.getRocketChatId(), enquirySessionWithoutConsultant.getGroupId()));
+    verify(rocketChatFacade, timeout(10000))
+        .addUserToRocketChatGroup(
+            consultant.getRocketChatId(), enquirySessionWithoutConsultant.getGroupId());
 
-    verifyAsync(
-        (a) ->
-            verify(rocketChatFacade, times(1))
-                .addUserToRocketChatGroup(
-                    consultant.getRocketChatId(),
-                    enquirySessionWithoutConsultant.getFeedbackGroupId()));
+    verify(rocketChatFacade, timeout(10000))
+        .addUserToRocketChatGroup(
+            consultant.getRocketChatId(), enquirySessionWithoutConsultant.getFeedbackGroupId());
 
     List<ConsultantAgency> result =
         this.consultantAgencyRepository.findByConsultantIdAndDeleteDateIsNull(consultant.getId());
