@@ -2765,7 +2765,9 @@ components:
           type: integer
           format: int64
           example: 12
-
+        hasVideoCalls:
+          type: boolean
+          nullable: false
 
     MobileTokenDTO:
       type: object

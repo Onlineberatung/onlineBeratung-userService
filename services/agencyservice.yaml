@@ -165,6 +165,9 @@ components:
           type: integer
           format: int64
           example: 12
+        hasVideoCalls:
+          type: boolean
+          nullable: false
 
     FullAgencyResponseDTO:
       type: object
