@@ -234,9 +234,8 @@ public class MessageServiceProviderTest {
   }
 
   @Test
-  public void
-      postFurtherStepsIfConfigured_Should_SaveFurtherStepsMessage_When_Configured()
-          throws RocketChatPostFurtherStepsMessageException {
+  public void postFurtherStepsIfConfigured_Should_SaveFurtherStepsMessage_When_Configured()
+      throws RocketChatPostFurtherStepsMessageException {
     CreateEnquiryExceptionInformation exceptionInformation =
         mock(CreateEnquiryExceptionInformation.class);
     HttpHeaders headers = mock(HttpHeaders.class);
