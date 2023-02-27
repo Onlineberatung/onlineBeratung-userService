@@ -45,7 +45,7 @@ public class LogstashAppender<T extends DeferredProcessingAware>
 
   private boolean isLogstashEnvVariableSet() {
     this.logstashHost = getLogstashHost();
-    System.out.println("the logstash host is about to be set!")
+    System.out.println("the logstash host is about to be set!");
     if (logstashHost == null) {
       logToStandardError(
           "Logstash env variable (LOGSTASH_HOST) not set, skipping logging to logstash");
