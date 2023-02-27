@@ -412,7 +412,6 @@ public class EmailNotificationFacadeTest {
               .welcomeMessage(
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
-              .sendSaveSessionDataMessage(false)
               .sessionDataInitializing(null)
               .monitoring(
                   new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
@@ -432,7 +431,6 @@ public class EmailNotificationFacadeTest {
               .welcomeMessage(
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
-              .sendSaveSessionDataMessage(false)
               .sessionDataInitializing(null)
               .monitoring(
                   new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))

@@ -1772,7 +1772,6 @@ public class TestConstants {
           .welcomeMessage(
               new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
           .sendFurtherStepsMessage(false)
-          .sendSaveSessionDataMessage(false)
           .sessionDataInitializing(null)
           .monitoring(new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
           .initializeFeedbackChat(false)
@@ -1800,7 +1799,6 @@ public class TestConstants {
               .welcomeMessage(
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
-              .sendSaveSessionDataMessage(false)
               .sessionDataInitializing(null)
               .monitoring(
                   new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
@@ -1820,7 +1818,6 @@ public class TestConstants {
               .welcomeMessage(
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
-              .sendSaveSessionDataMessage(false)
               .sessionDataInitializing(null)
               .monitoring(
                   new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
@@ -1848,7 +1845,6 @@ public class TestConstants {
               .welcomeMessage(
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
-              .sendSaveSessionDataMessage(false)
               .sessionDataInitializing(null)
               .monitoring(
                   new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
@@ -1868,7 +1864,6 @@ public class TestConstants {
               .welcomeMessage(
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
-              .sendSaveSessionDataMessage(false)
               .sessionDataInitializing(null)
               .monitoring(
                   new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
@@ -1906,7 +1901,6 @@ public class TestConstants {
               .welcomeMessage(
                   new WelcomeMessageDTO().sendWelcomeMessage(true).welcomeMessageText("Hallo"))
               .sendFurtherStepsMessage(false)
-              .sendSaveSessionDataMessage(false)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING)
               .monitoring(
                   new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
@@ -1926,7 +1920,6 @@ public class TestConstants {
               .welcomeMessage(
                   new WelcomeMessageDTO().sendWelcomeMessage(true).welcomeMessageText("Hallo"))
               .sendFurtherStepsMessage(false)
-              .sendSaveSessionDataMessage(false)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING)
               .monitoring(
                   new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
@@ -1946,7 +1939,6 @@ public class TestConstants {
           .welcomeMessage(
               new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
           .sendFurtherStepsMessage(false)
-          .sendSaveSessionDataMessage(false)
           .sessionDataInitializing(SESSION_DATA_INITIALIZING)
           .monitoring(
               new MonitoringDTO()
@@ -1967,7 +1959,6 @@ public class TestConstants {
           .welcomeMessage(
               new WelcomeMessageDTO().sendWelcomeMessage(true).welcomeMessageText("Hallo"))
           .sendFurtherStepsMessage(false)
-          .sendSaveSessionDataMessage(false)
           .sessionDataInitializing(SESSION_DATA_INITIALIZING)
           .monitoring(
               new MonitoringDTO()
@@ -1989,7 +1980,6 @@ public class TestConstants {
               .welcomeMessage(
                   new WelcomeMessageDTO().sendWelcomeMessage(true).welcomeMessageText("Hallo"))
               .sendFurtherStepsMessage(false)
-              .sendSaveSessionDataMessage(false)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING)
               .monitoring(
                   new MonitoringDTO()
@@ -2011,7 +2001,6 @@ public class TestConstants {
               .welcomeMessage(
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
-              .sendSaveSessionDataMessage(false)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING)
               .monitoring(
                   new MonitoringDTO()
@@ -2033,7 +2022,6 @@ public class TestConstants {
               .welcomeMessage(
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
-              .sendSaveSessionDataMessage(false)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING)
               .monitoring(
                   new MonitoringDTO()
@@ -2055,7 +2043,6 @@ public class TestConstants {
               .welcomeMessage(
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(true)
-              .sendSaveSessionDataMessage(false)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING)
               .monitoring(
                   new MonitoringDTO()
@@ -2077,7 +2064,6 @@ public class TestConstants {
               .welcomeMessage(
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
-              .sendSaveSessionDataMessage(true)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING)
               .monitoring(
                   new MonitoringDTO()
@@ -2099,7 +2085,6 @@ public class TestConstants {
               .welcomeMessage(
                   new WelcomeMessageDTO().sendWelcomeMessage(true).welcomeMessageText("Hallo"))
               .sendFurtherStepsMessage(false)
-              .sendSaveSessionDataMessage(false)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING)
               .monitoring(
                   new MonitoringDTO()
@@ -2120,7 +2105,6 @@ public class TestConstants {
           .welcomeMessage(
               new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
           .sendFurtherStepsMessage(false)
-          .sendSaveSessionDataMessage(false)
           .sessionDataInitializing(SESSION_DATA_INITIALIZING)
           .monitoring(new MonitoringDTO().initializeMonitoring(false).monitoringTemplateFile(null))
           .initializeFeedbackChat(false)
@@ -2138,7 +2122,6 @@ public class TestConstants {
           .welcomeMessage(
               new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
           .sendFurtherStepsMessage(false)
-          .sendSaveSessionDataMessage(false)
           .sessionDataInitializing(SESSION_DATA_INITIALIZING)
           .monitoring(new MonitoringDTO().initializeMonitoring(false).monitoringTemplateFile(null))
           .initializeFeedbackChat(false)
@@ -2156,7 +2139,6 @@ public class TestConstants {
           .welcomeMessage(
               new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
           .sendFurtherStepsMessage(false)
-          .sendSaveSessionDataMessage(false)
           .sessionDataInitializing(null)
           .monitoring(new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
           .initializeFeedbackChat(false)
@@ -2174,7 +2156,6 @@ public class TestConstants {
           .welcomeMessage(
               new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
           .sendFurtherStepsMessage(false)
-          .sendSaveSessionDataMessage(false)
           .sessionDataInitializing(null)
           .monitoring(
               new MonitoringDTO().initializeMonitoring(IS_MONITORING).monitoringTemplateFile(null))
@@ -2194,7 +2175,6 @@ public class TestConstants {
               .welcomeMessage(
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
-              .sendSaveSessionDataMessage(false)
               .sessionDataInitializing(null)
               .monitoring(
                   new MonitoringDTO()
