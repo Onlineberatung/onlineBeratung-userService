@@ -87,4 +87,6 @@ public class UserDataResponseDTO {
   private LocalDateTime dataPrivacyConfirmation;
 
   private Boolean available;
+
+  private EmailNotificationsDTO emailNotificationsDTO;
 }

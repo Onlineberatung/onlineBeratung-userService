@@ -2634,6 +2634,9 @@ components:
           type: string
           example: 2022-12-07T11:51:01
           description: "Datetime stamp when the user accepted data privacy"
+        emailNotifications:
+          $ref: "#/components/schemas/EmailNotificationsDTO"
+
     PatchUserDTO:
       type: object
       description: at least one property must be set
@@ -3077,6 +3080,38 @@ components:
           default: true
           nullable: false
           description: indicates if 2FA is supposed to be encouraged
+
+    EmailNotificationsDTO:
+      type: object
+      required:
+        - emailNotificationsEnabled
+      properties:
+        emailNotificationsEnabled:
+          type: boolean
+          example: true
+          default: false
+        settings:
+           $ref: "#/components/schemas/NotificationsSettingsDTO"
+
+    NotificationsSettingsDTO:
+      type: object
+      properties:
+        initialEnquiryNotificationEnabled:
+          type: boolean
+          example: true
+          default: false
+        newChatMessageNotificiationEnabled:
+          type: boolean
+          example: true
+          default: false
+        reassignmentNotificiationEnabled:
+          type: boolean
+          example: true
+          default: false
+        appointmentNotificiationEnabled:
+          type: boolean
+          example: true
+          default: false
 
     OtpType:
       type: string

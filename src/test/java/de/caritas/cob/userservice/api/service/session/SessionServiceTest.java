@@ -127,6 +127,8 @@ class SessionServiceTest {
           false,
           LanguageCode.de,
           null,
+          null,
+          false,
           null);
   private final User USER = new User(USER_ID, null, "username", "name@domain.de", false);
   private final Session SESSION = TestConstants.SESSION;
@@ -922,6 +924,8 @@ class SessionServiceTest {
         false,
         LanguageCode.de,
         null,
+        null,
+        false,
         null);
   }
 }
