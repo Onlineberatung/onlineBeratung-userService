@@ -123,14 +123,13 @@ public class MessageServiceProvider {
   }
 
   /**
-   * Posts an alias only message and/or save session data message as system user in the provided
-   * Rocket.Chat group ID.
+   * Posts an alias only message as system user in the provided Rocket.Chat group ID.
    *
    * @param rcGroupId Rocket.Chat group ID
    * @param extendedConsultingTypeResponseDTO {@link ExtendedConsultingTypeResponseDTO}
    * @param exceptionInformation {@link CreateEnquiryExceptionInformation}
    */
-  public void postFurtherStepsOrSaveSessionDataMessageIfConfigured(
+  public void postFurtherStepsIfConfigured(
       String rcGroupId,
       ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO,
       CreateEnquiryExceptionInformation exceptionInformation)
@@ -138,10 +137,6 @@ public class MessageServiceProvider {
 
     if (isTrue(extendedConsultingTypeResponseDTO.getSendFurtherStepsMessage())) {
       this.postAliasOnlyMessage(rcGroupId, MessageType.FURTHER_STEPS, exceptionInformation);
-    }
-
-    if (isTrue(extendedConsultingTypeResponseDTO.getSendSaveSessionDataMessage())) {
-      this.postAliasOnlyMessage(rcGroupId, MessageType.UPDATE_SESSION_DATA, exceptionInformation);
     }
   }
 
