@@ -36,7 +36,7 @@ class EmailNotificationMapperTest {
     Mockito.when(notificationsAware.isNotificationEnabled()).thenReturn(true);
     Mockito.when(notificationsAware.getNotificationSettings())
         .thenReturn(
-            "{'initialEnquiryNotificationEnabled': 'true','newChatMessageNotificiationEnabled': 'true', 'reassignmentNotificiationEnabled': 'true','appointmentNotificiationEnabled': 'true'}");
+            "{'initialEnquiryNotificationEnabled': 'true','newChatMessageNotificationEnabled': 'true', 'reassignmentNotificationEnabled': 'true','appointmentNotificationEnabled': 'true'}");
 
     EmailNotificationsDTO emailNotificationsDTO =
         emailNotificationMapper.toEmailNotificationsDTO(notificationsAware);
