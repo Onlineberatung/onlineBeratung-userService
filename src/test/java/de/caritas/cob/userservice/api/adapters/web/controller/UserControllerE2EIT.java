@@ -757,7 +757,16 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("emailToggles[0].state", is(true)))
         .andExpect(jsonPath("emailToggles[1].state", is(true)))
         .andExpect(jsonPath("emailToggles[2].state", is(true)))
-        .andExpect(jsonPath("inTeamAgency", is(consultant.isTeamConsultant())));
+        .andExpect(jsonPath("inTeamAgency", is(consultant.isTeamConsultant())))
+        .andExpect(jsonPath("emailNotifications.emailNotificationsEnabled", is(true)))
+        .andExpect(jsonPath("emailNotifications.settings", is(notNullValue())))
+        .andExpect(
+            jsonPath("emailNotifications.settings.initialEnquiryNotificationEnabled", is(true)))
+        .andExpect(
+            jsonPath("emailNotifications.settings.newChatMessageNotificationEnabled", is(true)))
+        .andExpect(jsonPath("emailNotifications.settings.appointmentNotificationEnabled", is(true)))
+        .andExpect(
+            jsonPath("emailNotifications.settings.reassignmentNotificationEnabled", is(true)));
   }
 
   @Test
@@ -806,7 +815,17 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("preferredLanguage", is(user.getLanguageCode().toString())))
         .andExpect(jsonPath("e2eEncryptionEnabled", is(false)))
         .andExpect(jsonPath("emailToggles", is(nullValue())))
-        .andExpect(jsonPath("inTeamAgency", is(false)));
+        .andExpect(jsonPath("inTeamAgency", is(false)))
+        .andExpect(jsonPath("emailNotifications.emailNotificationsEnabled", is(false)))
+        .andExpect(jsonPath("emailNotifications.settings", is(notNullValue())))
+        .andExpect(
+            jsonPath("emailNotifications.settings.initialEnquiryNotificationEnabled", is(false)))
+        .andExpect(
+            jsonPath("emailNotifications.settings.newChatMessageNotificationEnabled", is(false)))
+        .andExpect(
+            jsonPath("emailNotifications.settings.appointmentNotificationEnabled", is(false)))
+        .andExpect(
+            jsonPath("emailNotifications.settings.reassignmentNotificationEnabled", is(false)));
   }
 
   @Test

@@ -43,9 +43,8 @@ class EmailNotificationMapperTest {
 
     assertThat(emailNotificationsDTO.getEmailNotificationsEnabled()).isTrue();
     assertThat(emailNotificationsDTO.getSettings().getInitialEnquiryNotificationEnabled()).isTrue();
-    assertThat(emailNotificationsDTO.getSettings().getNewChatMessageNotificiationEnabled())
-        .isTrue();
-    assertThat(emailNotificationsDTO.getSettings().getAppointmentNotificiationEnabled()).isTrue();
-    assertThat(emailNotificationsDTO.getSettings().getReassignmentNotificiationEnabled()).isTrue();
+    assertThat(emailNotificationsDTO.getSettings().getNewChatMessageNotificationEnabled()).isTrue();
+    assertThat(emailNotificationsDTO.getSettings().getAppointmentNotificationEnabled()).isTrue();
+    assertThat(emailNotificationsDTO.getSettings().getReassignmentNotificationEnabled()).isTrue();
   }
 }

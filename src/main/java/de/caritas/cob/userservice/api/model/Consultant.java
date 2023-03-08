@@ -203,7 +203,7 @@ public class Consultant implements TenantAware, NotificationsAware {
   @Column(name = "notifications_enabled", columnDefinition = "tinyint", nullable = false)
   private boolean notificationEnabled;
 
-  @Column(name = "notification_settings")
+  @Column(name = "notifications_settings")
   private String notificationSettings;
 
   @JsonIgnore

@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class NotificationSettings {
 
   boolean initialEnquiryNotificationEnabled;
-  boolean newChatMessageNotificiationEnabled;
-  boolean reassignmentNotificiationEnabled;
-  boolean appointmentNotificiationEnabled;
+  boolean newChatMessageNotificationEnabled;
+  boolean reassignmentNotificationEnabled;
+  boolean appointmentNotificationEnabled;
 }

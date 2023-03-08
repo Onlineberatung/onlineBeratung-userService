@@ -83,7 +83,7 @@ public class ConsultantDataProvider {
         .hasArchive(hasArchive(consultant))
         .dataPrivacyConfirmation(consultant.getDataPrivacyConfirmation())
         .termsAndConditionsConfirmation(consultant.getTermsAndConditionsConfirmation())
-        .emailNotificationsDTO(emailNotificationMapper.toEmailNotificationsDTO(consultant))
+        .emailNotifications(emailNotificationMapper.toEmailNotificationsDTO(consultant))
         .build();
   }
 

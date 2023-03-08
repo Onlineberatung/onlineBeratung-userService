@@ -5,7 +5,9 @@ import static de.caritas.cob.userservice.api.helper.json.JsonDeserializer.deseri
 import de.caritas.cob.userservice.api.adapters.web.dto.EmailNotificationsDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.NotificationsSettingsDTO;
 import de.caritas.cob.userservice.api.model.NotificationsAware;
+import org.springframework.stereotype.Component;
 
+@Component
 public class EmailNotificationMapper {
 
   EmailNotificationsDTO toEmailNotificationsDTO(NotificationsAware notificationsAware) {

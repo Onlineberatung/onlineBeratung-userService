@@ -88,5 +88,5 @@ public class UserDataResponseDTO {
 
   private Boolean available;
 
-  private EmailNotificationsDTO emailNotificationsDTO;
+  private EmailNotificationsDTO emailNotifications;
 }
