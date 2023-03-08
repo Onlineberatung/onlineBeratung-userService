@@ -9,8 +9,7 @@ import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
 
 public class JsonDeserializer {
 
-  private JsonDeserializer() {
-  }
+  private JsonDeserializer() {}
 
   public static <T> T deserializeFromJsonString(String jsonString, Class<T> clazz) {
     try {

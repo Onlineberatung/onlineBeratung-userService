@@ -655,8 +655,7 @@ class SessionServiceTest {
     session.setConsultant(CONSULTANT_WITH_AGENCY_2);
     session.setUser(USER_WITH_RC_ID);
     session.setTeamSession(true);
-    session.setAgencyId(
-        AGENCY_3);
+    session.setAgencyId(AGENCY_3);
     Long sessionId = session.getId();
     when(sessionRepository.findById(sessionId)).thenReturn(Optional.of(session));
 
