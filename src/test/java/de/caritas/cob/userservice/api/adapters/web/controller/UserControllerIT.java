@@ -223,6 +223,7 @@ import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.archive.SessionArchiveService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
+import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.api.workflow.delete.action.asker.DeleteSingleRoomAndSessionAction;
 import de.caritas.cob.userservice.api.workflow.delete.model.SessionDeletionWorkflowDTO;
 import java.util.ArrayList;
@@ -551,6 +552,7 @@ public class UserControllerIT {
     setInternalState(UserController.class, "log", logger);
     setInternalState(LogService.class, "LOGGER", logger);
     setInternalState(ApiResponseEntityExceptionHandler.class, "log", logger);
+    TenantContext.clear();
   }
 
   /** Method: registerUser */

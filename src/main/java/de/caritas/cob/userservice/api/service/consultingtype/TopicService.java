@@ -19,6 +19,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -39,9 +40,17 @@ public class TopicService {
   }
 
   public List<TopicDTO> getAllActiveTopics() {
-    log.info("Calling topic service to get all active topics");
     // Public endpoints needs to be called without Authentication header as not to cause a 401 error
-    return topicServiceApiControllerFactory.createControllerApi().getAllActiveTopics();
+    TopicControllerApi controllerApi = topicServiceApiControllerFactory.createControllerApi();
+    addTenantHeaders(controllerApi.getApiClient());
+    log.info("Calling topic service to get all active topics");
+    return controllerApi.getAllActiveTopics();
+  }
+
+  private void addTenantHeaders(ApiClient apiClient) {
+    var headers = new HttpHeaders();
+    tenantHeaderSupplier.addTenantHeader(headers);
+    headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
   }
 
   private void addDefaultHeaders(ApiClient apiClient) {
