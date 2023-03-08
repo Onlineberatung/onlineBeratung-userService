@@ -1,8 +1,6 @@
 package de.caritas.cob.userservice.api.port.out;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -51,12 +49,12 @@ class UserRepositoryIT {
     List<User> result =
         userRepository.findAllByDeleteDateNullAndNoRunningSessionsAndCreateDateOlderThan(dateCheck);
 
-    assertThat(result, notNullValue());
-    assertThat(result.size(), is(2));
-    assertThat(
-        result.stream().map(User::getUserId).anyMatch(USER_ID_SHOULD_IN_LIST_1::equals), is(true));
-    assertThat(
-        result.stream().map(User::getUserId).anyMatch(USER_ID_SHOULD_IN_LIST_2::equals), is(true));
+    assertThat(result).isNotNull();
+    assertThat(result).hasSize(2);
+    assertThat(result.stream().map(User::getUserId).anyMatch(USER_ID_SHOULD_IN_LIST_1::equals))
+        .isTrue();
+    assertThat(result.stream().map(User::getUserId).anyMatch(USER_ID_SHOULD_IN_LIST_2::equals))
+        .isTrue();
   }
 
   @Test
@@ -70,6 +68,12 @@ class UserRepositoryIT {
 
     assertNotNull(users);
     assertEquals(12, users.size());
+    users.stream().forEach(this::assertThatHasNotificationSettings);
+  }
+
+  private void assertThatHasNotificationSettings(User user) {
+    assertThat(user.isNotificationEnabled());
+    assertThat(user.getNotificationSettings()).isNull();
   }
 
   @Test

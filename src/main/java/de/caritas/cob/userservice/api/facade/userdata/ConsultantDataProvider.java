@@ -37,6 +37,8 @@ public class ConsultantDataProvider {
   private final @NonNull ConsultingTypeManager consultingTypeManager;
   private final @NonNull SessionRepository sessionRepository;
 
+  private final @NonNull EmailNotificationMapper emailNotificationMapper;
+
   /**
    * Retrieve the user data of a consultant, e.g. agencies, absence-state, username, name, ...
    *
@@ -81,6 +83,7 @@ public class ConsultantDataProvider {
         .hasArchive(hasArchive(consultant))
         .dataPrivacyConfirmation(consultant.getDataPrivacyConfirmation())
         .termsAndConditionsConfirmation(consultant.getTermsAndConditionsConfirmation())
+        .emailNotifications(emailNotificationMapper.toEmailNotificationsDTO(consultant))
         .build();
   }
 

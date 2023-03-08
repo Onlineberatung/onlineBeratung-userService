@@ -59,6 +59,8 @@ public class AskerDataProviderTest {
 
   @Mock IdentityClientConfig identityClientConfig;
 
+  @Mock EmailNotificationMapper emailNotificationMapper;
+
   @Test
   public void
       retrieveData_Should_ReturnUserDataWithAgency_When_ProvidedWithUserWithAgencyInSession() {
