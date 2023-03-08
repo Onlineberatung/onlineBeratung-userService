@@ -313,6 +313,8 @@ public class CreateEnquiryMessageFacadeTest {
             true,
             LanguageCode.de,
             null,
+            null,
+            false,
             null);
     this.extendedConsultingTypeResponseDTO = new ExtendedConsultingTypeResponseDTO();
     this.extendedConsultingTypeResponseDTO.setWelcomeMessage(new WelcomeMessageDTO());
