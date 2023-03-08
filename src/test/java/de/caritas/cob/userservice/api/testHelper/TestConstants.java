@@ -470,6 +470,8 @@ public class TestConstants {
           false,
           LanguageCode.de,
           null,
+          null,
+          false,
           null);
   public static final Consultant CONSULTANT_2 =
       new Consultant(
@@ -501,6 +503,8 @@ public class TestConstants {
           false,
           LanguageCode.de,
           null,
+          null,
+          false,
           null);
   public static final Consultant MAIN_CONSULTANT =
       new Consultant(
@@ -532,6 +536,8 @@ public class TestConstants {
           false,
           LanguageCode.de,
           null,
+          null,
+          false,
           null);
   public static final SessionConsultantForUserDTO CONSULTANT_DTO =
       new SessionConsultantForUserDTO();
@@ -570,6 +576,8 @@ public class TestConstants {
           null,
           LanguageCode.de,
           null,
+          null,
+          false,
           null);
   public static final User USER_NO_RC_USER_ID =
       new User(
@@ -590,6 +598,8 @@ public class TestConstants {
           null,
           LanguageCode.de,
           null,
+          null,
+          false,
           null);
   public static final User USER_NO_RC_USER_ID_2 =
       new User(
@@ -610,6 +620,8 @@ public class TestConstants {
           null,
           LanguageCode.de,
           null,
+          null,
+          false,
           null);
   public static final String ACCESS_TOKEN = "DASDLAJS835u83hKSAJDF";
   public static final AuthenticatedUser AUTHENTICATED_USER =
@@ -754,6 +766,8 @@ public class TestConstants {
           false,
           LanguageCode.de,
           null,
+          null,
+          false,
           null);
   public static final Consultant CONSULTANT_WITH_AGENCY_2 =
       new Consultant(
@@ -785,6 +799,8 @@ public class TestConstants {
           false,
           LanguageCode.de,
           null,
+          null,
+          false,
           null);
   /** UserAgency */
   public static final UserAgency USER_AGENCY = new UserAgency(USER, AGENCY_ID);
@@ -1028,6 +1044,8 @@ public class TestConstants {
           null,
           LanguageCode.de,
           null,
+          null,
+          false,
           null);
 
   public static final SessionDTO SESSION_DTO_SUCHT =

@@ -37,6 +37,8 @@ public class AskerDataProvider {
   private final @NonNull ConsultingTypeManager consultingTypeManager;
   private final @NonNull IdentityClientConfig identityClientConfig;
 
+  private final @NonNull EmailNotificationMapper emailNotificationMapper;
+
   /**
    * Retrieve the user data of an asker, e.g. username, email, name, ...
    *
@@ -60,6 +62,7 @@ public class AskerDataProvider {
         .hasArchive(false)
         .dataPrivacyConfirmation(user.getDataPrivacyConfirmation())
         .termsAndConditionsConfirmation(user.getTermsAndConditionsConfirmation())
+        .emailNotifications(emailNotificationMapper.toEmailNotificationsDTO(user))
         .build();
   }
 

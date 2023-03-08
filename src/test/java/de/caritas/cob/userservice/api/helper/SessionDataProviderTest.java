@@ -93,6 +93,8 @@ public class SessionDataProviderTest {
           false,
           LanguageCode.de,
           null,
+          null,
+          false,
           null);
   private final Session INITIALIZED_SESSION_SUCHT =
       Session.builder()
