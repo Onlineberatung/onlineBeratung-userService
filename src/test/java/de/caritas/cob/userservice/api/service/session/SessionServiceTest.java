@@ -97,6 +97,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 @ExtendWith(MockitoExtension.class)
 class SessionServiceTest {
 
+  public static final long AGENCY_3 = 3L;
   private final Consultant CONSULTANT =
       new Consultant(
           CONSULTANT_ID,
@@ -653,8 +654,9 @@ class SessionServiceTest {
     Session session = easyRandom.nextObject(Session.class);
     session.setConsultant(CONSULTANT_WITH_AGENCY_2);
     session.setUser(USER_WITH_RC_ID);
+    session.setTeamSession(true);
     session.setAgencyId(
-        CONSULTANT_WITH_AGENCY_2.getConsultantAgencies().iterator().next().getAgencyId());
+        AGENCY_3);
     Long sessionId = session.getId();
     when(sessionRepository.findById(sessionId)).thenReturn(Optional.of(session));
 
