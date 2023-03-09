@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.admin.service.consultant.create;
 
 import static de.caritas.cob.userservice.api.config.auth.UserRole.CONSULTANT;
 import static de.caritas.cob.userservice.api.config.auth.UserRole.GROUP_CHAT_CONSULTANT;
+import static de.caritas.cob.userservice.api.helper.json.JsonSerializationUtils.serializeToJsonString;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
@@ -10,6 +11,7 @@ import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.NotificationsSettingsDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.CreateConsultantDTOAbsenceInputAdapter;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
@@ -141,6 +143,8 @@ public class ConsultantCreatorService {
       ConsultantCreationInput consultantCreationInput,
       String keycloakUserId,
       String rocketChatUserId) {
+
+    allActiveNotifications();
     return Consultant.builder()
         .id(keycloakUserId)
         .idOld(consultantCreationInput.getIdOld())
@@ -164,7 +168,18 @@ public class ConsultantCreatorService {
         .status(ConsultantStatus.IN_PROGRESS)
         .walkThroughEnabled(true)
         .languageCode(LanguageCode.de)
+        .notificationsEnabled(true)
+        .notificationsSettings(serializeToJsonString(allActiveNotifications()))
         .build();
+  }
+
+  private NotificationsSettingsDTO allActiveNotifications() {
+    NotificationsSettingsDTO notificationsSettingsDTO = new NotificationsSettingsDTO();
+    notificationsSettingsDTO.setReassignmentNotificationEnabled(true);
+    notificationsSettingsDTO.setInitialEnquiryNotificationEnabled(true);
+    notificationsSettingsDTO.setAppointmentNotificationEnabled(true);
+    notificationsSettingsDTO.setNewChatMessageNotificationEnabled(true);
+    return notificationsSettingsDTO;
   }
 
   private UserDTO buildUserDTO(String username, String email, Long tenantId) {

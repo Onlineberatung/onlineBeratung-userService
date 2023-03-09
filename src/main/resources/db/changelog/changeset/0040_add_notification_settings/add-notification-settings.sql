@@ -16,6 +16,6 @@ ALTER TABLE `userservice`.`user`
     ADD COLUMN `notifications_settings` VARCHAR(4000) NULL DEFAULT '';
 
 UPDATE `userservice`.`user`
-SET notifications_settings = "{'initialEnquiryNotificationEnabled': 'true','newChatMessageNotificationEnabled': 'true', 'reassignmentNotificationEnabled': 'true','appointmentNotificationEnabled': 'true'}",
+SET notifications_settings = "{'newChatMessageNotificationEnabled': 'true', 'reassignmentNotificationEnabled': 'true', 'appointmentNotificationEnabled': 'true'}",
     notifications_enabled = 1
 WHERE email is not NULL and email <> '';
