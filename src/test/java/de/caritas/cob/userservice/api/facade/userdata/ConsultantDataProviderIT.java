@@ -107,7 +107,7 @@ public class ConsultantDataProviderIT {
   @NotNull
   private Consultant giveRandomConsultant() {
     var consultant = easyRandom.nextObject(Consultant.class);
-    consultant.setNotificationSettings("");
+    consultant.setNotificationsSettings("");
     return consultant;
   }
 }

@@ -108,6 +108,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -510,7 +511,11 @@ public class UserController implements UsersApi {
             .orElseThrow(
                 () -> new BadRequestException("Invalid payload: at least one property expected"));
 
-    accountManager.patchUser(patchMap).orElseThrow();
+    Optional<Map<String, Object>> patchResponse = accountManager.patchUser(patchMap);
+    if (patchResponse.isEmpty()) {
+      throw new IllegalStateException("patch response not valid");
+    }
+
     userDtoMapper
         .preferredLanguageOf(patchUserDTO)
         .ifPresent(lang -> identityManager.changeLanguage(userId, lang));

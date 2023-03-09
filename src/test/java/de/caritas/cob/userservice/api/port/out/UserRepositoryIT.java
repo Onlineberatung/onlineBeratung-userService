@@ -72,8 +72,8 @@ class UserRepositoryIT {
   }
 
   private void assertThatHasNotificationSettings(User user) {
-    assertThat(user.isNotificationEnabled());
-    assertThat(user.getNotificationSettings()).isNull();
+    assertThat(user.isNotificationsEnabled());
+    assertThat(user.getNotificationsSettings()).isNull();
   }
 
   @Test

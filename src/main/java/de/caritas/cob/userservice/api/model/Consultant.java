@@ -201,10 +201,10 @@ public class Consultant implements TenantAware, NotificationsAware {
   private LocalDateTime dataPrivacyConfirmation;
 
   @Column(name = "notifications_enabled", columnDefinition = "tinyint", nullable = false)
-  private boolean notificationEnabled;
+  private boolean notificationsEnabled;
 
   @Column(name = "notifications_settings")
-  private String notificationSettings;
+  private String notificationsSettings;
 
   @JsonIgnore
   public String getFullName() {
