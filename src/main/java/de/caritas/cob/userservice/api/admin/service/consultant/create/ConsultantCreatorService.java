@@ -144,7 +144,6 @@ public class ConsultantCreatorService {
       String keycloakUserId,
       String rocketChatUserId) {
 
-    allActiveNotifications();
     return Consultant.builder()
         .id(keycloakUserId)
         .idOld(consultantCreationInput.getIdOld())
