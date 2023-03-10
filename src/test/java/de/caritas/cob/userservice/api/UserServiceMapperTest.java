@@ -1,9 +1,9 @@
 package de.caritas.cob.userservice.api;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.EmailNotificationsDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.NotificationsSettingsDTO;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Consultant;
 import java.util.HashMap;
@@ -33,7 +33,30 @@ class UserServiceMapperTest {
 
     userServiceMapper.consultantOf(consultant, requestData);
 
-    assertEquals(true, consultant.getWalkThroughEnabled());
+    assertThat(consultant.getWalkThroughEnabled()).isTrue();
+  }
+
+  @Test
+  void saveNotificationsEnabled() {
+    Map<String, Object> requestData = new HashMap<>();
+    NotificationsSettingsDTO allActiveSettings =
+        new NotificationsSettingsDTO()
+            .appointmentNotificationEnabled(true)
+            .reassignmentNotificationEnabled(true)
+            .newChatMessageNotificationEnabled(true)
+            .appointmentNotificationEnabled(true);
+    EmailNotificationsDTO emailNotificationsDTO =
+        new EmailNotificationsDTO().emailNotificationsEnabled(true).settings(allActiveSettings);
+    requestData.put("emailNotifications", emailNotificationsDTO);
+    requestData.put("id", "1");
+    Consultant consultant = new Consultant();
+
+    userServiceMapper.consultantOf(consultant, requestData);
+
+    assertThat(consultant.isNotificationsEnabled()).isTrue();
+    assertThat(consultant.getNotificationsSettings())
+        .isEqualTo(
+            "{\"initialEnquiryNotificationEnabled\":false,\"newChatMessageNotificationEnabled\":true,\"reassignmentNotificationEnabled\":true,\"appointmentNotificationEnabled\":true}");
   }
 
   @Test
@@ -42,8 +65,8 @@ class UserServiceMapperTest {
 
     var e2eKey = userServiceMapper.e2eKeyOf(map);
 
-    assertTrue(e2eKey.isPresent());
-    assertEquals(map.get("e2eKey"), e2eKey.get());
+    assertThat(e2eKey).isPresent();
+    assertThat(map).containsEntry("e2eKey", e2eKey.get());
   }
 
   @Test
@@ -52,7 +75,7 @@ class UserServiceMapperTest {
 
     var e2eKey = userServiceMapper.e2eKeyOf(map);
 
-    assertFalse(e2eKey.isPresent());
+    assertThat(e2eKey).isNotPresent();
   }
 
   @Test
@@ -61,6 +84,6 @@ class UserServiceMapperTest {
 
     var e2eKey = userServiceMapper.e2eKeyOf(map);
 
-    assertFalse(e2eKey.isPresent());
+    assertThat(e2eKey).isNotPresent();
   }
 }

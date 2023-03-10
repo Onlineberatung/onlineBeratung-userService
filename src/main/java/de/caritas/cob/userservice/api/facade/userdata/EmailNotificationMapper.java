@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.facade.userdata;
 
-import static de.caritas.cob.userservice.api.helper.json.JsonDeserializer.deserializeFromJsonString;
+import static de.caritas.cob.userservice.api.helper.json.JsonSerializationUtils.deserializeFromJsonString;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.EmailNotificationsDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.NotificationsSettingsDTO;
@@ -13,17 +13,17 @@ public class EmailNotificationMapper {
 
   EmailNotificationsDTO toEmailNotificationsDTO(NotificationsAware notificationsAware) {
     EmailNotificationsDTO emailNotificationsDTO = new EmailNotificationsDTO();
-    emailNotificationsDTO.emailNotificationsEnabled(notificationsAware.isNotificationEnabled());
-    if (StringUtils.isBlank(notificationsAware.getNotificationSettings())) {
+    emailNotificationsDTO.emailNotificationsEnabled(notificationsAware.isNotificationsEnabled());
+    if (StringUtils.isBlank(notificationsAware.getNotificationsSettings())) {
       emailNotificationsDTO.settings(new NotificationsSettingsDTO());
     } else {
       emailNotificationsDTO.settings(
-          convertNotificationsFromJson(notificationsAware.getNotificationSettings()));
+          mapNotificationsFromJson(notificationsAware.getNotificationsSettings()));
     }
     return emailNotificationsDTO;
   }
 
-  public static NotificationsSettingsDTO convertNotificationsFromJson(String jsonString) {
+  public static NotificationsSettingsDTO mapNotificationsFromJson(String jsonString) {
     return deserializeFromJsonString(jsonString, NotificationsSettingsDTO.class);
   }
 }

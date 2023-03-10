@@ -2,9 +2,7 @@ package de.caritas.cob.userservice.api.service.user;
 
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -20,10 +18,12 @@ import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserUpdateDataDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserUpdateRequestDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.NotificationsSettingsDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.helper.json.JsonSerializationUtils;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.ConsultantService;
@@ -53,13 +53,29 @@ public class ValidatedUserAccountProviderTest {
   @Mock private AppointmentService appointmentService;
 
   @Test
+  public void updateUserEmail_setInitialEmailNotifications() {
+    // when
+    User user = new User();
+    accountProvider.updateUserEmail(user, "some@email.com");
+
+    assertThat(user.getEmail()).isNotNull();
+    var notificationsSettingsDTO =
+        JsonSerializationUtils.deserializeFromJsonString(
+            user.getNotificationsSettings(), NotificationsSettingsDTO.class);
+    assertThat(user.getNotificationsSettings()).isNotNull();
+    assertThat(notificationsSettingsDTO.getNewChatMessageNotificationEnabled()).isTrue();
+    assertThat(notificationsSettingsDTO.getAppointmentNotificationEnabled()).isTrue();
+    assertThat(notificationsSettingsDTO.getReassignmentNotificationEnabled()).isTrue();
+  }
+
+  @Test
   public void retrieveValidatedUser_Should_ReturnUser_When_UserIsPresent() {
     User userMock = mock(User.class);
     when(userService.getUser(any())).thenReturn(Optional.of(userMock));
 
     User resultUser = this.accountProvider.retrieveValidatedUser();
 
-    assertThat(resultUser, is(userMock));
+    assertThat(resultUser).isEqualTo(userMock);
   }
 
   @Test(expected = InternalServerErrorException.class)
@@ -77,7 +93,7 @@ public class ValidatedUserAccountProviderTest {
 
     Consultant resultUser = this.accountProvider.retrieveValidatedConsultant();
 
-    assertThat(resultUser, is(consultantMock));
+    assertThat(resultUser).isEqualTo(consultantMock);
   }
 
   @Test(expected = InternalServerErrorException.class)
@@ -97,7 +113,7 @@ public class ValidatedUserAccountProviderTest {
 
     Consultant resultUser = this.accountProvider.retrieveValidatedTeamConsultant();
 
-    assertThat(resultUser, is(teamConsultantMock));
+    assertThat(resultUser).isEqualTo(teamConsultantMock);
   }
 
   @Test(expected = ForbiddenException.class)
@@ -251,7 +267,7 @@ public class ValidatedUserAccountProviderTest {
 
     ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
     verify(this.userService, times(1)).saveUser(captor.capture());
-    assertThat(captor.getValue().getMobileToken(), is("mobileToken"));
+    assertThat(captor.getValue().getMobileToken()).isEqualTo("mobileToken");
   }
 
   @Test
@@ -263,7 +279,7 @@ public class ValidatedUserAccountProviderTest {
 
     ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
     verify(this.userService, times(1)).saveUser(captor.capture());
-    assertThat(captor.getValue().getMobileToken(), nullValue());
+    assertThat(captor.getValue().getMobileToken()).isNull();
   }
 
   @Test
@@ -275,7 +291,7 @@ public class ValidatedUserAccountProviderTest {
 
     ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
     verify(this.userService, times(1)).saveUser(captor.capture());
-    assertThat(captor.getValue().getMobileToken(), is(""));
+    assertThat(captor.getValue().getMobileToken()).isEmpty();
   }
 
   @Test

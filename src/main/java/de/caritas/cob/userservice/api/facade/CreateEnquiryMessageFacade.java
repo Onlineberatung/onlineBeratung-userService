@@ -132,7 +132,7 @@ public class CreateEnquiryMessageFacade {
           enquiryData.getUser(),
           extendedConsultingTypeResponseDTO,
           createEnquiryExceptionInformation);
-      messageServiceProvider.postFurtherStepsOrSaveSessionDataMessageIfConfigured(
+      messageServiceProvider.postFurtherStepsIfConfigured(
           rcGroupId, extendedConsultingTypeResponseDTO, createEnquiryExceptionInformation);
 
       updateSession(
