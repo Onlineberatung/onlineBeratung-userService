@@ -18,7 +18,7 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class UrlDecodePasswordJsonDeserializerTest {
+public class UrlDecodePasswordJsonSerializationUtilsTest {
 
   private ObjectMapper objectMapper;
   private UrlDecodePasswordJsonDeserializer urlDecodePasswordJsonDeserializer;

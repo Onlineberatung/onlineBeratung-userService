@@ -88,6 +88,8 @@ public class ConsultantCreatorServiceIT {
     assertThat(consultant.getLastName(), notNullValue());
     assertThat(consultant.getEmail(), notNullValue());
     assertThat(consultant.getFullName(), notNullValue());
+    assertThat(consultant.isNotificationsEnabled(), is(true));
+    assertThat(consultant.getNotificationsSettings(), notNullValue());
   }
 
   @Test

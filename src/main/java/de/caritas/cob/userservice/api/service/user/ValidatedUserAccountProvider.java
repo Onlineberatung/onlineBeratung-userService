@@ -5,10 +5,12 @@ import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserUpdateDataDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserUpdateRequestDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.NotificationsSettingsDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UserHelper;
+import de.caritas.cob.userservice.api.helper.json.JsonSerializationUtils;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
@@ -18,6 +20,7 @@ import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 /** Service class to provide methods to access and modify the currently validated user account. */
@@ -120,7 +123,7 @@ public class ValidatedUserAccountProvider {
     this.consultantService.saveConsultant(consultant);
   }
 
-  private void updateUserEmail(User user, String email) {
+  void updateUserEmail(User user, String email) {
     UserUpdateDataDTO userUpdateDataDTO = new UserUpdateDataDTO(email, true);
     UserUpdateRequestDTO requestDTO =
         new UserUpdateRequestDTO(user.getRcUserId(), userUpdateDataDTO);
@@ -131,8 +134,25 @@ public class ValidatedUserAccountProvider {
           "Skip update user email in RocketChat because user does not have rcUserId (maybe a newly registered user?)");
     }
     this.appointmentService.updateAskerEmail(user.getUserId(), email);
+    setInitialEmailNotificationsSettingsForNewEmailAddress(user, email);
     user.setEmail(email);
     this.userService.saveUser(user);
+  }
+
+  private void setInitialEmailNotificationsSettingsForNewEmailAddress(User user, String email) {
+    if (StringUtils.isBlank(user.getEmail()) && email != null) {
+      user.setNotificationsEnabled(true);
+      user.setNotificationsSettings(
+          JsonSerializationUtils.serializeToJsonString(activeNotificationsForAdviceSeeker()));
+    }
+  }
+
+  private NotificationsSettingsDTO activeNotificationsForAdviceSeeker() {
+    NotificationsSettingsDTO notificationsSettingsDTO = new NotificationsSettingsDTO();
+    notificationsSettingsDTO.setReassignmentNotificationEnabled(true);
+    notificationsSettingsDTO.setAppointmentNotificationEnabled(true);
+    notificationsSettingsDTO.setNewChatMessageNotificationEnabled(true);
+    return notificationsSettingsDTO;
   }
 
   /**

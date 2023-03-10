@@ -21,8 +21,8 @@ class EmailNotificationMapperTest {
 
   @Test
   void toEmailNotificationsDTO_Should_ConvertSettingsToDefaultSettingsIfNull() {
-    Mockito.when(notificationsAware.isNotificationEnabled()).thenReturn(true);
-    Mockito.when(notificationsAware.getNotificationSettings()).thenReturn(null);
+    Mockito.when(notificationsAware.isNotificationsEnabled()).thenReturn(true);
+    Mockito.when(notificationsAware.getNotificationsSettings()).thenReturn(null);
 
     EmailNotificationsDTO emailNotificationsDTO =
         emailNotificationMapper.toEmailNotificationsDTO(notificationsAware);
@@ -33,8 +33,8 @@ class EmailNotificationMapperTest {
 
   @Test
   void toEmailNotificationsDTO_Should_ConvertSettings() {
-    Mockito.when(notificationsAware.isNotificationEnabled()).thenReturn(true);
-    Mockito.when(notificationsAware.getNotificationSettings())
+    Mockito.when(notificationsAware.isNotificationsEnabled()).thenReturn(true);
+    Mockito.when(notificationsAware.getNotificationsSettings())
         .thenReturn(
             "{'initialEnquiryNotificationEnabled': 'true','newChatMessageNotificationEnabled': 'true', 'reassignmentNotificationEnabled': 'true','appointmentNotificationEnabled': 'true'}");
 

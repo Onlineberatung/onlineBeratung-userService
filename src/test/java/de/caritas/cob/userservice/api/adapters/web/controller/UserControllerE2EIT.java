@@ -48,8 +48,10 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.RocketChatUse
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UpdateUser;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.DeleteUserAccountDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.EmailNotificationsDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.EmailToggle;
 import de.caritas.cob.userservice.api.adapters.web.dto.EmailType;
+import de.caritas.cob.userservice.api.adapters.web.dto.NotificationsSettingsDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PasswordDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PatchUserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ReassignmentNotificationDTO;
@@ -911,6 +913,11 @@ class UserControllerE2EIT {
     var locale = userRepCaptor.getValue().getAttributes().get("locale");
     assertEquals(patchUserDTO.getPreferredLanguage().toString(), locale.get(0));
 
+    assertThat(savedUser.isNotificationsEnabled()).isTrue();
+    assertThat(savedUser.getNotificationsSettings())
+        .isEqualTo(
+            "{\"initialEnquiryNotificationEnabled\":true,\"newChatMessageNotificationEnabled\":true,\"reassignmentNotificationEnabled\":true,\"appointmentNotificationEnabled\":true}");
+
     verifyRocketChatNeverSetsUserPresence();
   }
 
@@ -922,6 +929,7 @@ class UserControllerE2EIT {
     givenAValidRocketChatUpdateUserResponse();
     givenAValidKeycloakUpdateLocaleResponse(consultant.getId());
     givenAValidRocketChatUserPresenceSetResponse();
+    patchUserDTO.setEmailNotifications(partiallyActiveEmailNotifications());
 
     mockMvc
         .perform(
@@ -956,6 +964,10 @@ class UserControllerE2EIT {
     assertTrue(user.getName().length() > 4);
 
     verifyRocketChatSetsUserPresence();
+    assertThat(savedConsultant.isNotificationsEnabled()).isTrue();
+    assertThat(savedConsultant.getNotificationsSettings())
+        .isEqualTo(
+            "{\"initialEnquiryNotificationEnabled\":true,\"newChatMessageNotificationEnabled\":false,\"reassignmentNotificationEnabled\":false,\"appointmentNotificationEnabled\":true}");
   }
 
   @Test
@@ -2120,6 +2132,30 @@ class UserControllerE2EIT {
     newFeedback.setState(true);
 
     patchUserDTO.setEmailToggles(Set.of(dailyEnquiries, newChat, newFeedback));
+
+    patchUserDTO.setEmailNotifications(activeEmailNotifications());
+  }
+
+  private EmailNotificationsDTO activeEmailNotifications() {
+    return new EmailNotificationsDTO()
+        .emailNotificationsEnabled(true)
+        .settings(
+            new NotificationsSettingsDTO()
+                .initialEnquiryNotificationEnabled(true)
+                .appointmentNotificationEnabled(true)
+                .reassignmentNotificationEnabled(true)
+                .newChatMessageNotificationEnabled(true));
+  }
+
+  private EmailNotificationsDTO partiallyActiveEmailNotifications() {
+    return new EmailNotificationsDTO()
+        .emailNotificationsEnabled(true)
+        .settings(
+            new NotificationsSettingsDTO()
+                .initialEnquiryNotificationEnabled(true)
+                .appointmentNotificationEnabled(true)
+                .reassignmentNotificationEnabled(false)
+                .newChatMessageNotificationEnabled(false));
   }
 
   private void givenAnUpdateConsultantDtoWithLanguages(String email) {

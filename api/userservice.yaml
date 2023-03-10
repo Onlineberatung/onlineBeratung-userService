@@ -2671,6 +2671,8 @@ components:
         available:
           description: mark consultant as (not) available for one-on-one chats, no effect on others
           type: boolean
+        emailNotifications:
+          $ref: "#/components/schemas/EmailNotificationsDTO"
 
     UpdateConsultantDTO:
       type: object
@@ -2706,6 +2708,8 @@ components:
           type: boolean
           example: true
           description: Flag that indicates does the user accepted new data privacy text
+        emailNotifications:
+          $ref: "#/components/schemas/EmailNotificationsDTO"
 
     LanguageCode:
       type: string
