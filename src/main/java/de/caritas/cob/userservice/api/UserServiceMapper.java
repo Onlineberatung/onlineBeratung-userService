@@ -427,14 +427,9 @@ public class UserServiceMapper {
       NotificationsAware user, EmailNotificationsDTO emailNotifications) {
     boolean notificationsEnabled = nullAsFalse(emailNotifications.getEmailNotificationsEnabled());
     user.setNotificationsEnabled(notificationsEnabled);
-    if (!notificationsEnabled) {
-      disableAllNotifications(user);
-    } else {
-      NotificationsSettingsDTO patchedSettings =
-          patchNotificationsSettingsDTO(user, emailNotifications);
-
-      user.setNotificationsSettings(JsonSerializationUtils.serializeToJsonString(patchedSettings));
-    }
+    NotificationsSettingsDTO patchedSettings =
+        patchNotificationsSettingsDTO(user, emailNotifications);
+    user.setNotificationsSettings(JsonSerializationUtils.serializeToJsonString(patchedSettings));
   }
 
   private NotificationsSettingsDTO patchNotificationsSettingsDTO(
