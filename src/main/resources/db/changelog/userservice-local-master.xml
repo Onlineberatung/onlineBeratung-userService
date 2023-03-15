@@ -46,4 +46,5 @@
   <include file="db/changelog/changeset/0038_consultant_confirmation_fields/0038_changeSet.xml"/>
   <include file="db/changelog/changeset/0039_session_main_topic_type/0039_changeSet.xml"/>
   <include file="db/changelog/changeset/0040_add_notification_settings/0040_changeSet.xml"/>
+  <include file="db/changelog/changeset/0041_migrate_notification_settings/0041_changeSet.xml"/>
 </databaseChangeLog>
