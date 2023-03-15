@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.workflow.enquirynotification.service;
 
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
+import static de.caritas.cob.userservice.api.helper.EmailNotificationUtils.deserializeNotificationSettingsOrDefaultIfNull;
 import static de.caritas.cob.userservice.api.service.emailsupplier.EmailSupplier.TEMPLATE_DAILY_ENQUIRY_NOTIFICATION;
 import static java.util.Arrays.asList;
 import static java.util.Objects.nonNull;
@@ -15,6 +16,8 @@ import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import de.caritas.cob.userservice.api.service.consultingtype.ReleaseToggle;
+import de.caritas.cob.userservice.api.service.consultingtype.ReleaseToggleService;
 import de.caritas.cob.userservice.api.service.helper.MailService;
 import de.caritas.cob.userservice.api.workflow.enquirynotification.model.EnquiriesNotificationMailContent;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
@@ -45,6 +48,8 @@ public class EnquiryNotificationService {
   private final @NonNull ConsultantAgencyService consultantAgencyService;
   private final @NonNull AgencyService agencyService;
 
+  private final @NonNull ReleaseToggleService releaseToggleService;
+
   @Value("${enquiry.open.notification.check.hours}")
   private Long openEnquiryCheckHours;
 
@@ -62,7 +67,7 @@ public class EnquiryNotificationService {
     var mailsContentForAgencies =
         createMailsContentForAgencies(agencyIdsWithOpenEnquiries, agencyIdToAgency);
 
-    mailsContentForAgencies.forEach(this::buildAndSendNotificationMails);
+    mailsContentForAgencies.forEach(this::buildAndSendEnquiryNotificationMails);
   }
 
   private Map<Long, Long> findAgencyIdsWithOpenEnquiries() {
@@ -104,15 +109,26 @@ public class EnquiryNotificationService {
     };
   }
 
-  private void buildAndSendNotificationMails(EnquiriesNotificationMailContent enquiryMailContent) {
+  private void buildAndSendEnquiryNotificationMails(
+      EnquiriesNotificationMailContent enquiryMailContent) {
     var mailDTOs =
         consultantAgencyService.findConsultantsByAgencyId(enquiryMailContent.getAgencyId()).stream()
             .map(ConsultantAgency::getConsultant)
-            .filter(Consultant::getNotifyEnquiriesRepeating)
+            .filter(c -> wantsToReceiveNotifications(c))
             .map(consultant -> buildMailTO(consultant, enquiryMailContent))
             .collect(Collectors.toList());
 
     buildAndSendNotificationEmail(mailDTOs);
+  }
+
+  private boolean wantsToReceiveNotifications(Consultant consultant) {
+    if (releaseToggleService.isToggleEnabled(ReleaseToggle.NEW_EMAIL_NOTIFICATIONS)) {
+      return consultant.isNotificationsEnabled()
+          && deserializeNotificationSettingsOrDefaultIfNull(consultant)
+              .isInitialEnquiryNotificationEnabled();
+    } else {
+      return consultant.getNotifyEnquiriesRepeating();
+    }
   }
 
   private MailDTO buildMailTO(
