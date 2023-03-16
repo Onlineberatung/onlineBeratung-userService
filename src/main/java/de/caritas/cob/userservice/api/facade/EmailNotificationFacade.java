@@ -86,6 +86,7 @@ public class EmailNotificationFacade {
    */
   @Async
   public void sendNewEnquiryEmailNotification(Session session, TenantData tenantData) {
+
     var sessionAlreadyAssignedToConsultant = nonNull(session.getConsultant());
     if (!sessionAlreadyAssignedToConsultant) {
       try {
@@ -257,6 +258,8 @@ public class EmailNotificationFacade {
     var user = session.getUser();
 
     if (!shouldSendReassignmentNotificationForAdviceSeeker(user)) {
+      log.info(
+          "Not sending email notification about reassignment because adviceseeker has this disabled this toggle.");
       return;
     }
 

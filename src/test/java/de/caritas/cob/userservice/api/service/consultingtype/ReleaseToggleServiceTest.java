@@ -23,7 +23,7 @@ class ReleaseToggleServiceTest {
   void isToggleEnabled_Should_ReturnTrueIfApplicationSettingsContainThisToggle() {
     // given
     Map<String, Object> releaseToggles = Maps.newHashMap();
-    releaseToggles.put(ReleaseToggle.NEW_EMAIL_NOTIFICATIONS.getValue(), true);
+    releaseToggles.put(ReleaseToggle.NEW_EMAIL_NOTIFICATIONS.getValue(), "true");
     when(applicationSettingsService.getApplicationSettings())
         .thenReturn(new ApplicationSettingsDTO().releaseToggles(releaseToggles));
     // when

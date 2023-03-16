@@ -17,8 +17,9 @@ public class ReleaseToggleService {
     Map<String, Object> releaseToggles =
         applicationSettingsService.getApplicationSettings().getReleaseToggles();
 
-    if (releaseToggles != null && releaseToggles.containsKey(toggle.getValue())) {
-      return nullAsFalse((Boolean) releaseToggles.get(toggle.getValue()));
+    String toggleKeyName = toggle.getValue();
+    if (releaseToggles != null && releaseToggles.containsKey(toggleKeyName)) {
+      return nullAsFalse(Boolean.parseBoolean((String) releaseToggles.get(toggleKeyName)));
     } else {
       log.debug("Release toggle not found: ", toggle);
       return false;

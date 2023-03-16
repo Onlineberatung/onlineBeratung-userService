@@ -539,6 +539,41 @@ public class TestConstants {
           null,
           false,
           null);
+
+  public static final Consultant MAIN_CONSULTANT_WITH_NEW_EMAIL_NOTIFICATIONS =
+      new Consultant(
+          MAIN_CONSULTANT_ID,
+          RC_USER_ID_MAIN_CONSULTANT,
+          USERNAME,
+          "first name",
+          "last name",
+          EMAIL,
+          false,
+          false,
+          null,
+          false,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          true,
+          true,
+          true,
+          true,
+          null,
+          null,
+          ConsultantStatus.CREATED,
+          false,
+          LanguageCode.de,
+          null,
+          null,
+          true,
+          "{'initialEnquiryNotificationEnabled': 'true','newChatMessageNotificationEnabled': 'true', 'reassignmentNotificationEnabled': 'true','appointmentNotificationEnabled': 'true'}");
+
   public static final SessionConsultantForUserDTO CONSULTANT_DTO =
       new SessionConsultantForUserDTO();
   public static final GroupSessionConsultantDTO GROUP_SESSION_CONSULTANT_DTO =
