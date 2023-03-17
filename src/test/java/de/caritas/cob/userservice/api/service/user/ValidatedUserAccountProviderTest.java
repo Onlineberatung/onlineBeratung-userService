@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service.user;
 
+import static de.caritas.cob.userservice.api.helper.EmailNotificationUtils.deserializeNotificationSettingsDTOOrDefaultIfNull;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -18,12 +19,10 @@ import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserUpdateDataDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserUpdateRequestDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.NotificationsSettingsDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UserHelper;
-import de.caritas.cob.userservice.api.helper.json.JsonSerializationUtils;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.ConsultantService;
@@ -59,9 +58,7 @@ public class ValidatedUserAccountProviderTest {
     accountProvider.updateUserEmail(user, "some@email.com");
 
     assertThat(user.getEmail()).isNotNull();
-    var notificationsSettingsDTO =
-        JsonSerializationUtils.deserializeFromJsonString(
-            user.getNotificationsSettings(), NotificationsSettingsDTO.class);
+    var notificationsSettingsDTO = deserializeNotificationSettingsDTOOrDefaultIfNull(user);
     assertThat(user.getNotificationsSettings()).isNotNull();
     assertThat(notificationsSettingsDTO.getNewChatMessageNotificationEnabled()).isTrue();
     assertThat(notificationsSettingsDTO.getAppointmentNotificationEnabled()).isTrue();

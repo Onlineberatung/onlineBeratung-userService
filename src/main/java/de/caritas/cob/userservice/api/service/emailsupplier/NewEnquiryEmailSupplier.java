@@ -1,16 +1,21 @@
 package de.caritas.cob.userservice.api.service.emailsupplier;
 
+import static de.caritas.cob.userservice.api.helper.EmailNotificationUtils.deserializeNotificationSettingsDTOOrDefaultIfNull;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.NotificationsSettingsDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.NotificationsAware;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import de.caritas.cob.userservice.api.service.consultingtype.ReleaseToggle;
+import de.caritas.cob.userservice.api.service.consultingtype.ReleaseToggleService;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.ArrayList;
@@ -35,6 +40,8 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
 
   private final @NonNull ConsultantAgencyRepository consultantAgencyRepository;
   private final @NonNull AgencyService agencyService;
+
+  private final @NonNull ReleaseToggleService releaseToggleService;
 
   @Value("${app.base.url}")
   private String applicationBaseUrl;
@@ -70,6 +77,7 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
     log.info("Retrieved agency " + agency);
     return consultantAgencyList.stream()
         .filter(this::validConsultantAgency)
+        .filter(this::shouldSendNewEnquiryNotificationForConsultant)
         .map(toEnquiryMailDTO(agency))
         .collect(Collectors.toList());
   }
@@ -78,6 +86,21 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
     return nonNull(consultantAgency)
         && isNotBlank(consultantAgency.getConsultant().getEmail())
         && !consultantAgency.getConsultant().isAbsent();
+  }
+
+  private boolean shouldSendNewEnquiryNotificationForConsultant(ConsultantAgency consultantAgency) {
+    if (releaseToggleService.isToggleEnabled(ReleaseToggle.NEW_EMAIL_NOTIFICATIONS)) {
+      return wantsToReceiveNotificationsAboutNewEnquiry(consultantAgency.getConsultant());
+    }
+    return true;
+  }
+
+  private boolean wantsToReceiveNotificationsAboutNewEnquiry(
+      NotificationsAware notificationsAware) {
+    NotificationsSettingsDTO notificationsSettingsDTO =
+        deserializeNotificationSettingsDTOOrDefaultIfNull(notificationsAware);
+    return notificationsAware.isNotificationsEnabled()
+        && notificationsSettingsDTO.getInitialEnquiryNotificationEnabled();
   }
 
   private Function<ConsultantAgency, MailDTO> toEnquiryMailDTO(AgencyDTO agency) {
