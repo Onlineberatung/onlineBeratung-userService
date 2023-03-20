@@ -14,6 +14,7 @@ import de.caritas.cob.userservice.api.helper.json.JsonSerializationUtils;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
+import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.appointment.AppointmentService;
 import java.util.Optional;
@@ -36,6 +37,8 @@ public class ValidatedUserAccountProvider {
   private final @NonNull IdentityClient identityClient;
   private final @NonNull RocketChatService rocketChatService;
   private final @NonNull UserHelper userHelper;
+
+  private final @NonNull IdentityClientConfig identityClientConfig;
 
   /**
    * Tries to retrieve the user of the current {@link AuthenticatedUser} and throws an 500 - Server
@@ -140,11 +143,20 @@ public class ValidatedUserAccountProvider {
   }
 
   private void setInitialEmailNotificationsSettingsForNewEmailAddress(User user, String email) {
-    if (StringUtils.isBlank(user.getEmail()) && email != null) {
+    if (isBlankOrInitialDummyEmail(user) && email != null) {
       user.setNotificationsEnabled(true);
       user.setNotificationsSettings(
           JsonSerializationUtils.serializeToJsonString(activeNotificationsForAdviceSeeker()));
     }
+  }
+
+  private boolean isBlankOrInitialDummyEmail(User user) {
+    return StringUtils.isBlank(user.getEmail()) || hasInitiallySetDummyEmail(user);
+  }
+
+  private boolean hasInitiallySetDummyEmail(User user) {
+    return identityClientConfig.getEmailDummySuffix() != null
+        && user.getEmail().endsWith(identityClientConfig.getEmailDummySuffix());
   }
 
   private NotificationsSettingsDTO activeNotificationsForAdviceSeeker() {
