@@ -1,10 +1,12 @@
 package de.caritas.cob.userservice.api.facade;
 
+import static de.caritas.cob.userservice.api.helper.EmailNotificationUtils.deserializeNotificationSettingsDTOOrDefaultIfNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.web.dto.NotificationsSettingsDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ReassignmentNotificationDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
@@ -12,12 +14,15 @@ import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMembersException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.NotificationsAware;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
+import de.caritas.cob.userservice.api.service.consultingtype.ReleaseToggle;
+import de.caritas.cob.userservice.api.service.consultingtype.ReleaseToggleService;
 import de.caritas.cob.userservice.api.service.emailsupplier.AssignEnquiryEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.EmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewDirectEnquiryEmailSupplier;
@@ -68,6 +73,8 @@ public class EmailNotificationFacade {
   private final @NonNull AssignEnquiryEmailSupplier assignEnquiryEmailSupplier;
   private final @NonNull TenantTemplateSupplier tenantTemplateSupplier;
 
+  private final @NonNull ReleaseToggleService releaseToggleService;
+
   @Value("${multitenancy.enabled}")
   private boolean multiTenancyEnabled;
 
@@ -79,6 +86,7 @@ public class EmailNotificationFacade {
    */
   @Async
   public void sendNewEnquiryEmailNotification(Session session, TenantData tenantData) {
+
     var sessionAlreadyAssignedToConsultant = nonNull(session.getConsultant());
     if (!sessionAlreadyAssignedToConsultant) {
       try {
@@ -160,6 +168,7 @@ public class EmailNotificationFacade {
               .tenantTemplateSupplier(tenantTemplateSupplier)
               .multiTenancyEnabled(multiTenancyEnabled)
               .messageClient(messageClient)
+              .releaseToggleService(releaseToggleService)
               .build();
       sendMailTasksToMailService(newMessageMails);
 
@@ -247,6 +256,13 @@ public class EmailNotificationFacade {
     TenantContext.setCurrentTenantData(tenantData);
     var session = sessionService.getSessionByGroupId(rcGroupId);
     var user = session.getUser();
+
+    if (!shouldSendReassignmentNotificationForAdviceSeeker(user)) {
+      log.info(
+          "Not sending email notification about reassignment because adviceseeker has this disabled this toggle.");
+      return;
+    }
+
     if (hasUserValidEmailAddress(user)) {
       var reassignmentRequestEmailSupplier =
           ReassignmentRequestEmailSupplier.builder()
@@ -268,6 +284,13 @@ public class EmailNotificationFacade {
     TenantContext.clear();
   }
 
+  private boolean shouldSendReassignmentNotificationForAdviceSeeker(User user) {
+    if (releaseToggleService.isToggleEnabled(ReleaseToggle.NEW_EMAIL_NOTIFICATIONS)) {
+      return wantsToReceiveNotificationsAboutReassignment(user);
+    }
+    return true;
+  }
+
   private boolean hasUserValidEmailAddress(User user) {
     return nonNull(user)
         && isNotBlank(user.getEmail())
@@ -279,10 +302,18 @@ public class EmailNotificationFacade {
   public void sendReassignConfirmationNotification(
       ReassignmentNotificationDTO reassignmentNotification, TenantData tenantData) {
     TenantContext.setCurrentTenantData(tenantData);
+    Consultant existingConsultantById =
+        findExistingConsultantById(reassignmentNotification.getToConsultantId().toString());
+
+    if (!shouldSendReassignmentNotificationForConsultant(existingConsultantById)) {
+      log.info(
+          "Not sending email notification about reassignment because consultant has this disabled this toggle");
+      return;
+    }
+
     var reassignmentConfirmationEmailSupplier =
         ReassignmentConfirmationEmailSupplier.builder()
-            .receiverConsultant(
-                findExistingConsultantById(reassignmentNotification.getToConsultantId().toString()))
+            .receiverConsultant(existingConsultantById)
             .senderConsultantName(reassignmentNotification.getFromConsultantName())
             .tenantTemplateSupplier(tenantTemplateSupplier)
             .applicationBaseUrl(applicationBaseUrl)
@@ -296,6 +327,22 @@ public class EmailNotificationFacade {
           exception);
     }
     TenantContext.clear();
+  }
+
+  private boolean shouldSendReassignmentNotificationForConsultant(
+      Consultant existingConsultantById) {
+    if (releaseToggleService.isToggleEnabled(ReleaseToggle.NEW_EMAIL_NOTIFICATIONS)) {
+      return wantsToReceiveNotificationsAboutReassignment(existingConsultantById);
+    }
+    return true;
+  }
+
+  private boolean wantsToReceiveNotificationsAboutReassignment(
+      NotificationsAware notificationsAware) {
+    NotificationsSettingsDTO notificationsSettingsDTO =
+        deserializeNotificationSettingsDTOOrDefaultIfNull(notificationsAware);
+    return notificationsAware.isNotificationsEnabled()
+        && notificationsSettingsDTO.getReassignmentNotificationEnabled();
   }
 
   private Consultant findExistingConsultantById(String consultantId) {

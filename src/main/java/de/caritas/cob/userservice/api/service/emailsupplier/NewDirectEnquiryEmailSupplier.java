@@ -1,12 +1,17 @@
 package de.caritas.cob.userservice.api.service.emailsupplier;
 
+import static de.caritas.cob.userservice.api.helper.EmailNotificationUtils.deserializeNotificationSettingsDTOOrDefaultIfNull;
 import static de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.fromValue;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.NotificationsSettingsDTO;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.NotificationsAware;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
+import de.caritas.cob.userservice.api.service.consultingtype.ReleaseToggle;
+import de.caritas.cob.userservice.api.service.consultingtype.ReleaseToggleService;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.ArrayList;
@@ -44,6 +49,8 @@ public class NewDirectEnquiryEmailSupplier implements EmailSupplier {
 
   @Setter private String consultantId;
 
+  private final @NonNull ReleaseToggleService releaseToggleService;
+
   /**
    * Generates a direct-enquiry email and sends it to the set consultant.
    *
@@ -61,8 +68,24 @@ public class NewDirectEnquiryEmailSupplier implements EmailSupplier {
 
     return consultantAgencyList.stream()
         .filter(this::validConsultantAgency)
+        .filter(this::shouldSendNewEnquiryNotificationForConsultant)
         .map(consultantAgency -> mailOf(consultantAgency.getConsultant(), postCode))
         .collect(Collectors.toList());
+  }
+
+  private boolean shouldSendNewEnquiryNotificationForConsultant(ConsultantAgency consultantAgency) {
+    if (releaseToggleService.isToggleEnabled(ReleaseToggle.NEW_EMAIL_NOTIFICATIONS)) {
+      return wantsToReceiveNotificationsAboutNewEnquiry(consultantAgency.getConsultant());
+    }
+    return true;
+  }
+
+  private boolean wantsToReceiveNotificationsAboutNewEnquiry(
+      NotificationsAware notificationsAware) {
+    NotificationsSettingsDTO notificationsSettingsDTO =
+        deserializeNotificationSettingsDTOOrDefaultIfNull(notificationsAware);
+    return notificationsAware.isNotificationsEnabled()
+        && notificationsSettingsDTO.getInitialEnquiryNotificationEnabled();
   }
 
   private Boolean validConsultantAgency(ConsultantAgency consultantAgency) {

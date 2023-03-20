@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api;
 
+import static de.caritas.cob.userservice.api.helper.EmailNotificationUtils.deserializeNotificationSettingsDTOOrDefaultIfNull;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
@@ -436,10 +437,7 @@ public class UserServiceMapper {
       NotificationsAware user, EmailNotificationsDTO emailNotifications) {
     NotificationsSettingsDTO newSettings = emailNotifications.getSettings();
     NotificationsSettingsDTO existingSettings =
-        user.getNotificationsSettings() == null
-            ? new NotificationsSettingsDTO()
-            : JsonSerializationUtils.deserializeFromJsonString(
-                user.getNotificationsSettings(), NotificationsSettingsDTO.class);
+        deserializeNotificationSettingsDTOOrDefaultIfNull(user);
     if (newSettings.getAppointmentNotificationEnabled() != null) {
       existingSettings.setAppointmentNotificationEnabled(
           newSettings.getAppointmentNotificationEnabled());
@@ -464,11 +462,6 @@ public class UserServiceMapper {
 
   private boolean nullAsFalse(Boolean topicsInRegistrationEnabled) {
     return Boolean.TRUE.equals(topicsInRegistrationEnabled);
-  }
-
-  private void disableAllNotifications(NotificationsAware user) {
-    user.setNotificationsSettings(
-        JsonSerializationUtils.serializeToJsonString(new NotificationsSettingsDTO()));
   }
 
   public Appointment appointmentOf(Map<String, Object> appointmentMap, Consultant consultant) {

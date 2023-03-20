@@ -20,6 +20,7 @@ import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import de.caritas.cob.userservice.api.service.consultingtype.ReleaseToggleService;
 import de.caritas.cob.userservice.api.service.helper.MailService;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailsDTO;
@@ -49,6 +50,8 @@ class EnquiryNotificationServiceTest {
   @Mock private ConsultantAgencyService consultantAgencyService;
 
   @Mock private AgencyService agencyService;
+
+  @Mock private ReleaseToggleService releaseToggleService;
 
   @BeforeEach
   public void setup() {

@@ -30,6 +30,7 @@ import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.MessageClient;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
+import de.caritas.cob.userservice.api.service.consultingtype.ReleaseToggleService;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.api.tenant.TenantData;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
@@ -74,6 +75,8 @@ public class NewMessageEmailSupplierTest {
 
   @Mock private MessageClient messageClient;
 
+  @Mock private ReleaseToggleService releaseToggleService;
+
   @Before
   public void setup() {
     this.newMessageEmailSupplier =
@@ -88,6 +91,7 @@ public class NewMessageEmailSupplierTest {
             .applicationBaseUrl("app baseurl")
             .emailDummySuffix("dummySuffix")
             .messageClient(messageClient)
+            .releaseToggleService(releaseToggleService)
             .build();
     setInternalState(NewMessageEmailSupplier.class, "log", logger);
   }
