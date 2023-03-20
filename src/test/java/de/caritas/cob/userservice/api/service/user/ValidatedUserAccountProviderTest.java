@@ -19,12 +19,15 @@ import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserUpdateDataDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserUpdateRequestDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.NotificationsSettingsDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.facade.userdata.EmailNotificationMapper;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.appointment.AppointmentService;
 import java.util.Optional;
@@ -50,6 +53,8 @@ public class ValidatedUserAccountProviderTest {
   @Mock private RocketChatService rocketChatService;
   @Mock private UserHelper userHelper;
   @Mock private AppointmentService appointmentService;
+
+  @Mock private IdentityClientConfig identityClientConfig;
 
   @Test
   public void updateUserEmail_setInitialEmailNotifications() {
@@ -223,8 +228,10 @@ public class ValidatedUserAccountProviderTest {
     var userId = RandomStringUtils.randomAlphabetic(16);
     var dummyEmail = RandomStringUtils.randomAlphabetic(16);
     when(authenticatedUser.getUserId()).thenReturn(userId);
+    user.setEmail(dummyEmail);
     when(userService.getUser(userId)).thenReturn(Optional.of(user));
     when(userHelper.getDummyEmail(userId)).thenReturn(dummyEmail);
+    when(identityClientConfig.getEmailDummySuffix()).thenReturn(dummyEmail);
 
     accountProvider.changeUserAccountEmailAddress(Optional.empty());
 
@@ -236,9 +243,19 @@ public class ValidatedUserAccountProviderTest {
     verify(this.appointmentService, times(1)).updateAskerEmail(user.getUserId(), dummyEmail);
     user.setEmail(dummyEmail);
     verify(userService).saveUser(user);
+    assertAllAdviceSeekerNotificationsAreEnabled(user);
     verifyNoMoreInteractions(rocketChatService);
     verify(consultantService).getConsultant(any());
     verifyNoMoreInteractions(consultantService);
+  }
+
+  private void assertAllAdviceSeekerNotificationsAreEnabled(User user) {
+    assertThat(user.isNotificationsEnabled()).isTrue();
+    NotificationsSettingsDTO notificationsSettingsDTO =
+        EmailNotificationMapper.mapNotificationsFromJson(user.getNotificationsSettings());
+    assertThat(notificationsSettingsDTO.getReassignmentNotificationEnabled()).isTrue();
+    assertThat(notificationsSettingsDTO.getAppointmentNotificationEnabled()).isTrue();
+    assertThat(notificationsSettingsDTO.getNewChatMessageNotificationEnabled()).isTrue();
   }
 
   @Test
