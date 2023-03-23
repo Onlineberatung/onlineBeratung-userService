@@ -1946,7 +1946,6 @@ public class TestConstants {
               .languageFormal(false)
               .roles(null)
               .registration(REGISTRATION_WITH_MANDATORY_FIELDS_TRUE);
-  public static final String CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH = "/monitoring/test.json";
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_SUCHT =
       new ExtendedConsultingTypeResponseDTO()
           .id(CONSULTING_TYPE_ID_SUCHT)
@@ -2113,38 +2112,7 @@ public class TestConstants {
           .languageFormal(false)
           .roles(null)
           .registration(REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
-  public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WIT_MONITORING =
-      new ExtendedConsultingTypeResponseDTO()
-          .id(CONSULTING_TYPE_ID_U25)
-          .slug("u25")
-          .excludeNonMainConsultantsFromTeamSessions(true)
-          .groupChat(new GroupChatDTO().isGroupChat(false))
-          .consultantBoundedToConsultingType(true)
-          .welcomeMessage(
-              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
-          .sendFurtherStepsMessage(false)
-          .sessionDataInitializing(null)
-          .initializeFeedbackChat(false)
-          .notifications(null)
-          .languageFormal(false)
-          .roles(null)
-          .registration(null);
-  public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITH_MONITORING =
-      new ExtendedConsultingTypeResponseDTO()
-          .id(CONSULTING_TYPE_ID_SUCHT)
-          .slug("suchtberatung")
-          .excludeNonMainConsultantsFromTeamSessions(false)
-          .groupChat(new GroupChatDTO().isGroupChat(false))
-          .consultantBoundedToConsultingType(false)
-          .welcomeMessage(
-              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
-          .sendFurtherStepsMessage(false)
-          .sessionDataInitializing(null)
-          .initializeFeedbackChat(false)
-          .notifications(null)
-          .languageFormal(false)
-          .roles(null)
-          .registration(null);
+
   public static final ExtendedConsultingTypeResponseDTO
       CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING =
           new ExtendedConsultingTypeResponseDTO()

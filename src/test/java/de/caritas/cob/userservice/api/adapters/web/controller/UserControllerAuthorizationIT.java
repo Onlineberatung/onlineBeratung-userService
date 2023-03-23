@@ -91,7 +91,6 @@ import de.caritas.cob.userservice.api.service.ConsultantImportService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.archive.SessionArchiveService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
@@ -138,7 +137,6 @@ class UserControllerAuthorizationIT {
   @MockBean private ConsultantDataFacade consultantDataFacade;
   @MockBean private EmailNotificationFacade emailNotificationFacade;
   @MockBean private ConsultantImportService consultantImportService;
-  @MockBean private MonitoringService monitoringService;
   @MockBean private AskerImportService askerImportService;
   @MockBean private ConsultantAgencyService consultantAgencyService;
   @MockBean private IdentityClient identityClient;
@@ -961,7 +959,7 @@ class UserControllerAuthorizationIT {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
-    verifyNoMoreInteractions(authenticatedUser, sessionService, monitoringService);
+    verifyNoMoreInteractions(authenticatedUser, sessionService);
   }
 
   @Test
@@ -994,7 +992,7 @@ class UserControllerAuthorizationIT {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(authenticatedUser, sessionService, monitoringService);
+    verifyNoMoreInteractions(authenticatedUser, sessionService);
   }
 
   @Test
@@ -1007,7 +1005,7 @@ class UserControllerAuthorizationIT {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(authenticatedUser, sessionService, monitoringService);
+    verifyNoMoreInteractions(authenticatedUser, sessionService);
   }
 
   /** PUT on /users/sessions/monitoring/{sessionId} (role: consultant) */
@@ -1023,7 +1021,7 @@ class UserControllerAuthorizationIT {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
-    verifyNoMoreInteractions(authenticatedUser, sessionService, monitoringService);
+    verifyNoMoreInteractions(authenticatedUser, sessionService);
   }
 
   @Test
@@ -1056,7 +1054,7 @@ class UserControllerAuthorizationIT {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(authenticatedUser, sessionService, monitoringService);
+    verifyNoMoreInteractions(authenticatedUser, sessionService);
   }
 
   @Test
@@ -1069,7 +1067,7 @@ class UserControllerAuthorizationIT {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(authenticatedUser, sessionService, monitoringService);
+    verifyNoMoreInteractions(authenticatedUser, sessionService);
   }
 
   /** POST on /users/askers/import (role: technical) */

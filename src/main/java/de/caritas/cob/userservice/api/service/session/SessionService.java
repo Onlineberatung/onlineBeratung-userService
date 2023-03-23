@@ -35,7 +35,6 @@ import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
-import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.MonitoringDTO;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;

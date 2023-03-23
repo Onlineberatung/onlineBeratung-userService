@@ -22,7 +22,6 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteGroupException;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.User;
-import de.caritas.cob.userservice.api.port.out.MonitoringRepository;
 import de.caritas.cob.userservice.api.port.out.SessionDataRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.workflow.delete.model.AskerDeletionWorkflowDTO;
@@ -48,8 +47,6 @@ public class DeleteAskerRoomsAndSessionsActionTest {
 
   @Mock private SessionDataRepository sessionDataRepository;
 
-  @Mock private MonitoringRepository monitoringRepository;
-
   @Mock private RocketChatService rocketChatService;
 
   @Mock private Logger logger;
@@ -68,7 +65,7 @@ public class DeleteAskerRoomsAndSessionsActionTest {
 
     assertThat(workflowErrors, hasSize(0));
     verifyNoMoreInteractions(
-        this.sessionDataRepository, this.monitoringRepository, this.rocketChatService, this.logger);
+        this.sessionDataRepository, this.rocketChatService, this.logger);
   }
 
   @Test
@@ -85,8 +82,6 @@ public class DeleteAskerRoomsAndSessionsActionTest {
     assertThat(workflowErrors, hasSize(0));
     verifyNoMoreInteractions(this.logger);
     verify(this.rocketChatService, times(2)).deleteGroupAsTechnicalUser(any());
-    verify(this.monitoringRepository, times(1)).findBySessionId(session.getId());
-    verify(this.monitoringRepository, times(1)).deleteAll(any());
     verify(this.sessionDataRepository, times(1)).findBySessionId(session.getId());
     verify(this.sessionDataRepository, times(1)).deleteAll(any());
     verify(this.sessionRepository, times(1)).delete(session);
@@ -101,7 +96,6 @@ public class DeleteAskerRoomsAndSessionsActionTest {
     doThrow(new RocketChatDeleteGroupException(new RuntimeException()))
         .when(this.rocketChatService)
         .deleteGroupAsTechnicalUser(any());
-    doThrow(new RuntimeException()).when(this.monitoringRepository).deleteAll(any());
     doThrow(new RuntimeException()).when(this.sessionDataRepository).deleteAll(any());
     doThrow(new RuntimeException()).when(this.sessionRepository).delete(any());
     AskerDeletionWorkflowDTO workflowDTO =
@@ -123,7 +117,6 @@ public class DeleteAskerRoomsAndSessionsActionTest {
     doThrow(new RocketChatDeleteGroupException(new RuntimeException()))
         .when(this.rocketChatService)
         .deleteGroupAsTechnicalUser(any());
-    doThrow(new RuntimeException()).when(this.monitoringRepository).deleteAll(any());
     doThrow(new RuntimeException()).when(this.sessionDataRepository).deleteAll(any());
     doThrow(new RuntimeException()).when(this.sessionRepository).delete(any());
     AskerDeletionWorkflowDTO workflowDTO =
@@ -168,7 +161,6 @@ public class DeleteAskerRoomsAndSessionsActionTest {
   public void execute_Should_returnExpectedWorkflowError_When_monitoringDeletionFails() {
     Session session = new EasyRandom().nextObject(Session.class);
     when(this.sessionRepository.findByUser(any())).thenReturn(singletonList(session));
-    doThrow(new RuntimeException()).when(this.monitoringRepository).deleteAll(any());
     AskerDeletionWorkflowDTO workflowDTO =
         new AskerDeletionWorkflowDTO(new User(), new ArrayList<>());
 

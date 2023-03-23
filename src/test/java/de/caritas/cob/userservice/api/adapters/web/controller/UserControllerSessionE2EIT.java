@@ -51,7 +51,6 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserInfoRespo
 import de.caritas.cob.userservice.api.adapters.web.dto.AliasMessageDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.EnquiryMessageDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.MessageType;
-import de.caritas.cob.userservice.api.adapters.web.dto.MonitoringDTO;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
 import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
@@ -248,7 +247,6 @@ class UserControllerSessionE2EIT {
     userInfoResponse = null;
     subscriptionsGetResponse = null;
     identityConfig.setDisplayNameAllowedForConsultants(false);
-    monitoringDTO = null;
     consultantToAssign = null;
   }
 
@@ -1208,7 +1206,7 @@ class UserControllerSessionE2EIT {
             any(HttpEntity.class), eq(SubscriptionsGetDTO.class)))
         .thenReturn(ResponseEntity.ok(subscriptionsGetResponse));
   }
-  
+
   private void givenAValidConsultant() {
     givenAValidConsultant(false);
   }

@@ -31,7 +31,6 @@ import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
-import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
 import de.caritas.cob.userservice.api.service.message.RocketChatData;
 import de.caritas.cob.userservice.api.service.session.SessionService;
@@ -61,7 +60,6 @@ public class CreateEnquiryMessageFacade {
   private final @NonNull EmailNotificationFacade emailNotificationFacade;
   private final @NonNull MessageServiceProvider messageServiceProvider;
   private final @NonNull ConsultantAgencyService consultantAgencyService;
-  private final @NonNull MonitoringService monitoringService;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
   private final @NonNull UserHelper userHelper;
   private final @NonNull UserService userService;
@@ -72,7 +70,7 @@ public class CreateEnquiryMessageFacade {
   private String rocketChatSystemUserId;
 
   /**
-   * Creates the private Rocket.Chat group, initializes the session monitoring and saves the enquiry
+   * Creates the private Rocket.Chat group, initializes the session and saves the enquiry
    * message in Rocket.Chat.
    *
    * @param enquiryData data necessary for creating the enquiry message

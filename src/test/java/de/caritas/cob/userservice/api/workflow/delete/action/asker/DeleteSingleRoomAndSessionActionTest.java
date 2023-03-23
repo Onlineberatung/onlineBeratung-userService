@@ -19,7 +19,6 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteGroupException;
 import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.port.out.MonitoringRepository;
 import de.caritas.cob.userservice.api.port.out.SessionDataRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
@@ -44,8 +43,6 @@ public class DeleteSingleRoomAndSessionActionTest {
 
   @Mock private SessionDataRepository sessionDataRepository;
 
-  @Mock private MonitoringRepository monitoringRepository;
-
   @Mock private RocketChatService rocketChatService;
 
   @Mock private Logger logger;
@@ -68,8 +65,6 @@ public class DeleteSingleRoomAndSessionActionTest {
     assertThat(workflowErrors, hasSize(0));
     verifyNoMoreInteractions(this.logger);
     verify(this.rocketChatService, times(2)).deleteGroupAsTechnicalUser(any());
-    verify(this.monitoringRepository, times(1)).findBySessionId(session.getId());
-    verify(this.monitoringRepository, times(1)).deleteAll(any());
     verify(this.sessionDataRepository, times(1)).findBySessionId(session.getId());
     verify(this.sessionDataRepository, times(1)).deleteAll(any());
     verify(this.sessionRepository, times(1)).delete(session);
@@ -83,7 +78,6 @@ public class DeleteSingleRoomAndSessionActionTest {
     doThrow(new RocketChatDeleteGroupException(new RuntimeException()))
         .when(this.rocketChatService)
         .deleteGroupAsTechnicalUser(any());
-    doThrow(new RuntimeException()).when(this.monitoringRepository).deleteAll(any());
     doThrow(new RuntimeException()).when(this.sessionDataRepository).deleteAll(any());
     doThrow(new RuntimeException()).when(this.sessionRepository).delete(any());
     SessionDeletionWorkflowDTO workflowDTO =
@@ -126,7 +120,6 @@ public class DeleteSingleRoomAndSessionActionTest {
   @Test
   public void execute_Should_returnExpectedWorkflowError_When_monitoringDeletionFails() {
     Session session = new EasyRandom().nextObject(Session.class);
-    doThrow(new RuntimeException()).when(this.monitoringRepository).deleteAll(any());
     SessionDeletionWorkflowDTO workflowDTO =
         new SessionDeletionWorkflowDTO(session, new ArrayList<>());
 

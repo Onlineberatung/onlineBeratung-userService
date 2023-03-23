@@ -7,7 +7,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatDeleteGroupException;
 import de.caritas.cob.userservice.api.model.Session;
-import de.caritas.cob.userservice.api.port.out.MonitoringRepository;
 import de.caritas.cob.userservice.api.port.out.SessionDataRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionTargetType;
@@ -23,7 +22,6 @@ abstract class DeleteRoomsAndSessionAction {
 
   protected final @NonNull SessionRepository sessionRepository;
   protected final @NonNull SessionDataRepository sessionDataRepository;
-  protected final @NonNull MonitoringRepository monitoringRepository;
   protected final @NonNull RocketChatService rocketChatService;
 
   void deleteRocketChatGroup(String rcGroupId, List<DeletionWorkflowError> workflowErrors) {
@@ -81,7 +79,6 @@ abstract class DeleteRoomsAndSessionAction {
 
     deleteRocketChatGroup(session.getGroupId(), workflowErrors);
     deleteRocketChatGroup(session.getFeedbackGroupId(), workflowErrors);
-    deleteMonitorings(session, workflowErrors);
     deleteSessionData(session, workflowErrors);
     deleteSession(session, workflowErrors);
   }

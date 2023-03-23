@@ -911,7 +911,6 @@ class UserControllerConsultantE2EIT {
         .andExpect(jsonPath("askerId", is("06c6601f-a5b4-4812-9260-20065390b1f5")))
         .andExpect(jsonPath("askerUserName", is("enc.OUZDK5DFON2DGNJVGU2Q....")))
         .andExpect(jsonPath("isTeamSession", is(true)))
-        .andExpect(jsonPath("isMonitoring", is(true)))
         .andExpect(jsonPath("postcode", is("12345")))
         .andExpect(jsonPath("age", is(15)))
         .andExpect(jsonPath("gender", is("FEMALE")))

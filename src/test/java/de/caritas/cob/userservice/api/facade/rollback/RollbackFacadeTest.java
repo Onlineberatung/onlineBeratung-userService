@@ -8,7 +8,6 @@ import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.model.UserAgency;
-import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.UserAgencyService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.UserService;
@@ -27,7 +26,6 @@ public class RollbackFacadeTest {
   @Mock private UserAgencyService userAgencyService;
   @Mock private SessionService sessionService;
   @Mock private UserService userService;
-  @Mock private MonitoringService monitoringService;
 
   @Test
   public void rollBackUserAccount_Should_DeleteSessionAndMonitoring_When_SessionIsGiven() {

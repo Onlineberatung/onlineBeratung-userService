@@ -9,7 +9,6 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.NewRegistrationResponseDto;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
-import de.caritas.cob.userservice.api.exception.CreateMonitoringException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -19,7 +18,6 @@ import de.caritas.cob.userservice.api.helper.AgencyVerifier;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.User;
-import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
@@ -38,7 +36,6 @@ public class CreateSessionFacade {
 
   private final @NonNull SessionService sessionService;
   private final @NonNull AgencyVerifier agencyVerifier;
-  private final @NonNull MonitoringService monitoringService;
   private final @NonNull SessionDataService sessionDataService;
   private final @NonNull RollbackFacade rollbackFacade;
   private final @NonNull ValidatedUserAccountProvider userAccountProvider;
@@ -100,7 +97,6 @@ public class CreateSessionFacade {
         sessionService.initializeDirectSession(
             consultant, user, userDTO, agencyDTO.getTeamAgency());
     sessionDataService.saveSessionData(session, fromUserDTO(userDTO));
-    initializeMonitoring(userDTO, user, extendedConsultingTypeResponseDTO, session);
     session.setConsultant(consultant);
     sessionService.saveSession(session);
 

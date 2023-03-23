@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.facade;
 
-import static de.caritas.cob.userservice.api.testHelper.ExceptionConstants.CREATE_MONITORING_EXCEPTION;
 import static de.caritas.cob.userservice.api.testHelper.ExceptionConstants.INTERNAL_SERVER_ERROR_EXCEPTION;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_DTO_U25;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_ID;
@@ -34,7 +33,6 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
-import de.caritas.cob.userservice.api.exception.CreateMonitoringException;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -42,7 +40,6 @@ import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.helper.AgencyVerifier;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
@@ -64,7 +61,6 @@ public class CreateSessionFacadeTest {
   @InjectMocks private CreateSessionFacade createSessionFacade;
   @Mock private SessionService sessionService;
   @Mock private AgencyVerifier agencyVerifier;
-  @Mock private MonitoringService monitoringService;
   @Mock private SessionDataService sessionDataService;
   @Mock private RollbackFacade rollbackFacade;
   @Mock private ValidatedUserAccountProvider userAccountProvider;
