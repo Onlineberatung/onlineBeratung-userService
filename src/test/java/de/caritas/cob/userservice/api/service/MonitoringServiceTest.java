@@ -50,7 +50,6 @@ public class MonitoringServiceTest {
           .postcode(POSTCODE)
           .status(IN_PROGRESS)
           .build();
-  private final MonitoringDTO MONITORING_DTO = new MonitoringDTO();
 
   @Before
   public void setUp() {
@@ -58,7 +57,6 @@ public class MonitoringServiceTest {
     drugsMap.put("others", false);
     HashMap<String, Object> addictiveDrugsMap = new HashMap<>();
     addictiveDrugsMap.put("drugs", drugsMap);
-    MONITORING_DTO.addProperties("addictiveDrugs", addictiveDrugsMap);
     setInternalState(LogService.class, "LOGGER", logger);
   }
 
@@ -136,8 +134,6 @@ public class MonitoringServiceTest {
     doReturn(MONITORING_DTO)
         .when(monitoringStructureProvider)
         .getMonitoringInitialList(Mockito.anyInt());
-
-    monitoringService.rollbackInitializeMonitoring(SESSION);
 
     verify(monitoringService, times(1)).deleteMonitoring(SESSION_ID, MONITORING_DTO);
     verify(monitoringStructureProvider, times(1))

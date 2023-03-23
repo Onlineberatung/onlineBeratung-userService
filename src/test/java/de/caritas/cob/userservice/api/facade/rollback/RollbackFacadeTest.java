@@ -39,7 +39,6 @@ public class RollbackFacadeTest {
     rollbackFacade.rollBackUserAccount(rbUserInfo);
 
     verify(sessionService, times(1)).deleteSession(session);
-    verify(monitoringService, times(1)).rollbackInitializeMonitoring(session);
   }
 
   @Test

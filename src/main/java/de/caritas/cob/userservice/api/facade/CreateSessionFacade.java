@@ -58,7 +58,6 @@ public class CreateSessionFacade {
     checkIfAlreadyRegisteredToConsultingType(user, extendedConsultingTypeResponseDTO.getId());
     var agencyDTO = obtainVerifiedAgency(userDTO, extendedConsultingTypeResponseDTO);
     var session = initializeSession(userDTO, user, agencyDTO);
-    initializeMonitoring(userDTO, user, extendedConsultingTypeResponseDTO, session);
 
     return session.getId();
   }
@@ -106,28 +105,6 @@ public class CreateSessionFacade {
     sessionService.saveSession(session);
 
     return new NewRegistrationResponseDto().sessionId(session.getId()).status(HttpStatus.CREATED);
-  }
-
-  private void initializeMonitoring(
-      UserDTO userDTO,
-      User user,
-      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO,
-      Session session) {
-    try {
-      monitoringService.createMonitoringIfConfigured(session, extendedConsultingTypeResponseDTO);
-    } catch (CreateMonitoringException exception) {
-      rollbackFacade.rollBackUserAccount(
-          RollbackUserAccountInformation.builder()
-              .userId(user.getUserId())
-              .user(user)
-              .rollBackUserAccount(Boolean.parseBoolean(userDTO.getTermsAccepted()))
-              .build());
-
-      throw new InternalServerErrorException(
-          String.format(
-              "Could not create monitoring for session with id %s. %s",
-              session.getId(), exception.getMessage()));
-    }
   }
 
   private Session initializeSession(UserDTO userDTO, User user, AgencyDTO agencyDTO) {

@@ -131,7 +131,6 @@ class SessionServiceIT {
     assertEquals(session.getUser().getRcUserId(), result.getAskerRcId());
     assertEquals(session.getUser().getUsername(), result.getAskerUserName());
     assertEquals(session.getPostcode(), result.getPostcode());
-    assertEquals(session.isMonitoring(), result.getIsMonitoring());
     assertEquals(session.getStatus().getValue(), result.getStatus().intValue());
     assertEquals(session.getGroupId(), result.getGroupId());
     assertEquals(session.getFeedbackGroupId(), result.getFeedbackGroupId());

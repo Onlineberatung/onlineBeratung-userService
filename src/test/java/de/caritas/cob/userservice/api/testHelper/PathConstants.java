@@ -64,8 +64,6 @@ public class PathConstants {
   public static final String PATH_POST_NEW_MESSAGE_NOTIFICATION = "/users/mails/messages/new";
   public static final String PATH_POST_IMPORT_CONSULTANTS = "/users/consultants/import";
   public static final String PATH_POST_IMPORT_ASKERS = "/users/askers/import";
-  public static final String PATH_GET_MONITORING = "/users/sessions/100/monitoring";
-  public static final String PATH_PUT_UPDATE_MONITORING = "/users/sessions/monitoring/100";
   public static final String PATH_GET_CONSULTANTS = "/users/consultants";
   public static final String PATH_POST_CHAT_NEW = "/users/chat/new";
   public static final String PATH_POST_CHAT_NEW_V2 = "/users/chat/v2/new";

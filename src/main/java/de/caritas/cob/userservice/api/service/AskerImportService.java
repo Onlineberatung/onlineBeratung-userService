@@ -545,23 +545,6 @@ public class AskerImportService {
                   rcGroupId, record.getUsername()));
         }
 
-        // Create an initial monitoring data set for the session
-        if (extendedConsultingTypeResponseDTO.getMonitoring().getMonitoringTemplateFile() != null
-            && !extendedConsultingTypeResponseDTO
-                .getMonitoring()
-                .getMonitoringTemplateFile()
-                .equals(StringUtils.EMPTY)) {
-          MonitoringDTO monitoringDTO =
-              monitoringStructureProvider.getMonitoringInitialList(agencyDTO.getConsultingType());
-          if (monitoringDTO != null) {
-            monitoringService.updateMonitoring(session.getId(), monitoringDTO);
-          } else {
-            throw new ImportException(
-                String.format(
-                    "Could not get initial monitoring for user %s", record.getUsername()));
-          }
-        }
-
         // Save session data
         sessionDataService.saveSessionData(session, fromUserDTO(userDTO));
 

@@ -322,7 +322,6 @@ public class EmailNotificationFacadeTest {
           .enquiryMessageDate(nowInUtc())
           .groupId(RC_GROUP_ID)
           .teamSession(IS_NO_TEAM_SESSION)
-          .monitoring(IS_MONITORING)
           .createDate(nowInUtc())
           .build();
 
@@ -338,7 +337,6 @@ public class EmailNotificationFacadeTest {
           .enquiryMessageDate(nowInUtc())
           .groupId(RC_GROUP_ID)
           .teamSession(IS_NO_TEAM_SESSION)
-          .monitoring(IS_MONITORING)
           .createDate(nowInUtc())
           .build();
 
@@ -355,7 +353,6 @@ public class EmailNotificationFacadeTest {
           .enquiryMessageDate(nowInUtc())
           .groupId(RC_GROUP_ID)
           .teamSession(IS_NO_TEAM_SESSION)
-          .monitoring(IS_MONITORING)
           .createDate(nowInUtc())
           .build();
 
@@ -372,7 +369,6 @@ public class EmailNotificationFacadeTest {
           .enquiryMessageDate(nowInUtc())
           .groupId(RC_GROUP_ID)
           .teamSession(IS_NO_TEAM_SESSION)
-          .monitoring(IS_MONITORING)
           .createDate(nowInUtc())
           .build();
 
@@ -389,7 +385,6 @@ public class EmailNotificationFacadeTest {
           .enquiryMessageDate(nowInUtc())
           .groupId(RC_GROUP_ID)
           .teamSession(IS_TEAM_SESSION)
-          .monitoring(IS_MONITORING)
           .createDate(nowInUtc())
           .build();
 
@@ -429,8 +424,6 @@ public class EmailNotificationFacadeTest {
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(null)
-              .monitoring(
-                  new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
               .initializeFeedbackChat(false)
               .notifications(NOTIFICATIONS_DTO_TO_ALL_TEAM_CONSULTANTS)
               .languageFormal(false)
@@ -448,8 +441,6 @@ public class EmailNotificationFacadeTest {
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(null)
-              .monitoring(
-                  new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
               .initializeFeedbackChat(false)
               .notifications(NOTIFICATIONS_DTO_TO_ASSIGNED_CONSULTANT_ONLY)
               .languageFormal(false)

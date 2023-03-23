@@ -61,7 +61,6 @@ class SessionRepositoryIT {
     assertEquals(sessionData.get(1), foundSession.getSessionData().get(1));
     assertFalse(foundSession.isTeamSession());
     assertFalse(foundSession.isPeerChat());
-    assertFalse(foundSession.isMonitoring());
   }
 
   private void givenValidSession() {

@@ -31,7 +31,6 @@ import de.caritas.cob.userservice.api.adapters.web.dto.GroupSessionListResponseD
 import de.caritas.cob.userservice.api.adapters.web.dto.LanguageResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.MasterKeyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.MobileTokenDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.MonitoringDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.NewMessageNotificationDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.NewRegistrationDto;
 import de.caritas.cob.userservice.api.adapters.web.dto.NewRegistrationResponseDto;
@@ -93,7 +92,6 @@ import de.caritas.cob.userservice.api.service.ConsultantImportService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.archive.SessionArchiveService;
 import de.caritas.cob.userservice.api.service.session.SessionFilter;
@@ -140,7 +138,6 @@ public class UserController implements UsersApi {
   private final @NotNull CreateEnquiryMessageFacade createEnquiryMessageFacade;
   private final @NotNull ConsultantImportService consultantImportService;
   private final @NotNull EmailNotificationFacade emailNotificationFacade;
-  private final @NotNull MonitoringService monitoringService;
   private final @NotNull AskerImportService askerImportService;
   private final @NotNull SessionListFacade sessionListFacade;
   private final @NotNull ConsultantAgencyService consultantAgencyService;
@@ -738,71 +735,6 @@ public class UserController implements UsersApi {
     }
 
     return new ResponseEntity<>(HttpStatus.OK);
-  }
-
-  /**
-   * Returns the monitoring for the given session.
-   *
-   * @param sessionId Session Id (required)
-   * @return {@link ResponseEntity} containing {@link MonitoringDTO}
-   */
-  @Override
-  public ResponseEntity<MonitoringDTO> getMonitoring(@PathVariable Long sessionId) {
-    var sessionOptional = sessionService.getSession(sessionId);
-    if (sessionOptional.isEmpty()) {
-      log.warn("Bad request: Session with id {} not found", sessionId);
-
-      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-    }
-
-    var session = sessionOptional.get();
-    var userId = authenticatedUser.getUserId();
-    if (!session.isAdvisedBy(userId) && !accountManager.isTeamAdvisedBy(sessionId, userId)) {
-      log.warn(
-          "Bad request: Consultant with id {} has no permission to access session with id {}",
-          userId,
-          sessionId);
-
-      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-    }
-
-    var responseDTO = monitoringService.getMonitoring(session);
-
-    if (nonNull(responseDTO) && MapUtils.isNotEmpty(responseDTO.getProperties())) {
-      return new ResponseEntity<>(responseDTO, HttpStatus.OK);
-    } else {
-      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-  }
-
-  /**
-   * Updates the monitoring values of a {@link Session}. Only a consultant which is directly
-   * assigned to the session can update the values (MVP only).
-   *
-   * @param sessionId Session Id (required)
-   * @param monitoring {@link MonitoringDTO} (required)
-   * @return {@link ResponseEntity} containing {@link HttpStatus}
-   */
-  @Override
-  public ResponseEntity<Void> updateMonitoring(
-      @PathVariable Long sessionId, @RequestBody MonitoringDTO monitoring) {
-    var sessionOptional = sessionService.getSession(sessionId);
-    if (sessionOptional.isEmpty()) {
-      log.warn("Bad request: Session with id {} not found", sessionId);
-      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-    }
-
-    var userId = authenticatedUser.getUserId();
-    var session = sessionOptional.get();
-    if (session.isAdvisedBy(userId) || accountManager.isTeamAdvisedBy(sessionId, userId)) {
-      monitoringService.updateMonitoring(session.getId(), monitoring);
-      return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    var message =
-        "Unauthorized: Consultant with id {} is not authorized to update monitoring of session {}";
-    log.warn(message, userId, sessionId);
-    return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
   }
 
   /**

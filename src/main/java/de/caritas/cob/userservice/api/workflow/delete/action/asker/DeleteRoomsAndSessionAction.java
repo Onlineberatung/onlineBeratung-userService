@@ -44,23 +44,6 @@ abstract class DeleteRoomsAndSessionAction {
     }
   }
 
-  void deleteMonitorings(Session session, List<DeletionWorkflowError> workflowErrors) {
-    try {
-      var monitorings = this.monitoringRepository.findBySessionId(session.getId());
-      this.monitoringRepository.deleteAll(monitorings);
-    } catch (Exception e) {
-      log.error("UserService delete workflow error: ", e);
-      workflowErrors.add(
-          DeletionWorkflowError.builder()
-              .deletionSourceType(ASKER)
-              .deletionTargetType(DeletionTargetType.DATABASE)
-              .identifier(String.valueOf(session.getId()))
-              .reason("Unable to delete monitorings from session")
-              .timestamp(nowInUtc())
-              .build());
-    }
-  }
-
   void deleteSessionData(Session session, List<DeletionWorkflowError> workflowErrors) {
     try {
       var sessionData = this.sessionDataRepository.findBySessionId(session.getId());

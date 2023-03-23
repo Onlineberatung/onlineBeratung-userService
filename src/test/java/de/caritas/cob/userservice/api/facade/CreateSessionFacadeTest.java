@@ -122,27 +122,6 @@ public class CreateSessionFacadeTest {
     verify(rollbackFacade, times(1)).rollBackUserAccount(any());
   }
 
-  @Test(expected = InternalServerErrorException.class)
-  public void
-      createUserSession_Should_ReturnInternalServerErrorAndRollbackUserAccount_When_MonitoringCouldNotBeSaved()
-          throws CreateMonitoringException {
-
-    when(sessionService.getSessionsForUserId(USER_ID))
-        .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
-    when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0)).thenReturn(AGENCY_DTO_U25);
-    when(sessionService.initializeSession(any(), any(), any(Boolean.class)))
-        .thenReturn(SESSION_WITH_CONSULTANT);
-    doThrow(CREATE_MONITORING_EXCEPTION)
-        .when(monitoringService)
-        .createMonitoringIfConfigured(any(), any());
-
-    createSessionFacade.createUserSession(USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
-
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
-    verify(monitoringService, times(1)).rollbackInitializeMonitoring(any());
-    verify(rollbackFacade, times(1)).rollBackUserAccount(any());
-  }
-
   @Test(expected = BadRequestException.class)
   public void
       createUserSession_Should_ReturnBadRequest_When_AgencyForConsultingTypeCouldNotBeFound() {
@@ -183,44 +162,6 @@ public class CreateSessionFacadeTest {
 
     assertEquals(SESSION_WITHOUT_CONSULTANT.getId(), result);
     verify(sessionDataService, times(1)).saveSessionData(any(Session.class), any());
-  }
-
-  @Test
-  public void createUserSession_Should_CreateMonitoring_When_ConsultingTypeContainsMonitoring()
-      throws CreateMonitoringException {
-
-    when(sessionService.getSessionsForUserId(USER_ID))
-        .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
-    when(agencyVerifier.getVerifiedAgency(USER_DTO_SUCHT.getAgencyId(), 2))
-        .thenReturn(AGENCY_DTO_U25);
-    when(sessionService.initializeSession(any(), any(), any(Boolean.class)))
-        .thenReturn(SESSION_WITHOUT_CONSULTANT);
-
-    Long result =
-        createSessionFacade.createUserSession(
-            USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_PREGNANCY);
-
-    assertEquals(SESSION_WITHOUT_CONSULTANT.getId(), result);
-    verify(monitoringService, times(1)).createMonitoringIfConfigured(any(), any());
-  }
-
-  @Test
-  public void
-      createUserSession_ShouldNot_CreateMonitoring_When_ConsultingTypeDoesNotContainMonitoring() {
-
-    when(sessionService.getSessionsForUserId(USER_ID))
-        .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_SUCHT);
-    when(agencyVerifier.getVerifiedAgency(USER_DTO_SUCHT.getAgencyId(), 14))
-        .thenReturn(AGENCY_DTO_U25);
-    when(sessionService.initializeSession(any(), any(), any(Boolean.class)))
-        .thenReturn(SESSION_WITHOUT_CONSULTANT);
-
-    Long result =
-        createSessionFacade.createUserSession(
-            USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_CHILDREN);
-
-    assertEquals(SESSION_WITHOUT_CONSULTANT.getId(), result);
-    verify(monitoringService, times(0)).updateMonitoring(any(), any());
   }
 
   @Test

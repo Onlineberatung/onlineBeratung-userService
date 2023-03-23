@@ -212,7 +212,6 @@ public class SessionService {
             .status(sessionStatus)
             .teamSession(isTeamSession)
             .isPeerChat(isTrue(extendedConsultingTypeResponseDTO.getIsPeerChat()))
-            .monitoring(retrieveCheckedMonitoringProperty(extendedConsultingTypeResponseDTO))
             .createDate(nowInUtc())
             .updateDate(nowInUtc())
             .mainTopicId(userDto.getMainTopicId())
@@ -257,13 +256,6 @@ public class SessionService {
       throw new BadRequestException("Consulting type id must not be null");
     }
     return consultingTypeId;
-  }
-
-  private boolean retrieveCheckedMonitoringProperty(
-      ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO) {
-    MonitoringDTO monitoring = extendedConsultingTypeResponseDTO.getMonitoring();
-
-    return nonNull(monitoring) && isTrue(monitoring.getInitializeMonitoring());
   }
 
   /**
@@ -633,7 +625,6 @@ public class SessionService {
             .askerUserName(session.getUser().getUsername())
             .feedbackGroupId(session.getFeedbackGroupId())
             .groupId(session.getGroupId())
-            .isMonitoring(session.isMonitoring())
             .postcode(session.getPostcode())
             .consultantId(nonNull(session.getConsultant()) ? session.getConsultant().getId() : null)
             .consultantRcId(

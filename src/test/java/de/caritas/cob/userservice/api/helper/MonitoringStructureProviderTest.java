@@ -37,7 +37,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class MonitoringStructureProviderTest {
 
   private static final Long SESSION_ID = 123L;
-  private static final MonitoringDTO SORTED_MONITORING_DTO = new MonitoringDTO();
   private static final String ALCOHOL = "alcohol";
   private static final String DRUGS = "drugs";
   private static final String OTHERS = "others";

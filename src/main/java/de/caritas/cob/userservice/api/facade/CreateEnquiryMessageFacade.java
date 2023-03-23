@@ -430,8 +430,6 @@ public class CreateEnquiryMessageFacade {
     if (nonNull(createEnquiryExceptionInformation)) {
       rollbackCreateGroup(createEnquiryExceptionInformation.getRcGroupId(), rocketChatCredentials);
       rollbackCreateGroupAsSystemUser(createEnquiryExceptionInformation.getRcFeedbackGroupId());
-      monitoringService.rollbackInitializeMonitoring(
-          createEnquiryExceptionInformation.getSession());
     }
   }
 

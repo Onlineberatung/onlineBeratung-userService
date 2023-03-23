@@ -60,8 +60,6 @@ public class ConsultantSessionEnricher {
     var session = consultantSessionResponseDTO.getSession();
     var groupId = session.getGroupId();
 
-    session.setMonitoring(getMonitoringProperty(session));
-
     session.setMessagesRead(
         sessionListAnalyser.areMessagesForRocketChatGroupReadByUser(
             rocketChatRoomInformation.getReadMessages(), groupId));
@@ -93,16 +91,6 @@ public class ConsultantSessionEnricher {
       sessionTopicEnrichmentService.enrichSessionWithTopicData(
           consultantSessionResponseDTO.getSession());
     }
-  }
-
-  private boolean getMonitoringProperty(SessionDTO session) {
-
-    var extendedConsultingTypeResponseDTO =
-        consultingTypeManager.getConsultingTypeSettings(session.getConsultingType());
-
-    return nonNull(extendedConsultingTypeResponseDTO)
-        && nonNull(extendedConsultingTypeResponseDTO.getMonitoring())
-        && isTrue(extendedConsultingTypeResponseDTO.getMonitoring().getInitializeMonitoring());
   }
 
   private boolean isFeedbackFlagAvailable(

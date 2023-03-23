@@ -116,23 +116,6 @@ public class MonitoringStructureProvider {
         });
   }
 
-  /**
-   * Creates the initial monitoring data of a session for the given consultingType ID. The structure
-   * (JSON) is being imported from the JSON file provided in the {@link
-   * ExtendedConsultingTypeResponseDTO}.
-   *
-   * @param consultingTypeId the consultingType ID to load the initial monitoring
-   * @return the generated {@link MonitoringDTO}
-   */
-  public MonitoringDTO getMonitoringInitialList(int consultingTypeId) {
-    var inputStream = getMonitoringJSONStream(consultingTypeId);
-    try {
-      return new ObjectMapper().readValue(inputStream, MonitoringDTO.class);
-    } catch (IOException ex) {
-      throw new InitializeMonitoringException(ex);
-    }
-  }
-
   private InputStream getMonitoringJSONStream(int consultingTypeId) {
     String monitoringFilePath = null;
     try {

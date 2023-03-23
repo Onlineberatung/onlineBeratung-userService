@@ -40,31 +40,7 @@ public class MonitoringService {
    * @param extendedConsultingTypeResponseDTO {@link ExtendedConsultingTypeResponseDTO}
    * @throws CreateMonitoringException @link CreateMonitoringException}
    */
-  public void createMonitoringIfConfigured(
-      Session session, ExtendedConsultingTypeResponseDTO extendedConsultingTypeResponseDTO)
-      throws CreateMonitoringException {
 
-    var monitoring = extendedConsultingTypeResponseDTO.getMonitoring();
-    if (nonNull(session) && nonNull(monitoring) && isTrue(monitoring.getInitializeMonitoring())) {
-      try {
-        updateMonitoring(
-            session.getId(),
-            monitoringStructureProvider.getMonitoringInitialList(session.getConsultingTypeId()));
-      } catch (Exception exception) {
-        CreateEnquiryExceptionInformation exceptionInformation =
-            CreateEnquiryExceptionInformation.builder()
-                .session(session)
-                .rcGroupId(session.getGroupId())
-                .build();
-        throw new CreateMonitoringException(
-            String.format(
-                "Could not create monitoring for session %s with consultingType %s",
-                session.getId(), extendedConsultingTypeResponseDTO.getId()),
-            exception,
-            exceptionInformation);
-      }
-    }
-  }
 
   /**
    * Returns the monitoring for the given session.
@@ -174,25 +150,4 @@ public class MonitoringService {
     return map;
   }
 
-  /**
-   * Roll back the initialization of the monitoring data for a {@link Session}.
-   *
-   * @param session {@link Session}
-   */
-  public void rollbackInitializeMonitoring(Session session) {
-    if (nonNull(session)) {
-      try {
-        deleteMonitoring(
-            session.getId(),
-            monitoringStructureProvider.getMonitoringInitialList(session.getConsultingTypeId()));
-
-      } catch (InternalServerErrorException ex) {
-        log.error(
-            "Internal Server Error: Error during monitoring rollback. Monitoring data could "
-                + "not be deleted for session: {}",
-            session,
-            ex);
-      }
-    }
-  }
 }

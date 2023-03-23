@@ -195,8 +195,6 @@ public class SessionDataProviderTest {
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING_WITH_ALL_SESSION_DATA_ITEMS)
-              .monitoring(
-                  new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
               .initializeFeedbackChat(false)
               .notifications(null)
               .languageFormal(false)
@@ -222,8 +220,6 @@ public class SessionDataProviderTest {
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING_WITH_NO_SESSION_DATA_ITEMS)
-              .monitoring(
-                  new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
               .initializeFeedbackChat(false)
               .notifications(null)
               .languageFormal(false)
