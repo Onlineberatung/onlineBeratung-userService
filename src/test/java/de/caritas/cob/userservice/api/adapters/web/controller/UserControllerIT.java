@@ -117,7 +117,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.contains;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -312,7 +311,7 @@ public class UserControllerIT {
           .groupId(RC_GROUP_ID)
           .askerRcId(RC_USER_ID)
           .messageDate(MESSAGE_DATE)
-          .isTeamSession(IS_NO_TEAM_SESSION)
+          .isTeamSession(IS_NO_TEAM_SESSION);
   private final AgencyDTO AGENCY_DTO =
       new AgencyDTO()
           .id(AGENCY_ID)

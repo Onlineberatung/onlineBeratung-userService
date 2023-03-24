@@ -27,7 +27,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -167,7 +166,7 @@ public class ConsultantSessionEnricherTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    
+
     ConsultantSessionResponseDTO result =
         consultantSessionEnricher
             .updateRequiredConsultantSessionValues(
@@ -270,13 +269,12 @@ public class ConsultantSessionEnricherTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    
+
     ConsultantSessionResponseDTO result =
         consultantSessionEnricher
             .updateRequiredConsultantSessionValues(
                 singletonList(CONSULTANT_SESSION_RESPONSE_DTO), RC_TOKEN, CONSULTANT)
             .get(0);
-
   }
 
   @Test
@@ -292,13 +290,12 @@ public class ConsultantSessionEnricherTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    
+
     ConsultantSessionResponseDTO result =
         consultantSessionEnricher
             .updateRequiredConsultantSessionValues(
                 singletonList(CONSULTANT_SESSION_RESPONSE_DTO), RC_TOKEN, CONSULTANT)
             .get(0);
-
   }
 
   @Test
@@ -394,7 +391,7 @@ public class ConsultantSessionEnricherTest {
             .build();
     when(rocketChatRoomInformationProvider.retrieveRocketChatInformation(Mockito.any()))
         .thenReturn(rocketChatRoomInformation);
-    
+
     ConsultantSessionResponseDTO result =
         consultantSessionEnricher
             .updateRequiredConsultantSessionValues(

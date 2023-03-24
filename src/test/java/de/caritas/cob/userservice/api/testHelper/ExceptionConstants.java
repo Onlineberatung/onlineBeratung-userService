@@ -24,7 +24,6 @@ public class ExceptionConstants {
           .session(TestConstants.SESSION)
           .build();
 
-
   /*
    * Rocket.Chat exceptions
    *

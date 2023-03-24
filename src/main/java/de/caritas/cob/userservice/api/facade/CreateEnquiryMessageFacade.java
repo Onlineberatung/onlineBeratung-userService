@@ -70,8 +70,8 @@ public class CreateEnquiryMessageFacade {
   private String rocketChatSystemUserId;
 
   /**
-   * Creates the private Rocket.Chat group, initializes the session and saves the enquiry
-   * message in Rocket.Chat.
+   * Creates the private Rocket.Chat group, initializes the session and saves the enquiry message in
+   * Rocket.Chat.
    *
    * @param enquiryData data necessary for creating the enquiry message
    */

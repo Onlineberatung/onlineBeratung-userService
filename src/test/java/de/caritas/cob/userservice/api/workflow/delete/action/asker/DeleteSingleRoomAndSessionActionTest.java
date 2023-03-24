@@ -86,8 +86,8 @@ public class DeleteSingleRoomAndSessionActionTest {
     this.deleteSingleRoomAndSessionAction.execute(workflowDTO);
     List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
 
-    assertThat(workflowErrors, hasSize(5));
-    verify(logger, times(5)).error(anyString(), any(Exception.class));
+    assertThat(workflowErrors, hasSize(4));
+    verify(logger, times(4)).error(anyString(), any(Exception.class));
   }
 
   @Test
@@ -115,24 +115,6 @@ public class DeleteSingleRoomAndSessionActionTest {
     assertThat(workflowErrors.get(1).getIdentifier(), is(session.getFeedbackGroupId()));
     assertThat(workflowErrors.get(1).getReason(), is("Deletion of Rocket.Chat group failed"));
     assertThat(workflowErrors.get(1).getTimestamp(), notNullValue());
-  }
-
-  @Test
-  public void execute_Should_returnExpectedWorkflowError_When_monitoringDeletionFails() {
-    Session session = new EasyRandom().nextObject(Session.class);
-    SessionDeletionWorkflowDTO workflowDTO =
-        new SessionDeletionWorkflowDTO(session, new ArrayList<>());
-
-    this.deleteSingleRoomAndSessionAction.execute(workflowDTO);
-    List<DeletionWorkflowError> workflowErrors = workflowDTO.getDeletionWorkflowErrors();
-
-    assertThat(workflowErrors, hasSize(1));
-    verify(logger).error(anyString(), any(RuntimeException.class));
-    assertThat(workflowErrors.get(0).getDeletionSourceType(), is(ASKER));
-    assertThat(workflowErrors.get(0).getDeletionTargetType(), is(DATABASE));
-    assertThat(workflowErrors.get(0).getIdentifier(), is(session.getId().toString()));
-    assertThat(workflowErrors.get(0).getReason(), is("Unable to delete monitorings from session"));
-    assertThat(workflowErrors.get(0).getTimestamp(), notNullValue());
   }
 
   @Test

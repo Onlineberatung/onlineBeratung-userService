@@ -1080,7 +1080,7 @@ public class TestConstants {
           .feedbackGroupId(RC_FEEDBACK_GROUP_ID)
           .askerRcId(RC_USER_ID)
           .messageDate(MESSAGE_DATE)
-          .isTeamSession(IS_TEAM_SESSION)
+          .isTeamSession(IS_TEAM_SESSION);
   public static final SessionDTO SESSION_DTO_U25 =
       new SessionDTO()
           .id(SESSION_ID)
@@ -1092,7 +1092,7 @@ public class TestConstants {
           .feedbackGroupId(RC_FEEDBACK_GROUP_ID)
           .askerRcId(RC_USER_ID)
           .messageDate(MESSAGE_DATE)
-          .isTeamSession(IS_TEAM_SESSION)
+          .isTeamSession(IS_TEAM_SESSION);
   public static final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO_SUCHT =
       new UserSessionResponseDTO()
           .session(SESSION_DTO_SUCHT)
@@ -1117,7 +1117,7 @@ public class TestConstants {
           .feedbackGroupId(RC_FEEDBACK_GROUP_ID)
           .askerRcId(RC_USER_ID)
           .messageDate(Helper.getUnixTimestampFromDate(NOW))
-          .isTeamSession(IS_NO_TEAM_SESSION)
+          .isTeamSession(IS_NO_TEAM_SESSION);
   public static final SessionDTO SESSION_DTO_2 =
       new SessionDTO()
           .id(SESSION_ID)
@@ -1128,7 +1128,7 @@ public class TestConstants {
           .feedbackGroupId(RC_FEEDBACK_GROUP_ID_2)
           .askerRcId(RC_USER_ID_2)
           .messageDate(Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 86400000)))
-          .isTeamSession(IS_NO_TEAM_SESSION)
+          .isTeamSession(IS_NO_TEAM_SESSION);
   public static final SessionDTO SESSION_DTO_3 =
       new SessionDTO()
           .id(SESSION_ID)
@@ -1139,7 +1139,7 @@ public class TestConstants {
           .feedbackGroupId(RC_FEEDBACK_GROUP_ID_3)
           .askerRcId(RC_USER_ID_3)
           .messageDate(Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 8640000)))
-          .isTeamSession(IS_NO_TEAM_SESSION)
+          .isTeamSession(IS_NO_TEAM_SESSION);
   public static final SessionDTO SESSION_DTO_WITH_FEEDBACK =
       new SessionDTO()
           .id(SESSION_ID)
@@ -1744,7 +1744,7 @@ public class TestConstants {
           .groupId(RC_GROUP_ID)
           .askerRcId(RC_USER_ID)
           .messageDate(Helper.getUnixTimestampFromDate(NOW))
-          .isTeamSession(IS_NO_TEAM_SESSION)
+          .isTeamSession(IS_NO_TEAM_SESSION);
   public static final ConsultantSessionResponseDTO
       CONSULTANT_SESSION_RESPONSE_DTO_WITHOUT_FEEDBACK_CHAT =
           new ConsultantSessionResponseDTO()
