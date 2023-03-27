@@ -6,10 +6,8 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.2.xsd">
     <!-- The base changeset contains the database state when liquibase was added to the project -->
 	<include file="db/changelog/changeset/0001_initsql/initSql.xml"/>
-	<include file="db/changelog/changeset/0002_monitoringKeys_feedbackChatClumn/0002_changeSet.xml"/>
 	<include file="db/changelog/changeset/0003_user_attribute_languageFormal/0003_changeSet.xml"/>
 	<include file="db/changelog/changeset/0004_consultant_attribute_languageFormal/0004_changeSet.xml"/>
-	<include file="db/changelog/changeset/0005_session_attribute_isMonitoring/0005_changeSet.xml"/>
 	<include file="db/changelog/changeset/0006_chat/0006_changeSet.xml"/>
 	<include file="db/changelog/changeset/0007_user_agency_relation/0007_changeSet.xml"/>
 	<include file="db/changelog/changeset/0008_chat_extension/0008_changeSet.xml"/>
