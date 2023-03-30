@@ -91,6 +91,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .permitAll()
         .antMatchers(HttpMethod.GET, "/conversations/anonymous/{sessionId:[0-9]+}")
         .hasAnyAuthority(ANONYMOUS_DEFAULT)
+        .antMatchers("/users/notifications")
+        .hasAnyAuthority(NOTIFICATIONS_TECHNICAL)
         .antMatchers("/users/data")
         .hasAnyAuthority(
             ANONYMOUS_DEFAULT,

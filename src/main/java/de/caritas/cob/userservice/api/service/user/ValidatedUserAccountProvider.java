@@ -40,6 +40,14 @@ public class ValidatedUserAccountProvider {
 
   private final @NonNull IdentityClientConfig identityClientConfig;
 
+  public Optional<User> findUserByEmail(String email) {
+    return this.userService.findUserByEmail(email);
+  }
+
+  public Optional<Consultant> findConsultantByEmail(String email) {
+    return this.consultantService.findConsultantByEmail(email);
+  }
+
   /**
    * Tries to retrieve the user of the current {@link AuthenticatedUser} and throws an 500 - Server
    * Error if {@link User} is not present.
