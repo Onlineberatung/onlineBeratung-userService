@@ -175,7 +175,7 @@ public class AppointmentController implements AppointmentsApi {
     var response = createEnquiryMessageFacade.createEnquiryMessage(enquiryData);
 
     var consultant =
-        consultantService.getConsultantByEmail(enquiryAppointmentDTO.getCounselorEmail());
+        consultantService.findConsultantByEmail(enquiryAppointmentDTO.getCounselorEmail());
     var session = sessionService.getSession(sessionId);
     this.assignEnquiryFacade.assignRegisteredEnquiry(session.get(), consultant.get());
 

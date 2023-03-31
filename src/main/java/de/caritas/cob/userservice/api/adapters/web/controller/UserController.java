@@ -26,6 +26,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.CreateEnquiryMessageRespo
 import de.caritas.cob.userservice.api.adapters.web.dto.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.E2eKeyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.EmailDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.EmailNotificationsDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.EnquiryMessageDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.GroupSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.LanguageResponseDTO;
@@ -75,9 +76,11 @@ import de.caritas.cob.userservice.api.facade.sessionlist.SessionListFacade;
 import de.caritas.cob.userservice.api.facade.userdata.AskerDataProvider;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataProvider;
+import de.caritas.cob.userservice.api.facade.userdata.EmailNotificationMapper;
 import de.caritas.cob.userservice.api.facade.userdata.KeycloakUserDataProvider;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.Chat;
+import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.EnquiryData;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
@@ -176,6 +179,8 @@ public class UserController implements UsersApi {
   private final @NotNull UsersStatisticsFacade usersStatisticsFacade;
 
   private final @NotNull AdminUserFacade adminUserFacade;
+
+  private final @NonNull EmailNotificationMapper emailNotificationMapper;
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
@@ -454,6 +459,32 @@ public class UserController implements UsersApi {
     this.consultantDataFacade.updateConsultantAbsent(consultant, absence);
 
     return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<EmailNotificationsDTO> getUserEmailNotifications(String email) {
+
+    Optional<Consultant> consultantByEmail = userAccountProvider.findConsultantByEmail(email);
+    if (consultantByEmail.isPresent()) {
+      return new ResponseEntity<>(getEmailNotifications(consultantByEmail.get()), HttpStatus.OK);
+    } else {
+      Optional<User> userByEmail = userAccountProvider.findUserByEmail(email);
+      if (userByEmail.isPresent()) {
+        return new ResponseEntity<>(getEmailNotifications(userByEmail.get()), HttpStatus.OK);
+      } else {
+        throw new NotFoundException("No adviceseeker nor consultant with given email found.");
+      }
+    }
+  }
+
+  private EmailNotificationsDTO getEmailNotifications(Consultant consultant) {
+    var consultantDTO = consultantDataProvider.retrieveData(consultant);
+    return consultantDTO.getEmailNotifications();
+  }
+
+  private EmailNotificationsDTO getEmailNotifications(User user) {
+    var userDTO = askerDataProvider.retrieveData(user);
+    return userDTO.getEmailNotifications();
   }
 
   /**

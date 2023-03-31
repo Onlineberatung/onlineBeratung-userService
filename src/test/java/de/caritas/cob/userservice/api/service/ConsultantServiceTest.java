@@ -82,7 +82,7 @@ class ConsultantServiceTest {
     when(consultantRepository.findByEmailAndDeleteDateIsNull(EMAIL))
         .thenReturn(Optional.of(CONSULTANT));
 
-    var result = consultantService.getConsultantByEmail(EMAIL);
+    var result = consultantService.findConsultantByEmail(EMAIL);
 
     assertTrue(result.isPresent());
     assertEquals(CONSULTANT, result.get());

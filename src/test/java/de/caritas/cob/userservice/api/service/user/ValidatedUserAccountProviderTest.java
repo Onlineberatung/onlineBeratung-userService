@@ -38,6 +38,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -55,6 +56,30 @@ public class ValidatedUserAccountProviderTest {
   @Mock private AppointmentService appointmentService;
 
   @Mock private IdentityClientConfig identityClientConfig;
+
+  @Test
+  public void findUserByEmail_Should_CallUserService() {
+    // given
+    String email = "mail@mail.de";
+
+    // when
+    accountProvider.findUserByEmail(email);
+
+    // then
+    Mockito.verify(userService).findUserByEmail(email);
+  }
+
+  @Test
+  public void findConsultantByEmail_Should_CallConsultantService() {
+    // given
+    String email = "mail@mail.de";
+
+    // when
+    accountProvider.findConsultantByEmail(email);
+
+    // then
+    Mockito.verify(consultantService).findConsultantByEmail(email);
+  }
 
   @Test
   public void updateUserEmail_setInitialEmailNotifications() {

@@ -61,7 +61,7 @@ public class ConsultantService {
    * @param email email address
    * @return An {@link Optional} with the {@link Consultant}
    */
-  public Optional<Consultant> getConsultantByEmail(String email) {
+  public Optional<Consultant> findConsultantByEmail(String email) {
     return consultantRepository.findByEmailAndDeleteDateIsNull(email);
   }
 
@@ -98,7 +98,7 @@ public class ConsultantService {
       return consultantOptional;
     }
 
-    consultantOptional = getConsultantByEmail(email);
+    consultantOptional = findConsultantByEmail(email);
     return consultantOptional;
   }
 
