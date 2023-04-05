@@ -180,7 +180,8 @@ class AssignEnquiryFacadeTest {
             argThat(
                 consultantSessionDTO ->
                     consultantSessionDTO.getConsultant().equals(consultant)
-                        && consultantSessionDTO.getSession().equals(session)));
+                        && consultantSessionDTO.getSession().equals(session)),
+            Mockito.eq(false));
   }
 
   private void verifyConsultantAndSessionHaveBeenCheckedButInProgressValidationSkipped(
@@ -190,7 +191,8 @@ class AssignEnquiryFacadeTest {
             argThat(
                 consultantSessionDTO ->
                     consultantSessionDTO.getConsultant().equals(consultant)
-                        && consultantSessionDTO.getSession().equals(session)));
+                        && consultantSessionDTO.getSession().equals(session)),
+            Mockito.eq(true));
   }
 
   @Test
