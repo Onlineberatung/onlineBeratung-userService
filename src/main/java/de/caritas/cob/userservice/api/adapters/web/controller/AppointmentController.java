@@ -45,6 +45,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = "appointment-controller")
 public class AppointmentController implements AppointmentsApi {
 
+  private static final String APPOINTMENT_NOT_FOUND = "Appointment (%s) not found.";
   private final Organizing organizer;
 
   private final AppointmentDtoMapper mapper;
@@ -70,7 +71,7 @@ public class AppointmentController implements AppointmentsApi {
     var appointmentMap =
         organizer
             .findAppointment(id.toString())
-            .orElseThrow(() -> new NotFoundException("Appointment (%s) not found.", id.toString()));
+            .orElseThrow(() -> new NotFoundException(APPOINTMENT_NOT_FOUND, id.toString()));
 
     var appointment = mapper.appointmentOf(appointmentMap, currentUser.isConsultant());
 
@@ -85,7 +86,7 @@ public class AppointmentController implements AppointmentsApi {
     var savedAppointmentMap =
         organizer
             .findAppointment(id.toString())
-            .orElseThrow(() -> new NotFoundException("Appointment (%s) not found.", id.toString()));
+            .orElseThrow(() -> new NotFoundException(APPOINTMENT_NOT_FOUND, id.toString()));
 
     var updatedAppointmentMap = mapper.mapOf(savedAppointmentMap, appointment);
     var savedMap = organizer.upsertAppointment(updatedAppointmentMap);
@@ -101,7 +102,7 @@ public class AppointmentController implements AppointmentsApi {
   @Override
   public ResponseEntity<Void> deleteAppointment(UUID id) {
     if (!organizer.deleteAppointment(id.toString())) {
-      throw new NotFoundException("Appointment (%s) not found.", id.toString());
+      throw new NotFoundException(APPOINTMENT_NOT_FOUND, id.toString());
     }
 
     return ResponseEntity.noContent().build();
@@ -177,7 +178,8 @@ public class AppointmentController implements AppointmentsApi {
     var consultant =
         consultantService.findConsultantByEmail(enquiryAppointmentDTO.getCounselorEmail());
     var session = sessionService.getSession(sessionId);
-    this.assignEnquiryFacade.assignRegisteredEnquiry(session.get(), consultant.get());
+
+    this.assignEnquiryFacade.assignRegisteredEnquiry(session.orElseThrow(), consultant.orElseThrow(), true);
 
     return new ResponseEntity<>(response, HttpStatus.CREATED);
   }

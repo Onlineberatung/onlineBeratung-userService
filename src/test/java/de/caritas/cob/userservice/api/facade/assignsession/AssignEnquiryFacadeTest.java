@@ -110,6 +110,17 @@ class AssignEnquiryFacadeTest {
   }
 
   @Test
+  void
+      assignRegisteredEnquiry_Should_ReturnOKAndNotRemoveSystemUser_AndSkipInProgressValidationIfSkipInProgressCheckIsRequired() {
+    assignEnquiryFacade.assignRegisteredEnquiry(
+        FEEDBACKSESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY, true);
+
+    verifyConsultantAndSessionHaveBeenCheckedButInProgressValidationSkipped(
+        FEEDBACKSESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
+    verify(rocketChatFacade, times(0)).removeUserFromGroup(ROCKET_CHAT_SYSTEM_USER_ID, RC_GROUP_ID);
+  }
+
+  @Test
   void assignEnquiry_Should_FireAssignSessionStatisticsEvent() {
     when(httpServletRequest.getRequestURI()).thenReturn(RandomStringUtils.randomAlphanumeric(32));
     when(httpServletRequest.getHeader("Referer"))
@@ -164,6 +175,16 @@ class AssignEnquiryFacadeTest {
                 consultantSessionDTO ->
                     consultantSessionDTO.getConsultant().equals(consultant)
                         && consultantSessionDTO.getSession().equals(session)));
+    verify(sessionToConsultantVerifier, times(1))
+        .verifyPreconditionsForAssignment(
+            argThat(
+                consultantSessionDTO ->
+                    consultantSessionDTO.getConsultant().equals(consultant)
+                        && consultantSessionDTO.getSession().equals(session)));
+  }
+
+  private void verifyConsultantAndSessionHaveBeenCheckedButInProgressValidationSkipped(
+      Session session, Consultant consultant) {
     verify(sessionToConsultantVerifier, times(1))
         .verifyPreconditionsForAssignment(
             argThat(

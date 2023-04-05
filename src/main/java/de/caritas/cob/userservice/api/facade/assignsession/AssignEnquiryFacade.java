@@ -59,9 +59,14 @@ public class AssignEnquiryFacade {
    * @param consultant the consultant to assign
    */
   public void assignRegisteredEnquiry(Session session, Consultant consultant) {
+    assignRegisteredEnquiry(session, consultant, false);
+  }
+
+  public void assignRegisteredEnquiry(
+      Session session, Consultant consultant, boolean skipSessionInProgressCheck) {
     var requestURI = httpServletRequest.getRequestURI();
     var requestReferer = httpServletRequest.getHeader(HttpHeaders.REFERER);
-    assignEnquiry(session, consultant);
+    assignEnquiry(session, consultant, skipSessionInProgressCheck);
     supplyAsync(updateRocketChatRooms(session, consultant, TenantContext.getCurrentTenant()))
         .thenRun(
             () -> {
@@ -99,9 +104,16 @@ public class AssignEnquiryFacade {
   }
 
   private void assignEnquiry(Session session, Consultant consultant) {
+    assignEnquiry(session, consultant, false);
+  }
+
+  private void assignEnquiry(
+      Session session, Consultant consultant, boolean skipSessionInProgressCheck) {
     var consultantSessionDTO =
         ConsultantSessionDTO.builder().consultant(consultant).session(session).build();
-    sessionToConsultantVerifier.verifySessionIsNotInProgress(consultantSessionDTO);
+    if (!skipSessionInProgressCheck) {
+      sessionToConsultantVerifier.verifySessionIsNotInProgress(consultantSessionDTO);
+    }
     sessionToConsultantVerifier.verifyPreconditionsForAssignment(consultantSessionDTO);
 
     sessionService.updateConsultantAndStatusForSession(session, consultant, IN_PROGRESS);
