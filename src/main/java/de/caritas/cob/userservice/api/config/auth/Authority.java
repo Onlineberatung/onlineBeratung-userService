@@ -42,6 +42,8 @@ public enum Authority {
           ASSIGN_CONSULTANT_TO_ENQUIRY,
           ASSIGN_CONSULTANT_TO_PEER_SESSION)),
   TECHNICAL(UserRole.TECHNICAL, singletonList(TECHNICAL_DEFAULT)),
+  NOTIFICATIONS_TECHNICAL(
+      UserRole.NOTIFICATIONS_TECHNICAL, singletonList(AuthorityValue.NOTIFICATIONS_TECHNICAL)),
   GROUP_CHAT_CONSULTANT(
       UserRole.GROUP_CHAT_CONSULTANT,
       List.of(CONSULTANT_DEFAULT, CREATE_NEW_CHAT, START_CHAT, STOP_CHAT, UPDATE_CHAT)),
@@ -70,6 +72,7 @@ public enum Authority {
 
     public static final String PREFIX = "AUTHORIZATION_";
     public static final String ANONYMOUS_DEFAULT = PREFIX + "ANONYMOUS_DEFAULT";
+    public static final String NOTIFICATIONS_TECHNICAL = PREFIX + "NOTIFICATIONS_TECHNICAL";
     public static final String USER_DEFAULT = PREFIX + "USER_DEFAULT";
     public static final String CONSULTANT_DEFAULT = PREFIX + "CONSULTANT_DEFAULT";
     public static final String USE_FEEDBACK = PREFIX + "USE_FEEDBACK";

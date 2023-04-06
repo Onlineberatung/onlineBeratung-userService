@@ -37,8 +37,11 @@ public class SessionToConsultantVerifier {
   }
 
   /** verifies necessary input data of {@link Session} and {@link Consultant}. */
-  public void verifyPreconditionsForAssignment(ConsultantSessionDTO consultantSessionDTO) {
-    verifyIfSessionIsAlreadyAssignedToConsultant(consultantSessionDTO);
+  public void verifyPreconditionsForAssignment(
+      ConsultantSessionDTO consultantSessionDTO, boolean skipSameConsultantAssignmentVerification) {
+    verifyIfSessionIsAlreadyAssignedToConsultant(
+        consultantSessionDTO, skipSameConsultantAssignmentVerification);
+
     verifyUserAndConsultantHaveRocketChatId(consultantSessionDTO);
     if (REGISTERED.equals(consultantSessionDTO.getSession().getRegistrationType())) {
       verifyIfConsultantIsAssignedToAgency(consultantSessionDTO);
@@ -48,8 +51,12 @@ public class SessionToConsultantVerifier {
     }
   }
 
+  public void verifyPreconditionsForAssignment(ConsultantSessionDTO consultantSessionDTO) {
+    verifyPreconditionsForAssignment(consultantSessionDTO, false);
+  }
+
   private void verifyIfSessionIsAlreadyAssignedToConsultant(
-      ConsultantSessionDTO consultantSessionDTO) {
+      ConsultantSessionDTO consultantSessionDTO, boolean skipSameConsultantAssignmentVerification) {
 
     if (this.conditionProvider.hasSessionNoConsultant(consultantSessionDTO.getSession())) {
       return;
@@ -65,8 +72,9 @@ public class SessionToConsultantVerifier {
       throw new ConflictException(message, LogService::logAssignSessionFacadeWarning);
     }
 
-    if (this.conditionProvider.isSessionAlreadyAssignedToConsultant(
-        consultantSessionDTO.getConsultant(), consultantSessionDTO.getSession())) {
+    if (!skipSameConsultantAssignmentVerification
+        && this.conditionProvider.isSessionAlreadyAssignedToConsultant(
+            consultantSessionDTO.getConsultant(), consultantSessionDTO.getSession())) {
       var message =
           String.format(
               "Session %s is already assigned to this consultant. Assignment to consultant %s is not possible.",

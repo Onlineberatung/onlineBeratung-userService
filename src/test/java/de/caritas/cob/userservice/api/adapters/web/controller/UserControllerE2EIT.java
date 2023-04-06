@@ -549,6 +549,74 @@ class UserControllerE2EIT {
   }
 
   @Test
+  @WithMockUser(authorities = {AuthorityValue.NOTIFICATIONS_TECHNICAL})
+  void getNotificationDataShouldGetNotificationDataForExistingConsultant() throws Exception {
+
+    mockMvc
+        .perform(
+            get("/users/notifications")
+                .param("email", "emigration@consultant.de")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("emailNotificationsEnabled", is(true)))
+        .andExpect(jsonPath("settings.initialEnquiryNotificationEnabled", is(true)))
+        .andExpect(jsonPath("settings.newChatMessageNotificationEnabled", is(true)))
+        .andExpect(jsonPath("settings.reassignmentNotificationEnabled", is(true)))
+        .andExpect(jsonPath("settings.appointmentNotificationEnabled", is(true)));
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.NOTIFICATIONS_TECHNICAL})
+  void getNotificationDataShouldGetNotificationDataForExistingAdviceSeeker() throws Exception {
+    givenConsultingTypeServiceResponse();
+    mockMvc
+        .perform(
+            get("/users/notifications")
+                .param("email", "fd639b0e-4e90-415e-9cd4-372781b71ce4@beratungcaritas.de")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("emailNotificationsEnabled", is(false)))
+        .andExpect(jsonPath("settings.initialEnquiryNotificationEnabled", is(false)))
+        .andExpect(jsonPath("settings.newChatMessageNotificationEnabled", is(false)))
+        .andExpect(jsonPath("settings.reassignmentNotificationEnabled", is(false)))
+        .andExpect(jsonPath("settings.appointmentNotificationEnabled", is(false)));
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
+  void getNotificationDataShouldReturnAccessDeniedIfDoesNotHaveNotificationsTechnicalAuthority()
+      throws Exception {
+
+    mockMvc
+        .perform(
+            get("/users/notifications")
+                .param("email", "emigration@consultant.de")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.NOTIFICATIONS_TECHNICAL})
+  void getNotificationDataShouldReturnNotFoundForMailNotMatchingAnyAdviceSeekerNorConsultant()
+      throws Exception {
+
+    mockMvc
+        .perform(
+            get("/users/notifications")
+                .param("email", "dummymail@dummy.de")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   void getSessionsForAuthenticatedConsultant_ShouldGetSessionsWithTopics() throws Exception {
     givenABearerToken();

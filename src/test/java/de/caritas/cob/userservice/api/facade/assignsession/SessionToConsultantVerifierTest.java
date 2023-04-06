@@ -16,6 +16,7 @@ import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.RegistrationType;
 import de.caritas.cob.userservice.api.model.User;
+import org.assertj.core.api.Fail;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -73,6 +74,25 @@ class SessionToConsultantVerifierTest {
     assertThrows(
         ConflictException.class,
         () -> sessionToConsultantVerifier.verifyPreconditionsForAssignment(consultantSessionDTO));
+  }
+
+  @Test
+  void
+      verifyPreconditionsForAssignment_Should_Not_throwException_When_sessionIsAlreadyAssignedToConsultantButSkipSameConsultantVerificationIsEnabled() {
+    //    when(sessionToConsultantConditionProvider.isSessionAlreadyAssignedToConsultant(any(),
+    // any()))
+    //        .thenReturn(true);
+    ConsultantSessionDTO consultantSessionDTO =
+        ConsultantSessionDTO.builder()
+            .consultant(mock(Consultant.class))
+            .session(mock(Session.class))
+            .build();
+
+    try {
+      sessionToConsultantVerifier.verifyPreconditionsForAssignment(consultantSessionDTO, true);
+    } catch (Exception ex) {
+      Fail.fail("exception was not expected");
+    }
   }
 
   @Test

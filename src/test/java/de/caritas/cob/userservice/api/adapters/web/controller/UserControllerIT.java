@@ -190,6 +190,7 @@ import de.caritas.cob.userservice.api.facade.sessionlist.SessionListFacade;
 import de.caritas.cob.userservice.api.facade.userdata.AskerDataProvider;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataProvider;
+import de.caritas.cob.userservice.api.facade.userdata.EmailNotificationMapper;
 import de.caritas.cob.userservice.api.facade.userdata.KeycloakUserDataProvider;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
@@ -521,6 +522,8 @@ public class UserControllerIT {
   private VideoChatConfig videoChatConfig;
 
   @MockBean private AdminUserFacade adminUserFacade;
+
+  @MockBean private EmailNotificationMapper emailNotificationMapper;
 
   @Mock private Logger logger;
 

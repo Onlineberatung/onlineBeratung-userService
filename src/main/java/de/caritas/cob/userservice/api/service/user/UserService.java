@@ -133,6 +133,10 @@ public class UserService {
             usernameTranscoder.decodeUsername(username)));
   }
 
+  public Optional<User> findUserByEmail(String email) {
+    return userRepository.findByEmailAndDeleteDateIsNull(email);
+  }
+
   /**
    * Updates/sets the user's Rocket.Chat ID in MariaDB if not already set.
    *
