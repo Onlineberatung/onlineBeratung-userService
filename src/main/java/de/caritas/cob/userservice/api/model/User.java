@@ -41,7 +41,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
     name = "tenantFilter",
     parameters = {@ParamDef(name = "tenantId", type = "long")})
 @Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
-public class User implements TenantAware {
+public class User implements TenantAware, NotificationsAware {
 
   @Id
   @Column(name = "user_id", updatable = false, nullable = false)
@@ -110,6 +110,12 @@ public class User implements TenantAware {
 
   @Column(name = "data_privacy_confirmation", columnDefinition = "datetime")
   private LocalDateTime dataPrivacyConfirmation;
+
+  @Column(name = "notifications_enabled", columnDefinition = "tinyint", nullable = false)
+  private boolean notificationsEnabled;
+
+  @Column(name = "notifications_settings")
+  private String notificationsSettings;
 
   public User(
       @Size(max = 36) @NonNull String userId,

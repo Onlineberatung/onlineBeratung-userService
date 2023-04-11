@@ -40,11 +40,13 @@ import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.NotificationsSettingsDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ReassignmentNotificationDTO;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.EmailNotificationException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
+import de.caritas.cob.userservice.api.helper.json.JsonSerializationUtils;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
@@ -57,6 +59,8 @@ import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import de.caritas.cob.userservice.api.service.consultingtype.ReleaseToggle;
+import de.caritas.cob.userservice.api.service.consultingtype.ReleaseToggleService;
 import de.caritas.cob.userservice.api.service.emailsupplier.AssignEnquiryEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewDirectEnquiryEmailSupplier;
 import de.caritas.cob.userservice.api.service.emailsupplier.NewEnquiryEmailSupplier;
@@ -126,6 +130,8 @@ public class EmailNotificationFacadeTest {
           false,
           LanguageCode.de,
           null,
+          null,
+          false,
           null);
   private final Consultant CONSULTANT_WITHOUT_MAIL =
       new Consultant(
@@ -157,6 +163,8 @@ public class EmailNotificationFacadeTest {
           false,
           LanguageCode.de,
           null,
+          null,
+          false,
           null);
   private final Consultant CONSULTANT2 =
       new Consultant(
@@ -188,6 +196,8 @@ public class EmailNotificationFacadeTest {
           false,
           LanguageCode.de,
           null,
+          null,
+          false,
           null);
   private final Consultant CONSULTANT3 =
       new Consultant(
@@ -219,6 +229,8 @@ public class EmailNotificationFacadeTest {
           false,
           LanguageCode.de,
           null,
+          null,
+          false,
           null);
   private final Consultant CONSULTANT_NO_EMAIL =
       new Consultant(
@@ -250,6 +262,8 @@ public class EmailNotificationFacadeTest {
           false,
           LanguageCode.de,
           null,
+          null,
+          false,
           null);
   private final Consultant ABSENT_CONSULTANT =
       new Consultant(
@@ -281,6 +295,8 @@ public class EmailNotificationFacadeTest {
           false,
           LanguageCode.de,
           null,
+          null,
+          false,
           null);
   private final User USER = new User(USER_ID, null, USERNAME_ENCODED, "email@email.de", false);
   private final User USER_NO_EMAIL = new User(USER_ID, null, "username", "", false);
@@ -412,7 +428,6 @@ public class EmailNotificationFacadeTest {
               .welcomeMessage(
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
-              .sendSaveSessionDataMessage(false)
               .sessionDataInitializing(null)
               .monitoring(
                   new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
@@ -432,7 +447,6 @@ public class EmailNotificationFacadeTest {
               .welcomeMessage(
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
-              .sendSaveSessionDataMessage(false)
               .sessionDataInitializing(null)
               .monitoring(
                   new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
@@ -451,7 +465,6 @@ public class EmailNotificationFacadeTest {
   private NewDirectEnquiryEmailSupplier newDirectEnquiryEmailSupplier;
 
   @Spy private AssignEnquiryEmailSupplier assignEnquiryEmailSupplier;
-
   @Mock private ConsultantAgencyRepository consultantAgencyRepository;
   @Mock private MailService mailService;
   @Mock private AgencyService agencyService;
@@ -462,6 +475,7 @@ public class EmailNotificationFacadeTest {
   @Mock RocketChatService rocketChatService;
   @Mock ConsultingTypeManager consultingTypeManager;
   @Mock IdentityClientConfig identityClientConfig;
+  @Mock ReleaseToggleService releaseToggleService;
 
   @Mock
   @SuppressWarnings("unused")
@@ -484,6 +498,8 @@ public class EmailNotificationFacadeTest {
     setInternalState(AssignEnquiryEmailSupplier.class, "log", logger);
     setInternalState(NewFeedbackEmailSupplier.class, "log", logger);
     setInternalState(NewMessageEmailSupplier.class, "log", logger);
+    when(releaseToggleService.isToggleEnabled(ReleaseToggle.NEW_EMAIL_NOTIFICATIONS))
+        .thenReturn(false);
   }
 
   @Test
@@ -898,6 +914,10 @@ public class EmailNotificationFacadeTest {
     var session = new EasyRandom().nextObject(Session.class);
     when(sessionService.getSessionByGroupId(any())).thenReturn(session);
     session.getUser().setEmail("mail@valid.de");
+    session
+        .getUser()
+        .setNotificationsSettings(
+            JsonSerializationUtils.serializeToJsonString(new NotificationsSettingsDTO()));
 
     emailNotificationFacade.sendReassignRequestNotification("id", null);
 
@@ -916,10 +936,69 @@ public class EmailNotificationFacadeTest {
   }
 
   @Test
+  public void
+      sendReassignRequestNotification_Should_SendEmail_When_NewNotificationModeEnabledAndAskerDoesNotWantToReceiveNotifications() {
+    var session = new EasyRandom().nextObject(Session.class);
+    when(sessionService.getSessionByGroupId(any())).thenReturn(session);
+    session.getUser().setEmail("mail@valid.de");
+    session
+        .getUser()
+        .setNotificationsSettings(
+            JsonSerializationUtils.serializeToJsonString(
+                new NotificationsSettingsDTO().reassignmentNotificationEnabled(false)));
+    when(releaseToggleService.isToggleEnabled(ReleaseToggle.NEW_EMAIL_NOTIFICATIONS))
+        .thenReturn(true);
+
+    emailNotificationFacade.sendReassignRequestNotification("id", null);
+
+    verifyNoInteractions(mailService);
+  }
+
+  @Test
   public void sendReassignConfirmationNotification_Should_sendEmail_When_consultantsExists() {
     var randomConsultant = new EasyRandom().nextObject(Consultant.class);
     when(consultantService.getConsultant(any())).thenReturn(Optional.of(randomConsultant));
     var reassignmentNotification = new EasyRandom().nextObject(ReassignmentNotificationDTO.class);
+    randomConsultant.setNotificationsSettings(
+        JsonSerializationUtils.serializeToJsonString(new NotificationsSettingsDTO()));
+
+    emailNotificationFacade.sendReassignConfirmationNotification(reassignmentNotification, null);
+
+    verifyAsync(a -> mailService.sendEmailNotification(Mockito.any()));
+  }
+
+  @Test
+  public void
+      sendReassignConfirmationNotification_Should_sendNotEmail_When_newEmailNotificationsEnabledAndConsultantsDoesNotWantToReceiveNotifications() {
+    var randomConsultant = new EasyRandom().nextObject(Consultant.class);
+    when(consultantService.getConsultant(any())).thenReturn(Optional.of(randomConsultant));
+    randomConsultant.setNotificationsSettings(
+        JsonSerializationUtils.serializeToJsonString(
+            new NotificationsSettingsDTO().reassignmentNotificationEnabled(false)));
+    var reassignmentNotification = new EasyRandom().nextObject(ReassignmentNotificationDTO.class);
+    randomConsultant.setNotificationsSettings(
+        JsonSerializationUtils.serializeToJsonString(new NotificationsSettingsDTO()));
+    when(releaseToggleService.isToggleEnabled(ReleaseToggle.NEW_EMAIL_NOTIFICATIONS))
+        .thenReturn(true);
+
+    emailNotificationFacade.sendReassignConfirmationNotification(reassignmentNotification, null);
+
+    verifyAsync(a -> mailService.sendEmailNotification(Mockito.any()));
+  }
+
+  @Test
+  public void
+      sendReassignConfirmationNotification_Should_sendEmail_When_newEmailNotificationsEnabledAndConsultantsDoesWantsToReceiveNotifications() {
+    var randomConsultant = new EasyRandom().nextObject(Consultant.class);
+    when(consultantService.getConsultant(any())).thenReturn(Optional.of(randomConsultant));
+    randomConsultant.setNotificationsSettings(
+        JsonSerializationUtils.serializeToJsonString(
+            new NotificationsSettingsDTO().reassignmentNotificationEnabled(true)));
+    var reassignmentNotification = new EasyRandom().nextObject(ReassignmentNotificationDTO.class);
+    randomConsultant.setNotificationsSettings(
+        JsonSerializationUtils.serializeToJsonString(new NotificationsSettingsDTO()));
+    when(releaseToggleService.isToggleEnabled(ReleaseToggle.NEW_EMAIL_NOTIFICATIONS))
+        .thenReturn(true);
 
     emailNotificationFacade.sendReassignConfirmationNotification(reassignmentNotification, null);
 

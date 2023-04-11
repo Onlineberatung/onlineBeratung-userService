@@ -182,7 +182,6 @@ public class CreateEnquiryMessageFacadeTest {
           .welcomeMessage(
               new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
           .sendFurtherStepsMessage(false)
-          .sendSaveSessionDataMessage(false)
           .sessionDataInitializing(SESSION_DATA_INITIALIZING)
           .monitoring(
               new MonitoringDTO()
@@ -203,7 +202,6 @@ public class CreateEnquiryMessageFacadeTest {
           .welcomeMessage(
               new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
           .sendFurtherStepsMessage(false)
-          .sendSaveSessionDataMessage(false)
           .sessionDataInitializing(SESSION_DATA_INITIALIZING)
           .monitoring(
               new MonitoringDTO()
@@ -225,7 +223,6 @@ public class CreateEnquiryMessageFacadeTest {
               .welcomeMessage(
                   new WelcomeMessageDTO().sendWelcomeMessage(true).welcomeMessageText(MESSAGE))
               .sendFurtherStepsMessage(false)
-              .sendSaveSessionDataMessage(false)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING)
               .monitoring(
                   new MonitoringDTO()
@@ -313,6 +310,8 @@ public class CreateEnquiryMessageFacadeTest {
             true,
             LanguageCode.de,
             null,
+            null,
+            false,
             null);
     this.extendedConsultingTypeResponseDTO = new ExtendedConsultingTypeResponseDTO();
     this.extendedConsultingTypeResponseDTO.setWelcomeMessage(new WelcomeMessageDTO());
@@ -1193,7 +1192,7 @@ public class CreateEnquiryMessageFacadeTest {
     verify(messageServiceProvider, times(1))
         .postWelcomeMessageIfConfigured(any(), any(), any(), any());
     verify(messageServiceProvider, times(1))
-        .postFurtherStepsOrSaveSessionDataMessageIfConfigured(anyString(), any(), any());
+        .postFurtherStepsIfConfigured(anyString(), any(), any());
     resetRequestAttributes();
   }
 

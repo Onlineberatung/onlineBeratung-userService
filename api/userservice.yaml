@@ -2634,6 +2634,9 @@ components:
           type: string
           example: 2022-12-07T11:51:01
           description: "Datetime stamp when the user accepted data privacy"
+        emailNotifications:
+          $ref: "#/components/schemas/EmailNotificationsDTO"
+
     PatchUserDTO:
       type: object
       description: at least one property must be set
@@ -2668,6 +2671,8 @@ components:
         available:
           description: mark consultant as (not) available for one-on-one chats, no effect on others
           type: boolean
+        emailNotifications:
+          $ref: "#/components/schemas/EmailNotificationsDTO"
 
     UpdateConsultantDTO:
       type: object
@@ -2703,6 +2708,8 @@ components:
           type: boolean
           example: true
           description: Flag that indicates does the user accepted new data privacy text
+        emailNotifications:
+          $ref: "#/components/schemas/EmailNotificationsDTO"
 
     LanguageCode:
       type: string
@@ -3077,6 +3084,38 @@ components:
           default: true
           nullable: false
           description: indicates if 2FA is supposed to be encouraged
+
+    EmailNotificationsDTO:
+      type: object
+      required:
+        - emailNotificationsEnabled
+      properties:
+        emailNotificationsEnabled:
+          type: boolean
+          example: true
+          default: false
+        settings:
+           $ref: "#/components/schemas/NotificationsSettingsDTO"
+
+    NotificationsSettingsDTO:
+      type: object
+      properties:
+        initialEnquiryNotificationEnabled:
+          type: boolean
+          example: true
+          default: false
+        newChatMessageNotificationEnabled:
+          type: boolean
+          example: true
+          default: false
+        reassignmentNotificationEnabled:
+          type: boolean
+          example: true
+          default: false
+        appointmentNotificationEnabled:
+          type: boolean
+          example: true
+          default: false
 
     OtpType:
       type: string

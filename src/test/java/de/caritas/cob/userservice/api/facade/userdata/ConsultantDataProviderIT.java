@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +52,7 @@ public class ConsultantDataProviderIT {
   @Test
   public void
       retrieveData_Should_returnDataWithHasArchiveTrue_When_ConsultantHasRegisteredSessions() {
-    var consultant = easyRandom.nextObject(Consultant.class);
+    var consultant = giveRandomConsultant();
     consultant.setId("94c3e0b1-0677-4fd2-a7ea-56a71aefd0e8");
     when(agencyService.getAgencies(any())).thenReturn(List.of(new AgencyDTO().consultingType(1)));
     when(consultingTypeManager.getConsultingTypeSettings(anyInt()))
@@ -65,7 +66,7 @@ public class ConsultantDataProviderIT {
   @Test
   public void
       retrieveData_Should_returnDataWithHasArchiveFalse_When_ConsultantHasNoRegisteredSessions() {
-    var consultant = easyRandom.nextObject(Consultant.class);
+    var consultant = giveRandomConsultant();
 
     consultant.setId("42c3x532-0677-4fd2-a7ea-56a71aefd088");
     when(agencyService.getAgencies(any())).thenReturn(List.of(new AgencyDTO().consultingType(1)));
@@ -79,7 +80,8 @@ public class ConsultantDataProviderIT {
 
   @Test
   public void retrieveDataShouldMapMultipleConsultantLanguages() {
-    var consultant = easyRandom.nextObject(Consultant.class);
+    Consultant consultant = giveRandomConsultant();
+
     var languages =
         consultant.getLanguages().stream()
             .map(Language::getLanguageCode)
@@ -93,11 +95,19 @@ public class ConsultantDataProviderIT {
 
   @Test
   public void retrieveDataShouldMapDefaultConsultantLanguages() {
-    var consultant = easyRandom.nextObject(Consultant.class);
+    Consultant consultant = giveRandomConsultant();
+
     consultant.setLanguages(Set.of());
 
     var result = underTest.retrieveData(consultant);
 
     assertEquals(Set.of("de"), result.getLanguages());
+  }
+
+  @NotNull
+  private Consultant giveRandomConsultant() {
+    var consultant = easyRandom.nextObject(Consultant.class);
+    consultant.setNotificationsSettings("");
+    return consultant;
   }
 }

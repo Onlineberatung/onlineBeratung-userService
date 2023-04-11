@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.service.emailsupplier;
 
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
+import static de.caritas.cob.userservice.api.helper.EmailNotificationUtils.deserializeNotificationSettingsOrDefaultIfNull;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.isNull;
@@ -9,6 +10,7 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import com.google.common.collect.Lists;
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -16,11 +18,15 @@ import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
+import de.caritas.cob.userservice.api.model.NotificationSettings;
+import de.caritas.cob.userservice.api.model.NotificationsAware;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.port.out.MessageClient;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
+import de.caritas.cob.userservice.api.service.consultingtype.ReleaseToggle;
+import de.caritas.cob.userservice.api.service.consultingtype.ReleaseToggleService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.NotificationsDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
@@ -51,6 +57,8 @@ public class NewMessageEmailSupplier implements EmailSupplier {
   private boolean multiTenancyEnabled;
   private final TenantTemplateSupplier tenantTemplateSupplier;
   private final MessageClient messageClient;
+
+  private final ReleaseToggleService releaseToggleService;
 
   /**
    * Generates new message notification mails sent to regarding consultants when a user has written
@@ -98,12 +106,33 @@ public class NewMessageEmailSupplier implements EmailSupplier {
     if (isNotEmpty(consultantList)) {
       return consultantList.stream()
           .filter(agency -> !agency.getConsultant().getEmail().isEmpty())
-          .filter(agency -> agency.getConsultant().getNotifyNewChatMessageFromAdviceSeeker())
+          .filter(agency -> wantsToReceiveNotifications(agency.getConsultant()))
           .filter(isConsultantLoggedOut())
           .map(this::toNewConsultantMessageMailDTO)
           .collect(Collectors.toList());
     }
     return emptyList();
+  }
+
+  private boolean wantsToReceiveNotifications(Consultant consultant) {
+
+    if (isNewNotificationToggleEnabled()) {
+      return wantsToReceiveNotificationsAboutNewMessage(consultant);
+    } else {
+      return consultant.getNotifyNewChatMessageFromAdviceSeeker();
+    }
+  }
+
+  private boolean isNewNotificationToggleEnabled() {
+    return releaseToggleService.isToggleEnabled(ReleaseToggle.NEW_EMAIL_NOTIFICATIONS);
+  }
+
+  private boolean wantsToReceiveNotificationsAboutNewMessage(
+      NotificationsAware notificationsAware) {
+    NotificationSettings notificationSettings =
+        deserializeNotificationSettingsOrDefaultIfNull(notificationsAware);
+    return notificationsAware.isNotificationsEnabled()
+        && notificationSettings.isNewChatMessageNotificationEnabled();
   }
 
   private boolean isNotTheFirstMessage() {
@@ -189,9 +218,15 @@ public class NewMessageEmailSupplier implements EmailSupplier {
   }
 
   private List<MailDTO> buildMailForAskerList() {
+
+    var asker = session.getUser();
+    if (isNewNotificationToggleEnabled()
+        && !wantsToReceiveNotificationsAboutNewMessage(session.getUser())) {
+      return Lists.newArrayList();
+    }
+
     var usernameTranscoder = new UsernameTranscoder();
     var consultantUsername = obtainConsultantUsername();
-    var asker = session.getUser();
     var mailDTO =
         buildMailDtoForNewMessageNotificationAsker(
             asker.getEmail(),

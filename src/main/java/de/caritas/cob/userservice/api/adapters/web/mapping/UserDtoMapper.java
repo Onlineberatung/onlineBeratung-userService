@@ -23,6 +23,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserDtoMapper {
 
+  private static final String DISPLAY_NAME = "displayName";
+
   @Value("${feature.appointment.enabled}")
   private boolean appointmentFeatureEnabled;
 
@@ -35,7 +37,7 @@ public class UserDtoMapper {
 
     if (nonNull(otpInfoDTO)) {
       twoFactorAuthDTO.setIsEnabled(true);
-      if (otpInfoDTO.getOtpSetup()) {
+      if (Boolean.TRUE.equals(otpInfoDTO.getOtpSetup())) {
         twoFactorAuthDTO.isActive(true);
         var foreignType = otpInfoDTO.getOtpType();
         if (nonNull(foreignType)) {
@@ -60,8 +62,8 @@ public class UserDtoMapper {
   }
 
   public String displayNameOf(Map<String, Object> consultantMap) {
-    if (consultantMap.containsKey("displayName")) {
-      return (String) consultantMap.get("displayName");
+    if (consultantMap.containsKey(DISPLAY_NAME)) {
+      return (String) consultantMap.get(DISPLAY_NAME);
     }
 
     return null;
@@ -97,7 +99,8 @@ public class UserDtoMapper {
         && isNull(patchUserDTO.getPreferredLanguage())
         && isNull(patchUserDTO.getDataPrivacyConfirmation())
         && isNull(patchUserDTO.getTermsAndConditionsConfirmation())
-        && isNull(patchUserDTO.getAvailable())) {
+        && isNull(patchUserDTO.getAvailable())
+        && isNull(patchUserDTO.getEmailNotifications())) {
       return Optional.empty();
     }
 
@@ -107,7 +110,7 @@ public class UserDtoMapper {
       map.put("encourage2fa", patchUserDTO.getEncourage2fa());
     }
     if (nonNull(patchUserDTO.getDisplayName())) {
-      map.put("displayName", patchUserDTO.getDisplayName());
+      map.put(DISPLAY_NAME, patchUserDTO.getDisplayName());
     }
     if (nonNull(patchUserDTO.getWalkThroughEnabled())) {
       map.put("walkThroughEnabled", patchUserDTO.getWalkThroughEnabled());
@@ -130,6 +133,9 @@ public class UserDtoMapper {
     }
     if (nonNull(patchUserDTO.getAvailable())) {
       map.put("available", patchUserDTO.getAvailable());
+    }
+    if (nonNull(patchUserDTO.getEmailNotifications())) {
+      map.put("emailNotifications", patchUserDTO.getEmailNotifications());
     }
     return Optional.of(map);
   }

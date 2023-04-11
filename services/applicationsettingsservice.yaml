@@ -61,6 +61,10 @@ components:
         useOverviewPage:
           allOf:
             - $ref: '#/components/schemas/FeatureToggleDTO'
+        releaseToggles:
+          type: object
+          additionalProperties:
+            type: object
 
 
     FeatureToggleDTO:

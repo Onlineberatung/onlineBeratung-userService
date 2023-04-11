@@ -149,21 +149,6 @@ public class AssignSessionFacade {
         .removeFromGroupOrRollbackOnFailure();
   }
 
-  private void removeUnauthorizedMembersFromFeedbackGroup(
-      Session session,
-      Consultant consultant,
-      List<GroupMemberDTO> memberList,
-      Consultant consultantToKeep) {
-    var consultantsToRemoveFromRocketChat =
-        unauthorizedMembersProvider.obtainConsultantsToRemove(
-            session.getFeedbackGroupId(), session, consultant, memberList, consultantToKeep);
-
-    RocketChatRemoveFromGroupOperationService.getInstance(
-            this.rocketChatFacade, this.identityClient, this.consultingTypeManager)
-        .onSessionConsultants(Map.of(session, consultantsToRemoveFromRocketChat))
-        .removeFromFeedbackGroupOrRollbackOnFailure();
-  }
-
   private void sendEmailForConsultantChange(Session session, Consultant consultant) {
     if (!authenticatedUser.getUserId().equals(consultant.getId())) {
       emailNotificationFacade.sendAssignEnquiryEmailNotification(
