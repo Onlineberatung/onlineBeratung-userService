@@ -4,12 +4,16 @@ import de.caritas.cob.userservice.api.helper.CustomLocalDateTime;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.model.UserChat;
 import org.jeasy.random.EasyRandom;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.TestPropertySource;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @DataJpaTest
 @TestPropertySource(properties = "spring.profiles.active=testing")
@@ -25,7 +29,7 @@ class UserChatRepositoryTest {
   @Autowired UserRepository userRepository;
 
   @Autowired ConsultantRepository consultantRepository;
-  /*
+
     @Test
     void save_Should_saveUserChatRelation() {
       // given
@@ -53,11 +57,11 @@ class UserChatRepositoryTest {
       var findByChatAndUser = chatUserRepository.findByChatAndUser(chat, user).orElseThrow();
 
       // then
-      assertTha t(findByChatAndUser.getId()).isEqualTo(chatUser.getId());
+      assertThat(findByChatAndUser.getId()).isEqualTo(chatUser.getId());
       assertThat(findByChatAndUser.getUser()).isEqualTo(chatUser.getUser());
       assertThat(findByChatAndUser.getChat()).isEqualTo(chatUser.getChat());
     }
-  */
+
   private Chat givenChat() {
     Chat chat = easyRandom.nextObject(Chat.class);
     chat.setId(null);
