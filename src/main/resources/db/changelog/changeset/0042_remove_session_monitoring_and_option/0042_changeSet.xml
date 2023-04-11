@@ -1,0 +1,6 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+<changeSet author="IoannisLafiotis" id="remove_session_monitoring_and_option">
+    <sqlFile path="db/changelog/changeset/0042_remove_session_monitoring_and_option/remove-session-monitoring-and-option.sql" stripComments="true"/>
+</changeSet>
+</databaseChangeLog>
