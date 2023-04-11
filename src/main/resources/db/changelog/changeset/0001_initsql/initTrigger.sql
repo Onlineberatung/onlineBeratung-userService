@@ -13,3 +13,9 @@ END //
 CREATE TRIGGER `userservice`.`session_data_update` BEFORE UPDATE ON `userservice`.`session_data` FOR EACH ROW BEGIN
 set new.update_date=utc_timestamp();
 END //
+CREATE TRIGGER `userservice`.`session_monitoring_update` BEFORE UPDATE ON `userservice`.`session_monitoring` FOR EACH ROW BEGIN
+set new.update_date=utc_timestamp();
+END //
+CREATE TRIGGER `userservice`.`session_monitoring_option_update` BEFORE UPDATE ON `userservice`.`session_monitoring_option` FOR EACH ROW BEGIN
+set new.update_date=utc_timestamp();
+END //

@@ -83,4 +83,23 @@ INCREMENT BY 1
 MINVALUE = 0
 NOMAXVALUE
 START WITH 0
+`session_id` bigint(21) unsigned NOT NULL,
+  `type` tinyint(4) unsigned NOT NULL,
+  `key_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `value` tinyint(1) DEFAULT NULL,
+  `create_date` datetime NOT NULL DEFAULT (UTC_TIMESTAMP),
+  `update_date` datetime NOT NULL DEFAULT (UTC_TIMESTAMP),
+  PRIMARY KEY (`session_id`,`type`,`key_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+CREATE TABLE `userservice`.`session_monitoring_option` (
+ `session_id` bigint(21) unsigned NOT NULL,
+ `monitoring_type` tinyint(4) unsigned NOT NULL,
+ `monitoring_key_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+ `key_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+ `value` tinyint(1) DEFAULT NULL,
+ `create_date` datetime NOT NULL DEFAULT (UTC_TIMESTAMP),
+ `update_date` datetime NOT NULL DEFAULT (UTC_TIMESTAMP),
+ PRIMARY KEY (`session_id`,`monitoring_type`,`monitoring_key_name`,`key_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
 CACHE 100;
