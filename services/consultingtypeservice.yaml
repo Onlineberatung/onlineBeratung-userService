@@ -1,0 +1,464 @@
+openapi: 3.0.1
+info:
+  title: will be replaced
+  description: This information will be replaced by the SpringFox config information
+  version: 0.0.1
+paths:
+  /consultingtypes/basic:
+    get:
+      tags:
+        - consulting-type-controller
+      summary: 'Returns a list of all consulting types with basic properties '
+      operationId: getBasicConsultingTypeList
+      responses:
+        200:
+          description: successful operation
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/BasicConsultingTypeListResponseDTO'
+        204:
+          description: successful operation, but no content
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+  /consultingtypes/{consultingTypeId}/basic:
+    get:
+      tags:
+        - consulting-type-controller
+      summary: 'Returns the consulting type with basic set of properties for a given consulting type id'
+      operationId: getBasicConsultingTypeById
+      parameters:
+        - name: consultingTypeId
+          in: path
+          description: cnsulting type id
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: successful operation
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/BasicConsultingTypeResponseDTO'
+        404:
+          description: NOT FOUND - ConsultingType not found
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+  /consultingtypes/{consultingTypeId}/extended:
+    get:
+      tags:
+        - consulting-type-controller
+      summary: 'Returns the consulting type with extended set of properties for a given consulting type id'
+      operationId: getExtendedConsultingTypeById
+      parameters:
+        - name: consultingTypeId
+          in: path
+          description: cnsulting type id
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: successful operation
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ExtendedConsultingTypeResponseDTO'
+        404:
+          description: NOT FOUND - ConsultingType not found
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+  /consultingtypes/{consultingTypeId}/full:
+    get:
+      tags:
+        - consulting-type-controller
+      summary: 'Returns the consulting type with all properties for a given consulting type id'
+      operationId: getFullConsultingTypeById
+      parameters:
+        - name: consultingTypeId
+          in: path
+          description: cnsulting type id
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: successful operation
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/FullConsultingTypeResponseDTO'
+        404:
+          description: NOT FOUND - ConsultingType not found
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+  /consultingtypes/byslug/{slug}/full:
+    get:
+      tags:
+        - consulting-type-controller
+      summary: 'Returns the consulting type with all properties for a given consulting type slug'
+      operationId: getFullConsultingTypeBySlug
+      parameters:
+        - name: slug
+          in: path
+          description: cnsulting type slug
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/FullConsultingTypeResponseDTO'
+        404:
+          description: NOT FOUND - ConsultingType not found
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+  /consultingtypes/groups:
+    get:
+      tags:
+        - consulting-type-controller
+      summary: 'Returns the group structure of all consulting types'
+      operationId: getConsultingTypeGroups
+      responses:
+        200:
+          description: successful operation
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ConsultingTypeGroupsResponseDTO'
+        204:
+          description: NO CONTENT - no groups defined
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+
+components:
+  schemas:
+
+    BasicConsultingTypeListResponseDTO:
+      type: array
+      items:
+        $ref: '#/components/schemas/BasicConsultingTypeResponseDTO'
+
+    BasicConsultingTypeResponseDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 100
+        description:
+          type: string
+          example: "Lorem ipsum dolor sit amet, consetetur sadipscing elitr."
+        furtherInformation:
+          allOf:
+            - $ref: '#/components/schemas/FurtherInformationDTO'
+        titles:
+          allOf:
+            - $ref: '#/components/schemas/TitlesDTO'
+        urls:
+          allOf:
+            - $ref: '#/components/schemas/UrlsDTO'
+        registration:
+          allOf:
+            - $ref: '#/components/schemas/RegistrationDTO'
+        groupChat:
+          allOf:
+            - $ref: '#/components/schemas/GroupChatDTO'
+        isSubsequentRegistrationAllowed:
+          type: boolean
+          example: true
+        isAnonymousConversationAllowed:
+          type: boolean
+          example: false
+        isSetEmailAllowed:
+          type: boolean
+          example: true
+        showAskerProfile:
+          type: boolean
+          example: true
+
+    ExtendedConsultingTypeResponseDTO:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/BasicConsultingTypeResponseDTO'
+        - type: object
+          properties:
+            slug:
+              type: string
+              example: part-of-url
+            languageFormal:
+              type: boolean
+              example: true
+            lockedAgencies:
+              type: boolean
+              example: false
+            excludeNonMainConsultantsFromTeamSessions:
+              type: boolean
+              example: true
+            whiteSpot:
+              allOf:
+                - $ref: '#/components/schemas/WhiteSpotDTO'
+            consultantBoundedToConsultingType:
+              type: boolean
+              example: false
+            welcomeMessage:
+              allOf:
+                - $ref: '#/components/schemas/WelcomeMessageDTO'
+            sendFurtherStepsMessage:
+              type: boolean
+              example: true
+            sendSaveSessionDataMessage:
+              type: boolean
+              example: false
+            sessionDataInitializing:
+              allOf:
+                - $ref: '#/components/schemas/SessionDataInitializingDTO'
+            initializeFeedbackChat:
+              type: boolean
+              example: true
+            isPeerChat:
+              type: boolean
+              example: true
+            roles:
+              $ref: '#/components/schemas/RolesDTO'
+            notifications:
+              allOf:
+                - $ref: '#/components/schemas/NotificationsDTO'
+
+    FullConsultingTypeResponseDTO:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/ExtendedConsultingTypeResponseDTO'
+        - type: object
+          properties:
+            voluntaryComponents:
+              type: array
+              items:
+                type: object
+            requiredComponents:
+              type: object
+            welcomeScreen:
+              $ref: '#/components/schemas/WelcomeScreenDTO'
+
+    FurtherInformationDTO:
+      type: object
+      properties:
+        label:
+          type: string
+          example: "Lorem ipsum"
+        url:
+          type: string
+          example: "https://www.domain.com"
+
+    TitlesDTO:
+      type: object
+      properties:
+        default:
+          type: string
+          example: "Beratung xyz"
+        short:
+          type: string
+          example: "xyz"
+        long:
+          type: string
+          example: "Beratung xyz in Ort"
+        welcome:
+          type: string
+          example: "Herzlich Willkommen zu Beratung xyz"
+        registrationDropdown:
+          type: string
+          example: "Beratung xyz"
+
+    UrlsDTO:
+      type: object
+      properties:
+        requiredAidMissingRedirectUrl:
+          type: string
+          example: "https://www.domain.tld/path"
+        registrationPostcodeFallbackUrl:
+          type: string
+          example: "https://www.domain.tld/path"
+
+    RegistrationDTO:
+      type: object
+      properties:
+        minPostcodeSize:
+          type: integer
+          example: 5
+        autoSelectAgency:
+          type: boolean
+          example: false
+        autoSelectPostcode:
+          type: boolean
+          example: true
+        notes:
+          allOf:
+            - $ref: '#/components/schemas/RegistrationNotesDTO'
+        mandatoryFields:
+          allOf:
+            - $ref: '#/components/schemas/RegistrationMandatoryFieldsDTO'
+
+    RegistrationNotesDTO:
+      type: object
+      properties:
+        agencySelection:
+          type: string
+          example: "Lorem ipsum"
+        password:
+          type: string
+          example: "Lorem impsum"
+
+    RegistrationMandatoryFieldsDTO:
+      type: object
+      properties:
+        age:
+          type: boolean
+          example: true
+        state:
+          type: boolean
+          example: false
+
+    WhiteSpotDTO:
+      type: object
+      properties:
+        whiteSpotAgencyAssigned:
+          type: boolean
+          example: true
+        whiteSpotAgencyId:
+          type: integer
+          example: 4567
+
+    GroupChatDTO:
+      type: object
+      properties:
+        isGroupChat:
+          type: boolean
+          example: true
+        groupChatRules:
+          type: array
+          items:
+            type: string
+
+    WelcomeMessageDTO:
+      type: object
+      properties:
+        sendWelcomeMessage:
+          type: boolean
+          example: true
+        welcomeMessageText:
+          type: string
+          example: Lorem ipsum
+
+    SessionDataInitializingDTO:
+      type: object
+      properties:
+        addictiveDrugs:
+          type: boolean
+          example: true
+        age:
+          type: boolean
+          example: false
+        gender:
+          type: boolean
+          example: true
+        relation:
+          type: boolean
+          example: false
+        state:
+          type: boolean
+          example: true
+
+    RolesDTO:
+      type: object
+      properties:
+        consultant:
+          $ref: '#/components/schemas/RoleConsultantDTO'
+
+    RoleConsultantDTO:
+      type: object
+      properties:
+        roleNames:
+          type: array
+          items:
+            type: string
+
+    NotificationsDTO:
+      type: object
+      properties:
+        teamSessions:
+          allOf:
+            - $ref: '#/components/schemas/TeamSessionsDTO'
+
+    TeamSessionsDTO:
+      type: object
+      properties:
+        newMessage:
+          allOf:
+            - $ref: '#/components/schemas/NewMessageDTO'
+
+    NewMessageDTO:
+      type: object
+      properties:
+        allTeamConsultants:
+          type: "boolean"
+          example: true
+
+    WelcomeScreenDTO:
+      type: object
+      properties:
+        anonymous:
+          $ref: '#/components/schemas/AnonymousScreenDTO'
+
+    AnonymousScreenDTO:
+      type: object
+      properties:
+        title:
+          type: string
+          example: Lorem ipsum
+        text:
+          type: string
+          example: Lorem ipsum dolor sit amet, consetetur...
+
+    ConsultingTypeGroupsResponseDTO:
+      type: array
+      items:
+        $ref: '#/components/schemas/ConsultingTypeGroupResponseDTO'
+
+    ConsultingTypeGroupResponseDTO:
+      type: object
+      properties:
+        title:
+          type: string
+          example: 'Lorem ipsum'
+        consultingTypes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsultingTypeCoreDTO'
+
+    ConsultingTypeCoreDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 12345
+        titles:
+          type: object
+          properties:
+            default:
+              type: string
+              example: "Lorem ipsum"
