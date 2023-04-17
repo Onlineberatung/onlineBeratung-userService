@@ -1838,7 +1838,7 @@ components:
   schemas:
     UserDTO:
       allOf:
-        - $ref: '#/components/schemas/MandatorySessionDataDTO'
+        - $ref: '#/components/schemas/SessionDataDTO'
       type: object
       required:
         - username
@@ -1891,22 +1891,6 @@ components:
           $ref: "#/components/schemas/LanguageCode"
 
     SessionDataDTO:
-      allOf:
-        - $ref: '#/components/schemas/MandatorySessionDataDTO'
-      type: object
-      properties:
-        addictiveDrugs:
-          type: string
-          example: 2,4
-          description: comma separated list of addictive drug IDs
-        relation:
-          type: string
-          example: 2
-        gender:
-          type: string
-          example: 0
-
-    MandatorySessionDataDTO:
       type: object
       properties:
         age:

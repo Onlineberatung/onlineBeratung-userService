@@ -1900,11 +1900,7 @@ public class TestConstants {
       new RegistrationMandatoryFieldsDTO().age(true).state(true);
   public static final SessionDataInitializingDTO SESSION_DATA_INITIALIZING =
       new SessionDataInitializingDTO()
-          .addictiveDrugs(true)
           .age(true)
-          .gender(true)
-          .relation(true)
-          .relation(true)
           .state(true);
   public static final RegistrationDTO REGISTRATION_WITH_MANDATORY_FIELDS_TRUE =
       new RegistrationDTO().mandatoryFields(MANDATORY_FIELDS_TRUE);

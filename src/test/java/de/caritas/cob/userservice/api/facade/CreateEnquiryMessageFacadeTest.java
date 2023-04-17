@@ -163,11 +163,7 @@ public class CreateEnquiryMessageFacadeTest {
   private final String ROCKET_CHAT_SYSTEM_USER_ID = "xN3Msb3ksnfxda7gEk";
   private SessionDataInitializingDTO SESSION_DATA_INITIALIZING =
       new SessionDataInitializingDTO()
-          .addictiveDrugs(true)
           .age(true)
-          .gender(true)
-          .relation(true)
-          .relation(true)
           .state(true);
   private final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_NO_WELCOME_MESSAGE =
       new ExtendedConsultingTypeResponseDTO()
