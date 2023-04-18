@@ -49,7 +49,8 @@ class HttpTenantFilterTest {
 
     // given
     Mockito.when(request.getRequestURI()).thenReturn("/users/1");
-    Mockito.when(tenantService.getRestrictedTenantData(Mockito.anyLong())).thenReturn(new RestrictedTenantDTO());
+    Mockito.when(tenantService.getRestrictedTenantData(Mockito.anyLong()))
+        .thenReturn(new RestrictedTenantDTO());
 
     // when
     httpTenantFilter.doFilterInternal(request, response, filterChain);
