@@ -76,6 +76,8 @@ public class ConsultantAgencyServiceTest {
           false,
           LanguageCode.de,
           null,
+          null,
+          false,
           null);
   private final ConsultantAgency CONSULTANT_AGENCY =
       new ConsultantAgency(

@@ -26,10 +26,12 @@ import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.Exte
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.UserRole;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
 /**
@@ -54,6 +56,7 @@ public class AssignSessionFacade {
   private final @NotNull CreateEnquiryMessageFacade createEnquiryMessageFacade;
   private final @NonNull ConsultantAgencyService consultantAgencyService;
   private final @NonNull AssignEnquiryFacade assignEnquiryFacade;
+  private final @NonNull HttpServletRequest httpServletRequest;
 
   /**
    * Assigns the given {@link Session} session to the given {@link Consultant}. Remove all other
@@ -77,9 +80,13 @@ public class AssignSessionFacade {
       sendEmailForConsultantChange(session, consultantToAssign);
     }
 
-    statisticsService.fireEvent(
+    var event =
         new AssignSessionStatisticsEvent(
-            consultantToAssign.getId(), UserRole.CONSULTANT, session.getId()));
+            consultantToAssign.getId(), UserRole.CONSULTANT, session.getId());
+    event.setRequestUri(httpServletRequest.getRequestURI());
+    event.setRequestReferer(httpServletRequest.getHeader(HttpHeaders.REFERER));
+    event.setRequestUserId(authenticatedUser.getUserId());
+    statisticsService.fireEvent(event);
   }
 
   private void createNewFeedbackGroup(Session session, Consultant consultantToAssign) {
@@ -140,21 +147,6 @@ public class AssignSessionFacade {
             this.rocketChatFacade, this.identityClient, this.consultingTypeManager)
         .onSessionConsultants(Map.of(session, consultantsToRemoveFromRocketChat))
         .removeFromGroupOrRollbackOnFailure();
-  }
-
-  private void removeUnauthorizedMembersFromFeedbackGroup(
-      Session session,
-      Consultant consultant,
-      List<GroupMemberDTO> memberList,
-      Consultant consultantToKeep) {
-    var consultantsToRemoveFromRocketChat =
-        unauthorizedMembersProvider.obtainConsultantsToRemove(
-            session.getFeedbackGroupId(), session, consultant, memberList, consultantToKeep);
-
-    RocketChatRemoveFromGroupOperationService.getInstance(
-            this.rocketChatFacade, this.identityClient, this.consultingTypeManager)
-        .onSessionConsultants(Map.of(session, consultantsToRemoveFromRocketChat))
-        .removeFromFeedbackGroupOrRollbackOnFailure();
   }
 
   private void sendEmailForConsultantChange(Session session, Consultant consultant) {

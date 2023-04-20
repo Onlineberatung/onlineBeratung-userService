@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
-import static de.caritas.cob.userservice.api.testHelper.AsyncVerification.verifyAsync;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS_SYSTEM_A;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS_TECHNICAL_A;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_TOKEN;
@@ -22,11 +21,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.endsWith;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -37,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Maps;
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakLoginResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
@@ -53,8 +49,10 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.RocketChatUse
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UpdateUser;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserInfoResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.DeleteUserAccountDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.EmailNotificationsDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.EmailToggle;
 import de.caritas.cob.userservice.api.adapters.web.dto.EmailType;
+import de.caritas.cob.userservice.api.adapters.web.dto.NotificationsSettingsDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PasswordDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PatchUserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ReassignmentNotificationDTO;
@@ -91,7 +89,9 @@ import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
+import de.caritas.cob.userservice.api.service.consultingtype.ApplicationSettingsService;
 import de.caritas.cob.userservice.api.testConfig.TestAgencyControllerApi;
+import de.caritas.cob.userservice.applicationsettingsservice.generated.web.model.ApplicationSettingsDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.ConsultingTypeControllerApi;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.BasicConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.MailsControllerApi;
@@ -224,6 +224,8 @@ class UserControllerE2EIT {
   @MockBean
   @Qualifier("mailsControllerApi")
   private MailsControllerApi mailsControllerApi;
+
+  @MockBean private ApplicationSettingsService applicationSettingsService;
 
   @MockBean AgencyServiceApiControllerFactory agencyServiceApiControllerFactory;
 
@@ -547,6 +549,74 @@ class UserControllerE2EIT {
   }
 
   @Test
+  @WithMockUser(authorities = {AuthorityValue.NOTIFICATIONS_TECHNICAL})
+  void getNotificationDataShouldGetNotificationDataForExistingConsultant() throws Exception {
+
+    mockMvc
+        .perform(
+            get("/users/notifications")
+                .param("email", "emigration@consultant.de")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("emailNotificationsEnabled", is(true)))
+        .andExpect(jsonPath("settings.initialEnquiryNotificationEnabled", is(true)))
+        .andExpect(jsonPath("settings.newChatMessageNotificationEnabled", is(true)))
+        .andExpect(jsonPath("settings.reassignmentNotificationEnabled", is(true)))
+        .andExpect(jsonPath("settings.appointmentNotificationEnabled", is(true)));
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.NOTIFICATIONS_TECHNICAL})
+  void getNotificationDataShouldGetNotificationDataForExistingAdviceSeeker() throws Exception {
+    givenConsultingTypeServiceResponse();
+    mockMvc
+        .perform(
+            get("/users/notifications")
+                .param("email", "fd639b0e-4e90-415e-9cd4-372781b71ce4@beratungcaritas.de")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("emailNotificationsEnabled", is(false)))
+        .andExpect(jsonPath("settings.initialEnquiryNotificationEnabled", is(false)))
+        .andExpect(jsonPath("settings.newChatMessageNotificationEnabled", is(false)))
+        .andExpect(jsonPath("settings.reassignmentNotificationEnabled", is(false)))
+        .andExpect(jsonPath("settings.appointmentNotificationEnabled", is(false)));
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
+  void getNotificationDataShouldReturnAccessDeniedIfDoesNotHaveNotificationsTechnicalAuthority()
+      throws Exception {
+
+    mockMvc
+        .perform(
+            get("/users/notifications")
+                .param("email", "emigration@consultant.de")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.NOTIFICATIONS_TECHNICAL})
+  void getNotificationDataShouldReturnNotFoundForMailNotMatchingAnyAdviceSeekerNorConsultant()
+      throws Exception {
+
+    mockMvc
+        .perform(
+            get("/users/notifications")
+                .param("email", "dummymail@dummy.de")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
   void getSessionsForAuthenticatedConsultant_ShouldGetSessionsWithTopics() throws Exception {
     givenABearerToken();
@@ -757,7 +827,16 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("emailToggles[0].state", is(true)))
         .andExpect(jsonPath("emailToggles[1].state", is(true)))
         .andExpect(jsonPath("emailToggles[2].state", is(true)))
-        .andExpect(jsonPath("inTeamAgency", is(consultant.isTeamConsultant())));
+        .andExpect(jsonPath("inTeamAgency", is(consultant.isTeamConsultant())))
+        .andExpect(jsonPath("emailNotifications.emailNotificationsEnabled", is(true)))
+        .andExpect(jsonPath("emailNotifications.settings", is(notNullValue())))
+        .andExpect(
+            jsonPath("emailNotifications.settings.initialEnquiryNotificationEnabled", is(true)))
+        .andExpect(
+            jsonPath("emailNotifications.settings.newChatMessageNotificationEnabled", is(true)))
+        .andExpect(jsonPath("emailNotifications.settings.appointmentNotificationEnabled", is(true)))
+        .andExpect(
+            jsonPath("emailNotifications.settings.reassignmentNotificationEnabled", is(true)));
   }
 
   @Test
@@ -806,7 +885,17 @@ class UserControllerE2EIT {
         .andExpect(jsonPath("preferredLanguage", is(user.getLanguageCode().toString())))
         .andExpect(jsonPath("e2eEncryptionEnabled", is(false)))
         .andExpect(jsonPath("emailToggles", is(nullValue())))
-        .andExpect(jsonPath("inTeamAgency", is(false)));
+        .andExpect(jsonPath("inTeamAgency", is(false)))
+        .andExpect(jsonPath("emailNotifications.emailNotificationsEnabled", is(false)))
+        .andExpect(jsonPath("emailNotifications.settings", is(notNullValue())))
+        .andExpect(
+            jsonPath("emailNotifications.settings.initialEnquiryNotificationEnabled", is(false)))
+        .andExpect(
+            jsonPath("emailNotifications.settings.newChatMessageNotificationEnabled", is(false)))
+        .andExpect(
+            jsonPath("emailNotifications.settings.appointmentNotificationEnabled", is(false)))
+        .andExpect(
+            jsonPath("emailNotifications.settings.reassignmentNotificationEnabled", is(false)));
   }
 
   @Test
@@ -897,6 +986,11 @@ class UserControllerE2EIT {
     var locale = userRepCaptor.getValue().getAttributes().get("locale");
     assertEquals(patchUserDTO.getPreferredLanguage().toString(), locale.get(0));
 
+    assertThat(savedUser.isNotificationsEnabled()).isTrue();
+    assertThat(savedUser.getNotificationsSettings())
+        .isEqualTo(
+            "{\"initialEnquiryNotificationEnabled\":true,\"newChatMessageNotificationEnabled\":true,\"reassignmentNotificationEnabled\":true,\"appointmentNotificationEnabled\":true}");
+
     verifyRocketChatNeverSetsUserPresence();
   }
 
@@ -908,6 +1002,7 @@ class UserControllerE2EIT {
     givenAValidRocketChatUpdateUserResponse();
     givenAValidKeycloakUpdateLocaleResponse(consultant.getId());
     givenAValidRocketChatUserPresenceSetResponse();
+    patchUserDTO.setEmailNotifications(partiallyActiveEmailNotifications());
 
     mockMvc
         .perform(
@@ -942,6 +1037,10 @@ class UserControllerE2EIT {
     assertTrue(user.getName().length() > 4);
 
     verifyRocketChatSetsUserPresence();
+    assertThat(savedConsultant.isNotificationsEnabled()).isTrue();
+    assertThat(savedConsultant.getNotificationsSettings())
+        .isEqualTo(
+            "{\"initialEnquiryNotificationEnabled\":true,\"newChatMessageNotificationEnabled\":false,\"reassignmentNotificationEnabled\":false,\"appointmentNotificationEnabled\":true}");
   }
 
   @Test
@@ -1239,6 +1338,44 @@ class UserControllerE2EIT {
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_DEFAULT)
   void updatePasswordShouldUpdatePasswordAndRespondWithOkIf2faIsOff() throws Exception {
+    givenAValidUser();
+    givenAPasswordDto();
+    givenAValidKeycloakLoginResponse();
+
+    mockMvc
+        .perform(
+            put("/users/password/change")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(passwordDto))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.SINGLE_TENANT_ADMIN)
+  void updatePasswordShouldUpdatePasswordAsSingleTenantAdminAndRespondWithOkIf2faIsOff()
+      throws Exception {
+    givenAValidUser();
+    givenAPasswordDto();
+    givenAValidKeycloakLoginResponse();
+
+    mockMvc
+        .perform(
+            put("/users/password/change")
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(passwordDto))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.TENANT_ADMIN)
+  void updatePasswordShouldUpdatePasswordAsTenantAdminAndRespondWithOkIf2faIsOff()
+      throws Exception {
     givenAValidUser();
     givenAPasswordDto();
     givenAValidKeycloakLoginResponse();
@@ -1601,6 +1738,8 @@ class UserControllerE2EIT {
   void sendReassignmentNotificationShouldSendEmailAndRespondWithOk() throws Exception {
     var apiClientMock = mock(de.caritas.cob.userservice.mailservice.generated.ApiClient.class);
     when(mailsControllerApi.getApiClient()).thenReturn(apiClientMock);
+    when(applicationSettingsService.getApplicationSettings())
+        .thenReturn(new ApplicationSettingsDTO().releaseToggles(Maps.newHashMap()));
     var session = givenAExistingSession();
     var assignemtNotification =
         new ReassignmentNotificationDTO()
@@ -1617,7 +1756,7 @@ class UserControllerE2EIT {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verifyAsync(a -> verify(mailsControllerApi).sendMails(any()));
+    Mockito.verify(mailsControllerApi, Mockito.timeout(8000).times(1)).sendMails(any());
   }
 
   private Session givenAExistingSession() {
@@ -2068,6 +2207,30 @@ class UserControllerE2EIT {
     newFeedback.setState(true);
 
     patchUserDTO.setEmailToggles(Set.of(dailyEnquiries, newChat, newFeedback));
+
+    patchUserDTO.setEmailNotifications(activeEmailNotifications());
+  }
+
+  private EmailNotificationsDTO activeEmailNotifications() {
+    return new EmailNotificationsDTO()
+        .emailNotificationsEnabled(true)
+        .settings(
+            new NotificationsSettingsDTO()
+                .initialEnquiryNotificationEnabled(true)
+                .appointmentNotificationEnabled(true)
+                .reassignmentNotificationEnabled(true)
+                .newChatMessageNotificationEnabled(true));
+  }
+
+  private EmailNotificationsDTO partiallyActiveEmailNotifications() {
+    return new EmailNotificationsDTO()
+        .emailNotificationsEnabled(true)
+        .settings(
+            new NotificationsSettingsDTO()
+                .initialEnquiryNotificationEnabled(true)
+                .appointmentNotificationEnabled(true)
+                .reassignmentNotificationEnabled(false)
+                .newChatMessageNotificationEnabled(false));
   }
 
   private void givenAnUpdateConsultantDtoWithLanguages(String email) {

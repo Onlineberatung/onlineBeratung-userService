@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.admin.service.admin.update;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.PatchAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAgencyAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateTenantAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
@@ -24,6 +25,7 @@ public class UpdateAdminService {
   public Admin updateAgencyAdmin(
       final String adminId, final UpdateAgencyAdminDTO updateAgencyAdminDTO) {
     final Admin admin = retrieveAdminService.findAdmin(adminId, Admin.AdminType.AGENCY);
+    assertAdminHasTenantIdNotNullAndNotZero(admin);
     final UserDTO userDTO = buildValidatedUserDTO(updateAgencyAdminDTO, admin);
     this.identityClient.updateUserData(
         admin.getId(),
@@ -32,6 +34,12 @@ public class UpdateAdminService {
         updateAgencyAdminDTO.getLastname());
 
     return this.adminRepository.save(buildAdmin(updateAgencyAdminDTO, admin));
+  }
+
+  private void assertAdminHasTenantIdNotNullAndNotZero(Admin admin) {
+    if (admin.getTenantId() != null && admin.getTenantId() == 0) {
+      throw new IllegalArgumentException("Admin has tenant id 0");
+    }
   }
 
   private UserDTO buildValidatedUserDTO(
@@ -51,7 +59,15 @@ public class UpdateAdminService {
     userDTO.setEmail(updateTenantAdminDTO.getEmail());
     userDTO.setUsername(admin.getUsername());
     userDTO.setTenantId(Long.valueOf(updateTenantAdminDTO.getTenantId()));
+    this.userAccountInputValidator.validateUserDTO(userDTO);
+    return userDTO;
+  }
 
+  private UserDTO buildValidatedUserDTO(final PatchAdminDTO patchAdminDTO, final Admin admin) {
+    UserDTO userDTO = new UserDTO();
+    userDTO.setEmail(patchAdminDTO.getEmail());
+    userDTO.setUsername(admin.getUsername());
+    userDTO.setTenantId(Long.valueOf(admin.getTenantId()));
     this.userAccountInputValidator.validateUserDTO(userDTO);
     return userDTO;
   }
@@ -71,6 +87,13 @@ public class UpdateAdminService {
     return admin;
   }
 
+  private Admin patchAdminEntity(final PatchAdminDTO patchAdminDTO, final Admin admin) {
+    admin.setLastName(patchAdminDTO.getLastname());
+    admin.setFirstName(patchAdminDTO.getFirstname());
+    admin.setEmail(patchAdminDTO.getEmail());
+    return admin;
+  }
+
   public Admin updateTenantAdmin(String adminId, UpdateTenantAdminDTO updateTenantAdminDTO) {
     final Admin admin = retrieveAdminService.findAdmin(adminId, Admin.AdminType.TENANT);
     final UserDTO userDTO = buildValidatedUserDTO(updateTenantAdminDTO, admin);
@@ -81,5 +104,24 @@ public class UpdateAdminService {
         updateTenantAdminDTO.getLastname());
 
     return this.adminRepository.save(buildAdmin(updateTenantAdminDTO, admin));
+  }
+
+  public Admin patchAgencyAdmin(final String adminId, final PatchAdminDTO patchAdminDTO) {
+    final Admin admin = retrieveAdminService.findAdmin(adminId, Admin.AdminType.AGENCY);
+    assertAdminHasTenantIdNotNullAndNotZero(admin);
+    final UserDTO userDTO = buildValidatedUserDTO(patchAdminDTO, admin);
+    this.identityClient.updateUserData(
+        admin.getId(), userDTO, patchAdminDTO.getFirstname(), patchAdminDTO.getLastname());
+
+    return this.adminRepository.save(patchAdminEntity(patchAdminDTO, admin));
+  }
+
+  public Admin patchTenantAdmin(String adminId, PatchAdminDTO patchAdminDTO) {
+    final Admin admin = retrieveAdminService.findAdmin(adminId, Admin.AdminType.TENANT);
+    final UserDTO userDTO = buildValidatedUserDTO(patchAdminDTO, admin);
+    this.identityClient.updateUserData(
+        admin.getId(), userDTO, patchAdminDTO.getFirstname(), patchAdminDTO.getLastname());
+
+    return this.adminRepository.save(patchAdminEntity(patchAdminDTO, admin));
   }
 }

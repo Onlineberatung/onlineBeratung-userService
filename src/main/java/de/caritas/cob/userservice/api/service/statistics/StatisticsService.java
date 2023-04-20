@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.service.statistics;
 
+import static java.util.Objects.nonNull;
+
 import de.caritas.cob.userservice.api.service.statistics.event.StatisticsEvent;
 import java.nio.charset.StandardCharsets;
 import javax.validation.constraints.NotNull;
@@ -34,7 +36,7 @@ public class StatisticsService {
   @Async
   public void fireEvent(StatisticsEvent statisticsEvent) {
 
-    if (statisticsEnabled) {
+    if (statisticsEnabled && nonNull(statisticsEvent)) {
       statisticsEvent
           .getPayload()
           .ifPresentOrElse(

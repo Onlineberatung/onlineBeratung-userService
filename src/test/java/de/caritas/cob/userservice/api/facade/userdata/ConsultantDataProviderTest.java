@@ -54,6 +54,8 @@ public class ConsultantDataProviderTest {
 
   @Mock private SessionRepository sessionRepository;
 
+  @Mock private EmailNotificationMapper emailNotificationMapper;
+
   @Test(expected = InternalServerErrorException.class)
   public void retrieveData_Should_ThrowInternalServerErrorException_When_NoAgenciesFound() {
     Consultant consultant = Mockito.mock(Consultant.class);

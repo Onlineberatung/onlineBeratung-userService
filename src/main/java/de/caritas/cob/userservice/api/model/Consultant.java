@@ -69,7 +69,7 @@ import org.springframework.lang.Nullable;
     name = "tenantFilter",
     parameters = {@ParamDef(name = "tenantId", type = "long")})
 @Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
-public class Consultant implements TenantAware {
+public class Consultant implements TenantAware, NotificationsAware {
 
   protected static final String EMAIL_ANALYZER = "emailAnalyzer";
 
@@ -199,6 +199,12 @@ public class Consultant implements TenantAware {
 
   @Column(name = "data_privacy_confirmation", columnDefinition = "datetime")
   private LocalDateTime dataPrivacyConfirmation;
+
+  @Column(name = "notifications_enabled", columnDefinition = "tinyint", nullable = false)
+  private boolean notificationsEnabled;
+
+  @Column(name = "notifications_settings")
+  private String notificationsSettings;
 
   @JsonIgnore
   public String getFullName() {

@@ -71,6 +71,8 @@ public class UserAdminControllerIT {
       ROOT_PATH + "/consultants/%s" + "/agencies/%s";
   protected static final String AGENCY_ADMIN_PATH = ROOT_PATH + "/agencyadmins/";
 
+  protected static final String ADMIN_DATA_PATH = ROOT_PATH + "/data/";
+
   protected static final String TENANT_ADMIN_PATH_WITHOUT_SLASH = ROOT_PATH + "/tenantadmins";
   protected static final String TENANT_ADMIN_PATH = TENANT_ADMIN_PATH_WITHOUT_SLASH + "/";
   protected static final String DELETE_AGENCY_ADMIN_PATH = AGENCY_ADMIN_PATH + "%s";
@@ -455,6 +457,7 @@ public class UserAdminControllerIT {
     // given
     UpdateAgencyAdminDTO updateAgencyAdminDTO =
         new EasyRandom().nextObject(UpdateAgencyAdminDTO.class);
+    updateAgencyAdminDTO.setEmail("test@test.com");
 
     // when
     this.mvc
@@ -474,6 +477,7 @@ public class UserAdminControllerIT {
     // given
     UpdateAgencyAdminDTO updateAgencyAdminDTO =
         new EasyRandom().nextObject(UpdateAgencyAdminDTO.class);
+    updateAgencyAdminDTO.setEmail("test@test.com");
 
     // when
     this.mvc

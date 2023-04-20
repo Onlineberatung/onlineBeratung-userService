@@ -193,6 +193,7 @@ import de.caritas.cob.userservice.api.facade.sessionlist.SessionListFacade;
 import de.caritas.cob.userservice.api.facade.userdata.AskerDataProvider;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataProvider;
+import de.caritas.cob.userservice.api.facade.userdata.EmailNotificationMapper;
 import de.caritas.cob.userservice.api.facade.userdata.KeycloakUserDataProvider;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
@@ -223,6 +224,7 @@ import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.archive.SessionArchiveService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
+import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.api.workflow.delete.action.asker.DeleteSingleRoomAndSessionAction;
 import de.caritas.cob.userservice.api.workflow.delete.model.SessionDeletionWorkflowDTO;
 import java.util.ArrayList;
@@ -299,6 +301,8 @@ public class UserControllerIT {
           false,
           LanguageCode.de,
           null,
+          null,
+          false,
           null);
   private final Set<String> ROLES_WITH_USER =
       new HashSet<>(Arrays.asList("dummyRoleA", UserRole.USER.getValue(), "dummyRoleB"));
@@ -535,6 +539,8 @@ public class UserControllerIT {
 
   @MockBean private AdminUserFacade adminUserFacade;
 
+  @MockBean private EmailNotificationMapper emailNotificationMapper;
+
   @Mock private Logger logger;
 
   @Mock private Chat chat;
@@ -549,6 +555,7 @@ public class UserControllerIT {
     setInternalState(UserController.class, "log", logger);
     setInternalState(LogService.class, "LOGGER", logger);
     setInternalState(ApiResponseEntityExceptionHandler.class, "log", logger);
+    TenantContext.clear();
   }
 
   /** Method: registerUser */
@@ -1397,6 +1404,35 @@ public class UserControllerIT {
   @Test
   public void getUserData_ForTenantSuperAdmin_Should_ReturnUserDataFromKeycloak() throws Exception {
     when(authenticatedUser.isTenantSuperAdmin()).thenReturn(true);
+    when(keycloakUserDataProvider.retrieveAuthenticatedUserData())
+        .thenReturn(new UserDataResponseDTO());
+
+    mvc.perform(
+            get(PATH_USER_DATA)
+                .contentType(MediaType.APPLICATION_JSON)
+                .cookie(RC_TOKEN_COOKIE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().is(HttpStatus.OK.value()));
+  }
+
+  @Test
+  public void getUserData_ForAgencySuperAdmin_Should_ReturnUserDataFromKeycloak() throws Exception {
+    when(authenticatedUser.isAgencySuperAdmin()).thenReturn(true);
+    when(keycloakUserDataProvider.retrieveAuthenticatedUserData())
+        .thenReturn(new UserDataResponseDTO());
+
+    mvc.perform(
+            get(PATH_USER_DATA)
+                .contentType(MediaType.APPLICATION_JSON)
+                .cookie(RC_TOKEN_COOKIE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().is(HttpStatus.OK.value()));
+  }
+
+  @Test
+  public void getUserData_ForRestrictedAgencyAdmin_Should_ReturnUserDataFromKeycloak()
+      throws Exception {
+    when(authenticatedUser.isRestrictedAgencyAdmin()).thenReturn(true);
     when(keycloakUserDataProvider.retrieveAuthenticatedUserData())
         .thenReturn(new UserDataResponseDTO());
 
@@ -2530,7 +2566,7 @@ public class UserControllerIT {
     verify(consultantUpdateService).updateConsultant(any(), captor.capture());
 
     var updateAdminConsultantDTO = captor.getValue();
-    assertEquals(updateConsultantDTO.getEmail(), updateAdminConsultantDTO.getEmail());
+    assertEquals(updateConsultantDTO.getEmail().toLowerCase(), updateAdminConsultantDTO.getEmail());
     assertEquals(updateConsultantDTO.getFirstname(), updateAdminConsultantDTO.getFirstname());
     assertEquals(updateConsultantDTO.getLastname(), updateAdminConsultantDTO.getLastname());
     assertEquals(consultant.isAbsent(), updateAdminConsultantDTO.getAbsent());

@@ -1,12 +1,16 @@
 package de.caritas.cob.userservice.api;
 
+import static de.caritas.cob.userservice.api.helper.EmailNotificationUtils.deserializeNotificationSettingsDTOOrDefaultIfNull;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 import com.google.api.client.util.ArrayMap;
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.EmailNotificationsDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.NotificationsSettingsDTO;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
+import de.caritas.cob.userservice.api.helper.json.JsonSerializationUtils;
 import de.caritas.cob.userservice.api.model.Admin;
 import de.caritas.cob.userservice.api.model.Admin.AdminBase;
 import de.caritas.cob.userservice.api.model.AdminAgency.AdminAgencyBase;
@@ -16,6 +20,7 @@ import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Consultant.ConsultantBase;
 import de.caritas.cob.userservice.api.model.ConsultantAgency.ConsultantAgencyBase;
 import de.caritas.cob.userservice.api.model.ConsultantStatus;
+import de.caritas.cob.userservice.api.model.NotificationsAware;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.User;
 import java.time.Instant;
@@ -360,12 +365,16 @@ public class UserServiceMapper {
       consultant.setNotifyNewFeedbackMessageFromAdviceSeeker(notify);
     }
     if (patchMap.containsKey("termsAndConditionsConfirmation")
-        && (Boolean) patchMap.get("termsAndConditionsConfirmation")) {
+        && (patchMap.get("termsAndConditionsConfirmation") instanceof Boolean)) {
       consultant.setTermsAndConditionsConfirmation(LocalDateTime.now());
     }
     if (patchMap.containsKey("dataPrivacyConfirmation")
-        && (Boolean) patchMap.get("dataPrivacyConfirmation")) {
+        && (patchMap.get("dataPrivacyConfirmation") instanceof Boolean)) {
       consultant.setDataPrivacyConfirmation(LocalDateTime.now());
+    }
+
+    if (patchMap.containsKey("emailNotifications")) {
+      patchEmailNotificationSettings(consultant, patchMap);
     }
 
     return consultant;
@@ -394,15 +403,65 @@ public class UserServiceMapper {
       adviceSeeker.setLanguageCode(LanguageCode.valueOf(preferredLanguage));
     }
     if (patchMap.containsKey("termsAndConditionsConfirmation")
-        && ((Boolean) patchMap.get("termsAndConditionsConfirmation"))) {
+        && (patchMap.get("termsAndConditionsConfirmation") instanceof Boolean)) {
       adviceSeeker.setTermsAndConditionsConfirmation(LocalDateTime.now());
     }
     if (patchMap.containsKey("dataPrivacyConfirmation")
-        && ((Boolean) patchMap.get("dataPrivacyConfirmation"))) {
+        && (patchMap.get("dataPrivacyConfirmation") instanceof Boolean)) {
       adviceSeeker.setDataPrivacyConfirmation(LocalDateTime.now());
+    }
+    if (patchMap.containsKey("emailNotifications")) {
+      patchEmailNotificationSettings(adviceSeeker, patchMap);
     }
 
     return adviceSeeker;
+  }
+
+  private void patchEmailNotificationSettings(
+      NotificationsAware adviceSeeker, Map<String, Object> patchMap) {
+    EmailNotificationsDTO emailNotifications =
+        (EmailNotificationsDTO) patchMap.get("emailNotifications");
+    patchEmailNotificationSettings(adviceSeeker, emailNotifications);
+  }
+
+  private void patchEmailNotificationSettings(
+      NotificationsAware user, EmailNotificationsDTO emailNotifications) {
+    boolean notificationsEnabled = nullAsFalse(emailNotifications.getEmailNotificationsEnabled());
+    user.setNotificationsEnabled(notificationsEnabled);
+    NotificationsSettingsDTO patchedSettings =
+        patchNotificationsSettingsDTO(user, emailNotifications);
+    user.setNotificationsSettings(JsonSerializationUtils.serializeToJsonString(patchedSettings));
+  }
+
+  private NotificationsSettingsDTO patchNotificationsSettingsDTO(
+      NotificationsAware user, EmailNotificationsDTO emailNotifications) {
+    NotificationsSettingsDTO newSettings = emailNotifications.getSettings();
+    NotificationsSettingsDTO existingSettings =
+        deserializeNotificationSettingsDTOOrDefaultIfNull(user);
+    if (newSettings.getAppointmentNotificationEnabled() != null) {
+      existingSettings.setAppointmentNotificationEnabled(
+          newSettings.getAppointmentNotificationEnabled());
+    }
+
+    if (newSettings.getNewChatMessageNotificationEnabled() != null) {
+      existingSettings.setNewChatMessageNotificationEnabled(
+          newSettings.getNewChatMessageNotificationEnabled());
+    }
+
+    if (newSettings.getInitialEnquiryNotificationEnabled() != null) {
+      existingSettings.setInitialEnquiryNotificationEnabled(
+          newSettings.getInitialEnquiryNotificationEnabled());
+    }
+
+    if (newSettings.getReassignmentNotificationEnabled() != null) {
+      existingSettings.setReassignmentNotificationEnabled(
+          newSettings.getReassignmentNotificationEnabled());
+    }
+    return existingSettings;
+  }
+
+  private boolean nullAsFalse(Boolean topicsInRegistrationEnabled) {
+    return Boolean.TRUE.equals(topicsInRegistrationEnabled);
   }
 
   public Appointment appointmentOf(Map<String, Object> appointmentMap, Consultant consultant) {

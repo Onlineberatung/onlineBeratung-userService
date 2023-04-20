@@ -42,7 +42,6 @@ import de.caritas.cob.userservice.messageservice.generated.web.model.MessageResp
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -90,23 +89,8 @@ public class CreateEnquiryMessageFacade {
 
       var extendedConsultingTypeResponseDTO =
           consultingTypeManager.getConsultingTypeSettings(session.getConsultingTypeId());
-
-      List<ConsultantAgency> agencyList;
-
-      if (isAppointmentEnquiryMessage(enquiryData)) {
-        agencyList =
-            consultantAgencyService.findConsultantsByAgencyId(session.getAgencyId()).stream()
-                .filter(
-                    consultantAgency ->
-                        consultantAgency
-                            .getConsultant()
-                            .getEmail()
-                            .equals(enquiryData.getConsultantEmail()))
-                .collect(Collectors.toList());
-      } else {
-        agencyList = consultantAgencyService.findConsultantsByAgencyId(session.getAgencyId());
-      }
-
+      List<ConsultantAgency> agencyList =
+          consultantAgencyService.findConsultantsByAgencyId(session.getAgencyId());
       String rcGroupId =
           createRocketChatRoomAndAddUsers(
               session, agencyList, enquiryData.getRocketChatCredentials());
@@ -148,7 +132,7 @@ public class CreateEnquiryMessageFacade {
           enquiryData.getUser(),
           extendedConsultingTypeResponseDTO,
           createEnquiryExceptionInformation);
-      messageServiceProvider.postFurtherStepsOrSaveSessionDataMessageIfConfigured(
+      messageServiceProvider.postFurtherStepsIfConfigured(
           rcGroupId, extendedConsultingTypeResponseDTO, createEnquiryExceptionInformation);
 
       updateSession(

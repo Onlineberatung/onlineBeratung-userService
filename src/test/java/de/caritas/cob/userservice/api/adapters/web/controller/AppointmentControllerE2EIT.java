@@ -1,10 +1,12 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
+import static de.caritas.cob.userservice.api.testHelper.AsyncVerification.verifyAsync;
 import static java.util.Objects.nonNull;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -33,6 +35,9 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -62,6 +67,8 @@ class AppointmentControllerE2EIT {
   @Autowired private ConsultantRepository consultantRepository;
 
   @Autowired private AppointmentRepository appointmentRepository;
+
+  @MockBean private RabbitTemplate amqpTemplate;
 
   @MockBean private AuthenticatedUser authenticatedUser;
 
@@ -169,7 +176,7 @@ class AppointmentControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  void putAppointmentShouldReturnUpdateAppointmentAndReturnOk() throws Exception {
+  void updateAppointmentShouldReturnUpdateAppointmentAndSendStartStopStatistics() throws Exception {
     givenAValidConsultant(true);
     givenASavedAppointment();
     givenAValidAppointmentDto(savedAppointment.getId(), null);
@@ -197,11 +204,17 @@ class AppointmentControllerE2EIT {
         updatedAppointment.getStatus().toString().toLowerCase());
     assertEquals(appointment.getDatetime(), updatedAppointment.getDatetime());
     assertEquals(appointment.getDescription(), updatedAppointment.getDescription());
+
+    if (appointment.getStatus() == AppointmentStatus.STARTED) {
+      verifyRabbitMqMessageHasBeenSent("START_VIDEO_CALL");
+    } else if (appointment.getStatus() == AppointmentStatus.PAUSED) {
+      verifyRabbitMqMessageHasBeenSent("STOP_VIDEO_CALL");
+    }
   }
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  void putAppointmentShouldReturnBadRequestIfIdsDiffer() throws Exception {
+  void updateAppointmentShouldReturnBadRequestIfIdsDiffer() throws Exception {
     givenAValidConsultant(true);
     givenASavedAppointment();
     givenAValidAppointmentDto(savedAppointment.getId(), null);
@@ -219,7 +232,7 @@ class AppointmentControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  void putAppointmentShouldReturnNotFoundIfIdIsUnknown() throws Exception {
+  void updateAppointmentShouldReturnNotFoundIfIdIsUnknown() throws Exception {
     givenAValidConsultant(true);
     var id = UUID.randomUUID();
     givenAValidAppointmentDto(id, null);
@@ -479,5 +492,12 @@ class AppointmentControllerE2EIT {
     when(authenticatedUser.getUsername()).thenReturn(RandomStringUtils.randomAlphabetic(8));
     when(authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.USER.getValue()));
     when(authenticatedUser.getGrantedAuthorities()).thenReturn(Set.of("anotherAuthority"));
+  }
+
+  private void verifyRabbitMqMessageHasBeenSent(String routingKey) {
+    verifyAsync(
+        a ->
+            amqpTemplate.convertAndSend(
+                eq("statistics.topic"), eq(routingKey), ArgumentMatchers.<Message>any()));
   }
 }

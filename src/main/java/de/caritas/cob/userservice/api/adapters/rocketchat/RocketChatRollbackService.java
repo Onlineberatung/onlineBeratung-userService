@@ -33,7 +33,7 @@ public class RocketChatRollbackService {
 
     if (memberList != null && groupId != null) {
       try {
-        List<GroupMemberDTO> currentList = rocketChatService.getMembersOfGroup(groupId);
+        List<GroupMemberDTO> currentList = rocketChatService.getChatUsers(groupId);
 
         // Add Rocket.Chat technical user, if not in current member list
         if (!listContainsTechUser(currentList)) {

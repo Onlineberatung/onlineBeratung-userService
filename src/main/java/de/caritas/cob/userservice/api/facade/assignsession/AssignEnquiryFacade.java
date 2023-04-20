@@ -23,8 +23,10 @@ import de.caritas.cob.userservice.statisticsservice.generated.web.model.UserRole
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import javax.servlet.http.HttpServletRequest;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
 /**
@@ -43,6 +45,7 @@ public class AssignEnquiryFacade {
   private final @NonNull UnauthorizedMembersProvider unauthorizedMembersProvider;
   private final @NonNull StatisticsService statisticsService;
   private final @NonNull TenantContextProvider tenantContextProvider;
+  private final @NonNull HttpServletRequest httpServletRequest;
 
   /**
    * Assigns the given {@link Session} session to the given {@link Consultant}. Remove all other
@@ -56,10 +59,28 @@ public class AssignEnquiryFacade {
    * @param consultant the consultant to assign
    */
   public void assignRegisteredEnquiry(Session session, Consultant consultant) {
-    assignEnquiry(session, consultant);
-    supplyAsync(updateRocketChatRooms(session, consultant, TenantContext.getCurrentTenant()));
-    statisticsService.fireEvent(
-        new AssignSessionStatisticsEvent(consultant.getId(), UserRole.CONSULTANT, session.getId()));
+    assignRegisteredEnquiry(session, consultant, false);
+  }
+
+  public void assignRegisteredEnquiry(
+      Session session,
+      Consultant consultant,
+      boolean skipConsultantAssignmentAndSessionInProgressCheck) {
+    var requestURI = httpServletRequest.getRequestURI();
+    var requestReferer = httpServletRequest.getHeader(HttpHeaders.REFERER);
+    assignEnquiry(session, consultant, skipConsultantAssignmentAndSessionInProgressCheck);
+    supplyAsync(updateRocketChatRooms(session, consultant, TenantContext.getCurrentTenant()))
+        .thenRun(
+            () -> {
+              var event =
+                  new AssignSessionStatisticsEvent(
+                      consultant.getId(), UserRole.CONSULTANT, session.getId());
+              event.setRequestUri(requestURI);
+              event.setRequestReferer(requestReferer);
+              event.setRequestUserId(consultant.getId());
+
+              statisticsService.fireEvent(event);
+            });
   }
 
   /**
@@ -85,10 +106,20 @@ public class AssignEnquiryFacade {
   }
 
   private void assignEnquiry(Session session, Consultant consultant) {
+    assignEnquiry(session, consultant, false);
+  }
+
+  private void assignEnquiry(
+      Session session,
+      Consultant consultant,
+      boolean skipConsultantAssignmentAndSessionInProgressChecks) {
     var consultantSessionDTO =
         ConsultantSessionDTO.builder().consultant(consultant).session(session).build();
-    sessionToConsultantVerifier.verifySessionIsNotInProgress(consultantSessionDTO);
-    sessionToConsultantVerifier.verifyPreconditionsForAssignment(consultantSessionDTO);
+    if (!skipConsultantAssignmentAndSessionInProgressChecks) {
+      sessionToConsultantVerifier.verifySessionIsNotInProgress(consultantSessionDTO);
+    }
+    sessionToConsultantVerifier.verifyPreconditionsForAssignment(
+        consultantSessionDTO, skipConsultantAssignmentAndSessionInProgressChecks);
 
     sessionService.updateConsultantAndStatusForSession(session, consultant, IN_PROGRESS);
   }

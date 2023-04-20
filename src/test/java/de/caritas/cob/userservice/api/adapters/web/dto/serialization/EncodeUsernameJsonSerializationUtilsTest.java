@@ -27,7 +27,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class EncodeUsernameJsonDeserializerTest {
+public class EncodeUsernameJsonSerializationUtilsTest {
 
   private ObjectMapper objectMapper;
 

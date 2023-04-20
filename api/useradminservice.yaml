@@ -1043,6 +1043,40 @@ paths:
             description: INTERNAL SERVER ERROR - server encountered unexpected condition
         security:
           - Bearer: [ ]
+
+  /useradmin/data:
+        patch:
+          tags:
+            - admin-user-controller
+          summary: 'Sets or updates the email, first and lastname of authorized admin account
+        [Authorization:  Role: single-tenant-admin, restricted-agency-admin]'
+          operationId: patchAdminData
+          requestBody:
+            content:
+              'application/json':
+                schema:
+                  $ref: '#/components/schemas/PatchAdminDTO'
+            required: true
+          responses:
+            200:
+              description: OK - admin was updated successfully
+              content:
+                'application/hal+json':
+                  schema:
+                    $ref: '#/components/schemas/AdminResponseDTO'
+            400:
+              description: BAD REQUEST - invalid/incomplete request or body object
+            401:
+              description: UNAUTHORIZED - no/invalid Keycloak token
+            403:
+              description: FORBIDDEN - no/invalid role/authorization or CSRF token
+            409:
+              description: CONFLICT - invalid/unavailable email
+            500:
+              description: INTERNAL SERVER ERROR - server encountered unexpected condition
+          security:
+            - Bearer: [ ]
+
 components:
   schemas:
     RootDTO:
@@ -1316,7 +1350,7 @@ components:
           type: integer
           example: "1"
 
-    UpdateAgencyAdminDTO:
+    PatchAdminDTO:
       type: object
       required:
         - firstname
@@ -1335,33 +1369,17 @@ components:
           maxLength: 255
         email:
           type: string
-          example: "max@mustermann.de"
-          minLength: 1
-          maxLength: 255
+          format: email
+          example: "maxmuster@mann.com"
 
+    UpdateAgencyAdminDTO:
+      allOf:
+        - $ref: '#/components/schemas/PatchAdminDTO'
 
     UpdateTenantAdminDTO:
-      type: object
-      required:
-        - firstname
-        - lastname
-        - email
+      allOf:
+        - $ref: '#/components/schemas/PatchAdminDTO'
       properties:
-        firstname:
-          type: string
-          example: "Max"
-          minLength: 1
-          maxLength: 255
-        lastname:
-          type: string
-          example: "Mustermann"
-          minLength: 1
-          maxLength: 255
-        email:
-          type: string
-          example: "max@mustermann.de"
-          minLength: 1
-          maxLength: 255
         tenantId:
           type: integer
           example: "1"
@@ -1675,6 +1693,8 @@ components:
           enum:
             - 'TEAM_AGENCY'
             - 'DEFAULT_AGENCY'
+
+
 
   securitySchemes:
     Bearer:

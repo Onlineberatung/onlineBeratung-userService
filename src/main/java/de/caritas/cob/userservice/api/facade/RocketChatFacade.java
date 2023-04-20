@@ -78,10 +78,10 @@ public class RocketChatFacade {
     }
     try {
       addTechnicalUserToGroup(rcGroupId);
-      List<GroupMemberDTO> memberList = rocketChatService.getMembersOfGroup(rcGroupId);
+      List<GroupMemberDTO> memberList = rocketChatService.getChatUsers(rcGroupId);
       leaveFromGroupAsTechnicalUser(rcGroupId);
       return memberList;
-    } catch (RocketChatGetGroupMembersException getGroupMembersEx) {
+    } catch (Exception exception) {
       var message =
           String.format(
               "Could not get Rocket.Chat group members of group id %s. Initiate rollback.",

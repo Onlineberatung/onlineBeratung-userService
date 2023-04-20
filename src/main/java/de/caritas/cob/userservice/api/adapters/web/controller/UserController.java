@@ -26,6 +26,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.CreateEnquiryMessageRespo
 import de.caritas.cob.userservice.api.adapters.web.dto.DeleteUserAccountDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.E2eKeyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.EmailDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.EmailNotificationsDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.EnquiryMessageDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.GroupSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.LanguageResponseDTO;
@@ -75,9 +76,11 @@ import de.caritas.cob.userservice.api.facade.sessionlist.SessionListFacade;
 import de.caritas.cob.userservice.api.facade.userdata.AskerDataProvider;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
 import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataProvider;
+import de.caritas.cob.userservice.api.facade.userdata.EmailNotificationMapper;
 import de.caritas.cob.userservice.api.facade.userdata.KeycloakUserDataProvider;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.Chat;
+import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.EnquiryData;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
@@ -108,6 +111,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -175,6 +179,8 @@ public class UserController implements UsersApi {
   private final @NotNull UsersStatisticsFacade usersStatisticsFacade;
 
   private final @NotNull AdminUserFacade adminUserFacade;
+
+  private final @NonNull EmailNotificationMapper emailNotificationMapper;
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
@@ -455,6 +461,32 @@ public class UserController implements UsersApi {
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
+  @Override
+  public ResponseEntity<EmailNotificationsDTO> getUserEmailNotifications(String email) {
+
+    Optional<Consultant> consultantByEmail = userAccountProvider.findConsultantByEmail(email);
+    if (consultantByEmail.isPresent()) {
+      return new ResponseEntity<>(getEmailNotifications(consultantByEmail.get()), HttpStatus.OK);
+    } else {
+      Optional<User> userByEmail = userAccountProvider.findUserByEmail(email);
+      if (userByEmail.isPresent()) {
+        return new ResponseEntity<>(getEmailNotifications(userByEmail.get()), HttpStatus.OK);
+      } else {
+        throw new NotFoundException("No adviceseeker nor consultant with given email found.");
+      }
+    }
+  }
+
+  private EmailNotificationsDTO getEmailNotifications(Consultant consultant) {
+    var consultantDTO = consultantDataProvider.retrieveData(consultant);
+    return consultantDTO.getEmailNotifications();
+  }
+
+  private EmailNotificationsDTO getEmailNotifications(User user) {
+    var userDTO = askerDataProvider.retrieveData(user);
+    return userDTO.getEmailNotifications();
+  }
+
   /**
    * Gets the user data for the current logged-in user depending on his user role.
    *
@@ -472,7 +504,7 @@ public class UserController implements UsersApi {
               consultantMap ->
                   partialUserData.setDisplayName(userDtoMapper.displayNameOf(consultantMap)));
       partialUserData.setAvailable(messenger.getAvailability(authenticatedUser.getUserId()));
-    } else if (isTenantAdmin()) {
+    } else if (isTenantAdmin() || isAgencyAdmin()) {
       partialUserData = keycloakUserDataProvider.retrieveAuthenticatedUserData();
     } else {
       var user = userAccountProvider.retrieveValidatedUser();
@@ -493,6 +525,10 @@ public class UserController implements UsersApi {
     return new ResponseEntity<>(fullUserData, HttpStatus.OK);
   }
 
+  private boolean isAgencyAdmin() {
+    return authenticatedUser.isAgencySuperAdmin() || authenticatedUser.isRestrictedAgencyAdmin();
+  }
+
   private boolean isTenantAdmin() {
     return authenticatedUser.isSingleTenantAdmin() || authenticatedUser.isTenantSuperAdmin();
   }
@@ -506,7 +542,11 @@ public class UserController implements UsersApi {
             .orElseThrow(
                 () -> new BadRequestException("Invalid payload: at least one property expected"));
 
-    accountManager.patchUser(patchMap).orElseThrow();
+    Optional<Map<String, Object>> patchResponse = accountManager.patchUser(patchMap);
+    if (patchResponse.isEmpty()) {
+      throw new IllegalStateException("patch response not valid");
+    }
+
     userDtoMapper
         .preferredLanguageOf(patchUserDTO)
         .ifPresent(lang -> identityManager.changeLanguage(userId, lang));
@@ -1218,7 +1258,8 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<Void> updateEmailAddress(@Valid String emailAddress) {
-    userAccountProvider.changeUserAccountEmailAddress(Optional.of(emailAddress));
+    var lowerCaseEmail = Optional.of(emailAddress.toLowerCase());
+    userAccountProvider.changeUserAccountEmailAddress(lowerCaseEmail);
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
@@ -1321,7 +1362,7 @@ public class UserController implements UsersApi {
   @Override
   public ResponseEntity<Void> startTwoFactorAuthByEmailSetup(EmailDTO emailDTO) {
     var username = authenticatedUser.getUsername();
-    var email = emailDTO.getEmail();
+    var email = emailDTO.getEmail().toLowerCase();
 
     if (!identityManager.isEmailAvailableOrOwn(username, email)) {
       return new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
