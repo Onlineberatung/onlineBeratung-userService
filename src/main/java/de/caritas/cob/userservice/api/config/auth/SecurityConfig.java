@@ -199,6 +199,10 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .permitAll()
         .antMatchers(HttpMethod.DELETE, "/useradmin/consultants/{consultantId:[0-9]+}/delete")
         .hasAuthority(USER_ADMIN)
+        .antMatchers(HttpMethod.GET, "/actuator/health")
+        .permitAll()
+        .antMatchers(HttpMethod.GET, "/actuator/health/*")
+        .permitAll()
         .anyRequest()
         .denyAll();
   }
