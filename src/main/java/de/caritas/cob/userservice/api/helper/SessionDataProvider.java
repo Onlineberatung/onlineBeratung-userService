@@ -1,5 +1,8 @@
 package de.caritas.cob.userservice.api.helper;
 
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDataDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
@@ -7,14 +10,10 @@ import de.caritas.cob.userservice.api.manager.consultingtype.SessionDataInitiali
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.SessionData;
 import de.caritas.cob.userservice.api.model.SessionData.SessionDataType;
+import java.util.*;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
-import java.util.*;
-
-import static java.util.Objects.nonNull;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /** Provider for {@link SessionData}. */
 @Component

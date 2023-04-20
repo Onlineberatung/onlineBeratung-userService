@@ -1,12 +1,12 @@
 package de.caritas.cob.userservice.api.manager.consultingtype;
 
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
+
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.SessionDataInitializingDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,7 +21,6 @@ public class SessionDataInitializing {
       SessionDataInitializingDTO sessionDataInitializingDTO) {
 
     return new SessionDataInitializing(
-        isTrue(sessionDataInitializingDTO.getAge()),
-        isTrue(sessionDataInitializingDTO.getState()));
+        isTrue(sessionDataInitializingDTO.getAge()), isTrue(sessionDataInitializingDTO.getState()));
   }
 }

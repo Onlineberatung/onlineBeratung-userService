@@ -142,13 +142,13 @@ public class SessionDataProviderTest {
           .createDate(nowInUtc())
           .build();
 
-  private final SessionDataDTO SESSION_DATA_DTO = new SessionDataDTO().age(AGE_VALUE).state(STATE_VALUE);
-  private final SessionDataDTO SESSION_DATA_DTO_WITH_NO_AGE_VALUE = new SessionDataDTO().state(STATE_VALUE);
+  private final SessionDataDTO SESSION_DATA_DTO =
+      new SessionDataDTO().age(AGE_VALUE).state(STATE_VALUE);
+  private final SessionDataDTO SESSION_DATA_DTO_WITH_NO_AGE_VALUE =
+      new SessionDataDTO().state(STATE_VALUE);
   private final SessionDataDTO EMPTY_SESSION_DATA_DTO = new SessionDataDTO();
   private final SessionDataInitializingDTO SESSION_DATA_INITIALIZING_WITH_ALL_SESSION_DATA_ITEMS =
-      new SessionDataInitializingDTO()
-          .age(true)
-          .state(true);
+      new SessionDataInitializingDTO().age(true).state(true);
   private final ExtendedConsultingTypeResponseDTO
       CONSULTING_TYPE_SETTINGS_WITH_ALL_SESSION_DATA_ITEMS =
           new ExtendedConsultingTypeResponseDTO()
@@ -167,9 +167,7 @@ public class SessionDataProviderTest {
               .roles(null)
               .registration(null);
   private final SessionDataInitializingDTO SESSION_DATA_INITIALIZING_WITH_NO_SESSION_DATA_ITEMS =
-      new SessionDataInitializingDTO()
-          .age(false)
-          .state(false);
+      new SessionDataInitializingDTO().age(false).state(false);
   private final ExtendedConsultingTypeResponseDTO
       CONSULTING_TYPE_SETTINGS_WITH_NO_SESSION_DATA_ITEMS =
           new ExtendedConsultingTypeResponseDTO()
