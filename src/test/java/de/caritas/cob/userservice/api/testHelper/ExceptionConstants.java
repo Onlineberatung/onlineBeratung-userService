@@ -1,7 +1,6 @@
 package de.caritas.cob.userservice.api.testHelper;
 
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
-import de.caritas.cob.userservice.api.exception.CreateMonitoringException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
@@ -24,11 +23,6 @@ public class ExceptionConstants {
           .rcFeedbackGroupId(TestConstants.RC_FEEDBACK_GROUP_ID)
           .session(TestConstants.SESSION)
           .build();
-
-  /** Monitoring exceptions */
-  public static final CreateMonitoringException CREATE_MONITORING_EXCEPTION =
-      new CreateMonitoringException(
-          TestConstants.MESSAGE, EXCEPTION, CREATE_ENQUIRY_EXCEPTION_PARAMETER);
 
   /*
    * Rocket.Chat exceptions

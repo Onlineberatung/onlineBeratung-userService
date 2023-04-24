@@ -145,7 +145,6 @@ class SessionServiceTest {
           .updateDate(nowInUtc())
           .teamSession(false)
           .isPeerChat(false)
-          .monitoring(false)
           .build();
 
   private final Session SESSION_WITH_CONSULTANT =
@@ -161,7 +160,6 @@ class SessionServiceTest {
           .updateDate(nowInUtc())
           .teamSession(false)
           .isPeerChat(false)
-          .monitoring(false)
           .build();
 
   private final Session ACCEPTED_SESSION =
@@ -178,7 +176,6 @@ class SessionServiceTest {
           .updateDate(nowInUtc())
           .teamSession(false)
           .isPeerChat(false)
-          .monitoring(false)
           .build();
 
   private final ConsultantAgency CONSULTANT_AGENCY_1 =
@@ -593,7 +590,6 @@ class SessionServiceTest {
     assertEquals(session.getUser().getUserId(), result.getAskerId());
     assertEquals(session.getUser().getRcUserId(), result.getAskerRcId());
     assertEquals(session.getPostcode(), result.getPostcode());
-    assertEquals(session.isMonitoring(), result.getIsMonitoring());
     assertEquals(session.getStatus().getValue(), result.getStatus().intValue());
     assertEquals(session.getGroupId(), result.getGroupId());
     assertEquals(session.getFeedbackGroupId(), result.getFeedbackGroupId());

@@ -51,7 +51,6 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.user.UserInfoRespo
 import de.caritas.cob.userservice.api.adapters.web.dto.AliasMessageDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.EnquiryMessageDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.MessageType;
-import de.caritas.cob.userservice.api.adapters.web.dto.MonitoringDTO;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
 import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
@@ -210,7 +209,6 @@ class UserControllerSessionE2EIT {
   private UserAgency userAgency;
   private UserInfoResponseDTO userInfoResponse;
   private SubscriptionsGetDTO subscriptionsGetResponse;
-  private MonitoringDTO monitoringDTO;
   private Consultant consultantToAssign;
 
   @AfterEach
@@ -249,7 +247,6 @@ class UserControllerSessionE2EIT {
     userInfoResponse = null;
     subscriptionsGetResponse = null;
     identityConfig.setDisplayNameAllowedForConsultants(false);
-    monitoringDTO = null;
     consultantToAssign = null;
   }
 
@@ -1036,23 +1033,6 @@ class UserControllerSessionE2EIT {
   }
 
   @Test
-  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  void updateMonitoringShouldRespondWithBadRequestIfSessionIsUnknown() throws Exception {
-    givenAValidConsultant(true);
-    givenAValidMonitoringDto();
-
-    mockMvc
-        .perform(
-            put("/users/sessions/monitoring/{sessionId}", 2000)
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(monitoringDTO))
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isBadRequest());
-  }
-
-  @Test
   @SuppressWarnings("java:S2925") // "Thread.sleep" should not be used in tests
   @WithMockUser(authorities = AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION)
   void assignSessionShouldReturnOkAndAssignWhenRequestedByConsultant(CapturedOutput logOutput)
@@ -1125,24 +1105,6 @@ class UserControllerSessionE2EIT {
     TimeUnit.SECONDS.sleep(1); // wait for logging thread
     var out = logOutput.getOut();
     assertFalse(out.contains("Sending 1 emails"));
-  }
-
-  @Test
-  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
-  void updateMonitoringShouldRespondWithUnauthorizedIfNotAdvisedByConsultant() throws Exception {
-    givenAValidConsultant(true);
-    givenAValidSession();
-    givenAValidMonitoringDto();
-
-    mockMvc
-        .perform(
-            put("/users/sessions/monitoring/{sessionId}", session.getId())
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(monitoringDTO))
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isUnauthorized());
   }
 
   private void givenKeycloakUserRoles(String userId, String... roles) {
@@ -1243,11 +1205,6 @@ class UserControllerSessionE2EIT {
             endsWith(urlSuffix), eq(HttpMethod.GET),
             any(HttpEntity.class), eq(SubscriptionsGetDTO.class)))
         .thenReturn(ResponseEntity.ok(subscriptionsGetResponse));
-  }
-
-  private void givenAValidMonitoringDto() {
-    monitoringDTO = new MonitoringDTO();
-    monitoringDTO.addProperties("a", "b");
   }
 
   private void givenAValidConsultant() {

@@ -10,7 +10,6 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_U25;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.EMAIL;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.GENDER_VALUE;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.IS_MONITORING;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.IS_TEAM_SESSION;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RELATION_VALUE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.ROCKETCHAT_ID;
@@ -41,7 +40,6 @@ import de.caritas.cob.userservice.api.model.SessionData.SessionDataType;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.GroupChatDTO;
-import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.MonitoringDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.SessionDataInitializingDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.WelcomeMessageDTO;
 import java.util.ArrayList;
@@ -157,7 +155,6 @@ public class SessionDataProviderTest {
           .enquiryMessageDate(nowInUtc())
           .sessionData(SESSION_DATA)
           .teamSession(IS_TEAM_SESSION)
-          .monitoring(IS_MONITORING)
           .createDate(nowInUtc())
           .build();
 
@@ -195,8 +192,6 @@ public class SessionDataProviderTest {
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING_WITH_ALL_SESSION_DATA_ITEMS)
-              .monitoring(
-                  new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
               .initializeFeedbackChat(false)
               .notifications(null)
               .languageFormal(false)
@@ -222,8 +217,6 @@ public class SessionDataProviderTest {
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING_WITH_NO_SESSION_DATA_ITEMS)
-              .monitoring(
-                  new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
               .initializeFeedbackChat(false)
               .notifications(null)
               .languageFormal(false)

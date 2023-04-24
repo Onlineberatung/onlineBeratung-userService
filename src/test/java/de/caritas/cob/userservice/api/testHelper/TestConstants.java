@@ -46,7 +46,6 @@ import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.model.UserAgency;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.GroupChatDTO;
-import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.MonitoringDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.RegistrationDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.RegistrationMandatoryFieldsDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.SessionDataInitializingDTO;
@@ -851,8 +850,6 @@ public class TestConstants {
   public static final Integer SESSION_STATUS_IN_PROGRESS = 2;
   public static final boolean IS_TEAM_SESSION = true;
   public static final boolean IS_NO_TEAM_SESSION = false;
-  public static final boolean IS_MONITORING = true;
-  public static final boolean IS_NOT_MONITORING = false;
   public static final Long ENQUIRY_ID = 1L;
   public static final Long ENQUIRY_ID_2 = 2L;
   public static final Session SESSION =
@@ -866,7 +863,6 @@ public class TestConstants {
           .updateDate(nowInUtc())
           .teamSession(false)
           .isPeerChat(false)
-          .monitoring(false)
           .build();
 
   public static final Session SESSION_WITH_CONSULTANT =
@@ -884,7 +880,6 @@ public class TestConstants {
           .updateDate(nowInUtc())
           .teamSession(false)
           .isPeerChat(false)
-          .monitoring(false)
           .build();
 
   public static final Session SESSION_WITH_ASKER_AND_CONSULTANT =
@@ -903,7 +898,6 @@ public class TestConstants {
           .updateDate(nowInUtc())
           .teamSession(false)
           .isPeerChat(false)
-          .monitoring(false)
           .build();
 
   public static final Session TEAM_SESSION_WITH_ASKER_AND_CONSULTANT =
@@ -922,7 +916,6 @@ public class TestConstants {
           .updateDate(nowInUtc())
           .teamSession(true)
           .isPeerChat(false)
-          .monitoring(false)
           .build();
 
   public static final Session FEEDBACK_SESSION_WITH_ASKER_AND_CONSULTANT =
@@ -942,7 +935,6 @@ public class TestConstants {
           .updateDate(nowInUtc())
           .teamSession(true)
           .isPeerChat(false)
-          .monitoring(false)
           .build();
 
   public static final Session ANONYMOUS_ENQUIRY_WITHOUT_CONSULTANT =
@@ -960,7 +952,6 @@ public class TestConstants {
           .updateDate(nowInUtc())
           .teamSession(false)
           .isPeerChat(false)
-          .monitoring(false)
           .build();
 
   public static final Session SESSION_WITHOUT_CONSULTANT =
@@ -978,7 +969,6 @@ public class TestConstants {
           .updateDate(nowInUtc())
           .teamSession(true)
           .isPeerChat(false)
-          .monitoring(true)
           .build();
 
   public static final Session FEEDBACKSESSION_WITHOUT_CONSULTANT =
@@ -997,7 +987,6 @@ public class TestConstants {
           .updateDate(nowInUtc())
           .teamSession(true)
           .isPeerChat(false)
-          .monitoring(true)
           .build();
   public static final Session FEEDBACKSESSION_WITH_CONSULTANT =
       Session.builder()
@@ -1016,7 +1005,6 @@ public class TestConstants {
           .updateDate(nowInUtc())
           .teamSession(true)
           .isPeerChat(false)
-          .monitoring(true)
           .build();
 
   public static final Session SESSION_WITHOUT_CONSULTANT_NO_RC_USER_ID =
@@ -1035,7 +1023,6 @@ public class TestConstants {
           .updateDate(nowInUtc())
           .teamSession(false)
           .isPeerChat(false)
-          .monitoring(true)
           .build();
 
   public static final Session U25_SESSION_WITHOUT_CONSULTANT =
@@ -1054,7 +1041,6 @@ public class TestConstants {
           .updateDate(nowInUtc())
           .teamSession(true)
           .isPeerChat(false)
-          .monitoring(true)
           .build();
   public static final List<Session> SESSION_LIST = Collections.singletonList(SESSION);
   public static final Set<Session> SESSION_SET =
@@ -1094,8 +1080,7 @@ public class TestConstants {
           .feedbackGroupId(RC_FEEDBACK_GROUP_ID)
           .askerRcId(RC_USER_ID)
           .messageDate(MESSAGE_DATE)
-          .isTeamSession(IS_TEAM_SESSION)
-          .monitoring(IS_MONITORING);
+          .isTeamSession(IS_TEAM_SESSION);
   public static final SessionDTO SESSION_DTO_U25 =
       new SessionDTO()
           .id(SESSION_ID)
@@ -1107,8 +1092,7 @@ public class TestConstants {
           .feedbackGroupId(RC_FEEDBACK_GROUP_ID)
           .askerRcId(RC_USER_ID)
           .messageDate(MESSAGE_DATE)
-          .isTeamSession(IS_TEAM_SESSION)
-          .monitoring(IS_MONITORING);
+          .isTeamSession(IS_TEAM_SESSION);
   public static final UserSessionResponseDTO USER_SESSION_RESPONSE_DTO_SUCHT =
       new UserSessionResponseDTO()
           .session(SESSION_DTO_SUCHT)
@@ -1133,8 +1117,7 @@ public class TestConstants {
           .feedbackGroupId(RC_FEEDBACK_GROUP_ID)
           .askerRcId(RC_USER_ID)
           .messageDate(Helper.getUnixTimestampFromDate(NOW))
-          .isTeamSession(IS_NO_TEAM_SESSION)
-          .monitoring(IS_MONITORING);
+          .isTeamSession(IS_NO_TEAM_SESSION);
   public static final SessionDTO SESSION_DTO_2 =
       new SessionDTO()
           .id(SESSION_ID)
@@ -1145,8 +1128,7 @@ public class TestConstants {
           .feedbackGroupId(RC_FEEDBACK_GROUP_ID_2)
           .askerRcId(RC_USER_ID_2)
           .messageDate(Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 86400000)))
-          .isTeamSession(IS_NO_TEAM_SESSION)
-          .monitoring(IS_MONITORING);
+          .isTeamSession(IS_NO_TEAM_SESSION);
   public static final SessionDTO SESSION_DTO_3 =
       new SessionDTO()
           .id(SESSION_ID)
@@ -1157,8 +1139,7 @@ public class TestConstants {
           .feedbackGroupId(RC_FEEDBACK_GROUP_ID_3)
           .askerRcId(RC_USER_ID_3)
           .messageDate(Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 8640000)))
-          .isTeamSession(IS_NO_TEAM_SESSION)
-          .monitoring(IS_MONITORING);
+          .isTeamSession(IS_NO_TEAM_SESSION);
   public static final SessionDTO SESSION_DTO_WITH_FEEDBACK =
       new SessionDTO()
           .id(SESSION_ID)
@@ -1170,7 +1151,6 @@ public class TestConstants {
           .askerRcId(RC_USER_ID_3)
           .messageDate(Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 8640000)))
           .isTeamSession(IS_NO_TEAM_SESSION)
-          .monitoring(IS_MONITORING)
           .feedbackRead(true);
   public static final SessionDTO SESSION_DTO_WITHOUT_FEEDBACK =
       new SessionDTO()
@@ -1183,7 +1163,6 @@ public class TestConstants {
           .askerRcId(RC_USER_ID_3)
           .messageDate(Helper.getUnixTimestampFromDate(new Date(NOW.getTime() + 8640000)))
           .isTeamSession(IS_NO_TEAM_SESSION)
-          .monitoring(IS_MONITORING)
           .feedbackRead(false);
   /** Chat */
   public static final String CHAT_TOPIC = "Pregnancy";
@@ -1765,8 +1744,7 @@ public class TestConstants {
           .groupId(RC_GROUP_ID)
           .askerRcId(RC_USER_ID)
           .messageDate(Helper.getUnixTimestampFromDate(NOW))
-          .isTeamSession(IS_NO_TEAM_SESSION)
-          .monitoring(IS_MONITORING);
+          .isTeamSession(IS_NO_TEAM_SESSION);
   public static final ConsultantSessionResponseDTO
       CONSULTANT_SESSION_RESPONSE_DTO_WITHOUT_FEEDBACK_CHAT =
           new ConsultantSessionResponseDTO()
@@ -1826,7 +1804,6 @@ public class TestConstants {
               new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
           .sendFurtherStepsMessage(false)
           .sessionDataInitializing(null)
-          .monitoring(new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
           .initializeFeedbackChat(false)
           .notifications(null)
           .languageFormal(true)
@@ -1853,8 +1830,6 @@ public class TestConstants {
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(null)
-              .monitoring(
-                  new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
               .initializeFeedbackChat(false)
               .notifications(null)
               .languageFormal(false)
@@ -1872,8 +1847,6 @@ public class TestConstants {
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(null)
-              .monitoring(
-                  new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
               .initializeFeedbackChat(false)
               .notifications(null)
               .languageFormal(false)
@@ -1899,8 +1872,6 @@ public class TestConstants {
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(null)
-              .monitoring(
-                  new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
               .initializeFeedbackChat(false)
               .notifications(null)
               .languageFormal(false)
@@ -1918,8 +1889,6 @@ public class TestConstants {
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(null)
-              .monitoring(
-                  new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
               .initializeFeedbackChat(false)
               .notifications(null)
               .languageFormal(false)
@@ -1955,8 +1924,6 @@ public class TestConstants {
                   new WelcomeMessageDTO().sendWelcomeMessage(true).welcomeMessageText("Hallo"))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING)
-              .monitoring(
-                  new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
               .initializeFeedbackChat(false)
               .notifications(null)
               .languageFormal(false)
@@ -1974,14 +1941,11 @@ public class TestConstants {
                   new WelcomeMessageDTO().sendWelcomeMessage(true).welcomeMessageText("Hallo"))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING)
-              .monitoring(
-                  new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
               .initializeFeedbackChat(false)
               .notifications(null)
               .languageFormal(false)
               .roles(null)
               .registration(REGISTRATION_WITH_MANDATORY_FIELDS_TRUE);
-  public static final String CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH = "/monitoring/test.json";
   public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_SUCHT =
       new ExtendedConsultingTypeResponseDTO()
           .id(CONSULTING_TYPE_ID_SUCHT)
@@ -1993,10 +1957,6 @@ public class TestConstants {
               new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
           .sendFurtherStepsMessage(false)
           .sessionDataInitializing(SESSION_DATA_INITIALIZING)
-          .monitoring(
-              new MonitoringDTO()
-                  .initializeMonitoring(true)
-                  .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
           .initializeFeedbackChat(false)
           .notifications(null)
           .languageFormal(false)
@@ -2013,10 +1973,6 @@ public class TestConstants {
               new WelcomeMessageDTO().sendWelcomeMessage(true).welcomeMessageText("Hallo"))
           .sendFurtherStepsMessage(false)
           .sessionDataInitializing(SESSION_DATA_INITIALIZING)
-          .monitoring(
-              new MonitoringDTO()
-                  .initializeMonitoring(true)
-                  .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
           .initializeFeedbackChat(false)
           .notifications(null)
           .languageFormal(false)
@@ -2034,10 +1990,6 @@ public class TestConstants {
                   new WelcomeMessageDTO().sendWelcomeMessage(true).welcomeMessageText("Hallo"))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING)
-              .monitoring(
-                  new MonitoringDTO()
-                      .initializeMonitoring(true)
-                      .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
               .initializeFeedbackChat(false)
               .notifications(null)
               .languageFormal(false)
@@ -2055,10 +2007,6 @@ public class TestConstants {
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING)
-              .monitoring(
-                  new MonitoringDTO()
-                      .initializeMonitoring(true)
-                      .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
               .initializeFeedbackChat(false)
               .notifications(null)
               .languageFormal(false)
@@ -2076,10 +2024,6 @@ public class TestConstants {
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING)
-              .monitoring(
-                  new MonitoringDTO()
-                      .initializeMonitoring(true)
-                      .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
               .initializeFeedbackChat(false)
               .notifications(null)
               .languageFormal(false)
@@ -2097,10 +2041,6 @@ public class TestConstants {
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(true)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING)
-              .monitoring(
-                  new MonitoringDTO()
-                      .initializeMonitoring(true)
-                      .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
               .initializeFeedbackChat(false)
               .notifications(null)
               .languageFormal(false)
@@ -2118,10 +2058,6 @@ public class TestConstants {
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING)
-              .monitoring(
-                  new MonitoringDTO()
-                      .initializeMonitoring(true)
-                      .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
               .initializeFeedbackChat(false)
               .notifications(null)
               .languageFormal(false)
@@ -2139,10 +2075,6 @@ public class TestConstants {
                   new WelcomeMessageDTO().sendWelcomeMessage(true).welcomeMessageText("Hallo"))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING)
-              .monitoring(
-                  new MonitoringDTO()
-                      .initializeMonitoring(true)
-                      .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
               .initializeFeedbackChat(false)
               .notifications(null)
               .languageFormal(false)
@@ -2159,7 +2091,6 @@ public class TestConstants {
               new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
           .sendFurtherStepsMessage(false)
           .sessionDataInitializing(SESSION_DATA_INITIALIZING)
-          .monitoring(new MonitoringDTO().initializeMonitoring(false).monitoringTemplateFile(null))
           .initializeFeedbackChat(false)
           .notifications(null)
           .languageFormal(false)
@@ -2176,47 +2107,12 @@ public class TestConstants {
               new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
           .sendFurtherStepsMessage(false)
           .sessionDataInitializing(SESSION_DATA_INITIALIZING)
-          .monitoring(new MonitoringDTO().initializeMonitoring(false).monitoringTemplateFile(null))
           .initializeFeedbackChat(false)
           .notifications(null)
           .languageFormal(false)
           .roles(null)
           .registration(REGISTRATION_WITH_MANDATORY_FIELDS_FALSE);
-  public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WIT_MONITORING =
-      new ExtendedConsultingTypeResponseDTO()
-          .id(CONSULTING_TYPE_ID_U25)
-          .slug("u25")
-          .excludeNonMainConsultantsFromTeamSessions(true)
-          .groupChat(new GroupChatDTO().isGroupChat(false))
-          .consultantBoundedToConsultingType(true)
-          .welcomeMessage(
-              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
-          .sendFurtherStepsMessage(false)
-          .sessionDataInitializing(null)
-          .monitoring(new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
-          .initializeFeedbackChat(false)
-          .notifications(null)
-          .languageFormal(false)
-          .roles(null)
-          .registration(null);
-  public static final ExtendedConsultingTypeResponseDTO CONSULTING_TYPE_SETTINGS_WITH_MONITORING =
-      new ExtendedConsultingTypeResponseDTO()
-          .id(CONSULTING_TYPE_ID_SUCHT)
-          .slug("suchtberatung")
-          .excludeNonMainConsultantsFromTeamSessions(false)
-          .groupChat(new GroupChatDTO().isGroupChat(false))
-          .consultantBoundedToConsultingType(false)
-          .welcomeMessage(
-              new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
-          .sendFurtherStepsMessage(false)
-          .sessionDataInitializing(null)
-          .monitoring(
-              new MonitoringDTO().initializeMonitoring(IS_MONITORING).monitoringTemplateFile(null))
-          .initializeFeedbackChat(false)
-          .notifications(null)
-          .languageFormal(false)
-          .roles(null)
-          .registration(null);
+
   public static final ExtendedConsultingTypeResponseDTO
       CONSULTING_TYPE_SETTINGS_WITHOUT_MONITORING =
           new ExtendedConsultingTypeResponseDTO()
@@ -2229,10 +2125,6 @@ public class TestConstants {
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(null)
-              .monitoring(
-                  new MonitoringDTO()
-                      .initializeMonitoring(IS_NOT_MONITORING)
-                      .monitoringTemplateFile(null))
               .initializeFeedbackChat(false)
               .notifications(null)
               .languageFormal(false)

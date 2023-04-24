@@ -1,8 +1,6 @@
 package de.caritas.cob.userservice.api.port.out;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.caritas.cob.userservice.api.config.JpaAuditingConfiguration;
 import de.caritas.cob.userservice.api.model.Admin;
@@ -56,7 +54,6 @@ class AdminRepositoryIT {
 
     auditingHandler.markModified(admin);
     admin = adminRepository.save(admin);
-
     assertTrue(admin.getCreateDate().isBefore(admin.getUpdateDate()));
   }
 
