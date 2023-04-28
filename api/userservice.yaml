@@ -1609,6 +1609,37 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /users/chat/{chatId}/verify:
+    put:
+      tags:
+        - user-controller
+      summary: 'Verify consultant has access to this chat [Authorization: Role: consultant]'
+      operationId: verifyCanModerateChat
+      parameters:
+        - name: chatId
+          in: path
+          description: Chat Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK - successful operation
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - No permission for chat
+        404:
+          description: NOT FOUND - Chat not found
+        409:
+          description: CONFLICT - Chat has not startet yet
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /users/chat/{chatId}/members:
     get:
       tags:

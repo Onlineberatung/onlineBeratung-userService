@@ -1139,9 +1139,13 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<Void> joinChat(@PathVariable Long chatId) {
-
     joinAndLeaveChatFacade.joinChat(chatId, authenticatedUser);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
 
+  @Override
+  public ResponseEntity<Void> verifyCanModerateChat(@PathVariable Long chatId) {
+    joinAndLeaveChatFacade.verifyCanModerate(chatId);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
