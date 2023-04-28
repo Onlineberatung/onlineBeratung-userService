@@ -3,7 +3,6 @@ package de.caritas.cob.userservice.api.facade.rollback;
 import static java.util.Objects.nonNull;
 
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
-import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.UserAgencyService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.UserService;
@@ -22,7 +21,6 @@ public class RollbackFacade {
   private final @NonNull UserAgencyService userAgencyService;
   private final @NonNull SessionService sessionService;
   private final @NonNull UserService userService;
-  private final @NonNull MonitoringService monitoringService;
 
   /**
    * Deletes the provided user in Keycloak, MariaDB and its related session or user-chat/agency
@@ -45,7 +43,6 @@ public class RollbackFacade {
   private void rollbackSession(RollbackUserAccountInformation rollbackUser) {
     if (nonNull(rollbackUser.getSession())) {
       sessionService.deleteSession(rollbackUser.getSession());
-      monitoringService.rollbackInitializeMonitoring(rollbackUser.getSession());
     }
   }
 

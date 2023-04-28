@@ -10,7 +10,6 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsP
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.LoginResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.MonitoringDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.container.CreateEnquiryExceptionInformation;
@@ -22,7 +21,6 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginExcept
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatPostWelcomeMessageException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
 import de.caritas.cob.userservice.api.helper.Helper;
-import de.caritas.cob.userservice.api.helper.MonitoringStructureProvider;
 import de.caritas.cob.userservice.api.helper.RocketChatRoomNameGenerator;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
@@ -99,9 +97,7 @@ public class AskerImportService {
   private final @NonNull SessionDataService sessionDataService;
   private final @NonNull ConsultantService consultantService;
   private final @NonNull ConsultantAgencyService consultantAgencyService;
-  private final @NonNull MonitoringService monitoringService;
   private final @NonNull MessageServiceProvider messageServiceProvider;
-  private final @NonNull MonitoringStructureProvider monitoringStructureProvider;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
   private final @NonNull AgencyService agencyService;
   private final @NonNull UserHelper userHelper;
@@ -543,23 +539,6 @@ public class AskerImportService {
               String.format(
                   "Could not remove system messages from group id %s for user %s",
                   rcGroupId, record.getUsername()));
-        }
-
-        // Create an initial monitoring data set for the session
-        if (extendedConsultingTypeResponseDTO.getMonitoring().getMonitoringTemplateFile() != null
-            && !extendedConsultingTypeResponseDTO
-                .getMonitoring()
-                .getMonitoringTemplateFile()
-                .equals(StringUtils.EMPTY)) {
-          MonitoringDTO monitoringDTO =
-              monitoringStructureProvider.getMonitoringInitialList(agencyDTO.getConsultingType());
-          if (monitoringDTO != null) {
-            monitoringService.updateMonitoring(session.getId(), monitoringDTO);
-          } else {
-            throw new ImportException(
-                String.format(
-                    "Could not get initial monitoring for user %s", record.getUsername()));
-          }
         }
 
         // Save session data

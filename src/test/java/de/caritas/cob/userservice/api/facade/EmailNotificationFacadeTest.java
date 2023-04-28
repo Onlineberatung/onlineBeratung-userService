@@ -13,7 +13,6 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_ID_2;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_ID_3;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.IS_MONITORING;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.IS_NO_TEAM_SESSION;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.IS_TEAM_SESSION;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.NAME;
@@ -72,7 +71,6 @@ import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.GroupChatDTO;
-import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.MonitoringDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.NewMessageDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.NotificationsDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.TeamSessionsDTO;
@@ -322,7 +320,6 @@ public class EmailNotificationFacadeTest {
           .enquiryMessageDate(nowInUtc())
           .groupId(RC_GROUP_ID)
           .teamSession(IS_NO_TEAM_SESSION)
-          .monitoring(IS_MONITORING)
           .createDate(nowInUtc())
           .build();
 
@@ -338,7 +335,6 @@ public class EmailNotificationFacadeTest {
           .enquiryMessageDate(nowInUtc())
           .groupId(RC_GROUP_ID)
           .teamSession(IS_NO_TEAM_SESSION)
-          .monitoring(IS_MONITORING)
           .createDate(nowInUtc())
           .build();
 
@@ -355,7 +351,6 @@ public class EmailNotificationFacadeTest {
           .enquiryMessageDate(nowInUtc())
           .groupId(RC_GROUP_ID)
           .teamSession(IS_NO_TEAM_SESSION)
-          .monitoring(IS_MONITORING)
           .createDate(nowInUtc())
           .build();
 
@@ -372,7 +367,6 @@ public class EmailNotificationFacadeTest {
           .enquiryMessageDate(nowInUtc())
           .groupId(RC_GROUP_ID)
           .teamSession(IS_NO_TEAM_SESSION)
-          .monitoring(IS_MONITORING)
           .createDate(nowInUtc())
           .build();
 
@@ -389,7 +383,6 @@ public class EmailNotificationFacadeTest {
           .enquiryMessageDate(nowInUtc())
           .groupId(RC_GROUP_ID)
           .teamSession(IS_TEAM_SESSION)
-          .monitoring(IS_MONITORING)
           .createDate(nowInUtc())
           .build();
 
@@ -429,8 +422,6 @@ public class EmailNotificationFacadeTest {
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(null)
-              .monitoring(
-                  new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
               .initializeFeedbackChat(false)
               .notifications(NOTIFICATIONS_DTO_TO_ALL_TEAM_CONSULTANTS)
               .languageFormal(false)
@@ -448,8 +439,6 @@ public class EmailNotificationFacadeTest {
                   new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(null)
-              .monitoring(
-                  new MonitoringDTO().initializeMonitoring(true).monitoringTemplateFile(null))
               .initializeFeedbackChat(false)
               .notifications(NOTIFICATIONS_DTO_TO_ASSIGNED_CONSULTANT_ONLY)
               .languageFormal(false)

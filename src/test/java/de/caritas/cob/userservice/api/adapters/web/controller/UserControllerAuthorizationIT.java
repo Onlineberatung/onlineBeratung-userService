@@ -10,7 +10,6 @@ import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_C
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_CHAT_MEMBERS;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_CONSULTANTS;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_ENQUIRIES_FOR_AGENCY;
-import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_MONITORING;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_OPEN_SESSIONS_FOR_AUTHENTICATED_CONSULTANT;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_SESSIONS_FOR_AUTHENTICATED_CONSULTANT;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_GET_SESSIONS_FOR_AUTHENTICATED_USER;
@@ -34,7 +33,6 @@ import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_L
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_UPDATE_CHAT;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_UPDATE_EMAIL;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_UPDATE_MOBILE_TOKEN;
-import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_UPDATE_MONITORING;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_UPDATE_PASSWORD;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_PUT_UPDATE_SESSION_DATA;
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.PATH_UPDATE_KEY;
@@ -91,7 +89,6 @@ import de.caritas.cob.userservice.api.service.ConsultantImportService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.DecryptionService;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.archive.SessionArchiveService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
@@ -138,7 +135,6 @@ class UserControllerAuthorizationIT {
   @MockBean private ConsultantDataFacade consultantDataFacade;
   @MockBean private EmailNotificationFacade emailNotificationFacade;
   @MockBean private ConsultantImportService consultantImportService;
-  @MockBean private MonitoringService monitoringService;
   @MockBean private AskerImportService askerImportService;
   @MockBean private ConsultantAgencyService consultantAgencyService;
   @MockBean private IdentityClient identityClient;
@@ -946,130 +942,6 @@ class UserControllerAuthorizationIT {
         .andExpect(status().isForbidden());
 
     verifyNoMoreInteractions(consultantImportService);
-  }
-
-  /** GET on /users/sessions/{sessionId}/monitoring (role: consultant) */
-  @Test
-  void getMonitoring_Should_ReturnUnauthorizedAndCallNoMethods_WhenNoKeycloakAuthorization()
-      throws Exception {
-
-    mvc.perform(
-            put(PATH_GET_MONITORING)
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isUnauthorized());
-
-    verifyNoMoreInteractions(authenticatedUser, sessionService, monitoringService);
-  }
-
-  @Test
-  @WithMockUser(
-      authorities = {
-        AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
-        AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-        AuthorityValue.USE_FEEDBACK,
-        AuthorityValue.VIEW_AGENCY_CONSULTANTS,
-        AuthorityValue.VIEW_ALL_PEER_SESSIONS,
-        AuthorityValue.TECHNICAL_DEFAULT,
-        AuthorityValue.USER_DEFAULT,
-        AuthorityValue.START_CHAT,
-        AuthorityValue.CREATE_NEW_CHAT,
-        AuthorityValue.STOP_CHAT,
-        AuthorityValue.UPDATE_CHAT,
-        AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS,
-        AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
-        AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-        AuthorityValue.USER_ADMIN
-      })
-  void getMonitoring_Should_ReturnForbiddenAndCallNoMethods_WhenNoConsultantDefaultAuthority()
-      throws Exception {
-
-    mvc.perform(
-            put(PATH_GET_MONITORING)
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isForbidden());
-
-    verifyNoMoreInteractions(authenticatedUser, sessionService, monitoringService);
-  }
-
-  @Test
-  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  void getMonitoring_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens() throws Exception {
-
-    mvc.perform(
-            put(PATH_GET_MONITORING)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isForbidden());
-
-    verifyNoMoreInteractions(authenticatedUser, sessionService, monitoringService);
-  }
-
-  /** PUT on /users/sessions/monitoring/{sessionId} (role: consultant) */
-  @Test
-  void updateMonitoring_Should_ReturnUnauthorizedAndCallNoMethods_WhenNoKeycloakAuthorization()
-      throws Exception {
-
-    mvc.perform(
-            put(PATH_PUT_UPDATE_MONITORING)
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isUnauthorized());
-
-    verifyNoMoreInteractions(authenticatedUser, sessionService, monitoringService);
-  }
-
-  @Test
-  @WithMockUser(
-      authorities = {
-        AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
-        AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-        AuthorityValue.USE_FEEDBACK,
-        AuthorityValue.VIEW_AGENCY_CONSULTANTS,
-        AuthorityValue.VIEW_ALL_PEER_SESSIONS,
-        AuthorityValue.TECHNICAL_DEFAULT,
-        AuthorityValue.USER_DEFAULT,
-        AuthorityValue.START_CHAT,
-        AuthorityValue.CREATE_NEW_CHAT,
-        AuthorityValue.STOP_CHAT,
-        AuthorityValue.UPDATE_CHAT,
-        AuthorityValue.VIEW_ALL_FEEDBACK_SESSIONS,
-        AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION,
-        AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY,
-        AuthorityValue.USER_ADMIN
-      })
-  void updateMonitoring_Should_ReturnForbiddenAndCallNoMethods_WhenNoConsultantDefaultAuthority()
-      throws Exception {
-
-    mvc.perform(
-            put(PATH_PUT_UPDATE_MONITORING)
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isForbidden());
-
-    verifyNoMoreInteractions(authenticatedUser, sessionService, monitoringService);
-  }
-
-  @Test
-  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  void updateMonitoring_Should_ReturnForbiddenAndCallNoMethods_WhenNoCsrfTokens() throws Exception {
-
-    mvc.perform(
-            put(PATH_PUT_UPDATE_MONITORING)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isForbidden());
-
-    verifyNoMoreInteractions(authenticatedUser, sessionService, monitoringService);
   }
 
   /** POST on /users/askers/import (role: technical) */

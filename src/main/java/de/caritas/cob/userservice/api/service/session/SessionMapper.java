@@ -69,7 +69,6 @@ public class SessionMapper {
         .isTeamSession(session.isTeamSession())
         .language(LanguageCode.fromValue(session.getLanguageCode().name()))
         .isPeerChat(session.isPeerChat())
-        .monitoring(session.isMonitoring())
         .registrationType(session.getRegistrationType().name())
         .createDate(toIsoTime(session.getCreateDate()))
         .topic(new SessionTopicDTO().id(session.getMainTopicId()));
