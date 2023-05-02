@@ -367,16 +367,7 @@ components:
     SessionDataInitializingDTO:
       type: object
       properties:
-        addictiveDrugs:
-          type: boolean
-          example: true
         age:
-          type: boolean
-          example: false
-        gender:
-          type: boolean
-          example: true
-        relation:
           type: boolean
           example: false
         state:
