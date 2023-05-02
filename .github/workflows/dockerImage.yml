@@ -14,7 +14,7 @@ jobs:
   test:
     name: Build and run unit tests
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 40
     env:
       FAIL_WEBHOOK_SECRET: ${{ secrets.MS_TEAMS_FAIL_WEBHOOK_URI }}
     steps:
@@ -68,7 +68,7 @@ jobs:
     needs: [ test ]
     name: Push Docker image to GitHub Packages
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 40
     env:
       IMAGE_WEBHOOK_SECRET: ${{ secrets.MS_TEAMS_IMAGE_WEBHOOK_URI }}
       FAIL_WEBHOOK_SECRET: ${{ secrets.MS_TEAMS_FAIL_WEBHOOK_URI }}
