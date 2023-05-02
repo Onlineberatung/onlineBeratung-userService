@@ -4,11 +4,9 @@ import de.caritas.cob.userservice.api.tenant.TenantContextProvider;
 import de.caritas.cob.userservice.api.workflow.deactivate.service.DeactivateAnonymousUserService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class DeactivateAnonymousUserScheduler {
@@ -18,12 +16,7 @@ public class DeactivateAnonymousUserScheduler {
 
   @Scheduled(cron = "${user.anonymous.deactivateworkflow.cron}")
   public void performDeactivationWorkflow() {
-    try {
-      log.info("Started deactivating stale anonymous users");
-      tenantContextProvider.setTechnicalContextIfMultiTenancyIsEnabled();
-      deactivateAnonymousUserService.deactivateStaleAnonymousUsers();
-    } finally {
-      log.info("Completed deactivating stale anonymous users");
-    }
+    tenantContextProvider.setTechnicalContextIfMultiTenancyIsEnabled();
+    deactivateAnonymousUserService.deactivateStaleAnonymousUsers();
   }
 }

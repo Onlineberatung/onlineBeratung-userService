@@ -13,7 +13,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class Organizer implements Organizing {
 
@@ -79,17 +77,12 @@ public class Organizer implements Organizing {
   @Transactional
   @Override
   public void deleteObsoleteAppointments() {
-    try {
-      log.info("Started deleting obsolete appointments");
-      if (!appointmentConfig.getDeleteJobEnabled()) {
-        return;
-      }
-      var lifespanInHours = appointmentConfig.getLifespanInHours();
-      var olderThanLifespan = clock.instant().minus(lifespanInHours, ChronoUnit.HOURS);
-
-      appointmentRepository.deleteOlderThan(olderThanLifespan);
-    } finally {
-      log.info("Completed deleting obsolete appointments");
+    if (!appointmentConfig.getDeleteJobEnabled()) {
+      return;
     }
+    var lifespanInHours = appointmentConfig.getLifespanInHours();
+    var olderThanLifespan = clock.instant().minus(lifespanInHours, ChronoUnit.HOURS);
+
+    appointmentRepository.deleteOlderThan(olderThanLifespan);
   }
 }

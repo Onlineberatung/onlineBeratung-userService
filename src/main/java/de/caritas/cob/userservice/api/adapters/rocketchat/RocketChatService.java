@@ -154,19 +154,17 @@ public class RocketChatService implements MessageClient {
   @Scheduled(cron = "#{rocketChatConfig.credentialCron}")
   @Profile("!testing")
   public void updateCredentials() {
+    if (rotatingTokensInitialized) {
+      log.debug("rotating tokens");
+    } else {
+      log.debug("initialize tokens");
+      rotatingTokensInitialized = true;
+    }
+
     try {
-      log.info("Started update rocketchat credentials");
-      if (rotatingTokensInitialized) {
-        log.debug("rotating tokens");
-      } else {
-        log.debug("initialize tokens");
-        rotatingTokensInitialized = true;
-      }
       rcCredentialHelper.updateCredentials();
     } catch (RocketChatLoginException e) {
       log.warn("Unauthorized: {}", e.getMessage());
-    } finally {
-      log.info("Completed update rocketchat credentials");
     }
   }
 
