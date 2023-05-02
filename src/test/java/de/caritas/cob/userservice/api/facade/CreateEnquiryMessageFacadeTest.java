@@ -77,7 +77,6 @@ import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.LogService;
-import de.caritas.cob.userservice.api.service.MonitoringService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.liveevents.LiveEventNotificationService;
 import de.caritas.cob.userservice.api.service.message.MessageServiceProvider;
@@ -86,7 +85,6 @@ import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.GroupChatDTO;
-import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.MonitoringDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.SessionDataInitializingDTO;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.WelcomeMessageDTO;
 import de.caritas.cob.userservice.messageservice.generated.web.model.MessageResponseDTO;
@@ -163,7 +161,6 @@ public class CreateEnquiryMessageFacadeTest {
       Collections.singletonList(CONSULTANT_AGENCY);
   private final String FIELD_NAME_ROCKET_CHAT_SYSTEM_USER_ID = "rocketChatSystemUserId";
   private final String ROCKET_CHAT_SYSTEM_USER_ID = "xN3Msb3ksnfxda7gEk";
-  private final String CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH = "/monitoring/test.json";
   private SessionDataInitializingDTO SESSION_DATA_INITIALIZING =
       new SessionDataInitializingDTO()
           .addictiveDrugs(true)
@@ -183,10 +180,6 @@ public class CreateEnquiryMessageFacadeTest {
               new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
           .sendFurtherStepsMessage(false)
           .sessionDataInitializing(SESSION_DATA_INITIALIZING)
-          .monitoring(
-              new MonitoringDTO()
-                  .initializeMonitoring(true)
-                  .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
           .initializeFeedbackChat(false)
           .notifications(null)
           .languageFormal(false)
@@ -203,10 +196,6 @@ public class CreateEnquiryMessageFacadeTest {
               new WelcomeMessageDTO().sendWelcomeMessage(false).welcomeMessageText(null))
           .sendFurtherStepsMessage(false)
           .sessionDataInitializing(SESSION_DATA_INITIALIZING)
-          .monitoring(
-              new MonitoringDTO()
-                  .initializeMonitoring(true)
-                  .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
           .initializeFeedbackChat(true)
           .notifications(null)
           .languageFormal(false)
@@ -224,10 +213,6 @@ public class CreateEnquiryMessageFacadeTest {
                   new WelcomeMessageDTO().sendWelcomeMessage(true).welcomeMessageText(MESSAGE))
               .sendFurtherStepsMessage(false)
               .sessionDataInitializing(SESSION_DATA_INITIALIZING)
-              .monitoring(
-                  new MonitoringDTO()
-                      .initializeMonitoring(true)
-                      .monitoringTemplateFile(CONSULTING_TYPE_SETTINGS_JSON_FILE_PATH))
               .initializeFeedbackChat(true)
               .notifications(null)
               .languageFormal(false)
@@ -247,8 +232,6 @@ public class CreateEnquiryMessageFacadeTest {
   @Mock private MessageServiceProvider messageServiceProvider;
 
   @Mock private ConsultantAgencyService consultantAgencyService;
-
-  @Mock private MonitoringService monitoringService;
 
   @Mock private Logger logger;
 

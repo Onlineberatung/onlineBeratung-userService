@@ -90,15 +90,13 @@ public class Session implements TenantAware {
       @NonNull String postcode,
       Long agencyId,
       @NonNull SessionStatus status,
-      boolean teamSession,
-      boolean monitoring) {
+      boolean teamSession) {
     this.user = user;
     this.consultingTypeId = consultingTypeId;
     this.postcode = postcode;
     this.agencyId = agencyId;
     this.status = status;
     this.teamSession = teamSession;
-    this.monitoring = monitoring;
     this.registrationType = RegistrationType.REGISTERED;
   }
 
@@ -168,9 +166,6 @@ public class Session implements TenantAware {
 
   @Column(name = "is_peer_chat", columnDefinition = "tinyint(4) unsigned default '0'")
   private boolean isPeerChat;
-
-  @Column(name = "is_monitoring", columnDefinition = "tinyint(4) default '0'")
-  private boolean monitoring;
 
   @Column(nullable = false, columnDefinition = "bit default false")
   private Boolean isConsultantDirectlySet;

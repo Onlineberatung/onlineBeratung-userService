@@ -1,11 +1,7 @@
 package de.caritas.cob.userservice.api.service.sessionlist;
 
-import static java.util.Objects.nonNull;
-import static org.apache.commons.lang3.BooleanUtils.isTrue;
-
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
 import de.caritas.cob.userservice.api.facade.sessionlist.RocketChatRoomInformationProvider;
 import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
@@ -60,8 +56,6 @@ public class ConsultantSessionEnricher {
     var session = consultantSessionResponseDTO.getSession();
     var groupId = session.getGroupId();
 
-    session.setMonitoring(getMonitoringProperty(session));
-
     session.setMessagesRead(
         sessionListAnalyser.areMessagesForRocketChatGroupReadByUser(
             rocketChatRoomInformation.getReadMessages(), groupId));
@@ -93,16 +87,6 @@ public class ConsultantSessionEnricher {
       sessionTopicEnrichmentService.enrichSessionWithTopicData(
           consultantSessionResponseDTO.getSession());
     }
-  }
-
-  private boolean getMonitoringProperty(SessionDTO session) {
-
-    var extendedConsultingTypeResponseDTO =
-        consultingTypeManager.getConsultingTypeSettings(session.getConsultingType());
-
-    return nonNull(extendedConsultingTypeResponseDTO)
-        && nonNull(extendedConsultingTypeResponseDTO.getMonitoring())
-        && isTrue(extendedConsultingTypeResponseDTO.getMonitoring().getInitializeMonitoring());
   }
 
   private boolean isFeedbackFlagAvailable(

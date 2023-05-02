@@ -3,7 +3,6 @@ package de.caritas.cob.userservice.api.workflow.delete.action.asker;
 import de.caritas.cob.userservice.api.actions.ActionCommand;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.model.User;
-import de.caritas.cob.userservice.api.port.out.MonitoringRepository;
 import de.caritas.cob.userservice.api.port.out.SessionDataRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.workflow.delete.model.AskerDeletionWorkflowDTO;
@@ -19,9 +18,8 @@ public class DeleteAskerRoomsAndSessionsAction extends DeleteRoomsAndSessionActi
   public DeleteAskerRoomsAndSessionsAction(
       SessionRepository sessionRepository,
       SessionDataRepository sessionDataRepository,
-      MonitoringRepository monitoringRepository,
       RocketChatService rocketChatService) {
-    super(sessionRepository, sessionDataRepository, monitoringRepository, rocketChatService);
+    super(sessionRepository, sessionDataRepository, rocketChatService);
   }
 
   /**
