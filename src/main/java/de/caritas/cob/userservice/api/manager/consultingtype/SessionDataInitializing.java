@@ -14,20 +14,13 @@ import lombok.Setter;
 @Setter
 public class SessionDataInitializing {
 
-  private boolean addictiveDrugs;
   private boolean age;
-  private boolean gender;
-  private boolean relation;
   private boolean state;
 
   public static SessionDataInitializing convertSessionDataInitializingDTOtoSessionDataInitializing(
       SessionDataInitializingDTO sessionDataInitializingDTO) {
 
     return new SessionDataInitializing(
-        isTrue(sessionDataInitializingDTO.getAddictiveDrugs()),
-        isTrue(sessionDataInitializingDTO.getAge()),
-        isTrue(sessionDataInitializingDTO.getGender()),
-        isTrue(sessionDataInitializingDTO.getRelation()),
-        isTrue(sessionDataInitializingDTO.getState()));
+        isTrue(sessionDataInitializingDTO.getAge()), isTrue(sessionDataInitializingDTO.getState()));
   }
 }
