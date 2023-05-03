@@ -518,6 +518,9 @@ components:
         deleteDate:
           type: string
           example: "2020-09-02T15:53:23"
+        hasVideoCalls:
+          type: boolean
+          nullable: false
 
     PostcodeRangeDTO:
       type: object
@@ -615,7 +618,9 @@ components:
           type: integer
           format: int64
           example: 12
-
+        hasVideoCalls:
+          type: boolean
+          default: true
 
     AgencyAdminFullResponseDTO:
       type: object
@@ -673,6 +678,9 @@ components:
             type: long
         demographics:
           $ref: '#/components/schemas/DemographicsDTO'
+        hasVideoCalls:
+          type: boolean
+          default: true
 
     DemographicsDTO:
       type: object
