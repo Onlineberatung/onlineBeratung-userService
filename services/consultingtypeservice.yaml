@@ -185,9 +185,6 @@ components:
         isAnonymousConversationAllowed:
           type: boolean
           example: false
-        isSetEmailAllowed:
-          type: boolean
-          example: true
         showAskerProfile:
           type: boolean
           example: true
