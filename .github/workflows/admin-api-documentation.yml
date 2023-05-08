@@ -12,6 +12,7 @@ jobs:
   documentation:
     name: Pushes changes to Admin API
     runs-on: ubuntu-latest
+    timeout-minutes: 40
     steps:
       - name: Checkout
         uses: actions/checkout@v2

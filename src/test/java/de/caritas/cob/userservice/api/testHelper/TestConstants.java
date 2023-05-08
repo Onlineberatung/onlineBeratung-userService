@@ -1899,13 +1899,7 @@ public class TestConstants {
   public static final RegistrationMandatoryFieldsDTO MANDATORY_FIELDS_TRUE =
       new RegistrationMandatoryFieldsDTO().age(true).state(true);
   public static final SessionDataInitializingDTO SESSION_DATA_INITIALIZING =
-      new SessionDataInitializingDTO()
-          .addictiveDrugs(true)
-          .age(true)
-          .gender(true)
-          .relation(true)
-          .relation(true)
-          .state(true);
+      new SessionDataInitializingDTO().age(true).state(true);
   public static final RegistrationDTO REGISTRATION_WITH_MANDATORY_FIELDS_TRUE =
       new RegistrationDTO().mandatoryFields(MANDATORY_FIELDS_TRUE);
   public static final RegistrationDTO REGISTRATION_WITH_MANDATORY_FIELDS_FALSE =
