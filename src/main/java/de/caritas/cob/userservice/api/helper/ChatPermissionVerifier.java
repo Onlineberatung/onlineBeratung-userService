@@ -42,6 +42,15 @@ public class ChatPermissionVerifier {
     }
   }
 
+  public void verifyCanModerateChat(Chat chat) {
+    Set<String> roles = authenticatedUser.getRoles();
+    if (roles.contains(UserRole.CONSULTANT.getValue())) {
+      this.verifyConsultantPermissionForChat(chat);
+    } else {
+      throw new ForbiddenException("User is not a consultant");
+    }
+  }
+
   /**
    * Check if the authenticated user has consultant permission on given chat.
    *

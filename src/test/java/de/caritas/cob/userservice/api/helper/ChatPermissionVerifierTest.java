@@ -225,6 +225,50 @@ public class ChatPermissionVerifierTest {
     assertDoesNotThrow(() -> this.chatPermissionVerifier.verifyPermissionForChat(chat));
   }
 
+  @Test
+  public void
+      verifyCanModerateChat_Should_AllowToModerate_When_ConsultantHasAccessToSameAgencyAsChat() {
+    Consultant consultant = new Consultant();
+    ConsultantAgency consultantAgency = new ConsultantAgency();
+    consultantAgency.setAgencyId(1L);
+    consultant.setConsultantAgencies(asSet(consultantAgency));
+    ChatAgency chatAgency = new ChatAgency();
+    chatAgency.setAgencyId(1L);
+    Chat chat = new Chat();
+    chat.setChatAgencies(asSet(chatAgency));
+    when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.CONSULTANT.getValue()));
+    when(consultantService.getConsultantViaAuthenticatedUser(authenticatedUser))
+        .thenReturn(Optional.of(consultant));
+    assertDoesNotThrow(() -> this.chatPermissionVerifier.verifyCanModerateChat(chat));
+  }
+
+  @Test(expected = ForbiddenException.class)
+  public void
+      verifyCanModerateChat_Should_Not_AllowToModerate_When_ConsultantDoesNotHaveAccessToSameAgencyAsChat() {
+    Consultant consultant = new Consultant();
+    ConsultantAgency consultantAgency = new ConsultantAgency();
+    consultantAgency.setAgencyId(2L);
+    consultant.setConsultantAgencies(asSet(consultantAgency));
+    ChatAgency chatAgency = new ChatAgency();
+    chatAgency.setAgencyId(1L);
+    Chat chat = new Chat();
+    chat.setChatAgencies(asSet(chatAgency));
+    when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.CONSULTANT.getValue()));
+    when(consultantService.getConsultantViaAuthenticatedUser(authenticatedUser))
+        .thenReturn(Optional.of(consultant));
+    this.chatPermissionVerifier.verifyCanModerateChat(chat);
+  }
+
+  @Test(expected = ForbiddenException.class)
+  public void verifyCanModerateChat_Should_Not_AllowToModerate_When_AccessedAsUser() {
+    ChatAgency chatAgency = new ChatAgency();
+    chatAgency.setAgencyId(1L);
+    Chat chat = new Chat();
+    chat.setChatAgencies(asSet(chatAgency));
+    when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.USER.getValue()));
+    this.chatPermissionVerifier.verifyCanModerateChat(chat);
+  }
+
   @Test(expected = NotFoundException.class)
   public void
       verifyPermissionForChat_Should_throwNotFoundException_When_UserDoesNotExistInDatabase() {

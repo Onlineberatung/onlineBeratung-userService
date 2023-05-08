@@ -52,6 +52,11 @@ public class JoinAndLeaveChatFacade {
     }
   }
 
+  public void verifyCanModerate(Long chatId) {
+    Chat chat = getChat(chatId);
+    this.chatPermissionVerifier.verifyCanModerateChat(chat);
+  }
+
   /**
    * Leave a chat.
    *
