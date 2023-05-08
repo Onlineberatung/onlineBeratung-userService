@@ -114,9 +114,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -169,6 +171,14 @@ class UserControllerSessionE2EIT {
   @MockBean private AuthenticatedUser authenticatedUser;
 
   @MockBean private RocketChatCredentialsProvider rocketChatCredentialsProvider;
+
+  @TestConfiguration
+  static class TestConfig {
+    @Bean(name = "initializeFeedbackChat")
+    public Boolean initializeFeedbackChat() {
+      return false;
+    }
+  }
 
   @SuppressWarnings("unused")
   @MockBean
