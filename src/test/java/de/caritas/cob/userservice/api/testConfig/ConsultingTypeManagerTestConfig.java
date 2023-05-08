@@ -4,7 +4,9 @@ import de.caritas.cob.userservice.api.exception.MissingConsultingTypeException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.service.ConsultingTypeService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
+import java.util.Optional;
 import org.jeasy.random.EasyRandom;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 
@@ -12,7 +14,9 @@ import org.springframework.context.annotation.Bean;
 public class ConsultingTypeManagerTestConfig {
 
   @Bean
-  public ConsultingTypeManager consultingTypeManager(ConsultingTypeService consultingTypeService) {
+  public ConsultingTypeManager consultingTypeManager(
+      ConsultingTypeService consultingTypeService,
+      @Qualifier("initializeFeedbackChat") Optional<Boolean> initializeFeedbackChat) {
     return new ConsultingTypeManager(consultingTypeService) {
       @Override
       public ExtendedConsultingTypeResponseDTO getConsultingTypeSettings(String consultingTypeId) {
@@ -26,10 +30,11 @@ public class ConsultingTypeManagerTestConfig {
       }
 
       private ExtendedConsultingTypeResponseDTO createDummy(Integer consultingTypeId) {
-        var extendedConsultingTypeResponseDTO =
-            new EasyRandom().nextObject(ExtendedConsultingTypeResponseDTO.class);
-        extendedConsultingTypeResponseDTO.setId((int) consultingTypeId);
-        return extendedConsultingTypeResponseDTO;
+        var dummy = new EasyRandom().nextObject(ExtendedConsultingTypeResponseDTO.class);
+        if (initializeFeedbackChat.isPresent()) {
+          dummy.initializeFeedbackChat(false);
+        }
+        return dummy.id(consultingTypeId);
       }
     };
   }
