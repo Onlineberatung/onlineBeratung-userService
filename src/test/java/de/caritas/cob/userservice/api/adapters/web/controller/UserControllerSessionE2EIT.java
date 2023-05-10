@@ -1290,6 +1290,7 @@ class UserControllerSessionE2EIT {
   private void givenAValidRocketChatSystemUser() throws RocketChatUserNotInitializedException {
     when(rocketChatCredentialsProvider.getSystemUserSneaky()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
     when(rocketChatCredentialsProvider.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
+
   }
 
   private void givenValidRocketChatTechUserResponse() throws RocketChatUserNotInitializedException {

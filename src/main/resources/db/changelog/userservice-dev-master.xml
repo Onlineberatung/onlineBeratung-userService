@@ -48,4 +48,5 @@
 	<include file="db/changelog/changeset/0040_add_notification_settings/0040_changeSet.xml"/>
 	<include file="db/changelog/changeset/0041_migrate_notification_settings/0041_changeSet.xml"/>
 	<include file="db/changelog/changeset/0042_remove_session_monitoring_and_option/0042_changeSet.xml"/>
+	<include file="db/changelog/changeset/0043_fix_sequence_start_value/0043-changeSet.xml"/>
 </databaseChangeLog>
