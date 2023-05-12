@@ -21,7 +21,7 @@ public class ReleaseToggleService {
     if (releaseToggles != null && releaseToggles.containsKey(toggleKeyName)) {
       return nullAsFalse(Boolean.parseBoolean((String) releaseToggles.get(toggleKeyName)));
     } else {
-      log.debug("Release toggle not found: ", toggle);
+      log.debug("Release toggle not found: {}", toggle);
       return false;
     }
   }

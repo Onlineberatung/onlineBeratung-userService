@@ -17,7 +17,7 @@ public class HttpHeadersResolver {
     try {
       return Optional.of(Long.parseLong(request.getHeader(headerName)));
     } catch (NumberFormatException exception) {
-      log.debug("Header not found or not a number", headerName);
+      log.debug("Header not found or not a number {}", headerName);
       return Optional.empty();
     }
   }
