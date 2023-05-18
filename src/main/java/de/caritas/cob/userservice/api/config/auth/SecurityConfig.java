@@ -191,6 +191,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .hasAnyAuthority(CONSULTANT_DEFAULT)
         .antMatchers("/appointments")
         .hasAnyAuthority(CONSULTANT_DEFAULT, TECHNICAL_DEFAULT)
+        .antMatchers("/appointments/booking/{id:[0-9]+}")
+        .hasAnyAuthority(CONSULTANT_DEFAULT, TECHNICAL_DEFAULT)
         .antMatchers(HttpMethod.PUT, APPOINTMENTS_APPOINTMENT_ID + UUID_PATTERN + "}")
         .hasAuthority(CONSULTANT_DEFAULT)
         .antMatchers(HttpMethod.DELETE, APPOINTMENTS_APPOINTMENT_ID + UUID_PATTERN + "}")

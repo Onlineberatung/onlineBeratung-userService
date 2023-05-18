@@ -59,6 +59,7 @@ class AppointmentControllerE2EIT {
   private static final String CSRF_HEADER = "csrfHeader";
   private static final String CSRF_VALUE = "test";
   private static final Cookie CSRF_COOKIE = new Cookie("csrfCookie", CSRF_VALUE);
+  private static final Integer BOOKING_ID = 1;
 
   @Autowired private MockMvc mockMvc;
 
@@ -96,6 +97,25 @@ class AppointmentControllerE2EIT {
     mockMvc
         .perform(
             get("/appointments/{id}", savedAppointment.getId())
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("id", is(notNullValue())))
+        .andExpect(jsonPath("description", is(savedAppointment.getDescription())))
+        .andExpect(jsonPath("datetime", is(savedAppointment.getDatetime().toString())))
+        .andExpect(jsonPath("status", is(savedAppointment.getStatus().toString().toLowerCase())));
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
+  void getAppointmentByBookingIdShouldReturnOk() throws Exception {
+    givenAValidConsultant(true);
+    givenASavedAppointment();
+
+    mockMvc
+        .perform(
+            get("/appointments/booking/{id}", savedAppointment.getBookingId())
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
@@ -444,6 +464,7 @@ class AppointmentControllerE2EIT {
         easyRandom.nextObject(de.caritas.cob.userservice.api.model.Appointment.class);
     savedAppointment.setConsultant(consultant);
     savedAppointment.setId(null);
+    savedAppointment.setBookingId(BOOKING_ID);
     var desc = savedAppointment.getDescription();
     if (desc.length() > 300) {
       savedAppointment.setDescription(desc.substring(0, 300));

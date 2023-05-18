@@ -1,0 +1,1 @@
+ALTER TABLE `userservice`.`appointment` DROP COLUMN booking_id;

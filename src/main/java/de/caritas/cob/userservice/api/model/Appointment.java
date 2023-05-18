@@ -43,6 +43,9 @@ public class Appointment {
   @Type(type = "org.hibernate.type.UUIDCharType")
   private UUID id;
 
+  @Column(length = 300)
+  private Integer bookingId;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(
       columnDefinition = "varchar(36)",

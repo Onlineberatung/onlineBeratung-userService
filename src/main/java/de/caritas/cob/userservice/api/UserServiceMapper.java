@@ -476,6 +476,9 @@ public class UserServiceMapper {
     var status = (String) appointmentMap.get("status");
     appointment.setStatus(AppointmentStatus.valueOf(status.toUpperCase()));
     appointment.setConsultant(consultant);
+    if (appointmentMap.containsKey("bookingId")) {
+      appointment.setBookingId((Integer) appointmentMap.get("bookingId"));
+    }
 
     return appointment;
   }

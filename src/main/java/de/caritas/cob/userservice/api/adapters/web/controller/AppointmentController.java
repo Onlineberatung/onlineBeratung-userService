@@ -46,6 +46,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class AppointmentController implements AppointmentsApi {
 
   private static final String APPOINTMENT_NOT_FOUND = "Appointment (%s) not found.";
+
+  private static final String APPOINTMENT_WITH_BOOKING_ID_NOT_FOUND =
+      "Appointment with booking id (%s) not found.";
   private final Organizing organizer;
 
   private final AppointmentDtoMapper mapper;
@@ -72,6 +75,21 @@ public class AppointmentController implements AppointmentsApi {
         organizer
             .findAppointment(id.toString())
             .orElseThrow(() -> new NotFoundException(APPOINTMENT_NOT_FOUND, id.toString()));
+
+    var appointment = mapper.appointmentOf(appointmentMap, currentUser.isConsultant());
+
+    return ResponseEntity.ok(appointment);
+  }
+
+  @Override
+  public ResponseEntity<Appointment> getAppointmentByBookingId(Integer bookingId) {
+    var appointmentMap =
+        organizer
+            .findAppointmentByBookingId(bookingId)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        APPOINTMENT_WITH_BOOKING_ID_NOT_FOUND, bookingId.toString()));
 
     var appointment = mapper.appointmentOf(appointmentMap, currentUser.isConsultant());
 
