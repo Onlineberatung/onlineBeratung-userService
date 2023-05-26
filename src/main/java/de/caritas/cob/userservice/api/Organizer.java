@@ -55,6 +55,16 @@ public class Organizer implements Organizing {
   }
 
   @Override
+  public Optional<Map<String, Object>> findAppointmentByBookingId(Integer bookingId) {
+    var appointmentMap = new HashMap<String, Object>();
+    appointmentRepository
+        .findByBookingId(bookingId)
+        .ifPresent(appointment -> appointmentMap.putAll(mapper.mapOf(appointment)));
+
+    return appointmentMap.isEmpty() ? Optional.empty() : Optional.of(appointmentMap);
+  }
+
+  @Override
   public List<Map<String, Object>> findAllTodaysAndFutureAppointments(String userId) {
     var startOfDay = clock.instant().truncatedTo(ChronoUnit.DAYS);
     var futureAppointments = appointmentRepository.findAllOrderByDatetimeAfter(startOfDay, userId);

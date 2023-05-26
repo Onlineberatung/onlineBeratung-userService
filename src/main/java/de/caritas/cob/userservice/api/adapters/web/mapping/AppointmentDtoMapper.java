@@ -19,36 +19,41 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AppointmentDtoMapper {
 
+  private static final String DESCRIPTION = "description";
+  private static final String DATETIME = "datetime";
+  private static final String STATUS = "status";
+
   public Map<String, Object> mapOf(Appointment appointment, String consultantId) {
     var appointmentMap = new HashMap<String, Object>();
     if (nonNull(appointment.getId())) {
       appointmentMap.put("id", appointment.getId().toString());
     }
-    appointmentMap.put("description", appointment.getDescription());
-    appointmentMap.put("datetime", appointment.getDatetime().toString());
-    appointmentMap.put("status", appointment.getStatus().getValue());
+    appointmentMap.put(DESCRIPTION, appointment.getDescription());
+    appointmentMap.put(DATETIME, appointment.getDatetime().toString());
+    appointmentMap.put(STATUS, appointment.getStatus().getValue());
     appointmentMap.put("consultantId", consultantId);
+    appointmentMap.put("bookingId", appointment.getBookingId());
 
     return appointmentMap;
   }
 
   public Map<String, Object> mapOf(Map<String, Object> initMap, Appointment overridingAppointment) {
-    initMap.put("description", overridingAppointment.getDescription());
-    initMap.put("datetime", overridingAppointment.getDatetime().toString());
-    initMap.put("status", overridingAppointment.getStatus().getValue());
+    initMap.put(DESCRIPTION, overridingAppointment.getDescription());
+    initMap.put(DATETIME, overridingAppointment.getDatetime().toString());
+    initMap.put(STATUS, overridingAppointment.getStatus().getValue());
 
     return initMap;
   }
 
   public Appointment appointmentOf(Map<String, Object> savedMap, boolean fullDto) {
     var appointment = new Appointment();
-    var status = (String) savedMap.get("status");
+    var status = (String) savedMap.get(STATUS);
     appointment.setId(UUID.fromString((String) savedMap.get("id")));
     appointment.setStatus(AppointmentStatus.fromValue(status));
 
     if (fullDto) {
-      appointment.setDescription((String) savedMap.get("description"));
-      appointment.setDatetime(Instant.parse((String) savedMap.get("datetime")));
+      appointment.setDescription((String) savedMap.get(DESCRIPTION));
+      appointment.setDatetime(Instant.parse((String) savedMap.get(DATETIME)));
     }
 
     return appointment;
