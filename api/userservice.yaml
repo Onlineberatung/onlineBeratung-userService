@@ -2873,6 +2873,8 @@ components:
           type: string
         utcOffset:
           type: string
+        userId:
+          type: string
 
     E2eKeyDTO:
       type: object
