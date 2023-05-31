@@ -15,9 +15,14 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInit
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Chat;
+import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
+import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.LogService;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +36,10 @@ public class GetChatMembersFacade {
   private final @NonNull ChatService chatService;
   private final @NonNull RocketChatService rocketChatService;
   private final @NonNull ChatPermissionVerifier chatPermissionVerifier;
+
+  private final @NonNull UserRepository userRepository;
+
+  private final @NonNull ConsultantRepository consultantRepository;
 
   /**
    * Get a filtered list of the members of a chat (without technical/system user).
@@ -81,10 +90,25 @@ public class GetChatMembersFacade {
                     member ->
                         new ChatMemberResponseDTO()
                             .id(member.get_id())
+                            .userId(getByRcUserIdAndDeleteDateIsNull(member))
                             .status(member.getStatus())
                             .username(new UsernameTranscoder().decodeUsername(member.getUsername()))
                             .displayName(member.getName())
                             .utcOffset(member.getUtcOffset()))
                 .collect(Collectors.toList()));
+  }
+
+  private String getByRcUserIdAndDeleteDateIsNull(GroupMemberDTO member) {
+    Optional<User> user = userRepository.findByRcUserIdAndDeleteDateIsNull(member.get_id());
+    if (user.isPresent()) {
+      return user.get().getUserId();
+    } else {
+      Optional<Consultant> consultant =
+          consultantRepository.findByRocketChatIdAndDeleteDateIsNull(member.get_id());
+      if (consultant.isPresent()) {
+        return consultant.get().getId();
+      }
+    }
+    return null;
   }
 }

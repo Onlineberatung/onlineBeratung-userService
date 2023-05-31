@@ -25,6 +25,8 @@ import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
+import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.service.ChatService;
 import java.util.Optional;
 import org.junit.Test;
@@ -45,6 +47,9 @@ public class GetChatMembersFacadeTest {
   @Mock private User user;
 
   @Mock private RocketChatService rocketChatService;
+
+  @Mock private UserRepository userRepository;
+  @Mock private ConsultantRepository consultantRepository;
 
   @Mock private UserHelper userHelper;
 
