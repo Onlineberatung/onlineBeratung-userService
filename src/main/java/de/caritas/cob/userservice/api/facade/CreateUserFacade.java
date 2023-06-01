@@ -5,7 +5,9 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
+import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
@@ -15,14 +17,17 @@ import de.caritas.cob.userservice.api.helper.UserVerifier;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.consultingtype.TopicService;
 import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
 import de.caritas.cob.userservice.api.service.statistics.event.RegistrationStatisticsEvent;
 import de.caritas.cob.userservice.api.service.user.UserService;
+import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 /** Facade to encapsulate the steps to initialize a user account. */
@@ -39,6 +44,10 @@ public class CreateUserFacade {
   private final @NonNull CreateNewConsultingTypeFacade createNewConsultingTypeFacade;
   private final @NonNull StatisticsService statisticsService;
   private final @NonNull TopicService topicService;
+
+  private final @NonNull TenantService tenantService;
+
+  private final @NonNull AgencyService agencyService;
 
   /**
    * Creates a user in Keycloak and MariaDB. Then creates a session or chat account depending on the
@@ -66,13 +75,32 @@ public class CreateUserFacade {
               user,
               registration.getSessionId(),
               topicService.findTopicInternalIdentifier(userDTO.getMainTopicId()),
-              topicService.findTopicsInternalAttributes(userDTO.getTopicIds()));
+              topicService.findTopicsInternalAttributes(userDTO.getTopicIds()),
+              getTenantName(),
+              getAgencyName(userDTO));
       statisticsService.fireEvent(registrationEvent);
     } catch (Exception e) {
       log.error("Could not create registration statistics event", e);
     }
 
     return registration.getSessionId();
+  }
+
+  private String getTenantName() {
+    de.caritas.cob.userservice.tenantservice.generated.web.model.RestrictedTenantDTO tenant =
+        tenantService.getRestrictedTenantData(TenantContext.getCurrentTenant());
+    return tenant.getName();
+  }
+
+  private String getAgencyName(UserDTO userDTO) {
+    if (userDTO.getAgencyId() != null) {
+      AgencyDTO agencyWithoutCaching = agencyService.getAgencyWithoutCaching(userDTO.getAgencyId());
+      return agencyWithoutCaching.getName();
+    } else {
+      log.warn(
+          "AgencyId is null for user during registration. Will not send agency name to statistics");
+      return StringUtils.EMPTY;
+    }
   }
 
   /**
