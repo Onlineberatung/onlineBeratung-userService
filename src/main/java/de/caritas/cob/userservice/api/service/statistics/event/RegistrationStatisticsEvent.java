@@ -30,17 +30,26 @@ public class RegistrationStatisticsEvent implements StatisticsEvent {
   private final String mainTopicInternalAttribute;
   private final List<String> topicsInternalAttributes;
 
+  private final String tenantName;
+
+  private final String agencyName;
+
   public RegistrationStatisticsEvent(
       UserDTO registeredUser,
       User createdUser,
       Long sessionId,
       String mainTopicInternalAttribute,
-      List<String> topicsInternalAttributes) {
+      List<String> topicsInternalAttributes,
+      String tenantName,
+      String agencyName) {
     this.registeredUser = registeredUser;
     this.createdUser = createdUser;
     this.sessionId = sessionId;
     this.mainTopicInternalAttribute = mainTopicInternalAttribute;
     this.topicsInternalAttributes = topicsInternalAttributes;
+    this.tenantName = tenantName;
+    this.agencyName = agencyName;
+
     OBJECT_MAPPER.registerModule(new JavaTimeModule());
     OBJECT_MAPPER.registerModule(buildSimpleModule());
   }
@@ -49,7 +58,6 @@ public class RegistrationStatisticsEvent implements StatisticsEvent {
     return new SimpleModule()
         .addSerializer(OffsetDateTime.class, new OffsetDateTimeToStringSerializer());
   }
-
   /** {@inheritDoc} */
   public EventType getEventType() {
     return EVENT_TYPE;
@@ -72,6 +80,8 @@ public class RegistrationStatisticsEvent implements StatisticsEvent {
             .mainTopicInternalAttribute(mainTopicInternalAttribute)
             .topicsInternalAttributes(topicsInternalAttributes)
             .postalCode(registeredUser.getPostcode())
+            .tenantName(tenantName)
+            .agencyName(agencyName)
             .timestamp(OffsetDateTime.now(ZoneOffset.UTC));
 
     try {
