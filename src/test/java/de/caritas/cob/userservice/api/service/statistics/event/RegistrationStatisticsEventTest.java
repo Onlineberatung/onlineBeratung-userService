@@ -57,7 +57,9 @@ public class RegistrationStatisticsEventTest {
     // then
     assertThat(optionalPayload).isPresent();
     String payload = optionalPayload.get();
-    assertThat(payload).contains("\"tenantName\":\"tenantNameValue\"").contains("\"agencyName\":\"agencyNameValue\"");
+    assertThat(payload)
+        .contains("\"tenantName\":\"tenantNameValue\"")
+        .contains("\"agencyName\":\"agencyNameValue\"");
 
     assertThat(registrationStatisticsEvent.getEventType()).isEqualTo(EventType.REGISTRATION);
   }
