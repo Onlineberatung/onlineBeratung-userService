@@ -9,6 +9,7 @@ on:
     tags:
       - "dockerImage.v.*"
       - "v*"
+  workflow_dispatch:
 
 jobs:
   test:
