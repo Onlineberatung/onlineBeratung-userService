@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.admin.service.consultant.update;
 
+import static de.caritas.cob.userservice.api.config.auth.UserRole.GROUP_CHAT_CONSULTANT;
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static java.util.Objects.isNull;
 
@@ -61,6 +62,11 @@ public class ConsultantUpdateService {
         userDTO,
         updateConsultantDTO.getFirstname(),
         updateConsultantDTO.getLastname());
+
+    if (updateConsultantDTO.getIsGroupchatConsultant() != null
+        && updateConsultantDTO.getIsGroupchatConsultant()) {
+      identityClient.updateRole(consultant.getId(), GROUP_CHAT_CONSULTANT.getValue());
+    }
 
     this.rocketChatService.updateUser(
         buildUserUpdateRequestDTO(consultant.getRocketChatId(), updateConsultantDTO));
