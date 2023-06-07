@@ -486,6 +486,40 @@ public class KeycloakService implements IdentityClient {
     this.updateRole(userId, role.getValue());
   }
 
+  @Override
+  public void removeRoleIfPresent(final String userId, final String roleName) {
+    // Get realm and user resources
+    var realmResource = keycloakClient.getRealmResource();
+    UsersResource userRessource = realmResource.users();
+    UserResource user = userRessource.get(userId);
+    // Remove role
+    var optionalRole = findRole(userId, roleName);
+    if (optionalRole.isPresent()) {
+      RoleRepresentation roleRepresentation =
+          realmResource.roles().get(optionalRole.get()).toRepresentation();
+      if (roleRepresentation != null) {
+        user.roles().realmLevel().remove(Collections.singletonList(roleRepresentation));
+      }
+    }
+  }
+
+  Optional<String> findRole(String userId, String roleName) {
+    // Get realm and user resources
+    var realmResource = keycloakClient.getRealmResource();
+    UsersResource userRessource = realmResource.users();
+    UserResource user = userRessource.get(userId);
+
+    List<RoleRepresentation> userRoles = user.roles().realmLevel().listAll();
+    if (userRoles != null) {
+      for (RoleRepresentation role : userRoles) {
+        if (role.toString().equals(roleName)) {
+          return Optional.of(role.getId());
+        }
+      }
+    }
+    return Optional.empty();
+  }
+
   /**
    * Assigns the role with the given name to the given user ID.
    *
