@@ -1223,6 +1223,9 @@ components:
         tenantId:
           type: integer
           example: "1"
+        isGroupchatConsultant:
+          type: boolean
+          example: true
 
     UpdateAdminConsultantDTO:
       type: object
@@ -1273,6 +1276,9 @@ components:
           type: boolean
           example: true
           description: Flag that indicates does the user accepted new data privacy text
+        isGroupchatConsultant:
+          type: boolean
+          example: true
 
 
     ConsultantDTO:
