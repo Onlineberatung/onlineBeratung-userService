@@ -281,6 +281,10 @@ components:
         postalCode:
           type: string
           example: '99999'
+        tenantName:
+          type: string
+        agencyName:
+          type: string
 
     RegistrationStatisticsListResponseDTO:
       type: object

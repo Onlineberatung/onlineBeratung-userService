@@ -6,14 +6,14 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.POSTCODE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RELATION_VALUE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.SESSION_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,11 +40,27 @@ public class RegistrationStatisticsEventTest {
     createdUser.setCreateDate(now);
     registrationStatisticsEvent =
         new RegistrationStatisticsEvent(
-            registeredUser, createdUser, SESSION_ID, "alk", List.of("alk", "drogen"));
+            registeredUser,
+            createdUser,
+            SESSION_ID,
+            "alk",
+            List.of("alk", "drogen"),
+            "tenantNameValue",
+            "agencyNameValue");
   }
 
   @Test
   public void getEventType_Should_ReturnEventTypeRegistration() {
-    assertThat(registrationStatisticsEvent.getEventType(), is(EventType.REGISTRATION));
+    // when
+    Optional<String> optionalPayload = registrationStatisticsEvent.getPayload();
+
+    // then
+    assertThat(optionalPayload).isPresent();
+    String payload = optionalPayload.get();
+    assertThat(payload)
+        .contains("\"tenantName\":\"tenantNameValue\"")
+        .contains("\"agencyName\":\"agencyNameValue\"");
+
+    assertThat(registrationStatisticsEvent.getEventType()).isEqualTo(EventType.REGISTRATION);
   }
 }
