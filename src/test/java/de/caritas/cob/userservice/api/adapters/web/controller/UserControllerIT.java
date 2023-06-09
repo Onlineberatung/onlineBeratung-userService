@@ -6,7 +6,6 @@ import static de.caritas.cob.userservice.api.model.Session.RegistrationType.REGI
 import static de.caritas.cob.userservice.api.testHelper.PathConstants.*;
 import static de.caritas.cob.userservice.api.testHelper.RequestBodyConstants.*;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.*;
-import static java.util.Collections.emptyList;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -70,7 +69,6 @@ import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.keycloak.representations.idm.UserRepresentation;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -374,20 +372,24 @@ public class UserControllerIT {
 
   @Test
   public void userExists_Should_Return404_When_UserDoesNotExist() throws Exception {
+    /* given */
     val username = "john@doe.com";
-    when(identityClient.findByUsername(username)).thenReturn(emptyList());
+    when(identityClient.isUsernameAvailable(username)).thenReturn(Boolean.TRUE);
+    /* when */
     mvc.perform(get("/users/{username}", username).accept(MediaType.APPLICATION_JSON))
+        /* then */
         .andExpect(status().isNotFound());
   }
 
   @Test
   public void userExists_Should_Return200_When_UserDoesExist() throws Exception {
+    /* given */
     val username = "john@doe.com";
-    val user = new UserRepresentation();
-    user.setUsername(username);
-    when(identityClient.findByUsername(username)).thenReturn(List.of(user));
+    when(identityClient.isUsernameAvailable(username)).thenReturn(Boolean.FALSE);
 
+    /* when */
     mvc.perform(get("/users/{username}", username).accept(MediaType.APPLICATION_JSON))
+        /* then */
         .andExpect(status().isOk());
   }
 

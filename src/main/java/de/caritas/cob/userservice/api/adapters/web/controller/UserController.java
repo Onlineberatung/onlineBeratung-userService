@@ -182,11 +182,12 @@ public class UserController implements UsersApi {
 
   @Override
   public ResponseEntity<Void> userExists(String username) {
-    val matches = identityClient.findByUsername(username);
-    if (matches.isEmpty()) {
-      return ResponseEntity.notFound().build();
+    val usernameAvailable = identityClient.isUsernameAvailable(username);
+    val userExists = !usernameAvailable;
+    if (userExists) {
+      return ResponseEntity.ok().build();
     }
-    return ResponseEntity.ok().build();
+    return ResponseEntity.notFound().build();
   }
 
   /**
