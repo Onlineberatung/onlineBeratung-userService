@@ -86,6 +86,7 @@ import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.in.AccountManaging;
 import de.caritas.cob.userservice.api.port.in.IdentityManaging;
 import de.caritas.cob.userservice.api.port.in.Messaging;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.AskerImportService;
 import de.caritas.cob.userservice.api.service.ChatService;
@@ -118,6 +119,7 @@ import javax.ws.rs.InternalServerErrorException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -172,10 +174,20 @@ public class UserController implements UsersApi {
   private final @NonNull VideoChatConfig videoChatConfig;
   private final @NonNull KeycloakUserDataProvider keycloakUserDataProvider;
   private final @NotNull UsersStatisticsFacade usersStatisticsFacade;
+  private final @NotNull IdentityClient identityClient;
 
   private final @NotNull AdminUserFacade adminUserFacade;
 
   private final @NonNull EmailNotificationMapper emailNotificationMapper;
+
+  @Override
+  public ResponseEntity<Void> userExists(String username) {
+    val matches = identityClient.findByUsername(username);
+    if (matches.isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+    return ResponseEntity.ok().build();
+  }
 
   /**
    * Creates an user account and returns a 201 CREATED on success.
