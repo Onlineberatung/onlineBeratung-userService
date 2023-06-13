@@ -207,6 +207,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .permitAll()
         .antMatchers(HttpMethod.GET, "/actuator/health/*")
         .permitAll()
+        .mvcMatchers(HttpMethod.GET, "/users/{username}")
+        .permitAll()
         .anyRequest()
         .denyAll();
   }

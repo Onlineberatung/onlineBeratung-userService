@@ -4,6 +4,24 @@ info:
   description: This information will be replaced by the SpringFox config information
   version: 0.0.1
 paths:
+  /users/{username}:
+    get:
+      tags:
+        - user-controller
+      summary: Checks if a given user exists, provided a username
+      operationId: userExists
+      parameters:
+        - name: username
+          in: path
+          description: username
+          required: true
+          schema:
+              type: string
+      responses:
+        200:
+          description: OK - user exists
+        404:
+          description: NOT FOUND - user does not exist
   /users/askers/new:
     post:
       tags:

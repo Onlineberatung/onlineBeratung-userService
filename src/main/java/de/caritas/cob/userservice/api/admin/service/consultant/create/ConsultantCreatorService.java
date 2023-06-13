@@ -3,7 +3,6 @@ package de.caritas.cob.userservice.api.admin.service.consultant.create;
 import static de.caritas.cob.userservice.api.config.auth.UserRole.CONSULTANT;
 import static de.caritas.cob.userservice.api.config.auth.UserRole.GROUP_CHAT_CONSULTANT;
 import static de.caritas.cob.userservice.api.helper.json.JsonSerializationUtils.serializeToJsonString;
-import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 
@@ -203,15 +202,8 @@ public class ConsultantCreatorService {
 
   private void addGroupChatConsultantRole(
       CreateConsultantDTO createConsultantDTO, Set<String> roles) {
-    if (isFeatureGroupChatV2Enabled(createConsultantDTO.getTenantId())) {
+    if (Boolean.TRUE.equals(createConsultantDTO.getIsGroupchatConsultant())) {
       roles.add(GROUP_CHAT_CONSULTANT.getValue());
     }
-  }
-
-  private boolean isFeatureGroupChatV2Enabled(Integer tenantId) {
-    var tenant = tenantAdminService.getTenantById(Long.valueOf(tenantId));
-    return nonNull(tenant)
-        && nonNull(tenant.getSettings())
-        && isTrue(tenant.getSettings().getFeatureGroupChatV2Enabled());
   }
 }

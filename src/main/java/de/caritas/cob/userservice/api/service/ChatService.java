@@ -102,7 +102,12 @@ public class ChatService {
    * @return saved {@link UserChat}
    */
   public UserChat saveUserChatRelation(UserChat userChat) {
-    return userChatRepository.save(userChat);
+
+    if (userChatRepository.findByChatAndUser(userChat.getChat(), userChat.getUser()).isEmpty()) {
+      return userChatRepository.save(userChat);
+    } else {
+      throw new ConflictException("User is already assigned to chat");
+    }
   }
 
   /**

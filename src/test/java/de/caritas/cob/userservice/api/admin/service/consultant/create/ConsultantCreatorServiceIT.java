@@ -71,10 +71,10 @@ public class ConsultantCreatorServiceIT {
     CreateConsultantDTO createConsultantDTO = this.easyRandom.nextObject(CreateConsultantDTO.class);
     createConsultantDTO.setUsername(VALID_USERNAME);
     createConsultantDTO.setEmail(VALID_EMAILADDRESS);
+    createConsultantDTO.setIsGroupchatConsultant(false);
 
     Consultant consultant = this.consultantCreatorService.createNewConsultant(createConsultantDTO);
 
-    verify(keycloakService).updateRole(anyString(), anyString());
     verify(keycloakService).updateRole(anyString(), eq(CONSULTANT.getValue()));
 
     assertThat(consultant, notNullValue());
@@ -94,26 +94,26 @@ public class ConsultantCreatorServiceIT {
 
   @Test
   public void
-      createNewConsultant_Should_addConsultantAndGroupChatConsultantRole_When_groupChatV2ForTenantIsEnabled()
+      createNewConsultant_Should_addConsultantAndGroupChatConsultantRole_When_isGroupChatConsultantFlagIsEnabled()
           throws RocketChatLoginException {
     // given
     when(rocketChatService.getUserID(anyString(), anyString(), anyBoolean()))
         .thenReturn(DUMMY_RC_ID);
     when(keycloakService.createKeycloakUser(any(), anyString(), any()))
         .thenReturn(easyRandom.nextObject(KeycloakCreateUserResponseDTO.class));
-    var tenant = new TenantDTO().settings(new Settings().featureGroupChatV2Enabled(true));
+    var tenant = new TenantDTO().settings(new Settings().featureGroupChatV2Enabled(false));
     when(tenantAdminService.getTenantById((long) TENANT_ID)).thenReturn(tenant);
 
     CreateConsultantDTO createConsultantDTO = this.easyRandom.nextObject(CreateConsultantDTO.class);
     createConsultantDTO.setTenantId(TENANT_ID);
     createConsultantDTO.setUsername(VALID_USERNAME);
     createConsultantDTO.setEmail(VALID_EMAILADDRESS);
+    createConsultantDTO.setIsGroupchatConsultant(true);
 
     // when
     Consultant consultant = consultantCreatorService.createNewConsultant(createConsultantDTO);
 
     // then
-    verify(tenantAdminService).getTenantById((long) TENANT_ID);
     verify(keycloakService, times(2)).updateRole(anyString(), anyString());
     verify(keycloakService).updateRole(anyString(), eq(CONSULTANT.getValue()));
     verify(keycloakService).updateRole(anyString(), eq(GROUP_CHAT_CONSULTANT.getValue()));
