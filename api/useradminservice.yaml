@@ -1224,8 +1224,11 @@ components:
           type: integer
           example: "1"
         isGroupchatConsultant:
-          type: boolean
-          example: true
+          $ref: '#/components/schemas/IsGroupchatConsultant'
+
+    IsGroupchatConsultant:
+      type: boolean
+      example: true
 
     UpdateAdminConsultantDTO:
       type: object
@@ -1277,9 +1280,7 @@ components:
           example: true
           description: Flag that indicates does the user accepted new data privacy text
         isGroupchatConsultant:
-          type: boolean
-          example: true
-
+          $ref: '#/components/schemas/IsGroupchatConsultant'
 
     ConsultantDTO:
       type: object
@@ -1323,6 +1324,8 @@ components:
           type: array
           items:
             $ref: './../services/agencyadminservice.yaml#/components/schemas/AgencyAdminResponseDTO'
+        isGroupchatConsultant:
+          $ref: '#/components/schemas/IsGroupchatConsultant'
 
     CreateAdminDTO:
       type: object
