@@ -16,17 +16,22 @@ import de.caritas.cob.userservice.api.adapters.web.dto.HalLink.MethodEnum;
 import de.caritas.cob.userservice.api.adapters.web.dto.PaginationLinks;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
+import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.generated.api.adapters.web.controller.UseradminApi;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import lombok.val;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ConsultantDtoMapper implements DtoMapperUtils {
+  @Autowired private IdentityClient identityClient;
 
   public UpdateAdminConsultantDTO updateAdminConsultantOf(
       UpdateConsultantDTO updateConsultantDTO, Consultant consultant) {
@@ -110,6 +115,9 @@ public class ConsultantDtoMapper implements DtoMapperUtils {
     consultant.setCreateDate((String) consultantMap.get("createdAt"));
     consultant.setUpdateDate((String) consultantMap.get("updatedAt"));
     consultant.setDeleteDate((String) consultantMap.get("deletedAt"));
+    val isGroupChatConsultant =
+        identityClient.userHasRole(consultant.getId(), UserRole.GROUP_CHAT_CONSULTANT.getValue());
+    consultant.setIsGroupchatConsultant(isGroupChatConsultant);
 
     var agencies = new ArrayList<AgencyAdminResponseDTO>();
     var agencyMaps = (ArrayList<Map<String, Object>>) consultantMap.get("agencies");

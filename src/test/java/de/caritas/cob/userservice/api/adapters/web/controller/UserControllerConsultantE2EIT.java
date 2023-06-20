@@ -556,6 +556,8 @@ class UserControllerConsultantE2EIT {
             .andExpect(jsonPath("_embedded[0]._embedded.lastname", containsString(infix)))
             .andExpect(jsonPath("_embedded[*]._embedded.username", not(contains(nullValue()))))
             .andExpect(jsonPath("_embedded[*]._embedded.email", not(contains(nullValue()))))
+            .andExpect(jsonPath("_embedded[0]._embedded.isGroupchatConsultant", is(true)))
+            .andExpect(jsonPath("_embedded[1]._embedded.isGroupchatConsultant", is(true)))
             .andExpect(jsonPath("_embedded[0]._embedded.agencies", hasSize(1)))
             .andExpect(
                 jsonPath("_embedded[0]._embedded.agencies[0].id", not(contains(nullValue()))))
