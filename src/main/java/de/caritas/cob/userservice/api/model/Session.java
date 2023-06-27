@@ -195,6 +195,9 @@ public class Session implements TenantAware {
   @Column(name = "counselling_relation")
   private String counsellingRelation;
 
+  @Column(name = "referer")
+  private String referer;
+
   @OneToMany(
       targetEntity = SessionTopic.class,
       mappedBy = "session",

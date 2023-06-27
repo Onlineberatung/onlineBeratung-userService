@@ -682,6 +682,7 @@ public class TestConstants {
           null,
           null,
           null,
+          null,
           null);
   public static final UserDTO USER_DTO_KREUZBUND =
       new UserDTO(
@@ -696,6 +697,7 @@ public class TestConstants {
           Integer.toString(CONSULTING_TYPE_ID_KREUZBUND),
           "",
           true,
+          null,
           null,
           null,
           null,

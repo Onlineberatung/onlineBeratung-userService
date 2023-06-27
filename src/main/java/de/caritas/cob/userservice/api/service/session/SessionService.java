@@ -217,6 +217,7 @@ public class SessionService {
             .userGender(userDto.getUserGender())
             .userAge(userDto.getUserAge())
             .counsellingRelation(userDto.getCounsellingRelation())
+            .referer(userDto.getReferer())
             .isConsultantDirectlySet(false)
             .build();
 
@@ -630,7 +631,8 @@ public class SessionService {
                 nonNull(session.getConsultant()) ? session.getConsultant().getRocketChatId() : null)
             .age(session.getUserAge())
             .gender(session.getUserGender())
-            .counsellingRelation(session.getCounsellingRelation());
+            .counsellingRelation(session.getCounsellingRelation())
+            .referer(session.getReferer());
 
     if (topicsFeatureEnabled) {
       consultantSessionDTO

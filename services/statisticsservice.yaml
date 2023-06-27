@@ -285,6 +285,8 @@ components:
           type: string
         agencyName:
           type: string
+        referer:
+          type: string
 
     RegistrationStatisticsListResponseDTO:
       type: object

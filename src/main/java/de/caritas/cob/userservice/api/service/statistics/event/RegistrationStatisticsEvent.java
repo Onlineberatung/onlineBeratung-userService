@@ -77,6 +77,7 @@ public class RegistrationStatisticsEvent implements StatisticsEvent {
             .age(registeredUser.getUserAge())
             .gender(registeredUser.getUserGender())
             .counsellingRelation(registeredUser.getCounsellingRelation())
+            .referer(registeredUser.getReferer())
             .mainTopicInternalAttribute(mainTopicInternalAttribute)
             .topicsInternalAttributes(topicsInternalAttributes)
             .postalCode(registeredUser.getPostcode())

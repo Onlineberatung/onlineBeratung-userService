@@ -23,4 +23,6 @@ public interface UserRegistrationDTO {
   Collection<Long> getTopicIds();
 
   String getCounsellingRelation();
+
+  String getReferer();
 }

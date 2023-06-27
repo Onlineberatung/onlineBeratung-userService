@@ -342,10 +342,6 @@ public class UserControllerIT {
   @SuppressWarnings("unused")
   private KeycloakUserDataProvider keycloakUserDataProvider;
 
-  @SuppressWarnings("unused")
-  @MockBean
-  private UsersStatisticsFacade usersStatisticsFacade;
-
   @MockBean
   @SuppressWarnings("unused")
   private VideoChatConfig videoChatConfig;

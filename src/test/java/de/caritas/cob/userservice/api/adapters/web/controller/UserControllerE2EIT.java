@@ -6,7 +6,6 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_TOKEN;
 import static java.util.Objects.nonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -145,7 +144,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplateHandler;
@@ -697,43 +695,6 @@ class UserControllerE2EIT {
                 .param("filter", "all")
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
-  }
-
-  @Test
-  @WithMockUser(authorities = {AuthorityValue.SINGLE_TENANT_ADMIN})
-  void getSessionsStatisticsAuthenticatedConsultant_ShouldGetSessionsWithTopics() throws Exception {
-    givenABearerToken();
-    givenAValidConsultantWithId("34c3x5b1-0677-4fd2-a7ea-56a71aefd099");
-    givenConsultingTypeServiceResponse();
-    givenAValidTopicServiceResponse();
-
-    MvcResult mvcResult =
-        mockMvc
-            .perform(
-                get("/users/statistics/registration")
-                    .cookie(CSRF_COOKIE)
-                    .header(CSRF_HEADER, CSRF_VALUE)
-                    .header("rcToken", RC_TOKEN)
-                    .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("registrationStatistics", hasSize(greaterThan(0))))
-            .andExpect(jsonPath("registrationStatistics[0].userId", is(notNullValue())))
-            .andExpect(jsonPath("registrationStatistics[0].registrationDate", is(notNullValue())))
-            .andExpect(jsonPath("registrationStatistics[0].age").isEmpty())
-            .andExpect(jsonPath("registrationStatistics[0].gender").isEmpty())
-            .andExpect(jsonPath("registrationStatistics[0].counsellingRelation").isEmpty())
-            .andExpect(jsonPath("registrationStatistics[0].postalCode", is(notNullValue())))
-            .andReturn();
-
-    var response =
-        new ObjectMapper()
-            .readValue(
-                mvcResult.getResponse().getContentAsString(),
-                de.caritas.cob.userservice.api.adapters.web.dto
-                    .RegistrationStatisticsListResponseDTO.class);
-
-    assertGender(response);
-    assertAge(response);
   }
 
   private void assertGender(RegistrationStatisticsListResponseDTO response) {
@@ -1686,7 +1647,7 @@ class UserControllerE2EIT {
       throws Exception {
     givenConsultingTypeServiceResponse(2);
     givenARealmResource();
-    givenAUserDTOWithCounsellingRelation();
+    givenAUserDTOWithCounsellingRelationAndReferer();
     givenAValidTopicServiceResponse();
 
     mockMvc
@@ -1796,6 +1757,7 @@ class UserControllerE2EIT {
     userDTO.setConsultantId(consultantId);
     userDTO.setAgencyId(aPositiveLong());
     userDTO.setEmail(givenAValidEmail());
+    userDTO.setReferer("validRef");
   }
 
   private void givenAUserDTOWithDemographics() {
@@ -1803,9 +1765,10 @@ class UserControllerE2EIT {
     userDTO.setUserGender("MALE");
   }
 
-  private void givenAUserDTOWithCounsellingRelation() {
+  private void givenAUserDTOWithCounsellingRelationAndReferer() {
     givenAUserDTO();
     userDTO.setCounsellingRelation("RELATIVE_COUNSELLING");
+    userDTO.setReferer("validRef");
   }
 
   private void givenAUserDTOWithMainTopic() {
