@@ -42,7 +42,7 @@
 		<liquibase-maven-plugin.version>4.8.0</liquibase-maven-plugin.version>
 		<javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
 		<spring-boot-starter-web.version>2.6.6</spring-boot-starter-web.version>
-		<spring-security-core.version>5.7.5</spring-security-core.version>
+		<spring-security-core.version>5.7.8</spring-security-core.version>
 		<spring-beans.version>5.2.20.RELEASE</spring-beans.version>
 		<spring-webmvc.version>5.2.20.RELEASE</spring-webmvc.version>
 		<spring-core.version>5.2.20.RELEASE</spring-core.version>
