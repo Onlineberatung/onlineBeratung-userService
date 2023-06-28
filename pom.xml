@@ -46,7 +46,7 @@
 		<spring-beans.version>5.2.20.RELEASE</spring-beans.version>
 		<spring-webmvc.version>5.2.20.RELEASE</spring-webmvc.version>
 		<spring-core.version>5.2.20.RELEASE</spring-core.version>
-		<json-smart.version>2.4.7</json-smart.version>
+		<json-smart.version>2.4.9</json-smart.version>
 		<springfox-swagger-ui.version>2.10.0</springfox-swagger-ui.version>
 		<spring-context-support.version>5.3.23</spring-context-support.version>
 		<ehcache.version>2.10.9.2</ehcache.version>
