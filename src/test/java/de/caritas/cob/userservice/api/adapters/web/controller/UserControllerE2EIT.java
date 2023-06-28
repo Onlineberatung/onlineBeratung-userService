@@ -55,8 +55,6 @@ import de.caritas.cob.userservice.api.adapters.web.dto.NotificationsSettingsDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PasswordDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PatchUserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ReassignmentNotificationDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.RegistrationStatisticsListResponseDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.RegistrationStatisticsResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
@@ -106,7 +104,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.servlet.http.Cookie;
 import lombok.NonNull;
@@ -695,26 +692,6 @@ class UserControllerE2EIT {
                 .param("filter", "all")
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
-  }
-
-  private void assertGender(RegistrationStatisticsListResponseDTO response) {
-    var resultList =
-        response.getRegistrationStatistics().stream()
-            .map(RegistrationStatisticsResponseDTO::getGender)
-            .distinct()
-            .collect(Collectors.toList());
-
-    assertThat(resultList).contains("FEMALE", "MALE", null);
-  }
-
-  private void assertAge(RegistrationStatisticsListResponseDTO response) {
-    var resultList =
-        response.getRegistrationStatistics().stream()
-            .map(RegistrationStatisticsResponseDTO::getAge)
-            .distinct()
-            .collect(Collectors.toList());
-
-    assertThat(resultList).contains(15, 25, null);
   }
 
   @Test
