@@ -201,6 +201,7 @@ class SessionServiceTest {
           null,
           null,
           null,
+          null,
           null);
 
   @InjectMocks private SessionService sessionService;
@@ -597,6 +598,7 @@ class SessionServiceTest {
     assertEquals(session.getUserAge(), result.getAge());
     assertEquals(session.getUserGender(), result.getGender());
     assertEquals(session.getCounsellingRelation(), result.getCounsellingRelation());
+    assertEquals(session.getReferer(), result.getReferer());
   }
 
   @Test

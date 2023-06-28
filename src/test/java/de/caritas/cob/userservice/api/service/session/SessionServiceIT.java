@@ -138,6 +138,7 @@ class SessionServiceIT {
     assertEquals(session.getUserAge(), result.getAge());
     assertEquals(session.getUserGender(), result.getGender());
     assertEquals(session.getCounsellingRelation(), result.getCounsellingRelation());
+    assertEquals(session.getReferer(), result.getReferer());
     assertNotNull(result.getMainTopic());
     assertEquals(1, result.getMainTopic().getId());
     assertEquals("topic name", result.getMainTopic().getName());

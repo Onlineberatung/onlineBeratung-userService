@@ -39,7 +39,6 @@ import de.caritas.cob.userservice.api.adapters.web.dto.OneTimePasswordDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PasswordDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PatchUserDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ReassignmentNotificationDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.RegistrationStatisticsListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.RocketChatGroupIdDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionDataDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateChatResponseDTO;
@@ -68,7 +67,6 @@ import de.caritas.cob.userservice.api.facade.GetChatMembersFacade;
 import de.caritas.cob.userservice.api.facade.JoinAndLeaveChatFacade;
 import de.caritas.cob.userservice.api.facade.StartChatFacade;
 import de.caritas.cob.userservice.api.facade.StopChatFacade;
-import de.caritas.cob.userservice.api.facade.UsersStatisticsFacade;
 import de.caritas.cob.userservice.api.facade.assignsession.AssignEnquiryFacade;
 import de.caritas.cob.userservice.api.facade.assignsession.AssignSessionFacade;
 import de.caritas.cob.userservice.api.facade.sessionlist.SessionListFacade;
@@ -173,7 +171,6 @@ public class UserController implements UsersApi {
   private final @NonNull AskerDataProvider askerDataProvider;
   private final @NonNull VideoChatConfig videoChatConfig;
   private final @NonNull KeycloakUserDataProvider keycloakUserDataProvider;
-  private final @NotNull UsersStatisticsFacade usersStatisticsFacade;
   private final @NotNull IdentityClient identityClient;
 
   private final @NotNull AdminUserFacade adminUserFacade;
@@ -234,14 +231,6 @@ public class UserController implements UsersApi {
             newRegistrationDto, user, rocketChatCredentials);
 
     return new ResponseEntity<>(registrationResponse, registrationResponse.getStatus());
-  }
-
-  @Override
-  public ResponseEntity<RegistrationStatisticsListResponseDTO> getRegistrationStatistics() {
-
-    var registrationResponse = usersStatisticsFacade.getRegistrationStatistics();
-
-    return new ResponseEntity<>(registrationResponse, HttpStatus.OK);
   }
 
   /**
