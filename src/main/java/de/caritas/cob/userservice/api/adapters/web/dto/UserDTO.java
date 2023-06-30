@@ -4,6 +4,7 @@ import static de.caritas.cob.userservice.api.helper.UserHelper.AGENCY_ID_MAX;
 import static de.caritas.cob.userservice.api.helper.UserHelper.AGENCY_ID_MIN;
 import static de.caritas.cob.userservice.api.helper.UserHelper.AGE_REGEXP;
 import static de.caritas.cob.userservice.api.helper.UserHelper.CONSULTING_TYPE_REGEXP;
+import static de.caritas.cob.userservice.api.helper.UserHelper.REFERER_REGEXP;
 import static de.caritas.cob.userservice.api.helper.UserHelper.STATE_REGEXP;
 import static de.caritas.cob.userservice.api.helper.UserHelper.TERMS_ACCEPTED_REGEXP;
 import static de.caritas.cob.userservice.api.helper.UserHelper.VALID_POSTCODE_REGEX;
@@ -127,6 +128,11 @@ public class UserDTO implements UserRegistrationDTO {
   private String counsellingRelation;
 
   private LanguageCode preferredLanguage;
+
+  @ApiModelProperty(required = false, example = "\"referer\"")
+  @Pattern(regexp = REFERER_REGEXP, message = "{user.custom.referer.invalid}")
+  @JsonProperty("referer")
+  private String referer;
 
   public Integer getUserAge() {
     return StringUtils.isNumeric(age) ? Integer.valueOf(age) : null;

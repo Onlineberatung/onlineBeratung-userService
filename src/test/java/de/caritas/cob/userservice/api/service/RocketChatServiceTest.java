@@ -1097,7 +1097,7 @@ public class RocketChatServiceTest {
     this.rocketChatService.fetchAllInactivePrivateGroupsSinceGivenDate(dateToCheck);
 
     String correctMongoQuery =
-        "{\"lastMessage.ts\": {\"$lt\": {\"$date\": \"2021-01-01T00:00:00.000Z\"}},"
+        "{\"lm\": {\"$lt\": {\"$date\": \"2021-01-01T00:00:00.000Z\"}},"
             + " \"$and\": [{\"t\": \"p\"}]}";
     verify(restTemplate, times(1))
         .exchange(

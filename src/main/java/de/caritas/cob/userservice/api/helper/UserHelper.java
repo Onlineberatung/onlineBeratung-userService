@@ -32,6 +32,8 @@ public class UserHelper {
   public static final String STATE_REGEXP = "[0-9]|1[0-6]";
   public static final String TERMS_ACCEPTED_REGEXP = "true|TRUE";
   public static final String CONSULTING_TYPE_REGEXP = "[0-9]+|";
+
+  public static final String REFERER_REGEXP = "[a-zA-Z0-9]{1,8}";
   public static final int CHAT_MIN_DURATION = 30;
   public static final int CHAT_MAX_DURATION = 180;
   public static final int CHAT_TOPIC_MIN_LENGTH = 3;

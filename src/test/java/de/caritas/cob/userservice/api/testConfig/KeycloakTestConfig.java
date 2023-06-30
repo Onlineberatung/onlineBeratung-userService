@@ -130,6 +130,11 @@ public class KeycloakTestConfig {
 
       @Override
       public void deactivateUser(String userId) {}
+
+      @Override
+      public boolean userHasRole(String userId, String userRole) {
+        return true;
+      }
     };
   }
 }
