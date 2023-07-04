@@ -38,7 +38,6 @@ public interface DtoMapperUtils {
         .teamAgency(agencyDTO.getTeamAgency())
         .offline(agencyDTO.getOffline())
         .topicIds(agencyDTO.getTopicIds());
-
   }
 
   default LanguageResponseDTO languageResponseDtoOf(Set<String> languageCodes) {
