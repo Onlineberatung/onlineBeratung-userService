@@ -885,7 +885,8 @@ class UserControllerConsultantE2EIT {
         .andExpect(jsonPath("agencies[0].description", is(notNullValue())))
         .andExpect(jsonPath("agencies[0].teamAgency", is(notNullValue())))
         .andExpect(jsonPath("agencies[0].offline", is(notNullValue())))
-        .andExpect(jsonPath("agencies[0].consultingType", is(notNullValue())));
+        .andExpect(jsonPath("agencies[0].consultingType", is(notNullValue())))
+        .andExpect(jsonPath("agencies[0].topicIds", is(notNullValue())));
   }
 
   @Test
