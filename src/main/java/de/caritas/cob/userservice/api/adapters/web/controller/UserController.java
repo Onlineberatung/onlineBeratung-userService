@@ -118,6 +118,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -177,6 +178,9 @@ public class UserController implements UsersApi {
 
   private final @NonNull EmailNotificationMapper emailNotificationMapper;
 
+  @Value("${feature.topics.enabled}")
+  private boolean featureTopicsEnabled;
+
   @Override
   public ResponseEntity<Void> userExists(String username) {
     val usernameAvailable = identityClient.isUsernameAvailable(username);
@@ -195,6 +199,7 @@ public class UserController implements UsersApi {
    */
   @Override
   public ResponseEntity<Void> registerUser(@Valid @RequestBody UserDTO user) {
+    validateUserHasChosenTopicIfTopicsFeatureIsEnabled(user);
     user.setNewUserAccount(true);
     var sessionId = createUserFacade.createUserAccountWithInitializedConsultingType(user);
 
@@ -206,6 +211,12 @@ public class UserController implements UsersApi {
     }
 
     return ResponseEntity.status(status).build();
+  }
+
+  private void validateUserHasChosenTopicIfTopicsFeatureIsEnabled(UserDTO user) {
+    if (featureTopicsEnabled && user.getMainTopicId() == null) {
+      throw new BadRequestException("Main topic id is required");
+    }
   }
 
   /**
