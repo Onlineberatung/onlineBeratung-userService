@@ -30,6 +30,8 @@ import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.appointment.AppointmentService;
+import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
+import de.caritas.cob.userservice.api.service.statistics.event.DeleteAccountStatisticsEvent;
 import java.util.Optional;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
@@ -42,11 +44,11 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ValidatedUserAccountProviderTest {
+public class UserAccountServiceTest {
 
   private static final EasyRandom EASY_RANDOM = new EasyRandom();
 
-  @InjectMocks private ValidatedUserAccountProvider accountProvider;
+  @InjectMocks private UserAccountService accountProvider;
   @Mock private UserService userService;
   @Mock private ConsultantService consultantService;
   @Mock private AuthenticatedUser authenticatedUser;
@@ -56,6 +58,8 @@ public class ValidatedUserAccountProviderTest {
   @Mock private AppointmentService appointmentService;
 
   @Mock private IdentityClientConfig identityClientConfig;
+
+  @Mock private StatisticsService statisticsService;
 
   @Test
   public void findUserByEmail_Should_CallUserService() {
@@ -295,6 +299,7 @@ public class ValidatedUserAccountProviderTest {
     ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
     verify(userService, times(1)).saveUser(captor.capture());
     assertNotNull(captor.getValue().getDeleteDate());
+    verify(statisticsService).fireEvent(any(DeleteAccountStatisticsEvent.class));
   }
 
   @Test

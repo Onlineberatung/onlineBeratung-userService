@@ -38,7 +38,7 @@ import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
-import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
+import de.caritas.cob.userservice.api.service.user.UserAccountService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
@@ -59,7 +59,7 @@ public class CreateSessionFacadeTest {
   @Mock private AgencyVerifier agencyVerifier;
   @Mock private SessionDataService sessionDataService;
   @Mock private RollbackFacade rollbackFacade;
-  @Mock private ValidatedUserAccountProvider userAccountProvider;
+  @Mock private UserAccountService userAccountProvider;
   @Mock private Logger logger;
 
   @Before

@@ -109,6 +109,7 @@ components:
       enum:
         - "ASSIGN_SESSION"
         - "ARCHIVE_SESSION"
+        - "DELETE_ACCOUNT"
         - "CREATE_MESSAGE"
         - "START_VIDEO_CALL"
         - "STOP_VIDEO_CALL"
@@ -188,6 +189,28 @@ components:
           type: string
           example: '2022-08-15T21:11:29'
 
+    DeleteAccountStatisticsEventMessage:
+      type: object
+      required:
+        - sessionId
+        - endDate
+      allOf:
+        - $ref: '#/components/schemas/StatisticsEventMessage'
+        - type: object
+      properties:
+        tenantId:
+          type: integer
+          format: int64
+          description: The id of the tenant
+          example: 1
+        userId:
+          type: string
+          description: The keycloak id of the consultant
+          example: d63f4cc0-215d-40e2-a866-2d3e910f0590
+        deleteDate:
+          type: string
+          example: '2022-08-15T21:11:29'
+
     CreateMessageStatisticsEventMessage:
       type: object
       required:
@@ -258,9 +281,61 @@ components:
           format: int64
           description: The id of the tenant
           example: 1
+        tenantName:
+          type: string
+          example: 'Tenant name'
         registrationDate:
           type: string
           example: '2022-08-15T21:11:29'
+        age:
+          type: integer
+          example: '25'
+        gender:
+          type: string
+          example: 'FEMALE'
+        counsellingRelation:
+          type: string
+          example: 'SELF_COUNSELLING'
+        topicsInternalAttributes:
+          type: array
+          items:
+            type: string
+          example: [ 'angeho01','angeho13' ]
+        mainTopicInternalAttribute:
+          type: string
+          example: 'angeho01'
+        postalCode:
+          type: string
+          example: '99999'
+        agencyName:
+          type: string
+          example: "Dortmund Beratungstelle"
+        referer:
+          type: string
+          example: "referer"
+
+    RegistrationStatisticsListResponseDTO:
+      type: object
+      properties:
+        registrationStatistics:
+          type: array
+          items:
+            $ref: '#/components/schemas/RegistrationStatisticsResponseDTO'
+
+    RegistrationStatisticsResponseDTO:
+      type: object
+      required:
+        - userId
+        - registrationDate
+      properties:
+        userId:
+          type: string
+        registrationDate:
+          type: string
+          example: '2022-08-15T21:11:29'
+        endDate:
+          type: string
+          example: '2022-10-14T17:28:29'
         age:
           type: integer
           example: '25'
@@ -283,50 +358,13 @@ components:
           example: '99999'
         tenantName:
           type: string
+          example: 'Tenant name'
         agencyName:
           type: string
+          example: "Dortmund Beratungstelle"
         referer:
           type: string
-
-    RegistrationStatisticsListResponseDTO:
-      type: object
-      properties:
-        registrationStatistics:
-          type: array
-          items:
-            $ref: '#/components/schemas/RegistrationStatisticsResponseDTO'
-
-    RegistrationStatisticsResponseDTO:
-      type: object
-      required:
-        - userId
-        - registrationDate
-      properties:
-        userId:
-          type: string
-        registrationDate:
-          type: string
-          example: '2022-08-15T21:11:29'
-        age:
-          type: integer
-          example: '25'
-        gender:
-          type: string
-          example: 'FEMALE'
-        counsellingRelation:
-          type: string
-          example: 'SELF_COUNSELLING'
-        topicsInternalAttributes:
-          type: array
-          items:
-            type: string
-          example: [ 'angeho01','angeho13' ]
-        mainTopicInternalAttribute:
-          type: string
-          example: 'angeho01'
-        postalCode:
-          type: string
-          example: '99999'
+          example: "referer"
 
     BookingCreatedStatisticsEventMessage:
       type: object

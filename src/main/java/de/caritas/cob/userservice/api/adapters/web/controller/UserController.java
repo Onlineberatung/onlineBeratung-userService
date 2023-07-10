@@ -97,7 +97,7 @@ import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.archive.SessionArchiveService;
 import de.caritas.cob.userservice.api.service.session.SessionFilter;
 import de.caritas.cob.userservice.api.service.session.SessionService;
-import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
+import de.caritas.cob.userservice.api.service.user.UserAccountService;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.api.workflow.delete.action.asker.DeleteSingleRoomAndSessionAction;
 import de.caritas.cob.userservice.api.workflow.delete.model.SessionDeletionWorkflowDTO;
@@ -133,7 +133,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = "user-controller")
 public class UserController implements UsersApi {
 
-  private final @NotNull ValidatedUserAccountProvider userAccountProvider;
+  private final @NotNull UserAccountService userAccountProvider;
   private final @NotNull SessionService sessionService;
   private final @NotNull AuthenticatedUser authenticatedUser;
   private final @NotNull CreateEnquiryMessageFacade createEnquiryMessageFacade;
