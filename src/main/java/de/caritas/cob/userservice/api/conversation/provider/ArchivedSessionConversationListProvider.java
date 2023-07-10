@@ -7,7 +7,7 @@ import de.caritas.cob.userservice.api.conversation.model.ConversationListType;
 import de.caritas.cob.userservice.api.conversation.model.PageableListRequest;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.sessionlist.ConsultantSessionEnricher;
-import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
+import de.caritas.cob.userservice.api.service.user.UserAccountService;
 import lombok.NonNull;
 import org.springframework.stereotype.Service;
 
@@ -16,10 +16,10 @@ import org.springframework.stereotype.Service;
 public class ArchivedSessionConversationListProvider extends DefaultConversationListProvider {
 
   private final SessionService sessionService;
-  private final ValidatedUserAccountProvider userAccountProvider;
+  private final UserAccountService userAccountProvider;
 
   public ArchivedSessionConversationListProvider(
-      @NonNull ValidatedUserAccountProvider userAccountProvider,
+      @NonNull UserAccountService userAccountProvider,
       @NonNull ConsultantSessionEnricher consultantSessionEnricher,
       @NonNull SessionService sessionService) {
     super(consultantSessionEnricher);

@@ -26,7 +26,7 @@ import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
-import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
+import de.caritas.cob.userservice.api.service.user.UserAccountService;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -62,7 +62,7 @@ public class ArchivedSessionConversationListProviderTestIT {
 
   @Autowired private UserRepository userRepository;
 
-  @MockBean private ValidatedUserAccountProvider userAccountProvider;
+  @MockBean private UserAccountService userAccountProvider;
 
   @After
   public void cleanDatabase() {
