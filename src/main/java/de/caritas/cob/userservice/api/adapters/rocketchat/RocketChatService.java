@@ -1136,7 +1136,7 @@ public class RocketChatService implements MessageClient {
   public List<GroupDTO> fetchAllInactivePrivateGroupsSinceGivenDate(
       LocalDateTime dateTimeSinceInactive) throws RocketChatGetGroupsListAllException {
 
-    final var GROUP_RESPONSE_LAST_MESSAGE_TIMESTAMP_FIELD = "lastMessage.ts";
+    final var GROUP_RESPONSE_LAST_MESSAGE_TIMESTAMP_FIELD = "lm";
     final var GROUP_RESPONSE_GROUP_TYPE_FIELD = "t";
     final var GROUP_RESPONSE_GROUP_TYPE_PRIVATE = "p";
 

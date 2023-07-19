@@ -4,6 +4,24 @@ info:
   description: This information will be replaced by the SpringFox config information
   version: 0.0.1
 paths:
+  /users/{username}:
+    get:
+      tags:
+        - user-controller
+      summary: Checks if a given user exists, provided a username
+      operationId: userExists
+      parameters:
+        - name: username
+          in: path
+          description: username
+          required: true
+          schema:
+              type: string
+      responses:
+        200:
+          description: OK - user exists
+        404:
+          description: NOT FOUND - user does not exist
   /users/askers/new:
     post:
       tags:
@@ -823,29 +841,6 @@ paths:
             'application/json':
               schema:
                 $ref: '#/components/schemas/ConsultantSessionListResponseDTO'
-        204:
-          description: successful operation, but no content
-        401:
-          description: UNAUTHORIZED - no/invalid Keycloak token
-        403:
-          description: FORBIDDEN - no/invalid role/authorization or CSRF token
-        500:
-          description: INTERNAL SERVER ERROR - server encountered unexpected condition
-      security:
-        - Bearer: [ ]
-  /users/statistics/registration:
-    get:
-      tags:
-        - user-controller
-      summary: 'Returns a list of user registration data per tenant'
-      operationId: getRegistrationStatistics
-      responses:
-        200:
-          description: successful operation
-          content:
-            'application/json':
-              schema:
-                $ref: '#/components/schemas/RegistrationStatisticsListResponseDTO'
         204:
           description: successful operation, but no content
         401:
@@ -1921,6 +1916,7 @@ components:
         preferredLanguage:
           $ref: "#/components/schemas/LanguageCode"
 
+
     SessionDataDTO:
       type: object
       properties:
@@ -1932,47 +1928,6 @@ components:
           type: string
           example: 8
           description: mandatory depending on the consulting type
-
-    RegistrationStatisticsListResponseDTO:
-      type: object
-      properties:
-        registrationStatistics:
-          type: array
-          items:
-            $ref: '#/components/schemas/RegistrationStatisticsResponseDTO'
-
-    RegistrationStatisticsResponseDTO:
-      type: object
-      required:
-        - userId
-        - registrationDate
-      properties:
-        userId:
-          type: string
-        registrationDate:
-          type: string
-          example: '2022-08-15T21:11:29'
-        age:
-          type: integer
-          example: '25'
-        gender:
-          type: string
-          example: 'FEMALE'
-        counsellingRelation:
-          type: string
-          example: 'SELF_COUNSELLING'
-        topicsInternalAttributes:
-          type: array
-          items:
-            type: string
-          example: [ 'angeho01','angeho13' ]
-        mainTopicInternalAttribute:
-          type: string
-          example: 'angeho01'
-        postalCode:
-          type: string
-          example: '99999'
-
 
     ConsultantSessionListResponseDTO:
       type: object
@@ -2335,6 +2290,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SessionTopicDTO'
+        referer:
+          type: string
+          pattern: "^[a-zA-Z0-9]{1,8}$"
+          maxLength: 8
+          example: '12345678'
 
     UserChatDTO:
       type: object
@@ -2932,6 +2892,11 @@ components:
         counsellingRelation:
           type: string
           example: 'SELF_COUNSELLING'
+        referer:
+          type: string
+          pattern: "^[a-zA-Z0-9]{1,8}$"
+          maxLength: 8
+          example: '12345678'
 
 
     NewRegistrationResponseDto:
