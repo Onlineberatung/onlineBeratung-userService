@@ -148,8 +148,6 @@ paths:
           description: NOT FOUND - agency not found
         409:
           description: CONFLICT - agency contains consultants and therefore can't be deleted
-        423:
-          description: LOCKED - agency is locked for deletion (e.g. Kreuzbund)
         401:
           description: UNAUTHORIZED - no/invalid role/authorization
         500:
