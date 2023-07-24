@@ -166,7 +166,7 @@ components:
           description: The id of the session
           example: 12345
 
-    ArchiveSessionStatisticsEventMessage:
+    ArchiveOrDeleteSessionStatisticsEventMessage:
       type: object
       required:
         - sessionId

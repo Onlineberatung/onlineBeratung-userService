@@ -21,7 +21,7 @@ import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
-import de.caritas.cob.userservice.api.service.statistics.event.ArchiveStatisticsEvent;
+import de.caritas.cob.userservice.api.service.statistics.event.ArchiveOrDeleteSessionStatisticsEvent;
 import de.caritas.cob.userservice.api.service.statistics.event.StatisticsEvent;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType;
 import java.util.Optional;
@@ -139,10 +139,10 @@ public class SessionArchiveServiceTest {
     sessionArchiveService.archiveSession(SESSION_ID);
 
     verify(session, times(1)).setStatus(SessionStatus.IN_ARCHIVE);
-    ArgumentCaptor<ArchiveStatisticsEvent> statisticsEventArgumentCaptor =
-        ArgumentCaptor.forClass(ArchiveStatisticsEvent.class);
+    ArgumentCaptor<ArchiveOrDeleteSessionStatisticsEvent> statisticsEventArgumentCaptor =
+        ArgumentCaptor.forClass(ArchiveOrDeleteSessionStatisticsEvent.class);
     verify(statisticsService).fireEvent(statisticsEventArgumentCaptor.capture());
-    ArchiveStatisticsEvent event = statisticsEventArgumentCaptor.getValue();
+    ArchiveOrDeleteSessionStatisticsEvent event = statisticsEventArgumentCaptor.getValue();
     assertThat(event.getEventType()).isEqualTo(EventType.ARCHIVE_SESSION);
     assertThat(event.getPayload().get()).isNotEmpty();
   }
@@ -161,10 +161,10 @@ public class SessionArchiveServiceTest {
     sessionArchiveService.archiveSession(SESSION_ID);
 
     verify(session, times(1)).setStatus(SessionStatus.IN_ARCHIVE);
-    ArgumentCaptor<ArchiveStatisticsEvent> statisticsEventArgumentCaptor =
-        ArgumentCaptor.forClass(ArchiveStatisticsEvent.class);
+    ArgumentCaptor<ArchiveOrDeleteSessionStatisticsEvent> statisticsEventArgumentCaptor =
+        ArgumentCaptor.forClass(ArchiveOrDeleteSessionStatisticsEvent.class);
     verify(statisticsService).fireEvent(statisticsEventArgumentCaptor.capture());
-    ArchiveStatisticsEvent event = statisticsEventArgumentCaptor.getValue();
+    ArchiveOrDeleteSessionStatisticsEvent event = statisticsEventArgumentCaptor.getValue();
     assertThat(event.getEventType()).isEqualTo(EventType.ARCHIVE_SESSION);
     assertThat(event.getPayload().get()).isNotEmpty();
     verify(logger)
