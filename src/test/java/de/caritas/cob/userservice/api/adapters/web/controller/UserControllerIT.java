@@ -17,9 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.neovisionaries.i18n.LanguageCode;
-import de.caritas.cob.userservice.api.actions.registry.ActionContainer;
 import de.caritas.cob.userservice.api.actions.registry.ActionsRegistry;
-import de.caritas.cob.userservice.api.actions.user.DeactivateKeycloakUserActionCommand;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.ApiResponseEntityExceptionHandler;
@@ -54,11 +52,10 @@ import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.*;
 import de.caritas.cob.userservice.api.service.archive.SessionArchiveService;
+import de.caritas.cob.userservice.api.service.archive.SessionDeleteService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.UserAccountService;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
-import de.caritas.cob.userservice.api.workflow.delete.action.asker.DeleteSingleRoomAndSessionAction;
-import de.caritas.cob.userservice.api.workflow.delete.model.SessionDeletionWorkflowDTO;
 import java.util.*;
 import javax.servlet.http.Cookie;
 import lombok.val;
@@ -349,6 +346,8 @@ public class UserControllerIT {
   @MockBean private AdminUserFacade adminUserFacade;
 
   @MockBean private EmailNotificationMapper emailNotificationMapper;
+
+  @MockBean private SessionDeleteService sessionDeleteService;
 
   @Mock private Logger logger;
 
@@ -2064,43 +2063,22 @@ public class UserControllerIT {
       throws Exception {
     var sessionId = easyRandom.nextLong();
 
+    doThrow(new NotFoundException("")).when(sessionDeleteService).deleteSession(sessionId);
     mvc.perform(delete("/users/sessions/{sessionId}", sessionId).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
 
-    verify(sessionService).getSession(sessionId);
-    verifyNoMoreInteractions(actionsRegistry);
+    verify(sessionDeleteService).deleteSession(sessionId);
   }
 
   @Test
   public void deleteSessionAndInactiveUser_Should_ReturnOK_When_SessionIdIsKnown()
       throws Exception {
     var sessionId = givenAPresentSession(false);
-    var actionContainer = givenActionRegistryDeletesSession();
 
     mvc.perform(delete("/users/sessions/{sessionId}", sessionId).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(sessionService).getSession(sessionId);
-    verify(actionContainer).executeActions(any(SessionDeletionWorkflowDTO.class));
-    verify(actionsRegistry).buildContainerForType(SessionDeletionWorkflowDTO.class);
-    verifyNoMoreInteractions(actionsRegistry);
-  }
-
-  @Test
-  public void deleteSessionAndInactiveUser_Should_DeactivateKeycloakUser_When_OnlySession()
-      throws Exception {
-    var sessionId = givenAPresentSession(true);
-    var actionContainerDelete = givenActionRegistryDeletesSession();
-    var actionContainerDeactivate = givenActionRegistryDeactivatesKeycloakUser();
-
-    mvc.perform(delete("/users/sessions/{sessionId}", sessionId).accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
-
-    verify(sessionService).getSession(sessionId);
-    verify(actionContainerDelete).executeActions(any(SessionDeletionWorkflowDTO.class));
-    verify(actionContainerDeactivate).executeActions(any(User.class));
-    verify(actionsRegistry).buildContainerForType(SessionDeletionWorkflowDTO.class);
-    verify(actionsRegistry).buildContainerForType(User.class);
+    verify(sessionDeleteService).deleteSession(sessionId);
   }
 
   @Test
@@ -2352,27 +2330,6 @@ public class UserControllerIT {
     when(sessionService.getSession(sessionId)).thenReturn(Optional.of(session));
 
     return sessionId;
-  }
-
-  private ActionContainer<SessionDeletionWorkflowDTO> givenActionRegistryDeletesSession() {
-    @SuppressWarnings("unchecked")
-    var actionContainer = (ActionContainer<SessionDeletionWorkflowDTO>) mock(ActionContainer.class);
-    when(actionContainer.addActionToExecute(DeleteSingleRoomAndSessionAction.class))
-        .thenReturn(actionContainer);
-    when(actionsRegistry.buildContainerForType(SessionDeletionWorkflowDTO.class))
-        .thenReturn(actionContainer);
-
-    return actionContainer;
-  }
-
-  private ActionContainer<User> givenActionRegistryDeactivatesKeycloakUser() {
-    @SuppressWarnings("unchecked")
-    var actionContainer = (ActionContainer<User>) mock(ActionContainer.class);
-    when(actionContainer.addActionToExecute(DeactivateKeycloakUserActionCommand.class))
-        .thenReturn(actionContainer);
-    when(actionsRegistry.buildContainerForType(User.class)).thenReturn(actionContainer);
-
-    return actionContainer;
   }
 
   private Map<String, Object> givenAnUpdateConsultantDtoWithInvalidLanguage() {
