@@ -106,7 +106,7 @@ public class EmailNotificationFacade {
     }
   }
 
-  // @Async
+  @Async
   public void sendNewDirectEnquiryEmailNotification(
       String consultantId, Long agencyId, String postCode, TenantData tenantData) {
     log.info(
