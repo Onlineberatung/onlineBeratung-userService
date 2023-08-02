@@ -23,6 +23,6 @@ public interface AppointmentRepository extends CrudRepository<Appointment, UUID>
   List<Appointment> findAllOrderByDatetimeAfter(Instant datetime, String userId);
 
   @Modifying
-  @Query(value = "DELETE FROM appointment a WHERE a.datetime <= :datetime", nativeQuery = true)
+  @Query(value = "DELETE FROM appointment WHERE `datetime` <= :datetime", nativeQuery = true)
   void deleteOlderThan(Instant datetime);
 }
