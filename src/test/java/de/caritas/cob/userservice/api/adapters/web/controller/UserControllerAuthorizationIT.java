@@ -92,8 +92,8 @@ import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.archive.SessionArchiveService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
+import de.caritas.cob.userservice.api.service.user.UserAccountService;
 import de.caritas.cob.userservice.api.service.user.UserService;
-import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -150,7 +150,7 @@ class UserControllerAuthorizationIT {
   @MockBean private GetChatMembersFacade getChatMembersFacade;
   @MockBean private UserHelper userHelper;
   @MockBean private CreateSessionFacade createSessionFacade;
-  @MockBean private ValidatedUserAccountProvider validatedUserAccountProvider;
+  @MockBean private UserAccountService userAccountService;
   @MockBean private SessionDataService sessionDataService;
   @MockBean private SessionArchiveService sessionArchiveService;
   @MockBean private ConsultantUpdateService consultantUpdateService;
@@ -2181,7 +2181,7 @@ class UserControllerAuthorizationIT {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
-    verifyNoMoreInteractions(validatedUserAccountProvider, sessionService);
+    verifyNoMoreInteractions(userAccountService, sessionService);
   }
 
   @Test
@@ -2215,7 +2215,7 @@ class UserControllerAuthorizationIT {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(validatedUserAccountProvider, sessionService);
+    verifyNoMoreInteractions(userAccountService, sessionService);
   }
 
   @Test
@@ -2451,7 +2451,7 @@ class UserControllerAuthorizationIT {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized());
 
-    verifyNoMoreInteractions(validatedUserAccountProvider);
+    verifyNoMoreInteractions(userAccountService);
   }
 
   @Test
@@ -2482,7 +2482,7 @@ class UserControllerAuthorizationIT {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(validatedUserAccountProvider);
+    verifyNoMoreInteractions(userAccountService);
   }
 
   @Test
@@ -2495,7 +2495,7 @@ class UserControllerAuthorizationIT {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(validatedUserAccountProvider);
+    verifyNoMoreInteractions(userAccountService);
   }
 
   @Test
@@ -2716,7 +2716,7 @@ class UserControllerAuthorizationIT {
   void getUserData_Should_ReturnOK_When_AnonymousAuthority() throws Exception {
 
     when(this.authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.ANONYMOUS.getValue()));
-    when(this.validatedUserAccountProvider.retrieveValidatedUser())
+    when(this.userAccountService.retrieveValidatedUser())
         .thenReturn(new EasyRandom().nextObject(User.class));
     when(askerDataProvider.retrieveData(any()))
         .thenReturn(easyRandom.nextObject(UserDataResponseDTO.class));
@@ -2736,7 +2736,7 @@ class UserControllerAuthorizationIT {
   void getAskerSessions_Should_ReturnNoContent_When_AnonymousAuthority() throws Exception {
 
     when(this.authenticatedUser.getRoles()).thenReturn(Set.of(UserRole.ANONYMOUS.getValue()));
-    when(this.validatedUserAccountProvider.retrieveValidatedUser())
+    when(this.userAccountService.retrieveValidatedUser())
         .thenReturn(new EasyRandom().nextObject(User.class));
 
     mvc.perform(
@@ -2866,7 +2866,7 @@ class UserControllerAuthorizationIT {
                 .header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isOk());
 
-    verify(this.validatedUserAccountProvider).addMobileAppToken("test");
+    verify(this.userAccountService).addMobileAppToken("test");
   }
 
   @Test
@@ -2875,7 +2875,7 @@ class UserControllerAuthorizationIT {
       throws Exception {
     mvc.perform(put(PATH_PUT_ADD_MOBILE_TOKEN)).andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(validatedUserAccountProvider);
+    verifyNoMoreInteractions(userAccountService);
   }
 
   @Test
@@ -2900,7 +2900,7 @@ class UserControllerAuthorizationIT {
     mvc.perform(put(PATH_PUT_ADD_MOBILE_TOKEN).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isForbidden());
 
-    verifyNoMoreInteractions(validatedUserAccountProvider);
+    verifyNoMoreInteractions(userAccountService);
   }
 
   @Test
@@ -2909,7 +2909,7 @@ class UserControllerAuthorizationIT {
     mvc.perform(put(PATH_PUT_ADD_MOBILE_TOKEN).cookie(CSRF_COOKIE).header(CSRF_HEADER, CSRF_VALUE))
         .andExpect(status().isUnauthorized());
 
-    verifyNoMoreInteractions(validatedUserAccountProvider);
+    verifyNoMoreInteractions(userAccountService);
   }
 
   @Test

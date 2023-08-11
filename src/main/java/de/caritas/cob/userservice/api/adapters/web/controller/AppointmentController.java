@@ -22,7 +22,7 @@ import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
-import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
+import de.caritas.cob.userservice.api.service.user.UserAccountService;
 import de.caritas.cob.userservice.generated.api.adapters.web.controller.AppointmentsApi;
 import io.swagger.annotations.Api;
 import java.util.List;
@@ -55,7 +55,7 @@ public class AppointmentController implements AppointmentsApi {
 
   private final AuthenticatedUser currentUser;
 
-  private final @NotNull ValidatedUserAccountProvider userAccountProvider;
+  private final @NotNull UserAccountService userAccountProvider;
 
   private final @NotNull CreateEnquiryMessageFacade createEnquiryMessageFacade;
 
