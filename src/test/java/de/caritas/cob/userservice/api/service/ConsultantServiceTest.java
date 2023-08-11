@@ -30,7 +30,7 @@ import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantMobileToken;
 import de.caritas.cob.userservice.api.port.out.ConsultantMobileTokenRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
-import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
+import de.caritas.cob.userservice.api.service.user.UserAccountService;
 import java.util.Collections;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
@@ -51,7 +51,7 @@ class ConsultantServiceTest {
 
   @Mock private ConsultantMobileTokenRepository consultantMobileTokenRepository;
 
-  @Mock private ValidatedUserAccountProvider validatedUserAccountProvider;
+  @Mock private UserAccountService userAccountService;
 
   @Mock private AuthenticatedUser authenticatedUser;
 

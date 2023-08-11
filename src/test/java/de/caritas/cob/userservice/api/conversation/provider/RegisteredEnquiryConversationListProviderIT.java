@@ -24,7 +24,7 @@ import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
-import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
+import de.caritas.cob.userservice.api.service.user.UserAccountService;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -55,7 +55,7 @@ public class RegisteredEnquiryConversationListProviderIT {
 
   @Autowired private UserRepository userRepository;
 
-  @MockBean private ValidatedUserAccountProvider userAccountProvider;
+  @MockBean private UserAccountService userAccountProvider;
 
   @Before
   public void setup() {

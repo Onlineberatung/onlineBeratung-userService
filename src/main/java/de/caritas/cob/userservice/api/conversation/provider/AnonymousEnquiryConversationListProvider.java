@@ -16,7 +16,7 @@ import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.session.SessionMapper;
 import de.caritas.cob.userservice.api.service.sessionlist.ConsultantSessionEnricher;
-import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
+import de.caritas.cob.userservice.api.service.user.UserAccountService;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,7 +31,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AnonymousEnquiryConversationListProvider implements ConversationListProvider {
 
-  private final @NonNull ValidatedUserAccountProvider userAccountProvider;
+  private final @NonNull UserAccountService userAccountProvider;
   private final @NonNull SessionRepository sessionRepository;
   private final @NonNull AgencyService agencyService;
   private final @NonNull ConsultantSessionEnricher consultantSessionEnricher;

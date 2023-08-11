@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import de.caritas.cob.userservice.api.helper.json.OffsetDateTimeToStringSerializer;
 import de.caritas.cob.userservice.api.model.User;
-import de.caritas.cob.userservice.statisticsservice.generated.web.model.ArchiveSessionStatisticsEventMessage;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -18,9 +17,9 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class ArchiveStatisticsEventTest {
+class ArchiveOrDeleteSessionStatisticsEventTest {
 
-  private ArchiveStatisticsEvent archiveStatisticsEvent;
+  private ArchiveOrDeleteSessionStatisticsEvent archiveOrDeleteSessionStatisticsEvent;
   private static final Long TENANT_ID = 2L;
   private static final String USER_ID = "userId";
   private static final LocalDateTime END_DATE = LocalDateTime.now();
@@ -30,29 +29,35 @@ class ArchiveStatisticsEventTest {
     User user = new User();
     user.setUserId(USER_ID);
     user.setTenantId(TENANT_ID);
-    archiveStatisticsEvent = new ArchiveStatisticsEvent(user, SESSION_ID, END_DATE);
+    archiveOrDeleteSessionStatisticsEvent =
+        new ArchiveOrDeleteSessionStatisticsEvent(user, SESSION_ID, END_DATE);
   }
 
   @Test
-  public void getEventType_Should_ReturnEventTypeArchiveMessage() {
+  void getEventType_Should_ReturnEventTypeArchiveMessage() {
 
-    assertThat(archiveStatisticsEvent.getEventType()).isEqualTo(EventType.ARCHIVE_SESSION);
+    assertThat(archiveOrDeleteSessionStatisticsEvent.getEventType())
+        .isEqualTo(EventType.ARCHIVE_SESSION);
   }
 
   @Test
-  public void getPayload_Should_ReturnValidJsonPayload() throws JsonProcessingException {
+  void getPayload_Should_ReturnValidJsonPayload() throws JsonProcessingException {
 
     ObjectMapper objectMapper = new ObjectMapper();
     objectMapper.registerModule(new JavaTimeModule());
     objectMapper.registerModule(buildSimpleModule());
 
-    ArchiveSessionStatisticsEventMessage archiveSessionStatisticsEventMessage =
-        objectMapper.readValue(
-            archiveStatisticsEvent.getPayload().get(), ArchiveSessionStatisticsEventMessage.class);
+    de.caritas.cob.userservice.statisticsservice.generated.web.model
+            .ArchiveOrDeleteSessionStatisticsEventMessage
+        archiveSessionStatisticsEventMessage =
+            objectMapper.readValue(
+                archiveOrDeleteSessionStatisticsEvent.getPayload().get(),
+                de.caritas.cob.userservice.statisticsservice.generated.web.model
+                    .ArchiveOrDeleteSessionStatisticsEventMessage.class);
 
-    Optional<String> result = archiveStatisticsEvent.getPayload();
+    Optional<String> result = archiveOrDeleteSessionStatisticsEvent.getPayload();
 
-    assertThat(result.isPresent()).isTrue();
+    assertThat(result).isPresent();
     assertThat(archiveSessionStatisticsEventMessage.getSessionId()).isEqualTo(SESSION_ID);
     assertThat(archiveSessionStatisticsEventMessage.getTenantId()).isEqualTo(TENANT_ID);
     assertThat(archiveSessionStatisticsEventMessage.getUserId()).isEqualTo(USER_ID);
