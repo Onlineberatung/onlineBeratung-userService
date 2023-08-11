@@ -1,9 +1,11 @@
 package de.caritas.cob.userservice.api.admin.service.consultant.delete;
 
-import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.CONSULTANT_HAS_ACTIVE_SESSIONS;
+import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.CONSULTANT_HAS_ACTIVE_OR_ARCHIVE_SESSIONS;
+import static de.caritas.cob.userservice.api.model.Session.SessionStatus.IN_ARCHIVE;
 import static de.caritas.cob.userservice.api.model.Session.SessionStatus.IN_PROGRESS;
 import static java.util.Objects.nonNull;
 
+import com.google.common.collect.Lists;
 import de.caritas.cob.userservice.api.admin.service.agency.ConsultantAgencyDeletionValidationService;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.model.Consultant;
@@ -32,7 +34,7 @@ public class ConsultantPreDeletionService {
    */
   public void performPreDeletionSteps(Consultant consultant) {
     if (hasConsultantActiveSessions(consultant)) {
-      throw new CustomValidationHttpStatusException(CONSULTANT_HAS_ACTIVE_SESSIONS);
+      throw new CustomValidationHttpStatusException(CONSULTANT_HAS_ACTIVE_OR_ARCHIVE_SESSIONS);
     }
     if (nonNull(consultant.getConsultantAgencies())) {
       consultant
@@ -43,6 +45,8 @@ public class ConsultantPreDeletionService {
   }
 
   private boolean hasConsultantActiveSessions(Consultant consultant) {
-    return !this.sessionRepository.findByConsultantAndStatus(consultant, IN_PROGRESS).isEmpty();
+    return !this.sessionRepository
+        .findByConsultantAndStatusIn(consultant, Lists.newArrayList(IN_PROGRESS, IN_ARCHIVE))
+        .isEmpty();
   }
 }
