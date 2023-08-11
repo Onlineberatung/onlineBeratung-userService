@@ -1,6 +1,8 @@
 package de.caritas.cob.userservice.api.admin.service.consultant.delete;
 
-import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.CONSULTANT_HAS_ACTIVE_SESSIONS;
+import static de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason.CONSULTANT_HAS_ACTIVE_OR_ARCHIVE_SESSIONS;
+import static de.caritas.cob.userservice.api.model.Session.SessionStatus.IN_ARCHIVE;
+import static de.caritas.cob.userservice.api.model.Session.SessionStatus.IN_PROGRESS;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
@@ -13,6 +15,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.Lists;
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.admin.service.agency.ConsultantAgencyDeletionValidationService;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
@@ -41,7 +44,8 @@ public class ConsultantPreDeletionServiceTest {
   public void
       performPreDeletionSteps_Should_throwCustomValidationHttpStatusException_When_consultantHasOpenSessions() {
     Consultant consultant = new EasyRandom().nextObject(Consultant.class);
-    when(this.sessionRepository.findByConsultantAndStatus(any(), any()))
+    when(this.sessionRepository.findByConsultantAndStatusIn(
+            consultant, Lists.newArrayList(IN_PROGRESS, IN_ARCHIVE)))
         .thenReturn(singletonList(mock(Session.class)));
 
     try {
@@ -50,7 +54,7 @@ public class ConsultantPreDeletionServiceTest {
     } catch (CustomValidationHttpStatusException e) {
       assertThat(
           requireNonNull(e.getCustomHttpHeader().get("X-Reason")).iterator().next(),
-          is(CONSULTANT_HAS_ACTIVE_SESSIONS.name()));
+          is(CONSULTANT_HAS_ACTIVE_OR_ARCHIVE_SESSIONS.name()));
     }
   }
 
@@ -58,7 +62,7 @@ public class ConsultantPreDeletionServiceTest {
   public void
       performPreDeletionSteps_Should_executeValidationForAllAgencyRelations_When_consultantIsAssignedToAgencies() {
     Consultant consultant = new EasyRandom().nextObject(Consultant.class);
-    when(this.sessionRepository.findByConsultantAndStatus(any(), any())).thenReturn(emptyList());
+    when(this.sessionRepository.findByConsultantAndStatusIn(any(), any())).thenReturn(emptyList());
 
     this.consultantPreDeletionService.performPreDeletionSteps(consultant);
 
@@ -70,7 +74,7 @@ public class ConsultantPreDeletionServiceTest {
   public void
       performPreDeletionSteps_Should_setConsultantInactiveInKeycloak_When_consultantCanBeDeleted() {
     Consultant consultant = new EasyRandom().nextObject(Consultant.class);
-    when(this.sessionRepository.findByConsultantAndStatus(any(), any())).thenReturn(emptyList());
+    when(this.sessionRepository.findByConsultantAndStatusIn(any(), any())).thenReturn(emptyList());
 
     this.consultantPreDeletionService.performPreDeletionSteps(consultant);
 
