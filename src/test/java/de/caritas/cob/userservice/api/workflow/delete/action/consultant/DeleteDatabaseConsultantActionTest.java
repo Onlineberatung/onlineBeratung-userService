@@ -102,7 +102,8 @@ public class DeleteDatabaseConsultantActionTest {
   }
 
   @Test
-  public void execute_Should_returnExpectedWorkflowErrorAndLogError_When_unassignmentOfSessionsFails() {
+  public void
+      execute_Should_returnExpectedWorkflowErrorAndLogError_When_unassignmentOfSessionsFails() {
     when(sessionRepository.findByConsultantAndStatusIn(any(), any()))
         .thenReturn(Lists.newArrayList(new Session(), new Session()));
     doThrow(new RuntimeException()).when(this.sessionRepository).save(any());
