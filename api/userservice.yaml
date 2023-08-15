@@ -1002,7 +1002,7 @@ paths:
       parameters:
         - name: query
           in: query
-          description: URL-encoded infix to search for in first name, last name, or email.
+          description: URL-encoded infix to search for in id, first name, last name, or email.
             A non-encoded star symbol searches for all.
           required: true
           schema:
