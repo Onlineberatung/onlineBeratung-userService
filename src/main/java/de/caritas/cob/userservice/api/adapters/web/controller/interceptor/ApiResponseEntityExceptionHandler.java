@@ -27,6 +27,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -43,10 +44,13 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
 
+  private static final String BAD_REQUEST = "Bad Request: ";
+  private static final String USER_SERVICE_API_LOG_PLACEHOLDER = "UserService API: {}: {}";
+
   @ExceptionHandler({DataIntegrityViolationException.class})
   public ResponseEntity<Object> handleJPAConstraintViolationException(
       final org.hibernate.exception.ConstraintViolationException ex, final WebRequest request) {
-    log.error("Bad Request: ", ex);
+    log.error(BAD_REQUEST, ex);
 
     return handleExceptionInternal(ex, null, new HttpHeaders(), HttpStatus.CONFLICT, request);
   }
@@ -54,7 +58,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
   @ExceptionHandler({CreateEnquiryMessageException.class})
   public ResponseEntity<Object> handleCreateEnquiryMessageException(
       final CreateEnquiryMessageException ex, final WebRequest request) {
-    log.error("Bad Request: ", ex);
+    log.error(BAD_REQUEST, ex);
 
     return handleExceptionInternal(ex, null, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
   }
@@ -68,7 +72,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
   @ExceptionHandler({BadRequestException.class})
   public ResponseEntity<Object> handleCustomBadRequest(
       final BadRequestException ex, final WebRequest request) {
-    log.warn("Bad Request: ", ex);
+    log.warn(BAD_REQUEST, ex);
 
     return handleExceptionInternal(ex, null, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
   }
@@ -113,7 +117,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
       final HttpHeaders headers,
       final HttpStatus status,
       final WebRequest request) {
-    log.warn("UserService API: {}: {}", status.getReasonPhrase(), ex.getStackTrace());
+    log.warn(USER_SERVICE_API_LOG_PLACEHOLDER, status.getReasonPhrase(), ex.getStackTrace());
 
     return handleExceptionInternal(null, null, headers, status, request);
   }
@@ -130,7 +134,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
       final HttpHeaders headers,
       final HttpStatus status,
       final WebRequest request) {
-    log.warn("UserService API: {}: {}", status.getReasonPhrase(), ex.getStackTrace());
+    log.warn(USER_SERVICE_API_LOG_PLACEHOLDER, status.getReasonPhrase(), ex);
 
     return handleExceptionInternal(null, null, headers, status, request);
   }
@@ -159,7 +163,7 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
   @ExceptionHandler({InvalidDataAccessApiUsageException.class})
   protected ResponseEntity<Object> handleConflict(
       final RuntimeException ex, final WebRequest request) {
-    log.warn("UserService API: {}: {}", HttpStatus.CONFLICT, ex.getStackTrace());
+    log.warn(USER_SERVICE_API_LOG_PLACEHOLDER, HttpStatus.CONFLICT, ex.getStackTrace());
 
     return handleExceptionInternal(null, null, new HttpHeaders(), HttpStatus.CONFLICT, request);
   }
@@ -255,5 +259,19 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
   public ResponseEntity<Object> handleInternal(
       final NoContentException ex, final WebRequest request) {
     return handleExceptionInternal(null, null, new HttpHeaders(), HttpStatus.NO_CONTENT, request);
+  }
+
+  @Override
+  protected ResponseEntity<Object> handleExceptionInternal(
+      @Nullable Exception ex,
+      @Nullable Object body,
+      HttpHeaders headers,
+      HttpStatus status,
+      WebRequest request) {
+    if (HttpStatus.INTERNAL_SERVER_ERROR.equals(status)) {
+      request.setAttribute("javax.servlet.error.exception", ex, 0);
+    }
+
+    return new ResponseEntity<>(body, headers, status);
   }
 }
