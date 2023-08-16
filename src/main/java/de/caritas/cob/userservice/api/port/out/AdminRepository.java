@@ -21,7 +21,7 @@ public interface AdminRepository extends CrudRepository<Admin, String> {
               + "AND ("
               + "  ?1 = '*' "
               + "  OR ("
-              + "    UPPER(a.adminId) = UPPER(?1)"
+              + "    UPPER(a.id) = UPPER(?1)"
               + "    OR UPPER(a.firstName) LIKE CONCAT('%', UPPER(?1), '%')"
               + "    OR UPPER(a.lastName) LIKE CONCAT('%', UPPER(?1), '%')"
               + "    OR UPPER(a.email) LIKE CONCAT('%', UPPER(?1), '%')"
