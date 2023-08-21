@@ -1,7 +1,6 @@
 package de.caritas.cob.userservice.api.admin.service.consultant;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -59,8 +58,7 @@ public class ConsultantAdminServiceTest {
 
     this.consultantAdminService.markConsultantForDeletion("id", false);
 
-    verify(this.consultantPreDeletionService, times(1))
-        .performPreDeletionSteps(consultant, false);
+    verify(this.consultantPreDeletionService, times(1)).performPreDeletionSteps(consultant, false);
     verify(consultant, times(1)).setDeleteDate(any());
     verify(this.consultantRepository, times(1)).save(consultant);
   }

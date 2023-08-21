@@ -148,7 +148,6 @@ public class ConsultantAdminService {
   private void deleteSessionsInProgressOrArchived(Consultant consultant) {
     sessionRepository
         .findByConsultantAndStatusIn(consultant, Lists.newArrayList(IN_PROGRESS, IN_ARCHIVE))
-        .forEach(
-            sessionRepository::delete);
+        .forEach(sessionRepository::delete);
   }
 }
