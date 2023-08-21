@@ -158,7 +158,7 @@ public class ConsultantDtoMapper implements DtoMapperUtils {
         httpEntity = userAdminApi.updateConsultant(id, null);
         break;
       case DELETE:
-        httpEntity = userAdminApi.markConsultantForDeletion(id);
+        httpEntity = userAdminApi.markConsultantForDeletion(id, false);
         break;
       default:
         httpEntity = userAdminApi.getConsultant(id);

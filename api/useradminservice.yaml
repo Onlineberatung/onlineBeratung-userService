@@ -208,6 +208,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: forceDeleteSessions
+          in: query
+          schema:
+            type: boolean
+          description: parameter specifying if consultant sessions need to be removed prior the deletion
       responses:
         200:
           description: OK - consultant was marked for deletion successfully

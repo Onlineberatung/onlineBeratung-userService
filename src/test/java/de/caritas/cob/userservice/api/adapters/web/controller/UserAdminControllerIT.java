@@ -335,7 +335,7 @@ public class UserAdminControllerIT {
         .perform(delete(DELETE_CONSULTANT_PATH).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(this.consultantAdminFacade, times(1)).markConsultantForDeletion("1234");
+    verify(this.consultantAdminFacade, times(1)).markConsultantForDeletion("1234", false);
   }
 
   @Test

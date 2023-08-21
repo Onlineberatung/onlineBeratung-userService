@@ -708,7 +708,7 @@ public class UserAdminControllerAuthorizationIT {
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(this.consultantAdminFacade, times(1)).markConsultantForDeletion(any());
+    verify(this.consultantAdminFacade, times(1)).markConsultantForDeletion(any(), any());
   }
 
   @Test
