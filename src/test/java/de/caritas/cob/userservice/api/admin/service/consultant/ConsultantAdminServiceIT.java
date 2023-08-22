@@ -95,7 +95,7 @@ public class ConsultantAdminServiceIT {
     assertThat(consultantById.getLinks().getDelete(), notNullValue());
     assertThat(
         consultantById.getLinks().getDelete().getHref(),
-        endsWith("/useradmin/consultants/" + EXISTING_CONSULTANT));
+        endsWith("/useradmin/consultants/" + EXISTING_CONSULTANT + "?forceDeleteSessions=false"));
     assertThat(consultantById.getLinks().getDelete().getMethod(), is(MethodEnum.DELETE));
     assertThat(consultantById.getLinks().getAgencies(), notNullValue());
     assertThat(
