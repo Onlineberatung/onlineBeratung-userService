@@ -84,7 +84,7 @@ public class ConsultantResponseDTOBuilder implements HalLinkBuilder {
 
   private HalLink buildDeleteLink() {
     return buildHalLink(
-        methodOn(UseradminApi.class).markConsultantForDeletion(this.consultant.getId()),
+        methodOn(UseradminApi.class).markConsultantForDeletion(this.consultant.getId(), false),
         MethodEnum.DELETE);
   }
 

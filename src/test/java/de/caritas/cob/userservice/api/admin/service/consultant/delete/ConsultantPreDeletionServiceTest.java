@@ -32,6 +32,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ConsultantPreDeletionServiceTest {
 
+  private static final Boolean FORCE_DELETE_SESSIONS = false;
+
   @InjectMocks private ConsultantPreDeletionService consultantPreDeletionService;
 
   @Mock private ConsultantAgencyDeletionValidationService validationService;
@@ -49,7 +51,7 @@ public class ConsultantPreDeletionServiceTest {
         .thenReturn(singletonList(mock(Session.class)));
 
     try {
-      this.consultantPreDeletionService.performPreDeletionSteps(consultant);
+      this.consultantPreDeletionService.performPreDeletionSteps(consultant, FORCE_DELETE_SESSIONS);
       fail("Exception was not thrown");
     } catch (CustomValidationHttpStatusException e) {
       assertThat(
@@ -64,7 +66,7 @@ public class ConsultantPreDeletionServiceTest {
     Consultant consultant = new EasyRandom().nextObject(Consultant.class);
     when(this.sessionRepository.findByConsultantAndStatusIn(any(), any())).thenReturn(emptyList());
 
-    this.consultantPreDeletionService.performPreDeletionSteps(consultant);
+    this.consultantPreDeletionService.performPreDeletionSteps(consultant, FORCE_DELETE_SESSIONS);
 
     verify(this.validationService, times(consultant.getConsultantAgencies().size()))
         .validateAndMarkForDeletion(any());
@@ -76,7 +78,7 @@ public class ConsultantPreDeletionServiceTest {
     Consultant consultant = new EasyRandom().nextObject(Consultant.class);
     when(this.sessionRepository.findByConsultantAndStatusIn(any(), any())).thenReturn(emptyList());
 
-    this.consultantPreDeletionService.performPreDeletionSteps(consultant);
+    this.consultantPreDeletionService.performPreDeletionSteps(consultant, FORCE_DELETE_SESSIONS);
 
     verify(this.keycloakService, times(1)).deactivateUser(consultant.getId());
   }

@@ -4,6 +4,7 @@ import static de.caritas.cob.userservice.api.exception.httpresponses.customheade
 import static de.caritas.cob.userservice.api.model.Session.SessionStatus.IN_ARCHIVE;
 import static de.caritas.cob.userservice.api.model.Session.SessionStatus.IN_PROGRESS;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.BooleanUtils.isNotTrue;
 
 import com.google.common.collect.Lists;
 import de.caritas.cob.userservice.api.admin.service.agency.ConsultantAgencyDeletionValidationService;
@@ -31,9 +32,11 @@ public class ConsultantPreDeletionService {
    * Validates if {@link Consultant} can be deleted and marks the account as inactive in keycloak.
    *
    * @param consultant the {@link Consultant} to be deleted
+   * @param forceDeleteSessions
    */
-  public void performPreDeletionSteps(Consultant consultant) {
-    if (hasConsultantActiveSessions(consultant)) {
+  public void performPreDeletionSteps(Consultant consultant, Boolean forceDeleteSessions) {
+
+    if (isNotTrue(forceDeleteSessions) && hasConsultantActiveSessions(consultant)) {
       throw new CustomValidationHttpStatusException(CONSULTANT_HAS_ACTIVE_OR_ARCHIVE_SESSIONS);
     }
     if (nonNull(consultant.getConsultantAgencies())) {
