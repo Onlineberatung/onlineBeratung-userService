@@ -110,6 +110,7 @@ public class AccountManager implements AccountManaging {
 
     var tenantIdsToNameMap =
         fullConsultants.stream()
+            .filter(consultant -> consultant.getTenantId() != null)
             .collect(
                 Collectors.toMap(
                     Consultant::getTenantId,
