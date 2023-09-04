@@ -35,6 +35,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -98,7 +99,8 @@ public class UserServiceMapper {
       Page<ConsultantBase> consultantPage,
       List<Consultant> fullConsultants,
       List<AgencyDTO> agencyDTOS,
-      List<ConsultantAgencyBase> consultantAgencies) {
+      List<ConsultantAgencyBase> consultantAgencies,
+      Map<Long, String> tenantIdsToNameMap) {
 
     var agencyLookupMap =
         agencyDTOS.stream().collect(Collectors.toMap(AgencyDTO::getId, Function.identity()));
@@ -115,7 +117,7 @@ public class UserServiceMapper {
         consultantBase -> {
           var fullConsultant = fullConsultantLookupMap.get(consultantBase.getId());
           var agencies = mapOf(fullConsultant, agencyLookupMap, consultantAgencyLookupMap);
-          var consultantMap = mapOf(consultantBase, fullConsultant, agencies);
+          var consultantMap = mapOf(consultantBase, fullConsultant, agencies, tenantIdsToNameMap);
           consultants.add(consultantMap);
         });
 
@@ -232,7 +234,8 @@ public class UserServiceMapper {
   public Map<String, Object> mapOf(
       ConsultantBase consultantBase,
       Consultant fullConsultant,
-      List<Map<String, Object>> agencies) {
+      List<Map<String, Object>> agencies,
+      Map<Long, String> tenantIdsToNameMap) {
     var status =
         isNull(fullConsultant.getStatus())
             ? ConsultantStatus.ERROR.toString()
@@ -259,7 +262,13 @@ public class UserServiceMapper {
         "deletedAt",
         nonNull(fullConsultant.getDeleteDate()) ? fullConsultant.getDeleteDate().toString() : null);
     map.put("agencies", agencies);
-
+    Long tenantId = fullConsultant.getTenantId();
+    map.put("tenantId", tenantId);
+    map.put(
+        "tenantName",
+        tenantIdsToNameMap.containsKey(tenantId)
+            ? tenantIdsToNameMap.get(tenantId)
+            : StringUtils.EMPTY);
     return map;
   }
 

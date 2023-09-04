@@ -115,6 +115,8 @@ public class ConsultantDtoMapper implements DtoMapperUtils {
     consultant.setCreateDate((String) consultantMap.get("createdAt"));
     consultant.setUpdateDate((String) consultantMap.get("updatedAt"));
     consultant.setDeleteDate((String) consultantMap.get("deletedAt"));
+    consultant.setTenantId((Integer) consultantMap.get("tenantId"));
+    consultant.setTenantName((String) consultantMap.get("tenantName"));
     val isGroupChatConsultant =
         identityClient.userHasRole(consultant.getId(), UserRole.GROUP_CHAT_CONSULTANT.getValue());
     consultant.setIsGroupchatConsultant(isGroupChatConsultant);
