@@ -574,6 +574,39 @@ public class KeycloakServiceTest {
   }
 
   @Test
+  public void removeRole_Should_removeRole_When_rolePresent() {
+    String validRole = "role";
+
+    UserResource userResource = mock(UserResource.class);
+    UsersResource usersResource = mock(UsersResource.class);
+    when(usersResource.get(anyString())).thenReturn(userResource);
+    RoleScopeResource roleScopeResource = mock(RoleScopeResource.class);
+    RoleRepresentation keycloakRoleMock = mock(RoleRepresentation.class);
+    when(keycloakRoleMock.getName()).thenReturn(validRole);
+    when(roleScopeResource.listAll()).thenReturn(singletonList(keycloakRoleMock));
+    when(roleScopeResource.listAll()).thenReturn(singletonList(keycloakRoleMock));
+    RoleMappingResource roleMappingResource = mock(RoleMappingResource.class);
+    when(roleMappingResource.realmLevel()).thenReturn(roleScopeResource);
+    when(userResource.roles()).thenReturn(roleMappingResource);
+
+    RoleRepresentation roleRepresentation = new EasyRandom().nextObject(RoleRepresentation.class);
+    roleRepresentation.setName("role");
+    RoleResource roleResource = mock(RoleResource.class);
+    when(roleResource.toRepresentation()).thenReturn(roleRepresentation);
+    RolesResource rolesResource = mock(RolesResource.class);
+    when(rolesResource.get(any())).thenReturn(roleResource);
+
+    RealmResource realmResource = mock(RealmResource.class);
+    when(realmResource.users()).thenReturn(usersResource);
+    when(realmResource.roles()).thenReturn(rolesResource);
+    when(keycloakClient.getRealmResource()).thenReturn(realmResource);
+
+    this.keycloakService.removeRoleIfPresent("user", validRole);
+
+    verify(roleScopeResource, times(1)).remove(any());
+  }
+
+  @Test
   public void updateRole_Should_updateUserWithProvidedRole() {
     UserRole validRole = UserRole.USER;
 

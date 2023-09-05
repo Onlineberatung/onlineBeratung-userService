@@ -95,4 +95,28 @@ public class ConsultantUpdateServiceTest {
     verify(this.consultantService, times(1)).saveConsultant(any());
     verify(this.appointmentService, times(1)).syncConsultantData(any());
   }
+
+  @Test
+  public void
+      updateConsultant_Should_callServicesCorrectly_And_RemoveGroupChatConsultantRole_When_givenConsultantDataIsValidAndGroupChatFlagIsGiven() {
+    Consultant consultant = new EasyRandom().nextObject(Consultant.class);
+    when(this.consultantService.getConsultant(any())).thenReturn(Optional.of(consultant));
+    UpdateAdminConsultantDTO updateConsultant =
+        new EasyRandom().nextObject(UpdateAdminConsultantDTO.class);
+    updateConsultant.setIsGroupchatConsultant(false);
+
+    this.consultantUpdateService.updateConsultant("", updateConsultant);
+
+    verify(this.keycloakService)
+        .removeRoleIfPresent(consultant.getId(), UserRole.GROUP_CHAT_CONSULTANT.getValue());
+
+    verify(this.keycloakService, times(1))
+        .updateUserData(
+            eq(consultant.getId()),
+            any(UserDTO.class),
+            eq(updateConsultant.getFirstname()),
+            eq(updateConsultant.getLastname()));
+    verify(this.consultantService, times(1)).saveConsultant(any());
+    verify(this.appointmentService, times(1)).syncConsultantData(any());
+  }
 }

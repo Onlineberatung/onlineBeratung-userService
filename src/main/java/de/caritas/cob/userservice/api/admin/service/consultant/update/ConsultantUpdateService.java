@@ -67,6 +67,11 @@ public class ConsultantUpdateService {
         && updateConsultantDTO.getIsGroupchatConsultant()) {
       identityClient.updateRole(consultant.getId(), GROUP_CHAT_CONSULTANT.getValue());
     }
+    if ((updateConsultantDTO.getIsGroupchatConsultant() != null
+            && !updateConsultantDTO.getIsGroupchatConsultant())
+        || isNull(updateConsultantDTO.getIsGroupchatConsultant())) {
+      identityClient.removeRoleIfPresent(consultant.getId(), GROUP_CHAT_CONSULTANT.getValue());
+    }
 
     this.rocketChatService.updateUser(
         buildUserUpdateRequestDTO(consultant.getRocketChatId(), updateConsultantDTO));
