@@ -573,6 +573,9 @@ class UserAdminControllerE2EIT {
   @WithMockUser(authorities = {AuthorityValue.TENANT_ADMIN})
   void searchTenantAdmin_Should_returnOk_When_attemptedToSearchTenantsWithTenantAdminAuthority()
       throws Exception {
+
+    when(tenantService.getRestrictedTenantData(Mockito.anyLong()))
+        .thenReturn(new RestrictedTenantDTO().subdomain("subdomain").name("name"));
     // when, then
     MvcResult mvcResult =
         this.mockMvc
@@ -632,6 +635,8 @@ class UserAdminControllerE2EIT {
     final String expectedFirstname = "Ceil";
     final String expectedLastname = "Genney";
     final String expectedEmail = "cgenney5@imageshack.us";
+    when(tenantService.getRestrictedTenantData(Mockito.anyLong()))
+        .thenReturn(new RestrictedTenantDTO().subdomain("subdomain").name("name"));
     // when, then
     MvcResult mvcResult =
         this.mockMvc
