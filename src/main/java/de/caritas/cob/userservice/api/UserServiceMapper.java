@@ -136,7 +136,8 @@ public class UserServiceMapper {
       Page<AdminBase> adminsPage,
       List<Admin> fullAdmins,
       List<AgencyDTO> agencyDTOs,
-      List<AdminAgencyBase> agenciesOfAdmin) {
+      List<AdminAgencyBase> agenciesOfAdmin,
+      Map<Long, String> tenantIdsToNameMap) {
     var agencyLookupMap =
         agencyDTOs.stream().collect(Collectors.toMap(AgencyDTO::getId, Function.identity()));
 
@@ -150,9 +151,9 @@ public class UserServiceMapper {
     adminsPage.forEach(
         adminBase -> {
           var fullAdmin = fullAdminLookupMap.get(adminBase.getId());
-          var agencies = mapOfAdmin(fullAdmin, agencyLookupMap, adminAgencyLookupMap);
-          var consultantMap = mapOfAdmin(adminBase, fullAdmin, agencies);
-          admins.add(consultantMap);
+          var agencies = mapOfAgencies(fullAdmin, agencyLookupMap, adminAgencyLookupMap);
+          var adminMap = mapOfAdmin(adminBase, fullAdmin, agencies, tenantIdsToNameMap);
+          admins.add(adminMap);
         });
 
     return Map.of(
@@ -192,7 +193,7 @@ public class UserServiceMapper {
     return agencies;
   }
 
-  private List<Map<String, Object>> mapOfAdmin(
+  private List<Map<String, Object>> mapOfAgencies(
       Admin admin,
       Map<Long, AgencyDTO> agencyLookupMap,
       Map<String, List<AdminAgencyBase>> aaLookupMap) {
@@ -273,7 +274,10 @@ public class UserServiceMapper {
   }
 
   public Map<String, Object> mapOfAdmin(
-      AdminBase adminBase, Admin fullAdmin, List<Map<String, Object>> agencies) {
+      AdminBase adminBase,
+      Admin fullAdmin,
+      List<Map<String, Object>> agencies,
+      Map<Long, String> tenantIdsToNameMap) {
 
     Map<String, Object> map = new HashMap<>();
     map.put("id", adminBase.getId());
@@ -282,6 +286,7 @@ public class UserServiceMapper {
     map.put("lastName", adminBase.getLastName());
     map.put("username", fullAdmin.getUsername());
     map.put("tenantId", fullAdmin.getTenantId());
+    map.put("tenantName", getTenantName(fullAdmin, tenantIdsToNameMap));
     map.put(
         "createdAt",
         nonNull(fullAdmin.getCreateDate()) ? fullAdmin.getCreateDate().toString() : null);
@@ -291,6 +296,12 @@ public class UserServiceMapper {
     map.put("agencies", agencies);
 
     return map;
+  }
+
+  private String getTenantName(Admin fullAdmin, Map<Long, String> tenantIdsToNameMap) {
+    return tenantIdsToNameMap.containsKey(fullAdmin.getTenantId())
+        ? tenantIdsToNameMap.get(fullAdmin.getTenantId())
+        : StringUtils.EMPTY;
   }
 
   public Optional<Map<String, Object>> mapOf(Optional<Session> optionalSession) {

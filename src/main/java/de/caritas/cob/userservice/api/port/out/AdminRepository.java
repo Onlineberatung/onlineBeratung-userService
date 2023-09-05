@@ -14,7 +14,7 @@ public interface AdminRepository extends CrudRepository<Admin, String> {
 
   @Query(
       value =
-          "SELECT a.id as id, a.firstName as firstName, a.lastName as lastName, a.email as email "
+          "SELECT a.id as id, a.firstName as firstName, a.lastName as lastName, a.email as email, a.tenantId as tenantId "
               + "FROM Admin a "
               + "WHERE"
               + "  type = ?2 "

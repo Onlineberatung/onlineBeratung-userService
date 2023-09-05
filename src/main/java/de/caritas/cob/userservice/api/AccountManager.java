@@ -115,7 +115,8 @@ public class AccountManager implements AccountManaging {
                 Collectors.toMap(
                     Consultant::getTenantId,
                     consultant ->
-                        tenantService.getRestrictedTenantData(consultant.getTenantId()).getName()));
+                        tenantService.getRestrictedTenantData(consultant.getTenantId()).getName(),
+                    (existing, replacement) -> existing));
 
     return userServiceMapper.mapOf(
         consultantPage, fullConsultants, agencies, consultingAgencies, tenantIdsToNameMap);
