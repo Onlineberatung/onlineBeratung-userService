@@ -1429,6 +1429,8 @@ components:
           type: string
         tenantId:
           type: string
+        tenantName:
+          type: string
         tenantSubdomain:
           type: string
         agencies:
