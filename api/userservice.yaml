@@ -2368,6 +2368,9 @@ components:
     SessionUserDTO:
       type: object
       properties:
+        id:
+          type: string
+          example: 926b9777-4eef-443d-925a-4aa534797bd7
         username:
           type: string
           example: max94
