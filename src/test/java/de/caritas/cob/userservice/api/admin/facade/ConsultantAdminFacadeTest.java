@@ -121,9 +121,9 @@ class ConsultantAdminFacadeTest {
 
   @Test
   void markConsultantForDeletion_Should_callMarkConsultantForDeletion() {
-    this.consultantAdminFacade.markConsultantForDeletion("1");
+    this.consultantAdminFacade.markConsultantForDeletion("1", true);
 
-    verify(this.consultantAdminService).markConsultantForDeletion("1");
+    verify(this.consultantAdminService).markConsultantForDeletion("1", true);
   }
 
   @Test

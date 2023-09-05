@@ -200,8 +200,8 @@ public class ConsultantAdminFacade {
    *
    * @param consultantId the consultant id
    */
-  public void markConsultantForDeletion(String consultantId) {
-    this.consultantAdminService.markConsultantForDeletion(consultantId);
+  public void markConsultantForDeletion(String consultantId, Boolean forceDeleteSessions) {
+    this.consultantAdminService.markConsultantForDeletion(consultantId, forceDeleteSessions);
   }
 
   /**
@@ -292,7 +292,7 @@ public class ConsultantAdminFacade {
           adminUserFacade.findAdminUserAgencyIds(authenticatedUser.getUserId());
       List<Long> agencyIdsFromTheRequest =
           agencyList.stream()
-              .map(createConsultantAgencyDTO -> createConsultantAgencyDTO.getAgencyId())
+              .map(CreateConsultantAgencyDTO::getAgencyId)
               .collect(Collectors.toList());
 
       if (!adminUserAgencyIds.containsAll(agencyIdsFromTheRequest)) {

@@ -15,10 +15,13 @@ import lombok.Setter;
 @ApiModel(value = "SessionUser")
 public class SessionUserDTO {
 
-  @ApiModelProperty(example = "Username", position = 0)
+  @ApiModelProperty(example = "id", position = 0)
+  private String id;
+
+  @ApiModelProperty(example = "Username", position = 1)
   private String username;
 
-  @ApiModelProperty(example = "isDeleted", position = 1)
+  @ApiModelProperty(example = "isDeleted", position = 2)
   private boolean isDeleted;
 
   private Map<String, Object> sessionData;
