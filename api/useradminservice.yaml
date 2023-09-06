@@ -1331,6 +1331,10 @@ components:
             $ref: './../services/agencyadminservice.yaml#/components/schemas/AgencyAdminResponseDTO'
         isGroupchatConsultant:
           $ref: '#/components/schemas/IsGroupchatConsultant'
+        tenantId:
+          type: integer
+        tenantName:
+          type: string
 
     CreateAdminDTO:
       type: object
@@ -1424,6 +1428,8 @@ components:
         deleteDate:
           type: string
         tenantId:
+          type: string
+        tenantName:
           type: string
         tenantSubdomain:
           type: string

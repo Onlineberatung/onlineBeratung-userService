@@ -152,12 +152,13 @@ public class AdminDtoMapper implements DtoMapperUtils {
     Long tenantId = (Long) adminUserMap.get("tenantId");
     adminDTO.setTenantId(String.valueOf(tenantId));
     if (tenantId != null) {
-      enrichWithTenantSubdomain(adminDTO, tenantId);
+      enrichWithTenantSubdomainAndName(adminDTO, tenantId);
     }
   }
 
-  private void enrichWithTenantSubdomain(AdminDTO adminDTO, Long tenantId) {
+  private void enrichWithTenantSubdomainAndName(AdminDTO adminDTO, Long tenantId) {
     RestrictedTenantDTO restrictedTenantData = tenantService.getRestrictedTenantData(tenantId);
     adminDTO.setTenantSubdomain(restrictedTenantData.getSubdomain());
+    adminDTO.setTenantName(restrictedTenantData.getName());
   }
 }

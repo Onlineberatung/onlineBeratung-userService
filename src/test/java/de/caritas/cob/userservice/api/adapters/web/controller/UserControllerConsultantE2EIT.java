@@ -34,6 +34,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSearchResultDTO
 import de.caritas.cob.userservice.api.adapters.web.dto.LanguageResponseDTO;
 import de.caritas.cob.userservice.api.admin.facade.AdminUserFacade;
 import de.caritas.cob.userservice.api.admin.service.agency.AgencyAdminService;
+import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
 import de.caritas.cob.userservice.api.config.VideoChatConfig;
 import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.apiclient.TopicServiceApiControllerFactory;
@@ -153,6 +154,8 @@ class UserControllerConsultantE2EIT {
   @MockBean private AgencyAdminService agencyAdminService;
 
   @MockBean private AdminUserFacade adminUserFacade;
+
+  @MockBean private TenantService tenantService;
 
   private User user;
   private Consultant consultant;
