@@ -1227,6 +1227,7 @@ components:
           maxLength: 10000
         tenantId:
           type: integer
+          format: int64
           example: "1"
         isGroupchatConsultant:
           $ref: '#/components/schemas/IsGroupchatConsultant'

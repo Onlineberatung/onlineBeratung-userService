@@ -38,8 +38,8 @@ public class AdminUserFacade {
 
   private final @NonNull AuthenticatedUser authenticatedUser;
 
-  public AdminResponseDTO createNewTenantAdmin(final CreateAdminDTO createAgencyAdminDTO) {
-    return this.tenantAdminUserService.createNewTenantAdmin(createAgencyAdminDTO);
+  public AdminResponseDTO createNewTenantAdmin(final CreateAdminDTO createTenantAdminDTO) {
+    return this.tenantAdminUserService.createNewTenantAdmin(createTenantAdminDTO);
   }
 
   public AdminResponseDTO createNewAgencyAdmin(final CreateAdminDTO createAgencyAdminDTO) {
