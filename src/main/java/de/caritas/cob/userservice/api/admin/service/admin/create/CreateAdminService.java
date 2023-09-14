@@ -89,13 +89,12 @@ public class CreateAdminService {
     return response.getUserId();
   }
 
-  private UserDTO buildValidatedUserDTO(final CreateAdminDTO createAgencyAdminDTO) {
+  private UserDTO buildValidatedUserDTO(final CreateAdminDTO createAdminDTO) {
     UserDTO userDto = new UserDTO();
-    userDto.setUsername(
-        new UsernameTranscoder().encodeUsername(createAgencyAdminDTO.getUsername()));
-    userDto.setEmail(createAgencyAdminDTO.getEmail());
+    userDto.setUsername(new UsernameTranscoder().encodeUsername(createAdminDTO.getUsername()));
+    userDto.setEmail(createAdminDTO.getEmail());
 
-    Integer tenantId = createAgencyAdminDTO.getTenantId();
+    Integer tenantId = createAdminDTO.getTenantId();
     userDto.setTenantId(tenantId == null ? null : Long.valueOf(tenantId));
 
     this.userAccountInputValidator.validateUserDTO(userDto);

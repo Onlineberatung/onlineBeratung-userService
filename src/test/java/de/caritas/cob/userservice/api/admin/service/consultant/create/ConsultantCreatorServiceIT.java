@@ -49,7 +49,7 @@ public class ConsultantCreatorServiceIT {
   private static final String DUMMY_RC_ID = "rcUserId";
   private static final String VALID_USERNAME = "validUsername";
   private static final String VALID_EMAILADDRESS = "valid@emailaddress.de";
-  private static final int TENANT_ID = 1;
+  private static final long TENANT_ID = 1L;
 
   @Autowired private ConsultantCreatorService consultantCreatorService;
 
