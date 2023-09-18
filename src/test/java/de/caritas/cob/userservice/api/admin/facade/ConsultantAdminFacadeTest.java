@@ -20,7 +20,9 @@ import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminSe
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.ArrayList;
+import lombok.NonNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -43,6 +45,8 @@ class ConsultantAdminFacadeTest {
   @Mock private AuthenticatedUser authenticatedUser;
 
   @Mock private AdminUserFacade adminUserFacade;
+
+  @Mock private AgencyService agencyService;
 
   @Test
   void findConsultant_Should_useConsultantAdminService() {
