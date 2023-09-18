@@ -318,25 +318,30 @@ public class ConsultantAdminFacade {
       String consultantId, List<CreateConsultantAgencyDTO> agencyList) {
 
     if (multiTenancyEnabled) {
-      ConsultantAdminResponseDTO consultantById = consultantAdminService.findConsultantById(
-          consultantId);
+      ConsultantAdminResponseDTO consultantById =
+          consultantAdminService.findConsultantById(consultantId);
       validateConsultantExistsAndHasTenantAssigned(consultantId, consultantById);
       Integer consultantTenantId = consultantById.getEmbedded().getTenantId();
       Long tenantId = consultantTenantId.longValue();
-      agencyList.stream().map(a -> agencyService.getAgency(a.getAgencyId()))
-          .map(a -> a.getTenantId()).filter(agencyTenantId -> !agencyTenantId.equals(tenantId)).findAny().ifPresent(t -> {
-        log.warn(
-            "Tenant of the consultant does not match tenant of the agency. Consultant tenant {}, requested agencies to  update: {}",
-            tenantId, agencyList);
-        throw new BadRequestException(
-            "Tenant of the consultant does not match tenant of the agency");
-      });
+      agencyList.stream()
+          .map(a -> agencyService.getAgency(a.getAgencyId()))
+          .map(a -> a.getTenantId())
+          .filter(agencyTenantId -> !agencyTenantId.equals(tenantId))
+          .findAny()
+          .ifPresent(
+              t -> {
+                log.warn(
+                    "Tenant of the consultant does not match tenant of the agency. Consultant tenant {}, requested agencies to  update: {}",
+                    tenantId,
+                    agencyList);
+                throw new BadRequestException(
+                    "Tenant of the consultant does not match tenant of the agency");
+              });
     }
-
-
   }
 
-  private void validateConsultantExistsAndHasTenantAssigned(String consultantId, ConsultantAdminResponseDTO consultantById) {
+  private void validateConsultantExistsAndHasTenantAssigned(
+      String consultantId, ConsultantAdminResponseDTO consultantById) {
     if (consultantById == null || consultantById.getEmbedded() == null) {
       log.warn("Consultant with id {} not found", consultantId);
       throw new BadRequestException("Consultant not found");
