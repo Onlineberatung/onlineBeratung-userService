@@ -321,23 +321,28 @@ public class ConsultantAdminFacade {
       ConsultantAdminResponseDTO consultantById =
           consultantAdminService.findConsultantById(consultantId);
       validateConsultantExistsAndHasTenantAssigned(consultantId, consultantById);
-      Integer consultantTenantId = consultantById.getEmbedded().getTenantId();
-      Long tenantId = consultantTenantId.longValue();
-      agencyList.stream()
-          .map(a -> agencyService.getAgency(a.getAgencyId()))
-          .map(a -> a.getTenantId())
-          .filter(agencyTenantId -> !agencyTenantId.equals(tenantId))
-          .findAny()
-          .ifPresent(
-              t -> {
-                log.warn(
-                    "Tenant of the consultant does not match tenant of the agency. Consultant tenant {}, requested agencies to  update: {}",
-                    tenantId,
-                    agencyList);
-                throw new BadRequestException(
-                    "Tenant of the consultant does not match tenant of the agency");
-              });
+      Long consultantTenantId = consultantById.getEmbedded().getTenantId().longValue();
+      checkAssignedAgenciesMatchConsultantTenant(agencyList, consultantTenantId);
     }
+  }
+
+  private void checkAssignedAgenciesMatchConsultantTenant(List<CreateConsultantAgencyDTO> agencyList, Long consultantTenantId) {
+    agencyList.stream()
+        .map(a -> agencyService.getAgency(a.getAgencyId()))
+        .map(a -> a.getTenantId())
+        .filter(agencyTenantId -> !agencyTenantId.equals(consultantTenantId))
+        .findAny()
+        .ifPresent(
+            agencyTenantId -> {
+              log.warn(
+                  "Tenant of the consultant does not match tenant of the agency. "
+                      + "Consultant tenant {}, agency tenant {}. Requested agencies to  update: {}",
+                  consultantTenantId,
+                  agencyTenantId,
+                  agencyList);
+              throw new BadRequestException(
+                  "Tenant of the consultant does not match tenant of the agency");
+            });
   }
 
   private void validateConsultantExistsAndHasTenantAssigned(
