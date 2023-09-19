@@ -180,10 +180,12 @@ class ConsultantAdminFacadeTest {
   }
 
   @Test
-  void checkAssignedAgenciesMatchConsultantTenant_Should_Throw_BadRequestException_When_TenantDoesNotMatch() {
+  void
+      checkAssignedAgenciesMatchConsultantTenant_Should_Throw_BadRequestException_When_TenantDoesNotMatch() {
     // given
     ReflectionTestUtils.setField(consultantAdminFacade, "multiTenancyEnabled", true);
-    ConsultantAdminResponseDTO consultant = new ConsultantAdminResponseDTO().embedded(new ConsultantDTO());
+    ConsultantAdminResponseDTO consultant =
+        new ConsultantAdminResponseDTO().embedded(new ConsultantDTO());
     consultant.getEmbedded().setTenantId(1);
 
     when(consultantAdminService.findConsultantById("consultantId")).thenReturn(consultant);
@@ -200,11 +202,13 @@ class ConsultantAdminFacadeTest {
     when(agencyService.getAgency(AGENCY_ID_1)).thenReturn(createAgencyWithTenant(1L));
     when(agencyService.getAgency(AGENCY_ID_2)).thenReturn(createAgencyWithTenant(2L));
 
-
     // when, then
-    assertThrows(BadRequestException.class, () -> {
-      consultantAdminFacade.checkAssignedAgenciesMatchConsultantTenant("consultantId", agencyList);
-    });
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          consultantAdminFacade.checkAssignedAgenciesMatchConsultantTenant(
+              "consultantId", agencyList);
+        });
 
     ReflectionTestUtils.setField(consultantAdminFacade, "multiTenancyEnabled", false);
   }
@@ -213,7 +217,8 @@ class ConsultantAdminFacadeTest {
   void checkAssignedAgenciesMatchConsultantTenant_Should_PassCheck_When_TenantMatches() {
     // given
     ReflectionTestUtils.setField(consultantAdminFacade, "multiTenancyEnabled", true);
-    ConsultantAdminResponseDTO consultant = new ConsultantAdminResponseDTO().embedded(new ConsultantDTO());
+    ConsultantAdminResponseDTO consultant =
+        new ConsultantAdminResponseDTO().embedded(new ConsultantDTO());
     consultant.getEmbedded().setTenantId(1);
 
     when(consultantAdminService.findConsultantById("consultantId")).thenReturn(consultant);
@@ -229,7 +234,6 @@ class ConsultantAdminFacadeTest {
 
     when(agencyService.getAgency(AGENCY_ID_1)).thenReturn(createAgencyWithTenant(1L));
     when(agencyService.getAgency(AGENCY_ID_2)).thenReturn(createAgencyWithTenant(1L));
-
 
     // when
     consultantAdminFacade.checkAssignedAgenciesMatchConsultantTenant("consultantId", agencyList);
@@ -267,5 +271,4 @@ class ConsultantAdminFacadeTest {
     agency.setTenantId(tenantId);
     return agency;
   }
-
 }

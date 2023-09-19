@@ -326,7 +326,8 @@ public class ConsultantAdminFacade {
     }
   }
 
-  private void checkAssignedAgenciesMatchConsultantTenant(List<CreateConsultantAgencyDTO> agencyList, Long consultantTenantId) {
+  private void checkAssignedAgenciesMatchConsultantTenant(
+      List<CreateConsultantAgencyDTO> agencyList, Long consultantTenantId) {
     agencyList.stream()
         .map(a -> agencyService.getAgency(a.getAgencyId()))
         .map(a -> a.getTenantId())
