@@ -140,6 +140,7 @@ public class UserAdminController implements UseradminApi {
       String consultantId, List<CreateConsultantAgencyDTO> agencyList) {
     var notFilteredAgencyList = new ArrayList<>(agencyList);
     consultantAdminFacade.checkPermissionsToAssignedAgencies(agencyList);
+    consultantAdminFacade.checkAssignedAgenciesMatchConsultantTenant(consultantId, agencyList);
     appointmentService.syncAgencies(consultantId, notFilteredAgencyList);
     var agencyIdsForDeletions =
         consultantAdminFacade.filterAgencyListForDeletion(consultantId, agencyList);

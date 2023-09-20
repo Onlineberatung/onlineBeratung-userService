@@ -5,11 +5,15 @@ import static de.caritas.cob.userservice.api.adapters.web.dto.AgencyTypeDTO.Agen
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyTypeDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantFilter;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantAgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.Sort;
@@ -18,18 +22,25 @@ import de.caritas.cob.userservice.api.admin.service.agency.ConsultantAgencyAdmin
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFilterService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class ConsultantAdminFacadeTest {
 
+  public static final Long AGENCY_ID_1 = 1L;
+  public static final Long AGENCY_ID_2 = 2L;
   @InjectMocks private ConsultantAdminFacade consultantAdminFacade;
 
   @Mock private ConsultantAdminService consultantAdminService;
@@ -43,6 +54,8 @@ class ConsultantAdminFacadeTest {
   @Mock private AuthenticatedUser authenticatedUser;
 
   @Mock private AdminUserFacade adminUserFacade;
+
+  @Mock private AgencyService agencyService;
 
   @Test
   void findConsultant_Should_useConsultantAdminService() {
@@ -164,5 +177,98 @@ class ConsultantAdminFacadeTest {
     assertThrows(
         ForbiddenException.class,
         () -> consultantAdminFacade.checkPermissionsToAssignedAgencies(agencyList));
+  }
+
+  @Test
+  void
+      checkAssignedAgenciesMatchConsultantTenant_Should_Throw_BadRequestException_When_TenantDoesNotMatch() {
+    // given
+    ReflectionTestUtils.setField(consultantAdminFacade, "multiTenancyEnabled", true);
+    ConsultantAdminResponseDTO consultant =
+        new ConsultantAdminResponseDTO().embedded(new ConsultantDTO());
+    consultant.getEmbedded().setTenantId(1);
+
+    when(consultantAdminService.findConsultantById("consultantId")).thenReturn(consultant);
+
+    List<CreateConsultantAgencyDTO> agencyList = new ArrayList<>();
+    CreateConsultantAgencyDTO agency1 = new CreateConsultantAgencyDTO();
+    agency1.setAgencyId(AGENCY_ID_1);
+    agencyList.add(agency1);
+
+    CreateConsultantAgencyDTO agency2 = new CreateConsultantAgencyDTO();
+    agency2.setAgencyId(AGENCY_ID_2);
+    agencyList.add(agency2);
+
+    when(agencyService.getAgency(AGENCY_ID_1)).thenReturn(createAgencyWithTenant(1L));
+    when(agencyService.getAgency(AGENCY_ID_2)).thenReturn(createAgencyWithTenant(2L));
+
+    // when, then
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          consultantAdminFacade.checkAssignedAgenciesMatchConsultantTenant(
+              "consultantId", agencyList);
+        });
+
+    ReflectionTestUtils.setField(consultantAdminFacade, "multiTenancyEnabled", false);
+  }
+
+  @Test
+  void checkAssignedAgenciesMatchConsultantTenant_Should_PassCheck_When_TenantMatches() {
+    // given
+    ReflectionTestUtils.setField(consultantAdminFacade, "multiTenancyEnabled", true);
+    ConsultantAdminResponseDTO consultant =
+        new ConsultantAdminResponseDTO().embedded(new ConsultantDTO());
+    consultant.getEmbedded().setTenantId(1);
+
+    when(consultantAdminService.findConsultantById("consultantId")).thenReturn(consultant);
+
+    List<CreateConsultantAgencyDTO> agencyList = new ArrayList<>();
+    CreateConsultantAgencyDTO agency1 = new CreateConsultantAgencyDTO();
+    agency1.setAgencyId(AGENCY_ID_1);
+    agencyList.add(agency1);
+
+    CreateConsultantAgencyDTO agency2 = new CreateConsultantAgencyDTO();
+    agency2.setAgencyId(AGENCY_ID_2);
+    agencyList.add(agency2);
+
+    when(agencyService.getAgency(AGENCY_ID_1)).thenReturn(createAgencyWithTenant(1L));
+    when(agencyService.getAgency(AGENCY_ID_2)).thenReturn(createAgencyWithTenant(1L));
+
+    // when
+    consultantAdminFacade.checkAssignedAgenciesMatchConsultantTenant("consultantId", agencyList);
+
+    // then
+    Mockito.verify(agencyService, times(2)).getAgency(any());
+
+    // tear down
+    ReflectionTestUtils.setField(consultantAdminFacade, "multiTenancyEnabled", false);
+  }
+
+  @Test
+  void checkAssignedAgenciesMatchConsultantTenant_Should_PassCheck_When_MultitenancyIsDisabled() {
+    // given
+    ReflectionTestUtils.setField(consultantAdminFacade, "multiTenancyEnabled", false);
+
+    List<CreateConsultantAgencyDTO> agencyList = new ArrayList<>();
+    CreateConsultantAgencyDTO agency1 = new CreateConsultantAgencyDTO();
+    agency1.setAgencyId(AGENCY_ID_1);
+    agencyList.add(agency1);
+
+    CreateConsultantAgencyDTO agency2 = new CreateConsultantAgencyDTO();
+    agency2.setAgencyId(AGENCY_ID_2);
+    agencyList.add(agency2);
+
+    // when
+    consultantAdminFacade.checkAssignedAgenciesMatchConsultantTenant("consultantId", agencyList);
+
+    // then
+    Mockito.verifyNoInteractions(agencyService);
+  }
+
+  private AgencyDTO createAgencyWithTenant(Long tenantId) {
+    AgencyDTO agency = new AgencyDTO();
+    agency.setTenantId(tenantId);
+    return agency;
   }
 }

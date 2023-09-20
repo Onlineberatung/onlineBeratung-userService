@@ -23,11 +23,13 @@ import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFi
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.CreateConsultantAgencyDTOInputAdapter;
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.service.LogService;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -35,6 +37,7 @@ import java.util.stream.Stream;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /** Facade to encapsulate admin functions for consultants. */
@@ -52,6 +55,11 @@ public class ConsultantAdminFacade {
   private final @NonNull AdminUserFacade adminUserFacade;
 
   private final @NonNull AuthenticatedUser authenticatedUser;
+
+  private final @NonNull AgencyService agencyService;
+
+  @Value("${multitenancy.enabled}")
+  private boolean multiTenancyEnabled;
 
   /**
    * Finds a consultant by given consultant id.
@@ -303,6 +311,50 @@ public class ConsultantAdminFacade {
         throw new ForbiddenException(
             "Does not have permissions to update some of the agencies from the request");
       }
+    }
+  }
+
+  public void checkAssignedAgenciesMatchConsultantTenant(
+      String consultantId, List<CreateConsultantAgencyDTO> agencyList) {
+
+    if (multiTenancyEnabled) {
+      ConsultantAdminResponseDTO consultantById =
+          consultantAdminService.findConsultantById(consultantId);
+      validateConsultantExistsAndHasTenantAssigned(consultantId, consultantById);
+      Long consultantTenantId = consultantById.getEmbedded().getTenantId().longValue();
+      checkAssignedAgenciesMatchConsultantTenant(agencyList, consultantTenantId);
+    }
+  }
+
+  private void checkAssignedAgenciesMatchConsultantTenant(
+      List<CreateConsultantAgencyDTO> agencyList, Long consultantTenantId) {
+    agencyList.stream()
+        .map(a -> agencyService.getAgency(a.getAgencyId()))
+        .map(a -> a.getTenantId())
+        .filter(agencyTenantId -> !agencyTenantId.equals(consultantTenantId))
+        .findAny()
+        .ifPresent(
+            agencyTenantId -> {
+              log.warn(
+                  "Tenant of the consultant does not match tenant of the agency. "
+                      + "Consultant tenant {}, agency tenant {}. Requested agencies to  update: {}",
+                  consultantTenantId,
+                  agencyTenantId,
+                  agencyList);
+              throw new BadRequestException(
+                  "Tenant of the consultant does not match tenant of the agency");
+            });
+  }
+
+  private void validateConsultantExistsAndHasTenantAssigned(
+      String consultantId, ConsultantAdminResponseDTO consultantById) {
+    if (consultantById == null || consultantById.getEmbedded() == null) {
+      log.warn("Consultant with id {} not found", consultantId);
+      throw new BadRequestException("Consultant not found");
+    }
+    if (consultantById.getEmbedded().getTenantId() == null) {
+      log.warn("Consultant has no tenant assigned ", consultantId);
+      throw new BadRequestException("Consultant has no tenant assigned");
     }
   }
 }
