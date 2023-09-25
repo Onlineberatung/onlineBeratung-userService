@@ -93,8 +93,17 @@ public class TenantAdminUserService {
     var adminIds = adminsPage.stream().map(AdminBase::getId).collect(Collectors.toSet());
     var fullAdmins = retrieveAdminService.findAllById(adminIds);
 
+    var tenantIdsToNameMap =
+        fullAdmins.stream()
+            .filter(consultant -> consultant.getTenantId() != null)
+            .collect(
+                Collectors.toMap(
+                    Admin::getTenantId,
+                    admin -> tenantService.getRestrictedTenantData(admin.getTenantId()).getName(),
+                    (existing, replacement) -> existing));
+
     return userServiceMapper.mapOfAdmin(
-        adminsPage, fullAdmins, Lists.newArrayList(), Lists.newArrayList());
+        adminsPage, fullAdmins, Lists.newArrayList(), Lists.newArrayList(), tenantIdsToNameMap);
   }
 
   public List<AdminResponseDTO> findTenantAdmins(Long tenantId) {

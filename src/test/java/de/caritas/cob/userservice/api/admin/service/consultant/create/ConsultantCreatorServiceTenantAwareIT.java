@@ -1,12 +1,26 @@
 package de.caritas.cob.userservice.api.admin.service.consultant.create;
 
+import static de.caritas.cob.userservice.api.config.auth.UserRole.CONSULTANT;
+import static de.caritas.cob.userservice.api.config.auth.UserRole.GROUP_CHAT_CONSULTANT;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.UserServiceApplication;
+import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
+import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.admin.service.tenant.TenantAdminService;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
@@ -15,7 +29,9 @@ import de.caritas.cob.userservice.tenantadminservice.generated.web.model.Licensi
 import de.caritas.cob.userservice.tenantadminservice.generated.web.model.TenantDTO;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -34,13 +50,27 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ConsultantCreatorServiceTenantAwareIT {
 
+  private static final String DUMMY_RC_ID = "rcUserId";
+  private static final String VALID_USERNAME = "validUsername";
+  private static final String VALID_EMAILADDRESS = "valid@emailaddress.de";
+  private static final long TENANT_ID = 1;
+
   @Autowired private ConsultantCreatorService consultantCreatorService;
 
   @Autowired private ConsultantRepository consultantRepository;
 
   @MockBean private TenantAdminService tenantAdminService;
 
+  @MockBean private RocketChatService rocketChatService;
+
+  @MockBean private KeycloakService keycloakService;
+
   private final EasyRandom easyRandom = new EasyRandom();
+
+  @AfterEach
+  public void tearDown() {
+    TenantContext.clear();
+  }
 
   @Test(expected = CustomValidationHttpStatusException.class)
   public void
@@ -52,6 +82,43 @@ public class ConsultantCreatorServiceTenantAwareIT {
     CreateConsultantDTO createConsultantDTO = this.easyRandom.nextObject(CreateConsultantDTO.class);
     this.consultantCreatorService.createNewConsultant(createConsultantDTO);
     rollbackDBState();
+  }
+
+  @Test
+  public void
+      createNewConsultant_Should_addConsultantAndGroupChatConsultantRole_When_isGroupChatConsultantFlagIsEnabled()
+          throws RocketChatLoginException {
+    // given
+    TenantContext.setCurrentTenant(1L);
+    when(rocketChatService.getUserID(anyString(), anyString(), anyBoolean()))
+        .thenReturn(DUMMY_RC_ID);
+    when(keycloakService.createKeycloakUser(any(), anyString(), any()))
+        .thenReturn(easyRandom.nextObject(KeycloakCreateUserResponseDTO.class));
+    var tenant =
+        new TenantDTO()
+            .licensing(new Licensing().allowedNumberOfUsers(1))
+            .settings(
+                new de.caritas.cob.userservice.tenantadminservice.generated.web.model.Settings()
+                    .featureGroupChatV2Enabled(false));
+    when(tenantAdminService.getTenantById(Mockito.anyLong())).thenReturn(tenant);
+
+    CreateConsultantDTO createConsultantDTO = this.easyRandom.nextObject(CreateConsultantDTO.class);
+    createConsultantDTO.setTenantId(TENANT_ID);
+    createConsultantDTO.setUsername(VALID_USERNAME);
+    createConsultantDTO.setEmail(VALID_EMAILADDRESS);
+    createConsultantDTO.setIsGroupchatConsultant(true);
+    createConsultantDTO.setTenantId(1L);
+
+    // when
+    Consultant consultant = consultantCreatorService.createNewConsultant(createConsultantDTO);
+
+    // then
+    verify(keycloakService, times(2)).updateRole(anyString(), anyString());
+    verify(keycloakService).updateRole(anyString(), eq(CONSULTANT.getValue()));
+    verify(keycloakService).updateRole(anyString(), eq(GROUP_CHAT_CONSULTANT.getValue()));
+
+    assertThat(consultant, notNullValue());
+    assertThat(consultant.getId(), notNullValue());
   }
 
   private void createConsultant(String username) {

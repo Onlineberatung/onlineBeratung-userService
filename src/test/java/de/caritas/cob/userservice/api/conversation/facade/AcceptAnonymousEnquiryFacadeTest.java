@@ -11,7 +11,7 @@ import de.caritas.cob.userservice.api.facade.assignsession.AssignEnquiryFacade;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.service.liveevents.LiveEventNotificationService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
-import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
+import de.caritas.cob.userservice.api.service.user.UserAccountService;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
@@ -31,7 +31,7 @@ public class AcceptAnonymousEnquiryFacadeTest {
 
   @Mock private SessionService sessionService;
 
-  @Mock private ValidatedUserAccountProvider validatedUserAccountProvider;
+  @Mock private UserAccountService userAccountService;
 
   @Test
   public void acceptAnonymousEnquiry_Should_useServicesCorrectly_When_sessionExists() {
@@ -40,7 +40,7 @@ public class AcceptAnonymousEnquiryFacadeTest {
 
     this.acceptAnonymousEnquiryFacade.acceptAnonymousEnquiry(session.getId());
 
-    verify(this.validatedUserAccountProvider, times(1)).retrieveValidatedConsultant();
+    verify(this.userAccountService, times(1)).retrieveValidatedConsultant();
     verify(this.assignEnquiryFacade, times(1)).assignAnonymousEnquiry(eq(session), any());
     verify(this.liveEventNotificationService, times(1))
         .sendAcceptAnonymousEnquiryEventToUser(session.getUser().getUserId());

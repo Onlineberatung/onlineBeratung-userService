@@ -154,7 +154,7 @@ class UserAdminControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
-  public void createNewAgencyAdmin_Should_returnOk_When_requiredCreateAgencyAdminIsGiven()
+  void createNewAgencyAdmin_Should_returnOk_When_requiredCreateAgencyAdminIsGiven()
       throws Exception {
     givenNewAgencyAdminIsCreated();
   }
@@ -186,8 +186,7 @@ class UserAdminControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.SINGLE_TENANT_ADMIN})
-  public void createNewAgencyAdmin_Should_returnForbidden_When_calledNotAsUserAdmin()
-      throws Exception {
+  void createNewAgencyAdmin_Should_returnForbidden_When_calledNotAsUserAdmin() throws Exception {
     // given
     CreateAdminDTO createAdminDTO = new EasyRandom().nextObject(CreateAdminDTO.class);
     createAdminDTO.setEmail("agencyadmin@email.com");
@@ -206,7 +205,7 @@ class UserAdminControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.TENANT_ADMIN})
-  public void createNewTenantAdmin_Should_returnOk_When_requiredCreateTenantAdminIsGiven()
+  void createNewTenantAdmin_Should_returnOk_When_requiredCreateTenantAdminIsGiven()
       throws Exception {
     // given
     CreateAdminDTO createAdminDTO = new EasyRandom().nextObject(CreateAdminDTO.class);
@@ -230,7 +229,7 @@ class UserAdminControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.TENANT_ADMIN})
-  public void
+  void
       createNewTenantAdmin_Should_returnBadRequest_When_requiredCreateTenantAdminIsGivenButTenantIdIsNull()
           throws Exception {
     // given
@@ -252,7 +251,7 @@ class UserAdminControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
-  public void
+  void
       createNewTenantAdmin_Should_returnForbidden_When_attemptedToCreateTenantAdminWithoutTenantAdminAuthority()
           throws Exception {
     // given
@@ -272,7 +271,7 @@ class UserAdminControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
-  public void updateAgencyAdmin_Should_returnOk_When_updateAttemptAsUserAdmin() throws Exception {
+  void updateAgencyAdmin_Should_returnOk_When_updateAttemptAsUserAdmin() throws Exception {
     // given
     String adminId = givenNewAgencyAdminIsCreated();
 
@@ -300,8 +299,7 @@ class UserAdminControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.RESTRICTED_AGENCY_ADMIN})
-  public void patchAdminData_Should_returnOk_When_patchAttemptAsRestrictedAgencyAdmin()
-      throws Exception {
+  void patchAdminData_Should_returnOk_When_patchAttemptAsRestrictedAgencyAdmin() throws Exception {
     // given
     String adminId = "6d15b3ff-2394-4d9f-9ea5-e958afe6a65c";
     when(authenticatedUser.getUserId()).thenReturn(adminId);
@@ -332,8 +330,7 @@ class UserAdminControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.SINGLE_TENANT_ADMIN})
-  public void patchAdminData_Should_returnOk_When_patchAttemptAsSingleTenantAdmin()
-      throws Exception {
+  void patchAdminData_Should_returnOk_When_patchAttemptAsSingleTenantAdmin() throws Exception {
     // given
     String adminId = "6584f4a9-a7f0-42f0-b929-ab5c99c0802d";
     when(authenticatedUser.getUserId()).thenReturn(adminId);
@@ -364,8 +361,7 @@ class UserAdminControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  public void patchAdminData_Should_returnForbidden_When_patchAttemptAsNonAdminUser()
-      throws Exception {
+  void patchAdminData_Should_returnForbidden_When_patchAttemptAsNonAdminUser() throws Exception {
     patchAdminAndExpectForbidden();
   }
 
@@ -396,7 +392,7 @@ class UserAdminControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
-  public void
+  void
       patchAdminData_Should_returnForbidden_When_patchAttemptAsUserAdminButNotSingleTenantAdminOrRestrictedAgencyAdmin()
           throws Exception {
     patchAdminAndExpectForbidden();
@@ -404,7 +400,7 @@ class UserAdminControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.SINGLE_TENANT_ADMIN})
-  public void updateAgencyAdmin_Should_returnForbidden_When_UpdateAttemptAsNonUserAdmin()
+  void updateAgencyAdmin_Should_returnForbidden_When_UpdateAttemptAsNonUserAdmin()
       throws Exception {
     // given
     String adminId = "5606179b-77e7-4056-aedc-68ddc769890c";
@@ -428,7 +424,7 @@ class UserAdminControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.TENANT_ADMIN})
-  public void updateTenantAdmin_Should_returnOk_When_updateAttemptAsTenantAdmin() throws Exception {
+  void updateTenantAdmin_Should_returnOk_When_updateAttemptAsTenantAdmin() throws Exception {
     // given
     String adminId = givenNewTenantAdminIsCreated();
 
@@ -457,7 +453,7 @@ class UserAdminControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
-  public void
+  void
       updateTenantAdmin_Should_returnForbidden_When_attemptedToUpdatedTenantAdminWithoutTenantAdminAuthority()
           throws Exception {
     // given
@@ -479,7 +475,7 @@ class UserAdminControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
-  public void getAgencydmin_Should_returnOk_When_attemptedToGetAgencyAdminWithTenantAdminAuthority()
+  void getAgencydmin_Should_returnOk_When_attemptedToGetAgencyAdminWithTenantAdminAuthority()
       throws Exception {
     // given
     var existingAdminId = "5606179b-77e7-4056-aedc-68ddc769890c";
@@ -497,7 +493,7 @@ class UserAdminControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.SINGLE_TENANT_ADMIN})
-  public void
+  void
       getAgencydmin_Should_returnForbidden_When_attemptedToGetAgencyAdminWithoutUserAdminAuthority()
           throws Exception {
     // given
@@ -511,9 +507,8 @@ class UserAdminControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.TENANT_ADMIN})
-  public void
-      getTenantAdmin_Should_returnOk_When_attemptedToGetTenantAdminWithTenantAdminAuthority()
-          throws Exception {
+  void getTenantAdmin_Should_returnOk_When_attemptedToGetTenantAdminWithTenantAdminAuthority()
+      throws Exception {
     // given
     var existingAdminId = "6584f4a9-a7f0-42f0-b929-ab5c99c0802d";
 
@@ -530,7 +525,7 @@ class UserAdminControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.TENANT_ADMIN})
-  public void
+  void
       getTenantAdmins_Should_returnOkAndFilterByTenantId_When_attemptedToGetTenantWithTenantAdminAuthority()
           throws Exception {
 
@@ -556,7 +551,7 @@ class UserAdminControllerE2EIT {
         AuthorityValue.USER_ADMIN,
         AuthorityValue.RESTRICTED_AGENCY_ADMIN
       })
-  public void
+  void
       getTenantAdmins_Should_returnForbidden_When_attemptedToGetTenantAdminsWithNonSuperTenantAdminAuthority()
           throws Exception {
 
@@ -576,9 +571,11 @@ class UserAdminControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.TENANT_ADMIN})
-  public void
-      searchTenantAdmin_Should_returnOk_When_attemptedToSearchTenantsWithTenantAdminAuthority()
-          throws Exception {
+  void searchTenantAdmin_Should_returnOk_When_attemptedToSearchTenantsWithTenantAdminAuthority()
+      throws Exception {
+
+    when(tenantService.getRestrictedTenantData(Mockito.anyLong()))
+        .thenReturn(new RestrictedTenantDTO().subdomain("subdomain").name("name"));
     // when, then
     MvcResult mvcResult =
         this.mockMvc
@@ -602,10 +599,12 @@ class UserAdminControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
-  public void
-      searchAgencyAdmins_Should_returnOk_When_attemptedToSearchTenantsWithUserAdminAuthority()
-          throws Exception {
-    // when, then
+  void searchAgencyAdmins_Should_returnOk_When_attemptedToSearchTenantsWithUserAdminAuthority()
+      throws Exception {
+    // when
+    when(tenantService.getRestrictedTenantData(Mockito.anyLong()))
+        .thenReturn(new RestrictedTenantDTO().subdomain("subdomain").name("name"));
+    // then
     MvcResult mvcResult =
         this.mockMvc
             .perform(
@@ -629,14 +628,15 @@ class UserAdminControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.TENANT_ADMIN})
-  public void searchTenantAdmin_Should_returnCorrectResult_When_tenantIdIsProvided()
-      throws Exception {
+  void searchTenantAdmin_Should_returnCorrectResult_When_tenantIdIsProvided() throws Exception {
     final String tenantId = "102";
     final String expectedAdminId = "6584f4a9-a7f0-42f0-b929-ab5c99c0802d";
     final String expectedUsername = "cgenney5";
     final String expectedFirstname = "Ceil";
     final String expectedLastname = "Genney";
     final String expectedEmail = "cgenney5@imageshack.us";
+    when(tenantService.getRestrictedTenantData(Mockito.anyLong()))
+        .thenReturn(new RestrictedTenantDTO().subdomain("subdomain").name("name"));
     // when, then
     MvcResult mvcResult =
         this.mockMvc
@@ -664,7 +664,7 @@ class UserAdminControllerE2EIT {
       JSONArray embedded, int pageSize, AdminType adminType) {
     for (int i = 0; i < pageSize; i++) {
       String tenantId = extractTenantWithOrderInList(embedded, i).get("id");
-      assertThat(adminRepository.findByIdAndType(tenantId, adminType).isPresent()).isTrue();
+      assertThat(adminRepository.findByIdAndType(tenantId, adminType)).isPresent();
     }
   }
 
@@ -675,7 +675,7 @@ class UserAdminControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
-  public void
+  void
       getTenantAdmin_Should_returnForbidden_When_attemptedToGetTenantAdminWithoutTenantAdminAuthority()
           throws Exception {
     // given
@@ -689,7 +689,7 @@ class UserAdminControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
-  public void
+  void
       deleteTenantAdmin_Should_returnForbidden_When_attemptedToDeleteTenantAdminWithoutTenantAdminAuthority()
           throws Exception {
     // given
@@ -703,9 +703,8 @@ class UserAdminControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.TENANT_ADMIN})
-  public void
-      deleteTenantAdmin_Should_delete_When_attemptedToDeleteTenantAdminWithTenantAdminAuthority()
-          throws Exception {
+  void deleteTenantAdmin_Should_delete_When_attemptedToDeleteTenantAdminWithTenantAdminAuthority()
+      throws Exception {
     // given
     var adminId = givenNewTenantAdminIsCreated();
 

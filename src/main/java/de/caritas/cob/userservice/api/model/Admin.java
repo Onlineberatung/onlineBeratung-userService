@@ -143,5 +143,7 @@ public class Admin implements TenantAware {
     String getLastName();
 
     String getEmail();
+
+    Long getTenantId();
   }
 }

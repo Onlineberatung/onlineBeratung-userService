@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import de.caritas.cob.userservice.api.helper.json.OffsetDateTimeToStringSerializer;
 import de.caritas.cob.userservice.api.model.User;
-import de.caritas.cob.userservice.statisticsservice.generated.web.model.ArchiveSessionStatisticsEventMessage;
+import de.caritas.cob.userservice.statisticsservice.generated.web.model.ArchiveOrDeleteSessionStatisticsEventMessage;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.UserRole;
 import java.time.LocalDateTime;
@@ -18,7 +18,7 @@ import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ArchiveStatisticsEvent implements StatisticsEvent {
+public class ArchiveOrDeleteSessionStatisticsEvent implements StatisticsEvent {
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final EventType EVENT_TYPE = EventType.ARCHIVE_SESSION;
@@ -27,7 +27,8 @@ public class ArchiveStatisticsEvent implements StatisticsEvent {
 
   private final LocalDateTime sessionEndDate;
 
-  public ArchiveStatisticsEvent(User user, Long sessionId, LocalDateTime sesionEndDate) {
+  public ArchiveOrDeleteSessionStatisticsEvent(
+      User user, Long sessionId, LocalDateTime sesionEndDate) {
     this.sessionId = sessionId;
     this.user = user;
     this.sessionEndDate = sesionEndDate;
@@ -49,7 +50,7 @@ public class ArchiveStatisticsEvent implements StatisticsEvent {
   @Override
   public Optional<String> getPayload() {
     var registrationStatisticsEventMessage =
-        new ArchiveSessionStatisticsEventMessage()
+        new ArchiveOrDeleteSessionStatisticsEventMessage()
             .eventType(EVENT_TYPE)
             .sessionId(sessionId)
             .tenantId(this.user.getTenantId())

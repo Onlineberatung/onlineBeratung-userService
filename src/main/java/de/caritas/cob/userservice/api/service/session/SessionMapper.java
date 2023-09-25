@@ -77,6 +77,7 @@ public class SessionMapper {
   private SessionUserDTO convertToSessionUserDTO(Session session) {
     if (nonNull(session.getUser()) && nonNull(session.getSessionData())) {
       var sessionUserDto = new SessionUserDTO();
+      sessionUserDto.setId(session.getUser().getUserId());
       sessionUserDto.setUsername(
           new UsernameTranscoder().decodeUsername(session.getUser().getUsername()));
       sessionUserDto.setSessionData(buildSessionDataMapFromSession(session));

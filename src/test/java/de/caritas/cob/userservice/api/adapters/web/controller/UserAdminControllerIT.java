@@ -335,7 +335,19 @@ public class UserAdminControllerIT {
         .perform(delete(DELETE_CONSULTANT_PATH).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
-    verify(this.consultantAdminFacade, times(1)).markConsultantForDeletion("1234");
+    verify(this.consultantAdminFacade, times(1)).markConsultantForDeletion("1234", null);
+  }
+
+  @Test
+  public void deleteConsultant_Should_returnOk_When_requiredParamIsGivenAndForceDeleteToTrue()
+      throws Exception {
+    this.mvc
+        .perform(
+            delete(DELETE_CONSULTANT_PATH + "?forceDeleteSessions=true")
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    verify(this.consultantAdminFacade, times(1)).markConsultantForDeletion("1234", true);
   }
 
   @Test

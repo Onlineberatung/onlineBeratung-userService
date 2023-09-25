@@ -4,7 +4,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.facade.assignsession.AssignEnquiryFacade;
 import de.caritas.cob.userservice.api.service.liveevents.LiveEventNotificationService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
-import de.caritas.cob.userservice.api.service.user.ValidatedUserAccountProvider;
+import de.caritas.cob.userservice.api.service.user.UserAccountService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ public class AcceptAnonymousEnquiryFacade {
   private final @NonNull AssignEnquiryFacade assignEnquiryFacade;
   private final @NonNull LiveEventNotificationService liveEventNotificationService;
   private final @NonNull SessionService sessionService;
-  private final @NonNull ValidatedUserAccountProvider userAccountProvider;
+  private final @NonNull UserAccountService userAccountProvider;
 
   /**
    * Accepts the anonymous enquiry with the given session id and assigns the session to the current

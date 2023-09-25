@@ -208,6 +208,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: forceDeleteSessions
+          in: query
+          schema:
+            type: boolean
+          description: parameter specifying if consultant sessions need to be removed prior the deletion
       responses:
         200:
           description: OK - consultant was marked for deletion successfully
@@ -568,7 +573,7 @@ paths:
       parameters:
         - name: query
           in: query
-          description: URL-encoded infix to search for in first name, last name, or email.
+          description: URL-encoded infix to search for in id first name, last name, or email.
             A non-encoded star symbol searches for all.
           required: true
           schema:
@@ -1222,6 +1227,7 @@ components:
           maxLength: 10000
         tenantId:
           type: integer
+          format: int64
           example: "1"
         isGroupchatConsultant:
           $ref: '#/components/schemas/IsGroupchatConsultant'
@@ -1326,6 +1332,10 @@ components:
             $ref: './../services/agencyadminservice.yaml#/components/schemas/AgencyAdminResponseDTO'
         isGroupchatConsultant:
           $ref: '#/components/schemas/IsGroupchatConsultant'
+        tenantId:
+          type: integer
+        tenantName:
+          type: string
 
     CreateAdminDTO:
       type: object
@@ -1419,6 +1429,8 @@ components:
         deleteDate:
           type: string
         tenantId:
+          type: string
+        tenantName:
           type: string
         tenantSubdomain:
           type: string

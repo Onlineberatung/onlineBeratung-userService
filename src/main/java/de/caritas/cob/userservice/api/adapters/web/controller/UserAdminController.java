@@ -47,6 +47,7 @@ import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /** Controller to handle all session admin requests. */
@@ -139,6 +140,7 @@ public class UserAdminController implements UseradminApi {
       String consultantId, List<CreateConsultantAgencyDTO> agencyList) {
     var notFilteredAgencyList = new ArrayList<>(agencyList);
     consultantAdminFacade.checkPermissionsToAssignedAgencies(agencyList);
+    consultantAdminFacade.checkAssignedAgenciesMatchConsultantTenant(consultantId, agencyList);
     appointmentService.syncAgencies(consultantId, notFilteredAgencyList);
     var agencyIdsForDeletions =
         consultantAdminFacade.filterAgencyListForDeletion(consultantId, agencyList);
@@ -167,8 +169,11 @@ public class UserAdminController implements UseradminApi {
    * @param consultantId consultant id (required)
    */
   @Override
-  public ResponseEntity<Void> markConsultantForDeletion(@PathVariable String consultantId) {
-    this.consultantAdminFacade.markConsultantForDeletion(consultantId);
+  public ResponseEntity<Void> markConsultantForDeletion(
+      @PathVariable String consultantId,
+      @Valid @RequestParam(value = "forceDeleteSessions", required = false)
+          Boolean forceDeleteSessions) {
+    this.consultantAdminFacade.markConsultantForDeletion(consultantId, forceDeleteSessions);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
