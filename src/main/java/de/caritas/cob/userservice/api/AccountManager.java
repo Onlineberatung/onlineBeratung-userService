@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api;
 
 import static java.util.Objects.isNull;
 
+import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Consultant;
@@ -43,6 +44,8 @@ public class AccountManager implements AccountManaging {
   private final UsernameTranscoder usernameTranscoder;
 
   private final AgencyService agencyService;
+
+  private final TenantService tenantService;
 
   private final ConsultantAgencyRepository consultantAgencyRepository;
 
@@ -105,7 +108,18 @@ public class AccountManager implements AccountManaging {
     var agencyIds = userServiceMapper.agencyIdsOf(consultingAgencies);
     var agencies = agencyService.getAgenciesWithoutCaching(agencyIds);
 
-    return userServiceMapper.mapOf(consultantPage, fullConsultants, agencies, consultingAgencies);
+    var tenantIdsToNameMap =
+        fullConsultants.stream()
+            .filter(consultant -> consultant.getTenantId() != null)
+            .collect(
+                Collectors.toMap(
+                    Consultant::getTenantId,
+                    consultant ->
+                        tenantService.getRestrictedTenantData(consultant.getTenantId()).getName(),
+                    (existing, replacement) -> existing));
+
+    return userServiceMapper.mapOf(
+        consultantPage, fullConsultants, agencies, consultingAgencies, tenantIdsToNameMap);
   }
 
   @Override

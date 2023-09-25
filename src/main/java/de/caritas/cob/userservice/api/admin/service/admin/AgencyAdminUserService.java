@@ -9,6 +9,7 @@ import de.caritas.cob.userservice.api.admin.service.admin.create.CreateAdminServ
 import de.caritas.cob.userservice.api.admin.service.admin.delete.DeleteAdminService;
 import de.caritas.cob.userservice.api.admin.service.admin.search.RetrieveAdminService;
 import de.caritas.cob.userservice.api.admin.service.admin.update.UpdateAdminService;
+import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
 import de.caritas.cob.userservice.api.model.Admin;
 import de.caritas.cob.userservice.api.model.Admin.AdminBase;
 import de.caritas.cob.userservice.api.model.AdminAgency.AdminAgencyBase;
@@ -32,6 +33,7 @@ public class AgencyAdminUserService {
   private final @NonNull DeleteAdminService deleteAdminService;
   private final @NonNull UserServiceMapper userServiceMapper;
   private final @NonNull AgencyService agencyService;
+  private final @NonNull TenantService tenantService;
 
   public AdminResponseDTO createNewAgencyAdmin(final CreateAdminDTO createAgencyAdminDTO) {
     final Admin newAdmin = createAdminService.createNewAgencyAdmin(createAgencyAdminDTO);
@@ -63,6 +65,15 @@ public class AgencyAdminUserService {
     var adminIds = adminsPage.stream().map(AdminBase::getId).collect(Collectors.toSet());
     var fullAdmins = retrieveAdminService.findAllById(adminIds);
 
+    var tenantIdsToNameMap =
+        adminsPage.stream()
+            .filter(admin -> admin.getTenantId() != null)
+            .collect(
+                Collectors.toMap(
+                    AdminBase::getTenantId,
+                    admin -> tenantService.getRestrictedTenantData(admin.getTenantId()).getName(),
+                    (existing, replacement) -> existing));
+
     var agenciesOfAdmin = retrieveAdminService.agenciesOfAdmin(adminIds);
     var agencyIds =
         agenciesOfAdmin.stream()
@@ -72,7 +83,8 @@ public class AgencyAdminUserService {
 
     var agencies = agencyService.getAgenciesWithoutCaching(agencyIds);
 
-    return userServiceMapper.mapOfAdmin(adminsPage, fullAdmins, agencies, agenciesOfAdmin);
+    return userServiceMapper.mapOfAdmin(
+        adminsPage, fullAdmins, agencies, agenciesOfAdmin, tenantIdsToNameMap);
   }
 
   public AdminResponseDTO patchAgencyAdmin(String adminId, PatchAdminDTO patchAdminDTO) {

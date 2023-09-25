@@ -26,6 +26,7 @@ import de.caritas.cob.userservice.messageservice.generated.web.model.MessageType
 import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
@@ -33,6 +34,7 @@ import org.springframework.web.client.RestClientException;
 /** Service class to provide message transmission to Rocket.Chat via the MessageService. */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MessageServiceProvider {
 
   private final @NonNull MessageServiceApiControllerFactory messageServiceApiControllerFactory;
@@ -108,6 +110,7 @@ public class MessageServiceProvider {
       this.postMessageAsSystemUser(welcomeMessage, rcGroupId);
 
     } catch (RestClientException | RocketChatUserNotInitializedException exception) {
+      log.error("Exception calling RocketChat API: {}", exception.getMessage());
       throw new RocketChatPostWelcomeMessageException(
           String.format("Could not post welcome message in Rocket.Chat group %s", rcGroupId),
           exception,

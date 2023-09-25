@@ -13,7 +13,7 @@ import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.statistics.StatisticsService;
-import de.caritas.cob.userservice.api.service.statistics.event.ArchiveStatisticsEvent;
+import de.caritas.cob.userservice.api.service.statistics.event.ArchiveOrDeleteSessionStatisticsEvent;
 import java.time.LocalDateTime;
 import java.util.function.Consumer;
 import lombok.NonNull;
@@ -47,14 +47,15 @@ public class SessionArchiveService {
         SessionStatus.IN_ARCHIVE,
         sessionArchiveValidator::isValidForArchiving,
         rocketChatService::setRoomReadOnly);
-    fireArchiveEvent(session);
+    fireArchiveOrDeleteSessionEvent(session);
   }
 
-  private void fireArchiveEvent(Session session) {
+  private void fireArchiveOrDeleteSessionEvent(Session session) {
     try {
-      ArchiveStatisticsEvent archiveStatisticsEvent =
-          new ArchiveStatisticsEvent(session.getUser(), session.getId(), LocalDateTime.now());
-      statisticsService.fireEvent(archiveStatisticsEvent);
+      ArchiveOrDeleteSessionStatisticsEvent archiveOrDeleteSessionStatisticsEvent =
+          new ArchiveOrDeleteSessionStatisticsEvent(
+              session.getUser(), session.getId(), LocalDateTime.now());
+      statisticsService.fireEvent(archiveOrDeleteSessionStatisticsEvent);
     } catch (Exception e) {
       log.error("Could not create session archive statistics event", e);
     }

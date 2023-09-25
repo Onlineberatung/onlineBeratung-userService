@@ -44,6 +44,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class ConsultantAdminServiceIT {
 
   private static final String EXISTING_CONSULTANT = "0b3b1cc6-be98-4787-aa56-212259d811b9";
+  private static final Boolean FORCE_DELETE_SESSIONS = false;
 
   @Autowired private ConsultantAdminService consultantAdminService;
 
@@ -94,7 +95,7 @@ public class ConsultantAdminServiceIT {
     assertThat(consultantById.getLinks().getDelete(), notNullValue());
     assertThat(
         consultantById.getLinks().getDelete().getHref(),
-        endsWith("/useradmin/consultants/" + EXISTING_CONSULTANT));
+        endsWith("/useradmin/consultants/" + EXISTING_CONSULTANT + "?forceDeleteSessions=false"));
     assertThat(consultantById.getLinks().getDelete().getMethod(), is(MethodEnum.DELETE));
     assertThat(consultantById.getLinks().getAgencies(), notNullValue());
     assertThat(
@@ -147,7 +148,7 @@ public class ConsultantAdminServiceIT {
   public void markConsultantForDeletion_Should_setDeleteDateForConsultantAndConsultantAgencies() {
     var consultant = givenAPersistedConsultantWithMultipleAgencies();
 
-    this.consultantAdminService.markConsultantForDeletion(consultant.getId());
+    this.consultantAdminService.markConsultantForDeletion(consultant.getId(), false);
 
     var deletedConsultant = consultantRepository.findById(consultant.getId());
     assertThat(deletedConsultant.get().getDeleteDate(), notNullValue());

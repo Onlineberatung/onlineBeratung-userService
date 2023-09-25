@@ -123,7 +123,6 @@ public class CreateConsultantDTOCreationInputAdapter implements ConsultantCreati
    */
   @Override
   public Long getTenantId() {
-    Integer tenantId = this.createConsultantDTO.getTenantId();
-    return tenantId == null ? null : Long.valueOf(tenantId);
+    return this.createConsultantDTO.getTenantId();
   }
 }

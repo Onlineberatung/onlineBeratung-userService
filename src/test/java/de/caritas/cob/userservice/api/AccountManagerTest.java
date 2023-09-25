@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api;
 
 import com.google.common.collect.Lists;
+import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
@@ -26,6 +27,8 @@ class AccountManagerTest {
   @Mock UserServiceMapper userServiceMapper;
 
   @Mock AgencyService agencyService;
+
+  @Mock TenantService tenantService;
 
   @Mock Page<Consultant.ConsultantBase> page;
 

@@ -113,6 +113,9 @@ public class KeycloakTestConfig {
       public void updateRole(String userId, String roleName) {}
 
       @Override
+      public void removeRoleIfPresent(String userId, String roleName) {}
+
+      @Override
       public void updatePassword(String userId, String password) {}
 
       @Override

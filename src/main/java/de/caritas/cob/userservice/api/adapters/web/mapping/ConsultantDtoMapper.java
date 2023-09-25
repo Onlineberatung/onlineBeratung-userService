@@ -115,6 +115,11 @@ public class ConsultantDtoMapper implements DtoMapperUtils {
     consultant.setCreateDate((String) consultantMap.get("createdAt"));
     consultant.setUpdateDate((String) consultantMap.get("updatedAt"));
     consultant.setDeleteDate((String) consultantMap.get("deletedAt"));
+    Long tenantId = (Long) consultantMap.get("tenantId");
+    if (tenantId != null) {
+      consultant.setTenantId(tenantId.intValue());
+    }
+    consultant.setTenantName((String) consultantMap.get("tenantName"));
     val isGroupChatConsultant =
         identityClient.userHasRole(consultant.getId(), UserRole.GROUP_CHAT_CONSULTANT.getValue());
     consultant.setIsGroupchatConsultant(isGroupChatConsultant);
@@ -158,7 +163,7 @@ public class ConsultantDtoMapper implements DtoMapperUtils {
         httpEntity = userAdminApi.updateConsultant(id, null);
         break;
       case DELETE:
-        httpEntity = userAdminApi.markConsultantForDeletion(id);
+        httpEntity = userAdminApi.markConsultantForDeletion(id, false);
         break;
       default:
         httpEntity = userAdminApi.getConsultant(id);
