@@ -125,6 +125,7 @@ public class UserControllerIT {
           null,
           null,
           false,
+          null,
           null);
   private final Set<String> ROLES_WITH_USER =
       new HashSet<>(Arrays.asList("dummyRoleA", UserRole.USER.getValue(), "dummyRoleB"));

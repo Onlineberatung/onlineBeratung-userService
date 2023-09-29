@@ -184,6 +184,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .hasAnyAuthority(USER_ADMIN, TECHNICAL_DEFAULT)
         .antMatchers("/users/consultants/search")
         .hasAnyAuthority(USER_ADMIN, TECHNICAL_DEFAULT)
+        .antMatchers("/users/consultants/search/hash/{hash:[0-9A-Za-z]+}")
+        .permitAll()
         .antMatchers(
             "/users/consultants/sessions/{sessionId:[0-9]+}",
             "/users/sessions/{sessionId:[0-9]+}/archive",

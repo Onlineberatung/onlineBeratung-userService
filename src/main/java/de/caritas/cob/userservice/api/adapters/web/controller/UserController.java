@@ -793,6 +793,21 @@ public class UserController implements UsersApi {
     return ResponseEntity.ok(result);
   }
 
+  @Override
+  public ResponseEntity<ConsultantResponseDTO> getConsultantPublicDataByEmailHash(
+      String emailHash) {
+    var consultant =
+        accountManager
+            .findConsultantByEmailHashIgnoreCase(emailHash)
+            .orElseThrow(
+                () -> new NotFoundException("Consultant with email hash %s not found", emailHash));
+    var onlineAgencies = consultantAgencyService.getOnlineAgenciesOfConsultant(consultant.getId());
+    var consultantPublicDataDto =
+        consultantDtoMapper.consultantResponseDtoOf(consultant, onlineAgencies, false);
+
+    return ResponseEntity.ok(consultantPublicDataDto);
+  }
+
   private void removeAgenciesWithoutAccessRight(
       ConsultantAdminResponseDTO response, Collection<Long> agenciesToFilterConsultants) {
     List<AgencyAdminResponseDTO> agencies = response.getEmbedded().getAgencies();

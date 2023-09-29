@@ -19,6 +19,8 @@ public interface ConsultantRepository extends CrudRepository<Consultant, String>
 
   Optional<Consultant> findByEmailAndDeleteDateIsNull(String email);
 
+  Optional<Consultant> findByEmailHashAndDeleteDateIsNullIgnoreCase(String emailHash);
+
   Optional<Consultant> findByUsernameAndDeleteDateIsNull(String username);
 
   List<Consultant> findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(List<Long> agencyIds);

@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.port.in;
 
+import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.User;
 import java.util.Collection;
 import java.util.Map;
@@ -27,4 +28,6 @@ public interface AccountManaging {
       boolean isAscending);
 
   boolean isTeamAdvisedBy(Long sessionId, String consultantId);
+
+  Optional<Consultant> findConsultantByEmailHashIgnoreCase(String emailHash);
 }

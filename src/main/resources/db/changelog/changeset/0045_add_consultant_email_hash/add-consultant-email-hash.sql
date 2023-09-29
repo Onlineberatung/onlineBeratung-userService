@@ -1,5 +1,5 @@
 ALTER TABLE `userservice`.`consultant`
-ADD COLUMN emailHash VARCHAR(32);
+ADD COLUMN email_hash VARCHAR(32);
 
 UPDATE `userservice`.`consultant`
-SET emailHash = MD5(email);
+SET email_hash = MD5(email);

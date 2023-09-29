@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.admin.service.consultant.create;
 
 import static de.caritas.cob.userservice.api.config.auth.UserRole.CONSULTANT;
 import static de.caritas.cob.userservice.api.config.auth.UserRole.GROUP_CHAT_CONSULTANT;
+import static de.caritas.cob.userservice.api.helper.MD5Utils.toMd5;
 import static de.caritas.cob.userservice.api.helper.json.JsonSerializationUtils.serializeToJsonString;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
@@ -197,6 +198,7 @@ public class ConsultantCreatorService {
         .languageCode(LanguageCode.de)
         .notificationsEnabled(true)
         .notificationsSettings(serializeToJsonString(allActiveNotifications()))
+        .emailHash(toMd5(consultantCreationInput.getEmail()))
         .build();
   }
 

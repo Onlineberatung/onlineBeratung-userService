@@ -206,6 +206,9 @@ public class Consultant implements TenantAware, NotificationsAware {
   @Column(name = "notifications_settings")
   private String notificationsSettings;
 
+  @Column(name = "email_hash")
+  private String emailHash;
+
   @JsonIgnore
   public String getFullName() {
     return (this.firstName + " " + this.lastName).trim();

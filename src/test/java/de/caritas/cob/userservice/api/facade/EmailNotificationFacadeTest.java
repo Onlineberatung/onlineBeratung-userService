@@ -130,6 +130,7 @@ public class EmailNotificationFacadeTest {
           null,
           null,
           false,
+          null,
           null);
   private final Consultant CONSULTANT_WITHOUT_MAIL =
       new Consultant(
@@ -163,6 +164,7 @@ public class EmailNotificationFacadeTest {
           null,
           null,
           false,
+          null,
           null);
   private final Consultant CONSULTANT2 =
       new Consultant(
@@ -196,6 +198,7 @@ public class EmailNotificationFacadeTest {
           null,
           null,
           false,
+          null,
           null);
   private final Consultant CONSULTANT3 =
       new Consultant(
@@ -229,6 +232,7 @@ public class EmailNotificationFacadeTest {
           null,
           null,
           false,
+          null,
           null);
   private final Consultant CONSULTANT_NO_EMAIL =
       new Consultant(
@@ -262,6 +266,7 @@ public class EmailNotificationFacadeTest {
           null,
           null,
           false,
+          null,
           null);
   private final Consultant ABSENT_CONSULTANT =
       new Consultant(
@@ -295,6 +300,7 @@ public class EmailNotificationFacadeTest {
           null,
           null,
           false,
+          null,
           null);
   private final User USER = new User(USER_ID, null, USERNAME_ENCODED, "email@email.de", false);
   private final User USER_NO_EMAIL = new User(USER_ID, null, "username", "", false);

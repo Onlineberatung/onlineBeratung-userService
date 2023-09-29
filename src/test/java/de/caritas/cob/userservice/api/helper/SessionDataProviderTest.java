@@ -90,6 +90,7 @@ public class SessionDataProviderTest {
           null,
           null,
           false,
+          null,
           null);
   private final Session INITIALIZED_SESSION_SUCHT =
       Session.builder()

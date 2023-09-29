@@ -80,6 +80,13 @@ public class AccountManager implements AccountManaging {
     return isNull(dbConsultant) ? Optional.empty() : Optional.of(findByDbConsultant(dbConsultant));
   }
 
+  @Override
+  public Optional<Consultant> findConsultantByEmailHashIgnoreCase(String emailHash) {
+
+    var emailHashUpperCase = emailHash != null ? emailHash.toUpperCase() : null;
+    return consultantRepository.findByEmailHashAndDeleteDateIsNullIgnoreCase(emailHashUpperCase);
+  }
+
   public Map<String, Object> findConsultantsByInfix(
       String infix,
       boolean shouldFilterByAgencies,

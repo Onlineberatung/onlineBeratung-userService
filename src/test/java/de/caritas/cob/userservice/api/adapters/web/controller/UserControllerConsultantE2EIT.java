@@ -43,6 +43,7 @@ import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
+import de.caritas.cob.userservice.api.helper.MD5Utils;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.ChatAgency;
@@ -278,10 +279,25 @@ class UserControllerConsultantE2EIT {
 
   @Test
   @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
+  void searchConsultantsByEmailHash_Should_FindCounsultantIfHashMatchesExistingConsultant()
+      throws Exception {
+
+    var hash = MD5Utils.toMd5("emigration@consultant.de");
+    mockMvc
+        .perform(
+            get("/users/consultants/search/hash/" + hash)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .accept("application/json"))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
   void searchConsultantsShouldRespondWithBadRequestIfOrderIsNotInEnum() throws Exception {
     mockMvc
         .perform(
-            get("/users/consultants/search")
+            get("/users/consultant/search/")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept("application/hal+json")

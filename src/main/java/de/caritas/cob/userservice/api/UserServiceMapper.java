@@ -18,7 +18,7 @@ import de.caritas.cob.userservice.api.model.Appointment;
 import de.caritas.cob.userservice.api.model.Appointment.AppointmentStatus;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Consultant.ConsultantBase;
-import de.caritas.cob.userservice.api.model.ConsultantAgency.ConsultantAgencyBase;
+import de.caritas.cob.userservice.api.model.ConsultantAgencyBase;
 import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.model.NotificationsAware;
 import de.caritas.cob.userservice.api.model.Session;
@@ -26,6 +26,7 @@ import de.caritas.cob.userservice.api.model.User;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -503,7 +504,7 @@ public class UserServiceMapper {
     return appointment;
   }
 
-  public List<Long> agencyIdsOf(List<ConsultantAgencyBase> consultantAgencies) {
+  public <T extends ConsultantAgencyBase> List<Long> agencyIdsOf(Collection<T> consultantAgencies) {
     return consultantAgencies.stream()
         .map(ConsultantAgencyBase::getAgencyId)
         .distinct()

@@ -1,2 +1,2 @@
 ALTER TABLE `userservice`.`consultant`
-DROP COLUMN emailHash;
+DROP COLUMN email_hash;

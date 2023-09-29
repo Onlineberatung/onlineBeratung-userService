@@ -1053,6 +1053,38 @@ paths:
           description: INTERNAL SERVER ERROR - server encountered unexpected condition
       security:
         - Bearer: [ ]
+  /users/consultants/search/hash/{emailHash}:
+    get:
+      tags:
+        - user-controller
+      summary: 'Get consultant public data matching the given hash [Authorization: none]'
+      operationId: getConsultantPublicDataByEmailHash
+      parameters:
+        - name: emailHash
+          in: path
+          description: md5 hash of consultant email
+          required: true
+          schema:
+            type: string
+            minLength: 32
+            maxLength: 32
+      responses:
+        200:
+          description: OK - successful operation
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ConsultantResponseDTO'
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid role/authorization
+        404:
+          description: NOT_FOUND - consultant with given email hash not found
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /users/sessions/{sessionId}/consultant/{consultantId}:
     put:
       tags:
