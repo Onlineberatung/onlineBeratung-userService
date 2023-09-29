@@ -297,7 +297,7 @@ class UserControllerConsultantE2EIT {
   void searchConsultantsShouldRespondWithBadRequestIfOrderIsNotInEnum() throws Exception {
     mockMvc
         .perform(
-            get("/users/consultant/search/")
+            get("/users/consultants/search")
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .accept("application/hal+json")

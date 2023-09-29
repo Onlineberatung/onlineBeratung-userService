@@ -1,7 +1,7 @@
 package de.caritas.cob.userservice.api.port.out;
 
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
-import de.caritas.cob.userservice.api.model.ConsultantAgencyBase;
+import de.caritas.cob.userservice.api.model.ConsultantAgency.ConsultantAgencyBase;
 import de.caritas.cob.userservice.api.model.ConsultantAgencyStatus;
 import java.util.Collection;
 import java.util.List;

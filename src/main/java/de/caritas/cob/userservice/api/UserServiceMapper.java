@@ -18,7 +18,7 @@ import de.caritas.cob.userservice.api.model.Appointment;
 import de.caritas.cob.userservice.api.model.Appointment.AppointmentStatus;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Consultant.ConsultantBase;
-import de.caritas.cob.userservice.api.model.ConsultantAgencyBase;
+import de.caritas.cob.userservice.api.model.ConsultantAgency.ConsultantAgencyBase;
 import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.model.NotificationsAware;
 import de.caritas.cob.userservice.api.model.Session;
