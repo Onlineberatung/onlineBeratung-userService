@@ -13,6 +13,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UpdateConsultantDTOAbsenceInputAdapter;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
+import de.caritas.cob.userservice.api.helper.MD5Utils;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Language;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
@@ -103,6 +104,7 @@ public class ConsultantUpdateService {
     consultant.setFirstName(updateConsultantDTO.getFirstname());
     consultant.setLastName(updateConsultantDTO.getLastname());
     consultant.setEmail(updateConsultantDTO.getEmail());
+    consultant.setEmailHash(MD5Utils.toMd5(updateConsultantDTO.getEmail()));
     consultant.setLanguageFormal(updateConsultantDTO.getFormalLanguage());
     consultant.setLanguages(languagesOf(updateConsultantDTO, consultant));
     consultant.setAbsent(updateConsultantDTO.getAbsent());
