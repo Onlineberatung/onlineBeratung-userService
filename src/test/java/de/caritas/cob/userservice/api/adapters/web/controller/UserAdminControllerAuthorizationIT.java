@@ -4,11 +4,11 @@ import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminCo
 import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.AGENCY_CONSULTANT_PATH;
 import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.CONSULTANT_AGENCIES_PATH;
 import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.CONSULTANT_AGENCY_PATH;
+import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.CONSULTANT_PATH;
 import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.DELETE_ASKER_PATH;
 import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.DELETE_CONSULTANT_AGENCY_PATH;
 import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.DELETE_CONSULTANT_PATH;
 import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.FILTERED_CONSULTANTS_PATH;
-import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.CONSULTANT_PATH;
 import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.PAGE_PARAM;
 import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.PER_PAGE_PARAM;
 import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.REPORT_PATH;

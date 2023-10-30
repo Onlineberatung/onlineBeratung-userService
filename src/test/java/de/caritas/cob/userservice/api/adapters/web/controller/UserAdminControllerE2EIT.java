@@ -156,15 +156,13 @@ class UserAdminControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
-  void createNewConsultant_Should_returnOk_When_requiredConsultantIsGiven()
-      throws Exception {
+  void createNewConsultant_Should_returnOk_When_requiredConsultantIsGiven() throws Exception {
     givenNewConsultantIsCreated();
   }
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CREATE_NEW_CHAT})
-  void createNewConsultant_WithoutValidCredentials_Should_returnAccessDenied()
-      throws Exception {
+  void createNewConsultant_WithoutValidCredentials_Should_returnAccessDenied() throws Exception {
     // given
     CreateConsultantDTO createAdminDTO = new EasyRandom().nextObject(CreateConsultantDTO.class);
     createAdminDTO.setEmail("consultant@email.com");
@@ -182,11 +180,9 @@ class UserAdminControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_CREATE_UPDATE})
-  void createNewConsultant_WithAuthorityConsultantCreateUpdate_Should_returnOK()
-      throws Exception {
+  void createNewConsultant_WithAuthorityConsultantCreateUpdate_Should_returnOK() throws Exception {
     givenNewConsultantIsCreated();
   }
-
 
   private String givenNewConsultantIsCreated() throws Exception {
     // given
