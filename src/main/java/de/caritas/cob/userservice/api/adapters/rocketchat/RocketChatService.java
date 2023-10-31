@@ -513,6 +513,10 @@ public class RocketChatService implements MessageClient {
       var url = rocketChatConfig.getApiUrl(ENDPOINT_USER_LOGIN);
       return restTemplate.postForEntity(url, request, LoginResponseDTO.class);
     } catch (Exception ex) {
+      log.error(
+          "Rocket.Chat Error: Could not login user ({}) in Rocket.Chat for the first time. Reason",
+          username,
+          ex);
       throw new RocketChatLoginException(
           String.format("Could not login user (%s) in Rocket.Chat for the first time", username));
     }
@@ -566,6 +570,11 @@ public class RocketChatService implements MessageClient {
       response = restTemplate.postForObject(url, request, GroupResponseDTO.class);
 
     } catch (Exception ex) {
+      log.error(
+          "Rocket.Chat Error: Could not add user {} to Rocket.Chat group with id {}. Reason: ",
+          rcUserId,
+          rcGroupId,
+          ex);
       throw new RocketChatAddUserToGroupException(
           String.format(
               "Could not add user %s to Rocket.Chat group with id %s", rcUserId, rcGroupId));
@@ -607,6 +616,10 @@ public class RocketChatService implements MessageClient {
       response = restTemplate.postForObject(url, request, GroupResponseDTO.class);
 
     } catch (Exception ex) {
+      log.error(
+          "Rocket.Chat Error: Could not leave as technical user from Rocket.Chat group with id {}. Reason: ",
+          rcGroupId,
+          ex);
       throw new RocketChatLeaveFromGroupException(
           String.format(
               "Could not leave as technical user from Rocket.Chat group with id %s", rcGroupId));
@@ -639,6 +652,11 @@ public class RocketChatService implements MessageClient {
       response = restTemplate.postForObject(url, request, GroupResponseDTO.class);
 
     } catch (Exception ex) {
+      log.error(
+          "Rocket.Chat Error: Could not remove user {} from Rocket.Chat group with id {}. Reason: ",
+          rcUserId,
+          rcGroupId,
+          ex);
       throw new RocketChatRemoveUserFromGroupException(
           String.format(
               "Could not remove user %s from Rocket.Chat group with id %s", rcUserId, rcGroupId));
@@ -678,6 +696,7 @@ public class RocketChatService implements MessageClient {
     try {
       groupMemberList = getChatUsers(rcGroupId);
     } catch (Exception exception) {
+      log.error("Could not get chat users. Reason: ", exception);
       throw new RocketChatGetGroupMembersException(
           String.format("Group member list from group with id %s is empty", rcGroupId));
     }
@@ -783,6 +802,7 @@ public class RocketChatService implements MessageClient {
               GroupMemberResponseDTO.class);
 
     } catch (Exception ex) {
+      log.error("Could not get chat users. Reason: ", ex);
       throw new RocketChatGetGroupMembersException(
           String.format("Could not get Rocket.Chat group" + " members for room id %s", rcGroupId),
           ex);
@@ -851,6 +871,7 @@ public class RocketChatService implements MessageClient {
       response = restTemplate.postForObject(url, request, StandardResponseDTO.class);
 
     } catch (Exception ex) {
+      log.error("Could not clean history of Rocket.Chat group id {}. Reason: ", rcGroupId, ex);
       throw new RocketChatRemoveSystemMessagesException(
           String.format("Could not clean history of Rocket.Chat group id %s", rcGroupId));
     }

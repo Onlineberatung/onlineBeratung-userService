@@ -61,8 +61,8 @@ public class UserAdminControllerIT {
   protected static final String SESSION_PATH = ROOT_PATH + "/sessions";
   protected static final String REPORT_PATH = ROOT_PATH + "/report";
   protected static final String FILTERED_CONSULTANTS_PATH = ROOT_PATH + "/consultants";
-  protected static final String GET_CONSULTANT_PATH = ROOT_PATH + "/consultants/";
-  protected static final String DELETE_CONSULTANT_PATH = GET_CONSULTANT_PATH + "1234";
+  protected static final String CONSULTANT_PATH = ROOT_PATH + "/consultants/";
+  protected static final String DELETE_CONSULTANT_PATH = CONSULTANT_PATH + "1234";
   protected static final String DELETE_ASKER_PATH = ROOT_PATH + "/askers/1234";
   protected static final String CONSULTANT_AGENCIES_PATH = ROOT_PATH + "/consultants/%s/agencies";
   protected static final String CONSULTANT_AGENCY_PATH = ROOT_PATH + "/consultants/%s/agencies";
@@ -184,7 +184,7 @@ public class UserAdminControllerIT {
   @Test
   public void getConsultant_Should_returnOk_When_requiredConsultantIdParamIsGiven()
       throws Exception {
-    this.mvc.perform(get(GET_CONSULTANT_PATH + "consultantId")).andExpect(status().isOk());
+    this.mvc.perform(get(CONSULTANT_PATH + "consultantId")).andExpect(status().isOk());
 
     verify(this.consultantAdminFacade, times(1)).findConsultant("consultantId");
   }
@@ -194,7 +194,7 @@ public class UserAdminControllerIT {
       throws Exception {
     when(this.consultantAdminFacade.findConsultant(any())).thenThrow(new NoContentException(""));
 
-    this.mvc.perform(get(GET_CONSULTANT_PATH + "consultantId")).andExpect(status().isNoContent());
+    this.mvc.perform(get(CONSULTANT_PATH + "consultantId")).andExpect(status().isNoContent());
   }
 
   @Test
@@ -205,7 +205,7 @@ public class UserAdminControllerIT {
 
     this.mvc
         .perform(
-            post(GET_CONSULTANT_PATH)
+            post(CONSULTANT_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createConsultantDTO)))
         .andExpect(status().isOk());
@@ -217,7 +217,7 @@ public class UserAdminControllerIT {
   public void createConsultant_Should_returnBadRequest_When_requiredCreateConsultantIsMissing()
       throws Exception {
     this.mvc
-        .perform(post(GET_CONSULTANT_PATH).contentType(MediaType.APPLICATION_JSON))
+        .perform(post(CONSULTANT_PATH).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
 
@@ -229,7 +229,7 @@ public class UserAdminControllerIT {
 
     this.mvc
         .perform(
-            put(GET_CONSULTANT_PATH + "consultantId")
+            put(CONSULTANT_PATH + "consultantId")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateConsultantDTO)))
         .andExpect(status().isOk());
@@ -241,7 +241,7 @@ public class UserAdminControllerIT {
   public void updateConsultant_Should_returnBadRequest_When_requiredParamsAreMissing()
       throws Exception {
     this.mvc
-        .perform(put(GET_CONSULTANT_PATH + "consultantId").contentType(MediaType.APPLICATION_JSON))
+        .perform(put(CONSULTANT_PATH + "consultantId").contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
 
@@ -410,7 +410,7 @@ public class UserAdminControllerIT {
 
     // when
     this.mvc
-        .perform(get(GET_CONSULTANT_PATH + "consultantId"))
+        .perform(get(CONSULTANT_PATH + "consultantId"))
 
         // then
         .andExpect(status().isNoContent());
