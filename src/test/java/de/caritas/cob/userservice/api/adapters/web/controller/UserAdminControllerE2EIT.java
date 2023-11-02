@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.adapters.web.controller;
 
 import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.ADMIN_DATA_PATH;
 import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.AGENCY_ADMIN_PATH;
+import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.CONSULTANT_PATH;
 import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.TENANT_ADMIN_PATH;
 import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.TENANT_ADMIN_PATH_WITHOUT_SLASH;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,6 +23,7 @@ import com.jayway.jsonpath.JsonPath;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.PatchAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAgencyAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateTenantAdminDTO;
@@ -150,6 +152,60 @@ class UserAdminControllerE2EIT {
     keycloakResponse.setUserId(new EasyRandom().nextObject(String.class));
     when(identityClient.createKeycloakUser(Mockito.any(), Mockito.anyString(), Mockito.anyString()))
         .thenReturn(keycloakResponse);
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
+  void createNewConsultant_Should_returnOk_When_requiredConsultantIsGiven() throws Exception {
+    givenNewConsultantIsCreated();
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CREATE_NEW_CHAT})
+  void createNewConsultant_WithoutValidCredentials_Should_returnAccessDenied() throws Exception {
+    // given
+    CreateConsultantDTO createAdminDTO = new EasyRandom().nextObject(CreateConsultantDTO.class);
+    createAdminDTO.setEmail("consultant@email.com");
+
+    // when, then
+    this.mockMvc
+        .perform(
+            post(CONSULTANT_PATH)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createAdminDTO)))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_CREATE_UPDATE})
+  void createNewConsultant_WithAuthorityConsultantCreateUpdate_Should_returnOK() throws Exception {
+    givenNewConsultantIsCreated();
+  }
+
+  private String givenNewConsultantIsCreated() throws Exception {
+    // given
+    CreateConsultantDTO createAdminDTO = new EasyRandom().nextObject(CreateConsultantDTO.class);
+    createAdminDTO.setEmail("consultant@email.com");
+
+    // when
+    MvcResult mvcResult =
+        this.mockMvc
+            .perform(
+                post(CONSULTANT_PATH)
+                    .cookie(CSRF_COOKIE)
+                    .header(CSRF_HEADER, CSRF_VALUE)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(createAdminDTO)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("_embedded.id", notNullValue()))
+            .andExpect(jsonPath("_embedded.username", notNullValue()))
+            .andExpect(jsonPath("_embedded.lastname", notNullValue()))
+            .andExpect(jsonPath("_embedded.email", is("consultant@email.com")))
+            .andReturn();
+    String content = mvcResult.getResponse().getContentAsString();
+    return JsonPath.read(content, "_embedded.id");
   }
 
   @Test

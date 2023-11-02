@@ -4,6 +4,7 @@ import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValu
 import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.ASSIGN_CONSULTANT_TO_ENQUIRY;
 import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.ASSIGN_CONSULTANT_TO_PEER_SESSION;
 import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.ASSIGN_CONSULTANT_TO_SESSION;
+import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.CONSULTANT_CREATE_UPDATE;
 import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.CONSULTANT_DEFAULT;
 import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.CREATE_NEW_CHAT;
 import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.START_CHAT;
@@ -47,10 +48,15 @@ public enum Authority {
   GROUP_CHAT_CONSULTANT(
       UserRole.GROUP_CHAT_CONSULTANT,
       List.of(CONSULTANT_DEFAULT, CREATE_NEW_CHAT, START_CHAT, STOP_CHAT, UPDATE_CHAT)),
-  USER_ADMIN(UserRole.USER_ADMIN, singletonList(AuthorityValue.USER_ADMIN)),
+  USER_ADMIN(
+      UserRole.USER_ADMIN,
+      List.of(AuthorityValue.USER_ADMIN, AuthorityValue.CONSULTANT_CREATE_UPDATE)),
   SINGLE_TENANT_ADMIN(
       UserRole.SINGLE_TENANT_ADMIN, singletonList(AuthorityValue.SINGLE_TENANT_ADMIN)),
   TENANT_ADMIN(UserRole.TENANT_ADMIN, singletonList(AuthorityValue.TENANT_ADMIN)),
+
+  RESTRICTED_CONSULTANT_ADMIN(
+      UserRole.RESTRICTED_CONSULTANT_ADMIN, singletonList(CONSULTANT_CREATE_UPDATE)),
   RESTRICTED_AGENCY_ADMIN(
       UserRole.RESTRICTED_AGENCY_ADMIN, singletonList(AuthorityValue.RESTRICTED_AGENCY_ADMIN));
 
@@ -91,6 +97,7 @@ public enum Authority {
     public static final String STOP_CHAT = PREFIX + "STOP_CHAT";
     public static final String UPDATE_CHAT = PREFIX + "UPDATE_CHAT";
     public static final String USER_ADMIN = PREFIX + "USER_ADMIN";
+    public static final String CONSULTANT_CREATE_UPDATE = PREFIX + "CONSULTANT_CREATE_UPDATE";
     public static final String SINGLE_TENANT_ADMIN = PREFIX + "SINGLE_TENANT_ADMIN";
     public static final String TENANT_ADMIN = PREFIX + "TENANT_ADMIN";
     public static final String RESTRICTED_AGENCY_ADMIN = PREFIX + "RESTRICTED_AGENCY_ADMIN";
