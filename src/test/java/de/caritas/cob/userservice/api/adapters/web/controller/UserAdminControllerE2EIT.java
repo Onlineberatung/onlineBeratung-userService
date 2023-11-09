@@ -155,7 +155,7 @@ class UserAdminControllerE2EIT {
   }
 
   @Test
-  @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_CREATE})
   void createNewConsultant_Should_returnOk_When_requiredConsultantIsGiven() throws Exception {
     givenNewConsultantIsCreated();
   }
@@ -179,7 +179,7 @@ class UserAdminControllerE2EIT {
   }
 
   @Test
-  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_CREATE_UPDATE})
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_CREATE})
   void createNewConsultant_WithAuthorityConsultantCreateUpdate_Should_returnOK() throws Exception {
     givenNewConsultantIsCreated();
   }
