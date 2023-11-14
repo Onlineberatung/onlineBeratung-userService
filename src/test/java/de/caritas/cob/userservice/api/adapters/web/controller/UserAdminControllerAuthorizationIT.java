@@ -359,7 +359,7 @@ public class UserAdminControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
+  @WithMockUser(authorities = {AuthorityValue.USER_ADMIN, AuthorityValue.CONSULTANT_CREATE})
   public void
       createConsultant_Should_ReturnOkAndCallConsultantAdminFilterService_When_userAdminAuthority()
           throws Exception {
@@ -528,7 +528,7 @@ public class UserAdminControllerAuthorizationIT {
   }
 
   @Test
-  @WithMockUser(authorities = AuthorityValue.USER_ADMIN)
+  @WithMockUser(authorities = {AuthorityValue.USER_ADMIN, AuthorityValue.CONSULTANT_UPDATE})
   public void setConsultantAgenciesShouldReturnOkAndCallConsultantAdminFacade() throws Exception {
     var agencies = List.of(easyRandom.nextObject(CreateConsultantAgencyDTO.class));
 
