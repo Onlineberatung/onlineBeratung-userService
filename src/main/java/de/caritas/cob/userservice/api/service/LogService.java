@@ -65,7 +65,7 @@ public class LogService {
    * @param ex the exception
    */
   public static void logRocketChatError(Exception ex) {
-    LOGGER.error("{}{}{})", ROCKET_CHAT_ERROR_TEXT, ex.getMessage(), getStackTrace(ex));
+    LOGGER.error("{}{}{}", ROCKET_CHAT_ERROR_TEXT, ex.getMessage(), getStackTrace(ex));
   }
 
   /**

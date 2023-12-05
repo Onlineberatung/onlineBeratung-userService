@@ -266,7 +266,7 @@ class AssignEnquiryFacadeTest {
     verify(sessionService, times(1))
         .updateConsultantAndStatusForSession(
             U25_SESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY, SessionStatus.IN_PROGRESS);
-    verifyAsync((a) -> verify(logger, times(1)).error(anyString(), anyString(), anyString()));
+    verifyAsync((a) -> verify(logger, times(1)).error(anyString(), anyString(), anyString(), anyString()));
   }
 
   @Test
@@ -294,7 +294,7 @@ class AssignEnquiryFacadeTest {
 
     verifyConsultantAndSessionHaveBeenChecked(
         U25_SESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
-    verifyAsync((a) -> verify(logger, times(1)).error(anyString(), anyString(), anyString()));
+    verifyAsync((a) -> verify(logger, times(1)).error(anyString(), anyString(), anyString(), anyString()));
     verify(sessionService, times(1))
         .updateConsultantAndStatusForSession(
             U25_SESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY, IN_PROGRESS);
@@ -311,7 +311,7 @@ class AssignEnquiryFacadeTest {
 
     verifyConsultantAndSessionHaveBeenChecked(
         U25_SESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
-    verifyAsync((a) -> verify(logger, times(1)).error(anyString(), anyString(), anyString()));
+    verifyAsync((a) -> verify(logger, times(1)).error(anyString(), anyString(), anyString(), anyString()));
     verify(sessionService, times(1))
         .updateConsultantAndStatusForSession(
             U25_SESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY, IN_PROGRESS);
@@ -328,7 +328,7 @@ class AssignEnquiryFacadeTest {
 
     verifyConsultantAndSessionHaveBeenChecked(
         U25_SESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY);
-    verifyAsync((a) -> verify(logger, times(1)).error(anyString(), anyString(), anyString()));
+    verifyAsync((a) -> verify(logger, times(1)).error(anyString(), anyString(), anyString(), anyString()));
     verify(sessionService, times(1))
         .updateConsultantAndStatusForSession(
             U25_SESSION_WITHOUT_CONSULTANT, CONSULTANT_WITH_AGENCY, IN_PROGRESS);
