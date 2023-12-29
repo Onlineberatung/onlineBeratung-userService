@@ -14,12 +14,16 @@ import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.port.in.AccountManaging;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ConsultantDataFacade {
 
   private final @NonNull ConsultantService consultantService;
@@ -81,11 +85,16 @@ public class ConsultantDataFacade {
             session -> {
               var chatOwner = session.getConsultant();
               if (nonNull(chatOwner) && nonNull(chatOwner.getUsername())) {
-                accountManager
-                    .findConsultantByUsername(chatOwner.getUsername())
-                    .ifPresent(
-                        consultantMap ->
-                            chatOwner.setDisplayName(userDtoMapper.displayNameOf(consultantMap)));
+                try {
+                  Optional<Map<String, Object>> consultantByUsername =
+                      accountManager.findConsultantByUsername(chatOwner.getUsername());
+                  if (consultantByUsername.isPresent()) {
+                    chatOwner.setDisplayName(
+                        userDtoMapper.displayNameOf(consultantByUsername.get()));
+                  }
+                } catch (Exception e) {
+                  log.error("Error while fetching consultant by username: {}", e.getMessage());
+                }
               }
             });
   }

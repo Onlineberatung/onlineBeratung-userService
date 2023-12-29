@@ -2782,7 +2782,6 @@ components:
         - startTime
         - duration
         - repetitive
-        - agencyId
       properties:
         topic:
           type: string

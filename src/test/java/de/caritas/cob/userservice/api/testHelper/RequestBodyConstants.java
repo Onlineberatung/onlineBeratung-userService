@@ -254,7 +254,7 @@ public class RequestBodyConstants {
           + "\", \"consultingType\": \""
           + CONSULTING_TYPE_ID_SUCHT
           + "\"}";
-  public static final String VALID_CREATE_CHAT_BODY =
+  public static final String VALID_CREATE_CHAT_V1_BODY =
       "{ \"topic\": \""
           + CHAT_TOPIC
           + "\", \"startDate\": \""
@@ -266,6 +266,21 @@ public class RequestBodyConstants {
           + CHAT_DURATION
           + "\", \"repetitive\": "
           + CHAT_REPETITIVE
+          + " }";
+  public static final String VALID_CREATE_CHAT_BODY_WITH_AGENCY_PLACEHOLDER =
+      "{ \"topic\": \""
+          + CHAT_TOPIC
+          + "\", \"startDate\": \""
+          + CHAT_START_DATE
+          + "\", "
+          + "\"startTime\": \""
+          + CHAT_START_TIME
+          + "\", \"duration\": \""
+          + CHAT_DURATION
+          + "\", \"repetitive\": "
+          + CHAT_REPETITIVE
+          + ", \"agencyId\": "
+          + "${AGENCY_ID}"
           + " }";
   public static final String VALID_UPDATE_CHAT_BODY =
       "{ \"topic\": \""

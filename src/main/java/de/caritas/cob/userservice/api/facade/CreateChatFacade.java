@@ -90,11 +90,18 @@ public class CreateChatFacade {
   }
 
   private Chat saveChatV2(Consultant consultant, ChatDTO chatDTO) {
+    assertAgencyIdIsNotNull(chatDTO);
     Chat chat = chatService.saveChat(chatConverter.convertToEntity(chatDTO, consultant));
     ConsultantAgency foundConsultantAgency =
         findConsultantAgencyForGivenChatAgency(consultant, chatDTO);
     createChatAgencyRelation(chat, foundConsultantAgency.getAgencyId());
     return chat;
+  }
+
+  private void assertAgencyIdIsNotNull(ChatDTO chatDTO) {
+    if (chatDTO.getAgencyId() == null) {
+      throw new BadRequestException("Agency id must not be null");
+    }
   }
 
   private ConsultantAgency findConsultantAgencyForGivenChatAgency(

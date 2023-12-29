@@ -1681,7 +1681,7 @@ public class UserControllerIT {
 
     mvc.perform(
             post(PATH_POST_CHAT_NEW)
-                .content(VALID_CREATE_CHAT_BODY)
+                .content(VALID_CREATE_CHAT_BODY_WITH_AGENCY_PLACEHOLDER)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
@@ -1697,7 +1697,7 @@ public class UserControllerIT {
 
     mvc.perform(
             post(PATH_POST_CHAT_NEW)
-                .content(VALID_CREATE_CHAT_BODY)
+                .content(VALID_CREATE_CHAT_BODY_WITH_AGENCY_PLACEHOLDER)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.CREATED.value()));
@@ -1727,7 +1727,7 @@ public class UserControllerIT {
 
     mvc.perform(
             post(PATH_POST_CHAT_NEW_V2)
-                .content(VALID_CREATE_CHAT_BODY)
+                .content(VALID_CREATE_CHAT_BODY_WITH_AGENCY_PLACEHOLDER)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
@@ -1743,7 +1743,7 @@ public class UserControllerIT {
 
     mvc.perform(
             post(PATH_POST_CHAT_NEW_V2)
-                .content(VALID_CREATE_CHAT_BODY)
+                .content(VALID_CREATE_CHAT_BODY_WITH_AGENCY_PLACEHOLDER)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.CREATED.value()));
