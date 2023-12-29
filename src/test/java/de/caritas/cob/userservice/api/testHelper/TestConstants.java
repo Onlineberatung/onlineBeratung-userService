@@ -6,6 +6,8 @@ import static de.caritas.cob.userservice.api.model.Session.RegistrationType.REGI
 import static de.caritas.cob.userservice.api.model.Session.SessionStatus.IN_PROGRESS;
 import static de.caritas.cob.userservice.api.model.Session.SessionStatus.NEW;
 
+import com.google.api.client.util.Sets;
+import com.google.common.collect.Lists;
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentials;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
@@ -1191,8 +1193,20 @@ public class TestConstants {
   public static final Long CHAT_ID_3 = 138L;
   public static final String INVALID_CHAT_ID = "xyz";
   public static final String GROUP_CHAT_NAME = "GROUP_CHAT_NAME";
+
+  private static final long CHAT_AGENCY_ID = 1L;
+
+  public static final String CHAT_HINT_MESSAGE = "CHAT_HINT_MESSAGE";
   public static final ChatDTO CHAT_DTO =
-      new ChatDTO(CHAT_TOPIC, CHAT_START_DATE, CHAT_START_TIME, CHAT_DURATION, CHAT_REPETITIVE);
+      new ChatDTO(
+          CHAT_TOPIC,
+          CHAT_START_DATE,
+          CHAT_START_TIME,
+          CHAT_DURATION,
+          CHAT_REPETITIVE,
+          CHAT_AGENCY_ID,
+          CHAT_HINT_MESSAGE);
+
   public static final CreateChatResponseDTO CREATE_CHAT_RESPONSE_DTO =
       new CreateChatResponseDTO().groupId(RC_GROUP_ID);
   public static final Chat ACTIVE_CHAT =
@@ -1209,9 +1223,11 @@ public class TestConstants {
           CHAT_MAX_PARTICIPANTS,
           RC_GROUP_ID,
           CONSULTANT,
+          Sets.newHashSet(),
           null,
-          null,
-          nowInUtc());
+          nowInUtc(),
+          nowInUtc(),
+          null);
   public static final Chat INACTIVE_CHAT =
       new Chat(
           CHAT_ID_2,
@@ -1226,9 +1242,11 @@ public class TestConstants {
           CHAT_MAX_PARTICIPANTS,
           RC_GROUP_ID,
           CONSULTANT,
+          Sets.newHashSet(),
           null,
-          null,
-          nowInUtc());
+          nowInUtc(),
+          nowInUtc(),
+          null);
   public static final Chat CHAT_V2 =
       new Chat(
           CHAT_ID_3,
@@ -1243,9 +1261,11 @@ public class TestConstants {
           CHAT_MAX_PARTICIPANTS,
           RC_GROUP_ID,
           CONSULTANT,
+          Set.of(new ChatAgency(null, CHAT_AGENCY_ID)),
           null,
-          null,
-          nowInUtc());
+          nowInUtc(),
+          nowInUtc(),
+          CHAT_HINT_MESSAGE);
   public static final ChatAgency CHAT_AGENCY = new ChatAgency(ACTIVE_CHAT, AGENCY_ID);
   public static final Set<ChatAgency> CHAT_AGENCIES =
       new HashSet<>(Collections.singletonList(CHAT_AGENCY));
@@ -1267,7 +1287,10 @@ public class TestConstants {
           false,
           null,
           nowInUtc(),
-          null);
+          null,
+          nowInUtc().toString(),
+          Lists.newArrayList(),
+          CHAT_HINT_MESSAGE);
   public static final UserChatDTO USER_CHAT_DTO_2 =
       new UserChatDTO(
           CHAT_ID_2,
@@ -1286,7 +1309,10 @@ public class TestConstants {
           false,
           null,
           nowInUtc(),
-          null);
+          null,
+          nowInUtc().toString(),
+          Lists.newArrayList(),
+          CHAT_HINT_MESSAGE);
   public static final UserChatDTO USER_CHAT_DTO_3 =
       new UserChatDTO(
           CHAT_ID_3,
@@ -1305,7 +1331,10 @@ public class TestConstants {
           false,
           null,
           nowInUtc(),
-          null);
+          null,
+          nowInUtc().toString(),
+          Lists.newArrayList(),
+          CHAT_HINT_MESSAGE);
   public static final UserSessionResponseDTO USER_CHAT_RESPONSE_DTO =
       new UserSessionResponseDTO()
           .chat(USER_CHAT_DTO_1)
@@ -2155,7 +2184,10 @@ public class TestConstants {
           false,
           null,
           nowInUtc(),
-          null);
+          null,
+          nowInUtc().toString(),
+          Lists.newArrayList(),
+          CHAT_HINT_MESSAGE);
   public static final ConsultantSessionResponseDTO
       CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE =
           new ConsultantSessionResponseDTO()

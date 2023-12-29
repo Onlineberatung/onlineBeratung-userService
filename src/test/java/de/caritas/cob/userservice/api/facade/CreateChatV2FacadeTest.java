@@ -2,14 +2,17 @@ package de.caritas.cob.userservice.api.facade;
 
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.ACTIVE_CHAT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_DTO;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_DURATION;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_REPETITIVE;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_START_DATE;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_START_TIME;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_TOPIC;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_AGENCIES_SET;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.ERROR;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.GROUP_CHAT_NAME;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -22,7 +25,9 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ChatDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateChatResponseDTO;
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
@@ -33,10 +38,13 @@ import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -75,7 +83,40 @@ public class CreateChatV2FacadeTest {
   @Before
   public void setup() {
     when(chat.getId()).thenReturn(CHAT_ID);
+    when(chat.getCreateDate()).thenReturn(LocalDateTime.now());
     setInternalState(LogService.class, "LOGGER", logger);
+  }
+
+  @Test
+  public void
+      createChatV2_Should_ThrowBadRequestException_When_ConsultantAgencyDoesNotMatchChatAgency()
+          throws Exception {
+    when(rocketChatService.createPrivateGroupWithSystemUser(any()))
+        .thenReturn(Optional.of(groupResponseDTO));
+    when(groupResponseDTO.getGroup()).thenReturn(groupDTO);
+    when(groupDTO.getId()).thenReturn(RC_GROUP_ID);
+    when(chatService.saveChat(Mockito.any())).thenReturn(chat);
+    when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCIES_SET);
+    String consultantId = UUID.randomUUID().toString();
+    when(consultant.getId()).thenReturn(consultantId);
+
+    var chatWithNonMatchingAgency =
+        new ChatDTO(
+            CHAT_TOPIC,
+            CHAT_START_DATE,
+            CHAT_START_TIME,
+            CHAT_DURATION,
+            CHAT_REPETITIVE,
+            999L,
+            "hint");
+
+    try {
+      createChatFacade.createChatV2(chatWithNonMatchingAgency, consultant);
+    } catch (BadRequestException e) {
+      assertThat(e.getMessage())
+          .isEqualTo(
+              "Consultant with id " + consultantId + " is not assigned to agency with id 999");
+    }
   }
 
   @Test
@@ -86,15 +127,16 @@ public class CreateChatV2FacadeTest {
     when(groupResponseDTO.getGroup()).thenReturn(groupDTO);
     when(groupDTO.getId()).thenReturn(RC_GROUP_ID);
     when(chatService.saveChat(Mockito.any())).thenReturn(chat);
+    when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCIES_SET);
 
     CreateChatResponseDTO result = createChatFacade.createChatV2(CHAT_DTO, consultant);
 
-    assertThat(result, instanceOf(CreateChatResponseDTO.class));
-    assertEquals(RC_GROUP_ID, result.getGroupId());
+    assertThat(result).isInstanceOf(CreateChatResponseDTO.class);
+    assertThat(result.getGroupId()).isEqualTo(RC_GROUP_ID);
   }
 
   @Test
-  public void createChatV2_Should_SaveConsultantAgenciesAsChatAgencyRelations()
+  public void createChatV2_Should_SaveConsultantAgency_From_CharDTOAsChatAgencyRelations()
       throws RocketChatCreateGroupException {
     when(consultant.getConsultantAgencies()).thenReturn(CONSULTANT_AGENCIES_SET);
     when(rocketChatService.createPrivateGroupWithSystemUser(any()))
@@ -106,7 +148,10 @@ public class CreateChatV2FacadeTest {
     createChatFacade.createChatV2(CHAT_DTO, consultant);
 
     verifyNoInteractions(agencyService);
-    verify(chatService, times(2)).saveChatAgencyRelation(any());
+    var captor = ArgumentCaptor.forClass(ChatAgency.class);
+    verify(chatService, times(1)).saveChatAgencyRelation(captor.capture());
+
+    assertThat(captor.getValue().getAgencyId()).isEqualTo(CHAT_DTO.getAgencyId());
   }
 
   @Test

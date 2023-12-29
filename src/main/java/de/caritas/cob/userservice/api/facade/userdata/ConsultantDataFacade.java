@@ -5,6 +5,7 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.AbsenceDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.GroupSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.mapping.UserDtoMapper;
@@ -12,6 +13,7 @@ import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.port.in.AccountManaging;
 import de.caritas.cob.userservice.api.service.ConsultantService;
+import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -68,6 +70,22 @@ public class ConsultantDataFacade {
                     .ifPresent(
                         consultantMap ->
                             consultant.setDisplayName(userDtoMapper.displayNameOf(consultantMap)));
+              }
+            });
+  }
+
+  public void addConsultantDisplayNameToSessionList(
+      List<ConsultantSessionResponseDTO> consultantSessionResponseDTOs) {
+    consultantSessionResponseDTOs.stream()
+        .forEach(
+            session -> {
+              var chatOwner = session.getConsultant();
+              if (nonNull(chatOwner) && nonNull(chatOwner.getUsername())) {
+                accountManager
+                    .findConsultantByUsername(chatOwner.getUsername())
+                    .ifPresent(
+                        consultantMap ->
+                            chatOwner.setDisplayName(userDtoMapper.displayNameOf(consultantMap)));
               }
             });
   }

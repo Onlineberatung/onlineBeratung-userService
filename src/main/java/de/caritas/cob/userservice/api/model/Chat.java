@@ -100,6 +100,12 @@ public class Chat {
   @Column(name = "update_date")
   private LocalDateTime updateDate;
 
+  @Column(name = "create_date")
+  private LocalDateTime createDate;
+
+  @Column(name = "hint_message")
+  private String hintMessage;
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {

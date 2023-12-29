@@ -8,6 +8,7 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupRespons
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ChatDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateChatResponseDTO;
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatCreateGroupException;
@@ -16,6 +17,7 @@ import de.caritas.cob.userservice.api.helper.RocketChatRoomNameGenerator;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.ChatAgency;
 import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.function.BiFunction;
@@ -32,7 +34,6 @@ public class CreateChatFacade {
   private final @NonNull RocketChatService rocketChatService;
   private final @NonNull AgencyService agencyService;
   private final @NonNull ChatConverter chatConverter;
-
   /**
    * Creates a chat in MariaDB, it's relation to the agency and Rocket.Chat-room.
    *
@@ -65,7 +66,10 @@ public class CreateChatFacade {
       rcGroupId = createRocketChatGroupWithTechnicalUser(chatDTO, chat);
       chat.setGroupId(rcGroupId);
       chatService.saveChat(chat);
-      return new CreateChatResponseDTO().groupId(rcGroupId);
+
+      return new CreateChatResponseDTO()
+          .groupId(rcGroupId)
+          .createdAt(chat.getCreateDate().toString());
     } catch (InternalServerErrorException e) {
       doRollback(chat, rcGroupId);
       throw e;
@@ -87,11 +91,23 @@ public class CreateChatFacade {
 
   private Chat saveChatV2(Consultant consultant, ChatDTO chatDTO) {
     Chat chat = chatService.saveChat(chatConverter.convertToEntity(chatDTO, consultant));
-    consultant
-        .getConsultantAgencies()
-        .forEach(
-            consultantAgency -> createChatAgencyRelation(chat, consultantAgency.getAgencyId()));
+    ConsultantAgency foundConsultantAgency =
+        findConsultantAgencyForGivenChatAgency(consultant, chatDTO);
+    createChatAgencyRelation(chat, foundConsultantAgency.getAgencyId());
     return chat;
+  }
+
+  private ConsultantAgency findConsultantAgencyForGivenChatAgency(
+      Consultant consultant, ChatDTO chatDTO) {
+    return consultant.getConsultantAgencies().stream()
+        .filter(agency -> agency.getAgencyId().equals(chatDTO.getAgencyId()))
+        .findFirst()
+        .orElseThrow(
+            () ->
+                new BadRequestException(
+                    String.format(
+                        "Consultant with id %s is not assigned to agency with id %s",
+                        consultant.getId(), chatDTO.getAgencyId())));
   }
 
   private void createChatAgencyRelation(Chat chat, Long agencyId) {

@@ -20,6 +20,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.validator.constraints.Length;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 
@@ -62,10 +63,23 @@ public class ChatDTO {
   @JsonProperty("repetitive")
   private boolean repetitive;
 
+  @NotNull(message = "{chat.agencyId.notNull}")
+  @ApiModelProperty(required = true, example = "5", position = 5)
+  @Min(value = 0, message = "{chat.agencyId.invalid}")
+  @JsonProperty("agencyId")
+  private long agencyId;
+
+  @ApiModelProperty(required = true, example = "5", position = 6)
+  @Length(max = 300, message = "{chat.hintMessage.invalid}")
+  @JsonProperty("hintMessage")
+  private String hintMessage;
+
   @Override
   public String toString() {
     return "ChatDTO [topic="
         + topic
+        + ", agencyId="
+        + agencyId
         + ", startDate="
         + startDate
         + ", startTime="

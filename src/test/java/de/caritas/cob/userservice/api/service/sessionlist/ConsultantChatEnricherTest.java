@@ -17,12 +17,15 @@ import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.container.RocketChatRoomInformation;
 import de.caritas.cob.userservice.api.facade.sessionlist.RocketChatRoomInformationProvider;
+import de.caritas.cob.userservice.api.facade.userdata.ConsultantDataFacade;
 import de.caritas.cob.userservice.api.helper.SessionListAnalyser;
+import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -38,6 +41,8 @@ public class ConsultantChatEnricherTest {
   @Mock private SessionListAnalyser sessionListAnalyser;
 
   @Mock private RocketChatRoomInformationProvider rocketChatRoomInformationProvider;
+
+  @Mock private ConsultantDataFacade consultantDataFacade;
 
   @Test
   public void
@@ -60,6 +65,7 @@ public class ConsultantChatEnricherTest {
                 CONSULTANT)
             .get(0);
 
+    verify(consultantDataFacade).addConsultantDisplayNameToSessionList(Mockito.any(List.class));
     assertTrue(result.getChat().isSubscribed());
   }
 
