@@ -234,7 +234,8 @@ public class NewMessageEmailSupplier implements EmailSupplier {
             asker.getEmail(),
             asker.getLanguageCode(),
             usernameTranscoder.decodeUsername(consultantUsername),
-            usernameTranscoder.decodeUsername(asker.getUsername()), asker.getDialect());
+            usernameTranscoder.decodeUsername(asker.getUsername()),
+            asker.getDialect());
 
     return singletonList(mailDTO);
   }
@@ -264,7 +265,10 @@ public class NewMessageEmailSupplier implements EmailSupplier {
   }
 
   private MailDTO buildMailDtoForNewMessageNotificationAsker(
-      String email, LanguageCode languageCode, String consultantName, String askerName,
+      String email,
+      LanguageCode languageCode,
+      String consultantName,
+      String askerName,
       Dialect askerDialect) {
     var templateAttributes = new ArrayList<TemplateDataDTO>();
     templateAttributes.add(new TemplateDataDTO().key("consultantName").value(consultantName));

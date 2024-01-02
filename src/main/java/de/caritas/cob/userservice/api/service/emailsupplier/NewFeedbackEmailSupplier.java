@@ -85,8 +85,9 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
       return buildNotificationMailsForAllOtherConsultants(sendingConsultant);
     }
 
-    if (Boolean.TRUE.equals(receivingConsultant.getNotifyNewFeedbackMessageFromAdviceSeeker()
-        && didAnotherConsultantWrite())
+    if (Boolean.TRUE.equals(
+            receivingConsultant.getNotifyNewFeedbackMessageFromAdviceSeeker()
+                && didAnotherConsultantWrite())
         && isLoggedOut(receivingConsultant)) {
       var mail = buildMailForAssignedConsultant(sendingConsultant, receivingConsultant);
 

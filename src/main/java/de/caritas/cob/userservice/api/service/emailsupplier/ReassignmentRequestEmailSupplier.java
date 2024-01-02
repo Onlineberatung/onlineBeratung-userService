@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.service.emailsupplier;
 
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
+import de.caritas.cob.userservice.mailservice.generated.web.model.Dialect;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.ArrayList;
@@ -9,7 +10,6 @@ import java.util.Collections;
 import java.util.List;
 import javax.transaction.Transactional;
 import lombok.Builder;
-import de.caritas.cob.userservice.mailservice.generated.web.model.Dialect;
 
 @Builder
 public class ReassignmentRequestEmailSupplier implements EmailSupplier {

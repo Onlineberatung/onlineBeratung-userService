@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.neovisionaries.i18n.LanguageCode;
+import de.caritas.cob.userservice.mailservice.generated.web.model.Dialect;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
@@ -29,7 +30,6 @@ import org.hibernate.annotations.ParamDef;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import de.caritas.cob.userservice.mailservice.generated.web.model.Dialect;
 
 /** Represents a user */
 @Entity
@@ -157,6 +157,6 @@ public class User implements TenantAware, NotificationsAware {
   @JsonIgnore
   @Transient
   public Dialect getDialect() {
-    return isLanguageFormal() ? Dialect.FORMAL: Dialect.INFORMAL;
+    return isLanguageFormal() ? Dialect.FORMAL : Dialect.INFORMAL;
   }
 }

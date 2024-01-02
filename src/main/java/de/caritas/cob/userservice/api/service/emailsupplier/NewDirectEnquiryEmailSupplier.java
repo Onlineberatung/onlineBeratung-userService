@@ -113,6 +113,4 @@ public class NewDirectEnquiryEmailSupplier implements EmailSupplier {
         .templateData(templateAttributes)
         .dialect(consultant.getDialect());
   }
-
-
 }

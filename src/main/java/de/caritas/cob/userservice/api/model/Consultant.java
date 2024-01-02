@@ -5,6 +5,7 @@ import static java.util.Objects.isNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.neovisionaries.i18n.LanguageCode;
+import de.caritas.cob.userservice.mailservice.generated.web.model.Dialect;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
@@ -43,7 +44,6 @@ import org.hibernate.search.annotations.SortableField;
 import org.hibernate.search.annotations.TokenFilterDef;
 import org.hibernate.search.annotations.TokenizerDef;
 import org.springframework.lang.Nullable;
-import de.caritas.cob.userservice.mailservice.generated.web.model.Dialect;
 
 /** Represents a consultant */
 @Entity
@@ -257,7 +257,7 @@ public class Consultant implements TenantAware, NotificationsAware {
   @JsonIgnore
   @Transient
   public Dialect getDialect() {
-    return isLanguageFormal() ? Dialect.FORMAL: Dialect.INFORMAL;
+    return isLanguageFormal() ? Dialect.FORMAL : Dialect.INFORMAL;
   }
 
   @Override

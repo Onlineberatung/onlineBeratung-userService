@@ -6,6 +6,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.GROUP_MEMBER_DTO_LIST;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.GROUP_MEMBER_USER_1;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
@@ -14,7 +15,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
-import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -158,9 +158,8 @@ public class NewFeedbackEmailSupplierTest {
     MailDTO generatedMail = generatedMails.get(0);
     assertThat(generatedMail.getTemplate()).isEqualTo(TEMPLATE_NEW_FEEDBACK_MESSAGE_NOTIFICATION);
     assertThat(generatedMail.getEmail()).isEqualTo("email@email.com");
-    assertThat(
-        generatedMail.getLanguage()).isEqualTo(
-        de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.DE);
+    assertThat(generatedMail.getLanguage())
+        .isEqualTo(de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.DE);
     List<TemplateDataDTO> templateData = generatedMail.getTemplateData();
     assertThat(templateData).hasSize(4);
     assertThat(templateData.get(0).getKey()).isEqualTo("name_sender");
@@ -293,9 +292,8 @@ public class NewFeedbackEmailSupplierTest {
     MailDTO generatedMail = generatedMails.get(0);
     assertThat(generatedMail.getTemplate()).isEqualTo(TEMPLATE_NEW_FEEDBACK_MESSAGE_NOTIFICATION);
     assertThat(generatedMail.getEmail()).isEqualTo("email@email.com");
-    assertThat(
-        generatedMail.getLanguage()).isEqualTo(
-        de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.DE);
+    assertThat(generatedMail.getLanguage())
+        .isEqualTo(de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.DE);
     List<TemplateDataDTO> templateData = generatedMail.getTemplateData();
     assertThat(templateData).hasSize(4);
     assertThat(templateData.get(0).getKey()).isEqualTo("name_sender");
