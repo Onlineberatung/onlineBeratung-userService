@@ -129,6 +129,7 @@ public class NewEnquiryEmailSupplier implements EmailSupplier {
         .template(TEMPLATE_NEW_ENQUIRY_NOTIFICATION)
         .email(consultant.getEmail())
         .language(language)
+        .dialect(consultant.getDialect())
         .templateData(templateAttributes);
   }
 }

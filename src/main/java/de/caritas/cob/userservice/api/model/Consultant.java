@@ -20,6 +20,7 @@ import javax.persistence.Index;
 import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -42,6 +43,7 @@ import org.hibernate.search.annotations.SortableField;
 import org.hibernate.search.annotations.TokenFilterDef;
 import org.hibernate.search.annotations.TokenizerDef;
 import org.springframework.lang.Nullable;
+import de.caritas.cob.userservice.mailservice.generated.web.model.Dialect;
 
 /** Represents a consultant */
 @Entity
@@ -250,6 +252,12 @@ public class Consultant implements TenantAware, NotificationsAware {
         .map(ConsultantAgency::getAgencyId)
         .collect(Collectors.toSet())
         .contains(agencyId);
+  }
+
+  @JsonIgnore
+  @Transient
+  public Dialect getDialect() {
+    return isLanguageFormal() ? Dialect.FORMAL: Dialect.INFORMAL;
   }
 
   @Override

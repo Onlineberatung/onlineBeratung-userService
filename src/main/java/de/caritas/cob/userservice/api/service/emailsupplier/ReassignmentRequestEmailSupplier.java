@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import javax.transaction.Transactional;
 import lombok.Builder;
+import de.caritas.cob.userservice.mailservice.generated.web.model.Dialect;
 
 @Builder
 public class ReassignmentRequestEmailSupplier implements EmailSupplier {
@@ -16,6 +17,8 @@ public class ReassignmentRequestEmailSupplier implements EmailSupplier {
   private final String receiverEmailAddress;
   private final LanguageCode receiverLanguageCode;
   private final String receiverUsername;
+
+  private final Dialect receiverDialect;
   private final String applicationBaseUrl;
   private final TenantTemplateSupplier tenantTemplateSupplier;
   private final boolean multiTenancyEnabled;
@@ -40,6 +43,7 @@ public class ReassignmentRequestEmailSupplier implements EmailSupplier {
     return new MailDTO()
         .template(TEMPLATE_REASSIGN_REQUEST_NOTIFICATION)
         .email(receiverEmailAddress)
+        .dialect(receiverDialect)
         .language(languageOf(receiverLanguageCode))
         .templateData(templateAttributes);
   }

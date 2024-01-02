@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.neovisionaries.i18n.LanguageCode;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -13,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,6 +29,7 @@ import org.hibernate.annotations.ParamDef;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import de.caritas.cob.userservice.mailservice.generated.web.model.Dialect;
 
 /** Represents a user */
 @Entity
@@ -149,5 +152,11 @@ public class User implements TenantAware, NotificationsAware {
   @Override
   public int hashCode() {
     return Objects.hash(userId);
+  }
+
+  @JsonIgnore
+  @Transient
+  public Dialect getDialect() {
+    return isLanguageFormal() ? Dialect.FORMAL: Dialect.INFORMAL;
   }
 }

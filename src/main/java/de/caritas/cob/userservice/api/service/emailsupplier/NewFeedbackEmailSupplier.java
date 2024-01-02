@@ -56,8 +56,7 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
     return emptyList();
   }
 
-  private List<MailDTO> buildFeedbackMessageMailsForExistingSession()
-      throws RocketChatGetGroupMembersException {
+  private List<MailDTO> buildFeedbackMessageMailsForExistingSession() {
     if (nonNull(session.getConsultant())) {
       return buildFeedbackMessageMailsForExistingConsultant();
     }
@@ -69,8 +68,7 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
     return emptyList();
   }
 
-  private List<MailDTO> buildFeedbackMessageMailsForExistingConsultant()
-      throws RocketChatGetGroupMembersException {
+  private List<MailDTO> buildFeedbackMessageMailsForExistingConsultant() {
     Optional<Consultant> sendingConsultantOptional = consultantService.getConsultant(userId);
     if (sendingConsultantOptional.isPresent()) {
       Consultant sendingConsultant = sendingConsultantOptional.get();
@@ -81,15 +79,14 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
     return emptyList();
   }
 
-  private List<MailDTO> buildMailsDependingOnAuthor(Consultant sendingConsultant)
-      throws RocketChatGetGroupMembersException {
+  private List<MailDTO> buildMailsDependingOnAuthor(Consultant sendingConsultant) {
     var receivingConsultant = session.getConsultant();
     if (areUsersEqual(userId, receivingConsultant)) {
       return buildNotificationMailsForAllOtherConsultants(sendingConsultant);
     }
 
-    if (receivingConsultant.getNotifyNewFeedbackMessageFromAdviceSeeker()
-        && didAnotherConsultantWrite()
+    if (Boolean.TRUE.equals(receivingConsultant.getNotifyNewFeedbackMessageFromAdviceSeeker()
+        && didAnotherConsultantWrite())
         && isLoggedOut(receivingConsultant)) {
       var mail = buildMailForAssignedConsultant(sendingConsultant, receivingConsultant);
 
@@ -190,6 +187,7 @@ public class NewFeedbackEmailSupplier implements EmailSupplier {
         .template(TEMPLATE_NEW_FEEDBACK_MESSAGE_NOTIFICATION)
         .email(recipient.getEmail())
         .language(language)
+        .dialect(recipient.getDialect())
         .templateData(
             asList(
                 new TemplateDataDTO().key("name_sender").value(nameSender),
