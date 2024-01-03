@@ -5,6 +5,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.AUTHENTICA
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AUTHENTICATED_USER_3;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AUTHENTICATED_USER_CONSULTANT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_DTO;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_HINT_MESSAGE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_V2;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT;
@@ -27,6 +28,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionResponseDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
@@ -39,6 +41,7 @@ import de.caritas.cob.userservice.api.model.UserChat;
 import de.caritas.cob.userservice.api.port.out.ChatAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.ChatRepository;
 import de.caritas.cob.userservice.api.port.out.UserChatRepository;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -66,6 +69,8 @@ public class ChatServiceTest {
   @Mock private Logger logger;
 
   @Mock private ConsultantService consultantService;
+
+  @Mock private AgencyService agencyService;
 
   @Before
   public void setup() {
@@ -130,31 +135,45 @@ public class ChatServiceTest {
     when(chatRepository.findAssignedByUserId(USER_ID)).thenReturn(singletonList(CHAT_V2));
     when(consultantService.findConsultantsByAgencyIds(Mockito.any()))
         .thenReturn(singletonList(CONSULTANT));
+    when(agencyService.getAgency(
+            CHAT_V2.getChatAgencies().stream().findFirst().orElseThrow().getAgencyId()))
+        .thenReturn(new AgencyDTO().name("agency name"));
 
     List<UserSessionResponseDTO> resultList = chatService.getChatsForUserId(USER_ID);
 
-    assertNull(resultList.get(0).getSession());
-    assertNotNull(resultList.get(0).getChat());
-    assertEquals(CHAT_V2.getId(), resultList.get(0).getChat().getId());
-    assertEquals(CHAT_V2.getTopic(), resultList.get(0).getChat().getTopic());
-    assertThat(CHAT_V2.getConsultingTypeId(), is(resultList.get(0).getChat().getConsultingType()));
+    UserSessionResponseDTO resultUserSessionResponseDTO = resultList.get(0);
+    assertNull(resultUserSessionResponseDTO.getSession());
+    assertNotNull(resultUserSessionResponseDTO.getChat());
+    assertEquals(CHAT_V2.getId(), resultUserSessionResponseDTO.getChat().getId());
+    assertEquals(CHAT_V2.getTopic(), resultUserSessionResponseDTO.getChat().getTopic());
+    assertThat(
+        CHAT_V2.getConsultingTypeId(),
+        is(resultUserSessionResponseDTO.getChat().getConsultingType()));
     assertEquals(
         LocalDate.of(
             CHAT_V2.getStartDate().getYear(),
             CHAT_V2.getStartDate().getMonth(),
             CHAT_V2.getStartDate().getDayOfMonth()),
-        resultList.get(0).getChat().getStartDate());
+        resultUserSessionResponseDTO.getChat().getStartDate());
     assertEquals(
         LocalTime.of(
             CHAT_V2.getInitialStartDate().getHour(), CHAT_V2.getInitialStartDate().getMinute()),
-        resultList.get(0).getChat().getStartTime());
-    assertEquals(CHAT_V2.getDuration(), resultList.get(0).getChat().getDuration());
-    assertEquals(CHAT_V2.isRepetitive(), resultList.get(0).getChat().isRepetitive());
-    assertEquals(CHAT_V2.isActive(), resultList.get(0).getChat().isActive());
-    assertEquals(CHAT_V2.getGroupId(), resultList.get(0).getChat().getGroupId());
-    assertNotNull(resultList.get(0).getChat().getModerators());
-    assertEquals(1, resultList.get(0).getChat().getModerators().length);
-    assertEquals(CONSULTANT.getRocketChatId(), resultList.get(0).getChat().getModerators()[0]);
+        resultUserSessionResponseDTO.getChat().getStartTime());
+    assertEquals(CHAT_V2.getDuration(), resultUserSessionResponseDTO.getChat().getDuration());
+    assertEquals(CHAT_V2.isRepetitive(), resultUserSessionResponseDTO.getChat().isRepetitive());
+    assertEquals(CHAT_V2.isActive(), resultUserSessionResponseDTO.getChat().isActive());
+    assertEquals(CHAT_V2.getGroupId(), resultUserSessionResponseDTO.getChat().getGroupId());
+
+    assertNotNull(resultUserSessionResponseDTO.getChat().getModerators());
+    assertEquals(1, resultUserSessionResponseDTO.getChat().getModerators().length);
+    assertEquals(
+        CONSULTANT.getRocketChatId(), resultUserSessionResponseDTO.getChat().getModerators()[0]);
+    assertEquals(1, resultUserSessionResponseDTO.getChat().getAssignedAgencies().size());
+    assertEquals(
+        "agency name",
+        resultUserSessionResponseDTO.getChat().getAssignedAgencies().get(0).getName());
+    assertNotNull(resultUserSessionResponseDTO.getChat().getCreatedAt());
+    assertEquals(CHAT_HINT_MESSAGE, resultUserSessionResponseDTO.getChat().getHintMessage());
   }
 
   @Test

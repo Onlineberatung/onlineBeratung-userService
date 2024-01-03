@@ -981,7 +981,6 @@ public class UserController implements UsersApi {
 
     var callingConsultant = this.userAccountProvider.retrieveValidatedConsultant();
     var response = createChatFacade.createChatV2(chatDTO, callingConsultant);
-
     return new ResponseEntity<>(response, HttpStatus.CREATED);
   }
 

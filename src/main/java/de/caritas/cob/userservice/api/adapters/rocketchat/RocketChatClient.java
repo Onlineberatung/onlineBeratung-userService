@@ -60,8 +60,10 @@ public class RocketChatClient {
     var systemUser = rcCredentialHelper.getSystemUserSneaky();
 
     var httpHeaders = new HttpHeaders();
-    httpHeaders.add(HEADER_AUTH_TOKEN, systemUser.getRocketChatToken());
-    httpHeaders.add(HEADER_USER_ID, systemUser.getRocketChatUserId());
+    if (systemUser != null) {
+      httpHeaders.add(HEADER_AUTH_TOKEN, systemUser.getRocketChatToken());
+      httpHeaders.add(HEADER_USER_ID, systemUser.getRocketChatUserId());
+    }
 
     return httpHeaders;
   }

@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
-import static de.caritas.cob.userservice.api.testHelper.RequestBodyConstants.VALID_CREATE_CHAT_BODY;
+import static de.caritas.cob.userservice.api.testHelper.RequestBodyConstants.VALID_CREATE_CHAT_BODY_WITH_AGENCY_PLACEHOLDER;
+import static de.caritas.cob.userservice.api.testHelper.RequestBodyConstants.VALID_CREATE_CHAT_V1_BODY;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS_SYSTEM_A;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_CREDENTIALS_TECHNICAL_A;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID;
@@ -62,6 +63,7 @@ import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.model.ChatAgency;
 import de.caritas.cob.userservice.api.model.Consultant;
+import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.model.UserAgency;
 import de.caritas.cob.userservice.api.model.UserChat;
@@ -229,7 +231,7 @@ class UserControllerChatE2EIT {
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .header("rcToken", RandomStringUtils.randomAlphabetic(16))
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(VALID_CREATE_CHAT_BODY)
+                .content(VALID_CREATE_CHAT_V1_BODY)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("groupId", is("rcGroupId")));
@@ -242,6 +244,8 @@ class UserControllerChatE2EIT {
     givenAValidConsultant(true);
     givenAValidRocketChatSystemUser();
 
+    ConsultantAgency consultantAgency =
+        consultant.getConsultantAgencies().stream().findFirst().orElseThrow();
     mockMvc
         .perform(
             post("/users/chat/v2/new")
@@ -249,10 +253,15 @@ class UserControllerChatE2EIT {
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .header("rcToken", RandomStringUtils.randomAlphabetic(16))
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(VALID_CREATE_CHAT_BODY)
+                .content(giveValidCreateChatBodyWithAgency(consultantAgency))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("groupId", is("rcGroupId")));
+  }
+
+  private String giveValidCreateChatBodyWithAgency(ConsultantAgency consultantAgency) {
+    return VALID_CREATE_CHAT_BODY_WITH_AGENCY_PLACEHOLDER.replace(
+        "${AGENCY_ID}", consultantAgency.getAgencyId().toString());
   }
 
   @Test

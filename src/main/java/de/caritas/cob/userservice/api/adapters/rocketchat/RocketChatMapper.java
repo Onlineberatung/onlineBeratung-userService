@@ -118,21 +118,22 @@ public class RocketChatMapper {
 
   public Optional<Map<String, Object>> mapOfUserResponse(
       ResponseEntity<UserInfoResponseDTO> userResponse) {
-    var body = userResponse.getBody();
-    if (nonNull(body)) {
-      var user = body.getUser();
-      var map = new HashMap<String, Object>();
-      map.put("id", user.getId());
-      if (nonNull(user.getUsername())) {
-        map.put("username", user.getUsername());
-      }
-      if (nonNull(user.getName())) {
-        map.put("displayName", user.getName());
-      }
+    if (nonNull(userResponse)) {
+      var body = userResponse.getBody();
+      if (nonNull(body)) {
+        var user = body.getUser();
+        var map = new HashMap<String, Object>();
+        map.put("id", user.getId());
+        if (nonNull(user.getUsername())) {
+          map.put("username", user.getUsername());
+        }
+        if (nonNull(user.getName())) {
+          map.put("displayName", user.getName());
+        }
 
-      return Optional.of(map);
+        return Optional.of(map);
+      }
     }
-
     return Optional.empty();
   }
 

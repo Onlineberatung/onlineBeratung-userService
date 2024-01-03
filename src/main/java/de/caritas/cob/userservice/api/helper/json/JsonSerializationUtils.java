@@ -6,6 +6,8 @@ import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.text.SimpleDateFormat;
 
 public class JsonSerializationUtils {
 
@@ -18,6 +20,10 @@ public class JsonSerializationUtils {
               .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
               .configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true)
               .configure(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature(), true);
+      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+      objectMapper.setDateFormat(dateFormat);
+      objectMapper.registerModule(new JavaTimeModule());
+
       return objectMapper.readValue(jsonString, clazz);
     } catch (JsonProcessingException e) {
       throw new RuntimeJsonMappingException(e.getMessage());
