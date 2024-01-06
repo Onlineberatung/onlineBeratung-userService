@@ -3,6 +3,8 @@ package de.caritas.cob.userservice.api.tenant;
 /** Holds the tenant_id variable for ongoing thread assigned for HTTP request. */
 public class TenantContext {
 
+  public static final Long TECHNICAL_TENANT_ID = 0L;
+
   private TenantContext() {}
 
   private static final ThreadLocal<TenantData> CURRENT_TENANT_DATA = new ThreadLocal<>();
@@ -41,5 +43,9 @@ public class TenantContext {
 
   public static boolean contextIsSet() {
     return getCurrentTenant() != null;
+  }
+
+  public static boolean isTechnicalOrSuperAdminContext() {
+    return TECHNICAL_TENANT_ID.equals(getCurrentTenant());
   }
 }

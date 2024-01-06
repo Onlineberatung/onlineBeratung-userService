@@ -27,6 +27,7 @@ public class ConsultantAdminFilterTenantAwareService extends ConsultantAdminFilt
     super(entityManagerFactory);
   }
 
+  @Override
   protected FullTextQuery buildFilteredQuery(
       ConsultantFilter consultantFilter, FullTextEntityManager fullTextEntityManager) {
 
@@ -53,8 +54,10 @@ public class ConsultantAdminFilterTenantAwareService extends ConsultantAdminFilt
             .onConsultantFilter(consultantFilter)
             .buildQuery();
 
-    Query resultQuery = queryBuilder.bool().must(tenantQuery).must(query).createQuery();
-
+    Query resultQuery =
+        TenantContext.isTechnicalOrSuperAdminContext()
+            ? query
+            : queryBuilder.bool().must(tenantQuery).must(query).createQuery();
     return fullTextEntityManager.createFullTextQuery(resultQuery, Consultant.class);
   }
 }
