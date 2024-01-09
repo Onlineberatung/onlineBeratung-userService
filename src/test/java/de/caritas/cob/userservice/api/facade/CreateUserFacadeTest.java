@@ -78,9 +78,9 @@ public class CreateUserFacadeTest {
     try {
       this.createUserFacade.createUserAccountWithInitializedConsultingType(USER_DTO_SUCHT);
     } catch (CustomValidationHttpStatusException e) {
-      assertThat(e.getCustomHttpHeader(), notNullValue());
+      assertThat(e.getCustomHttpHeaders(), notNullValue());
       assertThat(
-          e.getCustomHttpHeader().get("X-Reason").get(0),
+          e.getCustomHttpHeaders().get("X-Reason").get(0),
           Matchers.is(USERNAME_NOT_AVAILABLE.name()));
     }
   }
@@ -106,9 +106,9 @@ public class CreateUserFacadeTest {
     try {
       this.createUserFacade.createUserAccountWithInitializedConsultingType(USER_DTO_SUCHT);
     } catch (CustomValidationHttpStatusException e) {
-      assertThat(e.getCustomHttpHeader(), notNullValue());
+      assertThat(e.getCustomHttpHeaders(), notNullValue());
       assertThat(
-          e.getCustomHttpHeader().get("X-Reason").get(0),
+          e.getCustomHttpHeaders().get("X-Reason").get(0),
           Matchers.is(USERNAME_NOT_AVAILABLE.name()));
       assertThat(e.getHttpStatus(), is(HttpStatus.CONFLICT));
     }

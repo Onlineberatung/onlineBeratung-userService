@@ -74,7 +74,7 @@ public class UpdateAdminServiceIT {
 
       // then
     } catch (CustomValidationHttpStatusException e) {
-      assertThat(e.getCustomHttpHeader().get("X-Reason").get(0), is(EMAIL_NOT_VALID.name()));
+      assertThat(e.getCustomHttpHeaders().get("X-Reason").get(0), is(EMAIL_NOT_VALID.name()));
     }
   }
 }

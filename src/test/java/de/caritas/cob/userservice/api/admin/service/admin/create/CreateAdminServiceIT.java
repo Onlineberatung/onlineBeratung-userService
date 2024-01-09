@@ -179,8 +179,8 @@ public class CreateAdminServiceIT {
 
       // then
     } catch (CustomValidationHttpStatusException e) {
-      assertThat(e.getCustomHttpHeader()).isNotNull();
-      assertThat(e.getCustomHttpHeader().get("X-Reason").get(0)).isEqualTo(EMAIL_NOT_VALID.name());
+      assertThat(e.getCustomHttpHeaders()).isNotNull();
+      assertThat(e.getCustomHttpHeaders().get("X-Reason").get(0)).isEqualTo(EMAIL_NOT_VALID.name());
     }
   }
 }
