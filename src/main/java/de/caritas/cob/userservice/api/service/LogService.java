@@ -116,8 +116,6 @@ public class LogService {
    * @param exception The exception
    */
   public static void logWarn(Exception exception) {
-    if (LOGGER.isWarnEnabled()) {
-      LOGGER.warn(getStackTrace(exception));
-    }
+    LOGGER.warn(getStackTrace(exception));
   }
 }
