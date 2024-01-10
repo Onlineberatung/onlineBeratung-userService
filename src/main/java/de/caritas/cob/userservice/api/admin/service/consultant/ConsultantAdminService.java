@@ -88,7 +88,7 @@ public class ConsultantAdminService {
 
     try {
       this.appointmentService.createConsultant(consultantAdminResponseDTO);
-    } catch (RestClientException e) {
+    } catch (Exception e) {
       log.error(
           "User with id {}, who has roles {}, has created a consultant with id {} but the appointment service returned an error: {}",
           authenticatedUser.getUserId(),
