@@ -36,6 +36,7 @@ class ReassignmentConfirmationEmailSupplierTest {
     var language = mail.getLanguage();
     assertThat(language, is(notNullValue()));
     assertThat(language.toString(), is(receiverConsultant.getLanguageCode().toString()));
+    assertThat(mail.getDialect(), is(receiverConsultant.getDialect()));
 
     assertThat(mail.getTemplateData(), hasSize(3));
     assertThat(mail.getTemplateData().get(0).getKey(), is("name_recipient"));
