@@ -1,7 +1,5 @@
 package de.caritas.cob.userservice.api.tenant;
 
-import static de.caritas.cob.userservice.api.tenant.TenantResolverService.TECHNICAL_TENANT_ID;
-
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import lombok.NonNull;
@@ -23,7 +21,7 @@ public class TenantAspect {
   @Before("execution(* de.caritas.cob.userservice.api.port..*(..)))")
   public void beforeQueryAspect() {
 
-    if (TECHNICAL_TENANT_ID.equals(TenantContext.getCurrentTenant())) {
+    if (TenantContext.isTechnicalOrSuperAdminContext()) {
       return;
     }
 
