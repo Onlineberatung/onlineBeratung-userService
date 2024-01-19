@@ -271,6 +271,7 @@ public class ChatService {
     chat.setChatInterval(isTrue(chatDTO.isRepetitive()) ? ChatInterval.WEEKLY : null);
     chat.setStartDate(startDate);
     chat.setInitialStartDate(startDate);
+    chat.setHintMessage(chatDTO.getHintMessage());
 
     this.saveChat(chat);
 

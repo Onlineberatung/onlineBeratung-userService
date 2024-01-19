@@ -161,6 +161,7 @@ public class NewMessageEmailSupplierTest {
     assertThat(generatedMail.getTemplate(), is(TEMPLATE_NEW_MESSAGE_NOTIFICATION_CONSULTANT));
     assertThat(generatedMail.getEmail(), is("email@email.com"));
     assertThat(generatedMail.getLanguage(), is(LanguageCode.DE));
+    assertThat(generatedMail.getDialect(), is(CONSULTANT.getDialect()));
     List<TemplateDataDTO> templateData = generatedMail.getTemplateData();
     assertThat(templateData, hasSize(3));
     assertThat(templateData.get(0).getKey(), is("name"));

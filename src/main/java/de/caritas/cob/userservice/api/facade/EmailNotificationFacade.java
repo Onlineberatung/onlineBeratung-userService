@@ -269,6 +269,7 @@ public class EmailNotificationFacade {
               .receiverEmailAddress(user.getEmail())
               .receiverLanguageCode(user.getLanguageCode())
               .receiverUsername(user.getUsername())
+              .receiverDialect(user.getDialect())
               .tenantTemplateSupplier(tenantTemplateSupplier)
               .applicationBaseUrl(applicationBaseUrl)
               .multiTenancyEnabled(multiTenancyEnabled)

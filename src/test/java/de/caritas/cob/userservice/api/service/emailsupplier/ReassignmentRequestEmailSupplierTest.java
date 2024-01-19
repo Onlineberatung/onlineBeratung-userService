@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
 import com.neovisionaries.i18n.LanguageCode;
+import de.caritas.cob.userservice.mailservice.generated.web.model.Dialect;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +28,7 @@ class ReassignmentRequestEmailSupplierTest {
             .receiverLanguageCode(receiverLanguageCode)
             .applicationBaseUrl("base")
             .receiverUsername("receiverUsername")
+            .receiverDialect(Dialect.INFORMAL)
             .build();
 
     var mails = reassignmentSupplier.generateEmails();
@@ -36,6 +38,7 @@ class ReassignmentRequestEmailSupplierTest {
     assertThat(mail.getEmail(), is("receiverMail"));
     assertThat(mail.getTemplate(), is(TEMPLATE_REASSIGN_REQUEST_NOTIFICATION));
     assertThat(mail.getLanguage(), is(notNullValue()));
+    assertThat(mail.getDialect(), is(Dialect.INFORMAL));
     assertThat(mail.getLanguage().toString(), is(receiverLanguageCode.toString()));
     assertThat(mail.getTemplateData(), hasSize(2));
     assertThat(mail.getTemplateData().get(0).getKey(), is("name_recipient"));

@@ -28,6 +28,7 @@ import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.consultingtype.ReleaseToggle;
 import de.caritas.cob.userservice.api.service.consultingtype.ReleaseToggleService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.NotificationsDTO;
+import de.caritas.cob.userservice.mailservice.generated.web.model.Dialect;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.ArrayList;
@@ -188,6 +189,7 @@ public class NewMessageEmailSupplier implements EmailSupplier {
     return new MailDTO()
         .template(TEMPLATE_NEW_MESSAGE_NOTIFICATION_CONSULTANT)
         .email(recipient.getEmail())
+        .dialect(recipient.getDialect())
         .language(languageOf(recipient.getLanguageCode()))
         .templateData(templateAttributes);
   }
@@ -232,7 +234,8 @@ public class NewMessageEmailSupplier implements EmailSupplier {
             asker.getEmail(),
             asker.getLanguageCode(),
             usernameTranscoder.decodeUsername(consultantUsername),
-            usernameTranscoder.decodeUsername(asker.getUsername()));
+            usernameTranscoder.decodeUsername(asker.getUsername()),
+            asker.getDialect());
 
     return singletonList(mailDTO);
   }
@@ -262,7 +265,11 @@ public class NewMessageEmailSupplier implements EmailSupplier {
   }
 
   private MailDTO buildMailDtoForNewMessageNotificationAsker(
-      String email, LanguageCode languageCode, String consultantName, String askerName) {
+      String email,
+      LanguageCode languageCode,
+      String consultantName,
+      String askerName,
+      Dialect askerDialect) {
     var templateAttributes = new ArrayList<TemplateDataDTO>();
     templateAttributes.add(new TemplateDataDTO().key("consultantName").value(consultantName));
     templateAttributes.add(new TemplateDataDTO().key("askerName").value(askerName));
@@ -275,6 +282,7 @@ public class NewMessageEmailSupplier implements EmailSupplier {
 
     return new MailDTO()
         .template(TEMPLATE_NEW_MESSAGE_NOTIFICATION_ASKER)
+        .dialect(askerDialect)
         .email(email)
         .language(languageOf(languageCode))
         .templateData(templateAttributes);
