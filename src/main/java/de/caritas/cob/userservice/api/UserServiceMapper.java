@@ -400,12 +400,21 @@ public class UserServiceMapper {
     return consultant;
   }
 
-  public Optional<String> displayNameOf(Map<String, Object> patchMap) {
+  public Optional<String> encodedDisplayNameOf(Map<String, Object> patchMap) {
     if (patchMap.containsKey("displayName")) {
       var displayName = (String) patchMap.get("displayName");
       var encodedDisplayName = usernameTranscoder.encodeUsername(displayName);
 
       return Optional.of(encodedDisplayName);
+    }
+
+    return Optional.empty();
+  }
+
+  public Optional<String> displayNameOf(Map<String, Object> patchMap) {
+    if (patchMap.containsKey("displayName")) {
+      var displayName = (String) patchMap.get("displayName");
+      return Optional.of(displayName);
     }
 
     return Optional.empty();

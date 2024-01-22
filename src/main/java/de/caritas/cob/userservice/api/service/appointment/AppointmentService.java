@@ -222,4 +222,24 @@ public class AppointmentService {
     tenantHeaderSupplier.addTenantHeader(headers);
     headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
   }
+
+  public void patchConsultant(String consultantId, String displayName) {
+    if (!appointmentFeatureEnabled) {
+      return;
+    }
+    ConsultantApi appointmentConsultantApi =
+        this.appointmentConsultantServiceApiControllerFactory.createControllerApi();
+
+    if (consultantId != null && !consultantId.isEmpty()) {
+      addTechnicalUserHeaders(appointmentConsultantApi.getApiClient());
+      try {
+        appointmentConsultantApi.patchConsultant(
+            consultantId,
+            new de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO()
+                .displayName(displayName));
+      } catch (HttpClientErrorException ex) {
+        acceptDeletionIfConsultantNotFoundInAppointmentService(ex, consultantId);
+      }
+    }
+  }
 }
