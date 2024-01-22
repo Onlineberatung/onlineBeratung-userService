@@ -33,8 +33,7 @@ class PatchConsultantSagaTest {
 
   @Mock ConsultantRepository consultantRepository;
 
-  @Mock
-  UserServiceMapper userServiceMapper;
+  @Mock UserServiceMapper userServiceMapper;
 
   @Mock MessageClient messageClient;
 
@@ -76,7 +75,8 @@ class PatchConsultantSagaTest {
     // given
     Map<String, Object> patchMap = givenPatchMapWithDisplayName();
     givenUserServiceMapper();
-    when(userServiceMapper.displayNameOf(patchMap)).thenReturn(java.util.Optional.of(CHANGED_DISPLAY_NAME));
+    when(userServiceMapper.displayNameOf(patchMap))
+        .thenReturn(java.util.Optional.of(CHANGED_DISPLAY_NAME));
     when(messageClient.updateUser(Mockito.eq(ROCKETCHAT_ID), Mockito.anyString())).thenReturn(true);
     Consultant patchedConsultant =
         Consultant.builder()
@@ -113,7 +113,8 @@ class PatchConsultantSagaTest {
       executeTransactionalOrRollback_Should_Not_CallAppointmentService_When_RocketchatService_ThrowsException() {
     // given
     Map<String, Object> patchMap = givenPatchMapWithDisplayName();
-    when(userServiceMapper.encodedDisplayNameOf(Mockito.anyMap())).thenReturn(java.util.Optional.of(CHANGED_DISPLAY_NAME));
+    when(userServiceMapper.encodedDisplayNameOf(Mockito.anyMap()))
+        .thenReturn(java.util.Optional.of(CHANGED_DISPLAY_NAME));
 
     Consultant patchedConsultant =
         Consultant.builder()
@@ -148,14 +149,16 @@ class PatchConsultantSagaTest {
   }
 
   @NotNull
-  private  Map<String, Object> givenPatchMapWithDisplayName() {
+  private Map<String, Object> givenPatchMapWithDisplayName() {
     Map<String, Object> patchMap = Maps.newHashMap();
     patchMap.put("displayName", CHANGED_DISPLAY_NAME);
     return patchMap;
   }
 
   private void givenUserServiceMapper() {
-    when(userServiceMapper.displayNameOf(Mockito.anyMap())).thenReturn(java.util.Optional.of(CHANGED_DISPLAY_NAME));
-    when(userServiceMapper.encodedDisplayNameOf(Mockito.anyMap())).thenReturn(java.util.Optional.of(CHANGED_DISPLAY_NAME));
+    when(userServiceMapper.displayNameOf(Mockito.anyMap()))
+        .thenReturn(java.util.Optional.of(CHANGED_DISPLAY_NAME));
+    when(userServiceMapper.encodedDisplayNameOf(Mockito.anyMap()))
+        .thenReturn(java.util.Optional.of(CHANGED_DISPLAY_NAME));
   }
 }
