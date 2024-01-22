@@ -22,7 +22,7 @@ public class PatchConsultantSaga {
 
   private final ConsultantRepository consultantRepository;
 
-  @Setter private UserServiceMapper userServiceMapper;
+  private final UserServiceMapper userServiceMapper;
 
   private final MessageClient messageClient;
 

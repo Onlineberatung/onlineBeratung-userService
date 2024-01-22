@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Fail.fail;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -9,15 +10,12 @@ import com.google.common.collect.Maps;
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.admin.service.consultant.TransactionalStep;
 import de.caritas.cob.userservice.api.exception.httpresponses.DistributedTransactionException;
-import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.MessageClient;
 import de.caritas.cob.userservice.api.service.appointment.AppointmentService;
 import java.util.Map;
-import org.assertj.core.api.Fail;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,7 +33,8 @@ class PatchConsultantSagaTest {
 
   @Mock ConsultantRepository consultantRepository;
 
-  UserServiceMapper userServiceMapper = new UserServiceMapper(new UsernameTranscoder());
+  @Mock
+  UserServiceMapper userServiceMapper;
 
   @Mock MessageClient messageClient;
 
@@ -43,16 +42,12 @@ class PatchConsultantSagaTest {
 
   @Mock PatchConsultantSagaRollbackHandler patchConsultantSagaRollbackHandler;
 
-  @BeforeEach
-  void setup() {
-    patchConsultantSaga.setUserServiceMapper(userServiceMapper);
-  }
-
   @Test
   void
       executeTransactionalOrRollback_Should_SaveConsultantInMariaDB_And_UpdateRocketChat_And_AppointmentService() {
     // given
     Map<String, Object> patchMap = givenPatchMapWithDisplayName();
+    givenUserServiceMapper();
     when(messageClient.updateUser(Mockito.eq(ROCKETCHAT_ID), Mockito.anyString())).thenReturn(true);
     Consultant patchedConsultant =
         Consultant.builder()
@@ -80,6 +75,8 @@ class PatchConsultantSagaTest {
       executeTransactionalOrRollback_Should_RollbackUpdateRocketChat_When_AppointmentService_ThrowsException() {
     // given
     Map<String, Object> patchMap = givenPatchMapWithDisplayName();
+    givenUserServiceMapper();
+    when(userServiceMapper.displayNameOf(patchMap)).thenReturn(java.util.Optional.of(CHANGED_DISPLAY_NAME));
     when(messageClient.updateUser(Mockito.eq(ROCKETCHAT_ID), Mockito.anyString())).thenReturn(true);
     Consultant patchedConsultant =
         Consultant.builder()
@@ -99,7 +96,7 @@ class PatchConsultantSagaTest {
     try {
       // when
       patchConsultantSaga.executeTransactional(patchedConsultant, patchMap);
-      Fail.fail("Expected DistributedTransactionException");
+      fail("Expected DistributedTransactionException");
     } catch (DistributedTransactionException ex) {
       // then
       verify(consultantRepository).save(patchedConsultant);
@@ -113,9 +110,11 @@ class PatchConsultantSagaTest {
 
   @Test
   void
-      executeTransactionalOrRollback_Should_Not_CallAppoitmentService_When_RocketchatService_ThrowsException() {
+      executeTransactionalOrRollback_Should_Not_CallAppointmentService_When_RocketchatService_ThrowsException() {
     // given
     Map<String, Object> patchMap = givenPatchMapWithDisplayName();
+    when(userServiceMapper.encodedDisplayNameOf(Mockito.anyMap())).thenReturn(java.util.Optional.of(CHANGED_DISPLAY_NAME));
+
     Consultant patchedConsultant =
         Consultant.builder()
             .rocketChatId(ROCKETCHAT_ID)
@@ -134,7 +133,7 @@ class PatchConsultantSagaTest {
     try {
       // when
       patchConsultantSaga.executeTransactional(patchedConsultant, patchMap);
-      Fail.fail("Expected DistributedTransactionException");
+      fail("Expected DistributedTransactionException");
     } catch (DistributedTransactionException ex) {
       // then
       verify(consultantRepository).save(patchedConsultant);
@@ -149,9 +148,14 @@ class PatchConsultantSagaTest {
   }
 
   @NotNull
-  private static Map<String, Object> givenPatchMapWithDisplayName() {
+  private  Map<String, Object> givenPatchMapWithDisplayName() {
     Map<String, Object> patchMap = Maps.newHashMap();
     patchMap.put("displayName", CHANGED_DISPLAY_NAME);
     return patchMap;
+  }
+
+  private void givenUserServiceMapper() {
+    when(userServiceMapper.displayNameOf(Mockito.anyMap())).thenReturn(java.util.Optional.of(CHANGED_DISPLAY_NAME));
+    when(userServiceMapper.encodedDisplayNameOf(Mockito.anyMap())).thenReturn(java.util.Optional.of(CHANGED_DISPLAY_NAME));
   }
 }
