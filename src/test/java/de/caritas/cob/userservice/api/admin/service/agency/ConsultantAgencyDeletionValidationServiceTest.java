@@ -53,7 +53,7 @@ public class ConsultantAgencyDeletionValidationServiceTest {
       fail("Exception was not thrown");
     } catch (CustomValidationHttpStatusException e) {
       assertThat(
-          requireNonNull(e.getCustomHttpHeader().get("X-Reason")).iterator().next(),
+          requireNonNull(e.getCustomHttpHeaders().get("X-Reason")).iterator().next(),
           is(CONSULTANT_IS_THE_LAST_OF_AGENCY_AND_AGENCY_IS_STILL_ACTIVE.name()));
     }
   }
@@ -75,7 +75,7 @@ public class ConsultantAgencyDeletionValidationServiceTest {
       fail("Exception was not thrown");
     } catch (CustomValidationHttpStatusException e) {
       assertThat(
-          requireNonNull(e.getCustomHttpHeader().get("X-Reason")).iterator().next(),
+          requireNonNull(e.getCustomHttpHeaders().get("X-Reason")).iterator().next(),
           is(CONSULTANT_IS_THE_LAST_OF_AGENCY_AND_AGENCY_HAS_OPEN_ENQUIRIES.name()));
     }
   }

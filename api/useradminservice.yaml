@@ -1336,6 +1336,8 @@ components:
           type: integer
         tenantName:
           type: string
+        displayName:
+          type: string
 
     CreateAdminDTO:
       type: object

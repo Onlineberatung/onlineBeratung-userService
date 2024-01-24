@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 public class CustomValidationHttpStatusException extends CustomHttpStatusException {
 
-  private final HttpHeaders customHttpHeader;
+  private final HttpHeaders customHttpHeaders;
   private final HttpStatus httpStatus;
 
   /**
@@ -21,7 +21,7 @@ public class CustomValidationHttpStatusException extends CustomHttpStatusExcepti
    */
   public CustomValidationHttpStatusException(HttpStatusExceptionReason httpStatusExceptionReason) {
     super();
-    this.customHttpHeader = new CustomHttpHeader(httpStatusExceptionReason).buildHeader();
+    this.customHttpHeaders = new CustomHttpHeader(httpStatusExceptionReason).buildHeader();
     this.httpStatus = HttpStatus.BAD_REQUEST;
   }
 
@@ -35,7 +35,7 @@ public class CustomValidationHttpStatusException extends CustomHttpStatusExcepti
   public CustomValidationHttpStatusException(
       HttpStatusExceptionReason reason, HttpStatus httpStatus) {
     super();
-    this.customHttpHeader = new CustomHttpHeader(reason).buildHeader();
+    this.customHttpHeaders = new CustomHttpHeader(reason).buildHeader();
     this.httpStatus = httpStatus;
   }
 }

@@ -20,6 +20,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHt
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
+import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
@@ -51,6 +52,8 @@ public class ConsultantCreatorService {
   private final @NonNull UserHelper userHelper;
   private final @NonNull UserAccountInputValidator userAccountInputValidator;
   private final @NonNull TenantAdminService tenantAdminService;
+
+  private final @NonNull RollbackFacade rollbackFacade;
 
   @Value("${multitenancy.enabled}")
   private boolean multiTenancyEnabled;
@@ -234,5 +237,10 @@ public class ConsultantCreatorService {
     if (Boolean.TRUE.equals(createConsultantDTO.getIsGroupchatConsultant())) {
       roles.add(GROUP_CHAT_CONSULTANT.getValue());
     }
+  }
+
+  public void rollbackCreateNewConsultant(Consultant newConsultant) {
+    log.info("Rollback creation of consultant with id {}", newConsultant.getId());
+    rollbackFacade.rollbackConsultantAccount(newConsultant);
   }
 }
