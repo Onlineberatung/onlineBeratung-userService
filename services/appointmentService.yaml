@@ -35,6 +35,28 @@ paths:
               schema:
                 $ref: '#/components/schemas/CalcomUser'
   /consultants/{consultantId}:
+    patch:
+      tags:
+        - consultant
+      summary: Patch consultant to cal.com with consultant object
+      operationId: patchConsultant
+      parameters:
+        - name: consultantId
+          in: path
+          description: ID of onber consultant
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: consultant object that needs to be patched to cal.com
+        content:
+          application/json:
+            schema:
+              $ref: './../api/useradminservice.yaml#/components/schemas/ConsultantDTO'
+        required: true
+      responses:
+        '200':
+          description: successful operation
     put:
       tags:
         - consultant

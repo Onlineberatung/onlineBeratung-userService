@@ -71,6 +71,8 @@ components:
           example: "max@mustermann.de"
         language:
           $ref: '#/components/schemas/LanguageCode'
+        dialect:
+          $ref: '#/components/schemas/Dialect'
         templateData:
           type: array
           items:
@@ -115,4 +117,11 @@ components:
         pa, pi, pl, ps, pt, qu, rm, rn, ro, ru, rw, sa, sc, sd, se, sg, si, sk, sl, sm, sn,
         so, sq, sr, ss, st, su, sv, sw, ta, te, tg, th, ti, tk, tl, tn, to, tr, ts, tt, tw,
         ty, ug, uk, ur, uz, ve, vi, vo, wa, wo, xh, yi, yo, za, zh, zu
+      ]
+
+    Dialect:
+      type: string
+      default: formal
+      enum: [
+          formal, informal
       ]

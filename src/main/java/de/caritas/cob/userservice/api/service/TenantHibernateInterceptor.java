@@ -1,7 +1,5 @@
 package de.caritas.cob.userservice.api.service;
 
-import static de.caritas.cob.userservice.api.tenant.TenantResolverService.TECHNICAL_TENANT_ID;
-
 import de.caritas.cob.userservice.api.model.TenantAware;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import java.util.Iterator;
@@ -22,8 +20,7 @@ public class TenantHibernateInterceptor extends EmptyInterceptor {
       entity = entities.next();
       if (entity instanceof TenantAware) {
         var tenantAware = (TenantAware) entity;
-        if (tenantAware.getTenantId() == null
-            && !TECHNICAL_TENANT_ID.equals(TenantContext.getCurrentTenant())) {
+        if (tenantAware.getTenantId() == null && !TenantContext.isTechnicalOrSuperAdminContext()) {
           ((TenantAware) entity).setTenantId(TenantContext.getCurrentTenant());
         }
       }

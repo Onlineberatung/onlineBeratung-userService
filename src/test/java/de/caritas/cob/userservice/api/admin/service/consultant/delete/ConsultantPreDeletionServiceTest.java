@@ -55,7 +55,7 @@ public class ConsultantPreDeletionServiceTest {
       fail("Exception was not thrown");
     } catch (CustomValidationHttpStatusException e) {
       assertThat(
-          requireNonNull(e.getCustomHttpHeader().get("X-Reason")).iterator().next(),
+          requireNonNull(e.getCustomHttpHeaders().get("X-Reason")).iterator().next(),
           is(CONSULTANT_HAS_ACTIVE_OR_ARCHIVE_SESSIONS.name()));
     }
   }

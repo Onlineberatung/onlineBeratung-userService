@@ -68,9 +68,9 @@ public class UserAccountInputValidatorTest {
       this.userAccountInputValidator.validateAbsence(createConsultantDTO);
       fail("Exception should be thrown");
     } catch (CustomValidationHttpStatusException e) {
-      assertThat(e.getCustomHttpHeader(), notNullValue());
+      assertThat(e.getCustomHttpHeaders(), notNullValue());
       assertThat(
-          e.getCustomHttpHeader().get("X-Reason").get(0),
+          e.getCustomHttpHeaders().get("X-Reason").get(0),
           is(MISSING_ABSENCE_MESSAGE_FOR_ABSENT_USER.name()));
     }
   }
@@ -106,8 +106,8 @@ public class UserAccountInputValidatorTest {
       this.userAccountInputValidator.validateEmailAddress("invalid");
       fail("Exception should be thrown");
     } catch (CustomValidationHttpStatusException e) {
-      assertThat(e.getCustomHttpHeader(), notNullValue());
-      assertThat(e.getCustomHttpHeader().get("X-Reason").get(0), is(EMAIL_NOT_VALID.name()));
+      assertThat(e.getCustomHttpHeaders(), notNullValue());
+      assertThat(e.getCustomHttpHeaders().get("X-Reason").get(0), is(EMAIL_NOT_VALID.name()));
     }
   }
 }

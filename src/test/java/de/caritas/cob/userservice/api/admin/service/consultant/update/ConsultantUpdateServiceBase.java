@@ -61,7 +61,7 @@ public class ConsultantUpdateServiceBase {
       fail("Exception should be thrown");
     } catch (CustomValidationHttpStatusException e) {
       assertThat(
-          e.getCustomHttpHeader().get("X-Reason").get(0),
+          e.getCustomHttpHeaders().get("X-Reason").get(0),
           is(MISSING_ABSENCE_MESSAGE_FOR_ABSENT_USER.name()));
     }
   }
@@ -74,7 +74,7 @@ public class ConsultantUpdateServiceBase {
       this.consultantUpdateService.updateConsultant(getValidConsultantId(), updateConsultantDTO);
       fail("Exception should be thrown");
     } catch (CustomValidationHttpStatusException e) {
-      assertThat(e.getCustomHttpHeader().get("X-Reason").get(0), is(EMAIL_NOT_VALID.name()));
+      assertThat(e.getCustomHttpHeaders().get("X-Reason").get(0), is(EMAIL_NOT_VALID.name()));
     }
   }
 

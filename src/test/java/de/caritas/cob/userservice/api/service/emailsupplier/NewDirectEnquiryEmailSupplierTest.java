@@ -91,6 +91,7 @@ public class NewDirectEnquiryEmailSupplierTest {
     assertThat(generatedMail.getTemplate(), is(TEMPLATE_NEW_DIRECT_ENQUIRY_NOTIFICATION));
     assertThat(generatedMail.getEmail(), is("email@email.com"));
     assertThat(generatedMail.getLanguage(), is(LanguageCode.DE));
+    assertThat(generatedMail.getDialect(), is(MAIN_CONSULTANT.getDialect()));
 
     var templateData = generatedMail.getTemplateData();
     assertThat(templateData, hasSize(3));
@@ -143,11 +144,12 @@ public class NewDirectEnquiryEmailSupplierTest {
     assertThat(generatedMail.getTemplate(), is(TEMPLATE_NEW_DIRECT_ENQUIRY_NOTIFICATION));
     assertThat(generatedMail.getEmail(), is("email@email.com"));
     assertThat(generatedMail.getLanguage(), is(LanguageCode.DE));
-
+    assertThat(generatedMail.getDialect(), is(MAIN_CONSULTANT.getDialect()));
     var templateData = generatedMail.getTemplateData();
     assertThat(templateData, hasSize(3));
     assertThat(templateData.get(0).getKey(), is("name"));
     assertThat(templateData.get(0).getValue(), is("first name last name"));
+
     assertThat(templateData.get(1).getKey(), is("plz"));
     assertThat(templateData.get(1).getValue(), is(POSTCODE));
     assertThat(templateData.get(2).getKey(), is("url"));

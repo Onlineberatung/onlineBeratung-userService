@@ -106,6 +106,10 @@ public class LogService {
     LOGGER.info(getStackTrace(exception));
   }
 
+  public static void logError(Exception exception) {
+    LOGGER.error(getStackTrace(exception));
+  }
+
   /**
    * Logs an warning message.
    *

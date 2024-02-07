@@ -110,6 +110,7 @@ public class NewDirectEnquiryEmailSupplier implements EmailSupplier {
         .template(TEMPLATE_NEW_DIRECT_ENQUIRY_NOTIFICATION)
         .email(consultant.getEmail())
         .language(fromValue(consultant.getLanguageCode().toString()))
-        .templateData(templateAttributes);
+        .templateData(templateAttributes)
+        .dialect(consultant.getDialect());
   }
 }

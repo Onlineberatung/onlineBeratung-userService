@@ -15,6 +15,8 @@ import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantCreatorService;
 import de.caritas.cob.userservice.api.admin.service.consultant.delete.ConsultantPreDeletionService;
 import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
+import de.caritas.cob.userservice.api.exception.httpresponses.DistributedTransactionException;
+import de.caritas.cob.userservice.api.exception.httpresponses.DistributedTransactionInfo;
 import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
@@ -23,6 +25,7 @@ import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.appointment.AppointmentService;
+import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -69,14 +72,36 @@ public class ConsultantAdminService {
    * @return the generated and persisted {@link Consultant} representation as {@link
    *     ConsultantAdminResponseDTO}
    */
-  public ConsultantAdminResponseDTO createNewConsultant(CreateConsultantDTO createConsultantDTO) {
+  public ConsultantAdminResponseDTO createNewConsultant(CreateConsultantDTO createConsultantDTO)
+      throws DistributedTransactionException {
     Consultant newConsultant =
         this.consultantCreatorService.createNewConsultant(createConsultantDTO);
+    List<TransactionalStep> completedSteps =
+        Lists.newArrayList(
+            TransactionalStep.CREATE_ACCOUNT_IN_KEYCLOAK,
+            TransactionalStep.CREATE_ACCOUNT_IN_ROCKETCHAT,
+            TransactionalStep.CREATE_CONSULTANT_IN_MARIADB);
 
     ConsultantAdminResponseDTO consultantAdminResponseDTO =
         ConsultantResponseDTOBuilder.getInstance(newConsultant).buildResponseDTO();
 
-    this.appointmentService.createConsultant(consultantAdminResponseDTO);
+    try {
+      this.appointmentService.createConsultant(consultantAdminResponseDTO);
+    } catch (Exception e) {
+      log.error(
+          "User with id {}, who has roles {}, has created a consultant with id {} but the appointment service returned an error: {}",
+          authenticatedUser.getUserId(),
+          authenticatedUser.getRoles(),
+          newConsultant.getId(),
+          e.getMessage());
+      this.consultantCreatorService.rollbackCreateNewConsultant(newConsultant);
+      throw new DistributedTransactionException(
+          e,
+          new DistributedTransactionInfo(
+              "createNewConsultant",
+              completedSteps,
+              TransactionalStep.CREATE_ACCOUNT_IN_CALCOM_OR_APPOINTMENTSERVICE));
+    }
 
     return consultantAdminResponseDTO;
   }

@@ -22,7 +22,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,6 +48,7 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -281,15 +281,20 @@ public class ChatServiceTest {
 
   @Test
   public void updateChat_Should_SaveNewChatSettings() {
-    Chat inactiveChat = mock(Chat.class);
-    when(inactiveChat.isActive()).thenReturn(false);
-    when(inactiveChat.getChatOwner()).thenReturn(CONSULTANT);
+    // given
+    Chat inactiveChat = new Chat();
+    inactiveChat.setActive(false);
+    inactiveChat.setChatOwner(CONSULTANT);
 
     when(chatRepository.findById(Mockito.any())).thenReturn(Optional.of(inactiveChat));
 
+    // when
     chatService.updateChat(CHAT_ID, CHAT_DTO, AUTHENTICATED_USER_CONSULTANT);
 
-    verify(chatRepository, times(1)).save(Mockito.any());
+    // then
+    ArgumentCaptor<Chat> chatArgumentCaptor = ArgumentCaptor.forClass(Chat.class);
+    verify(chatRepository, times(1)).save(chatArgumentCaptor.capture());
+    assertEquals(CHAT_HINT_MESSAGE, chatArgumentCaptor.getValue().getHintMessage());
   }
 
   @Test

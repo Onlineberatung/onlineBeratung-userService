@@ -271,6 +271,8 @@ public class KeycloakServiceTest {
     when(keycloakClient.getUsersResource()).thenReturn(usersResource);
 
     keycloakService.deleteEmailAddress();
+
+    Mockito.verify(userResource, times(1)).update(any());
   }
 
   @Test
@@ -403,8 +405,8 @@ public class KeycloakServiceTest {
     try {
       this.keycloakService.createKeycloakUser(userDTO);
     } catch (CustomValidationHttpStatusException e) {
-      assertThat(e.getCustomHttpHeader(), notNullValue());
-      assertThat(e.getCustomHttpHeader().get("X-Reason").get(0), is(EMAIL_NOT_AVAILABLE.name()));
+      assertThat(e.getCustomHttpHeaders(), notNullValue());
+      assertThat(e.getCustomHttpHeaders().get("X-Reason").get(0), is(EMAIL_NOT_AVAILABLE.name()));
     }
   }
 
@@ -424,8 +426,9 @@ public class KeycloakServiceTest {
     try {
       this.keycloakService.createKeycloakUser(userDTO);
     } catch (CustomValidationHttpStatusException e) {
-      assertThat(e.getCustomHttpHeader(), notNullValue());
-      assertThat(e.getCustomHttpHeader().get("X-Reason").get(0), is(USERNAME_NOT_AVAILABLE.name()));
+      assertThat(e.getCustomHttpHeaders(), notNullValue());
+      assertThat(
+          e.getCustomHttpHeaders().get("X-Reason").get(0), is(USERNAME_NOT_AVAILABLE.name()));
     }
   }
 
@@ -445,8 +448,9 @@ public class KeycloakServiceTest {
     try {
       this.keycloakService.createKeycloakUser(userDTO);
     } catch (CustomValidationHttpStatusException e) {
-      assertThat(e.getCustomHttpHeader(), notNullValue());
-      assertThat(e.getCustomHttpHeader().get("X-Reason").get(0), is(USERNAME_NOT_AVAILABLE.name()));
+      assertThat(e.getCustomHttpHeaders(), notNullValue());
+      assertThat(
+          e.getCustomHttpHeaders().get("X-Reason").get(0), is(USERNAME_NOT_AVAILABLE.name()));
     }
   }
 
@@ -723,7 +727,7 @@ public class KeycloakServiceTest {
       this.keycloakService.updateUserData("userId", userDTO, "firstName", "lastName");
       fail("Exception was not thrown");
     } catch (CustomValidationHttpStatusException e) {
-      assertThat(e.getCustomHttpHeader().get("X-Reason").get(0), is(EMAIL_NOT_AVAILABLE.name()));
+      assertThat(e.getCustomHttpHeaders().get("X-Reason").get(0), is(EMAIL_NOT_AVAILABLE.name()));
     }
   }
 
