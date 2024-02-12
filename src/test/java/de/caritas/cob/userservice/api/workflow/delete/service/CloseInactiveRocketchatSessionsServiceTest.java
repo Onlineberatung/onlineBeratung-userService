@@ -6,8 +6,8 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
-import de.caritas.cob.userservice.api.model.RocketchatSession;
-import de.caritas.cob.userservice.api.port.out.RocketchatSessionRepository;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatMongoDbService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.model.RocketchatSession;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +21,7 @@ class CloseInactiveRocketchatSessionsServiceTest {
 
   @InjectMocks CloseInactiveRocketchatSessionsService closeInactiveRocketchatSessionsService;
 
-  @Mock RocketchatSessionRepository rocketchatSessionRepository;
+  @Mock RocketChatMongoDbService rocketChatMongoDbService;
 
   @Mock WorkflowErrorMailService workflowErrorMailService;
 
@@ -30,8 +30,7 @@ class CloseInactiveRocketchatSessionsServiceTest {
   @Test
   void deleteInactiveRocketchatSessions_Should_CallDeleteInactiveRocketchatSessions() {
     // given
-    when(rocketchatSessionRepository.findInactiveSessions())
-        .thenReturn(Lists.newArrayList(session));
+    when(rocketChatMongoDbService.findInactiveSessions()).thenReturn(Lists.newArrayList(session));
     // when
     closeInactiveRocketchatSessionsService.closeInactiveRocketchatSessions();
     // then
@@ -43,7 +42,7 @@ class CloseInactiveRocketchatSessionsServiceTest {
   void
       deleteInactiveRocketchatSessions_Should_SendWorkflowErrorsIfExceptionCaughtUponSessionDeletion() {
     // given
-    doThrow(IllegalStateException.class).when(rocketchatSessionRepository).findInactiveSessions();
+    doThrow(IllegalStateException.class).when(rocketChatMongoDbService).findInactiveSessions();
     // when
     closeInactiveRocketchatSessionsService.closeInactiveRocketchatSessions();
     // then

@@ -5,8 +5,8 @@ import static de.caritas.cob.userservice.api.workflow.delete.model.DeletionSourc
 import static de.caritas.cob.userservice.api.workflow.delete.model.DeletionTargetType.ALL;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
-import de.caritas.cob.userservice.api.model.RocketchatSession;
-import de.caritas.cob.userservice.api.port.out.RocketchatSessionRepository;
+import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatMongoDbService;
+import de.caritas.cob.userservice.api.adapters.rocketchat.model.RocketchatSession;
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class CloseInactiveRocketchatSessionsService {
 
-  private final @NonNull RocketchatSessionRepository rocketchatSessionRepository;
+  private final @NonNull RocketChatMongoDbService rocketChatMongoDbService;
 
   private final @NonNull WorkflowErrorMailService workflowErrorMailService;
 
@@ -30,7 +30,7 @@ public class CloseInactiveRocketchatSessionsService {
 
     List<DeletionWorkflowError> workflowErrors = new ArrayList<>();
     try {
-      List<RocketchatSession> inactiveSessions = rocketchatSessionRepository.findInactiveSessions();
+      List<RocketchatSession> inactiveSessions = rocketChatMongoDbService.findInactiveSessions();
       if (isNotEmpty(inactiveSessions)) {
         log.info("Found {} inactive rocketchat sessions.", inactiveSessions.size());
       } else {
@@ -55,7 +55,7 @@ public class CloseInactiveRocketchatSessionsService {
         "Closing rocketchat session with id: {} for rcUserId: {}",
         rocketchatSession.getSessionId());
     rocketchatSession.setClosedAt(Instant.now());
-    rocketchatSessionRepository.save(rocketchatSession);
+    rocketChatMongoDbService.patchClosedAt(rocketchatSession);
   }
 
   private void sendWorkflowErrorsMail(List<DeletionWorkflowError> workflowErrors) {

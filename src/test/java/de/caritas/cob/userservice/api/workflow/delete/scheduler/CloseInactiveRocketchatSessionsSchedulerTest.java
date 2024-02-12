@@ -25,7 +25,7 @@ class CloseInactiveRocketchatSessionsSchedulerTest {
             closeInactiveRocketchatSessionsService, tenantContextProvider);
     ReflectionTestUtils.setField(
         deleteInactiveRocketchatSessionsScheduler,
-        "rocketchatSessionInactiveDeleteWorkflowEnabled",
+        "rocketchatSessionInactiveCloseWorkflowEnabled",
         true);
     // when
     deleteInactiveRocketchatSessionsScheduler.performDeletionWorkflow();
@@ -42,7 +42,7 @@ class CloseInactiveRocketchatSessionsSchedulerTest {
             closeInactiveRocketchatSessionsService, tenantContextProvider);
     ReflectionTestUtils.setField(
         closeInactiveRocketchatSessionsScheduler,
-        "rocketchatSessionInactiveDeleteWorkflowEnabled",
+        "rocketchatSessionInactiveCloseWorkflowEnabled",
         false);
     // when
     closeInactiveRocketchatSessionsScheduler.performDeletionWorkflow();
