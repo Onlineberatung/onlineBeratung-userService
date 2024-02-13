@@ -164,6 +164,17 @@ class UserController2faE2EIT {
   @Test
   @WithMockUser(authorities = AuthorityValue.CONSULTANT_DEFAULT)
   void startTwoFactorAuthByEmailSetupShouldRespondWithNoContent() throws Exception {
+    startTwoFactorAuthorizationAndAssertResponseIsCorrect();
+  }
+
+  @Test
+  @WithMockUser(authorities = AuthorityValue.RESTRICTED_AGENCY_ADMIN)
+  void startTwoFactorAuthByEmailSetupShouldRespondWithNoContent_If_Called_As_AgencyAdmin()
+      throws Exception {
+    startTwoFactorAuthorizationAndAssertResponseIsCorrect();
+  }
+
+  private void startTwoFactorAuthorizationAndAssertResponseIsCorrect() throws Exception {
     givenAValidConsultant();
     givenAValidEmailDTO();
     givenKeycloakFoundNoEmailInUse();
