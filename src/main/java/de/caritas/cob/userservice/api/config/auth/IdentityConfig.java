@@ -85,6 +85,7 @@ public class IdentityConfig implements IdentityClientConfig {
         || roles.contains(UserRole.TENANT_ADMIN.getValue()) && otpAllowedForTenantSuperAdmins
         || roles.contains(UserRole.SINGLE_TENANT_ADMIN.getValue())
             && otpAllowedForSingleTenantAdmins
-        || roles.contains(UserRole.RESTRICTED_AGENCY_ADMIN.getValue()) && otpAllowedForRestrictedAgencyAdmins;
+        || roles.contains(UserRole.RESTRICTED_AGENCY_ADMIN.getValue())
+            && otpAllowedForRestrictedAgencyAdmins;
   }
 }
