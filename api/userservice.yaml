@@ -2725,6 +2725,10 @@ components:
           type: integer
           format: int64
           example: 12
+        topicIds:
+          type: array
+          items:
+            type: long
 
 
     MobileTokenDTO:
