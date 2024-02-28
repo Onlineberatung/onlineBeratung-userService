@@ -9,6 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import de.caritas.cob.userservice.api.AccountManager;
 import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
@@ -57,6 +58,8 @@ public class ConsultantAdminServiceIT {
   @MockBean private ConsultantUpdateService consultantUpdateService;
 
   @MockBean private AppointmentService appointmentService;
+
+  @MockBean private AccountManager accountManager;
 
   @Test
   public void findConsultantById_Should_returnExpectedConsultant_When_consultantIdExists() {

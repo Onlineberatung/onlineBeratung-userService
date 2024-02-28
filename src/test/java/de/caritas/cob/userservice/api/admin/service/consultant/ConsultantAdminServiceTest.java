@@ -6,6 +6,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import de.caritas.cob.userservice.api.AccountManager;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantCreatorService;
 import de.caritas.cob.userservice.api.admin.service.consultant.delete.ConsultantPreDeletionService;
 import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
@@ -40,6 +41,8 @@ public class ConsultantAdminServiceTest {
   @Mock private SessionRepository sessionRepository;
 
   @Mock private AuthenticatedUser authenticatedUser;
+
+  @Mock private AccountManager accountManager;
 
   @Test(expected = NotFoundException.class)
   public void
