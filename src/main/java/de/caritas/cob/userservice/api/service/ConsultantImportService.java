@@ -3,7 +3,7 @@ package de.caritas.cob.userservice.api.service;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
-import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantCreatorService;
+import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantCreateSaga;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
 import de.caritas.cob.userservice.api.exception.ImportException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -55,7 +55,7 @@ public class ConsultantImportService {
   private final @NonNull ConsultingTypeManager consultingTypeManager;
   private final @NonNull AgencyService agencyService;
   private final @NonNull UserHelper userHelper;
-  private final @NonNull ConsultantCreatorService consultantCreatorService;
+  private final @NonNull ConsultantCreateSaga consultantCreateSaga;
   private final @NonNull ConsultantAgencyRelationCreatorService
       consultantAgencyRelationCreatorService;
 
@@ -226,7 +226,7 @@ public class ConsultantImportService {
         writeToImportLog(logMessage);
 
         if (importRecord.getConsultantId() == null) {
-          consultant = this.consultantCreatorService.createNewConsultant(importRecord, roles);
+          consultant = this.consultantCreateSaga.createNewConsultant(importRecord, roles);
 
           importRecord.setConsultantId(consultant.getId());
           logMessage = "Keycloak-ID: " + consultant.getId();

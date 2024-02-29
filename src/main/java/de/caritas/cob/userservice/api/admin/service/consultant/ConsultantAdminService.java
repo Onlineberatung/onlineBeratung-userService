@@ -13,11 +13,10 @@ import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
-import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantCreatorService;
+import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantCreateSaga;
 import de.caritas.cob.userservice.api.admin.service.consultant.delete.ConsultantPreDeletionService;
 import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
 import de.caritas.cob.userservice.api.exception.httpresponses.DistributedTransactionException;
-import de.caritas.cob.userservice.api.exception.httpresponses.DistributedTransactionInfo;
 import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
@@ -26,7 +25,6 @@ import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.appointment.AppointmentService;
-import java.util.List;
 import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -40,16 +38,17 @@ import org.springframework.stereotype.Service;
 public class ConsultantAdminService {
 
   private final @NonNull ConsultantRepository consultantRepository;
-  private final @NonNull ConsultantCreatorService consultantCreatorService;
+  private final @NonNull ConsultantCreateSaga consultantCreateSaga;
   private final @NonNull ConsultantUpdateService consultantUpdateService;
   private final @NonNull ConsultantPreDeletionService consultantPreDeletionService;
-  private final @NonNull AppointmentService appointmentService;
 
   private final @NonNull SessionRepository sessionRepository;
 
   private final @NonNull AuthenticatedUser authenticatedUser;
 
   private final @NonNull AccountManager accountManager;
+
+  private final @NonNull AppointmentService appointmentService;
 
   /**
    * Finds a {@link Consultant} by the given consultant id and throws a {@link NoContentException}
@@ -90,36 +89,7 @@ public class ConsultantAdminService {
    */
   public ConsultantAdminResponseDTO createNewConsultant(CreateConsultantDTO createConsultantDTO)
       throws DistributedTransactionException {
-    Consultant newConsultant =
-        this.consultantCreatorService.createNewConsultant(createConsultantDTO);
-    List<TransactionalStep> completedSteps =
-        Lists.newArrayList(
-            TransactionalStep.CREATE_ACCOUNT_IN_KEYCLOAK,
-            TransactionalStep.CREATE_ACCOUNT_IN_ROCKETCHAT,
-            TransactionalStep.CREATE_CONSULTANT_IN_MARIADB);
-
-    ConsultantAdminResponseDTO consultantAdminResponseDTO =
-        ConsultantResponseDTOBuilder.getInstance(newConsultant).buildResponseDTO();
-
-    try {
-      this.appointmentService.createConsultant(consultantAdminResponseDTO);
-    } catch (Exception e) {
-      log.error(
-          "User with id {}, who has roles {}, has created a consultant with id {} but the appointment service returned an error: {}",
-          authenticatedUser.getUserId(),
-          authenticatedUser.getRoles(),
-          newConsultant.getId(),
-          e.getMessage());
-      this.consultantCreatorService.rollbackCreateNewConsultant(newConsultant);
-      throw new DistributedTransactionException(
-          e,
-          new DistributedTransactionInfo(
-              "createNewConsultant",
-              completedSteps,
-              TransactionalStep.CREATE_ACCOUNT_IN_CALCOM_OR_APPOINTMENTSERVICE));
-    }
-
-    return consultantAdminResponseDTO;
+    return this.consultantCreateSaga.createNewConsultant(createConsultantDTO);
   }
 
   /**
