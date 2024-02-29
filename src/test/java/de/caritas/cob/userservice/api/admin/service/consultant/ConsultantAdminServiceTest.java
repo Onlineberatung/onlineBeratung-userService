@@ -7,7 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import de.caritas.cob.userservice.api.AccountManager;
-import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantCreateSaga;
+import de.caritas.cob.userservice.api.admin.service.consultant.create.CreateConsultantSaga;
 import de.caritas.cob.userservice.api.admin.service.consultant.delete.ConsultantPreDeletionService;
 import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
@@ -30,7 +30,7 @@ public class ConsultantAdminServiceTest {
 
   @Mock private ConsultantRepository consultantRepository;
 
-  @Mock private ConsultantCreateSaga consultantCreateSaga;
+  @Mock private CreateConsultantSaga createConsultantSaga;
 
   @Mock private ConsultantUpdateService consultantUpdateService;
 
