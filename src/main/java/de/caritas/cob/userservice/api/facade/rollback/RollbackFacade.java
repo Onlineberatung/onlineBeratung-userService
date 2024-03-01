@@ -32,14 +32,16 @@ public class RollbackFacade {
   private final @NonNull DeleteUserAccountService deleteUserAccountService;
 
   public void rollbackConsultantAccount(Consultant consultant) {
-    log.info("Rollback consultant account: {}", consultant);
+    log.info(
+        "Initiating rollback of consultant account. Consultant id: {}",
+        consultant.getId(),
+        consultant.getUsername());
     consultant.setDeleteDate(LocalDateTime.now());
     List<DeletionWorkflowError> deletionWorkflowErrors =
         deleteUserAccountService.performConsultantDeletion(consultant);
     if (nonNull(deletionWorkflowErrors) && !deletionWorkflowErrors.isEmpty()) {
-
       deletionWorkflowErrors.stream()
-          .forEach(e -> log.error("Consultant delete workflow error: ", e));
+          .forEach(e -> log.error("Consultant delete error during rollback: ", e));
     }
   }
   /**

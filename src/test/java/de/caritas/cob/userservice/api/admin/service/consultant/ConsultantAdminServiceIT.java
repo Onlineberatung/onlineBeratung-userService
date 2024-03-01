@@ -15,7 +15,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDT
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.HalLink.MethodEnum;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
-import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantCreatorService;
+import de.caritas.cob.userservice.api.admin.service.consultant.create.CreateConsultantSaga;
 import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
 import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
 import de.caritas.cob.userservice.api.model.Consultant;
@@ -53,7 +53,7 @@ public class ConsultantAdminServiceIT {
 
   @Autowired private ConsultantAgencyRepository consultantAgencyRepository;
 
-  @MockBean private ConsultantCreatorService consultantCreatorService;
+  @MockBean private CreateConsultantSaga createConsultantSaga;
 
   @MockBean private ConsultantUpdateService consultantUpdateService;
 
@@ -121,13 +121,13 @@ public class ConsultantAdminServiceIT {
   public void createNewConsultant_Should_useCreatorServiceAndBuildConsultantAdminResponseDTO() {
     CreateConsultantDTO createConsultantDTO =
         new EasyRandom().nextObject(CreateConsultantDTO.class);
-    when(this.consultantCreatorService.createNewConsultant(any()))
-        .thenReturn(new EasyRandom().nextObject(Consultant.class));
+    when(this.createConsultantSaga.createNewConsultant(any()))
+        .thenReturn(new EasyRandom().nextObject(ConsultantAdminResponseDTO.class));
 
     ConsultantAdminResponseDTO result =
         this.consultantAdminService.createNewConsultant(createConsultantDTO);
 
-    verify(this.consultantCreatorService, times(1)).createNewConsultant(createConsultantDTO);
+    verify(this.createConsultantSaga, times(1)).createNewConsultant(createConsultantDTO);
     assertThat(result.getLinks(), notNullValue());
     assertThat(result.getEmbedded(), notNullValue());
   }
