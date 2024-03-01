@@ -119,7 +119,12 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .antMatchers("/users/chat/{chatId:[0-9]+}/verify")
         .hasAnyAuthority(CONSULTANT_DEFAULT)
         .antMatchers("/users/password/change")
-        .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT, SINGLE_TENANT_ADMIN, TENANT_ADMIN, RESTRICTED_AGENCY_ADMIN)
+        .hasAnyAuthority(
+            USER_DEFAULT,
+            CONSULTANT_DEFAULT,
+            SINGLE_TENANT_ADMIN,
+            TENANT_ADMIN,
+            RESTRICTED_AGENCY_ADMIN)
         .antMatchers("/users/twoFactorAuth", "/users/2fa/**", "/users/mobile/app/token")
         .hasAnyAuthority(
             SINGLE_TENANT_ADMIN,
