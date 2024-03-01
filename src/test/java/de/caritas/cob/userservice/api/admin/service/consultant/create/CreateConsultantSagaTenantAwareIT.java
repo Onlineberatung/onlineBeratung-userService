@@ -49,14 +49,14 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 @TestPropertySource(properties = "multitenancy.enabled=true")
 @Transactional
-public class ConsultantCreateSagaTenantAwareIT {
+public class CreateConsultantSagaTenantAwareIT {
 
   private static final String DUMMY_RC_ID = "rcUserId";
   private static final String VALID_USERNAME = "validUsername";
   private static final String VALID_EMAILADDRESS = "valid@emailaddress.de";
   private static final long TENANT_ID = 1;
 
-  @Autowired private ConsultantCreateSaga consultantCreateSaga;
+  @Autowired private CreateConsultantSaga createConsultantSaga;
 
   @Autowired private ConsultantRepository consultantRepository;
 
@@ -81,7 +81,7 @@ public class ConsultantCreateSagaTenantAwareIT {
     createConsultant("username1");
     createConsultant("username2");
     CreateConsultantDTO createConsultantDTO = this.easyRandom.nextObject(CreateConsultantDTO.class);
-    this.consultantCreateSaga.createNewConsultant(createConsultantDTO);
+    this.createConsultantSaga.createNewConsultant(createConsultantDTO);
     rollbackDBState();
   }
 
@@ -112,7 +112,7 @@ public class ConsultantCreateSagaTenantAwareIT {
 
     // when
     ConsultantAdminResponseDTO consultant =
-        consultantCreateSaga.createNewConsultant(createConsultantDTO);
+        createConsultantSaga.createNewConsultant(createConsultantDTO);
 
     // then
     verify(keycloakService, times(2)).updateRole(anyString(), anyString());
@@ -159,7 +159,7 @@ public class ConsultantCreateSagaTenantAwareIT {
     var licensing = new Licensing();
     licensing.setAllowedNumberOfUsers(2);
     dummyTenant.setLicensing(licensing);
-    ReflectionTestUtils.setField(consultantCreateSaga, "tenantAdminService", tenantAdminService);
+    ReflectionTestUtils.setField(createConsultantSaga, "tenantAdminService", tenantAdminService);
     when(tenantAdminService.getTenantById(TenantContext.getCurrentTenant()))
         .thenReturn(dummyTenant);
   }
