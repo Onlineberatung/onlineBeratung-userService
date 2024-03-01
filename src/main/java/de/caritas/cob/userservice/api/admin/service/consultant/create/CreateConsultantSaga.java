@@ -1,12 +1,12 @@
 package de.caritas.cob.userservice.api.admin.service.consultant.create;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static de.caritas.cob.userservice.api.config.auth.UserRole.CONSULTANT;
 import static de.caritas.cob.userservice.api.config.auth.UserRole.GROUP_CHAT_CONSULTANT;
 import static de.caritas.cob.userservice.api.helper.json.JsonSerializationUtils.serializeToJsonString;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 
-import com.google.common.collect.Lists;
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
@@ -50,8 +50,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ConsultantCreateSaga {
+public class CreateConsultantSaga {
 
+  private static final String CREATE_CONSULTANT = "createConsultant";
   private final @NonNull IdentityClient identityClient;
   private final @NonNull RocketChatService rocketChatService;
   private final @NonNull ConsultantService consultantService;
@@ -71,13 +72,6 @@ public class ConsultantCreateSaga {
 
   private final @NonNull AppointmentService appointmentService;
 
-  /**
-   * Creates a new {@link Consultant} by {@link CreateConsultantDTO} in database, keycloak and
-   * rocket chat.
-   *
-   * @param createConsultantDTO the input used for creation
-   * @return the generated {@link Consultant}
-   */
   private Consultant createNewConsultantWithoutAppointment(
       CreateConsultantDTO createConsultantDTO) {
     assertLicensesNotExceeded();
@@ -93,6 +87,14 @@ public class ConsultantCreateSaga {
     return createNewConsultant(consultantCreationInput, roles);
   }
 
+  /**
+   * Creates a new {@link Consultant} by {@link CreateConsultantDTO} in database, keycloak and
+   * rocket chat, and optionally in the appointment service (calcom), provided the appointment
+   * feature is enabled.
+   *
+   * @param createConsultantDTO the input used for creation
+   * @return the generated {@link Consultant}
+   */
   @Transactional
   public ConsultantAdminResponseDTO createNewConsultant(CreateConsultantDTO createConsultantDTO)
       throws DistributedTransactionException {
@@ -121,15 +123,17 @@ public class ConsultantCreateSaga {
       this.rollbackCreateNewConsultant(newConsultant);
       throw new DistributedTransactionException(
           e,
-          new DistributedTransactionInfo(
-              "createNewConsultant",
-              Lists.newArrayList(
-                  TransactionalStep.CREATE_ACCOUNT_IN_KEYCLOAK,
-                  TransactionalStep.UPDATE_USER_PASSWORD_IN_KEYCLOAK,
-                  TransactionalStep.UPDATE_USER_ROLES_IN_KEYCLOAK,
-                  TransactionalStep.CREATE_ACCOUNT_IN_ROCKETCHAT,
-                  TransactionalStep.CREATE_CONSULTANT_IN_MARIADB),
-              TransactionalStep.CREATE_ACCOUNT_IN_CALCOM_OR_APPOINTMENTSERVICE));
+          DistributedTransactionInfo.builder()
+              .name("createNewConsultant")
+              .completedTransactionalOperations(
+                  newArrayList(
+                      TransactionalStep.CREATE_ACCOUNT_IN_KEYCLOAK,
+                      TransactionalStep.UPDATE_USER_PASSWORD_IN_KEYCLOAK,
+                      TransactionalStep.UPDATE_USER_ROLES_IN_KEYCLOAK,
+                      TransactionalStep.CREATE_ACCOUNT_IN_ROCKETCHAT,
+                      TransactionalStep.CREATE_CONSULTANT_IN_MARIADB))
+              .failedStep(TransactionalStep.CREATE_ACCOUNT_IN_CALCOM_OR_APPOINTMENTSERVICE)
+              .build());
     }
   }
 
@@ -197,9 +201,9 @@ public class ConsultantCreateSaga {
       throw new DistributedTransactionException(
           e,
           DistributedTransactionInfo.builder()
+              .name(CREATE_CONSULTANT)
               .completedTransactionalOperations(
-                  Lists.newArrayList(TransactionalStep.CREATE_ACCOUNT_IN_KEYCLOAK))
-              .name("createConsultant")
+                  newArrayList(TransactionalStep.CREATE_ACCOUNT_IN_KEYCLOAK))
               .failedStep(TransactionalStep.UPDATE_USER_PASSWORD_IN_KEYCLOAK)
               .build());
     }
@@ -219,10 +223,10 @@ public class ConsultantCreateSaga {
           e,
           DistributedTransactionInfo.builder()
               .completedTransactionalOperations(
-                  Lists.newArrayList(
+                  newArrayList(
                       TransactionalStep.CREATE_ACCOUNT_IN_KEYCLOAK,
                       TransactionalStep.UPDATE_USER_PASSWORD_IN_KEYCLOAK))
-              .name("createConsultant")
+              .name(CREATE_CONSULTANT)
               .failedStep(TransactionalStep.UPDATE_USER_ROLES_IN_KEYCLOAK)
               .build());
     }
@@ -245,13 +249,13 @@ public class ConsultantCreateSaga {
       throw new DistributedTransactionException(
           e,
           DistributedTransactionInfo.builder()
+              .name(CREATE_CONSULTANT)
               .completedTransactionalOperations(
-                  Lists.newArrayList(
+                  newArrayList(
                       TransactionalStep.CREATE_ACCOUNT_IN_KEYCLOAK,
                       TransactionalStep.UPDATE_USER_PASSWORD_IN_KEYCLOAK,
                       TransactionalStep.UPDATE_USER_ROLES_IN_KEYCLOAK,
                       TransactionalStep.CREATE_ACCOUNT_IN_ROCKETCHAT))
-              .name("createConsultant")
               .failedStep(TransactionalStep.CREATE_CONSULTANT_IN_MARIADB)
               .build());
     }
@@ -299,11 +303,11 @@ public class ConsultantCreateSaga {
           e,
           DistributedTransactionInfo.builder()
               .completedTransactionalOperations(
-                  Lists.newArrayList(
+                  newArrayList(
                       TransactionalStep.CREATE_ACCOUNT_IN_KEYCLOAK,
                       TransactionalStep.UPDATE_USER_PASSWORD_IN_KEYCLOAK,
                       TransactionalStep.UPDATE_USER_ROLES_IN_KEYCLOAK))
-              .name("createConsultant")
+              .name(CREATE_CONSULTANT)
               .failedStep(TransactionalStep.CREATE_ACCOUNT_IN_ROCKETCHAT)
               .build());
     }

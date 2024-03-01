@@ -13,7 +13,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateAdminConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UpdateConsultantDTO;
-import de.caritas.cob.userservice.api.admin.service.consultant.create.ConsultantCreateSaga;
+import de.caritas.cob.userservice.api.admin.service.consultant.create.CreateConsultantSaga;
 import de.caritas.cob.userservice.api.admin.service.consultant.delete.ConsultantPreDeletionService;
 import de.caritas.cob.userservice.api.admin.service.consultant.update.ConsultantUpdateService;
 import de.caritas.cob.userservice.api.exception.httpresponses.DistributedTransactionException;
@@ -38,7 +38,7 @@ import org.springframework.stereotype.Service;
 public class ConsultantAdminService {
 
   private final @NonNull ConsultantRepository consultantRepository;
-  private final @NonNull ConsultantCreateSaga consultantCreateSaga;
+  private final @NonNull CreateConsultantSaga createConsultantSaga;
   private final @NonNull ConsultantUpdateService consultantUpdateService;
   private final @NonNull ConsultantPreDeletionService consultantPreDeletionService;
 
@@ -89,7 +89,7 @@ public class ConsultantAdminService {
    */
   public ConsultantAdminResponseDTO createNewConsultant(CreateConsultantDTO createConsultantDTO)
       throws DistributedTransactionException {
-    return this.consultantCreateSaga.createNewConsultant(createConsultantDTO);
+    return createConsultantSaga.createNewConsultant(createConsultantDTO);
   }
 
   /**

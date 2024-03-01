@@ -52,14 +52,14 @@ import org.springframework.test.util.ReflectionTestUtils;
 @SpringBootTest(classes = UserServiceApplication.class)
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class ConsultantCreateSagaIT {
+public class CreateConsultantSagaIT {
 
   private static final String DUMMY_RC_ID = "rcUserId";
   private static final String VALID_USERNAME = "validUsername";
   private static final String VALID_EMAILADDRESS = "valid@emailaddress.de";
   private static final long TENANT_ID = 1L;
 
-  @Autowired private ConsultantCreateSaga consultantCreateSaga;
+  @Autowired private CreateConsultantSaga createConsultantSaga;
 
   @MockBean private RocketChatService rocketChatService;
 
@@ -75,7 +75,7 @@ public class ConsultantCreateSagaIT {
 
   @Before
   public void setup() {
-    ReflectionTestUtils.setField(consultantCreateSaga, "appointmentFeatureEnabled", false);
+    ReflectionTestUtils.setField(createConsultantSaga, "appointmentFeatureEnabled", false);
   }
 
   @Test
@@ -91,7 +91,7 @@ public class ConsultantCreateSagaIT {
     createConsultantDTO.setIsGroupchatConsultant(false);
 
     var consultantAdminResponseDTO =
-        this.consultantCreateSaga.createNewConsultant(createConsultantDTO);
+        this.createConsultantSaga.createNewConsultant(createConsultantDTO);
 
     ConsultantDTO consultant = consultantAdminResponseDTO.getEmbedded();
     verify(keycloakService).updateRole(anyString(), eq(CONSULTANT.getValue()));
@@ -121,7 +121,7 @@ public class ConsultantCreateSagaIT {
     createConsultantDTO.setIsGroupchatConsultant(false);
 
     try {
-      this.consultantCreateSaga.createNewConsultant(createConsultantDTO);
+      this.createConsultantSaga.createNewConsultant(createConsultantDTO);
       fail("Exception should be thrown");
     } catch (DistributedTransactionException ex) {
       assertThat(
@@ -136,7 +136,7 @@ public class ConsultantCreateSagaIT {
   @Test
   public void createNewConsultant_Should_callRollback_When_AppointmentServiceThrowsException()
       throws RocketChatLoginException {
-    ReflectionTestUtils.setField(consultantCreateSaga, "appointmentFeatureEnabled", true);
+    ReflectionTestUtils.setField(createConsultantSaga, "appointmentFeatureEnabled", true);
     doThrow(BadRequestException.class).when(appointmentService).createConsultant(any());
     when(keycloakService.createKeycloakUser(any(), anyString(), any()))
         .thenReturn(easyRandom.nextObject(KeycloakCreateUserResponseDTO.class));
@@ -148,7 +148,7 @@ public class ConsultantCreateSagaIT {
     createConsultantDTO.setIsGroupchatConsultant(false);
 
     try {
-      this.consultantCreateSaga.createNewConsultant(createConsultantDTO);
+      this.createConsultantSaga.createNewConsultant(createConsultantDTO);
       fail("Exception should be thrown");
     } catch (DistributedTransactionException ex) {
       assertThat(
@@ -173,7 +173,7 @@ public class ConsultantCreateSagaIT {
     createConsultantDTO.setIsGroupchatConsultant(false);
 
     try {
-      this.consultantCreateSaga.createNewConsultant(createConsultantDTO);
+      this.createConsultantSaga.createNewConsultant(createConsultantDTO);
       fail("Exception should be thrown");
     } catch (DistributedTransactionException ex) {
       assertThat(
@@ -196,7 +196,7 @@ public class ConsultantCreateSagaIT {
     createConsultantDTO.setIsGroupchatConsultant(false);
 
     try {
-      this.consultantCreateSaga.createNewConsultant(createConsultantDTO);
+      this.createConsultantSaga.createNewConsultant(createConsultantDTO);
       fail("Exception should be thrown");
     } catch (DistributedTransactionException ex) {
       assertThat(
@@ -221,7 +221,7 @@ public class ConsultantCreateSagaIT {
     createConsultantDTO.setIsGroupchatConsultant(false);
 
     try {
-      this.consultantCreateSaga.createNewConsultant(createConsultantDTO);
+      this.createConsultantSaga.createNewConsultant(createConsultantDTO);
       fail("Exception should be thrown");
     } catch (DistributedTransactionException ex) {
       assertThat(
@@ -252,7 +252,7 @@ public class ConsultantCreateSagaIT {
     createConsultantDTO.setIsGroupchatConsultant(true);
 
     // when
-    var consultantAdminResponseDTO = consultantCreateSaga.createNewConsultant(createConsultantDTO);
+    var consultantAdminResponseDTO = createConsultantSaga.createNewConsultant(createConsultantDTO);
 
     // then
     verify(keycloakService, times(2)).updateRole(anyString(), anyString());
@@ -276,7 +276,7 @@ public class ConsultantCreateSagaIT {
     importRecord.setEmail(VALID_EMAILADDRESS);
 
     Consultant consultant =
-        this.consultantCreateSaga.createNewConsultant(importRecord, asSet(CONSULTANT.getValue()));
+        this.createConsultantSaga.createNewConsultant(importRecord, asSet(CONSULTANT.getValue()));
 
     assertThat(consultant, notNullValue());
     assertThat(consultant.getId(), notNullValue());
@@ -305,7 +305,7 @@ public class ConsultantCreateSagaIT {
     createConsultantDTO.setUsername(VALID_USERNAME);
     createConsultantDTO.setEmail(VALID_EMAILADDRESS);
 
-    this.consultantCreateSaga.createNewConsultant(createConsultantDTO);
+    this.createConsultantSaga.createNewConsultant(createConsultantDTO);
   }
 
   @Test(expected = CustomValidationHttpStatusException.class)
@@ -321,7 +321,7 @@ public class ConsultantCreateSagaIT {
         .thenReturn(keycloakResponse);
     CreateConsultantDTO createConsultantDTO = this.easyRandom.nextObject(CreateConsultantDTO.class);
 
-    this.consultantCreateSaga.createNewConsultant(createConsultantDTO);
+    this.createConsultantSaga.createNewConsultant(createConsultantDTO);
   }
 
   @Test
@@ -330,7 +330,7 @@ public class ConsultantCreateSagaIT {
     createConsultantDTO.setEmail("invalid");
 
     try {
-      this.consultantCreateSaga.createNewConsultant(createConsultantDTO);
+      this.createConsultantSaga.createNewConsultant(createConsultantDTO);
       fail("Exception should be thrown");
     } catch (CustomValidationHttpStatusException e) {
       assertThat(e.getCustomHttpHeaders(), notNullValue());
