@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.adapters.web.controller.interceptor;
 
+import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import io.swagger.models.HttpMethod;
 import java.io.IOException;
 import java.util.Collections;
@@ -35,13 +36,13 @@ public class ApiTokenFilter  extends OncePerRequestFilter {
   protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
       @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-    String token = request.getHeader("Authorization");
+    String token = request.getHeader("api-token");
 
     if (validateExternalUserCreateTenantApiToken(token)){
       // Create an authentication token
       UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
           "ExternalTechnicalAdmin", null,
-          Collections.singletonList(new SimpleGrantedAuthority("AUTHORIZATION_CREATE_TENANT")));
+          Collections.singletonList(new SimpleGrantedAuthority(AuthorityValue.TENANT_ADMIN)));
       // Set the authentication in the SecurityContext
       SecurityContextHolder.getContext().setAuthentication(auth);
     }
