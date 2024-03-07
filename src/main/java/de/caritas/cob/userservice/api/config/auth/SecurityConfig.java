@@ -49,7 +49,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 
   @Bean
   public ApiTokenFilter apiTokenFilter() {
-    return apiTokenFilter();
+    return new ApiTokenFilter();
   }
 
   /**
