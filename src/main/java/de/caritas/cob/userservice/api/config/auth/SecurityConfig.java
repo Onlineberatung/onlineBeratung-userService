@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.config.auth;
 
 import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue.*;
 
+import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.ApiTokenFilter;
 import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.HttpTenantFilter;
 import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.StatelessCsrfFilter;
 import de.caritas.cob.userservice.api.config.CsrfSecurityProperties;
@@ -23,6 +24,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.security.web.csrf.CsrfFilter;
@@ -44,6 +46,9 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   private boolean multitenancy;
 
   private HttpTenantFilter tenantFilter;
+
+  @Bean
+  public ApiTokenFilter apiTokenFilter() { return apiTokenFilter(); }
 
   /**
    * Processes HTTP requests and checks for a valid spring security authentication for the
@@ -71,7 +76,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
     var httpSecurity =
         http.csrf()
             .disable()
-            .addFilterBefore(new StatelessCsrfFilter(csrfSecurityProperties), CsrfFilter.class);
+            .addFilterBefore(new StatelessCsrfFilter(csrfSecurityProperties), CsrfFilter.class)
+            .addFilterBefore(apiTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
     httpSecurity = enableTenantFilterIfMultitenancyEnabled(httpSecurity);
 
