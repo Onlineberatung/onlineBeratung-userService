@@ -18,4 +18,9 @@ public class GroupsListAllResponseDTO {
 
   @JsonProperty("groups")
   private GroupDTO[] groups;
+
+  private Integer offset;
+  private Integer count;
+  private Integer total;
+
 }
