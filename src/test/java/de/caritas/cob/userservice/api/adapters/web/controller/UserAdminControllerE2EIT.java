@@ -327,8 +327,8 @@ class UserAdminControllerE2EIT {
 
   @Test
   void
-  createNewTenantAdmin_Should_returnOk_When_calledWithValidTenantCreateParamsAndValidExternalUserCreateTenantApiToken()
-      throws Exception {
+      createNewTenantAdmin_Should_returnOk_When_calledWithValidTenantCreateParamsAndValidExternalUserCreateTenantApiToken()
+          throws Exception {
     // given
     CreateAdminDTO createAdminDTO = new EasyRandom().nextObject(CreateAdminDTO.class);
     createAdminDTO.setEmail("valid@email.com");
@@ -352,8 +352,8 @@ class UserAdminControllerE2EIT {
 
   @Test
   void
-  createNewTenantAdmin_Should_returnStatusUnauthorized_When_calledWithValidTenantCreateParamsAndInvalidExternalUserCreateTenantApiToken()
-      throws Exception {
+      createNewTenantAdmin_Should_returnStatusUnauthorized_When_calledWithValidTenantCreateParamsAndInvalidExternalUserCreateTenantApiToken()
+          throws Exception {
     // given
     CreateAdminDTO createAdminDTO = new EasyRandom().nextObject(CreateAdminDTO.class);
     createAdminDTO.setEmail("valid@email.com");

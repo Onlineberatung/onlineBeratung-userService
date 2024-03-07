@@ -48,7 +48,9 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   private HttpTenantFilter tenantFilter;
 
   @Bean
-  public ApiTokenFilter apiTokenFilter() { return apiTokenFilter(); }
+  public ApiTokenFilter apiTokenFilter() {
+    return apiTokenFilter();
+  }
 
   /**
    * Processes HTTP requests and checks for a valid spring security authentication for the
