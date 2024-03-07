@@ -326,6 +326,52 @@ class UserAdminControllerE2EIT {
   }
 
   @Test
+  void
+  createNewTenantAdmin_Should_returnOk_When_calledWithValidTenantCreateParamsAndValidExternalUserCreateTenantApiToken()
+      throws Exception {
+    // given
+    CreateAdminDTO createAdminDTO = new EasyRandom().nextObject(CreateAdminDTO.class);
+    createAdminDTO.setEmail("valid@email.com");
+
+    // when
+
+    this.mockMvc
+        .perform(
+            post(TENANT_ADMIN_PATH_WITHOUT_SLASH)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header("api-token", "7c066536-5283-478e-a574-d694f28aeeb6")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createAdminDTO)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("_embedded.id", notNullValue()))
+        .andExpect(jsonPath("_embedded.username", notNullValue()))
+        .andExpect(jsonPath("_embedded.lastname", notNullValue()))
+        .andExpect(jsonPath("_embedded.email", is("valid@email.com")));
+  }
+
+  @Test
+  void
+  createNewTenantAdmin_Should_returnStatusUnauthorized_When_calledWithValidTenantCreateParamsAndInvalidExternalUserCreateTenantApiToken()
+      throws Exception {
+    // given
+    CreateAdminDTO createAdminDTO = new EasyRandom().nextObject(CreateAdminDTO.class);
+    createAdminDTO.setEmail("valid@email.com");
+
+    // when
+
+    this.mockMvc
+        .perform(
+            post(TENANT_ADMIN_PATH_WITHOUT_SLASH)
+                .cookie(CSRF_COOKIE)
+                .header(CSRF_HEADER, CSRF_VALUE)
+                .header("api-token", "Invalid token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createAdminDTO)))
+        .andExpect(status().isUnauthorized());
+  }
+
+  @Test
   @WithMockUser(authorities = {AuthorityValue.USER_ADMIN})
   void updateAgencyAdmin_Should_returnOk_When_updateAttemptAsUserAdmin() throws Exception {
     // given
