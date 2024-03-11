@@ -24,9 +24,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CsrfFilter;
 
 /** Provides the Keycloak/Spring Security configuration. */
@@ -79,7 +79,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         http.csrf()
             .disable()
             .addFilterBefore(new StatelessCsrfFilter(csrfSecurityProperties), CsrfFilter.class)
-            .addFilterBefore(apiTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(apiTokenFilter(), BasicAuthenticationFilter.class);
 
     httpSecurity = enableTenantFilterIfMultitenancyEnabled(httpSecurity);
 
