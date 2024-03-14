@@ -1681,10 +1681,20 @@ public class UserControllerIT {
 
     mvc.perform(
             post(PATH_POST_CHAT_NEW)
-                .content(VALID_CREATE_CHAT_BODY)
+                .content(giveValidCreateChatBodyWithAgencyId(1L))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
+  }
+
+  private String giveValidCreateChatBodyWithAgency(ConsultantAgency consultantAgency) {
+    return VALID_CREATE_CHAT_BODY_WITH_AGENCY_PLACEHOLDER.replace(
+        "${AGENCY_ID}", consultantAgency.getAgencyId().toString());
+  }
+
+  private String giveValidCreateChatBodyWithAgencyId(Long agencyId) {
+    return VALID_CREATE_CHAT_BODY_WITH_AGENCY_PLACEHOLDER.replace(
+        "${AGENCY_ID}", agencyId.toString());
   }
 
   @Test
@@ -1697,7 +1707,7 @@ public class UserControllerIT {
 
     mvc.perform(
             post(PATH_POST_CHAT_NEW)
-                .content(VALID_CREATE_CHAT_BODY)
+                .content(giveValidCreateChatBodyWithAgencyId(1L))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.CREATED.value()));
@@ -1727,7 +1737,7 @@ public class UserControllerIT {
 
     mvc.perform(
             post(PATH_POST_CHAT_NEW_V2)
-                .content(VALID_CREATE_CHAT_BODY)
+                .content(giveValidCreateChatBodyWithAgencyId(1L))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
@@ -1743,7 +1753,7 @@ public class UserControllerIT {
 
     mvc.perform(
             post(PATH_POST_CHAT_NEW_V2)
-                .content(VALID_CREATE_CHAT_BODY)
+                .content(giveValidCreateChatBodyWithAgencyId(1L))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.CREATED.value()));

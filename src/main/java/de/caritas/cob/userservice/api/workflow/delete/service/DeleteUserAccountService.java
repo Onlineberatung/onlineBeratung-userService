@@ -83,7 +83,7 @@ public class DeleteUserAccountService {
         .collect(Collectors.toList());
   }
 
-  private List<DeletionWorkflowError> performConsultantDeletion(Consultant consultant) {
+  public List<DeletionWorkflowError> performConsultantDeletion(Consultant consultant) {
 
     var deletionWorkflowDTO = new ConsultantDeletionWorkflowDTO(consultant, new ArrayList<>());
 

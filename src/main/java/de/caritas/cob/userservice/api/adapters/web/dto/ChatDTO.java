@@ -5,6 +5,7 @@ import static de.caritas.cob.userservice.api.helper.UserHelper.CHAT_MIN_DURATION
 import static de.caritas.cob.userservice.api.helper.UserHelper.CHAT_TOPIC_MAX_LENGTH;
 import static de.caritas.cob.userservice.api.helper.UserHelper.CHAT_TOPIC_MIN_LENGTH;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -20,6 +21,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.validator.constraints.Length;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 
@@ -42,6 +44,7 @@ public class ChatDTO {
   @NotNull(message = "{chat.startDate.invalid}")
   @ApiModelProperty(required = true, example = "2019-10-23", position = 1)
   @JsonProperty("startDate")
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
   private LocalDate startDate;
 
   @DateTimeFormat(pattern = "HH:mm")
@@ -62,10 +65,22 @@ public class ChatDTO {
   @JsonProperty("repetitive")
   private boolean repetitive;
 
+  @ApiModelProperty(required = true, example = "5", position = 5)
+  @Min(value = 0, message = "{chat.agencyId.invalid}")
+  @JsonProperty("agencyId")
+  private Long agencyId;
+
+  @ApiModelProperty(required = true, example = "5", position = 6)
+  @Length(max = 300, message = "{chat.hintMessage.invalid}")
+  @JsonProperty("hintMessage")
+  private String hintMessage;
+
   @Override
   public String toString() {
     return "ChatDTO [topic="
         + topic
+        + ", agencyId="
+        + agencyId
         + ", startDate="
         + startDate
         + ", startTime="
@@ -74,6 +89,10 @@ public class ChatDTO {
         + duration
         + ", repetitive="
         + repetitive
+        + ", agencyId="
+        + agencyId
+        + ", hintMessage="
+        + hintMessage
         + "]";
   }
 }

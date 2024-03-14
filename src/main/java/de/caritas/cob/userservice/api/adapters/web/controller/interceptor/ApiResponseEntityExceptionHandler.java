@@ -6,6 +6,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestExceptio
 import de.caritas.cob.userservice.api.exception.httpresponses.ConflictException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CreateEnquiryMessageException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
+import de.caritas.cob.userservice.api.exception.httpresponses.DistributedTransactionException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
@@ -55,6 +56,14 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
     return handleExceptionInternal(ex, null, new HttpHeaders(), HttpStatus.CONFLICT, request);
   }
 
+  @ExceptionHandler({DistributedTransactionException.class})
+  public ResponseEntity<Object> handleDistributedTransactionException(
+      final DistributedTransactionException ex, final WebRequest request) {
+    log.error("Distributed transaction failed to complete", ex);
+    return handleExceptionInternal(
+        ex, null, ex.getCustomHttpHeaders(), HttpStatus.FAILED_DEPENDENCY, request);
+  }
+
   @ExceptionHandler({CreateEnquiryMessageException.class})
   public ResponseEntity<Object> handleCreateEnquiryMessageException(
       final CreateEnquiryMessageException ex, final WebRequest request) {
@@ -88,7 +97,8 @@ public class ApiResponseEntityExceptionHandler extends ResponseEntityExceptionHa
       final CustomValidationHttpStatusException ex, final WebRequest request) {
     ex.executeLogging();
 
-    return handleExceptionInternal(ex, null, ex.getCustomHttpHeader(), ex.getHttpStatus(), request);
+    return handleExceptionInternal(
+        ex, null, ex.getCustomHttpHeaders(), ex.getHttpStatus(), request);
   }
 
   /**

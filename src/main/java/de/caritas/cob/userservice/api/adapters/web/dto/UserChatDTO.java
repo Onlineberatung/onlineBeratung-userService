@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -69,4 +70,10 @@ public class UserChatDTO {
   @JsonIgnore private LocalDateTime startDateWithTime;
 
   @ApiModelProperty private LastMessageDTO e2eLastMessage;
+
+  @ApiModelProperty private String createdAt;
+
+  @ApiModelProperty private List<AgencyDTO> assignedAgencies;
+
+  @ApiModelProperty private String hintMessage;
 }

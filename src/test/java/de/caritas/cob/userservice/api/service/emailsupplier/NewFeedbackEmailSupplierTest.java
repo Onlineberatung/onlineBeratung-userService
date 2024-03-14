@@ -6,10 +6,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.GROUP_MEMBER_DTO_LIST;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.GROUP_MEMBER_USER_1;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
@@ -88,7 +85,7 @@ public class NewFeedbackEmailSupplierTest {
                 keycloakService)
             .generateEmails();
 
-    assertThat(generatedMails, hasSize(0));
+    assertThat(generatedMails).isEmpty();
     verify(logger).error(anyString(), anyString());
   }
 
@@ -98,7 +95,7 @@ public class NewFeedbackEmailSupplierTest {
 
     List<MailDTO> generatedMails = newFeedbackEmailSupplier.generateEmails();
 
-    assertThat(generatedMails, hasSize(0));
+    assertThat(generatedMails).isEmpty();
     verify(logger).error(anyString(), anyString());
   }
 
@@ -110,7 +107,7 @@ public class NewFeedbackEmailSupplierTest {
 
     List<MailDTO> generatedMails = newFeedbackEmailSupplier.generateEmails();
 
-    assertThat(generatedMails, hasSize(0));
+    assertThat(generatedMails).isEmpty();
     verify(logger).error(anyString(), anyString());
   }
 
@@ -124,7 +121,7 @@ public class NewFeedbackEmailSupplierTest {
 
     List<MailDTO> generatedMails = newFeedbackEmailSupplier.generateEmails();
 
-    assertThat(generatedMails, hasSize(0));
+    assertThat(generatedMails).isEmpty();
     verify(logger).error(anyString(), anyString());
   }
 
@@ -139,7 +136,7 @@ public class NewFeedbackEmailSupplierTest {
 
     List<MailDTO> generatedMails = newFeedbackEmailSupplier.generateEmails();
 
-    assertThat(generatedMails, hasSize(0));
+    assertThat(generatedMails).isEmpty();
     verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
@@ -157,23 +154,22 @@ public class NewFeedbackEmailSupplierTest {
 
     List<MailDTO> generatedMails = newFeedbackEmailSupplier.generateEmails();
 
-    assertThat(generatedMails, hasSize(4));
+    assertThat(generatedMails).hasSize(4);
     MailDTO generatedMail = generatedMails.get(0);
-    assertThat(generatedMail.getTemplate(), is(TEMPLATE_NEW_FEEDBACK_MESSAGE_NOTIFICATION));
-    assertThat(generatedMail.getEmail(), is("email@email.com"));
-    assertThat(
-        generatedMail.getLanguage(),
-        is(de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.DE));
+    assertThat(generatedMail.getTemplate()).isEqualTo(TEMPLATE_NEW_FEEDBACK_MESSAGE_NOTIFICATION);
+    assertThat(generatedMail.getEmail()).isEqualTo("email@email.com");
+    assertThat(generatedMail.getLanguage())
+        .isEqualTo(de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.DE);
     List<TemplateDataDTO> templateData = generatedMail.getTemplateData();
-    assertThat(templateData, hasSize(4));
-    assertThat(templateData.get(0).getKey(), is("name_sender"));
-    assertThat(templateData.get(0).getValue(), is("vorname nachname"));
-    assertThat(templateData.get(1).getKey(), is("name_recipient"));
-    assertThat(templateData.get(1).getValue(), is("first name last name"));
-    assertThat(templateData.get(2).getKey(), is("name_user"));
-    assertThat(templateData.get(2).getValue(), is("username"));
-    assertThat(templateData.get(3).getKey(), is("url"));
-    assertThat(templateData.get(3).getValue(), is("applicationBaseUrl"));
+    assertThat(templateData).hasSize(4);
+    assertThat(templateData.get(0).getKey()).isEqualTo("name_sender");
+    assertThat(templateData.get(0).getValue()).isEqualTo(("vorname nachname"));
+    assertThat(templateData.get(1).getKey()).isEqualTo("name_recipient");
+    assertThat(templateData.get(1).getValue()).isEqualTo("first name last name");
+    assertThat(templateData.get(2).getKey()).isEqualTo("name_user");
+    assertThat(templateData.get(2).getValue()).isEqualTo(("username"));
+    assertThat(templateData.get(3).getKey()).isEqualTo("url");
+    assertThat(templateData.get(3).getValue()).isEqualTo("applicationBaseUrl");
   }
 
   @Test
@@ -197,7 +193,7 @@ public class NewFeedbackEmailSupplierTest {
 
     var generatedMails = newFeedbackEmailSupplier.generateEmails();
 
-    assertThat(generatedMails, hasSize(1));
+    assertThat(generatedMails).hasSize(1);
   }
 
   @Test
@@ -219,7 +215,7 @@ public class NewFeedbackEmailSupplierTest {
 
     var generatedMails = newFeedbackEmailSupplier.generateEmails();
 
-    assertThat(generatedMails, hasSize(0));
+    assertThat(generatedMails).isEmpty();
   }
 
   @Test
@@ -244,7 +240,7 @@ public class NewFeedbackEmailSupplierTest {
 
     var generatedMails = newFeedbackEmailSupplier.generateEmails();
 
-    assertThat(generatedMails, hasSize(1));
+    assertThat(generatedMails).hasSize(1);
   }
 
   @Test
@@ -267,7 +263,7 @@ public class NewFeedbackEmailSupplierTest {
 
     var generatedMails = newFeedbackEmailSupplier.generateEmails();
 
-    assertThat(generatedMails, empty());
+    assertThat(generatedMails).isEmpty();
   }
 
   @Test
@@ -279,7 +275,7 @@ public class NewFeedbackEmailSupplierTest {
 
     List<MailDTO> generatedMails = newFeedbackEmailSupplier.generateEmails();
 
-    assertThat(generatedMails, hasSize(0));
+    assertThat(generatedMails).isEmpty();
   }
 
   @Test
@@ -292,23 +288,22 @@ public class NewFeedbackEmailSupplierTest {
 
     List<MailDTO> generatedMails = newFeedbackEmailSupplier.generateEmails();
 
-    assertThat(generatedMails, hasSize(1));
+    assertThat(generatedMails).hasSize(1);
     MailDTO generatedMail = generatedMails.get(0);
-    assertThat(generatedMail.getTemplate(), is(TEMPLATE_NEW_FEEDBACK_MESSAGE_NOTIFICATION));
-    assertThat(generatedMail.getEmail(), is("email@email.com"));
-    assertThat(
-        generatedMail.getLanguage(),
-        is(de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.DE));
+    assertThat(generatedMail.getTemplate()).isEqualTo(TEMPLATE_NEW_FEEDBACK_MESSAGE_NOTIFICATION);
+    assertThat(generatedMail.getEmail()).isEqualTo("email@email.com");
+    assertThat(generatedMail.getLanguage())
+        .isEqualTo(de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode.DE);
     List<TemplateDataDTO> templateData = generatedMail.getTemplateData();
-    assertThat(templateData, hasSize(4));
-    assertThat(templateData.get(0).getKey(), is("name_sender"));
-    assertThat(templateData.get(0).getValue(), is("first name last name"));
-    assertThat(templateData.get(1).getKey(), is("name_recipient"));
-    assertThat(templateData.get(1).getValue(), is("first name last name"));
-    assertThat(templateData.get(2).getKey(), is("name_user"));
-    assertThat(templateData.get(2).getValue(), is("username"));
-    assertThat(templateData.get(3).getKey(), is("url"));
-    assertThat(templateData.get(3).getValue(), is("applicationBaseUrl"));
+    assertThat(templateData).hasSize(4);
+    assertThat(templateData.get(0).getKey()).isEqualTo("name_sender");
+    assertThat(templateData.get(0).getValue()).isEqualTo("first name last name");
+    assertThat(templateData.get(1).getKey()).isEqualTo("name_recipient");
+    assertThat(templateData.get(1).getValue()).isEqualTo(("first name last name"));
+    assertThat(templateData.get(2).getKey()).isEqualTo(("name_user"));
+    assertThat(templateData.get(2).getValue()).isEqualTo(("username"));
+    assertThat(templateData.get(3).getKey()).isEqualTo(("url"));
+    assertThat(templateData.get(3).getValue()).isEqualTo(("applicationBaseUrl"));
   }
 
   @Test
@@ -322,7 +317,8 @@ public class NewFeedbackEmailSupplierTest {
 
     var generatedMails = newFeedbackEmailSupplier.generateEmails();
 
-    assertThat(generatedMails, hasSize(1));
+    assertThat(generatedMails).hasSize(1);
+    assertThat(generatedMails.get(0).getDialect()).isEqualTo(CONSULTANT_2.getDialect());
   }
 
   @Test
@@ -335,7 +331,7 @@ public class NewFeedbackEmailSupplierTest {
 
     var generatedMails = newFeedbackEmailSupplier.generateEmails();
 
-    assertThat(generatedMails, hasSize(0));
+    assertThat(generatedMails).isEmpty();
   }
 
   @Test
@@ -350,7 +346,7 @@ public class NewFeedbackEmailSupplierTest {
 
     var generatedMails = newFeedbackEmailSupplier.generateEmails();
 
-    assertThat(generatedMails, hasSize(1));
+    assertThat(generatedMails).hasSize(1);
   }
 
   @Test
@@ -363,7 +359,7 @@ public class NewFeedbackEmailSupplierTest {
 
     var generatedMails = newFeedbackEmailSupplier.generateEmails();
 
-    assertThat(generatedMails, empty());
+    assertThat(generatedMails).isEmpty();
   }
 
   @Test
@@ -381,7 +377,7 @@ public class NewFeedbackEmailSupplierTest {
 
     var generatedMails = newFeedbackEmailSupplier.generateEmails();
 
-    assertThat(generatedMails, hasSize(0));
+    assertThat(generatedMails).isEmpty();
   }
 
   @Test
@@ -400,7 +396,7 @@ public class NewFeedbackEmailSupplierTest {
 
     var generatedMails = newFeedbackEmailSupplier.generateEmails();
 
-    assertThat(generatedMails, hasSize(4));
+    assertThat(generatedMails).hasSize(4);
   }
 
   @Test
@@ -418,7 +414,8 @@ public class NewFeedbackEmailSupplierTest {
 
     var generatedMails = newFeedbackEmailSupplier.generateEmails();
 
-    assertThat(generatedMails, hasSize(4));
+    assertThat(generatedMails).hasSize(4);
+    assertThat(generatedMails).extracting("dialect").containsOnly(CONSULTANT_2.getDialect());
   }
 
   private Consultant givenAConsultant() throws JsonProcessingException {

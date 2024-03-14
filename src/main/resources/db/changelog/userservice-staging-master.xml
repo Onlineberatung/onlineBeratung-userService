@@ -48,4 +48,5 @@
 	<include file="db/changelog/changeset/0042_remove_session_monitoring_and_option/0042_changeSet.xml"/>
 	<include file="db/changelog/changeset/0043_add_booking_id_to_appointment/0043_changeSet.xml"/>
 	<include file="db/changelog/changeset/0044_add_referer_to_user/0044_changeSet.xml"/>
+	<include file="db/changelog/changeset/0045_add_hint_and_create_date_to_chat/0045_changeSet.xml"/>
 </databaseChangeLog>

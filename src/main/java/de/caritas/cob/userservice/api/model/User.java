@@ -1,6 +1,8 @@
 package de.caritas.cob.userservice.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.neovisionaries.i18n.LanguageCode;
+import de.caritas.cob.userservice.mailservice.generated.web.model.Dialect;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
@@ -13,6 +15,7 @@ import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -149,5 +152,11 @@ public class User implements TenantAware, NotificationsAware {
   @Override
   public int hashCode() {
     return Objects.hash(userId);
+  }
+
+  @JsonIgnore
+  @Transient
+  public Dialect getDialect() {
+    return isLanguageFormal() ? Dialect.FORMAL : Dialect.INFORMAL;
   }
 }

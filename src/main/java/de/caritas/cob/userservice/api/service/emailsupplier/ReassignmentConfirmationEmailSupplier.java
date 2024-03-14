@@ -51,6 +51,7 @@ public class ReassignmentConfirmationEmailSupplier implements EmailSupplier {
         .template(TEMPLATE_REASSIGN_CONFIRMATION_NOTIFICATION)
         .email(receiverConsultant.getEmail())
         .language(languageOf(receiverConsultant.getLanguageCode()))
+        .dialect(receiverConsultant.getDialect())
         .templateData(templateAttributes);
   }
 

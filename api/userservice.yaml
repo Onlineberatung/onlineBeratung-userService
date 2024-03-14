@@ -2364,6 +2364,18 @@ components:
           type: string
           format: date-time
           writeOnly: true
+        createdAt:
+          type: string
+          format: time
+          example: 2023-10-23T12:05:00.000Z
+        chatAgencies:
+          type: array
+          items:
+              $ref: '#/components/schemas/AgencyDTO'
+        hintMessage:
+          type: string
+          example: "Hint"
+          maxLength: 300
 
     SessionUserDTO:
       type: object
@@ -2394,6 +2406,12 @@ components:
         lastName:
           type: string
           example: Mustermann
+        username:
+          type: string
+          example: beraterXYZ
+        displayName:
+          type: string
+          example: Berater XYZ
 
     UserSessionListResponseDTO:
       type: object
@@ -2772,6 +2790,10 @@ components:
         topic:
           type: string
           example: Wöchentliche Drogenberatung
+        agencyId:
+          type: integer
+          format: int64
+          example: 7
         startDate:
           type: string
           format: date
@@ -2786,12 +2808,23 @@ components:
         repetitive:
           type: boolean
           example: false
+        hintMessage:
+          type: string
+          example: "Hint"
+          maxLength: 300
 
     CreateChatResponseDTO:
       type: object
       required:
         - groupId
       properties:
+        createdAt:
+          type: string
+          format: time
+          example: 2019-10-23T12:05:00.000Z
+        creatorDisplayName:
+          type: string
+          example: Max M.
         groupId:
           type: string
           example: WCET6GWir78pNMyyD

@@ -21,6 +21,7 @@ import de.caritas.cob.userservice.api.model.UserChat;
 import de.caritas.cob.userservice.api.port.out.ChatAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.ChatRepository;
 import de.caritas.cob.userservice.api.port.out.UserChatRepository;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -32,17 +33,21 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /** Chat service class */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ChatService {
 
   private final @NonNull ChatRepository chatRepository;
   private final @NonNull ChatAgencyRepository chatAgencyRepository;
   private final @NonNull UserChatRepository userChatRepository;
   private final @NonNull ConsultantService consultantService;
+
+  private final @NonNull AgencyService agencyService;
 
   /**
    * Returns a list of current chats for the provided {@link Consultant}
@@ -66,7 +71,8 @@ public class ChatService {
             new SessionConsultantForConsultantDTO()
                 .id(chat.getChatOwner().getId())
                 .firstName(chat.getChatOwner().getFirstName())
-                .lastName(chat.getChatOwner().getLastName()));
+                .lastName(chat.getChatOwner().getLastName())
+                .username(chat.getChatOwner().getUsername()));
   }
 
   private String[] getChatModerators(Set<ChatAgency> chatAgencies) {
@@ -137,6 +143,16 @@ public class ChatService {
   }
 
   private UserChatDTO createUserChat(Chat chat) {
+    if (chat.getChatAgencies().size() > 1) {
+      log.warn(
+          "Chat with id {} has more than one agency assigned. " + "This should not be the case.",
+          chat.getId());
+    }
+    var chatAgencies =
+        chat.getChatAgencies().stream()
+            .map(chatAgency -> agencyService.getAgency(chatAgency.getAgencyId()))
+            .collect(Collectors.toList());
+
     return new UserChatDTO(
         chat.getId(),
         chat.getTopic(),
@@ -160,7 +176,10 @@ public class ChatService {
         false,
         getChatModerators(chat.getChatAgencies()),
         chat.getStartDate(),
-        null);
+        null,
+        chat.getCreateDate() != null ? chat.getCreateDate().toString() : null,
+        chatAgencies,
+        chat.getHintMessage());
   }
 
   /**
@@ -252,6 +271,7 @@ public class ChatService {
     chat.setChatInterval(isTrue(chatDTO.isRepetitive()) ? ChatInterval.WEEKLY : null);
     chat.setStartDate(startDate);
     chat.setInitialStartDate(startDate);
+    chat.setHintMessage(chatDTO.getHintMessage());
 
     this.saveChat(chat);
 

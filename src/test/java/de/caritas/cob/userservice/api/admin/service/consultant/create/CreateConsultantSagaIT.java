@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -20,18 +21,24 @@ import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.admin.service.tenant.TenantAdminService;
+import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
-import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
+import de.caritas.cob.userservice.api.exception.httpresponses.DistributedTransactionException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
+import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.service.ConsultantImportService.ImportRecord;
+import de.caritas.cob.userservice.api.service.appointment.AppointmentService;
 import de.caritas.cob.userservice.tenantadminservice.generated.web.model.Settings;
 import de.caritas.cob.userservice.tenantadminservice.generated.web.model.TenantDTO;
 import org.jeasy.random.EasyRandom;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -39,19 +46,20 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = UserServiceApplication.class)
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class ConsultantCreatorServiceIT {
+public class CreateConsultantSagaIT {
 
   private static final String DUMMY_RC_ID = "rcUserId";
   private static final String VALID_USERNAME = "validUsername";
   private static final String VALID_EMAILADDRESS = "valid@emailaddress.de";
   private static final long TENANT_ID = 1L;
 
-  @Autowired private ConsultantCreatorService consultantCreatorService;
+  @Autowired private CreateConsultantSaga createConsultantSaga;
 
   @MockBean private RocketChatService rocketChatService;
 
@@ -59,7 +67,16 @@ public class ConsultantCreatorServiceIT {
 
   @MockBean private TenantAdminService tenantAdminService;
 
+  @MockBean private RollbackFacade rollbackFacade;
+
+  @MockBean private AppointmentService appointmentService;
+
   private final EasyRandom easyRandom = new EasyRandom();
+
+  @Before
+  public void setup() {
+    ReflectionTestUtils.setField(createConsultantSaga, "appointmentFeatureEnabled", false);
+  }
 
   @Test
   public void createNewConsultant_Should_returnExpectedCreatedConsultant_When_inputDataIsCorrect()
@@ -73,23 +90,147 @@ public class ConsultantCreatorServiceIT {
     createConsultantDTO.setEmail(VALID_EMAILADDRESS);
     createConsultantDTO.setIsGroupchatConsultant(false);
 
-    Consultant consultant = this.consultantCreatorService.createNewConsultant(createConsultantDTO);
+    var consultantAdminResponseDTO =
+        this.createConsultantSaga.createNewConsultant(createConsultantDTO);
 
+    ConsultantDTO consultant = consultantAdminResponseDTO.getEmbedded();
     verify(keycloakService).updateRole(anyString(), eq(CONSULTANT.getValue()));
 
     assertThat(consultant, notNullValue());
     assertThat(consultant.getId(), notNullValue());
-    assertThat(consultant.getRocketChatId(), is(DUMMY_RC_ID));
     assertThat(consultant.getAbsenceMessage(), notNullValue());
     assertThat(consultant.getCreateDate(), notNullValue());
     assertThat(consultant.getUpdateDate(), notNullValue());
     assertThat(consultant.getUsername(), notNullValue());
-    assertThat(consultant.getFirstName(), notNullValue());
-    assertThat(consultant.getLastName(), notNullValue());
+    assertThat(consultant.getFirstname(), notNullValue());
+    assertThat(consultant.getLastname(), notNullValue());
     assertThat(consultant.getEmail(), notNullValue());
-    assertThat(consultant.getFullName(), notNullValue());
-    assertThat(consultant.isNotificationsEnabled(), is(true));
-    assertThat(consultant.getNotificationsSettings(), notNullValue());
+  }
+
+  @Test
+  public void createNewConsultant_Should_callRollback_When_RocketchatThrowsException()
+      throws RocketChatLoginException {
+    doThrow(BadRequestException.class)
+        .when(rocketChatService)
+        .getUserID(anyString(), anyString(), anyBoolean());
+    when(keycloakService.createKeycloakUser(any(), anyString(), any()))
+        .thenReturn(easyRandom.nextObject(KeycloakCreateUserResponseDTO.class));
+    CreateConsultantDTO createConsultantDTO = this.easyRandom.nextObject(CreateConsultantDTO.class);
+    createConsultantDTO.setUsername(VALID_USERNAME);
+    createConsultantDTO.setEmail(VALID_EMAILADDRESS);
+    createConsultantDTO.setIsGroupchatConsultant(false);
+
+    try {
+      this.createConsultantSaga.createNewConsultant(createConsultantDTO);
+      fail("Exception should be thrown");
+    } catch (DistributedTransactionException ex) {
+      assertThat(
+          ex.getCustomHttpHeaders().get("X-Reason").get(0),
+          is("DISTRIBUTED_TRANSACTION_FAILED_ON_STEP_CREATE_ACCOUNT_IN_ROCKETCHAT"));
+      verify(keycloakService).updateRole(anyString(), eq(CONSULTANT.getValue()));
+      verify(keycloakService).updateRole(anyString(), eq(CONSULTANT.getValue()));
+      verify(rollbackFacade).rollbackConsultantAccount(Mockito.any(Consultant.class));
+    }
+  }
+
+  @Test
+  public void createNewConsultant_Should_callRollback_When_AppointmentServiceThrowsException()
+      throws RocketChatLoginException {
+    ReflectionTestUtils.setField(createConsultantSaga, "appointmentFeatureEnabled", true);
+    doThrow(BadRequestException.class).when(appointmentService).createConsultant(any());
+    when(keycloakService.createKeycloakUser(any(), anyString(), any()))
+        .thenReturn(easyRandom.nextObject(KeycloakCreateUserResponseDTO.class));
+    when(rocketChatService.getUserID(anyString(), anyString(), anyBoolean()))
+        .thenReturn(DUMMY_RC_ID);
+    CreateConsultantDTO createConsultantDTO = this.easyRandom.nextObject(CreateConsultantDTO.class);
+    createConsultantDTO.setUsername(VALID_USERNAME);
+    createConsultantDTO.setEmail(VALID_EMAILADDRESS);
+    createConsultantDTO.setIsGroupchatConsultant(false);
+
+    try {
+      this.createConsultantSaga.createNewConsultant(createConsultantDTO);
+      fail("Exception should be thrown");
+    } catch (DistributedTransactionException ex) {
+      assertThat(
+          ex.getCustomHttpHeaders().get("X-Reason").get(0),
+          is(
+              "DISTRIBUTED_TRANSACTION_FAILED_ON_STEP_CREATE_ACCOUNT_IN_CALCOM_OR_APPOINTMENTSERVICE"));
+      verify(keycloakService).updateRole(anyString(), eq(CONSULTANT.getValue()));
+      verify(keycloakService).updateRole(anyString(), eq(CONSULTANT.getValue()));
+      verify(rocketChatService).getUserID(anyString(), anyString(), anyBoolean());
+      verify(rollbackFacade).rollbackConsultantAccount(Mockito.any(Consultant.class));
+    }
+  }
+
+  @Test
+  public void createNewConsultant_Should_callRollback_When_KeycloakUpdatePasswordThrowsException() {
+    when(keycloakService.createKeycloakUser(any(), anyString(), any()))
+        .thenReturn(easyRandom.nextObject(KeycloakCreateUserResponseDTO.class));
+    doThrow(BadRequestException.class).when(keycloakService).updatePassword(any(), any());
+    CreateConsultantDTO createConsultantDTO = this.easyRandom.nextObject(CreateConsultantDTO.class);
+    createConsultantDTO.setUsername(VALID_USERNAME);
+    createConsultantDTO.setEmail(VALID_EMAILADDRESS);
+    createConsultantDTO.setIsGroupchatConsultant(false);
+
+    try {
+      this.createConsultantSaga.createNewConsultant(createConsultantDTO);
+      fail("Exception should be thrown");
+    } catch (DistributedTransactionException ex) {
+      assertThat(
+          ex.getCustomHttpHeaders().get("X-Reason").get(0),
+          is("DISTRIBUTED_TRANSACTION_FAILED_ON_STEP_UPDATE_USER_PASSWORD_IN_KEYCLOAK"));
+      verify(keycloakService, Mockito.never()).updateRole(anyString(), eq(CONSULTANT.getValue()));
+      verify(rollbackFacade).rollbackConsultantAccount(Mockito.any(Consultant.class));
+    }
+  }
+
+  @Test
+  public void createNewConsultant_Should_callRollback_When_KeycloakUpdateRoleThrowsException()
+      throws RocketChatLoginException {
+    when(keycloakService.createKeycloakUser(any(), anyString(), any()))
+        .thenReturn(easyRandom.nextObject(KeycloakCreateUserResponseDTO.class));
+    doThrow(BadRequestException.class).when(keycloakService).updateRole(anyString(), anyString());
+    CreateConsultantDTO createConsultantDTO = this.easyRandom.nextObject(CreateConsultantDTO.class);
+    createConsultantDTO.setUsername(VALID_USERNAME);
+    createConsultantDTO.setEmail(VALID_EMAILADDRESS);
+    createConsultantDTO.setIsGroupchatConsultant(false);
+
+    try {
+      this.createConsultantSaga.createNewConsultant(createConsultantDTO);
+      fail("Exception should be thrown");
+    } catch (DistributedTransactionException ex) {
+      assertThat(
+          ex.getCustomHttpHeaders().get("X-Reason").get(0),
+          is("DISTRIBUTED_TRANSACTION_FAILED_ON_STEP_UPDATE_USER_ROLES_IN_KEYCLOAK"));
+      verify(rocketChatService, Mockito.never()).getUserID(anyString(), anyString(), anyBoolean());
+      verify(rollbackFacade).rollbackConsultantAccount(Mockito.any(Consultant.class));
+    }
+  }
+
+  @Test
+  public void createNewConsultant_Should_callRollback_When_anyOfTheServicesThrowsException()
+      throws RocketChatLoginException {
+    doThrow(BadRequestException.class)
+        .when(rocketChatService)
+        .getUserID(anyString(), anyString(), anyBoolean());
+    when(keycloakService.createKeycloakUser(any(), anyString(), any()))
+        .thenReturn(easyRandom.nextObject(KeycloakCreateUserResponseDTO.class));
+    CreateConsultantDTO createConsultantDTO = this.easyRandom.nextObject(CreateConsultantDTO.class);
+    createConsultantDTO.setUsername(VALID_USERNAME);
+    createConsultantDTO.setEmail(VALID_EMAILADDRESS);
+    createConsultantDTO.setIsGroupchatConsultant(false);
+
+    try {
+      this.createConsultantSaga.createNewConsultant(createConsultantDTO);
+      fail("Exception should be thrown");
+    } catch (DistributedTransactionException ex) {
+      assertThat(
+          ex.getCustomHttpHeaders().get("X-Reason").get(0),
+          is("DISTRIBUTED_TRANSACTION_FAILED_ON_STEP_CREATE_ACCOUNT_IN_ROCKETCHAT"));
+      verify(keycloakService).updateRole(anyString(), eq(CONSULTANT.getValue()));
+      verify(keycloakService).updateRole(anyString(), eq(CONSULTANT.getValue()));
+      verify(rollbackFacade).rollbackConsultantAccount(Mockito.any(Consultant.class));
+    }
   }
 
   @Test
@@ -111,15 +252,15 @@ public class ConsultantCreatorServiceIT {
     createConsultantDTO.setIsGroupchatConsultant(true);
 
     // when
-    Consultant consultant = consultantCreatorService.createNewConsultant(createConsultantDTO);
+    var consultantAdminResponseDTO = createConsultantSaga.createNewConsultant(createConsultantDTO);
 
     // then
     verify(keycloakService, times(2)).updateRole(anyString(), anyString());
     verify(keycloakService).updateRole(anyString(), eq(CONSULTANT.getValue()));
     verify(keycloakService).updateRole(anyString(), eq(GROUP_CHAT_CONSULTANT.getValue()));
 
-    assertThat(consultant, notNullValue());
-    assertThat(consultant.getId(), notNullValue());
+    assertThat(consultantAdminResponseDTO.getEmbedded(), notNullValue());
+    assertThat(consultantAdminResponseDTO.getEmbedded().getId(), notNullValue());
   }
 
   @Test
@@ -135,8 +276,7 @@ public class ConsultantCreatorServiceIT {
     importRecord.setEmail(VALID_EMAILADDRESS);
 
     Consultant consultant =
-        this.consultantCreatorService.createNewConsultant(
-            importRecord, asSet(CONSULTANT.getValue()));
+        this.createConsultantSaga.createNewConsultant(importRecord, asSet(CONSULTANT.getValue()));
 
     assertThat(consultant, notNullValue());
     assertThat(consultant.getId(), notNullValue());
@@ -151,7 +291,7 @@ public class ConsultantCreatorServiceIT {
     assertThat(consultant.getFullName(), notNullValue());
   }
 
-  @Test(expected = InternalServerErrorException.class)
+  @Test(expected = DistributedTransactionException.class)
   public void
       createNewConsultant_Should_throwCustomValidationHttpStatusException_When_userCanNotBeCreatedInRocketChat()
           throws RocketChatLoginException {
@@ -165,7 +305,7 @@ public class ConsultantCreatorServiceIT {
     createConsultantDTO.setUsername(VALID_USERNAME);
     createConsultantDTO.setEmail(VALID_EMAILADDRESS);
 
-    this.consultantCreatorService.createNewConsultant(createConsultantDTO);
+    this.createConsultantSaga.createNewConsultant(createConsultantDTO);
   }
 
   @Test(expected = CustomValidationHttpStatusException.class)
@@ -181,7 +321,7 @@ public class ConsultantCreatorServiceIT {
         .thenReturn(keycloakResponse);
     CreateConsultantDTO createConsultantDTO = this.easyRandom.nextObject(CreateConsultantDTO.class);
 
-    this.consultantCreatorService.createNewConsultant(createConsultantDTO);
+    this.createConsultantSaga.createNewConsultant(createConsultantDTO);
   }
 
   @Test
@@ -190,11 +330,11 @@ public class ConsultantCreatorServiceIT {
     createConsultantDTO.setEmail("invalid");
 
     try {
-      this.consultantCreatorService.createNewConsultant(createConsultantDTO);
+      this.createConsultantSaga.createNewConsultant(createConsultantDTO);
       fail("Exception should be thrown");
     } catch (CustomValidationHttpStatusException e) {
-      assertThat(e.getCustomHttpHeader(), notNullValue());
-      assertThat(e.getCustomHttpHeader().get("X-Reason").get(0), is(EMAIL_NOT_VALID.name()));
+      assertThat(e.getCustomHttpHeaders(), notNullValue());
+      assertThat(e.getCustomHttpHeaders().get("X-Reason").get(0), is(EMAIL_NOT_VALID.name()));
     }
   }
 }

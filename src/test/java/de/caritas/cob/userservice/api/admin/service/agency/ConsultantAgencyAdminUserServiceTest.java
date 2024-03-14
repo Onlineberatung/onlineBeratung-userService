@@ -141,7 +141,7 @@ public class ConsultantAgencyAdminUserServiceTest {
       fail("Exception was not thrown");
     } catch (CustomValidationHttpStatusException e) {
       assertThat(
-          requireNonNull(e.getCustomHttpHeader().get("X-Reason")).iterator().next(),
+          requireNonNull(e.getCustomHttpHeaders().get("X-Reason")).iterator().next(),
           is(CONSULTANT_AGENCY_RELATION_DOES_NOT_EXIST.name()));
     }
   }

@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.service.appointment;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDTO;
@@ -28,6 +29,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 
 /** Service class to communicate with the AppointmentService. */
 @Component
@@ -52,7 +54,8 @@ public class AppointmentService {
   @Value("${feature.appointment.enabled}")
   private boolean appointmentFeatureEnabled;
 
-  public void createConsultant(ConsultantAdminResponseDTO consultantAdminResponseDTO) {
+  public void createConsultant(ConsultantAdminResponseDTO consultantAdminResponseDTO)
+      throws RestClientException {
     if (!appointmentFeatureEnabled) {
       return;
     }
@@ -62,29 +65,38 @@ public class AppointmentService {
       ConsultantApi appointmentConsultantApi =
           this.appointmentConsultantServiceApiControllerFactory.createControllerApi();
       addTechnicalUserHeaders(appointmentConsultantApi.getApiClient());
-      try {
-        de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO consultant =
-            mapper.readValue(
-                mapper.writeValueAsString(consultantAdminResponseDTO.getEmbedded()),
-                de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO
-                    .class);
-        appointmentConsultantApi.createConsultant(consultant);
-      } catch (Exception e) {
-        log.error(e.getMessage());
-      }
+      de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO consultant =
+          getConsultantDTO(consultantAdminResponseDTO, mapper);
+      appointmentConsultantApi.createConsultant(consultant);
     }
   }
 
+  private de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO
+      getConsultantDTO(ConsultantAdminResponseDTO consultantAdminResponseDTO, ObjectMapper mapper) {
+    de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO consultant =
+        null;
+    try {
+      consultant =
+          mapper.readValue(
+              mapper.writeValueAsString(consultantAdminResponseDTO.getEmbedded()),
+              de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO
+                  .class);
+    } catch (JsonProcessingException e) {
+      throw new IllegalStateException(e);
+    }
+    return consultant;
+  }
+
   public void syncConsultantData(Consultant consultant) {
-    ConsultantAdminResponseDTO ConsultantAdminResponseDTO = new ConsultantAdminResponseDTO();
+    ConsultantAdminResponseDTO consultantAdminResponseDTO = new ConsultantAdminResponseDTO();
     ConsultantDTO consultantEmbeded = new ConsultantDTO();
     consultantEmbeded.setId(consultant.getId());
     consultantEmbeded.setFirstname(consultant.getFirstName());
     consultantEmbeded.setLastname(consultant.getLastName());
     consultantEmbeded.setEmail(consultant.getEmail());
     consultantEmbeded.setAbsent(consultant.isAbsent());
-    ConsultantAdminResponseDTO.setEmbedded(consultantEmbeded);
-    updateConsultant(ConsultantAdminResponseDTO);
+    consultantAdminResponseDTO.setEmbedded(consultantEmbeded);
+    updateConsultant(consultantAdminResponseDTO);
   }
 
   public void updateConsultant(ConsultantAdminResponseDTO consultantAdminResponseDTO) {
@@ -209,5 +221,25 @@ public class AppointmentService {
     HttpHeaders headers = this.securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders();
     tenantHeaderSupplier.addTenantHeader(headers);
     headers.forEach((key, value) -> apiClient.addDefaultHeader(key, value.iterator().next()));
+  }
+
+  public void patchConsultant(String consultantId, String displayName) {
+    if (!appointmentFeatureEnabled) {
+      return;
+    }
+    ConsultantApi appointmentConsultantApi =
+        this.appointmentConsultantServiceApiControllerFactory.createControllerApi();
+
+    if (consultantId != null && !consultantId.isEmpty()) {
+      addTechnicalUserHeaders(appointmentConsultantApi.getApiClient());
+      try {
+        appointmentConsultantApi.patchConsultant(
+            consultantId,
+            new de.caritas.cob.userservice.appointmentservice.generated.web.model.ConsultantDTO()
+                .displayName(displayName));
+      } catch (HttpClientErrorException ex) {
+        acceptDeletionIfConsultantNotFoundInAppointmentService(ex, consultantId);
+      }
+    }
   }
 }

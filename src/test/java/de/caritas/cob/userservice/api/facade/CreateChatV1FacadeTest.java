@@ -34,6 +34,7 @@ import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.service.ChatService;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
@@ -77,6 +78,7 @@ public class CreateChatV1FacadeTest {
   public void setup() {
     when(chat.getId()).thenReturn(CHAT_ID);
     when(chat.getConsultingTypeId()).thenReturn(15);
+    when(chat.getCreateDate()).thenReturn(LocalDateTime.now());
     when(agencyService.getAgency(any())).thenReturn(AGENCY_DTO_KREUZBUND);
     setInternalState(LogService.class, "LOGGER", logger);
   }

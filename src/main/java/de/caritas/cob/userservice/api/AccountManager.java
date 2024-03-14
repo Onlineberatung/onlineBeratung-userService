@@ -15,6 +15,7 @@ import de.caritas.cob.userservice.api.port.out.MessageClient;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import de.caritas.cob.userservice.api.service.appointment.AppointmentService;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,6 +51,10 @@ public class AccountManager implements AccountManaging {
   private final ConsultantAgencyRepository consultantAgencyRepository;
 
   private final SessionRepository sessionRepository;
+
+  private final AppointmentService appointmentService;
+
+  private final PatchConsultantSaga patchConsultantSaga;
 
   @Override
   public Optional<Map<String, Object>> findConsultant(String id) {
@@ -173,15 +178,7 @@ public class AccountManager implements AccountManaging {
 
   private Map<String, Object> patchConsultant(Consultant consultant, Map<String, Object> patchMap) {
     var patchedConsultant = userServiceMapper.consultantOf(consultant, patchMap);
-    var savedConsultant = consultantRepository.save(patchedConsultant);
-
-    userServiceMapper
-        .displayNameOf(patchMap)
-        .ifPresent(
-            displayName ->
-                messageClient.updateUser(savedConsultant.getRocketChatId(), displayName));
-
-    return userServiceMapper.mapOf(savedConsultant, patchMap);
+    return patchConsultantSaga.executeTransactional(patchedConsultant, patchMap);
   }
 
   private Map<String, Object> findByDbConsultant(Consultant dbConsultant) {

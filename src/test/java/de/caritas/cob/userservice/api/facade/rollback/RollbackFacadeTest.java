@@ -5,12 +5,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
+import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.model.UserAgency;
 import de.caritas.cob.userservice.api.service.UserAgencyService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.UserService;
+import de.caritas.cob.userservice.api.workflow.delete.service.DeleteUserAccountService;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +28,19 @@ public class RollbackFacadeTest {
   @Mock private UserAgencyService userAgencyService;
   @Mock private SessionService sessionService;
   @Mock private UserService userService;
+
+  @Mock DeleteUserAccountService deleteUserAccountService;
+
+  @Test
+  public void rollbackConsultantAccount_Should_Call_DeleteUserAccountService() {
+    // given
+    EasyRandom easyRandom = new EasyRandom();
+    Consultant consultant = easyRandom.nextObject(Consultant.class);
+    // when
+    rollbackFacade.rollbackConsultantAccount(consultant);
+    // then
+    verify(deleteUserAccountService, times(1)).performConsultantDeletion(consultant);
+  }
 
   @Test
   public void rollBackUserAccount_Should_DeleteSessionAndMonitoring_When_SessionIsGiven() {

@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.facade;
 
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_HINT_MESSAGE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
@@ -124,7 +125,7 @@ class ChatConverterTest {
   }
 
   @Test
-  void convertToEntity_Should_setUpdateDate() {
+  void convertToEntity_Should_setUpdateDate_And_CreateDate() {
     // given
     ChatDTO chatDTO = givenChatDTO();
     Consultant consultant = givenConsultant();
@@ -136,6 +137,22 @@ class ChatConverterTest {
 
     // then
     assertThat(chat.getUpdateDate()).isNotNull();
+    assertThat(chat.getCreateDate()).isNotNull();
+  }
+
+  @Test
+  void convertToEntity_Should_setHintMessage() {
+    // given
+    ChatDTO chatDTO = givenChatDTO();
+    Consultant consultant = givenConsultant();
+    AgencyDTO agencyDTO = givenAgencyDTO();
+
+    // when
+    ChatConverter chatConverter = new ChatConverter();
+    Chat chat = chatConverter.convertToEntity(chatDTO, consultant, agencyDTO);
+
+    // then
+    assertThat(chat.getHintMessage()).isEqualTo(CHAT_HINT_MESSAGE);
   }
 
   private ChatDTO givenChatDTO() {
@@ -149,6 +166,7 @@ class ChatConverterTest {
         .startTime(LocalTime.of(12, 5))
         .duration(120)
         .repetitive(repetitive)
+        .hintMessage(CHAT_HINT_MESSAGE)
         .build();
   }
 

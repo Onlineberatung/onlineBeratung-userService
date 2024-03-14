@@ -98,7 +98,7 @@ public class InactivePrivateGroupsProviderTest {
 
     inactivePrivateGroupsProvider.retrieveUserWithInactiveGroupsMap();
 
-    verify(this.logger, times(1)).error(anyString(), anyString(), anyString());
+    verify(this.logger, times(1)).error(anyString(), anyString(), anyString(), anyString());
   }
 
   @Test

@@ -32,7 +32,9 @@ public class ChatConverter {
             .repetitive(isTrue(chatDTO.isRepetitive()))
             // Note that the repetition interval can only be weekly atm.
             .chatInterval(isTrue(chatDTO.isRepetitive()) ? ChatInterval.WEEKLY : null)
-            .updateDate(nowInUtc());
+            .updateDate(nowInUtc())
+            .createDate(nowInUtc())
+            .hintMessage(chatDTO.getHintMessage());
 
     if (nonNull(agencyDTO)) {
       builder.consultingTypeId(agencyDTO.getConsultingType());

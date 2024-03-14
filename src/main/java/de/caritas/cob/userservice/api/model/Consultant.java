@@ -5,6 +5,7 @@ import static java.util.Objects.isNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.neovisionaries.i18n.LanguageCode;
+import de.caritas.cob.userservice.mailservice.generated.web.model.Dialect;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
@@ -20,6 +21,7 @@ import javax.persistence.Index;
 import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -250,6 +252,12 @@ public class Consultant implements TenantAware, NotificationsAware {
         .map(ConsultantAgency::getAgencyId)
         .collect(Collectors.toSet())
         .contains(agencyId);
+  }
+
+  @JsonIgnore
+  @Transient
+  public Dialect getDialect() {
+    return isLanguageFormal() ? Dialect.FORMAL : Dialect.INFORMAL;
   }
 
   @Override

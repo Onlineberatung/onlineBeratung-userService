@@ -146,7 +146,8 @@ public class SessionMapper {
         GroupSessionConsultantDTO.builder()
             .id(sessionConsultant.getId())
             .firstName(sessionConsultant.getFirstName())
-            .lastName(sessionConsultant.getLastName());
+            .lastName(sessionConsultant.getLastName())
+            .displayName(sessionConsultant.getDisplayName());
     return response.consultant(consultant.build());
   }
 }

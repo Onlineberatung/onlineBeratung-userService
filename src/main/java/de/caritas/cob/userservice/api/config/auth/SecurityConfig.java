@@ -119,9 +119,19 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .antMatchers("/users/chat/{chatId:[0-9]+}/verify")
         .hasAnyAuthority(CONSULTANT_DEFAULT)
         .antMatchers("/users/password/change")
-        .hasAnyAuthority(USER_DEFAULT, CONSULTANT_DEFAULT, SINGLE_TENANT_ADMIN, TENANT_ADMIN)
+        .hasAnyAuthority(
+            USER_DEFAULT,
+            CONSULTANT_DEFAULT,
+            SINGLE_TENANT_ADMIN,
+            TENANT_ADMIN,
+            RESTRICTED_AGENCY_ADMIN)
         .antMatchers("/users/twoFactorAuth", "/users/2fa/**", "/users/mobile/app/token")
-        .hasAnyAuthority(SINGLE_TENANT_ADMIN, TENANT_ADMIN, USER_DEFAULT, CONSULTANT_DEFAULT)
+        .hasAnyAuthority(
+            SINGLE_TENANT_ADMIN,
+            TENANT_ADMIN,
+            USER_DEFAULT,
+            CONSULTANT_DEFAULT,
+            RESTRICTED_AGENCY_ADMIN)
         .antMatchers("/users/statistics/registration")
         .hasAnyAuthority(SINGLE_TENANT_ADMIN, TENANT_ADMIN)
         .antMatchers(
@@ -181,9 +191,12 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         .antMatchers("/useradmin/data/*")
         .hasAnyAuthority(SINGLE_TENANT_ADMIN, RESTRICTED_AGENCY_ADMIN)
         .antMatchers(HttpMethod.POST, "/useradmin/consultants/")
-        .hasAnyAuthority(USER_ADMIN, CONSULTANT_CREATE_UPDATE, TECHNICAL_DEFAULT)
+        .hasAnyAuthority(CONSULTANT_CREATE, TECHNICAL_DEFAULT)
         .antMatchers(HttpMethod.PUT, "/useradmin/consultants/{consultantId:" + UUID_PATTERN + "}")
-        .hasAnyAuthority(USER_ADMIN, CONSULTANT_CREATE_UPDATE, TECHNICAL_DEFAULT)
+        .hasAnyAuthority(CONSULTANT_UPDATE, TECHNICAL_DEFAULT)
+        .antMatchers(
+            HttpMethod.PUT, "/useradmin/consultants/{consultantId:" + UUID_PATTERN + "}/agencies")
+        .hasAnyAuthority(CONSULTANT_UPDATE, TECHNICAL_DEFAULT)
         .antMatchers("/useradmin", "/useradmin/**")
         .hasAnyAuthority(USER_ADMIN, TECHNICAL_DEFAULT)
         .antMatchers("/users/consultants/search")

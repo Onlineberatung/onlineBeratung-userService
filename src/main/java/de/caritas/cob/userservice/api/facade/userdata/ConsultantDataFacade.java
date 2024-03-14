@@ -5,6 +5,7 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.AbsenceDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.GroupSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserSessionListResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.mapping.UserDtoMapper;
@@ -12,12 +13,17 @@ import de.caritas.cob.userservice.api.helper.Helper;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.port.in.AccountManaging;
 import de.caritas.cob.userservice.api.service.ConsultantService;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ConsultantDataFacade {
 
   private final @NonNull ConsultantService consultantService;
@@ -68,6 +74,27 @@ public class ConsultantDataFacade {
                     .ifPresent(
                         consultantMap ->
                             consultant.setDisplayName(userDtoMapper.displayNameOf(consultantMap)));
+              }
+            });
+  }
+
+  public void addConsultantDisplayNameToSessionList(
+      List<ConsultantSessionResponseDTO> consultantSessionResponseDTOs) {
+    consultantSessionResponseDTOs.stream()
+        .forEach(
+            session -> {
+              var chatOwner = session.getConsultant();
+              if (nonNull(chatOwner) && nonNull(chatOwner.getUsername())) {
+                try {
+                  Optional<Map<String, Object>> consultantByUsername =
+                      accountManager.findConsultantByUsername(chatOwner.getUsername());
+                  if (consultantByUsername.isPresent()) {
+                    chatOwner.setDisplayName(
+                        userDtoMapper.displayNameOf(consultantByUsername.get()));
+                  }
+                } catch (Exception e) {
+                  log.error("Error while fetching consultant by username: {}", e.getMessage());
+                }
               }
             });
   }
