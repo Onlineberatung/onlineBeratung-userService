@@ -203,45 +203,64 @@ class ConsultantServiceTest {
   @ParameterizedTest
   @NullAndEmptySource
   void addMobileAppToken_Should_callNoOtherMethods_When_mobileTokenIsNullOrEmpty(String token) {
-    this.consultantService.addMobileAppToken(null, token);
+    consultantService.addMobileAppToken(null, token);
 
-    verifyNoMoreInteractions(this.consultantMobileTokenRepository);
-    verifyNoMoreInteractions(this.consultantRepository);
+    verifyNoMoreInteractions(consultantMobileTokenRepository);
+    verifyNoMoreInteractions(consultantRepository);
   }
 
   @Test
   void addMobileAppToken_Should_callNoOtherMethods_When_consultantDoesNotExist() {
-    when(this.consultantRepository.findByIdAndDeleteDateIsNull(any())).thenReturn(Optional.empty());
+    when(consultantRepository.findByIdAndDeleteDateIsNull(any())).thenReturn(Optional.empty());
 
-    this.consultantService.addMobileAppToken("id", "token");
+    consultantService.addMobileAppToken("id", "token");
 
-    verifyNoMoreInteractions(this.consultantMobileTokenRepository);
-    verifyNoMoreInteractions(this.consultantRepository);
+    verifyNoMoreInteractions(consultantMobileTokenRepository);
+    verifyNoMoreInteractions(consultantRepository);
   }
 
   @Test
   void addMobileAppToken_Should_addMobileTokenToConsultant_When_consultantExists() {
     var consultant = new EasyRandom().nextObject(Consultant.class);
     consultant.getConsultantMobileTokens().clear();
-    when(this.consultantRepository.findByIdAndDeleteDateIsNull(any()))
+    when(consultantRepository.findByIdAndDeleteDateIsNull(any()))
         .thenReturn(Optional.of(consultant));
 
-    this.consultantService.addMobileAppToken("id", "token");
+    consultantService.addMobileAppToken("id", "token");
 
-    verify(this.consultantMobileTokenRepository, times(1)).findByMobileAppToken("token");
-    verify(this.consultantMobileTokenRepository, times(1)).save(any());
+    verify(consultantMobileTokenRepository, times(1)).findByMobileAppToken("token");
+    verify(consultantMobileTokenRepository, times(1)).save(any());
     assertThat(consultant.getConsultantMobileTokens(), hasSize(1));
   }
 
   @Test
   void addMobileAppToken_Should_throwConflictException_When_tokenAlreadyExists() {
     var consultant = new EasyRandom().nextObject(Consultant.class);
-    when(this.consultantRepository.findByIdAndDeleteDateIsNull(any()))
+    when(consultantRepository.findByIdAndDeleteDateIsNull(any()))
         .thenReturn(Optional.of(consultant));
-    when(this.consultantMobileTokenRepository.findByMobileAppToken(any()))
+    when(consultantMobileTokenRepository.findByMobileAppToken(any()))
         .thenReturn(Optional.of(new ConsultantMobileToken()));
 
-    assertThrows(
-        ConflictException.class, () -> this.consultantService.addMobileAppToken("id", "token"));
+    assertThrows(ConflictException.class, () -> consultantService.addMobileAppToken("id", "token"));
+  }
+
+  @Test
+  void getNumberOfActiveConsultants_Should_ReturnNumberOfActiveConsultants() {
+    when(consultantRepository.countByDeleteDateIsNull()).thenReturn(1L);
+
+    var result = consultantService.getNumberOfActiveConsultants();
+
+    verify(consultantRepository).countByDeleteDateIsNull();
+    assertEquals(1L, result);
+  }
+
+  @Test
+  void getNumberOfActiveConsultantsByTenantId_Should_ReturnNumberOfActiveConsultants() {
+    when(consultantRepository.countByTenantIdAndDeleteDateIsNull(1L)).thenReturn(1L);
+
+    var result = consultantService.getNumberOfActiveConsultants(1L);
+
+    verify(consultantRepository).countByTenantIdAndDeleteDateIsNull(1L);
+    assertEquals(1L, result);
   }
 }

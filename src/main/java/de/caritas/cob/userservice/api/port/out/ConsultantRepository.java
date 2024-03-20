@@ -64,6 +64,8 @@ public interface ConsultantRepository extends CrudRepository<Consultant, String>
 
   long countByDeleteDateIsNull();
 
+  long countByTenantIdAndDeleteDateIsNull(Long tenantId);
+
   @Query(
       value =
           "SELECT DISTINCT c.rocketChatId "
