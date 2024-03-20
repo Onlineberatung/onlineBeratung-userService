@@ -153,6 +153,10 @@ public class ConsultantService {
     return consultantRepository.countByDeleteDateIsNull();
   }
 
+  public long getNumberOfActiveConsultants(Long tenantId) {
+    return consultantRepository.countByTenantIdAndDeleteDateIsNull(tenantId);
+  }
+
   private void addConsultantToken(Consultant consultant, String mobileToken) {
     verifyTokenDoesNotAlreadyExist(mobileToken);
     var consultantMobileToken = new ConsultantMobileToken();

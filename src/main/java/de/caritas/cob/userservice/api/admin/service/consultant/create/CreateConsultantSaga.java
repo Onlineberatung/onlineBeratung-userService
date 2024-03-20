@@ -4,6 +4,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static de.caritas.cob.userservice.api.config.auth.UserRole.CONSULTANT;
 import static de.caritas.cob.userservice.api.config.auth.UserRole.GROUP_CHAT_CONSULTANT;
 import static de.caritas.cob.userservice.api.helper.json.JsonSerializationUtils.serializeToJsonString;
+import static java.util.Objects.*;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 
@@ -74,12 +75,16 @@ public class CreateConsultantSaga {
 
   private Consultant createNewConsultantWithoutAppointment(
       CreateConsultantDTO createConsultantDTO) {
-    assertLicensesNotExceeded();
+    validateTenantId(createConsultantDTO);
+    setCurrentTenant(createConsultantDTO);
+
+    assertLicensesNotExceeded(createConsultantDTO);
+
     this.userAccountInputValidator.validateAbsence(
         new CreateConsultantDTOAbsenceInputAdapter(createConsultantDTO));
+
     ConsultantCreationInput consultantCreationInput =
         new CreateConsultantDTOCreationInputAdapter(createConsultantDTO);
-    assignCurrentTenantContext(createConsultantDTO);
 
     var roles = asSet(CONSULTANT.getValue());
     addGroupChatConsultantRole(createConsultantDTO, roles);
@@ -138,13 +143,15 @@ public class CreateConsultantSaga {
   }
 
   private void validateTenantId(CreateConsultantDTO createConsultantDTO) {
-    if (authenticatedUser.isTenantSuperAdmin()) {
-      if (createConsultantDTO.getTenantId() == null) {
-        throw new BadRequestException(
-            "TenantId must be set if consultant is created by superadmin");
+    if (multiTenancyEnabled) {
+      if (authenticatedUser.isTenantSuperAdmin()) {
+        if (createConsultantDTO.getTenantId() == null) {
+          throw new BadRequestException(
+              "TenantId must be set if consultant is created by superadmin");
+        }
+      } else {
+        checkIfTenantIdMatch(createConsultantDTO);
       }
-    } else {
-      checkIfTenantIdMatch(createConsultantDTO);
     }
   }
 
@@ -261,12 +268,10 @@ public class CreateConsultantSaga {
     }
   }
 
-  private void assignCurrentTenantContext(CreateConsultantDTO createConsultantDTO) {
-    if (multiTenancyEnabled) {
-      validateTenantId(createConsultantDTO);
-      if (!authenticatedUser.isTenantSuperAdmin() && createConsultantDTO.getTenantId() == null) {
-        createConsultantDTO.setTenantId(TenantContext.getCurrentTenant());
-      }
+  private void setCurrentTenant(CreateConsultantDTO createConsultantDTO) {
+    if (multiTenancyEnabled
+        && (!authenticatedUser.isTenantSuperAdmin() && createConsultantDTO.getTenantId() == null)) {
+      createConsultantDTO.setTenantId(TenantContext.getCurrentTenant());
     }
   }
 
@@ -376,10 +381,15 @@ public class CreateConsultantSaga {
     return userDto;
   }
 
-  private void assertLicensesNotExceeded() {
+  private void assertLicensesNotExceeded(CreateConsultantDTO createConsultantDTO) {
     if (multiTenancyEnabled) {
-      TenantDTO tenantById = tenantAdminService.getTenantById(TenantContext.getCurrentTenant());
-      long numberOfActiveConsultants = consultantService.getNumberOfActiveConsultants();
+      TenantDTO tenantById = tenantAdminService.getTenantById(createConsultantDTO.getTenantId());
+      long numberOfActiveConsultants =
+          authenticatedUser.isTenantSuperAdmin()
+              ? consultantService.getNumberOfActiveConsultants(createConsultantDTO.getTenantId())
+              : consultantService.getNumberOfActiveConsultants();
+
+      assert nonNull(tenantById.getLicensing());
       Integer allowedNumberOfUsers = tenantById.getLicensing().getAllowedNumberOfUsers();
       if (numberOfActiveConsultants >= allowedNumberOfUsers) {
         throw new CustomValidationHttpStatusException(
