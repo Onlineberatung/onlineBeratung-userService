@@ -21,6 +21,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
+import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.model.Admin;
 import de.caritas.cob.userservice.api.model.Admin.AdminType;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
@@ -53,6 +54,7 @@ public class CreateAdminServiceIT {
 
   @Autowired private CreateAdminService createAdminService;
   @MockBean private IdentityClient identityClient;
+  @MockBean private AuthenticatedUser authenticatedUser;
   @Captor private ArgumentCaptor<UserDTO> userDTOArgumentCaptor;
   private final EasyRandom easyRandom = new EasyRandom();
 
@@ -85,6 +87,7 @@ public class CreateAdminServiceIT {
     verify(identityClient).updateRole(anyString(), eq(USER_ADMIN));
 
     assertThat(admin).isNotNull();
+    assertThat(admin.getTenantId()).isNull();
     assertThat(admin.getId()).isNotNull();
     assertThat(admin.getType()).isEqualTo(AdminType.AGENCY);
     assertThat(admin.getUsername()).isNotNull();
@@ -93,7 +96,6 @@ public class CreateAdminServiceIT {
     assertThat(admin.getEmail()).isNotNull();
     assertThat(admin.getCreateDate()).isNotNull();
     assertThat(admin.getUpdateDate()).isNotNull();
-    assertThat(admin.getTenantId()).isNotNull();
   }
 
   @Test
@@ -122,6 +124,7 @@ public class CreateAdminServiceIT {
     verify(identityClient).updateRole(anyString(), eq(USER_ADMIN));
 
     assertThat(admin).isNotNull();
+    assertThat(admin.getTenantId()).isEqualTo(1L);
     assertThat(admin.getId()).isNotNull();
     assertThat(admin.getType()).isEqualTo(AdminType.AGENCY);
     assertThat(admin.getUsername()).isNotNull();
@@ -130,7 +133,40 @@ public class CreateAdminServiceIT {
     assertThat(admin.getEmail()).isNotNull();
     assertThat(admin.getCreateDate()).isNotNull();
     assertThat(admin.getUpdateDate()).isNotNull();
-    assertThat(admin.getTenantId()).isNotNull();
+  }
+
+  @Test
+  public void
+      createNewAdminAgency_Should_returnExpectedCreatedAdmin_When_userIsSuperAdminAndInputDataIsCorrectAndMultitenancyEnabled() {
+    // given
+    ReflectionTestUtils.setField(createAdminService, "multiTenancyEnabled", true);
+    TenantContext.setCurrentTenant(0L);
+    when(authenticatedUser.isTenantSuperAdmin()).thenReturn(true);
+    when(identityClient.createKeycloakUser(any(), anyString(), any()))
+        .thenReturn(easyRandom.nextObject(KeycloakCreateUserResponseDTO.class));
+    when(identityClient.createKeycloakUser(any(), anyString(), any()))
+        .thenReturn(easyRandom.nextObject(KeycloakCreateUserResponseDTO.class));
+    CreateAdminDTO createAdminDTO = this.easyRandom.nextObject(CreateAdminDTO.class);
+    createAdminDTO.setTenantId(1);
+    createAdminDTO.setUsername(VALID_USERNAME);
+    createAdminDTO.setEmail(VALID_EMAIL_ADDRESS);
+
+    // when
+    Admin admin = this.createAdminService.createNewAgencyAdmin(createAdminDTO);
+
+    // then
+    verify(identityClient)
+        .createKeycloakUser(userDTOArgumentCaptor.capture(), anyString(), anyString());
+    assertNotNull(userDTOArgumentCaptor.getValue().getTenantId());
+    assertEquals(1L, (long) userDTOArgumentCaptor.getValue().getTenantId());
+
+    verify(identityClient).updatePassword(anyString(), anyString());
+    verify(identityClient).updateRole(anyString(), eq(RESTRICTED_AGENCY_ADMIN));
+    verify(identityClient).updateRole(anyString(), eq(USER_ADMIN));
+
+    assertThat(admin).isNotNull();
+    assertThat(admin.getTenantId()).isEqualTo(1L);
+    assertThat(admin.getId()).isNotNull();
   }
 
   @Test
