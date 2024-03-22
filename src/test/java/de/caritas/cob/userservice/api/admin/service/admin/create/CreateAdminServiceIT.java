@@ -171,7 +171,7 @@ public class CreateAdminServiceIT {
 
   @Test
   public void
-  createNewAdminAgency_Should_returnExpectedCreatedAdmin_When_userIsSuperAdminAndInputDataIsCorrectAndMultitenancyDisabled() {
+      createNewAdminAgency_Should_returnExpectedCreatedAdmin_When_userIsSuperAdminAndInputDataIsCorrectAndMultitenancyDisabled() {
     // given
     ReflectionTestUtils.setField(createAdminService, "multiTenancyEnabled", false);
     TenantContext.setCurrentTenant(0L);
