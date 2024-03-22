@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.admin.service.admin.create;
 
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
+import static org.apache.commons.lang3.Validate.notNull;
 
 import com.google.common.collect.Lists;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
@@ -8,6 +9,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
 import de.caritas.cob.userservice.api.admin.service.consultant.validation.UserAccountInputValidator;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
+import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
 import de.caritas.cob.userservice.api.model.Admin;
@@ -35,10 +37,10 @@ public class CreateAdminService {
   private final @NonNull UserAccountInputValidator userAccountInputValidator;
   private final @NonNull UserHelper userHelper;
   private final @NonNull AdminRepository adminRepository;
+  private final @NonNull AuthenticatedUser authenticatedUser;
 
   public Admin createNewAgencyAdmin(CreateAdminDTO createAdminDTO) {
-    createAdminDTO.setTenantId(null);
-    assignCurrentTenantContext(createAdminDTO);
+    setTenantId(createAdminDTO);
     return createNewAdmin(createAdminDTO, Admin.AdminType.AGENCY);
   }
 
@@ -54,6 +56,18 @@ public class CreateAdminService {
       return getUserRolesForTenantAdmin();
     }
     return Lists.newArrayList();
+  }
+
+  private void setTenantId(CreateAdminDTO createAdminDTO) {
+    if (multiTenancyEnabled) {
+      if (authenticatedUser.isTenantSuperAdmin()) {
+        notNull(createAdminDTO.getTenantId());
+      } else {
+        createAdminDTO.setTenantId(TenantContext.getCurrentTenant().intValue());
+      }
+    } else {
+      createAdminDTO.setTenantId(null);
+    }
   }
 
   private ArrayList<UserRole> getUserRolesForTenantAdmin() {
@@ -117,15 +131,5 @@ public class CreateAdminService {
         .createDate(nowInUtc())
         .updateDate(nowInUtc())
         .build();
-  }
-
-  private void assignCurrentTenantContext(CreateAdminDTO createAgencyAdminDTO) {
-    if (multiTenancyEnabled && !isTechnicalTenant(TenantContext.getCurrentTenant())) {
-      createAgencyAdminDTO.setTenantId(TenantContext.getCurrentTenant().intValue());
-    }
-  }
-
-  private boolean isTechnicalTenant(Long tenantId) {
-    return tenantId != null && tenantId.equals(0L);
   }
 }
