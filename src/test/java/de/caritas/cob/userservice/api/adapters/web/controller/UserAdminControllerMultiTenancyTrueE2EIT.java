@@ -16,16 +16,11 @@ import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserRe
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateAdminDTO;
 import de.caritas.cob.userservice.api.admin.service.tenant.TenantService;
 import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiControllerFactory;
-import de.caritas.cob.userservice.api.config.apiclient.ConsultingTypeServiceApiControllerFactory;
-import de.caritas.cob.userservice.api.config.apiclient.MailServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValue;
 import de.caritas.cob.userservice.api.config.auth.IdentityConfig;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.tenant.TenantResolverService;
-import de.caritas.cob.userservice.api.testConfig.TestAgencyControllerApi;
-import de.caritas.cob.userservice.consultingtypeservice.generated.web.ConsultingTypeControllerApi;
-import de.caritas.cob.userservice.mailservice.generated.web.MailsControllerApi;
 import de.caritas.cob.userservice.tenantservice.generated.web.model.RestrictedTenantDTO;
 import javax.servlet.http.Cookie;
 import org.jeasy.random.EasyRandom;
@@ -34,7 +29,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -62,20 +56,7 @@ class UserAdminControllerMultiTenancyTrueE2EIT {
 
   @Autowired private ObjectMapper objectMapper;
 
-  @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-  @Autowired
-  private ConsultingTypeControllerApi consultingTypeControllerApi;
-
   @Autowired private IdentityConfig identityConfig;
-
-  @MockBean
-  private ConsultingTypeServiceApiControllerFactory consultingTypeServiceApiControllerFactory;
-
-  @MockBean private MailServiceApiControllerFactory mailServiceApiControllerFactory;
-
-  @MockBean
-  @Qualifier("mailsControllerApi")
-  private MailsControllerApi mailsControllerApi;
 
   @MockBean AgencyServiceApiControllerFactory agencyServiceApiControllerFactory;
 
@@ -94,14 +75,6 @@ class UserAdminControllerMultiTenancyTrueE2EIT {
 
   @BeforeEach
   public void setUp() {
-    when(agencyServiceApiControllerFactory.createControllerApi())
-        .thenReturn(
-            new TestAgencyControllerApi(
-                new de.caritas.cob.userservice.agencyserivce.generated.ApiClient()));
-
-    when(consultingTypeServiceApiControllerFactory.createControllerApi())
-        .thenReturn(consultingTypeControllerApi);
-    when(mailServiceApiControllerFactory.createControllerApi()).thenReturn(mailsControllerApi);
 
     KeycloakCreateUserResponseDTO keycloakResponse = new KeycloakCreateUserResponseDTO();
     keycloakResponse.setUserId(new EasyRandom().nextObject(String.class));
