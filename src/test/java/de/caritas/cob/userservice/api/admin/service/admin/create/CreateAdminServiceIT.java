@@ -170,6 +170,39 @@ public class CreateAdminServiceIT {
   }
 
   @Test
+  public void
+      createNewAdminAgency_Should_returnExpectedCreatedAdmin_When_userIsSuperAdminAndInputDataIsCorrectAndMultitenancyDisabled() {
+    // given
+    ReflectionTestUtils.setField(createAdminService, "multiTenancyEnabled", false);
+    TenantContext.setCurrentTenant(0L);
+    when(authenticatedUser.isTenantSuperAdmin()).thenReturn(true);
+    when(identityClient.createKeycloakUser(any(), anyString(), any()))
+        .thenReturn(easyRandom.nextObject(KeycloakCreateUserResponseDTO.class));
+    when(identityClient.createKeycloakUser(any(), anyString(), any()))
+        .thenReturn(easyRandom.nextObject(KeycloakCreateUserResponseDTO.class));
+    CreateAdminDTO createAdminDTO = this.easyRandom.nextObject(CreateAdminDTO.class);
+    createAdminDTO.setTenantId(1);
+    createAdminDTO.setUsername(VALID_USERNAME);
+    createAdminDTO.setEmail(VALID_EMAIL_ADDRESS);
+
+    // when
+    Admin admin = this.createAdminService.createNewAgencyAdmin(createAdminDTO);
+
+    // then
+    verify(identityClient)
+        .createKeycloakUser(userDTOArgumentCaptor.capture(), anyString(), anyString());
+    assertNull(userDTOArgumentCaptor.getValue().getTenantId());
+
+    verify(identityClient).updatePassword(anyString(), anyString());
+    verify(identityClient).updateRole(anyString(), eq(RESTRICTED_AGENCY_ADMIN));
+    verify(identityClient).updateRole(anyString(), eq(USER_ADMIN));
+
+    assertThat(admin).isNotNull();
+    assertThat(admin.getTenantId()).isNull();
+    assertThat(admin.getId()).isNotNull();
+  }
+
+  @Test
   public void getUserRolesForTenantAdmin_ShouldGetProperDefaultRoles_ForSingleDomainMultitenancy() {
     Whitebox.setInternalState(createAdminService, "multitenancyWithSingleDomain", true);
     List<UserRole> defaultRoles = this.createAdminService.getDefaultRoles(AdminType.TENANT);

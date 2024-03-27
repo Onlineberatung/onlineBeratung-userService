@@ -60,13 +60,17 @@ public class CreateAdminService {
 
   private void setTenantId(CreateAdminDTO createAdminDTO) {
     if (multiTenancyEnabled) {
-      if (authenticatedUser.isTenantSuperAdmin()) {
-        notNull(createAdminDTO.getTenantId());
-      } else {
-        createAdminDTO.setTenantId(TenantContext.getCurrentTenant().intValue());
-      }
+      setTenantIdForMultiTenancy(createAdminDTO);
     } else {
       createAdminDTO.setTenantId(null);
+    }
+  }
+
+  private void setTenantIdForMultiTenancy(CreateAdminDTO createAdminDTO) {
+    if (authenticatedUser.isTenantSuperAdmin()) {
+      notNull(createAdminDTO.getTenantId());
+    } else {
+      createAdminDTO.setTenantId(TenantContext.getCurrentTenant().intValue());
     }
   }
 

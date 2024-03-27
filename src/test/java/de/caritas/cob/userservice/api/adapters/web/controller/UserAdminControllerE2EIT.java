@@ -188,7 +188,6 @@ class UserAdminControllerE2EIT {
     // given
     CreateConsultantDTO createAdminDTO = new EasyRandom().nextObject(CreateConsultantDTO.class);
     createAdminDTO.setEmail("consultant@email.com");
-
     // when
     MvcResult mvcResult =
         this.mockMvc
@@ -219,6 +218,7 @@ class UserAdminControllerE2EIT {
     // given
     CreateAdminDTO createAdminDTO = new EasyRandom().nextObject(CreateAdminDTO.class);
     createAdminDTO.setEmail("agencyadmin@email.com");
+    createAdminDTO.setTenantId(95);
 
     // when
 
@@ -235,6 +235,7 @@ class UserAdminControllerE2EIT {
             .andExpect(jsonPath("_embedded.username", notNullValue()))
             .andExpect(jsonPath("_embedded.lastname", notNullValue()))
             .andExpect(jsonPath("_embedded.email", is("agencyadmin@email.com")))
+            .andExpect(jsonPath("_embedded.tenantId", is("null")))
             .andReturn();
     String content = mvcResult.getResponse().getContentAsString();
     return JsonPath.read(content, "_embedded.id");
