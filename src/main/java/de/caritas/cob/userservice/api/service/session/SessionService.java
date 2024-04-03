@@ -38,6 +38,7 @@ import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.Exte
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -49,6 +50,7 @@ import java.util.stream.StreamSupport;
 import javax.ws.rs.BadRequestException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -56,6 +58,7 @@ import org.springframework.stereotype.Service;
 /** Service for sessions */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SessionService {
 
   private final @NonNull SessionRepository sessionRepository;
@@ -437,11 +440,21 @@ public class SessionService {
    * @param roles the roles of the given consultant
    * @return {@link ConsultantSessionResponseDTO}
    */
-  public List<ConsultantSessionResponseDTO> getSessionsByConsultantAndGroupOrFeedbackGroupIds(
+  public List<ConsultantSessionResponseDTO> getAllowedSessionsByConsultantAndGroupOrFeedbackGroupIds(
       Consultant consultant, Set<String> rcGroupIds, Set<String> roles) {
     checkForUserOrConsultantRole(roles);
     var sessions = sessionRepository.findByGroupOrFeedbackGroupIds(rcGroupIds);
-    sessions.forEach(session -> checkConsultantAssignment(consultant, session));
+
+    Iterator<Session> iterator = sessions.iterator();
+    while (iterator.hasNext()) {
+      Session session = iterator.next();
+      try {
+        checkConsultantAssignment(consultant, session);
+      } catch (ForbiddenException e) {
+        log.info(e.getMessage());
+        iterator.remove();
+      }
+    }
     return mapSessionsToConsultantSessionDto(sessions);
   }
 

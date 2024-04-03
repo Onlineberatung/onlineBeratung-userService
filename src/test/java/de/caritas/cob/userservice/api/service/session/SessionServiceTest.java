@@ -783,7 +783,7 @@ class SessionServiceTest {
 
   @Test
   void
-      getSessionsByConsultantAndGroupOrFeedbackGroupIds_should_find_new_anonymous_enquiry_if_consultant_may_advise_consulting_type() {
+  getAllowedSessionsByConsultantAndGroupOrFeedbackGroupIds_should_find_new_anonymous_enquiry_if_consultant_may_advise_consulting_type() {
     Session anonymousEnquiry =
         createAnonymousNewEnquiryWithConsultingType(AGENCY_DTO_SUCHT.getConsultingType());
     when(sessionRepository.findByGroupOrFeedbackGroupIds(singleton("rcGroupId")))
@@ -794,10 +794,37 @@ class SessionServiceTest {
     var consultant = createConsultantWithAgencies(agency);
 
     var sessionResponse =
-        sessionService.getSessionsByConsultantAndGroupOrFeedbackGroupIds(
+        sessionService.getAllowedSessionsByConsultantAndGroupOrFeedbackGroupIds(
             consultant, singleton("rcGroupId"), singleton(UserRole.CONSULTANT.getValue()));
 
     assertEquals(1, sessionResponse.size());
+  }
+
+  @Test
+  void
+  getAllowedSessionsByConsultantAndGroupOrFeedbackGroupIds_should_only_return_the_sessions_the_consultant_can_see() {
+    Session allowedSession =
+        createAnonymousNewEnquiryWithConsultingType(AGENCY_DTO_SUCHT.getConsultingType());
+    Session notAllowedSession =
+        createAnonymousNewEnquiryWithConsultingType(AGENCY_DTO_SUCHT.getConsultingType());
+    List<Session> sessions = new ArrayList<>();
+    sessions.add(notAllowedSession);
+    sessions.add(allowedSession);
+    ConsultantAgency agency = new ConsultantAgency();
+    agency.setAgencyId(4711L);
+    var consultant = createConsultantWithAgencies(agency);
+    allowedSession.setConsultant(consultant);
+    allowedSession.setId(1L);
+    notAllowedSession.setId(2L);
+    when(sessionRepository.findByGroupOrFeedbackGroupIds(singleton("rcGroupId")))
+        .thenReturn(sessions);
+
+    var sessionResponse =
+        sessionService.getAllowedSessionsByConsultantAndGroupOrFeedbackGroupIds(
+            consultant, singleton("rcGroupId"), singleton(UserRole.CONSULTANT.getValue()));
+
+    assertEquals(1, sessionResponse.size());
+    assertEquals(sessionResponse.get(0).getSession().getId(),allowedSession.getId());
   }
 
   @Test
