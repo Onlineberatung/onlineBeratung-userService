@@ -440,8 +440,9 @@ public class SessionService {
    * @param roles the roles of the given consultant
    * @return {@link ConsultantSessionResponseDTO}
    */
-  public List<ConsultantSessionResponseDTO> getAllowedSessionsByConsultantAndGroupOrFeedbackGroupIds(
-      Consultant consultant, Set<String> rcGroupIds, Set<String> roles) {
+  public List<ConsultantSessionResponseDTO>
+      getAllowedSessionsByConsultantAndGroupOrFeedbackGroupIds(
+          Consultant consultant, Set<String> rcGroupIds, Set<String> roles) {
     checkForUserOrConsultantRole(roles);
     var sessions = sessionRepository.findByGroupOrFeedbackGroupIds(rcGroupIds);
 
