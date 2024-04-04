@@ -810,8 +810,8 @@ class SessionServiceTest {
     agency.setAgencyId(4711L);
     var consultant = createConsultantWithAgencies(agency);
     var allowedSession = giveAllowedSessionWithID(1L, consultant);
-    var notAllowed = giveNotallowedSessionWithID(2L);
-    sessions.add(notAllowed);
+    var notAllowedSession = giveNotallowedSessionWithID(2L);
+    sessions.add(notAllowedSession);
     sessions.add(allowedSession);
     when(sessionRepository.findByGroupOrFeedbackGroupIds(singleton("rcGroupId")))
         .thenReturn(sessions);
