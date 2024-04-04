@@ -810,8 +810,8 @@ class SessionServiceTest {
     agency.setAgencyId(4711L);
     var consultant = createConsultantWithAgencies(agency);
     var allowedSession = giveAllowedSessionWithID(1L, consultant);
-    var unhallowedSession = giveUnhallowedSessionWithID(2L);
-    sessions.add(unhallowedSession);
+    var notAllowed = giveNotallowedSessionWithID(2L);
+    sessions.add(notAllowed);
     sessions.add(allowedSession);
     when(sessionRepository.findByGroupOrFeedbackGroupIds(singleton("rcGroupId")))
         .thenReturn(sessions);
@@ -914,7 +914,7 @@ class SessionServiceTest {
     return allowedSession;
   }
 
-  private Session giveUnhallowedSessionWithID(Long id) {
+  private Session giveNotallowedSessionWithID(Long id) {
     Session unhallowedSession =
         createAnonymousNewEnquiryWithConsultingType(AGENCY_DTO_SUCHT.getConsultingType());
     unhallowedSession.setId(id);
