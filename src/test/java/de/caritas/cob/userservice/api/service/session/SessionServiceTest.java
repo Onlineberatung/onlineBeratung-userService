@@ -26,6 +26,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_WITH_
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static liquibase.util.BooleanUtils.isTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -803,6 +804,7 @@ class SessionServiceTest {
   @Test
   void
       getAllowedSessionsByConsultantAndGroupOrFeedbackGroupIds_should_only_return_the_sessions_the_consultant_can_see() {
+    //given
     Session allowedSession =
         createAnonymousNewEnquiryWithConsultingType(AGENCY_DTO_SUCHT.getConsultingType());
     Session notAllowedSession =
@@ -818,13 +820,13 @@ class SessionServiceTest {
     notAllowedSession.setId(2L);
     when(sessionRepository.findByGroupOrFeedbackGroupIds(singleton("rcGroupId")))
         .thenReturn(sessions);
-
+    //when
     var sessionResponse =
         sessionService.getAllowedSessionsByConsultantAndGroupOrFeedbackGroupIds(
             consultant, singleton("rcGroupId"), singleton(UserRole.CONSULTANT.getValue()));
-
-    assertEquals(1, sessionResponse.size());
-    assertEquals(sessionResponse.get(0).getSession().getId(), allowedSession.getId());
+    //then
+    assertThat(sessionResponse).hasSize(1);
+    assertThat(sessionResponse.get(0).getSession().getId()).isEqualTo(allowedSession.getId());
   }
 
   @Test
