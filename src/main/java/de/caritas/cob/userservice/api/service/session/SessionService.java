@@ -38,7 +38,6 @@ import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.Exte
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -446,9 +445,10 @@ public class SessionService {
     checkForUserOrConsultantRole(roles);
     var sessions = sessionRepository.findByGroupOrFeedbackGroupIds(rcGroupIds);
 
-    List<Session> allowedSessions = sessions.stream()
-        .filter(session -> isConsultantPermittedToSession(consultant, session))
-        .collect(Collectors.toList());
+    List<Session> allowedSessions =
+        sessions.stream()
+            .filter(session -> isConsultantPermittedToSession(consultant, session))
+            .collect(Collectors.toList());
 
     return mapSessionsToConsultantSessionDto(allowedSessions);
   }

@@ -804,7 +804,7 @@ class SessionServiceTest {
   @Test
   void
       getAllowedSessionsByConsultantAndGroupOrFeedbackGroupIds_should_only_return_the_sessions_the_consultant_can_see() {
-    //given
+    // given
     List<Session> sessions = new ArrayList<>();
     ConsultantAgency agency = new ConsultantAgency();
     agency.setAgencyId(4711L);
@@ -815,11 +815,11 @@ class SessionServiceTest {
     sessions.add(allowedSession);
     when(sessionRepository.findByGroupOrFeedbackGroupIds(singleton("rcGroupId")))
         .thenReturn(sessions);
-    //when
+    // when
     var sessionResponse =
         sessionService.getAllowedSessionsByConsultantAndGroupOrFeedbackGroupIds(
             consultant, singleton("rcGroupId"), singleton(UserRole.CONSULTANT.getValue()));
-    //then
+    // then
     assertThat(sessionResponse).hasSize(1);
     assertThat(sessionResponse.get(0).getSession().getId()).isEqualTo(allowedSession.getId());
   }
@@ -906,7 +906,7 @@ class SessionServiceTest {
         someUserId, singleton(anonymousEnquiry.getId()), singleton(UserRole.ANONYMOUS.getValue()));
   }
 
-  private Session giveAllowedSessionWithID(Long id, Consultant consultant){
+  private Session giveAllowedSessionWithID(Long id, Consultant consultant) {
     Session allowedSession =
         createAnonymousNewEnquiryWithConsultingType(AGENCY_DTO_SUCHT.getConsultingType());
     allowedSession.setId(id);
@@ -914,7 +914,7 @@ class SessionServiceTest {
     return allowedSession;
   }
 
-  private Session giveUnhallowedSessionWithID(Long id){
+  private Session giveUnhallowedSessionWithID(Long id) {
     Session unhallowedSession =
         createAnonymousNewEnquiryWithConsultingType(AGENCY_DTO_SUCHT.getConsultingType());
     unhallowedSession.setId(id);
