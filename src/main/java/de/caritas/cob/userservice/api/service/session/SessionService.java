@@ -446,17 +446,11 @@ public class SessionService {
     checkForUserOrConsultantRole(roles);
     var sessions = sessionRepository.findByGroupOrFeedbackGroupIds(rcGroupIds);
 
-    Iterator<Session> iterator = sessions.iterator();
-    while (iterator.hasNext()) {
-      Session session = iterator.next();
-      try {
-        checkConsultantAssignment(consultant, session);
-      } catch (ForbiddenException e) {
-        log.info(e.getMessage());
-        iterator.remove();
-      }
-    }
-    return mapSessionsToConsultantSessionDto(sessions);
+    List<Session> allowedSessions = sessions.stream()
+        .filter(session -> isConsultantPermittedToSession(consultant, session))
+        .collect(Collectors.toList());
+
+    return mapSessionsToConsultantSessionDto(allowedSessions);
   }
 
   /**
@@ -548,6 +542,16 @@ public class SessionService {
       var consultant = loadConsultantOrThrow(userId);
       checkPermissionForConsultantSession(session, consultant);
     }
+  }
+
+  private boolean isConsultantPermittedToSession(Consultant consultant, Session session) {
+    try {
+      checkConsultantAssignment(consultant, session);
+    } catch (ForbiddenException e) {
+      log.info(e.getMessage());
+      return false;
+    }
+    return true;
   }
 
   private void checkConsultantAssignment(Consultant consultant, Session session) {
