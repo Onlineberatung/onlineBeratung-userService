@@ -805,19 +805,14 @@ class SessionServiceTest {
   void
       getAllowedSessionsByConsultantAndGroupOrFeedbackGroupIds_should_only_return_the_sessions_the_consultant_can_see() {
     //given
-    Session allowedSession =
-        createAnonymousNewEnquiryWithConsultingType(AGENCY_DTO_SUCHT.getConsultingType());
-    Session notAllowedSession =
-        createAnonymousNewEnquiryWithConsultingType(AGENCY_DTO_SUCHT.getConsultingType());
     List<Session> sessions = new ArrayList<>();
-    sessions.add(notAllowedSession);
-    sessions.add(allowedSession);
     ConsultantAgency agency = new ConsultantAgency();
     agency.setAgencyId(4711L);
     var consultant = createConsultantWithAgencies(agency);
-    allowedSession.setConsultant(consultant);
-    allowedSession.setId(1L);
-    notAllowedSession.setId(2L);
+    var allowedSession = giveAllowedSessionWithID(1L, consultant);
+    var unhallowedSession = giveUnhallowedSessionWithID(2L);
+    sessions.add(unhallowedSession);
+    sessions.add(allowedSession);
     when(sessionRepository.findByGroupOrFeedbackGroupIds(singleton("rcGroupId")))
         .thenReturn(sessions);
     //when
@@ -909,6 +904,21 @@ class SessionServiceTest {
   private List<UserSessionResponseDTO> getSomeUserId(String someUserId, Session anonymousEnquiry) {
     return sessionService.getSessionsByUserAndSessionIds(
         someUserId, singleton(anonymousEnquiry.getId()), singleton(UserRole.ANONYMOUS.getValue()));
+  }
+
+  private Session giveAllowedSessionWithID(Long id, Consultant consultant){
+    Session allowedSession =
+        createAnonymousNewEnquiryWithConsultingType(AGENCY_DTO_SUCHT.getConsultingType());
+    allowedSession.setId(id);
+    allowedSession.setConsultant(consultant);
+    return allowedSession;
+  }
+
+  private Session giveUnhallowedSessionWithID(Long id){
+    Session unhallowedSession =
+        createAnonymousNewEnquiryWithConsultingType(AGENCY_DTO_SUCHT.getConsultingType());
+    unhallowedSession.setId(id);
+    return unhallowedSession;
   }
 
   private Session createAnonymousNewEnquiryWithConsultingType(int consultingTypeId) {
