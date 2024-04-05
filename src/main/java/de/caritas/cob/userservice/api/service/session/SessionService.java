@@ -49,6 +49,7 @@ import java.util.stream.StreamSupport;
 import javax.ws.rs.BadRequestException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -56,6 +57,7 @@ import org.springframework.stereotype.Service;
 /** Service for sessions */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SessionService {
 
   private final @NonNull SessionRepository sessionRepository;
@@ -437,12 +439,18 @@ public class SessionService {
    * @param roles the roles of the given consultant
    * @return {@link ConsultantSessionResponseDTO}
    */
-  public List<ConsultantSessionResponseDTO> getSessionsByConsultantAndGroupOrFeedbackGroupIds(
-      Consultant consultant, Set<String> rcGroupIds, Set<String> roles) {
+  public List<ConsultantSessionResponseDTO>
+      getAllowedSessionsByConsultantAndGroupOrFeedbackGroupIds(
+          Consultant consultant, Set<String> rcGroupIds, Set<String> roles) {
     checkForUserOrConsultantRole(roles);
     var sessions = sessionRepository.findByGroupOrFeedbackGroupIds(rcGroupIds);
-    sessions.forEach(session -> checkConsultantAssignment(consultant, session));
-    return mapSessionsToConsultantSessionDto(sessions);
+
+    List<Session> allowedSessions =
+        sessions.stream()
+            .filter(session -> isConsultantPermittedToSession(consultant, session))
+            .collect(Collectors.toList());
+
+    return mapSessionsToConsultantSessionDto(allowedSessions);
   }
 
   /**
@@ -534,6 +542,16 @@ public class SessionService {
       var consultant = loadConsultantOrThrow(userId);
       checkPermissionForConsultantSession(session, consultant);
     }
+  }
+
+  private boolean isConsultantPermittedToSession(Consultant consultant, Session session) {
+    try {
+      checkConsultantAssignment(consultant, session);
+    } catch (ForbiddenException e) {
+      log.info(e.getMessage());
+      return false;
+    }
+    return true;
   }
 
   private void checkConsultantAssignment(Consultant consultant, Session session) {
