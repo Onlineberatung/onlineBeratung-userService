@@ -20,6 +20,8 @@ public class CacheManagerConfig {
   public static final String TENANT_ADMIN_CACHE = "tenantAdminCache";
   public static final String TOPICS_CACHE = "topicsCache";
 
+  public static final String ROCKET_CHAT_USER_CACHE = "rocketchatUserCache";
+
   @Value("${cache.agencies.configuration.maxEntriesLocalHeap}")
   private long agenciesMaxEntriesLocalHeap;
 
@@ -80,6 +82,18 @@ public class CacheManagerConfig {
   @Value("${cache.appsettings.configuration.timeToLiveSeconds}")
   private long appSettingsTimeToLiveSeconds;
 
+  @Value("${cache.rocketchat.configuration.maxEntriesLocalHeap}")
+  private long rocketchatCacheMaxEntriesLocalHeap;
+
+  @Value("${cache.rocketchat.configuration.eternal}")
+  private boolean rocketchatCacheEternal;
+
+  @Value("${cache.rocketchat.configuration.timeToIdleSeconds}")
+  private long rocketchatCacheTimeToIdleSeconds;
+
+  @Value("${cache.rocketchat.configuration.timeToLiveSeconds}")
+  private long rocketchatCacheTimeToLiveSeconds;
+
   @Bean
   public CacheManager cacheManager() {
     return new EhCacheCacheManager(ehCacheManager());
@@ -94,6 +108,8 @@ public class CacheManagerConfig {
     config.addCache(buildTenantAdminCacheConfiguration());
     config.addCache(buildTopicCacheConfiguration());
     config.addCache(buildApplicationSettingsCacheConfiguration());
+
+    config.addCache(buildRocketchatUserCacheConfiguration());
     return net.sf.ehcache.CacheManager.newInstance(config);
   }
 
@@ -154,6 +170,16 @@ public class CacheManagerConfig {
     appSettingsCacheConfiguration.setEternal(appSettingsEternal);
     appSettingsCacheConfiguration.setTimeToIdleSeconds(appSettingsTimeToIdleSeconds);
     appSettingsCacheConfiguration.setTimeToLiveSeconds(appSettingsTimeToLiveSeconds);
+    return appSettingsCacheConfiguration;
+  }
+
+  private CacheConfiguration buildRocketchatUserCacheConfiguration() {
+    var appSettingsCacheConfiguration = new CacheConfiguration();
+    appSettingsCacheConfiguration.setName(ROCKET_CHAT_USER_CACHE);
+    appSettingsCacheConfiguration.setMaxEntriesLocalHeap(rocketchatCacheMaxEntriesLocalHeap);
+    appSettingsCacheConfiguration.setEternal(rocketchatCacheEternal);
+    appSettingsCacheConfiguration.setTimeToIdleSeconds(rocketchatCacheTimeToIdleSeconds);
+    appSettingsCacheConfiguration.setTimeToLiveSeconds(rocketchatCacheTimeToLiveSeconds);
     return appSettingsCacheConfiguration;
   }
 }

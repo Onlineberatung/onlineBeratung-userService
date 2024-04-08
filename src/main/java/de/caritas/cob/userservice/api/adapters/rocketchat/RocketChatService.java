@@ -72,6 +72,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -307,6 +308,12 @@ public class RocketChatService implements MessageClient {
       log.error("User Info failed.", exception);
       return Optional.empty();
     }
+  }
+
+  @Override
+  @Cacheable(key = "#chatUserId", value = "rocketChatUserCache")
+  public Optional<Map<String, Object>> findUserAndAddToCache(String chatUserId) {
+    return findUser(chatUserId);
   }
 
   @Override
@@ -1202,12 +1209,14 @@ public class RocketChatService implements MessageClient {
     }
   }
 
-  private List<GroupDTO> getGroupListAllCombiningPages(DBObject mongoDbQuery,
-      HttpEntity<GroupAddUserBodyDTO> request) throws RocketChatGetGroupsListAllException {
+  private List<GroupDTO> getGroupListAllCombiningPages(
+      DBObject mongoDbQuery, HttpEntity<GroupAddUserBodyDTO> request)
+      throws RocketChatGetGroupsListAllException {
     List<GroupDTO> result = Lists.newArrayList();
     int currentOffset = 0;
-    var pageResponse = getGroupsListAllResponseDTOResponseEntityForCurrentOffset(mongoDbQuery,
-        request, currentOffset);
+    var pageResponse =
+        getGroupsListAllResponseDTOResponseEntityForCurrentOffset(
+            mongoDbQuery, request, currentOffset);
 
     var totalResultSize = 0;
     if (isResponseSuccessful(pageResponse)) {
@@ -1217,14 +1226,18 @@ public class RocketChatService implements MessageClient {
     while (isResponseSuccessful(pageResponse) && currentOffset < totalResultSize) {
       result.addAll(asList(pageResponse.getBody().getGroups()));
       currentOffset += PAGE_SIZE;
-      pageResponse = getGroupsListAllResponseDTOResponseEntityForCurrentOffset(mongoDbQuery,
-          request, currentOffset);
+      pageResponse =
+          getGroupsListAllResponseDTOResponseEntityForCurrentOffset(
+              mongoDbQuery, request, currentOffset);
     }
     if (pageResponse.getStatusCode() != HttpStatus.OK || isNull(pageResponse.getBody())) {
-      log.error("Could not get Rocket.Chat groups list all. Reason {} {}. Url {}", pageResponse.getStatusCode(),  pageResponse.getBody(), getGroupAllPaginatedUrl(currentOffset));
+      log.error(
+          "Could not get Rocket.Chat groups list all. Reason {} {}. Url {}",
+          pageResponse.getStatusCode(),
+          pageResponse.getBody(),
+          getGroupAllPaginatedUrl(currentOffset));
       throw new RocketChatGetGroupsListAllException(GROUPS_LIST_ALL_ERROR_MESSAGE);
     }
-
 
     return result;
   }
@@ -1233,24 +1246,23 @@ public class RocketChatService implements MessageClient {
     return pageResponse.getStatusCode() == HttpStatus.OK && nonNull(pageResponse.getBody());
   }
 
-  private ResponseEntity<GroupsListAllResponseDTO> getGroupsListAllResponseDTOResponseEntityForCurrentOffset(
-      DBObject mongoDbQuery, HttpEntity<GroupAddUserBodyDTO> request, int currentOffset) {
+  private ResponseEntity<GroupsListAllResponseDTO>
+      getGroupsListAllResponseDTOResponseEntityForCurrentOffset(
+          DBObject mongoDbQuery, HttpEntity<GroupAddUserBodyDTO> request, int currentOffset) {
     ResponseEntity<GroupsListAllResponseDTO> response;
     var url = getGroupAllPaginatedUrl(currentOffset);
     response =
         restTemplate.exchange(
-            url,
-            HttpMethod.GET,
-            request,
-            GroupsListAllResponseDTO.class,
-            mongoDbQuery.toString());
+            url, HttpMethod.GET, request, GroupsListAllResponseDTO.class, mongoDbQuery.toString());
     return response;
   }
 
   private String getGroupAllPaginatedUrl(int currentOffset) {
-    return rocketChatConfig.getApiUrl(ENDPOINT_GROUP_LIST) + "?query={query}&offset="
+    return rocketChatConfig.getApiUrl(ENDPOINT_GROUP_LIST)
+        + "?query={query}&offset="
         + currentOffset
-        + "&count=" + PAGE_SIZE;
+        + "&count="
+        + PAGE_SIZE;
   }
 
   /**
