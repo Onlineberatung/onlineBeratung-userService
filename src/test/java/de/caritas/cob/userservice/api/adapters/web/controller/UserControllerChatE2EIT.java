@@ -155,8 +155,7 @@ class UserControllerChatE2EIT {
 
   @MockBean private AgencyServiceApiControllerFactory agencyServiceApiControllerFactory;
 
-  @Autowired
-  private CacheManager  cacheManager;
+  @Autowired private CacheManager cacheManager;
 
   @MockBean
   @Qualifier("restTemplate")
