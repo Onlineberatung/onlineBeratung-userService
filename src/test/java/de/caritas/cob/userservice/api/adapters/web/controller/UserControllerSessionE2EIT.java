@@ -99,6 +99,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.RoleMappingResource;
@@ -710,36 +712,19 @@ class UserControllerSessionE2EIT {
         .andExpect(status().isForbidden());
   }
 
-  @Test
+  @ParameterizedTest
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
+  @ValueSource(strings = {"QBv2xym9qQ2DoAxkR", "doesNotExist", "mzAdWzQEobJ2PkoxP"})
   void
-      getSessionsForGroupOrFeedbackGroupIdsShouldBeForbiddenIfConsultantDoesNotParticipateInSession()
-          throws Exception {
+      getSessionsForGroupOrFeedbackGroupIdsShouldBeNoContentIfConsultantDoesNotParticipateInSessionOrNoSessionsFoundForIdsOrNewEnquiriesForConsultantsNotInAgency(
+          String rcGroupId) throws Exception {
     givenAConsultantWithSessions();
     givenNoRocketChatSubscriptionUpdates();
     givenNoRocketChatRoomUpdates();
 
     mockMvc
         .perform(
-            get("/users/sessions/room?rcGroupIds=QBv2xym9qQ2DoAxkR")
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isForbidden());
-  }
-
-  @Test
-  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  void getSessionsForGroupOrFeedbackGroupIdsShouldBeNoContentIfNoSessionsFoundForIds()
-      throws Exception {
-    givenAConsultantWithSessions();
-    givenNoRocketChatSubscriptionUpdates();
-    givenNoRocketChatRoomUpdates();
-
-    mockMvc
-        .perform(
-            get("/users/sessions/room?rcGroupIds=doesNotExist")
+            get("/users/sessions/room?rcGroupIds=" + rcGroupId)
                 .cookie(CSRF_COOKIE)
                 .header(CSRF_HEADER, CSRF_VALUE)
                 .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
@@ -766,25 +751,6 @@ class UserControllerSessionE2EIT {
         .andExpect(status().isOk())
         .andExpect(jsonPath("sessions[0].session.groupId", is("XJrRTzFg8Ac5BwE86")))
         .andExpect(jsonPath("sessions", hasSize(1)));
-  }
-
-  @Test
-  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_DEFAULT})
-  void
-      getSessionsForGroupOrFeedbackGroupIdsShouldReturnForbiddenForNewEnquiriesForConsultantsNotInAgency()
-          throws Exception {
-    givenAConsultantWithSessions();
-    givenNoRocketChatSubscriptionUpdates();
-    givenNoRocketChatRoomUpdates();
-
-    mockMvc
-        .perform(
-            get("/users/sessions/room?rcGroupIds=mzAdWzQEobJ2PkoxP")
-                .cookie(CSRF_COOKIE)
-                .header(CSRF_HEADER, CSRF_VALUE)
-                .header(RC_TOKEN_HEADER_PARAMETER_NAME, RC_TOKEN)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isForbidden());
   }
 
   @Test
