@@ -174,12 +174,12 @@ public class CacheManagerConfig {
   }
 
   private CacheConfiguration buildRocketchatUserCacheConfiguration() {
-    var appSettingsCacheConfiguration = new CacheConfiguration();
-    appSettingsCacheConfiguration.setName(ROCKET_CHAT_USER_CACHE);
-    appSettingsCacheConfiguration.setMaxEntriesLocalHeap(rocketchatCacheMaxEntriesLocalHeap);
-    appSettingsCacheConfiguration.setEternal(rocketchatCacheEternal);
-    appSettingsCacheConfiguration.setTimeToIdleSeconds(rocketchatCacheTimeToIdleSeconds);
-    appSettingsCacheConfiguration.setTimeToLiveSeconds(rocketchatCacheTimeToLiveSeconds);
-    return appSettingsCacheConfiguration;
+    var rocketchatCacheConfiguration = new CacheConfiguration();
+    rocketchatCacheConfiguration.setName(ROCKET_CHAT_USER_CACHE);
+    rocketchatCacheConfiguration.setMaxEntriesLocalHeap(rocketchatCacheMaxEntriesLocalHeap);
+    rocketchatCacheConfiguration.setEternal(rocketchatCacheEternal);
+    rocketchatCacheConfiguration.setTimeToIdleSeconds(rocketchatCacheTimeToIdleSeconds);
+    rocketchatCacheConfiguration.setTimeToLiveSeconds(rocketchatCacheTimeToLiveSeconds);
+    return rocketchatCacheConfiguration;
   }
 }
