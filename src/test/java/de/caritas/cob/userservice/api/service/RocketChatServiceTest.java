@@ -165,9 +165,16 @@ public class RocketChatServiceTest {
       new UsersListReponseDTO(
           new RocketChatUserDTO[] {ROCKET_CHAT_USER_DTO, ROCKET_CHAT_USER_DTO_2});
   private final GroupsListAllResponseDTO GROUPS_LIST_ALL_RESPONSE_DTO_EMPTY =
-      new GroupsListAllResponseDTO(new GroupDTO[0]);
+      new GroupsListAllResponseDTO(new GroupDTO[0], 1, 0, 0);
   private final GroupsListAllResponseDTO GROUPS_LIST_ALL_RESPONSE_DTO =
-      new GroupsListAllResponseDTO(new GroupDTO[] {GROUP_DTO, GROUP_DTO_2});
+      new GroupsListAllResponseDTO(new GroupDTO[] {GROUP_DTO, GROUP_DTO_2}, 0, 2, 10);
+
+  private final GroupsListAllResponseDTO GROUPS_LIST_ALL_RESPONSE_DTO_PAGINATED =
+      new GroupsListAllResponseDTO(new GroupDTO[] {GROUP_DTO, GROUP_DTO_2}, 0, 100, 1000);
+
+  private final GroupsListAllResponseDTO
+      GROUPS_LIST_ALL_RESPONSE_DTO_PAGINATED_WITH_TOTAL_ZERO_ELEMENTS =
+          new GroupsListAllResponseDTO(new GroupDTO[] {GROUP_DTO, GROUP_DTO_2}, 0, 0, 0);
   private final LocalDateTime DATETIME_OLDEST = nowInUtc();
   private final LocalDateTime DATETIME_LATEST = nowInUtc();
   private final String PASSWORD = "password";
@@ -738,7 +745,7 @@ public class RocketChatServiceTest {
     List<GroupMemberDTO> result = rocketChatService.getStandardMembersOfGroup(GROUP_ID);
 
     assertEquals(1, result.size());
-    assertEquals(result.get(0).get_id(), "a");
+    assertEquals("a", result.get(0).get_id());
   }
 
   /** Method: getUserInfo */
@@ -1093,6 +1100,68 @@ public class RocketChatServiceTest {
             eq(GroupsListAllResponseDTO.class),
             anyString()))
         .thenReturn(new ResponseEntity<>(GROUPS_LIST_ALL_RESPONSE_DTO, HttpStatus.OK));
+
+    this.rocketChatService.fetchAllInactivePrivateGroupsSinceGivenDate(dateToCheck);
+
+    String correctMongoQuery =
+        "{\"lm\": {\"$lt\": {\"$date\": \"2021-01-01T00:00:00.000Z\"}},"
+            + " \"$and\": [{\"t\": \"p\"}]}";
+    verify(restTemplate, times(2))
+        .exchange(
+            anyString(),
+            eq(HttpMethod.GET),
+            any(),
+            eq(GroupsListAllResponseDTO.class),
+            eq(correctMongoQuery));
+  }
+
+  @Test
+  public void
+      fetchAllInactivePrivateGroupsSinceGivenDate_Should_CallRocketChatApiMultipleTimes_When_ResultIsPaginated()
+          throws RocketChatUserNotInitializedException, RocketChatGetGroupsListAllException {
+
+    LocalDateTime dateToCheck = LocalDateTime.of(2021, 1, 1, 0, 0, 0);
+
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
+    when(restTemplate.exchange(
+            anyString(),
+            eq(HttpMethod.GET),
+            any(),
+            eq(GroupsListAllResponseDTO.class),
+            anyString()))
+        .thenReturn(new ResponseEntity<>(GROUPS_LIST_ALL_RESPONSE_DTO_PAGINATED, HttpStatus.OK));
+
+    this.rocketChatService.fetchAllInactivePrivateGroupsSinceGivenDate(dateToCheck);
+
+    String correctMongoQuery =
+        "{\"lm\": {\"$lt\": {\"$date\": \"2021-01-01T00:00:00.000Z\"}},"
+            + " \"$and\": [{\"t\": \"p\"}]}";
+    verify(restTemplate, times(11))
+        .exchange(
+            anyString(),
+            eq(HttpMethod.GET),
+            any(),
+            eq(GroupsListAllResponseDTO.class),
+            eq(correctMongoQuery));
+  }
+
+  @Test
+  public void
+      fetchAllInactivePrivateGroupsSinceGivenDate_Should_CallRocketChatApiOnlyOnce_When_ResponseContainsTotalOfZeroElements()
+          throws RocketChatUserNotInitializedException, RocketChatGetGroupsListAllException {
+
+    LocalDateTime dateToCheck = LocalDateTime.of(2021, 1, 1, 0, 0, 0);
+
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
+    when(restTemplate.exchange(
+            anyString(),
+            eq(HttpMethod.GET),
+            any(),
+            eq(GroupsListAllResponseDTO.class),
+            anyString()))
+        .thenReturn(
+            new ResponseEntity<>(
+                GROUPS_LIST_ALL_RESPONSE_DTO_PAGINATED_WITH_TOTAL_ZERO_ELEMENTS, HttpStatus.OK));
 
     this.rocketChatService.fetchAllInactivePrivateGroupsSinceGivenDate(dateToCheck);
 
