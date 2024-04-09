@@ -26,6 +26,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_WITH_
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static liquibase.util.BooleanUtils.isTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -783,7 +784,7 @@ class SessionServiceTest {
 
   @Test
   void
-      getSessionsByConsultantAndGroupOrFeedbackGroupIds_should_find_new_anonymous_enquiry_if_consultant_may_advise_consulting_type() {
+      getAllowedSessionsByConsultantAndGroupOrFeedbackGroupIds_should_find_new_anonymous_enquiry_if_consultant_may_advise_consulting_type() {
     Session anonymousEnquiry =
         createAnonymousNewEnquiryWithConsultingType(AGENCY_DTO_SUCHT.getConsultingType());
     when(sessionRepository.findByGroupOrFeedbackGroupIds(singleton("rcGroupId")))
@@ -794,10 +795,32 @@ class SessionServiceTest {
     var consultant = createConsultantWithAgencies(agency);
 
     var sessionResponse =
-        sessionService.getSessionsByConsultantAndGroupOrFeedbackGroupIds(
+        sessionService.getAllowedSessionsByConsultantAndGroupOrFeedbackGroupIds(
             consultant, singleton("rcGroupId"), singleton(UserRole.CONSULTANT.getValue()));
 
     assertEquals(1, sessionResponse.size());
+  }
+
+  @Test
+  void
+      getAllowedSessionsByConsultantAndGroupOrFeedbackGroupIds_should_only_return_the_sessions_the_consultant_can_see() {
+    // given
+    List<Session> sessions = new ArrayList<>();
+    ConsultantAgency agency = new ConsultantAgency();
+    agency.setAgencyId(4711L);
+    var consultant = createConsultantWithAgencies(agency);
+    var allowedSession = giveAllowedSessionWithID(1L, consultant);
+    sessions.add(giveAllowedSessionWithID(2L, null));
+    sessions.add(allowedSession);
+    when(sessionRepository.findByGroupOrFeedbackGroupIds(singleton("rcGroupId")))
+        .thenReturn(sessions);
+    // when
+    var sessionResponse =
+        sessionService.getAllowedSessionsByConsultantAndGroupOrFeedbackGroupIds(
+            consultant, singleton("rcGroupId"), singleton(UserRole.CONSULTANT.getValue()));
+    // then
+    assertThat(sessionResponse).hasSize(1);
+    assertThat(sessionResponse.get(0).getSession().getId()).isEqualTo(allowedSession.getId());
   }
 
   @Test
@@ -880,6 +903,14 @@ class SessionServiceTest {
   private List<UserSessionResponseDTO> getSomeUserId(String someUserId, Session anonymousEnquiry) {
     return sessionService.getSessionsByUserAndSessionIds(
         someUserId, singleton(anonymousEnquiry.getId()), singleton(UserRole.ANONYMOUS.getValue()));
+  }
+
+  private Session giveAllowedSessionWithID(Long id, Consultant consultant) {
+    Session allowedSession =
+        createAnonymousNewEnquiryWithConsultingType(AGENCY_DTO_SUCHT.getConsultingType());
+    allowedSession.setId(id);
+    allowedSession.setConsultant(consultant);
+    return allowedSession;
   }
 
   private Session createAnonymousNewEnquiryWithConsultingType(int consultingTypeId) {
