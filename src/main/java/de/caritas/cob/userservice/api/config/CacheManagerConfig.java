@@ -20,7 +20,7 @@ public class CacheManagerConfig {
   public static final String TENANT_ADMIN_CACHE = "tenantAdminCache";
   public static final String TOPICS_CACHE = "topicsCache";
 
-  public static final String ROCKET_CHAT_USER_CACHE = "rocketchatUserCache";
+  public static final String ROCKET_CHAT_USER_CACHE = "rocketChatUserCache";
 
   @Value("${cache.agencies.configuration.maxEntriesLocalHeap}")
   private long agenciesMaxEntriesLocalHeap;
