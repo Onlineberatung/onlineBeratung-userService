@@ -22,5 +22,4 @@ public class GroupsListAllResponseDTO {
   private Integer offset;
   private Integer count;
   private Integer total;
-
 }
