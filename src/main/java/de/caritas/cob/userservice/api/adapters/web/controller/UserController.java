@@ -94,6 +94,7 @@ import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.SessionDataService;
 import de.caritas.cob.userservice.api.service.archive.SessionArchiveService;
 import de.caritas.cob.userservice.api.service.archive.SessionDeleteService;
+import de.caritas.cob.userservice.api.service.helper.EmailUrlDecoder;
 import de.caritas.cob.userservice.api.service.session.SessionFilter;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.UserAccountService;
@@ -115,6 +116,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -766,7 +768,7 @@ public class UserController implements UsersApi {
   @Override
   public ResponseEntity<ConsultantSearchResultDTO> searchConsultants(
       String query, Integer page, Integer perPage, String field, String order) {
-    var decodedInfix = URLDecoder.decode(query, StandardCharsets.UTF_8).trim();
+    var decodedInfix = determineDecodedInfix(query).trim();
     var isAscending = order.equalsIgnoreCase("asc");
     var mappedField = consultantDtoMapper.mappedFieldOf(field);
     var resultMap =
@@ -791,6 +793,14 @@ public class UserController implements UsersApi {
     }
 
     return ResponseEntity.ok(result);
+  }
+
+  private String determineDecodedInfix(String query) {
+    if (EmailValidator.getInstance().isValid(query)) {
+      return EmailUrlDecoder.decodeEmailQuery(query);
+    } else {
+      return URLDecoder.decode(query, StandardCharsets.UTF_8).trim();
+    }
   }
 
   private void removeAgenciesWithoutAccessRight(

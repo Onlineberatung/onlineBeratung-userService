@@ -17,6 +17,6 @@ public class EmailUrlDecoder {
         strings.stream()
             .map(part -> URLDecoder.decode(part, StandardCharsets.UTF_8).trim())
             .collect(Collectors.toList());
-    return Joiner.on(PLUS).join(decodedList);
+    return Joiner.on(PLUS).join(decodedList).trim();
   }
 }
