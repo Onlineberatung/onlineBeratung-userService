@@ -777,7 +777,7 @@ public class UserController implements UsersApi {
   @Override
   public ResponseEntity<ConsultantSearchResultDTO> searchConsultants(
       String query, Integer page, Integer perPage, String field, String order) {
-    var decodedInfix = URLDecoder.decode(query, StandardCharsets.UTF_8).trim();
+    var decodedInfix = SearchQueryDecoder.decode(query);
     var isAscending = order.equalsIgnoreCase("asc");
     var mappedField = consultantDtoMapper.mappedFieldOf(field);
     var resultMap =
