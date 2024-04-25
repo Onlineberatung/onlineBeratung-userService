@@ -72,6 +72,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -307,6 +308,12 @@ public class RocketChatService implements MessageClient {
       log.error("User Info failed.", exception);
       return Optional.empty();
     }
+  }
+
+  @Override
+  @Cacheable(key = "#chatUserId", value = "rocketChatUserCache")
+  public Optional<Map<String, Object>> findUserAndAddToCache(String chatUserId) {
+    return findUser(chatUserId);
   }
 
   @Override

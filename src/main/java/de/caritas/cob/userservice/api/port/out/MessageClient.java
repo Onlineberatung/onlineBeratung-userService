@@ -27,6 +27,8 @@ public interface MessageClient {
 
   Optional<Map<String, Object>> findUser(String chatUserId);
 
+  Optional<Map<String, Object>> findUserAndAddToCache(String chatUserId);
+
   Optional<List<Map<String, String>>> findAllChats(String chatUserId);
 
   boolean updateChatE2eKey(String chatUserId, String roomId, String key);

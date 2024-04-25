@@ -102,6 +102,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
+import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -153,6 +154,8 @@ class UserControllerChatE2EIT {
   @MockBean private RocketChatCredentialsProvider rocketChatCredentialsProvider;
 
   @MockBean private AgencyServiceApiControllerFactory agencyServiceApiControllerFactory;
+
+  @Autowired private CacheManager cacheManager;
 
   @MockBean
   @Qualifier("restTemplate")
@@ -207,6 +210,7 @@ class UserControllerChatE2EIT {
     subscriptionsGetResponse = null;
     groupDeleteResponse = null;
     identityConfig.setDisplayNameAllowedForConsultants(false);
+    cacheManager.getCache("rocketChatUserCache").clear();
   }
 
   @BeforeEach

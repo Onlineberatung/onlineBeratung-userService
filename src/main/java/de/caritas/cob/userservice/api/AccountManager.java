@@ -185,7 +185,7 @@ public class AccountManager implements AccountManaging {
     var userMap = new HashMap<String, Object>();
 
     messageClient
-        .findUser(dbConsultant.getRocketChatId())
+        .findUserAndAddToCache(dbConsultant.getRocketChatId())
         .ifPresentOrElse(
             chatUserMap -> userMap.putAll(userServiceMapper.mapOf(dbConsultant, chatUserMap)),
             throwPersistenceConflict(dbConsultant.getId(), dbConsultant.getRocketChatId()));
