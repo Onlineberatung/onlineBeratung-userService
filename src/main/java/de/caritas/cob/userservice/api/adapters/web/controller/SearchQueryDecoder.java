@@ -12,6 +12,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SearchQueryDecoder {
 
+  private SearchQueryDecoder() {
+    throw new IllegalStateException("Utility class");
+  }
+
   private static final String SEPARATOR = "+";
 
   /* Allows the query string to contain plus sign, but not change it to space.
@@ -23,7 +27,8 @@ public class SearchQueryDecoder {
     var parts = Splitter.on(SEPARATOR).split(query);
     return newArrayList(parts).stream()
         .map(SearchQueryDecoder::decodePart)
-        .collect(Collectors.joining(SEPARATOR)).trim();
+        .collect(Collectors.joining(SEPARATOR))
+        .trim();
   }
 
   private static String decodePart(String s) {
