@@ -17,21 +17,26 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.Lists;
 import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.adapters.keycloak.KeycloakService;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
 import de.caritas.cob.userservice.api.admin.service.tenant.TenantAdminService;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.DistributedTransactionException;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLoginException;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.service.ConsultantImportService.ImportRecord;
 import de.caritas.cob.userservice.api.service.appointment.AppointmentService;
+import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.tenantadminservice.generated.web.model.Settings;
 import de.caritas.cob.userservice.tenantadminservice.generated.web.model.TenantDTO;
 import org.jeasy.random.EasyRandom;
@@ -71,6 +76,8 @@ public class CreateConsultantSagaIT {
 
   @MockBean private AppointmentService appointmentService;
 
+  @MockBean private SessionService sessionService;
+
   private final EasyRandom easyRandom = new EasyRandom();
 
   @Before
@@ -80,7 +87,7 @@ public class CreateConsultantSagaIT {
 
   @Test
   public void createNewConsultant_Should_returnExpectedCreatedConsultant_When_inputDataIsCorrect()
-      throws RocketChatLoginException {
+      throws RocketChatLoginException, RocketChatAddUserToGroupException {
     when(rocketChatService.getUserID(anyString(), anyString(), anyBoolean()))
         .thenReturn(DUMMY_RC_ID);
     when(keycloakService.createKeycloakUser(any(), anyString(), any()))
@@ -89,6 +96,11 @@ public class CreateConsultantSagaIT {
     createConsultantDTO.setUsername(VALID_USERNAME);
     createConsultantDTO.setEmail(VALID_EMAILADDRESS);
     createConsultantDTO.setIsGroupchatConsultant(false);
+
+    when(sessionService.getRegisteredEnquiriesForConsultant(any()))
+        .thenReturn(
+            Lists.newArrayList(
+                new ConsultantSessionResponseDTO().session(new SessionDTO().groupId("groupId"))));
 
     var consultantAdminResponseDTO =
         this.createConsultantSaga.createNewConsultant(createConsultantDTO);
@@ -105,6 +117,9 @@ public class CreateConsultantSagaIT {
     assertThat(consultant.getFirstname(), notNullValue());
     assertThat(consultant.getLastname(), notNullValue());
     assertThat(consultant.getEmail(), notNullValue());
+
+    verify(rocketChatService).getUserID(anyString(), anyString(), anyBoolean());
+    verify(rocketChatService).addUserToGroup(Mockito.anyString(), Mockito.eq("groupId"));
   }
 
   @Test
