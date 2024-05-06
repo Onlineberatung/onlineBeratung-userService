@@ -30,7 +30,7 @@ public class DeleteInactiveSessionsAndUserService {
   private final @NonNull UserRepository userRepository;
   private final @NonNull SessionRepository sessionRepository;
   private final @NonNull DeleteUserAccountService deleteUserAccountService;
-  private final @NonNull WorkflowErrorMailService workflowErrorMailService;
+  private final @NonNull WorkflowErrorLogService workflowErrorLogService;
   private final @NonNull DeleteSessionService deleteSessionService;
   private final @NonNull InactivePrivateGroupsProvider inactivePrivateGroupsProvider;
 
@@ -49,12 +49,12 @@ public class DeleteInactiveSessionsAndUserService {
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
 
-    sendWorkflowErrorsMail(workflowErrors);
+    logWorkflowErrors(workflowErrors);
   }
 
-  private void sendWorkflowErrorsMail(List<DeletionWorkflowError> workflowErrors) {
+  private void logWorkflowErrors(List<DeletionWorkflowError> workflowErrors) {
     if (isNotEmpty(workflowErrors)) {
-      this.workflowErrorMailService.buildAndSendErrorMail(workflowErrors);
+      this.workflowErrorLogService.logWorkflowErrors(workflowErrors);
     }
   }
 
