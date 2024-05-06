@@ -12,6 +12,7 @@ import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.keycloak.dto.KeycloakCreateUserResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantAdminResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.CreateConsultantDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.NotificationsSettingsDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDTO;
@@ -25,6 +26,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHt
 import de.caritas.cob.userservice.api.exception.httpresponses.DistributedTransactionException;
 import de.caritas.cob.userservice.api.exception.httpresponses.DistributedTransactionInfo;
 import de.caritas.cob.userservice.api.exception.httpresponses.customheader.HttpStatusExceptionReason;
+import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGroupException;
 import de.caritas.cob.userservice.api.facade.rollback.RollbackFacade;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.UserHelper;
@@ -35,8 +37,10 @@ import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.ConsultantImportService.ImportRecord;
 import de.caritas.cob.userservice.api.service.ConsultantService;
 import de.caritas.cob.userservice.api.service.appointment.AppointmentService;
+import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.tenantadminservice.generated.web.model.TenantDTO;
+import java.util.List;
 import java.util.Set;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -72,6 +76,8 @@ public class CreateConsultantSaga {
   private final @NonNull AuthenticatedUser authenticatedUser;
 
   private final @NonNull AppointmentService appointmentService;
+
+  private final @NonNull SessionService sessionService;
 
   private Consultant createNewConsultantWithoutAppointment(
       CreateConsultantDTO createConsultantDTO) {
@@ -191,8 +197,38 @@ public class CreateConsultantSaga {
     String rocketChatUserId =
         createRocketChatUserOrRollback(consultantCreationInput, keycloakUserId, password);
 
-    return createConsultantInMariaDBOrRollback(
-        consultantCreationInput, keycloakUserId, rocketChatUserId);
+    var consultant =
+        createConsultantInMariaDBOrRollback(
+            consultantCreationInput, keycloakUserId, rocketChatUserId);
+
+    tryAssignConsultantToExistingSessions(consultant);
+    return consultant;
+  }
+
+  private void tryAssignConsultantToExistingSessions(Consultant consultant) {
+    // This is not transactional on purpose.
+    // If the consultant could not be added to all existing enquiries, he can still work, without
+    // access to the enquiry, that can be picked up by another consultant from the team.
+    var registeredEnquiries = sessionService.getRegisteredEnquiriesForConsultant(consultant);
+    tryAssignConsultantToRocketchatGroup(consultant, registeredEnquiries);
+    var archivedEnquiries = sessionService.getArchivedSessionsForConsultant(consultant);
+    tryAssignConsultantToRocketchatGroup(consultant, archivedEnquiries);
+  }
+
+  private void tryAssignConsultantToRocketchatGroup(
+      Consultant consultant, List<ConsultantSessionResponseDTO> enquiries) {
+    enquiries.forEach(
+        session -> {
+          try {
+            rocketChatService.addUserToGroup(
+                consultant.getRocketChatId(), session.getSession().getGroupId());
+          } catch (RocketChatAddUserToGroupException e) {
+            log.error(
+                "Unable to add user with id {} to group with id {}",
+                consultant.getRocketChatId(),
+                session.getSession().getGroupId());
+          }
+        });
   }
 
   private void updateKeycloakPasswordOrRollback(

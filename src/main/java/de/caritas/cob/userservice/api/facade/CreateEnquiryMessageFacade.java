@@ -251,7 +251,6 @@ public class CreateEnquiryMessageFacade {
       Session session, RocketChatCredentials rocketChatCredentials) {
 
     try {
-
       Optional<GroupResponseDTO> rcGroupDTO =
           rocketChatService.createPrivateGroup(
               rocketChatRoomNameGenerator.generateGroupName(session), rocketChatCredentials);
