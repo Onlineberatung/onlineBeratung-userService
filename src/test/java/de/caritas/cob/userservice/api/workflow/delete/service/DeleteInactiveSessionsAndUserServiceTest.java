@@ -30,6 +30,7 @@ public class DeleteInactiveSessionsAndUserServiceTest {
 
   @InjectMocks private DeleteInactiveSessionsAndUserService deleteInactiveSessionsAndUserService;
 
+  @Mock private WorkflowErrorMailService workflowErrorMailService;
   @Mock private WorkflowErrorLogService workflowErrorLogService;
   @Mock private UserRepository userRepository;
   @Mock private SessionRepository sessionRepository;
@@ -38,7 +39,8 @@ public class DeleteInactiveSessionsAndUserServiceTest {
   @Mock private InactivePrivateGroupsProvider inactivePrivateGroupsProvider;
 
   @Test
-  public void deleteInactiveSessionsAndUsers_Should_SendWorkflowErrorsMail() {
+  public void
+      deleteInactiveSessionsAndUsers_Should_SendWorkflowErrorsMail_When_userNotFoundReason() {
 
     EasyRandom easyRandom = new EasyRandom();
     User user = easyRandom.nextObject(User.class);
@@ -60,7 +62,8 @@ public class DeleteInactiveSessionsAndUserServiceTest {
 
     deleteInactiveSessionsAndUserService.deleteInactiveSessionsAndUsers();
 
-    verify(workflowErrorLogService, Mockito.times(1)).logWorkflowErrors(any());
+    verify(workflowErrorLogService, Mockito.times(1)).logWorkflowErrors(Collections.emptyList());
+    verify(workflowErrorMailService, Mockito.times(1)).buildAndSendErrorMail(any());
   }
 
   @Test
@@ -115,7 +118,7 @@ public class DeleteInactiveSessionsAndUserServiceTest {
 
   @Test
   public void
-      deleteInactiveSessionsAndUsers_Should_SendWorkflowErrorMail_WhenUserHasActiveAndInactiveSessionsAndHasErrors() {
+      deleteInactiveSessionsAndUsers_Should_logWorkflowErrorMail_WhenUserHasActiveAndInactiveSessionsAndHasErrors() {
 
     EasyRandom easyRandom = new EasyRandom();
     User user = easyRandom.nextObject(User.class);
@@ -139,6 +142,8 @@ public class DeleteInactiveSessionsAndUserServiceTest {
     deleteInactiveSessionsAndUserService.deleteInactiveSessionsAndUsers();
 
     verify(workflowErrorLogService, Mockito.times(1)).logWorkflowErrors(any());
+    verify(workflowErrorMailService, Mockito.times(1))
+        .buildAndSendErrorMail(Collections.emptyList());
   }
 
   @Test
@@ -165,6 +170,8 @@ public class DeleteInactiveSessionsAndUserServiceTest {
     deleteInactiveSessionsAndUserService.deleteInactiveSessionsAndUsers();
 
     verify(workflowErrorLogService, Mockito.times(1)).logWorkflowErrors(any());
+    verify(workflowErrorMailService, Mockito.times(1))
+        .buildAndSendErrorMail(Collections.emptyList());
   }
 
   @Test
@@ -187,6 +194,7 @@ public class DeleteInactiveSessionsAndUserServiceTest {
 
     deleteInactiveSessionsAndUserService.deleteInactiveSessionsAndUsers();
 
-    verify(workflowErrorLogService, Mockito.times(1)).logWorkflowErrors(any());
+    verify(workflowErrorLogService, Mockito.times(1)).logWorkflowErrors(Collections.emptyList());
+    verify(workflowErrorMailService, Mockito.times(1)).buildAndSendErrorMail(any());
   }
 }
