@@ -54,10 +54,10 @@ public class DeleteInactiveSessionsAndUserService {
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
 
-    processWorkflowErrors(workflowErrors);
+    findWorkflowErrorByReason(workflowErrors);
   }
 
-  private void processWorkflowErrors(List<DeletionWorkflowError> workflowErrors) {
+  private void findWorkflowErrorByReason(List<DeletionWorkflowError> workflowErrors) {
     if (isNotEmpty(workflowErrors)) {
       List<DeletionWorkflowError> userNotFoundWorkflowErrors =
           getSameReasonWorkflowErrors(workflowErrors, USER_NOT_FOUND_REASON);
