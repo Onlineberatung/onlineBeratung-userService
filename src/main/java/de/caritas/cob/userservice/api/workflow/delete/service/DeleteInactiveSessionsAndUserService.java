@@ -61,12 +61,11 @@ public class DeleteInactiveSessionsAndUserService {
     if (isNotEmpty(workflowErrors)) {
       List<DeletionWorkflowError> rcSessionGroupNotFoundWorkflowErrors =
           getSameReasonWorkflowErrors(workflowErrors, RC_SESSION_GROUP_NOT_FOUND_REASON);
-      List<DeletionWorkflowError> userNotFoundWorkflowErrors =
-          workflowErrors.stream()
-              .filter(rcSessionGroupError -> !workflowErrors.contains(rcSessionGroupError))
-              .collect(Collectors.toList());
+      List<DeletionWorkflowError> workflowErrorsExceptSessionGroupNotFound =
+          new ArrayList<>(workflowErrors);
+      workflowErrorsExceptSessionGroupNotFound.removeAll(rcSessionGroupNotFoundWorkflowErrors);
       this.workflowErrorLogService.logWorkflowErrors(rcSessionGroupNotFoundWorkflowErrors);
-      this.workflowErrorMailService.buildAndSendErrorMail(userNotFoundWorkflowErrors);
+      this.workflowErrorMailService.buildAndSendErrorMail(workflowErrorsExceptSessionGroupNotFound);
     }
   }
 
