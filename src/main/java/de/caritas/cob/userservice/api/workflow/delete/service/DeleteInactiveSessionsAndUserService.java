@@ -31,8 +31,13 @@ public class DeleteInactiveSessionsAndUserService {
   private final @NonNull SessionRepository sessionRepository;
   private final @NonNull DeleteUserAccountService deleteUserAccountService;
   private final @NonNull WorkflowErrorMailService workflowErrorMailService;
+  private final @NonNull WorkflowErrorLogService workflowErrorLogService;
   private final @NonNull DeleteSessionService deleteSessionService;
   private final @NonNull InactivePrivateGroupsProvider inactivePrivateGroupsProvider;
+
+  private static final String USER_NOT_FOUND_REASON = "User could not be found.";
+  private static final String RC_SESSION_GROUP_NOT_FOUND_REASON =
+      "Session with rc group id could not be found.";
 
   /**
    * Deletes all inactive sessions and even the asker accounts, if there are no more active
@@ -49,13 +54,26 @@ public class DeleteInactiveSessionsAndUserService {
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
 
-    sendWorkflowErrorsMail(workflowErrors);
+    findWorkflowErrorByReason(workflowErrors);
   }
 
-  private void sendWorkflowErrorsMail(List<DeletionWorkflowError> workflowErrors) {
+  private void findWorkflowErrorByReason(List<DeletionWorkflowError> workflowErrors) {
     if (isNotEmpty(workflowErrors)) {
-      this.workflowErrorMailService.buildAndSendErrorMail(workflowErrors);
+      List<DeletionWorkflowError> rcSessionGroupNotFoundWorkflowErrors =
+          getSameReasonWorkflowErrors(workflowErrors, RC_SESSION_GROUP_NOT_FOUND_REASON);
+      List<DeletionWorkflowError> workflowErrorsExceptSessionGroupNotFound =
+          new ArrayList<>(workflowErrors);
+      workflowErrorsExceptSessionGroupNotFound.removeAll(rcSessionGroupNotFoundWorkflowErrors);
+      this.workflowErrorLogService.logWorkflowErrors(rcSessionGroupNotFoundWorkflowErrors);
+      this.workflowErrorMailService.buildAndSendErrorMail(workflowErrorsExceptSessionGroupNotFound);
     }
+  }
+
+  private static List<DeletionWorkflowError> getSameReasonWorkflowErrors(
+      List<DeletionWorkflowError> workflowErrors, String reason) {
+    return workflowErrors.stream()
+        .filter(error -> reason.equals(error.getReason()))
+        .collect(Collectors.toList());
   }
 
   private List<DeletionWorkflowError> performDeletionWorkflow(
@@ -73,7 +91,7 @@ public class DeleteInactiveSessionsAndUserService {
                     .deletionSourceType(ASKER)
                     .deletionTargetType(ALL)
                     .identifier(userInactiveGroupEntry.getKey())
-                    .reason("User could not be found.")
+                    .reason(USER_NOT_FOUND_REASON)
                     .timestamp(nowInUtc())
                     .build()));
 
@@ -115,7 +133,7 @@ public class DeleteInactiveSessionsAndUserService {
                     .deletionSourceType(ASKER)
                     .deletionTargetType(ALL)
                     .identifier(rcGroupId)
-                    .reason("Session with rc group id could not be found.")
+                    .reason(RC_SESSION_GROUP_NOT_FOUND_REASON)
                     .timestamp(nowInUtc())
                     .build()));
 
