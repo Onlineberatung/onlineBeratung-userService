@@ -86,6 +86,7 @@ public class ConsultantUpdateService {
     UserDTO userDTO = new UserDTO();
     userDTO.setEmail(updateConsultantDTO.getEmail());
     userDTO.setUsername(consultant.getUsername());
+    userDTO.setTenantId(consultant.getTenantId());
 
     this.userAccountInputValidator.validateUserDTO(userDTO);
     return userDTO;

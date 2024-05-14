@@ -1,5 +1,6 @@
 package de.caritas.cob.userservice.api.admin.service.consultant.update;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -21,6 +22,7 @@ import java.util.Optional;
 import org.jeasy.random.EasyRandom;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -52,6 +54,7 @@ public class ConsultantUpdateServiceTest {
   @Test
   public void updateConsultant_Should_callServicesCorrectly_When_givenConsultantDataIsValid() {
     Consultant consultant = new EasyRandom().nextObject(Consultant.class);
+    consultant.setTenantId(1L);
     when(this.consultantService.getConsultant(any())).thenReturn(Optional.of(consultant));
     UpdateAdminConsultantDTO updateConsultant =
         new EasyRandom().nextObject(UpdateAdminConsultantDTO.class);
@@ -62,12 +65,14 @@ public class ConsultantUpdateServiceTest {
     verify(this.keycloakService, Mockito.never())
         .updateRole(consultant.getId(), UserRole.GROUP_CHAT_CONSULTANT.getValue());
 
+    ArgumentCaptor<UserDTO> userDTOArgumentCaptor = ArgumentCaptor.forClass(UserDTO.class);
     verify(this.keycloakService, times(1))
         .updateUserData(
             eq(consultant.getId()),
-            any(UserDTO.class),
+            userDTOArgumentCaptor.capture(),
             eq(updateConsultant.getFirstname()),
             eq(updateConsultant.getLastname()));
+    assertThat(userDTOArgumentCaptor.getValue().getTenantId()).isEqualTo(consultant.getTenantId());
     verify(this.consultantService, times(1)).saveConsultant(any());
     verify(this.appointmentService, times(1)).syncConsultantData(any());
   }
