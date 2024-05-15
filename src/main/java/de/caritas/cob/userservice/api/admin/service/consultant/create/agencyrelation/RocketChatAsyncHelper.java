@@ -19,7 +19,6 @@ import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.helper.MailService;
-import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.mailservice.generated.web.model.ErrorMailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.List;
@@ -28,7 +27,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,12 +46,10 @@ public class RocketChatAsyncHelper {
   @Value("${app.base.url}")
   private String applicationBaseUrl;
 
-  @Async
   @Transactional
   public void addConsultantToSessions(
-      Consultant consultant, AgencyDTO agency, Consumer<String> logMethod, Long tenantId) {
+      Consultant consultant, AgencyDTO agency, Consumer<String> logMethod) {
     try {
-      TenantContext.setCurrentTenant(tenantId);
       List<Session> relevantSessions = collectRelevantSessionsToAddConsultant(agency);
       RocketChatAddToGroupOperationService.getInstance(
               this.rocketChatFacade, identityClient, logMethod, consultingTypeManager)
@@ -67,7 +63,6 @@ public class RocketChatAsyncHelper {
       sendErrorEmail(consultant, e);
       log.error("Error happened during rocket chat session assignments", e);
     }
-    TenantContext.clear();
   }
 
   private void updateConsultantStatus(Consultant consultant, AgencyDTO agencyDTO) {
@@ -79,7 +74,7 @@ public class RocketChatAsyncHelper {
     List<ConsultantAgency> consultantAgencies =
         consultantAgencyRepository.findByConsultantIdAndStatusAndDeleteDateIsNull(
             consultant.getId(), ConsultantAgencyStatus.IN_PROGRESS);
-    if (consultantAgencies.size() == 0) {
+    if (consultantAgencies.isEmpty()) {
       consultant.setStatus(ConsultantStatus.CREATED);
       consultantRepository.save(consultant);
     }

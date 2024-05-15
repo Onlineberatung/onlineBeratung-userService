@@ -18,7 +18,6 @@ import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantImportService.ImportRecord;
 import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
-import de.caritas.cob.userservice.api.tenant.TenantContext;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
@@ -98,8 +97,7 @@ public class ConsultantAgencyRelationCreatorService {
       consultantRepository.save(consultant);
     }
 
-    rocketChatAsyncHelper.addConsultantToSessions(
-        consultant, agency, logMethod, TenantContext.getCurrentTenant());
+    rocketChatAsyncHelper.addConsultantToSessions(consultant, agency, logMethod);
 
     if (isTeamAgencyButNotTeamConsultant(agency, consultant)) {
       consultant.setTeamConsultant(true);
