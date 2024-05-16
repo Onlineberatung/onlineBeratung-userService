@@ -97,8 +97,7 @@ class JoinAndLeaveChatFacadeTest {
   }
 
   @Test
-  void
-      joinChat_Should_ThrowRequestForbiddenException_WhenConsultantHasNoPermissionForChat() {
+  void joinChat_Should_ThrowRequestForbiddenException_WhenConsultantHasNoPermissionForChat() {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
     doThrow(new ForbiddenException(""))
         .when(chatPermissionVerifier)
@@ -172,8 +171,7 @@ class JoinAndLeaveChatFacadeTest {
   }
 
   @Test
-  void joinChat_Should_AddConsultantToRocketChatGroup()
-      throws RocketChatAddUserToGroupException {
+  void joinChat_Should_AddConsultantToRocketChatGroup() throws RocketChatAddUserToGroupException {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
     when(consultantService.getConsultantViaAuthenticatedUser(authenticatedUser))
         .thenReturn(Optional.of(CONSULTANT));
@@ -227,8 +225,7 @@ class JoinAndLeaveChatFacadeTest {
   }
 
   @Test
-  void
-      leaveChat_Should_ThrowRequestForbiddenException_WhenConsultantHasNoPermissionForChat() {
+  void leaveChat_Should_ThrowRequestForbiddenException_WhenConsultantHasNoPermissionForChat() {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
     doThrow(new ForbiddenException(""))
         .when(chatPermissionVerifier)
@@ -318,9 +315,8 @@ class JoinAndLeaveChatFacadeTest {
   }
 
   @Test
-  void
-      leaveChat_Should_throwInternalServerErrorException_When_rocketChatUserCanNotBeRemoved()
-          throws RocketChatRemoveUserFromGroupException {
+  void leaveChat_Should_throwInternalServerErrorException_When_rocketChatUserCanNotBeRemoved()
+      throws RocketChatRemoveUserFromGroupException {
     assertThrows(
         InternalServerErrorException.class,
         () -> {

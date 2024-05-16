@@ -253,8 +253,7 @@ class RocketChatServiceTest {
   }
 
   @Test
-  void deleteGroup_Should_ReturnFalseAndLog_WhenApiCallIsNotSuccessful()
-      throws SecurityException {
+  void deleteGroup_Should_ReturnFalseAndLog_WhenApiCallIsNotSuccessful() throws SecurityException {
 
     GroupDeleteResponseDTO response = new GroupDeleteResponseDTO(false);
 
@@ -438,8 +437,7 @@ class RocketChatServiceTest {
   }
 
   @Test
-  void removeSystemMessages_Should_NotThrowException_WhenApiCallIsSuccessful()
-      throws Exception {
+  void removeSystemMessages_Should_NotThrowException_WhenApiCallIsSuccessful() throws Exception {
 
     when(restTemplate.postForObject(
             ArgumentMatchers.anyString(),
@@ -565,8 +563,7 @@ class RocketChatServiceTest {
   }
 
   @Test
-  void
-      getSubscriptionsOfUser_Should_ReturnListOfSubscriptionsUpdateDTO_When_APICallIsSuccessful() {
+  void getSubscriptionsOfUser_Should_ReturnListOfSubscriptionsUpdateDTO_When_APICallIsSuccessful() {
 
     when(restTemplate.exchange(
             ArgumentMatchers.anyString(),
@@ -582,8 +579,7 @@ class RocketChatServiceTest {
 
   /** Method: getRoomsOfUser */
   @Test
-  void
-      getRoomsOfUser_Should_ThrowInternalServerErrorException_When_APICallIsNotSuccessful() {
+  void getRoomsOfUser_Should_ThrowInternalServerErrorException_When_APICallIsNotSuccessful() {
 
     Exception exception = new RuntimeException(MESSAGE);
 
@@ -600,8 +596,7 @@ class RocketChatServiceTest {
   }
 
   @Test
-  void
-      getRoomsOfUser_Should_ThrowInternalServerErrorException_When_APIResponseIsUnSuccessful() {
+  void getRoomsOfUser_Should_ThrowInternalServerErrorException_When_APIResponseIsUnSuccessful() {
 
     when(restTemplate.exchange(
             ArgumentMatchers.anyString(), any(), any(), ArgumentMatchers.<Class<RoomsGetDTO>>any()))
@@ -646,9 +641,8 @@ class RocketChatServiceTest {
   }
 
   @Test
-  void
-      removeAllStandardUsersFromGroup_Should_RemoveAllStandardUsersAndNotTechnicalOrSystemUser()
-          throws Exception {
+  void removeAllStandardUsersFromGroup_Should_RemoveAllStandardUsersAndNotTechnicalOrSystemUser()
+      throws Exception {
 
     RocketChatService spy = Mockito.spy(rocketChatService);
 
@@ -669,8 +663,7 @@ class RocketChatServiceTest {
 
   /** Method: removeAllMessages */
   @Test
-  void removeAllMessages_Should_NotThrowException_WhenRemoveMessagesSucceeded()
-      throws Exception {
+  void removeAllMessages_Should_NotThrowException_WhenRemoveMessagesSucceeded() throws Exception {
 
     when(restTemplate.postForObject(
             ArgumentMatchers.anyString(),
@@ -732,9 +725,8 @@ class RocketChatServiceTest {
   }
 
   @Test
-  void
-      getStandardMembersOfGroup_Should_ReturnListFilteredOfGroupMemberDTO_WhenAPICallIsSuccessful()
-          throws Exception {
+  void getStandardMembersOfGroup_Should_ReturnListFilteredOfGroupMemberDTO_WhenAPICallIsSuccessful()
+      throws Exception {
 
     var doc1 = givenSubscription(RC_CREDENTIALS_SYSTEM_A.getRocketChatUserId(), "s");
     givenMongoResponseWith(doc1);
@@ -813,8 +805,7 @@ class RocketChatServiceTest {
   }
 
   @Test
-  void updateUser_Should_performRocketChatUpdate()
-      throws RocketChatUserNotInitializedException {
+  void updateUser_Should_performRocketChatUpdate() throws RocketChatUserNotInitializedException {
     UserUpdateRequestDTO userUpdateRequestDTO =
         new EasyRandom().nextObject(UserUpdateRequestDTO.class);
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
@@ -957,9 +948,8 @@ class RocketChatServiceTest {
   }
 
   @Test
-  void
-      deleteGroupAsSystemUser_Should_throwInternalServerErrorException_When_responseIsNotSuccess()
-          throws Exception {
+  void deleteGroupAsSystemUser_Should_throwInternalServerErrorException_When_responseIsNotSuccess()
+      throws Exception {
     assertThrows(
         InternalServerErrorException.class,
         () -> {
@@ -1059,9 +1049,8 @@ class RocketChatServiceTest {
   }
 
   @Test
-  void
-      fetchAllInactivePrivateGroupsSinceGivenDate_ShouldThrowException_WhenRocketChatCallFails()
-          throws RocketChatUserNotInitializedException {
+  void fetchAllInactivePrivateGroupsSinceGivenDate_ShouldThrowException_WhenRocketChatCallFails()
+      throws RocketChatUserNotInitializedException {
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
     HttpServerErrorException httpServerErrorException =
@@ -1291,9 +1280,8 @@ class RocketChatServiceTest {
   }
 
   @Test
-  void
-      getRocketChatUserIdByUsername_Should_ThrowException_WhenHttpStatusFromRocketChatCallIsNotOk()
-          throws RocketChatUserNotInitializedException {
+  void getRocketChatUserIdByUsername_Should_ThrowException_WhenHttpStatusFromRocketChatCallIsNotOk()
+      throws RocketChatUserNotInitializedException {
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
     when(restTemplate.exchange(

@@ -69,8 +69,7 @@ class ChatPermissionVerifierTest {
   }
 
   @Test
-  void
-      hasSameAgencyAssigned_Should_ReturnFalse_When_ChatAgenciesNotContainConsultantAgency() {
+  void hasSameAgencyAssigned_Should_ReturnFalse_When_ChatAgenciesNotContainConsultantAgency() {
     ConsultantAgency[] consultantAgencyArray =
         new ConsultantAgency[] {
           new ConsultantAgency(
@@ -205,8 +204,7 @@ class ChatPermissionVerifierTest {
   }
 
   @Test
-  void
-      verifyPermissionForChat_Should_verifyUserPermission_When_ChatAgenciesContainUserAgency() {
+  void verifyPermissionForChat_Should_verifyUserPermission_When_ChatAgenciesContainUserAgency() {
     User user = new User();
     UserAgency userAgency = new UserAgency();
     userAgency.setAgencyId(1L);
@@ -232,8 +230,7 @@ class ChatPermissionVerifierTest {
   }
 
   @Test
-  void
-      verifyCanModerateChat_Should_AllowToModerate_When_ConsultantHasAccessToSameAgencyAsChat() {
+  void verifyCanModerateChat_Should_AllowToModerate_When_ConsultantHasAccessToSameAgencyAsChat() {
     Consultant consultant = new Consultant();
     ConsultantAgency consultantAgency = new ConsultantAgency();
     consultantAgency.setAgencyId(1L);
@@ -284,8 +281,7 @@ class ChatPermissionVerifierTest {
   }
 
   @Test
-  void
-      verifyPermissionForChat_Should_throwNotFoundException_When_UserDoesNotExistInDatabase() {
+  void verifyPermissionForChat_Should_throwNotFoundException_When_UserDoesNotExistInDatabase() {
     assertThrows(
         NotFoundException.class,
         () -> {
@@ -320,8 +316,7 @@ class ChatPermissionVerifierTest {
   }
 
   @Test
-  void
-      verifyPermissionForChat_Should_throwForbiddenException_When_UserHasNoChatUserAssignment() {
+  void verifyPermissionForChat_Should_throwForbiddenException_When_UserHasNoChatUserAssignment() {
     assertThrows(
         ForbiddenException.class,
         () -> {

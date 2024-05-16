@@ -120,8 +120,7 @@ class ConsultantSessionEnricherTest {
   }
 
   @Test
-  void
-      updateRequiredConsultantSessionValues_Should_EnrichWithTopicsIfTopicFeatureIsEnabled() {
+  void updateRequiredConsultantSessionValues_Should_EnrichWithTopicsIfTopicFeatureIsEnabled() {
     ReflectionTestUtils.setField(consultantSessionEnricher, "topicsFeatureEnabled", true);
     ReflectionTestUtils.setField(
         consultantSessionEnricher, "sessionTopicEnrichmentService", sessionTopicEnrichmentService);
@@ -377,8 +376,7 @@ class ConsultantSessionEnricherTest {
   }
 
   @Test
-  void
-      updateRequiredConsultantSessionValues_Should_ReturnMessageDateAsUnixtime0_WhenNoMessages() {
+  void updateRequiredConsultantSessionValues_Should_ReturnMessageDateAsUnixtime0_WhenNoMessages() {
     RocketChatRoomInformation rocketChatRoomInformation =
         RocketChatRoomInformation.builder()
             .readMessages(MESSAGES_READ_MAP_WITHOUT_UNREADS)

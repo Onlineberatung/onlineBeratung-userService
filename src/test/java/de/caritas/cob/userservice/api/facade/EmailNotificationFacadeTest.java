@@ -507,8 +507,7 @@ class EmailNotificationFacadeTest {
   }
 
   @Test
-  void
-      sendNewEnquiryEmailNotification_ShouldNot_SendEmailNotificationViaMailServiceHelperToUser() {
+  void sendNewEnquiryEmailNotification_ShouldNot_SendEmailNotificationViaMailServiceHelperToUser() {
     givenNewEnquiryMailSupplierReturnNonEmptyMails();
     var session = givenEnquirySession();
 
@@ -799,8 +798,7 @@ class EmailNotificationFacadeTest {
   }
 
   @Test
-  void
-      sendNewFeedbackMessageNotification_Should_LogErrorAndSendNoMails_WhenSessionIsNotFound() {
+  void sendNewFeedbackMessageNotification_Should_LogErrorAndSendNoMails_WhenSessionIsNotFound() {
 
     when(sessionService.getSessionByFeedbackGroupId(RC_FEEDBACK_GROUP_ID)).thenReturn(null);
 
@@ -875,8 +873,7 @@ class EmailNotificationFacadeTest {
   }
 
   @Test
-  void
-      sendAssignEnquiryEmailNotification_Should_LogError_When_MailServiceHelperThrowsException() {
+  void sendAssignEnquiryEmailNotification_Should_LogError_When_MailServiceHelperThrowsException() {
     doThrow(new RuntimeException("unexpected")).when(mailService).sendEmailNotification(any());
     when(consultantService.getConsultant(any())).thenReturn(Optional.of(CONSULTANT));
     emailNotificationFacade.sendAssignEnquiryEmailNotification(CONSULTANT, USER_ID, NAME, null);
