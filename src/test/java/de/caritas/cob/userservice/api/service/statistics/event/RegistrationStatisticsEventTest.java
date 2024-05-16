@@ -14,17 +14,17 @@ import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventTyp
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class RegistrationStatisticsEventTest {
 
   private RegistrationStatisticsEvent registrationStatisticsEvent;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     UserDTO registeredUser =
         UserDTO.builder()

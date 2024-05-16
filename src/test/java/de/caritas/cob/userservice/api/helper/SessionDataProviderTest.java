@@ -18,11 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 import com.neovisionaries.i18n.LanguageCode;
@@ -44,13 +40,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.jeasy.random.EasyRandom;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SessionDataProviderTest {
 
   private SessionDataProvider sessionDataProvider;
@@ -186,7 +182,7 @@ public class SessionDataProviderTest {
               .roles(null)
               .registration(null);
 
-  @Before
+  @BeforeEach
   public void setup() {
     consultingTypeManager = Mockito.mock(ConsultingTypeManager.class);
     sessionDataProvider = new SessionDataProvider(consultingTypeManager);

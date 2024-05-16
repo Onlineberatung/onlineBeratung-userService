@@ -3,7 +3,7 @@ package de.caritas.cob.userservice.api.admin.service.rocketchat;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
@@ -23,13 +23,13 @@ import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class RocketChatRemoveFromGroupOperationServiceTest {
 
   private RocketChatRemoveFromGroupOperationService removeService;
@@ -44,7 +44,7 @@ public class RocketChatRemoveFromGroupOperationServiceTest {
 
   @Mock private ConsultingTypeManager consultingTypeManager;
 
-  @Before
+  @BeforeEach
   public void setup() {
     Map<Session, List<Consultant>> sessionConsultants = new HashMap<>();
     sessionConsultants.put(session, singletonList(consultant));

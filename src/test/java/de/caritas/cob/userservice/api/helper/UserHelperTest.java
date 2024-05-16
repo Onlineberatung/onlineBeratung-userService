@@ -9,24 +9,25 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME_T
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME_TOO_SHORT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import java.util.List;
 import org.jeasy.random.EasyRandom;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
-@RunWith(MockitoJUnitRunner.class)
-public class UserHelperTest {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class UserHelperTest {
 
   private static final EasyRandom easyRandom = new EasyRandom();
   private final UsernameTranscoder usernameTranscoder = new UsernameTranscoder();
@@ -34,38 +35,38 @@ public class UserHelperTest {
   @InjectMocks private UserHelper userHelper;
   @Mock private IdentityClientConfig identityClientConfig;
 
-  @Before
-  public void setup() throws NoSuchFieldException, SecurityException {
+  @BeforeEach
+  void setup() throws NoSuchFieldException, SecurityException {
     when(identityClientConfig.getEmailDummySuffix()).thenReturn(FIELD_VALUE_EMAIL_DUMMY_SUFFIX);
     setField(userHelper, "usernameTranscoder", usernameTranscoder);
   }
 
   @Test
-  public void isUsernameValid_Should_ReturnFalse_WhenUsernameIsTooShort() {
+  void isUsernameValid_Should_ReturnFalse_WhenUsernameIsTooShort() {
     assertFalse(userHelper.isUsernameValid(USERNAME_TOO_SHORT));
   }
 
   @Test
-  public void isUsernameValid_Should_ReturnFalse_WhenUsernameIsTooLong() {
+  void isUsernameValid_Should_ReturnFalse_WhenUsernameIsTooLong() {
     assertFalse(userHelper.isUsernameValid(USERNAME_TOO_LONG));
   }
 
   @Test
-  public void isValidEmailShouldReturnTrueOnValidAddress() {
+  void isValidEmailShouldReturnTrueOnValidAddress() {
     var emailAddress = givenARandomEmail();
 
     assertTrue(userHelper.isValidEmail(emailAddress));
   }
 
   @Test
-  public void isValidEmailShouldReturnTrueOnAddressWithUmlaut() {
+  void isValidEmailShouldReturnTrueOnAddressWithUmlaut() {
     var emailAddress = givenARandomEmailWithAnUmlaut();
 
     assertTrue(userHelper.isValidEmail(emailAddress));
   }
 
   @Test
-  public void isValidEmailShouldReturnFalseOnEmptyAddress() {
+  void isValidEmailShouldReturnFalseOnEmptyAddress() {
     assertFalse(userHelper.isValidEmail(null));
     assertFalse(userHelper.isValidEmail(""));
     assertFalse(userHelper.isValidEmail("@"));
@@ -74,37 +75,37 @@ public class UserHelperTest {
   }
 
   @Test
-  public void getDummyEmail_Should_ReturnRcUserIdWithDummyEmailSuffix() {
+  void getDummyEmail_Should_ReturnRcUserIdWithDummyEmailSuffix() {
     assertEquals(USER_ID + FIELD_VALUE_EMAIL_DUMMY_SUFFIX, userHelper.getDummyEmail(USER_ID));
   }
 
   @Test
-  public void doUsernamesMatch_Should_ReturnFalse_WhenDecodedUsernamesDontMatch() {
+  void doUsernamesMatch_Should_ReturnFalse_WhenDecodedUsernamesDontMatch() {
     assertFalse(userHelper.doUsernamesMatch(USERNAME_CONSULTANT_DECODED, USERNAME_DECODED));
   }
 
   @Test
-  public void doUsernamesMatch_Should_ReturnFalse_WhenEncodedUsernamesDontMatch() {
+  void doUsernamesMatch_Should_ReturnFalse_WhenEncodedUsernamesDontMatch() {
     assertFalse(userHelper.doUsernamesMatch(USERNAME_CONSULTANT_ENCODED, USERNAME_ENCODED));
   }
 
   @Test
-  public void doUsernamesMatch_Should_ReturnFalse_WhenEncodedAndDecodedUsernamesDontMatch() {
+  void doUsernamesMatch_Should_ReturnFalse_WhenEncodedAndDecodedUsernamesDontMatch() {
     assertFalse(userHelper.doUsernamesMatch(USERNAME_CONSULTANT_ENCODED, USERNAME_DECODED));
   }
 
   @Test
-  public void doUsernamesMatch_Should_ReturnTrue_WhenDecodedUsernamesMatch() {
+  void doUsernamesMatch_Should_ReturnTrue_WhenDecodedUsernamesMatch() {
     assertTrue(userHelper.doUsernamesMatch(USERNAME_DECODED, USERNAME_DECODED));
   }
 
   @Test
-  public void doUsernamesMatch_Should_ReturnTrue_WhenEncodedUsernamesMatch() {
+  void doUsernamesMatch_Should_ReturnTrue_WhenEncodedUsernamesMatch() {
     assertTrue(userHelper.doUsernamesMatch(USERNAME_ENCODED, USERNAME_ENCODED));
   }
 
   @Test
-  public void doUsernamesMatch_Should_ReturnTrue_WhenEncodedAndDecodedUsernamesMatch() {
+  void doUsernamesMatch_Should_ReturnTrue_WhenEncodedAndDecodedUsernamesMatch() {
     assertTrue(userHelper.doUsernamesMatch(USERNAME_ENCODED, USERNAME_DECODED));
   }
 

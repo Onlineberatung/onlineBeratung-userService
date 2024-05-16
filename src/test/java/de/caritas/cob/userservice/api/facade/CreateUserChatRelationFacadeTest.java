@@ -7,8 +7,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.MESSAGE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_WITH_RC_ID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -30,15 +29,15 @@ import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.Collections;
 import java.util.List;
 import org.jeasy.random.EasyRandom;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.auditing.AuditingHandler;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CreateUserChatRelationFacadeTest {
 
   @InjectMocks private CreateUserChatRelationFacade createUserChatRelationFacade;
@@ -126,46 +125,54 @@ public class CreateUserChatRelationFacadeTest {
     assertEquals(rocketChatCredentials.getRocketChatUserId(), captor.getValue().getRcUserId());
   }
 
-  @Test(expected = InternalServerErrorException.class)
+  @Test
   public void
       initializeUserChatAgencyRelation_Should_ThrowInternalServerErrorExceptionAndRollBackUserAccount_IfLoginToRocketChatFails_OnUpdatingRocketChatCredentialsInDb()
           throws RocketChatLoginException {
-    EasyRandom easyRandom = new EasyRandom();
-    UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
-    User user = easyRandom.nextObject(User.class);
-    user.setRcUserId(null);
-    ArgumentCaptor<RollbackUserAccountInformation> captor =
-        ArgumentCaptor.forClass(RollbackUserAccountInformation.class);
+    assertThrows(
+        InternalServerErrorException.class,
+        () -> {
+          EasyRandom easyRandom = new EasyRandom();
+          UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
+          User user = easyRandom.nextObject(User.class);
+          user.setRcUserId(null);
+          ArgumentCaptor<RollbackUserAccountInformation> captor =
+              ArgumentCaptor.forClass(RollbackUserAccountInformation.class);
 
-    when(rocketChatService.loginUserFirstTime(any(), any()))
-        .thenThrow(new RocketChatLoginException(MESSAGE));
+          when(rocketChatService.loginUserFirstTime(any(), any()))
+              .thenThrow(new RocketChatLoginException(MESSAGE));
 
-    createUserChatRelationFacade.initializeUserChatAgencyRelation(userDTO, user, null);
+          createUserChatRelationFacade.initializeUserChatAgencyRelation(userDTO, user, null);
 
-    verify(rollbackFacade).rollBackUserAccount(captor.capture());
-    assertEquals(user, captor.getValue().getUser());
-    assertTrue(captor.getValue().isRollBackUserAccount());
+          verify(rollbackFacade).rollBackUserAccount(captor.capture());
+          assertEquals(user, captor.getValue().getUser());
+          assertTrue(captor.getValue().isRollBackUserAccount());
+        });
   }
 
-  @Test(expected = InternalServerErrorException.class)
+  @Test
   public void
       initializeUserChatAgencyRelation_Should_ThrowInternalServerErrorExceptionAndRollBackUserAccount_IfLoginToRocketChatReturnsInvalidResponse_OnUpdatingRocketChatCredentialsInDb()
           throws RocketChatLoginException {
-    EasyRandom easyRandom = new EasyRandom();
-    UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
-    User user = easyRandom.nextObject(User.class);
-    user.setRcUserId(null);
-    ArgumentCaptor<RollbackUserAccountInformation> captor =
-        ArgumentCaptor.forClass(RollbackUserAccountInformation.class);
+    assertThrows(
+        InternalServerErrorException.class,
+        () -> {
+          EasyRandom easyRandom = new EasyRandom();
+          UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
+          User user = easyRandom.nextObject(User.class);
+          user.setRcUserId(null);
+          ArgumentCaptor<RollbackUserAccountInformation> captor =
+              ArgumentCaptor.forClass(RollbackUserAccountInformation.class);
 
-    when(rocketChatService.loginUserFirstTime(any(), any()))
-        .thenReturn(LOGIN_RESPONSE_ENTITY_OK_NO_TOKEN);
+          when(rocketChatService.loginUserFirstTime(any(), any()))
+              .thenReturn(LOGIN_RESPONSE_ENTITY_OK_NO_TOKEN);
 
-    createUserChatRelationFacade.initializeUserChatAgencyRelation(userDTO, user, null);
+          createUserChatRelationFacade.initializeUserChatAgencyRelation(userDTO, user, null);
 
-    verify(rollbackFacade).rollBackUserAccount(captor.capture());
-    assertEquals(user, captor.getValue().getUser());
-    assertTrue(captor.getValue().isRollBackUserAccount());
+          verify(rollbackFacade).rollBackUserAccount(captor.capture());
+          assertEquals(user, captor.getValue().getUser());
+          assertTrue(captor.getValue().isRollBackUserAccount());
+        });
   }
 
   @Test
@@ -193,45 +200,53 @@ public class CreateUserChatRelationFacadeTest {
     assertEquals(user, captor.getValue().getUser());
   }
 
-  @Test(expected = InternalServerErrorException.class)
+  @Test
   public void
       initializeUserChatAgencyRelation_Should_ThrowInternalServerErrorExceptionAndRollBackUserAccount_IfCreateUserChatAgencyRelationFails() {
-    ArgumentCaptor<RollbackUserAccountInformation> captor =
-        ArgumentCaptor.forClass(RollbackUserAccountInformation.class);
-    EasyRandom easyRandom = new EasyRandom();
-    UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
-    User user = easyRandom.nextObject(User.class);
-    RocketChatCredentials rocketChatCredentials =
-        easyRandom.nextObject(RocketChatCredentials.class);
+    assertThrows(
+        InternalServerErrorException.class,
+        () -> {
+          ArgumentCaptor<RollbackUserAccountInformation> captor =
+              ArgumentCaptor.forClass(RollbackUserAccountInformation.class);
+          EasyRandom easyRandom = new EasyRandom();
+          UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
+          User user = easyRandom.nextObject(User.class);
+          RocketChatCredentials rocketChatCredentials =
+              easyRandom.nextObject(RocketChatCredentials.class);
 
-    when(userAgencyService.saveUserAgency(any()))
-        .thenThrow(new InternalServerErrorException(MESSAGE));
+          when(userAgencyService.saveUserAgency(any()))
+              .thenThrow(new InternalServerErrorException(MESSAGE));
 
-    createUserChatRelationFacade.initializeUserChatAgencyRelation(
-        userDTO, user, rocketChatCredentials);
+          createUserChatRelationFacade.initializeUserChatAgencyRelation(
+              userDTO, user, rocketChatCredentials);
 
-    verify(rollbackFacade).rollBackUserAccount(captor.capture());
-    assertEquals(user, captor.getValue().getUser());
-    assertTrue(captor.getValue().isRollBackUserAccount());
+          verify(rollbackFacade).rollBackUserAccount(captor.capture());
+          assertEquals(user, captor.getValue().getUser());
+          assertTrue(captor.getValue().isRollBackUserAccount());
+        });
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void
       initializeUserChatAgencyRelation_Should_ThrowBadRequestException_WhenAlreadyRegisteredToConsultingType() {
-    EasyRandom easyRandom = new EasyRandom();
-    UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
-    userDTO.setAgencyId(AGENCY_ID);
-    User user = easyRandom.nextObject(User.class);
-    RocketChatCredentials rocketChatCredentials =
-        easyRandom.nextObject(RocketChatCredentials.class);
-    UserAgency userAgency = new UserAgency(user, AGENCY_ID);
-    List<UserAgency> userAgencies = Collections.singletonList(userAgency);
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          EasyRandom easyRandom = new EasyRandom();
+          UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
+          userDTO.setAgencyId(AGENCY_ID);
+          User user = easyRandom.nextObject(User.class);
+          RocketChatCredentials rocketChatCredentials =
+              easyRandom.nextObject(RocketChatCredentials.class);
+          UserAgency userAgency = new UserAgency(user, AGENCY_ID);
+          List<UserAgency> userAgencies = Collections.singletonList(userAgency);
 
-    when(userAgencyService.getUserAgenciesByUser(any())).thenReturn(userAgencies);
+          when(userAgencyService.getUserAgenciesByUser(any())).thenReturn(userAgencies);
 
-    createUserChatRelationFacade.initializeUserChatAgencyRelation(
-        userDTO, user, rocketChatCredentials);
+          createUserChatRelationFacade.initializeUserChatAgencyRelation(
+              userDTO, user, rocketChatCredentials);
 
-    verify(userAgencyService, times(1)).saveUserAgency(any());
+          verify(userAgencyService, times(1)).saveUserAgency(any());
+        });
   }
 }

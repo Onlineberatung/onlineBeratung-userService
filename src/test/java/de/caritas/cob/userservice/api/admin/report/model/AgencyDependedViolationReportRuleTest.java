@@ -9,27 +9,27 @@ import static org.hamcrest.Matchers.is;
 import de.caritas.cob.userservice.agencyadminserivce.generated.web.model.AgencyAdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ViolationDTO;
 import java.util.List;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class AgencyDependedViolationReportRuleTest {
+class AgencyDependedViolationReportRuleTest {
 
   private AgencyDependedViolationReportRule reportRule =
       new AgencyDependedViolationReportRule() {
         @Override
-        public List<ViolationDTO> generateViolations() {
+        List<ViolationDTO> generateViolations() {
           return emptyList();
         }
       };
 
   @Test
-  public void getAllAgencies_Should_returnEmptyList_When_noAgenciesHaveBeenSet() {
+  void getAllAgencies_Should_returnEmptyList_When_noAgenciesHaveBeenSet() {
     List<AgencyAdminResponseDTO> allAgencies = reportRule.getAllAgencies();
 
     assertThat(allAgencies, is(emptyList()));
   }
 
   @Test
-  public void getAllAgencies_Should_returnExpectedList_When_agenciesHaveBeenSet() {
+  void getAllAgencies_Should_returnExpectedList_When_agenciesHaveBeenSet() {
     List<AgencyAdminResponseDTO> agencies =
         asList(new AgencyAdminResponseDTO(), new AgencyAdminResponseDTO());
 

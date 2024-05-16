@@ -8,13 +8,13 @@ import static org.mockito.Mockito.verify;
 import com.fasterxml.jackson.core.JsonGenerator;
 import de.caritas.cob.userservice.api.helper.UserHelper;
 import java.io.IOException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DecodeUsernameJsonSerializerTest {
 
   @InjectMocks private DecodeUsernameJsonSerializer serializer;

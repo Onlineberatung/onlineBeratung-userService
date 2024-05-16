@@ -35,10 +35,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.iterators.PeekingIterator;
 import org.jeasy.random.EasyRandom;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -46,14 +45,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = UserServiceApplication.class)
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 @Import({ConsultingTypeManagerTestConfig.class})
-public class AnonymousEnquiryConversationListProviderIT {
+class AnonymousEnquiryConversationListProviderIT {
 
   @Autowired
   private AnonymousEnquiryConversationListProvider anonymousEnquiryConversationListProvider;
@@ -66,8 +63,8 @@ public class AnonymousEnquiryConversationListProviderIT {
 
   @MockBean private UserAccountService userAccountProvider;
 
-  @Before
-  public void setup() {
+  @BeforeEach
+  void setup() {
     Consultant consultant = mock(Consultant.class);
     ConsultantAgency consultantAgency = mock(ConsultantAgency.class);
     when(consultant.getConsultantAgencies()).thenReturn(asSet(consultantAgency));
@@ -76,14 +73,13 @@ public class AnonymousEnquiryConversationListProviderIT {
     when(this.agencyService.getAgencies(any())).thenReturn(singletonList(agencyDTO));
   }
 
-  @After
-  public void cleanDatabase() {
+  @AfterEach
+  void cleanDatabase() {
     this.sessionRepository.deleteAll();
   }
 
   @Test
-  public void
-      buildConversations_Should_returnExpectedResponseDTO_When_consultantHasAnonymousEnquiries() {
+  void buildConversations_Should_returnExpectedResponseDTO_When_consultantHasAnonymousEnquiries() {
     saveAnonymousSessions(10);
     PageableListRequest request = PageableListRequest.builder().count(5).offset(0).build();
 
@@ -97,7 +93,7 @@ public class AnonymousEnquiryConversationListProviderIT {
   }
 
   @Test
-  public void buildConversations_Should_returnExpectedElements_When_paginationParamsAreAtTheEnd() {
+  void buildConversations_Should_returnExpectedElements_When_paginationParamsAreAtTheEnd() {
     saveAnonymousSessions(10);
     PageableListRequest request = PageableListRequest.builder().count(3).offset(9).build();
 
@@ -111,7 +107,7 @@ public class AnonymousEnquiryConversationListProviderIT {
   }
 
   @Test
-  public void buildConversations_Should_returnElementsInExpectedOrder() {
+  void buildConversations_Should_returnElementsInExpectedOrder() {
     saveAnonymousSessions(100);
     PageableListRequest request = PageableListRequest.builder().count(100).offset(0).build();
 
@@ -130,7 +126,7 @@ public class AnonymousEnquiryConversationListProviderIT {
   }
 
   @Test
-  public void providedType_Should_return_anonymousEnquiry() {
+  void providedType_Should_return_anonymousEnquiry() {
     ConversationListType conversationListType =
         this.anonymousEnquiryConversationListProvider.providedType();
 

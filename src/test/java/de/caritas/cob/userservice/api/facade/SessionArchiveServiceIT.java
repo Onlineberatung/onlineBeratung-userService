@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.facade;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -20,8 +21,7 @@ import de.caritas.cob.userservice.api.service.archive.SessionArchiveService;
 import de.caritas.cob.userservice.api.testConfig.ConsultingTypeManagerTestConfig;
 import java.util.Optional;
 import java.util.UUID;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -29,9 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = UserServiceApplication.class)
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -56,36 +54,50 @@ public class SessionArchiveServiceIT {
     assertThat(session.get().getStatus(), is(SessionStatus.IN_ARCHIVE));
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void archiveSession_Should_ThrowNotFoundException_WhenSessionIsNotFound() {
-    sessionArchiveService.archiveSession(99999999L);
+    assertThrows(
+        NotFoundException.class,
+        () -> {
+          sessionArchiveService.archiveSession(99999999L);
+        });
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void archiveSession_Should_ThrowForbiddenException_WhenConsultantHasNoPermission() {
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          when(authenticatedUser.getUserId()).thenReturn("88613f5d-0d40-47e0-b323-e792e7fba3ed");
+          when(authenticatedUser.isConsultant()).thenReturn(true);
+          sessionArchiveService.archiveSession(1L);
 
-    when(authenticatedUser.getUserId()).thenReturn("88613f5d-0d40-47e0-b323-e792e7fba3ed");
-    when(authenticatedUser.isConsultant()).thenReturn(true);
-    sessionArchiveService.archiveSession(1L);
-
-    verify(sessionRepository, times(0)).save(any());
+          verify(sessionRepository, times(0)).save(any());
+        });
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void archiveSession_Should_ThrowForbiddenException_WhenUserHasNoPermission() {
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          when(authenticatedUser.getUserId()).thenReturn("88613f5d-0d40-47e0-b323-e792e7fba3ed");
+          when(authenticatedUser.isAdviceSeeker()).thenReturn(true);
+          sessionArchiveService.archiveSession(1L);
 
-    when(authenticatedUser.getUserId()).thenReturn("88613f5d-0d40-47e0-b323-e792e7fba3ed");
-    when(authenticatedUser.isAdviceSeeker()).thenReturn(true);
-    sessionArchiveService.archiveSession(1L);
-
-    verify(sessionRepository, times(0)).save(any());
+          verify(sessionRepository, times(0)).save(any());
+        });
   }
 
-  @Test(expected = ConflictException.class)
+  @Test
   public void archiveSession_Should_ThrowConflictException_WhenSessionIsNotInProgress() {
-    when(authenticatedUser.getUserId()).thenReturn("75abe824-fb42-476d-a52a-66660113bdcc");
+    assertThrows(
+        ConflictException.class,
+        () -> {
+          when(authenticatedUser.getUserId()).thenReturn("75abe824-fb42-476d-a52a-66660113bdcc");
 
-    sessionArchiveService.archiveSession(1214L);
+          sessionArchiveService.archiveSession(1214L);
+        });
   }
 
   @Test
@@ -114,21 +126,33 @@ public class SessionArchiveServiceIT {
     assertThat(session.get().getStatus(), is(SessionStatus.IN_PROGRESS));
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void reactivateSession_Should_ThrowNotFoundException_WhenSessionIsNotFound() {
-    sessionArchiveService.dearchiveSession(99999999L);
+    assertThrows(
+        NotFoundException.class,
+        () -> {
+          sessionArchiveService.dearchiveSession(99999999L);
+        });
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void reactivateSession_Should_ThrowForbiddenException_WhenUserHasNoPermission() {
-    when(authenticatedUser.getUserId()).thenReturn(UUID.randomUUID().toString());
-    sessionArchiveService.dearchiveSession(1210L);
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          when(authenticatedUser.getUserId()).thenReturn(UUID.randomUUID().toString());
+          sessionArchiveService.dearchiveSession(1210L);
+        });
   }
 
-  @Test(expected = ConflictException.class)
+  @Test
   public void reactivateSession_Should_ThrowConflictException_WhenSessionIsNotInArchive() {
-    when(authenticatedUser.getUserId()).thenReturn("473f7c4b-f011-4fc2-847c-ceb636a5b399");
-    when(authenticatedUser.isConsultant()).thenReturn(true);
-    sessionArchiveService.dearchiveSession(1L);
+    assertThrows(
+        ConflictException.class,
+        () -> {
+          when(authenticatedUser.getUserId()).thenReturn("473f7c4b-f011-4fc2-847c-ceb636a5b399");
+          when(authenticatedUser.isConsultant()).thenReturn(true);
+          sessionArchiveService.dearchiveSession(1L);
+        });
   }
 }

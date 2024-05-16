@@ -21,15 +21,15 @@ import de.caritas.cob.userservice.api.workflow.delete.model.AskerDeletionWorkflo
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DeleteDatabaseAskerActionTest {
 
   @InjectMocks private DeleteDatabaseAskerAction deleteDatabaseAskerAction;
@@ -38,7 +38,7 @@ public class DeleteDatabaseAskerActionTest {
 
   @Mock private Logger logger;
 
-  @Before
+  @BeforeEach
   public void setup() {
     setInternalState(DeleteDatabaseAskerAction.class, "log", logger);
   }

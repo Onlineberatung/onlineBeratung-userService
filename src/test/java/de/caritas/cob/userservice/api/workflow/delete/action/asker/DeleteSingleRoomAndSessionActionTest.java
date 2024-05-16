@@ -26,15 +26,15 @@ import de.caritas.cob.userservice.api.workflow.delete.model.SessionDeletionWorkf
 import java.util.ArrayList;
 import java.util.List;
 import org.jeasy.random.EasyRandom;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DeleteSingleRoomAndSessionActionTest {
 
   @InjectMocks private DeleteSingleRoomAndSessionAction deleteSingleRoomAndSessionAction;
@@ -47,7 +47,7 @@ public class DeleteSingleRoomAndSessionActionTest {
 
   @Mock private Logger logger;
 
-  @Before
+  @BeforeEach
   public void setup() {
     setInternalState(DeleteSingleRoomAndSessionAction.class, "log", logger);
   }

@@ -8,7 +8,7 @@ import static de.caritas.cob.userservice.api.testHelper.RequestBodyConstants.*;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.*;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.powermock.reflect.Whitebox.setInternalState;
@@ -63,9 +63,8 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.service.spi.ServiceException;
 import org.jeasy.random.EasyRandom;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -79,14 +78,12 @@ import org.springframework.hateoas.client.LinkDiscoverers;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(UserController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @TestPropertySource(properties = "spring.profiles.active=testing,feature.topics.enabled=true")
-public class UserControllerIT {
+class UserControllerIT {
 
   private static final Cookie RC_TOKEN_COOKIE =
       new Cookie("rc_token", RandomStringUtils.randomAlphanumeric(43));
@@ -353,8 +350,8 @@ public class UserControllerIT {
 
   @Mock private Chat chat;
 
-  @Before
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     HashMap<String, Object> drugsMap = new HashMap<>();
     drugsMap.put("others", false);
     HashMap<String, Object> addictiveDrugsMap = new HashMap<>();
@@ -366,7 +363,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void userExists_Should_Return404_When_UserDoesNotExist() throws Exception {
+  void userExists_Should_Return404_When_UserDoesNotExist() throws Exception {
     /* given */
     val username = "john@doe.com";
     when(identityClient.isUsernameAvailable(username)).thenReturn(Boolean.TRUE);
@@ -377,7 +374,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void userExists_Should_Return200_When_UserDoesExist() throws Exception {
+  void userExists_Should_Return200_When_UserDoesExist() throws Exception {
     /* given */
     val username = "john@doe.com";
     when(identityClient.isUsernameAvailable(username)).thenReturn(Boolean.FALSE);
@@ -390,7 +387,7 @@ public class UserControllerIT {
 
   /** Method: registerUser */
   @Test
-  public void registerUser_Should_ReturnBadRequest_WhenProvidedWithInvalidRequestBody()
+  void registerUser_Should_ReturnBadRequest_WhenProvidedWithInvalidRequestBody()
       throws Exception {
 
     mvc.perform(
@@ -402,7 +399,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       registerUser_Should_ReturnBadRequest_WhenProvidedWithConsultingTypeWithMandatoryFieldsAndInvalidAge()
           throws Exception {
 
@@ -418,7 +415,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       registerUser_Should_ReturnBadRequest_WhenProvidedWithConsultingTypeWithMandatoryFieldsAndInvalidState()
           throws Exception {
 
@@ -438,7 +435,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void registerUser_Should_ReturnBadRequest_WhenProvidedUsernameIsTooShort()
+  void registerUser_Should_ReturnBadRequest_WhenProvidedUsernameIsTooShort()
       throws Exception {
 
     when(consultingTypeManager.getConsultingTypeSettings(0))
@@ -453,7 +450,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       activateTwoFactorAuthByApp_Should_NotActivateIfSingleTenantAdminButNotConfiguredToUse2Fa()
           throws Exception {
     when(authenticatedUser.isSingleTenantAdmin()).thenReturn(true);
@@ -469,7 +466,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       activateTwoFactorAuthByApp_Should_NotActivateIfTenantSuperAdminButNotConfiguredToUse2Fa()
           throws Exception {
     when(authenticatedUser.isTenantSuperAdmin()).thenReturn(true);
@@ -485,7 +482,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void activateTwoFactorAuthByApp_Should_Activate() throws Exception {
+  void activateTwoFactorAuthByApp_Should_Activate() throws Exception {
     when(authenticatedUser.getUsername()).thenReturn("username");
     when(identityManager.setUpOneTimePassword(anyString(), anyString(), anyString()))
         .thenReturn(true);
@@ -500,7 +497,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void registerUser_Should_ReturnBadRequest_WhenProvidedUsernameIsTooLong()
+  void registerUser_Should_ReturnBadRequest_WhenProvidedUsernameIsTooLong()
       throws Exception {
 
     when(consultingTypeManager.getConsultingTypeSettings(0))
@@ -515,7 +512,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       registerUser_Should_ReturnCreated_WhenProvidedWithValidRequestBodyAndKeycloakResponseIsSuccessful()
           throws Exception {
     when(userHelper.isUsernameValid(anyString())).thenReturn(true);
@@ -535,7 +532,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       registerUser_Should_ReturnCreated_WhenProvidedWithValidU25RequestBodyAndKeycloakResponseIsSuccessful()
           throws Exception {
     when(userHelper.isUsernameValid(anyString())).thenReturn(true);
@@ -555,7 +552,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       registerUser_Should_ReturnConflict_WhenProvidedWithValidRequestBodyAndKeycloakResponseIsConflict()
           throws Exception {
     when(userHelper.isUsernameValid(anyString())).thenReturn(true);
@@ -578,7 +575,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void registerUser_Should_ReturnBadRequest_When_PostcodeIsMissing() throws Exception {
+  void registerUser_Should_ReturnBadRequest_When_PostcodeIsMissing() throws Exception {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(anyString()))
         .thenReturn(
@@ -596,7 +593,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void registerUser_Should_ReturnBadRequest_When_PostcodeIsInvalid() throws Exception {
+  void registerUser_Should_ReturnBadRequest_When_PostcodeIsInvalid() throws Exception {
 
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(anyString()))
         .thenReturn(
@@ -615,7 +612,7 @@ public class UserControllerIT {
 
   /** Method: registerNewConsultingType */
   @Test
-  public void
+  void
       registerNewConsultingType_Should_ReturnBadRequest_When_ProvidedWithInvalidRequestBody()
           throws Exception {
     mvc.perform(
@@ -629,7 +626,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void registerNewConsultingType_Should_ReturnBadRequest_When_PostcodeIsInvalid()
+  void registerNewConsultingType_Should_ReturnBadRequest_When_PostcodeIsInvalid()
       throws Exception {
     mvc.perform(
             post(PATH_POST_REGISTER_NEW_CONSULTING_TYPE)
@@ -642,7 +639,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void registerNewConsultingType_Should_ReturnBadRequest_When_PostcodeIsMissing()
+  void registerNewConsultingType_Should_ReturnBadRequest_When_PostcodeIsMissing()
       throws Exception {
     mvc.perform(
             post(PATH_POST_REGISTER_NEW_CONSULTING_TYPE)
@@ -655,7 +652,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void registerNewConsultingType_Should_ReturnBadRequest_When_AgencyIdMissing()
+  void registerNewConsultingType_Should_ReturnBadRequest_When_AgencyIdMissing()
       throws Exception {
     when(consultingTypeManager.getConsultingTypeSettings(any()))
         .thenReturn(CONSULTING_TYPE_SETTINGS_SUCHT);
@@ -671,7 +668,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void registerNewConsultingType_Should_ReturnBadRequest_When_ConsultingTypeMissing()
+  void registerNewConsultingType_Should_ReturnBadRequest_When_ConsultingTypeMissing()
       throws Exception {
     mvc.perform(
             post(PATH_POST_REGISTER_NEW_CONSULTING_TYPE)
@@ -684,7 +681,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void registerNewConsultingType_Should_ReturnBadRequest_When_RcUserIdIsMissing()
+  void registerNewConsultingType_Should_ReturnBadRequest_When_RcUserIdIsMissing()
       throws Exception {
     mvc.perform(
             post(PATH_POST_REGISTER_NEW_CONSULTING_TYPE)
@@ -696,7 +693,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void registerNewConsultingType_Should_ReturnBadRequest_When_RcTokenIsMissing()
+  void registerNewConsultingType_Should_ReturnBadRequest_When_RcTokenIsMissing()
       throws Exception {
     mvc.perform(
             post(PATH_POST_REGISTER_NEW_CONSULTING_TYPE)
@@ -708,7 +705,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void registerNewConsultingTyp_Should_ReturnCreated_When_ProvidedWithValidRequestBody()
+  void registerNewConsultingTyp_Should_ReturnCreated_When_ProvidedWithValidRequestBody()
       throws Exception {
 
     when(accountProvider.retrieveValidatedUser()).thenReturn(USER);
@@ -730,7 +727,7 @@ public class UserControllerIT {
 
   /** Method: acceptEnquiry */
   @Test
-  public void acceptEnquiry_Should_ReturnInternalServerError_WhenNoConsultantInDbFound()
+  void acceptEnquiry_Should_ReturnInternalServerError_WhenNoConsultantInDbFound()
       throws Exception {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(SESSION));
@@ -749,7 +746,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void acceptEnquiry_Should_ReturnInternalServerError_WhenSessionNotFoundInDb()
+  void acceptEnquiry_Should_ReturnInternalServerError_WhenSessionNotFoundInDb()
       throws Exception {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.empty());
@@ -767,7 +764,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void acceptEnquiry_Should_ReturnInternalServerError_WhenSessionHasNoRocketChatGroupId()
+  void acceptEnquiry_Should_ReturnInternalServerError_WhenSessionHasNoRocketChatGroupId()
       throws Exception {
 
     when(sessionService.getSession(SESSION_ID))
@@ -786,7 +783,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void acceptEnquiry_Should_ReturnSuccess_WhenAcceptEnquiryIsSuccessfull() throws Exception {
+  void acceptEnquiry_Should_ReturnSuccess_WhenAcceptEnquiryIsSuccessfull() throws Exception {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(TEAM_SESSION));
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
@@ -801,7 +798,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void acceptEnquiry_Should_ReturnConflict_WhenEnquiryIsAlreadyAssigned() throws Exception {
+  void acceptEnquiry_Should_ReturnConflict_WhenEnquiryIsAlreadyAssigned() throws Exception {
 
     when(sessionService.getSession(SESSION_ID)).thenReturn(Optional.of(TEAM_SESSION));
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
@@ -819,7 +816,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       acceptEnquiry_Should_ReturnInternalServerError_WhenAuthenticatedUserIsNotPresentInApplicationDb()
           throws Exception {
 
@@ -837,7 +834,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void createEnquiryMessage_Should_ReturnConflict_WhenMessageIsAlreadyCreated()
+  void createEnquiryMessage_Should_ReturnConflict_WhenMessageIsAlreadyCreated()
       throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
@@ -857,7 +854,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void createEnquiryMessage_Should_ReturnCreated_WhenMessageWasCreated() throws Exception {
+  void createEnquiryMessage_Should_ReturnCreated_WhenMessageWasCreated() throws Exception {
     when(authenticatedUser.getUserId()).thenReturn(USER_ID);
     when(accountProvider.retrieveValidatedUser()).thenReturn(USER);
     var expectedRCCredentials =
@@ -884,7 +881,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       createEnquiryMessage_Should_ReturnInternalServerError_WhenAuthenticatedUserIsNotPresentInApplicationDb()
           throws Exception {
 
@@ -903,7 +900,7 @@ public class UserControllerIT {
 
   /** Method: getSessionsForAuthenticatedUser (role: user) */
   @Test
-  public void getSessionsForAuthenticatedUser_Should_ReturnUserSessionsAndOk_WhenAuthorized()
+  void getSessionsForAuthenticatedUser_Should_ReturnUserSessionsAndOk_WhenAuthorized()
       throws Exception {
 
     List<UserSessionResponseDTO> sessions = new ArrayList<>();
@@ -937,7 +934,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       getSessionsForAuthenticatedUser_Should_ReturnInternalServerError_WhenAuthorizedButUserNotFound()
           throws Exception {
 
@@ -956,7 +953,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       getSessionsForAuthenticatedUser_Should_ReturnNoContent_WhenAuthorizedAndNoOpenSessionsAvailableAndSessionListIsEmpty()
           throws Exception {
     List<UserSessionResponseDTO> session = new ArrayList<>();
@@ -977,7 +974,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void getSessionsForAuthenticatedUser_Should_ReturnBadRequest_WhenHeaderParamIsMissing()
+  void getSessionsForAuthenticatedUser_Should_ReturnBadRequest_WhenHeaderParamIsMissing()
       throws Exception {
 
     mvc.perform(
@@ -988,7 +985,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void updateAbsence_Should_ReturnOk_When_Saved() throws Exception {
+  void updateAbsence_Should_ReturnOk_When_Saved() throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedTeamConsultant()).thenReturn(TEAM_CONSULTANT);
@@ -1003,7 +1000,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void updateAbsence_Should_ReturnBadRequest_When_RequestBodyIsMissing() throws Exception {
+  void updateAbsence_Should_ReturnBadRequest_When_RequestBodyIsMissing() throws Exception {
     mvc.perform(
             put(PATH_PUT_CONSULTANT_ABSENT)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -1013,7 +1010,7 @@ public class UserControllerIT {
 
   /** Method: getSessionsForAuthenticatedConsultant (role: consultant) */
   @Test
-  public void
+  void
       getSessionsForAuthenticatedConsultant_Should_ReturnBadRequest_WhenStatusParamIsMissing()
           throws Exception {
     mvc.perform(
@@ -1027,7 +1024,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       getSessionsForAuthenticatedConsultant_Should_ReturnUnauthorized_WhenUnauthorizedExceptionIsRaised()
           throws Exception {
     var runtimeException = easyRandom.nextObject(RuntimeException.class);
@@ -1052,7 +1049,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       getSessionsForAuthenticatedConsultant_Should_ReturnBadRequest_WhenHeaderParamIsMissing()
           throws Exception {
     mvc.perform(
@@ -1065,7 +1062,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       getSessionsForAuthenticatedConsultant_Should_ReturnInternalServerError_WhenNoConsultantInDbFound()
           throws Exception {
 
@@ -1082,7 +1079,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       getSessionsForAuthenticatedConsultant_Should_ReturnSuccess_WhenAuthorizedAndSessionAvailable()
           throws Exception {
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
@@ -1097,7 +1094,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       getSessionsForAuthenticatedConsultant_Should_ReturnNoContent_WhenAuthorizedAndNoSessionsAvailable()
           throws Exception {
 
@@ -1113,7 +1110,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       getSessionsForAuthenticatedConsultant_Should_ReturnNoContent_WhenAuthorizedAndSessionListIsEmpty()
           throws Exception {
 
@@ -1129,7 +1126,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       getSessionsForAuthenticatedConsultant_Should_ReturnBadRequest_WhenParamOffestIsMissing()
           throws Exception {
 
@@ -1142,7 +1139,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       getSessionsForAuthenticatedConsultant_Should_ReturnBadRequest_WhenParamOffestHasANegativeValue()
           throws Exception {
 
@@ -1155,7 +1152,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       getSessionsForAuthenticatedConsultant_Should_ReturnBadRequest_WhenParamCountIsMissing()
           throws Exception {
 
@@ -1168,7 +1165,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       getSessionsForAuthenticatedConsultant_Should_ReturnBadRequest_WhenParamCountHasANegativeValue()
           throws Exception {
 
@@ -1181,7 +1178,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       getSessionsForAuthenticatedConsultant_Should_ReturnNotContent_WhenFilterParamIsInvalid()
           throws Exception {
 
@@ -1198,7 +1195,7 @@ public class UserControllerIT {
 
   /** Method: getUserData (role: consultant / user) */
   @Test
-  public void
+  void
       getUserData_ForUser_Should_ReturnInternalServerError_WhenAuthenticatedUserIsNotPresentInApplicationDb()
           throws Exception {
 
@@ -1217,7 +1214,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void getUserData_ForSingleTenantAdmin_Should_ReturnUserDataFromKeycloak()
+  void getUserData_ForSingleTenantAdmin_Should_ReturnUserDataFromKeycloak()
       throws Exception {
     when(authenticatedUser.isSingleTenantAdmin()).thenReturn(true);
     when(keycloakUserDataProvider.retrieveAuthenticatedUserData())
@@ -1232,7 +1229,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void getUserData_ForTenantSuperAdmin_Should_ReturnUserDataFromKeycloak() throws Exception {
+  void getUserData_ForTenantSuperAdmin_Should_ReturnUserDataFromKeycloak() throws Exception {
     when(authenticatedUser.isTenantSuperAdmin()).thenReturn(true);
     when(keycloakUserDataProvider.retrieveAuthenticatedUserData())
         .thenReturn(new UserDataResponseDTO());
@@ -1246,7 +1243,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void getUserData_ForAgencySuperAdmin_Should_ReturnUserDataFromKeycloak() throws Exception {
+  void getUserData_ForAgencySuperAdmin_Should_ReturnUserDataFromKeycloak() throws Exception {
     when(authenticatedUser.isAgencySuperAdmin()).thenReturn(true);
     when(keycloakUserDataProvider.retrieveAuthenticatedUserData())
         .thenReturn(new UserDataResponseDTO());
@@ -1260,7 +1257,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void getUserData_ForRestrictedAgencyAdmin_Should_ReturnUserDataFromKeycloak()
+  void getUserData_ForRestrictedAgencyAdmin_Should_ReturnUserDataFromKeycloak()
       throws Exception {
     when(authenticatedUser.isRestrictedAgencyAdmin()).thenReturn(true);
     when(keycloakUserDataProvider.retrieveAuthenticatedUserData())
@@ -1276,7 +1273,7 @@ public class UserControllerIT {
 
   /** Method: getTeamSessionsForAuthenticatedConsultant (role: consultant) */
   @Test
-  public void
+  void
       getTeamSessionsForAuthenticatedConsultant_Should_ReturnBadRequest_WhenHeaderParamIsMissing()
           throws Exception {
 
@@ -1288,7 +1285,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       getTeamSessionsForAuthenticatedConsultant_Should_ReturnInternalServerError_WhenNoConsultantInDbFound()
           throws Exception {
 
@@ -1305,7 +1302,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       getTeamSessionsForAuthenticatedConsultant_Should_ReturnForbidden_WhenConsultantIsNoTeamConsultant()
           throws Exception {
 
@@ -1323,7 +1320,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       getTeamSessionsForAuthenticatedConsultant_Should_ReturnNoContent_WhenAuthorizedAndNoSessionsAvailable()
           throws Exception {
 
@@ -1339,7 +1336,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       getTeamSessionsForAuthenticatedConsultant_Should_ReturnSucess_WhenAuthorizedAndSessionsAvailable()
           throws Exception {
 
@@ -1355,7 +1352,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       getTeamSessionsForAuthenticatedConsultant_Should_ReturnBadRequest_WhenParamOffestIsMissing()
           throws Exception {
     mvc.perform(
@@ -1367,7 +1364,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       getTeamSessionsForAuthenticatedConsultant_Should_ReturnBadRequest_WhenParamOffestHasANegativeValue()
           throws Exception {
     mvc.perform(
@@ -1379,7 +1376,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       getTeamSessionsForAuthenticatedConsultant_Should_ReturnBadRequest_WhenParamCountIsMissing()
           throws Exception {
     mvc.perform(
@@ -1391,7 +1388,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       getTeamSessionsForAuthenticatedConsultant_Should_ReturnBadRequest_WhenParamCountHasANegativeValue()
           throws Exception {
     mvc.perform(
@@ -1403,7 +1400,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       getTeamSessionsForAuthenticatedConsultant_Should_ReturnNotContent_WhenFilterParamIsInvalid()
           throws Exception {
 
@@ -1420,7 +1417,7 @@ public class UserControllerIT {
 
   /** sendNewMessageNotification() */
   @Test
-  public void
+  void
       sendNewMessageNotification_Should_CallEmailNotificationFacadeAndReturn2xxSuccessful_WhenCalled()
           throws Exception {
     var validNewMessageRequestBody = "{\"rcGroupId\": \"" + RC_GROUP_ID + "\"}";
@@ -1438,7 +1435,7 @@ public class UserControllerIT {
 
   /** Method: getConsultants (authority: VIEW_AGENCY_CONSULTANTS) */
   @Test
-  public void getConsultants_Should_ReturnBadRequest_WhenQueryParamIsMissing() throws Exception {
+  void getConsultants_Should_ReturnBadRequest_WhenQueryParamIsMissing() throws Exception {
 
     mvc.perform(
             get(PATH_GET_CONSULTANTS_FOR_AGENCY_WITHOUT_PARAM)
@@ -1448,7 +1445,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void getConsultants_Should_ReturnNoContent_WhenNoConsultantInDbFound() throws Exception {
+  void getConsultants_Should_ReturnNoContent_WhenNoConsultantInDbFound() throws Exception {
 
     mvc.perform(
             get(PATH_GET_CONSULTANTS_FOR_AGENCY)
@@ -1458,7 +1455,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       getConsultants_Should_ReturnInternalServerError_WhenConsultantAgencyServiceThrowsException()
           throws Exception {
 
@@ -1473,7 +1470,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       getConsultants_Should_ReturnOkAndValidContent_WhenConsultantAgencyServiceReturnsListWithEntries()
           throws Exception {
 
@@ -1498,7 +1495,7 @@ public class UserControllerIT {
 
   /** Method: assignSession (role: consultant) */
   @Test
-  public void assignSession_Should_ReturnBadRequest_WhenQueryParamsAreInvalid() throws Exception {
+  void assignSession_Should_ReturnBadRequest_WhenQueryParamsAreInvalid() throws Exception {
 
     mvc.perform(
             put(PATH_PUT_ASSIGN_SESSION_INVALID_PARAMS)
@@ -1508,7 +1505,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       assignSession_Should_ReturnInternalServerErrorAndLogError_WhenSessionServiceThrowsException()
           throws Exception {
 
@@ -1524,7 +1521,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void assignSession_Should_ReturnHttpStatusOfAssignSessionFacade() throws Exception {
+  void assignSession_Should_ReturnHttpStatusOfAssignSessionFacade() throws Exception {
 
     when(accountProvider.retrieveValidatedConsultantById(any())).thenReturn(TEAM_CONSULTANT);
     when(sessionService.getSession(Mockito.anyLong())).thenReturn(Optional.of(SESSION));
@@ -1544,7 +1541,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       assignSession_Should_ReturnInternalServerErrorAndLogError_WhenConsultantIsNotFoundInDb()
           throws Exception {
 
@@ -1561,7 +1558,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void assignSession_Should_ReturnInternalServerErrorAndLogError_WhenSessionIsNotFoundInDb()
+  void assignSession_Should_ReturnInternalServerErrorAndLogError_WhenSessionIsNotFoundInDb()
       throws Exception {
 
     when(accountProvider.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
@@ -1577,7 +1574,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       assignSession_Should_ReturnForbiddenAndLogError_WhenCallerDoesNotHaveTheRightToAssignEnquiries()
           throws Exception {
 
@@ -1596,7 +1593,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void registerUser_Should_DecodePassword() throws Exception {
+  void registerUser_Should_DecodePassword() throws Exception {
     when(userHelper.isUsernameValid(anyString())).thenReturn(true);
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(anyString()))
         .thenReturn(
@@ -1620,7 +1617,7 @@ public class UserControllerIT {
 
   /** updatePassword() */
   @Test
-  public void updatePassword_Should_ReturnBadRequest_When_PasswordsAreMissing() throws Exception {
+  void updatePassword_Should_ReturnBadRequest_When_PasswordsAreMissing() throws Exception {
 
     mvc.perform(
             put(PATH_PUT_UPDATE_PASSWORD)
@@ -1632,7 +1629,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void updateKey_Should_ReturnConflict_WhenProvidedWithSameKey() throws Exception {
+  void updateKey_Should_ReturnConflict_WhenProvidedWithSameKey() throws Exception {
 
     when(encryptionService.getMasterKey()).thenReturn(MASTER_KEY_1);
 
@@ -1645,7 +1642,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void updateKey_Should_ReturnAccepted_WhenProvidedWithNewKey() throws Exception {
+  void updateKey_Should_ReturnAccepted_WhenProvidedWithNewKey() throws Exception {
 
     when(encryptionService.getMasterKey()).thenReturn(MASTER_KEY_1);
 
@@ -1658,7 +1655,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void createChat_Should_ReturnBadRequest_WhenQueryParamsAreInvalid() throws Exception {
+  void createChat_Should_ReturnBadRequest_WhenQueryParamsAreInvalid() throws Exception {
 
     mvc.perform(
             post(PATH_POST_CHAT_NEW)
@@ -1671,7 +1668,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void createChat_Should_ReturnInternalServerErrorAndLogError_When_ChatCouldNotBeCreated()
+  void createChat_Should_ReturnInternalServerErrorAndLogError_When_ChatCouldNotBeCreated()
       throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
@@ -1698,7 +1695,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void createChat_Should_ReturnCreated_When_ChatWasCreated() throws Exception {
+  void createChat_Should_ReturnCreated_When_ChatWasCreated() throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
@@ -1714,7 +1711,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void createChatV2_Should_ReturnBadRequest_WhenQueryParamsAreInvalid() throws Exception {
+  void createChatV2_Should_ReturnBadRequest_WhenQueryParamsAreInvalid() throws Exception {
 
     mvc.perform(
             post(PATH_POST_CHAT_NEW_V2)
@@ -1727,7 +1724,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void createChatV2_Should_ReturnInternalServerErrorAndLogError_When_ChatCouldNotBeCreated()
+  void createChatV2_Should_ReturnInternalServerErrorAndLogError_When_ChatCouldNotBeCreated()
       throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
@@ -1744,7 +1741,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void createChatV2_Should_ReturnCreated_When_ChatWasCreated() throws Exception {
+  void createChatV2_Should_ReturnCreated_When_ChatWasCreated() throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
@@ -1761,7 +1758,7 @@ public class UserControllerIT {
 
   /** Method: startChat */
   @Test
-  public void startChat_Should_ReturnBadRequest_WhenPathParamsAreInvalid() throws Exception {
+  void startChat_Should_ReturnBadRequest_WhenPathParamsAreInvalid() throws Exception {
 
     mvc.perform(
             put(PATH_PUT_CHAT_START_WITH_INVALID_PATH_PARAMS)
@@ -1776,7 +1773,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void startChat_Should_ReturnOK_When_ChatWasStarted() throws Exception {
+  void startChat_Should_ReturnOK_When_ChatWasStarted() throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
@@ -1790,7 +1787,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void startChat_Should_ReturnBadRequest_When_StartChatThrowsBadRequest() throws Exception {
+  void startChat_Should_ReturnBadRequest_When_StartChatThrowsBadRequest() throws Exception {
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
     when(chatService.getChat(Mockito.any())).thenReturn(Optional.empty());
 
@@ -1805,7 +1802,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void startChat_Should_ReturnBadRequest_When_ChatWasNotFound() throws Exception {
+  void startChat_Should_ReturnBadRequest_When_ChatWasNotFound() throws Exception {
 
     when(authenticatedUser.getUserId()).thenReturn(CONSULTANT_ID);
     when(accountProvider.retrieveValidatedConsultant())
@@ -1821,7 +1818,7 @@ public class UserControllerIT {
 
   /** Method: getChat */
   @Test
-  public void getChat_Should_ReturnBadRequest_WhenPathParamsAreInvalid() throws Exception {
+  void getChat_Should_ReturnBadRequest_WhenPathParamsAreInvalid() throws Exception {
 
     mvc.perform(
             get(PATH_GET_CHAT_WITH_INVALID_PATH_PARAMS)
@@ -1836,7 +1833,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void getChat_Should_ReturnOk_When_RequestOk() throws Exception {
+  void getChat_Should_ReturnOk_When_RequestOk() throws Exception {
 
     mvc.perform(
             get(PATH_GET_CHAT)
@@ -1848,7 +1845,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void assignChat_Should_ReturnOk_When_ChatWasAssigned() throws Exception {
+  void assignChat_Should_ReturnOk_When_ChatWasAssigned() throws Exception {
     mvc.perform(
             put(PATH_PUT_ASSIGN_CHAT)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -1860,7 +1857,7 @@ public class UserControllerIT {
 
   /** Method: joinChat */
   @Test
-  public void joinChat_Should_ReturnBadRequest_WhenPathParamsAreInvalid() throws Exception {
+  void joinChat_Should_ReturnBadRequest_WhenPathParamsAreInvalid() throws Exception {
 
     mvc.perform(
             put(PATH_PUT_JOIN_CHAT_WITH_INVALID_PATH_PARAMS)
@@ -1875,7 +1872,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void joinChat_Should_ReturnOk_When_ChatWasJoined() throws Exception {
+  void joinChat_Should_ReturnOk_When_ChatWasJoined() throws Exception {
 
     mvc.perform(
             put(PATH_PUT_JOIN_CHAT)
@@ -1887,7 +1884,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void stopChat_Should_ReturnBadRequest_WhenQueryParamsAreInvalid() throws Exception {
+  void stopChat_Should_ReturnBadRequest_WhenQueryParamsAreInvalid() throws Exception {
 
     mvc.perform(
             put(PATH_PUT_CHAT_STOP_INVALID)
@@ -1901,7 +1898,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void stopChat_Should_ReturnInternalServerError_When_CallingConsultantDoesNotExist()
+  void stopChat_Should_ReturnInternalServerError_When_CallingConsultantDoesNotExist()
       throws Exception {
 
     when(chatService.getChat(any())).thenReturn(Optional.of(mock(Chat.class)));
@@ -1915,7 +1912,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void stopChat_Should_ReturnBadRequest_When_ChatNotFound() throws Exception {
+  void stopChat_Should_ReturnBadRequest_When_ChatNotFound() throws Exception {
 
     when(accountProvider.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
     when(chatService.getChat(Mockito.anyLong())).thenReturn(Optional.empty());
@@ -1925,7 +1922,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void stopChat_Should_ReturnOk_When_ChatWasStopped() throws Exception {
+  void stopChat_Should_ReturnOk_When_ChatWasStopped() throws Exception {
 
     when(accountProvider.retrieveValidatedConsultant()).thenReturn(TEAM_CONSULTANT);
     when(chatService.getChat(Mockito.anyLong())).thenReturn(Optional.of(chat));
@@ -1936,7 +1933,7 @@ public class UserControllerIT {
 
   /** Method: getChat */
   @Test
-  public void getChatMembers_Should_ReturnBadRequest_WhenPathParamsAreInvalid() throws Exception {
+  void getChatMembers_Should_ReturnBadRequest_WhenPathParamsAreInvalid() throws Exception {
 
     mvc.perform(
             get(PATH_GET_CHAT_MEMBERS_WITH_INVALID_PATH_PARAMS)
@@ -1953,7 +1950,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void getChatMembers_Should_ReturnOk_When_RequestOk() throws Exception {
+  void getChatMembers_Should_ReturnOk_When_RequestOk() throws Exception {
 
     mvc.perform(
             get(PATH_GET_CHAT_MEMBERS)
@@ -1966,7 +1963,7 @@ public class UserControllerIT {
 
   /** Method: updateChat */
   @Test
-  public void updateChat_Should_ReturnBadRequest_WhenPathParamsAreInvalid() throws Exception {
+  void updateChat_Should_ReturnBadRequest_WhenPathParamsAreInvalid() throws Exception {
 
     mvc.perform(
             put(PATH_PUT_UPDATE_CHAT_INVALID_PATH_PARAMS)
@@ -1978,7 +1975,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void updateChat_Should_ReturnOk_When_RequestOk() throws Exception {
+  void updateChat_Should_ReturnOk_When_RequestOk() throws Exception {
 
     mvc.perform(
             put(PATH_PUT_UPDATE_CHAT)
@@ -1992,7 +1989,7 @@ public class UserControllerIT {
 
   /** Method: fetchSessionForConsultant */
   @Test
-  public void fetchSessionForConsultant_Should_ReturnOk_WhenRequestOk() throws Exception {
+  void fetchSessionForConsultant_Should_ReturnOk_WhenRequestOk() throws Exception {
 
     mvc.perform(
             get(PATH_GET_SESSION_FOR_CONSULTANT)
@@ -2005,7 +2002,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       fetchSessionForConsultant_Should_ReturnInternalServerError_WhenAuthorizedButUserNotFound()
           throws Exception {
 
@@ -2024,7 +2021,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void updateEmailAddress_Should_ReturnOk_When_RequestOk() throws Exception {
+  void updateEmailAddress_Should_ReturnOk_When_RequestOk() throws Exception {
     mvc.perform(
             put(PATH_PUT_UPDATE_EMAIL)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -2036,7 +2033,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void deleteEmailAddress_Should_ReturnOk_When_RequestOk() throws Exception {
+  void deleteEmailAddress_Should_ReturnOk_When_RequestOk() throws Exception {
     mvc.perform(delete("/users/email").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk());
 
@@ -2044,7 +2041,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void updateEmailAddress_Should_ReturnBadRequest_When_bodyIsEmpty() throws Exception {
+  void updateEmailAddress_Should_ReturnBadRequest_When_bodyIsEmpty() throws Exception {
     mvc.perform(
             put(PATH_PUT_UPDATE_EMAIL)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -2055,7 +2052,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       deactivateAndFlagUserAccountForDeletion_Should_ReturnBadRequest_When_BodyValuesAreMissing()
           throws Exception {
 
@@ -2069,7 +2066,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void deleteSessionAndInactiveUser_Should_ReturnNotFound_When_SessionIdIsUnknown()
+  void deleteSessionAndInactiveUser_Should_ReturnNotFound_When_SessionIdIsUnknown()
       throws Exception {
     var sessionId = easyRandom.nextLong();
 
@@ -2081,7 +2078,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void deleteSessionAndInactiveUser_Should_ReturnOK_When_SessionIdIsKnown()
+  void deleteSessionAndInactiveUser_Should_ReturnOK_When_SessionIdIsKnown()
       throws Exception {
     var sessionId = givenAPresentSession(false);
 
@@ -2092,7 +2089,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void updateMobileToken_Should_ReturnOk_When_RequestOk() throws Exception {
+  void updateMobileToken_Should_ReturnOk_When_RequestOk() throws Exception {
     mvc.perform(
             put(PATH_PUT_UPDATE_MOBILE_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -2104,7 +2101,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void updateMobileToken_Should_ReturnBadRequest_When_bodyIsEmpty() throws Exception {
+  void updateMobileToken_Should_ReturnBadRequest_When_bodyIsEmpty() throws Exception {
     mvc.perform(
             put(PATH_PUT_UPDATE_MOBILE_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -2115,7 +2112,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void updateSessionData_Should_ReturnBadRequest_When_BodyIsEmpty() throws Exception {
+  void updateSessionData_Should_ReturnBadRequest_When_BodyIsEmpty() throws Exception {
     mvc.perform(
             put(PATH_PUT_UPDATE_SESSION_DATA)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -2126,7 +2123,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void updateSessionData_Should_ReturnBadRequest_When_PathVariableIsInvalid()
+  void updateSessionData_Should_ReturnBadRequest_When_PathVariableIsInvalid()
       throws Exception {
     mvc.perform(
             put(PATH_PUT_UPDATE_SESSION_DATA_INVALID_PATH_VAR)
@@ -2138,7 +2135,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void updateSessionData_Should_ReturnOk_When_RequestIsOk() throws Exception {
+  void updateSessionData_Should_ReturnOk_When_RequestIsOk() throws Exception {
     mvc.perform(
             put(PATH_PUT_UPDATE_SESSION_DATA)
                 .content(objectMapper.writeValueAsString(new SessionDTO()))
@@ -2148,7 +2145,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void updateUserData_Should_ReturnNotFound_When_ConsultantDoesNotExist() throws Exception {
+  void updateUserData_Should_ReturnNotFound_When_ConsultantDoesNotExist() throws Exception {
     when(consultantService.getConsultant(anyString())).thenReturn(Optional.empty());
     var updateConsultant =
         objectMapper.writeValueAsString(givenAMinimalUpdateConsultantDto(givenAValidEmail()));
@@ -2164,7 +2161,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void updateUserData_Should_ReturnBadRequest_When_PathVariableIsInvalid() throws Exception {
+  void updateUserData_Should_ReturnBadRequest_When_PathVariableIsInvalid() throws Exception {
     mvc.perform(
             put(PATH_GET_USER_DATA)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -2175,7 +2172,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void updateUserData_Should_ReturnBadRequest_When_LanguageIsInvalid() throws Exception {
+  void updateUserData_Should_ReturnBadRequest_When_LanguageIsInvalid() throws Exception {
     var updateConsultantDTO = givenAnUpdateConsultantDtoWithInvalidLanguage();
 
     mvc.perform(
@@ -2189,7 +2186,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void updateUserData_Should_ReturnOk_When_RequestIsOk() throws Exception {
+  void updateUserData_Should_ReturnOk_When_RequestIsOk() throws Exception {
     var consultant = givenAValidConsultant();
     var updateConsultantDTO = givenAMinimalUpdateConsultantDto(consultant.getEmail());
 
@@ -2213,7 +2210,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void updateUserData_Should_ReturnBadRequest_When_emailAddressIsNotValid()
+  void updateUserData_Should_ReturnBadRequest_When_emailAddressIsNotValid()
       throws Exception {
     var updateConsultantDto = givenAMinimalUpdateConsultantDto("invalid");
 
@@ -2226,7 +2223,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void archiveSession_Should_ReturnBadRequest_When_PathVariableIsInvalid() throws Exception {
+  void archiveSession_Should_ReturnBadRequest_When_PathVariableIsInvalid() throws Exception {
     mvc.perform(
             put(PATH_ARCHIVE_SESSION_INVALID_PATH_VAR)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -2237,12 +2234,12 @@ public class UserControllerIT {
   }
 
   @Test
-  public void archiveSession_Should_ReturnOk_When_RequestIsOk() throws Exception {
+  void archiveSession_Should_ReturnOk_When_RequestIsOk() throws Exception {
     mvc.perform(put(PATH_ARCHIVE_SESSION)).andExpect(status().isOk());
   }
 
   @Test
-  public void dearchiveSession_Should_ReturnBadRequest_When_PathVariableIsInvalid()
+  void dearchiveSession_Should_ReturnBadRequest_When_PathVariableIsInvalid()
       throws Exception {
     mvc.perform(
             put(PATH_DEARCHIVE_SESSION_INVALID_PATH_VAR)
@@ -2254,12 +2251,12 @@ public class UserControllerIT {
   }
 
   @Test
-  public void dearchiveSession_Should_ReturnOk_When_RequestIsOk() throws Exception {
+  void dearchiveSession_Should_ReturnOk_When_RequestIsOk() throws Exception {
     mvc.perform(put(PATH_DEARCHIVE_SESSION)).andExpect(status().isOk());
   }
 
   @Test
-  public void addMobileAppToken_Should_returnOk_When_RequestIsOk() throws Exception {
+  void addMobileAppToken_Should_returnOk_When_RequestIsOk() throws Exception {
     mvc.perform(
             put(PATH_PUT_ADD_MOBILE_TOKEN)
                 .content(objectMapper.writeValueAsString(new MobileTokenDTO()))
@@ -2268,13 +2265,13 @@ public class UserControllerIT {
   }
 
   @Test
-  public void addMobileAppToken_Should_returnBadRequest_When_RequestIsEmpty() throws Exception {
+  void addMobileAppToken_Should_returnBadRequest_When_RequestIsEmpty() throws Exception {
     mvc.perform(put(PATH_PUT_ADD_MOBILE_TOKEN).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
 
   @Test
-  public void getConsultantPublicData_Should_returnOk_When_consultantIdIsGiven() throws Exception {
+  void getConsultantPublicData_Should_returnOk_When_consultantIdIsGiven() throws Exception {
     givenAValidConsultant();
 
     mvc.perform(get(PATH_GET_PUBLIC_CONSULTANT_DATA).contentType(MediaType.APPLICATION_JSON))
@@ -2285,7 +2282,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       updateE2eInChats_Should_returnAccepted_When_adviceSeekerWithoutInitializedSessionIsGiven()
           throws Exception {
     givenAdviceSeekerWithoutInitializedSession(false);
@@ -2303,7 +2300,7 @@ public class UserControllerIT {
   }
 
   @Test
-  public void
+  void
       updateE2eInChats_Should_returnServerError_When_adviceSeekerWithoutInitializedSessionShouldHaveBeenInitialized()
           throws Exception {
     givenAdviceSeekerWithoutInitializedSession(true);

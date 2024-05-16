@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.facade;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -17,13 +18,13 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatGetGroupMem
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLeaveFromGroupException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveSystemMessagesException;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatRemoveUserFromGroupException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class RocketChatFacadeTest {
 
   @InjectMocks private RocketChatFacade rocketChatFacade;
@@ -39,15 +40,19 @@ public class RocketChatFacadeTest {
     verify(this.rocketChatService, times(1)).leaveFromGroupAsTechnicalUser("group");
   }
 
-  @Test(expected = InternalServerErrorException.class)
+  @Test
   public void
       addUserToRocketChatGroup_Should_throwInternalServerErrorException_When_RocketChatAddUserToGroupExceptionIsThrown()
           throws RocketChatAddUserToGroupException {
-    doThrow(new RocketChatAddUserToGroupException(""))
-        .when(this.rocketChatService)
-        .addUserToGroup(anyString(), anyString());
+    assertThrows(
+        InternalServerErrorException.class,
+        () -> {
+          doThrow(new RocketChatAddUserToGroupException(""))
+              .when(this.rocketChatService)
+              .addUserToGroup(anyString(), anyString());
 
-    this.rocketChatFacade.addUserToRocketChatGroup("user", "group");
+          this.rocketChatFacade.addUserToRocketChatGroup("user", "group");
+        });
   }
 
   @Test
@@ -61,15 +66,19 @@ public class RocketChatFacadeTest {
     verify(this.rocketChatService, times(1)).leaveFromGroupAsTechnicalUser("group");
   }
 
-  @Test(expected = InternalServerErrorException.class)
+  @Test
   public void
       removeSystemMessagesFromRocketChatGroup_Should_throwInternalServerErrorException_When_RocketChatRemoveSystemMessagesExceptionIsThrown()
           throws Exception {
-    doThrow(new RocketChatRemoveSystemMessagesException(""))
-        .when(this.rocketChatService)
-        .removeSystemMessages(anyString(), any(), any());
+    assertThrows(
+        InternalServerErrorException.class,
+        () -> {
+          doThrow(new RocketChatRemoveSystemMessagesException(""))
+              .when(this.rocketChatService)
+              .removeSystemMessages(anyString(), any(), any());
 
-    this.rocketChatFacade.removeSystemMessagesFromRocketChatGroup("group");
+          this.rocketChatFacade.removeSystemMessagesFromRocketChatGroup("group");
+        });
   }
 
   @Test
@@ -81,12 +90,18 @@ public class RocketChatFacadeTest {
     verify(this.rocketChatService, times(1)).leaveFromGroupAsTechnicalUser("group");
   }
 
-  @Test(expected = InternalServerErrorException.class)
+  @Test
   public void
       retrieveRocketChatMembers_Should_throwInternalServerErrorException_When_RocketChatGetGroupMembersException() {
-    doThrow(new MongoClientException("")).when(this.rocketChatService).getChatUsers(anyString());
+    assertThrows(
+        InternalServerErrorException.class,
+        () -> {
+          doThrow(new MongoClientException(""))
+              .when(this.rocketChatService)
+              .getChatUsers(anyString());
 
-    this.rocketChatFacade.retrieveRocketChatMembers("group");
+          this.rocketChatFacade.retrieveRocketChatMembers("group");
+        });
   }
 
   @Test
@@ -96,15 +111,19 @@ public class RocketChatFacadeTest {
     verify(this.rocketChatService, times(1)).addTechnicalUserToGroup("group");
   }
 
-  @Test(expected = InternalServerErrorException.class)
+  @Test
   public void
       addTechnicalUserToGroup_Should_throwInternalServerErrorException_When_RocketChatGetGroupMembersException()
           throws Exception {
-    doThrow(new RocketChatAddUserToGroupException(""))
-        .when(this.rocketChatService)
-        .addTechnicalUserToGroup(anyString());
+    assertThrows(
+        InternalServerErrorException.class,
+        () -> {
+          doThrow(new RocketChatAddUserToGroupException(""))
+              .when(this.rocketChatService)
+              .addTechnicalUserToGroup(anyString());
 
-    this.rocketChatFacade.addTechnicalUserToGroup("group");
+          this.rocketChatFacade.addTechnicalUserToGroup("group");
+        });
   }
 
   @Test
@@ -115,15 +134,19 @@ public class RocketChatFacadeTest {
     verify(this.rocketChatService, times(1)).leaveFromGroupAsTechnicalUser("group");
   }
 
-  @Test(expected = InternalServerErrorException.class)
+  @Test
   public void
       leaveFromGroupAsTechnicalUser_Should_throwInternalServerErrorException_When_RocketChatLeaveFromGroupException()
           throws Exception {
-    doThrow(new RocketChatLeaveFromGroupException(""))
-        .when(this.rocketChatService)
-        .leaveFromGroupAsTechnicalUser(anyString());
+    assertThrows(
+        InternalServerErrorException.class,
+        () -> {
+          doThrow(new RocketChatLeaveFromGroupException(""))
+              .when(this.rocketChatService)
+              .leaveFromGroupAsTechnicalUser(anyString());
 
-    this.rocketChatFacade.leaveFromGroupAsTechnicalUser("group");
+          this.rocketChatFacade.leaveFromGroupAsTechnicalUser("group");
+        });
   }
 
   @Test
@@ -133,15 +156,19 @@ public class RocketChatFacadeTest {
     verify(this.rocketChatService, times(1)).removeUserFromGroup("user", "group");
   }
 
-  @Test(expected = InternalServerErrorException.class)
+  @Test
   public void
       removeUserFromGroup_Should_throwInternalServerErrorException_When_RocketChatRemoveUserFromGroupExceptionIsThrown()
           throws Exception {
-    doThrow(new RocketChatRemoveUserFromGroupException(""))
-        .when(this.rocketChatService)
-        .removeUserFromGroup(anyString(), anyString());
+    assertThrows(
+        InternalServerErrorException.class,
+        () -> {
+          doThrow(new RocketChatRemoveUserFromGroupException(""))
+              .when(this.rocketChatService)
+              .removeUserFromGroup(anyString(), anyString());
 
-    this.rocketChatFacade.removeUserFromGroup("user", "group");
+          this.rocketChatFacade.removeUserFromGroup("user", "group");
+        });
   }
 
   @Test
@@ -151,14 +178,18 @@ public class RocketChatFacadeTest {
     verify(this.rocketChatService, times(1)).getStandardMembersOfGroup("group");
   }
 
-  @Test(expected = InternalServerErrorException.class)
+  @Test
   public void getStandardMembersOfGroup_Should_throwInternalServerError_When_rocketChatAccessFails()
       throws Exception {
-    doThrow(new RocketChatGetGroupMembersException(""))
-        .when(this.rocketChatService)
-        .getStandardMembersOfGroup(any());
+    assertThrows(
+        InternalServerErrorException.class,
+        () -> {
+          doThrow(new RocketChatGetGroupMembersException(""))
+              .when(this.rocketChatService)
+              .getStandardMembersOfGroup(any());
 
-    this.rocketChatFacade.getStandardMembersOfGroup("");
+          this.rocketChatFacade.getStandardMembersOfGroup("");
+        });
   }
 
   @Test

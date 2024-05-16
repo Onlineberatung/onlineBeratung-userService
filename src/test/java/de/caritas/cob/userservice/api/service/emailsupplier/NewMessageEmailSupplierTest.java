@@ -12,6 +12,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -45,16 +46,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.slf4j.Logger;
 import org.springframework.test.util.ReflectionTestUtils;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class NewMessageEmailSupplierTest {
 
   private NewMessageEmailSupplier newMessageEmailSupplier;
@@ -77,7 +81,7 @@ public class NewMessageEmailSupplierTest {
 
   @Mock private ReleaseToggleService releaseToggleService;
 
-  @Before
+  @BeforeEach
   public void setup() {
     this.newMessageEmailSupplier =
         NewMessageEmailSupplier.builder()
@@ -367,16 +371,20 @@ public class NewMessageEmailSupplierTest {
     TenantContext.clear();
   }
 
-  @Test(expected = InternalServerErrorException.class)
+  @Test
   public void generateEmails_Should_ThrowInternalServerException_When_ConsultantIsNotFound() {
-    when(roles.contains(UserRole.CONSULTANT.getValue())).thenReturn(true);
-    Consultant consultant = mock(Consultant.class);
-    when(session.getConsultant()).thenReturn(consultant);
-    when(consultant.getId()).thenReturn(CONSULTANT_ID);
-    when(session.getUser()).thenReturn(USER);
-    when(consultantService.getConsultant(USER.getUserId())).thenReturn(Optional.empty());
+    assertThrows(
+        InternalServerErrorException.class,
+        () -> {
+          when(roles.contains(UserRole.CONSULTANT.getValue())).thenReturn(true);
+          Consultant consultant = mock(Consultant.class);
+          when(session.getConsultant()).thenReturn(consultant);
+          when(consultant.getId()).thenReturn(CONSULTANT_ID);
+          when(session.getUser()).thenReturn(USER);
+          when(consultantService.getConsultant(USER.getUserId())).thenReturn(Optional.empty());
 
-    this.newMessageEmailSupplier.generateEmails();
+          this.newMessageEmailSupplier.generateEmails();
+        });
   }
 
   private void givenCurrentTenantDataIsSet() {

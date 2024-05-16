@@ -11,17 +11,17 @@ import de.caritas.cob.userservice.statisticsservice.generated.web.model.UserRole
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Optional;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AssignSessionStatisticsEventTest {
 
   private AssignSessionStatisticsEvent assignSessionStatisticsEvent;
 
-  @Before
+  @BeforeEach
   public void setup() throws NoSuchFieldException, IllegalAccessException {
     assignSessionStatisticsEvent =
         new AssignSessionStatisticsEvent(CONSULTANT_ID, UserRole.CONSULTANT, SESSION_ID);

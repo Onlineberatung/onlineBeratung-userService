@@ -14,9 +14,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.SESSION_ST
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_SESSION_RESPONSE_SESSION_CHAT_DTO_LIST;
 import static java.util.Objects.nonNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionListResponseDTO;
@@ -29,16 +27,16 @@ import de.caritas.cob.userservice.api.service.session.SessionFilter;
 import de.caritas.cob.userservice.api.service.session.SessionTopicEnrichmentService;
 import de.caritas.cob.userservice.api.service.sessionlist.ConsultantSessionListService;
 import de.caritas.cob.userservice.api.service.sessionlist.UserSessionListService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SessionListFacadeTest {
 
   @InjectMocks private SessionListFacade sessionListFacade;
@@ -47,7 +45,7 @@ public class SessionListFacadeTest {
   @Mock private SessionTopicEnrichmentService sessionTopicEnrichmentService;
 
   /** Method: retrieveSessionsForAuthenticatedUser */
-  @Before
+  @BeforeEach
   public void setUp() {
     ReflectionTestUtils.setField(
         sessionListFacade, "sessionTopicEnrichmentService", sessionTopicEnrichmentService);

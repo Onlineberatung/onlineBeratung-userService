@@ -7,10 +7,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_AGENC
 import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -20,15 +17,15 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.model.UserAgency;
 import de.caritas.cob.userservice.api.port.out.UserAgencyRepository;
 import java.util.List;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.dao.DataAccessException;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class UserAgencyServiceTest {
 
   @InjectMocks private UserAgencyService userAgencyService;
@@ -47,7 +44,7 @@ public class UserAgencyServiceTest {
       userAgencyService.saveUserAgency(USER_AGENCY);
       fail("Expected exception: InternalServerErrorException");
     } catch (InternalServerErrorException serviceException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
+      assertTrue(true, "Excepted InternalServerErrorException thrown");
     }
   }
 
@@ -75,7 +72,7 @@ public class UserAgencyServiceTest {
       userAgencyService.getUserAgenciesByUser(USER);
       fail("Expected exception: InternalServerErrorException");
     } catch (InternalServerErrorException serviceEx) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
+      assertTrue(true, "Excepted InternalServerErrorException thrown");
     }
   }
 
@@ -102,7 +99,7 @@ public class UserAgencyServiceTest {
       userAgencyService.deleteUserAgency(USER_AGENCY);
       fail("Expected exception: InternalServerErrorException");
     } catch (InternalServerErrorException serviceEx) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
+      assertTrue(true, "Excepted InternalServerErrorException thrown");
     }
   }
 
@@ -116,7 +113,7 @@ public class UserAgencyServiceTest {
       userAgencyService.deleteUserAgency(null);
       fail("Expected exception: InternalServerErrorException");
     } catch (InternalServerErrorException serviceEx) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
+      assertTrue(true, "Excepted InternalServerErrorException thrown");
     }
   }
 

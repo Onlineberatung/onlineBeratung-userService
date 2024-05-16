@@ -6,7 +6,6 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatLeaveFromGr
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -16,7 +15,6 @@ public class RocketChatRollbackService {
   private final RocketChatService rocketChatService;
   private final RocketChatCredentialsProvider rcCredentialsHelper;
 
-  @Autowired
   public RocketChatRollbackService(
       RocketChatService rocketChatService, RocketChatCredentialsProvider rcCredentialsHelper) {
     this.rocketChatService = rocketChatService;

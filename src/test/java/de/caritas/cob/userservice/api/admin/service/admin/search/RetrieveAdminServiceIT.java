@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import de.caritas.cob.userservice.api.UserServiceApplication;
 import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
@@ -14,8 +15,7 @@ import de.caritas.cob.userservice.api.model.AdminAgency.AdminAgencyBase;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -23,9 +23,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = UserServiceApplication.class)
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -46,11 +44,15 @@ public class RetrieveAdminServiceIT {
     assertThat(admin.getId(), is(VALID_ADMIN_ID));
   }
 
-  @Test(expected = NoContentException.class)
+  @Test
   public void findAgencyAdmin_Should_throwNoContentException_When_incorrectIdIsProvided() {
-    // given
-    // when
-    retrieveAdminService.findAdmin("invalid", Admin.AdminType.AGENCY);
+    assertThrows(
+        NoContentException.class,
+        () -> {
+          // given
+          // when
+          retrieveAdminService.findAdmin("invalid", Admin.AdminType.AGENCY);
+        });
   }
 
   @Test

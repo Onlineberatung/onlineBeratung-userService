@@ -6,11 +6,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.GRANTED_AU
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
@@ -32,14 +28,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ConsultantDataProviderTest {
 
   private final EasyRandom easyRandom = new EasyRandom();
@@ -56,12 +52,16 @@ public class ConsultantDataProviderTest {
 
   @Mock private EmailNotificationMapper emailNotificationMapper;
 
-  @Test(expected = InternalServerErrorException.class)
+  @Test
   public void retrieveData_Should_ThrowInternalServerErrorException_When_NoAgenciesFound() {
-    Consultant consultant = Mockito.mock(Consultant.class);
-    when(consultant.getConsultantAgencies()).thenReturn(new HashSet<>());
+    assertThrows(
+        InternalServerErrorException.class,
+        () -> {
+          Consultant consultant = Mockito.mock(Consultant.class);
+          when(consultant.getConsultantAgencies()).thenReturn(new HashSet<>());
 
-    underTest.retrieveData(consultant);
+          underTest.retrieveData(consultant);
+        });
   }
 
   @Test
