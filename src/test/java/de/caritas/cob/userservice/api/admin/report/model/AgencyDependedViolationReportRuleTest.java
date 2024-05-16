@@ -16,7 +16,7 @@ class AgencyDependedViolationReportRuleTest {
   private AgencyDependedViolationReportRule reportRule =
       new AgencyDependedViolationReportRule() {
         @Override
-        List<ViolationDTO> generateViolations() {
+        public List<ViolationDTO> generateViolations() {
           return emptyList();
         }
       };
