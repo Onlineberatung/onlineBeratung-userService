@@ -16,7 +16,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.4.13</version>
+		<version>2.6.15</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 
@@ -41,14 +41,14 @@
 		<commons-validator.version>1.7</commons-validator.version>
 		<liquibase-maven-plugin.version>4.8.0</liquibase-maven-plugin.version>
 		<javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
-		<spring-boot-starter-web.version>2.6.6</spring-boot-starter-web.version>
+		<spring-boot-starter-web.version>2.6.15</spring-boot-starter-web.version>
 		<spring-security-core.version>5.7.5</spring-security-core.version>
-		<spring-beans.version>5.3.34</spring-beans.version>
-		<spring-webmvc.version>5.3.34</spring-webmvc.version>
-		<spring-core.version>5.3.34</spring-core.version>
+		<spring-beans.version>5.3.35</spring-beans.version>
+		<spring-webmvc.version>5.3.35</spring-webmvc.version>
+		<spring-core.version>5.3.35</spring-core.version>
 		<json-smart.version>2.4.7</json-smart.version>
 		<springfox-swagger-ui.version>2.10.0</springfox-swagger-ui.version>
-		<spring-context-support.version>5.3.34</spring-context-support.version>
+		<spring-context-support.version>5.3.35</spring-context-support.version>
 		<ehcache.version>2.10.9.2</ehcache.version>
 		<testcontainers.version>1.17.6</testcontainers.version>
 	</properties>
@@ -67,7 +67,7 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
-			<version>5.3.34</version>
+			<version>5.3.35</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -170,16 +170,6 @@
 		<dependency>
 			<groupId>javax.validation</groupId>
 			<artifactId>validation-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-bean-validators</artifactId>
-			<version>${springfox.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger-ui</artifactId>
-			<version>${springfox-swagger-ui.version}</version>
 		</dependency>
 
 		<!-- Keycloak dependencies -->
@@ -370,6 +360,26 @@
 			</exclusions>
 		</dependency>
 		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>5.12.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<version>5.12.0</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/net.bytebuddy/byte-buddy -->
+		<dependency>
+			<groupId>net.bytebuddy</groupId>
+			<artifactId>byte-buddy</artifactId>
+			<version>1.14.15</version>
+		</dependency>
+
+
+		<dependency>
 			<artifactId>powermock-api-mockito2</artifactId>
 			<groupId>org.powermock</groupId>
 			<scope>test</scope>
@@ -433,10 +443,10 @@
 
 		<!-- MongoDB dependencies -->
 		<dependency>
-			<groupId>org.mongodb</groupId>
-			<artifactId>mongo-java-driver</artifactId>
-			<version>3.12.11</version>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-mongodb</artifactId>
 		</dependency>
+
 
 		<dependency>
 			<groupId>org.yaml</groupId>
@@ -473,16 +483,12 @@
 		</resources>
 		<plugins>
 			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
 				<groupId>org.openrewrite.maven</groupId>
 				<artifactId>rewrite-maven-plugin</artifactId>
 				<version>5.30.0</version>
 				<configuration>
 					<activeRecipes>
-						<recipe>org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_4</recipe>
+						<recipe>org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_7</recipe>
 					</activeRecipes>
 				</configuration>
 				<dependencies>
@@ -493,6 +499,7 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+
 
 			<!--
               Add generated sources as source directory

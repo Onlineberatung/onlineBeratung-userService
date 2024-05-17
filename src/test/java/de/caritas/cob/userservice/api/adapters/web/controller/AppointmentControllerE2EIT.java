@@ -35,6 +35,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.keycloak.adapters.KeycloakConfigResolver;
 import org.mockito.ArgumentMatchers;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -74,6 +75,8 @@ class AppointmentControllerE2EIT {
   @MockBean private AuthenticatedUser authenticatedUser;
 
   @MockBean private Clock clock;
+
+  @MockBean private KeycloakConfigResolver keycloakConfigResolver;
 
   private Appointment appointment;
 

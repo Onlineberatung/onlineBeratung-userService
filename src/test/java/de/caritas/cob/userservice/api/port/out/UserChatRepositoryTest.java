@@ -13,11 +13,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
 @TestPropertySource(properties = "spring.profiles.active=testing")
+@ActiveProfiles("testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
+@Sql(scripts = "classpath:database/UserServiceDDL.sql")
+@TestPropertySource(properties = "spring.jpa.hibernate.ddl-auto=create-drop")
 class UserChatRepositoryTest {
 
   private static final EasyRandom easyRandom = new EasyRandom();

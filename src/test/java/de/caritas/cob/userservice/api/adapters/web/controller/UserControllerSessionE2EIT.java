@@ -101,6 +101,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.keycloak.adapters.KeycloakConfigResolver;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.RoleMappingResource;
@@ -173,6 +174,8 @@ class UserControllerSessionE2EIT {
   @MockBean private AuthenticatedUser authenticatedUser;
 
   @MockBean private RocketChatCredentialsProvider rocketChatCredentialsProvider;
+
+  @MockBean private KeycloakConfigResolver keycloakConfigResolver;
 
   @TestConfiguration
   static class TestConfig {

@@ -11,6 +11,8 @@ import javax.validation.constraints.NotNull;
 import lombok.Data;
 import org.hibernate.validator.constraints.URL;
 import org.keycloak.KeycloakSecurityContext;
+import org.keycloak.adapters.KeycloakConfigResolver;
+import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
@@ -89,6 +91,15 @@ public class KeycloakConfig {
         .password(config.getAdminPassword())
         .clientId(config.getAdminClientId())
         .build();
+  }
+
+  /**
+   * Use the KeycloakSpringBootConfigResolver to be able to save the Keycloak settings in the spring
+   * application properties.
+   */
+  @Bean
+  public KeycloakConfigResolver keyCloakConfigResolver() {
+    return new KeycloakSpringBootConfigResolver();
   }
 
   @URL private String authServerUrl;

@@ -1,5 +1,7 @@
 package de.caritas.cob.userservice.api.adapters.rocketchat;
 
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.lt;
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static java.util.Arrays.asList;
 import static java.util.Objects.isNull;
@@ -7,8 +9,6 @@ import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.ArrayUtils.isNotEmpty;
 
 import com.google.common.collect.Lists;
-import com.mongodb.DBObject;
-import com.mongodb.QueryBuilder;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.model.Filters;
 import de.caritas.cob.userservice.api.adapters.rocketchat.config.RocketChatConfig;
@@ -71,6 +71,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.BsonDocument;
 import org.bson.Document;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Profile;
@@ -769,7 +770,7 @@ public class RocketChatService implements MessageClient {
         mongoClient
             .getDatabase(MONGO_DATABASE_NAME)
             .getCollection(MONGO_COLLECTION_SUBSCRIPTION)
-            .find(Filters.eq("rid", chatId));
+            .find(eq("rid", chatId));
 
     var members = new ArrayList<GroupMemberDTO>();
     try (var cursor = subscriptions.iterator()) {
@@ -1170,31 +1171,26 @@ public class RocketChatService implements MessageClient {
     final var GROUP_RESPONSE_GROUP_TYPE_FIELD = "t";
     final var GROUP_RESPONSE_GROUP_TYPE_PRIVATE = "p";
 
-    DBObject mongoDbQuery =
-        QueryBuilder.start(GROUP_RESPONSE_LAST_MESSAGE_TIMESTAMP_FIELD)
-            .lessThan(
-                QueryBuilder.start("$date")
-                    .is(
-                        dateTimeSinceInactive.format(
-                            DateTimeFormatter.ofPattern(RC_DATE_TIME_PATTERN)))
-                    .get())
-            .and(
-                QueryBuilder.start(GROUP_RESPONSE_GROUP_TYPE_FIELD)
-                    .is(GROUP_RESPONSE_GROUP_TYPE_PRIVATE)
-                    .get())
-            .get();
+    BsonDocument filter =
+        Filters.and(
+                lt(
+                    GROUP_RESPONSE_LAST_MESSAGE_TIMESTAMP_FIELD,
+                    dateTimeSinceInactive.format(
+                        DateTimeFormatter.ofPattern(RC_DATE_TIME_PATTERN))),
+                eq(GROUP_RESPONSE_GROUP_TYPE_FIELD, GROUP_RESPONSE_GROUP_TYPE_PRIVATE))
+            .toBsonDocument();
 
-    return getGroupsListAll(mongoDbQuery);
+    return getGroupsListAll(filter.toJson());
   }
 
   /**
    * Returns a list of all Rocket.Chat groups.
    *
-   * @param mongoDbQuery mongoDB Query as {@link DBObject} created with {@link QueryBuilder}
+   * @param mongoDbQuery mongoDB Query as {@link String}
    * @return a {@link List} of {@link GroupDTO} instances
    * @throws RocketChatGetGroupsListAllException when request fails
    */
-  private List<GroupDTO> getGroupsListAll(DBObject mongoDbQuery)
+  private List<GroupDTO> getGroupsListAll(String mongoDbQuery)
       throws RocketChatGetGroupsListAllException {
 
     try {
@@ -1210,7 +1206,7 @@ public class RocketChatService implements MessageClient {
   }
 
   private List<GroupDTO> getGroupListAllCombiningPages(
-      DBObject mongoDbQuery, HttpEntity<GroupAddUserBodyDTO> request)
+      String mongoDbQuery, HttpEntity<GroupAddUserBodyDTO> request)
       throws RocketChatGetGroupsListAllException {
     List<GroupDTO> result = Lists.newArrayList();
     int currentOffset = 0;
@@ -1248,12 +1244,12 @@ public class RocketChatService implements MessageClient {
 
   private ResponseEntity<GroupsListAllResponseDTO>
       getGroupsListAllResponseDTOResponseEntityForCurrentOffset(
-          DBObject mongoDbQuery, HttpEntity<GroupAddUserBodyDTO> request, int currentOffset) {
+          String mongoDbQuery, HttpEntity<GroupAddUserBodyDTO> request, int currentOffset) {
     ResponseEntity<GroupsListAllResponseDTO> response;
     var url = getGroupAllPaginatedUrl(currentOffset);
     response =
         restTemplate.exchange(
-            url, HttpMethod.GET, request, GroupsListAllResponseDTO.class, mongoDbQuery.toString());
+            url, HttpMethod.GET, request, GroupsListAllResponseDTO.class, mongoDbQuery);
     return response;
   }
 

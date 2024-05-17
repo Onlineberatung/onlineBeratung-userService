@@ -7,7 +7,7 @@ import static de.caritas.cob.userservice.api.testHelper.PathConstants.*;
 import static de.caritas.cob.userservice.api.testHelper.RequestBodyConstants.*;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.*;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -65,6 +65,7 @@ import org.hibernate.service.spi.ServiceException;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.keycloak.adapters.KeycloakConfigResolver;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -280,6 +281,8 @@ class UserControllerIT {
   @MockBean private StopChatFacade stopChatFacade;
   @MockBean private GetChatMembersFacade getChatMembersFacade;
   @MockBean private CreateUserFacade createUserFacade;
+
+  @MockBean KeycloakConfigResolver resolver;
 
   @MockBean
   @SuppressWarnings("unused")
