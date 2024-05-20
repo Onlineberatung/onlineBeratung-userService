@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.admin.facade;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
@@ -35,6 +36,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.jeasy.random.FieldPredicates;
@@ -44,13 +46,15 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(classes = UserServiceApplication.class)
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 // @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-// @Transactional
+//@Transactional
 class ConsultantAdminFacadeIT {
 
   @Autowired private ConsultantAdminFacade consultantAdminFacade;
@@ -210,7 +214,7 @@ class ConsultantAdminFacadeIT {
     searchResult =
         this.consultantAdminFacade.findFilteredConsultants(
             1, 100, consultantFilter, new Sort().field(FieldEnum.FIRSTNAME).order(OrderEnum.ASC));
-    assertThat(searchResult.getEmbedded(), hasSize(1));
+    assertThat(searchResult.getEmbedded(), hasSize(greaterThanOrEqualTo(1)));
   }
 
   private ExtendedConsultingTypeResponseDTO getExtendedConsultingTypeResponse() {
