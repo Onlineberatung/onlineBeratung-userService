@@ -487,6 +487,10 @@
 		</resources>
 		<plugins>
 			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
 				<groupId>org.openrewrite.maven</groupId>
 				<artifactId>rewrite-maven-plugin</artifactId>
 				<version>5.30.0</version>
@@ -503,8 +507,6 @@
 					</dependency>
 				</dependencies>
 			</plugin>
-
-
 			<!--
               Add generated sources as source directory
       -->
