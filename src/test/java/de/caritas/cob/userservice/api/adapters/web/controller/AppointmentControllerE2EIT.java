@@ -59,7 +59,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExc
 import org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod;
 
 @SpringBootTest
-// @AutoConfigureMockMvc
 @ActiveProfiles("testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 class AppointmentControllerE2EIT {

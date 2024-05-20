@@ -328,6 +328,7 @@
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<scope>test</scope>
+			<version>1.4.200</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jeasy</groupId>
@@ -450,7 +451,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-mongodb</artifactId>
 		</dependency>
-
 
 		<dependency>
 			<groupId>org.yaml</groupId>
