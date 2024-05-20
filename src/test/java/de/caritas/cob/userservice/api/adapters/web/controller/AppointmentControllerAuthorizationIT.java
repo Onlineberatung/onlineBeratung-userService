@@ -13,6 +13,7 @@ import java.util.UUID;
 import javax.servlet.http.Cookie;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -37,6 +38,11 @@ class AppointmentControllerAuthorizationIT {
   @Autowired private MockMvc mvc;
 
   private Appointment appointment;
+
+  @BeforeEach
+  public void setUp() {
+    objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+  }
 
   @AfterEach
   public void cleanUp() {

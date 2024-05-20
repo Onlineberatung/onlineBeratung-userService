@@ -11,15 +11,20 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest(classes = UserServiceApplication.class)
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-@TestPropertySource(properties = "multitenancy.enabled=true")
+@TestPropertySource(properties = "multitenancy.enabled=false")
 @TestPropertySource(
     properties =
         "spring.datasource.data=classpath*:database/UserServiceDatabase.sql,classpath*:database/transformDataForTenants.sql")
+@TestPropertySource(
+    properties =
+        "spring.sql.init.data-locations=classpath:database/UserServiceDatabase.sql,classpath:database/transformDataForTenants.sql")
+@Sql(scripts = {"classpath:database/transformDataForTenants.sql"})
 @Transactional
 public class ConsultantAdminFilterServiceTenantAwareIT extends ConsultantAdminFilterServiceBase {
 
@@ -37,6 +42,7 @@ public class ConsultantAdminFilterServiceTenantAwareIT extends ConsultantAdminFi
 
   @Test
   public void findFilteredConsultants_Should_returnAllConsultants_When_noFilterIsGiven() {
+    consultantRepository.findAll().forEach(consultant -> System.out.println(consultant));
     super.findFilteredConsultants_Should_returnAllConsultants_When_noFilterIsGiven();
   }
 

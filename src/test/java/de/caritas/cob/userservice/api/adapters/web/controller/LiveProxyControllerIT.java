@@ -44,8 +44,7 @@ class LiveProxyControllerIT {
   }
 
   @Test
-  void sendLiveEvent_Should_returnStatusOkAndUseMock_When_rcGroupIdIsProvided()
-      throws Exception {
+  void sendLiveEvent_Should_returnStatusOkAndUseMock_When_rcGroupIdIsProvided() throws Exception {
     this.mockMvc.perform(post(LIVE_EVENT_PATH).param("rcGroupId", "id")).andExpect(status().isOk());
 
     verify(liveEventNotificationService, times(1)).sendLiveDirectMessageEventToUsers(eq("id"));

@@ -171,8 +171,7 @@ class UserAdminControllerIT {
   }
 
   @Test
-  void getConsultants_Should_returnOk_When_requiredPaginationParamsAreGiven()
-      throws Exception {
+  void getConsultants_Should_returnOk_When_requiredPaginationParamsAreGiven() throws Exception {
     this.mvc
         .perform(get(FILTERED_CONSULTANTS_PATH).param(PAGE_PARAM, "0").param(PER_PAGE_PARAM, "1"))
         .andExpect(status().isOk());
@@ -182,24 +181,21 @@ class UserAdminControllerIT {
   }
 
   @Test
-  void getConsultant_Should_returnOk_When_requiredConsultantIdParamIsGiven()
-      throws Exception {
+  void getConsultant_Should_returnOk_When_requiredConsultantIdParamIsGiven() throws Exception {
     this.mvc.perform(get(CONSULTANT_PATH + "consultantId")).andExpect(status().isOk());
 
     verify(this.consultantAdminFacade, times(1)).findConsultant("consultantId");
   }
 
   @Test
-  void getConsultant_Should_returnNoContent_When_requiredConsultantDoesNotExist()
-      throws Exception {
+  void getConsultant_Should_returnNoContent_When_requiredConsultantDoesNotExist() throws Exception {
     when(this.consultantAdminFacade.findConsultant(any())).thenThrow(new NoContentException(""));
 
     this.mvc.perform(get(CONSULTANT_PATH + "consultantId")).andExpect(status().isNoContent());
   }
 
   @Test
-  void createConsultant_Should_returnOk_When_requiredCreateConsultantIsGiven()
-      throws Exception {
+  void createConsultant_Should_returnOk_When_requiredCreateConsultantIsGiven() throws Exception {
     CreateConsultantDTO createConsultantDTO =
         new EasyRandom().nextObject(CreateConsultantDTO.class);
 
@@ -222,8 +218,7 @@ class UserAdminControllerIT {
   }
 
   @Test
-  void updateConsultant_Should_returnOk_When_requiredCreateConsultantIsGiven()
-      throws Exception {
+  void updateConsultant_Should_returnOk_When_requiredCreateConsultantIsGiven() throws Exception {
     UpdateAdminConsultantDTO updateConsultantDTO =
         new EasyRandom().nextObject(UpdateAdminConsultantDTO.class);
 
@@ -238,16 +233,14 @@ class UserAdminControllerIT {
   }
 
   @Test
-  void updateConsultant_Should_returnBadRequest_When_requiredParamsAreMissing()
-      throws Exception {
+  void updateConsultant_Should_returnBadRequest_When_requiredParamsAreMissing() throws Exception {
     this.mvc
         .perform(put(CONSULTANT_PATH + "consultantId").contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
 
   @Test
-  void createConsultantAgency_Should_returnCreated_When_requiredParamsAreGiven()
-      throws Exception {
+  void createConsultantAgency_Should_returnCreated_When_requiredParamsAreGiven() throws Exception {
     String consultantId = "1da238c6-cd46-4162-80f1-bff74eafeAAA";
 
     String consultantAgencyPath = String.format(CONSULTANT_AGENCY_PATH, consultantId);
@@ -313,8 +306,7 @@ class UserAdminControllerIT {
   }
 
   @Test
-  void deleteConsultantAgency_Should_returnOk_When_requiredParamsAreGiven()
-      throws Exception {
+  void deleteConsultantAgency_Should_returnOk_When_requiredParamsAreGiven() throws Exception {
     String consultantId = "1da238c6-cd46-4162-80f1-bff74eafeAAA";
     Long agencyId = 1L;
 
@@ -360,8 +352,7 @@ class UserAdminControllerIT {
   }
 
   @Test
-  void getAgencyConsultants_Should_returnOk_When_requiredAgencyIdParamIsGiven()
-      throws Exception {
+  void getAgencyConsultants_Should_returnOk_When_requiredAgencyIdParamIsGiven() throws Exception {
     var agencyId = "1";
     var agencyConsultantsPath = String.format(AGENCY_CONSULTANT_PATH, agencyId);
 
@@ -377,8 +368,7 @@ class UserAdminControllerIT {
   }
 
   @Test
-  void getAgencyAdmins_Should_returnOk_When_requiredPaginationParamsAreGiven()
-      throws Exception {
+  void getAgencyAdmins_Should_returnOk_When_requiredPaginationParamsAreGiven() throws Exception {
     // given
     // when
     this.mvc
@@ -402,8 +392,7 @@ class UserAdminControllerIT {
   }
 
   @Test
-  void getAgencyAdmin_Should_returnNoContent_When_requiredAdminDoesNotExist()
-      throws Exception {
+  void getAgencyAdmin_Should_returnNoContent_When_requiredAdminDoesNotExist() throws Exception {
 
     // given
     when(this.consultantAdminFacade.findConsultant(any())).thenThrow(new NoContentException(""));
@@ -464,8 +453,7 @@ class UserAdminControllerIT {
   }
 
   @Test
-  void updateAgencyAdmin_Should_returnOk_When_requiredCreateAgencyAdminIsGiven()
-      throws Exception {
+  void updateAgencyAdmin_Should_returnOk_When_requiredCreateAgencyAdminIsGiven() throws Exception {
     // given
     UpdateAgencyAdminDTO updateAgencyAdminDTO =
         new EasyRandom().nextObject(UpdateAgencyAdminDTO.class);
@@ -484,8 +472,7 @@ class UserAdminControllerIT {
   }
 
   @Test
-  void updateTenantAdmin_Should_returnOk_When_requiredCreateTenantAdminIsGiven()
-      throws Exception {
+  void updateTenantAdmin_Should_returnOk_When_requiredCreateTenantAdminIsGiven() throws Exception {
     // given
     UpdateAgencyAdminDTO updateAgencyAdminDTO =
         new EasyRandom().nextObject(UpdateAgencyAdminDTO.class);
@@ -504,8 +491,7 @@ class UserAdminControllerIT {
   }
 
   @Test
-  void updateAgencyAdmin_Should_returnBadRequest_When_requiredParamsAreMissing()
-      throws Exception {
+  void updateAgencyAdmin_Should_returnBadRequest_When_requiredParamsAreMissing() throws Exception {
     // given
     // when
     this.mvc
@@ -515,8 +501,7 @@ class UserAdminControllerIT {
   }
 
   @Test
-  void createAdminAgency_Should_returnCreated_When_requiredParamsAreGiven()
-      throws Exception {
+  void createAdminAgency_Should_returnCreated_When_requiredParamsAreGiven() throws Exception {
     String adminId = "1da238c6-cd46-4162-80f1-bff74eafeAAA";
 
     // given

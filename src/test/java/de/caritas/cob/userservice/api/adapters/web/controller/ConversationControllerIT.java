@@ -85,8 +85,7 @@ class ConversationControllerIT {
   }
 
   @Test
-  void getAnonymousEnquiries_Should_returnBadRequest_When_offsetIsMissing()
-      throws Exception {
+  void getAnonymousEnquiries_Should_returnBadRequest_When_offsetIsMissing() throws Exception {
     this.mvc
         .perform(
             get(GET_ANONYMOUS_ENQUIRIES_PATH)
@@ -106,8 +105,7 @@ class ConversationControllerIT {
   }
 
   @Test
-  void getAnonymousEnquiries_Should_returnBadRequest_When_offsetIsLowerThanZero()
-      throws Exception {
+  void getAnonymousEnquiries_Should_returnBadRequest_When_offsetIsLowerThanZero() throws Exception {
     this.mvc
         .perform(
             get(GET_ANONYMOUS_ENQUIRIES_PATH)
@@ -129,8 +127,7 @@ class ConversationControllerIT {
   }
 
   @Test
-  void getAnonymousEnquiries_Should_returnBadRequest_When_countIsLowerThanZero()
-      throws Exception {
+  void getAnonymousEnquiries_Should_returnBadRequest_When_countIsLowerThanZero() throws Exception {
     this.mvc
         .perform(
             get(GET_ANONYMOUS_ENQUIRIES_PATH)
@@ -152,8 +149,7 @@ class ConversationControllerIT {
   }
 
   @Test
-  void getRegisteredEnquiries_Should_returnBadRequest_When_offsetIsMissing()
-      throws Exception {
+  void getRegisteredEnquiries_Should_returnBadRequest_When_offsetIsMissing() throws Exception {
     this.mvc
         .perform(
             get(GET_REGISTERED_ENQUIRIES_PATH)
@@ -163,8 +159,7 @@ class ConversationControllerIT {
   }
 
   @Test
-  void getRegisteredEnquiries_Should_returnBadRequest_When_countIsMissing()
-      throws Exception {
+  void getRegisteredEnquiries_Should_returnBadRequest_When_countIsMissing() throws Exception {
     this.mvc
         .perform(
             get(GET_REGISTERED_ENQUIRIES_PATH)
@@ -197,8 +192,7 @@ class ConversationControllerIT {
   }
 
   @Test
-  void getRegisteredEnquiries_Should_returnBadRequest_When_countIsLowerThanZero()
-      throws Exception {
+  void getRegisteredEnquiries_Should_returnBadRequest_When_countIsLowerThanZero() throws Exception {
     this.mvc
         .perform(
             get(GET_REGISTERED_ENQUIRIES_PATH)
@@ -219,8 +213,7 @@ class ConversationControllerIT {
   }
 
   @Test
-  void acceptAnonymousEnquiry_Should_returnBadRequest_When_sessionIdIsInvalid()
-      throws Exception {
+  void acceptAnonymousEnquiry_Should_returnBadRequest_When_sessionIdIsInvalid() throws Exception {
     this.mvc
         .perform(
             put(ACCEPT_ANONYMOUS_ENQUIRY_PATH.replace("1", "invalid"))
