@@ -1,19 +1,17 @@
 package de.caritas.cob.userservice.api.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.caritas.cob.userservice.api.exception.CustomCryptoException;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DecryptionServiceTest {
 
   private final String KEY_MASTER = "MasterKeyTestKey";
@@ -30,7 +28,7 @@ public class DecryptionServiceTest {
 
   @Mock private LogService logService;
 
-  @Before
+  @BeforeEach
   public void setup() throws NoSuchFieldException {
     ReflectionTestUtils.setField(encryptionService, FIELD_NAME_FRAGMENT_APP_KEY, KEY_APPLICATION);
     encryptionService.updateMasterKey(KEY_MASTER);
@@ -38,24 +36,24 @@ public class DecryptionServiceTest {
 
   @Test
   public void check_setup() {
-    assertEquals("MasterKey was not properly set", KEY_MASTER, encryptionService.getMasterKey());
+    assertEquals(KEY_MASTER, encryptionService.getMasterKey(), "MasterKey was not properly set");
     assertEquals(
-        "ApplicationKey was not properly set",
         KEY_APPLICATION,
-        encryptionService.getApplicationKey());
+        encryptionService.getApplicationKey(),
+        "ApplicationKey was not properly set");
   }
 
   @Test
   public void updateMasterKey_Should_UpdateMasterKeyFragment() {
     encryptionService.updateMasterKey(KEY_MASTER);
-    assertEquals("Cannot properly set MasterKey", KEY_MASTER, encryptionService.getMasterKey());
+    assertEquals(KEY_MASTER, encryptionService.getMasterKey(), "Cannot properly set MasterKey");
   }
 
   @Test
   public void decrypt_Should_ReturnDecryptedText_WhenProvidedWithValidParameters()
       throws Exception {
     String decryptedMessage = encryptionService.decrypt(MESSAGE_ENCRYPTED, KEY_SESSION);
-    assertEquals("Did not get the expected decrypted result.", MESSAGE_PLAIN, decryptedMessage);
+    assertEquals(MESSAGE_PLAIN, decryptedMessage, "Did not get the expected decrypted result.");
   }
 
   @Test
@@ -64,7 +62,7 @@ public class DecryptionServiceTest {
       encryptionService.decrypt(MESSAGE_ENCRYPTED, KEY_SESSION_WRONG);
       fail("The expected BadPaddingException due to wrong password was not thrown.");
     } catch (CustomCryptoException ex) {
-      assertTrue("Expected BadPaddingException thrown", true);
+      assertTrue(true, "Expected BadPaddingException thrown");
     }
   }
 }

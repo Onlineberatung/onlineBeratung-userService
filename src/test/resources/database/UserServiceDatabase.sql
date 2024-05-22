@@ -1,8 +1,13 @@
+CREATE sequence if not exists sequence_session;
+CREATE sequence if not exists sequence_session_topic;
+CREATE sequence if not exists sequence_consultant_agency;
+CREATE sequence if not exists sequence_admin_agency;
+
 ALTER SEQUENCE sequence_session RESTART WITH 100000;
 ALTER SEQUENCE sequence_session_topic RESTART WITH 100000;
 ALTER SEQUENCE sequence_consultant_agency RESTART WITH 100000;
 ALTER SEQUENCE sequence_admin_agency RESTART WITH 100000;
-INSERT INTO user (`user_id`, `id_old`, `delete_date`, `username`, `email`, `rc_user_id`,
+INSERT INTO user(`user_id`, `id_old`, `delete_date`, `username`, `email`, `rc_user_id`,
                   `language_formal`, `create_date`, `update_date`,`notifications_enabled`)
 VALUES ('015d013d-95e7-4e91-85b5-12cdb3d317f3', 0, NULL, 'enc.OBSXEZTPOJWWC3TDMUWWC43LMVZC2NZS',
         '015d013d-95e7-4e91-85b5-12cdb3d317f3@beratungcaritas.de', 'dciScSDa9Qm8vmEBB', 1,

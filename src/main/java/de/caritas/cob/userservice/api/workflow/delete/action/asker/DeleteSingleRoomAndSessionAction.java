@@ -6,7 +6,6 @@ import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.port.out.SessionDataRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.workflow.delete.model.SessionDeletionWorkflowDTO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,7 +19,6 @@ public class DeleteSingleRoomAndSessionAction extends DeleteRoomsAndSessionActio
    * @param sessionDataRepository a {@link SessionDataRepository} instance
    * @param rocketChatService a {@link RocketChatService} instance
    */
-  @Autowired
   public DeleteSingleRoomAndSessionAction(
       SessionRepository sessionRepository,
       SessionDataRepository sessionDataRepository,

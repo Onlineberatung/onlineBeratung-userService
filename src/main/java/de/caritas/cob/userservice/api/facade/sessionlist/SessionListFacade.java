@@ -47,7 +47,6 @@ public class SessionListFacade {
   @Autowired(required = false)
   SessionTopicEnrichmentService sessionTopicEnrichmentService;
 
-  @Autowired
   public SessionListFacade(
       UserSessionListService userSessionListService,
       ConsultantSessionListService consultantSessionListService) {

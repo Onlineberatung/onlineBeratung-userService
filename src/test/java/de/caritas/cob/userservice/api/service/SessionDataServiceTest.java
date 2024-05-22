@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.service;
 
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.SESSION_ID;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -14,13 +15,13 @@ import de.caritas.cob.userservice.api.port.out.SessionDataRepository;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SessionDataServiceTest {
 
   @InjectMocks private SessionDataService sessionDataService;
@@ -30,12 +31,16 @@ public class SessionDataServiceTest {
 
   private final EasyRandom easyRandom = new EasyRandom();
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void saveSessionDataForSessionId_Should_ThrowNotFoundException_When_SessionNotFound() {
-    SessionDataDTO sessionData = easyRandom.nextObject(SessionDataDTO.class);
-    when(sessionService.getSession(any())).thenReturn(Optional.empty());
+    assertThrows(
+        NotFoundException.class,
+        () -> {
+          SessionDataDTO sessionData = easyRandom.nextObject(SessionDataDTO.class);
+          when(sessionService.getSession(any())).thenReturn(Optional.empty());
 
-    sessionDataService.saveSessionData(SESSION_ID, sessionData);
+          sessionDataService.saveSessionData(SESSION_ID, sessionData);
+        });
   }
 
   @Test

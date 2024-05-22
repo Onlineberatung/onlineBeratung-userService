@@ -26,15 +26,15 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.commons.collections4.IterableUtils;
 import org.jeasy.random.EasyRandom;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class InactivePrivateGroupsProviderTest {
 
   @InjectMocks private InactivePrivateGroupsProvider inactivePrivateGroupsProvider;
@@ -43,7 +43,7 @@ public class InactivePrivateGroupsProviderTest {
   @Mock private ChatRepository chatRepository;
   @Mock private Logger logger;
 
-  @Before
+  @BeforeEach
   public void setup() {
     setInternalState(LogService.class, "LOGGER", logger);
   }

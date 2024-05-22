@@ -5,9 +5,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -19,13 +17,13 @@ import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
 import de.caritas.cob.userservice.api.service.ChatService;
 import java.util.Optional;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class GetChatFacadeTest {
 
   @InjectMocks private GetChatFacade getChatFacade;
@@ -42,7 +40,7 @@ public class GetChatFacadeTest {
       getChatFacade.getChat(CHAT_ID);
       fail("Expected exception: NotFoundException");
     } catch (NotFoundException notFoundException) {
-      assertTrue("Excepted NotFoundException thrown", true);
+      assertTrue(true, "Excepted NotFoundException thrown");
     }
 
     verify(chatService, times(1)).getChat(CHAT_ID);
@@ -59,7 +57,7 @@ public class GetChatFacadeTest {
       getChatFacade.getChat(CHAT_ID);
       fail("Expected exception: RequestForbiddenException");
     } catch (ForbiddenException requestForbiddenException) {
-      assertTrue("Excepted RequestForbiddenException thrown", true);
+      assertTrue(true, "Excepted RequestForbiddenException thrown");
     }
 
     verify(chatService, times(1)).getChat(CHAT_ID);
@@ -77,7 +75,7 @@ public class GetChatFacadeTest {
       getChatFacade.getChat(CHAT_ID);
       fail("Expected exception: RequestForbiddenException");
     } catch (ForbiddenException requestForbiddenException) {
-      assertTrue("Excepted RequestForbiddenException thrown", true);
+      assertTrue(true, "Excepted RequestForbiddenException thrown");
     }
 
     verify(chatService, times(1)).getChat(CHAT_ID);

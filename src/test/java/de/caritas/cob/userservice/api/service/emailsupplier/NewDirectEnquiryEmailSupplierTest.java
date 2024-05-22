@@ -24,13 +24,13 @@ import de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import java.util.List;
 import org.assertj.core.api.Assertions;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class NewDirectEnquiryEmailSupplierTest {
 
   private NewDirectEnquiryEmailSupplier newDirectEnquiryEmailSupplier;
@@ -38,7 +38,7 @@ public class NewDirectEnquiryEmailSupplierTest {
   @Mock private ConsultantAgencyRepository consultantAgencyRepository;
   @Mock private ReleaseToggleService releaseToggleService;
 
-  @Before
+  @BeforeEach
   public void setup() {
     newDirectEnquiryEmailSupplier =
         new NewDirectEnquiryEmailSupplier(consultantAgencyRepository, null, releaseToggleService);

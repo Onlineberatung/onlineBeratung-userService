@@ -13,7 +13,8 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_SESSION_RESPONSE_DTO_LIST_U25;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -42,16 +43,16 @@ import de.caritas.cob.userservice.api.service.user.UserAccountService;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class CreateSessionFacadeTest {
 
   @InjectMocks private CreateSessionFacade createSessionFacade;
@@ -62,67 +63,83 @@ public class CreateSessionFacadeTest {
   @Mock private UserAccountService userAccountProvider;
   @Mock private Logger logger;
 
-  @Before
+  @BeforeEach
   public void setup() {
     setInternalState(LogService.class, "LOGGER", logger);
   }
 
   /** Method: createUserSession */
-  @Test(expected = ConflictException.class)
+  @Test
   public void createUserSession_Should_ReturnConflict_When_AlreadyRegisteredToConsultingType() {
+    assertThrows(
+        ConflictException.class,
+        () -> {
+          when(sessionService.getSessionsForUserByConsultingTypeId(any(), anyInt()))
+              .thenReturn(SESSION_LIST);
+          createSessionFacade.createUserSession(
+              USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
 
-    when(sessionService.getSessionsForUserByConsultingTypeId(any(), anyInt()))
-        .thenReturn(SESSION_LIST);
-    createSessionFacade.createUserSession(USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
-
-    verify(sessionService, times(0)).saveSession(any());
+          verify(sessionService, times(0)).saveSession(any());
+        });
   }
 
-  @Test(expected = InternalServerErrorException.class)
+  @Test
   public void
       createUserSession_Should_ReturnInternalServerErrorAndRollbackUserAccount_When_SessionCouldNotBeSaved() {
+    assertThrows(
+        InternalServerErrorException.class,
+        () -> {
+          when(sessionService.getSessionsForUserId(USER_ID))
+              .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
+          when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0)).thenReturn(AGENCY_DTO_U25);
+          when(sessionService.initializeSession(any(), any(), any(Boolean.class)))
+              .thenThrow(new InternalServerErrorException(MESSAGE));
 
-    when(sessionService.getSessionsForUserId(USER_ID))
-        .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
-    when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0)).thenReturn(AGENCY_DTO_U25);
-    when(sessionService.initializeSession(any(), any(), any(Boolean.class)))
-        .thenThrow(new InternalServerErrorException(MESSAGE));
+          createSessionFacade.createUserSession(
+              USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
 
-    createSessionFacade.createUserSession(USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
-
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
-    verify(rollbackFacade, times(1)).rollBackUserAccount(any());
+          verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+          verify(rollbackFacade, times(1)).rollBackUserAccount(any());
+        });
   }
 
-  @Test(expected = InternalServerErrorException.class)
+  @Test
   public void
       createUserSession_Should_ReturnInternalServerErrorAndRollbackUserAccount_When_SessionDataCouldNotBeSaved() {
+    assertThrows(
+        InternalServerErrorException.class,
+        () -> {
+          when(sessionService.getSessionsForUserId(USER_ID))
+              .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
+          when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0)).thenReturn(AGENCY_DTO_U25);
+          when(sessionService.initializeSession(any(), any(), any(Boolean.class)))
+              .thenThrow(new InternalServerErrorException(MESSAGE));
+          doThrow(INTERNAL_SERVER_ERROR_EXCEPTION)
+              .when(sessionDataService)
+              .saveSessionData(any(Session.class), any());
 
-    when(sessionService.getSessionsForUserId(USER_ID))
-        .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
-    when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0)).thenReturn(AGENCY_DTO_U25);
-    when(sessionService.initializeSession(any(), any(), any(Boolean.class)))
-        .thenThrow(new InternalServerErrorException(MESSAGE));
-    doThrow(INTERNAL_SERVER_ERROR_EXCEPTION)
-        .when(sessionDataService)
-        .saveSessionData(any(Session.class), any());
+          createSessionFacade.createUserSession(
+              USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
 
-    createSessionFacade.createUserSession(USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
-
-    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
-    verify(sessionService, times(1)).deleteSession(any());
-    verify(rollbackFacade, times(1)).rollBackUserAccount(any());
+          verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
+          verify(sessionService, times(1)).deleteSession(any());
+          verify(rollbackFacade, times(1)).rollBackUserAccount(any());
+        });
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void
       createUserSession_Should_ReturnBadRequest_When_AgencyForConsultingTypeCouldNotBeFound() {
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          when(sessionService.getSessionsForUserId(USER_ID))
+              .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
+          when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0)).thenReturn(null);
 
-    when(sessionService.getSessionsForUserId(USER_ID))
-        .thenReturn(USER_SESSION_RESPONSE_DTO_LIST_U25);
-    when(agencyVerifier.getVerifiedAgency(AGENCY_ID, 0)).thenReturn(null);
-
-    createSessionFacade.createUserSession(USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
+          createSessionFacade.createUserSession(
+              USER_DTO_SUCHT, USER, CONSULTING_TYPE_SETTINGS_SUCHT);
+        });
   }
 
   @Test

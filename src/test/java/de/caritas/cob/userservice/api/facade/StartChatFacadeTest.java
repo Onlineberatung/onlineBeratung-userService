@@ -4,8 +4,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.ACTIVE_CHA
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.INACTIVE_CHAT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -20,13 +19,13 @@ import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatAddUserToGr
 import de.caritas.cob.userservice.api.helper.ChatPermissionVerifier;
 import de.caritas.cob.userservice.api.model.Chat;
 import de.caritas.cob.userservice.api.service.ChatService;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class StartChatFacadeTest {
 
   @InjectMocks private StartChatFacade startChatFacade;
@@ -48,7 +47,7 @@ public class StartChatFacadeTest {
       startChatFacade.startChat(ACTIVE_CHAT, CONSULTANT);
       fail("Expected exception: RequestForbiddenException");
     } catch (ForbiddenException sequestForbiddenException) {
-      assertTrue("Excepted RequestForbiddenException thrown", true);
+      assertTrue(true, "Excepted RequestForbiddenException thrown");
     }
   }
 
@@ -60,7 +59,7 @@ public class StartChatFacadeTest {
       startChatFacade.startChat(ACTIVE_CHAT, CONSULTANT);
       fail("Expected exception: ConflictException");
     } catch (ConflictException conflictException) {
-      assertTrue("Excepted ConflictException thrown", true);
+      assertTrue(true, "Excepted ConflictException thrown");
     }
   }
 
@@ -75,7 +74,7 @@ public class StartChatFacadeTest {
       startChatFacade.startChat(chat, CONSULTANT);
       fail("Expected exception: InternalServerErrorException");
     } catch (InternalServerErrorException internalServerErrorException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
+      assertTrue(true, "Excepted InternalServerErrorException thrown");
     }
   }
 
@@ -101,19 +100,23 @@ public class StartChatFacadeTest {
     verify(chatService, times(1)).saveChat(chat);
   }
 
-  @Test(expected = InternalServerErrorException.class)
+  @Test
   public void
       startChat_Should_throwInternalServerErrorException_When_userCanNotBeAddedToGroupInRocketChat()
           throws RocketChatAddUserToGroupException {
-    when(chat.getGroupId()).thenReturn(RC_GROUP_ID);
-    when(chatPermissionVerifier.hasSameAgencyAssigned(chat, CONSULTANT)).thenReturn(true);
-    doThrow(new RocketChatAddUserToGroupException(""))
-        .when(rocketChatService)
-        .addUserToGroup(any(), any());
+    assertThrows(
+        InternalServerErrorException.class,
+        () -> {
+          when(chat.getGroupId()).thenReturn(RC_GROUP_ID);
+          when(chatPermissionVerifier.hasSameAgencyAssigned(chat, CONSULTANT)).thenReturn(true);
+          doThrow(new RocketChatAddUserToGroupException(""))
+              .when(rocketChatService)
+              .addUserToGroup(any(), any());
 
-    startChatFacade.startChat(chat, CONSULTANT);
+          startChatFacade.startChat(chat, CONSULTANT);
 
-    verify(chat, times(1)).setActive(true);
-    verify(chatService, times(1)).saveChat(chat);
+          verify(chat, times(1)).setActive(true);
+          verify(chatService, times(1)).saveChat(chat);
+        });
   }
 }

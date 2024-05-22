@@ -15,7 +15,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -23,7 +22,6 @@ public class RocketChatRoomInformationProvider {
 
   private final RocketChatService rocketChatService;
 
-  @Autowired
   public RocketChatRoomInformationProvider(RocketChatService rocketChatService) {
     this.rocketChatService = requireNonNull(rocketChatService);
   }

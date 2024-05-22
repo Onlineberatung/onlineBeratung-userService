@@ -5,8 +5,6 @@ import static de.caritas.cob.userservice.api.config.auth.Authority.AuthorityValu
 import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.HttpTenantFilter;
 import de.caritas.cob.userservice.api.adapters.web.controller.interceptor.StatelessCsrfFilter;
 import de.caritas.cob.userservice.api.config.CsrfSecurityProperties;
-import org.keycloak.adapters.KeycloakConfigResolver;
-import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
 import org.keycloak.adapters.springsecurity.client.KeycloakClientRequestFactory;
 import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
@@ -242,15 +240,6 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
           httpSecurity.addFilterAfter(this.tenantFilter, KeycloakAuthenticatedActionsFilter.class);
     }
     return httpSecurity;
-  }
-
-  /**
-   * Use the KeycloakSpringBootConfigResolver to be able to save the Keycloak settings in the spring
-   * application properties.
-   */
-  @Bean
-  public KeycloakConfigResolver keyCloakConfigResolver() {
-    return new KeycloakSpringBootConfigResolver();
   }
 
   /** Change springs authentication strategy to be stateless (no session is being created). */

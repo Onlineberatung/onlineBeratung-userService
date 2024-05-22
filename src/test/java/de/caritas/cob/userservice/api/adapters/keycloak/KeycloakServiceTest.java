@@ -11,12 +11,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -51,10 +46,10 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.RoleMappingResource;
 import org.keycloak.admin.client.resource.RoleResource;
@@ -70,7 +65,9 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -78,7 +75,8 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class KeycloakServiceTest {
 
   private final String USER_ID = "asdh89sdfsjodifjsdf";
@@ -108,7 +106,7 @@ public class KeycloakServiceTest {
 
   EasyRandom easyRandom = new EasyRandom();
 
-  @Before
+  @BeforeEach
   public void setup() throws NoSuchFieldException, SecurityException {
     givenAKeycloakLoginUrl();
     givenAKeycloakLogoutUrl();
@@ -164,7 +162,7 @@ public class KeycloakServiceTest {
       keycloakService.loginUser(USER_ID, OLD_PW);
       fail("Expected exception: BadRequestException");
     } catch (BadRequestException badRequestException) {
-      assertTrue("Excepted BadRequestException thrown", true);
+      assertTrue(true, "Excepted BadRequestException thrown");
     }
   }
 
@@ -285,13 +283,17 @@ public class KeycloakServiceTest {
     assertEquals(OTP_INFO_DTO, keycloakService.getOtpCredential(USERNAME));
   }
 
-  @Test(expected = RestClientException.class)
+  @Test
   public void getOtpCredential_Should_Throw_When_RequestHasAnError() {
-    when(keycloakClient.getBearerToken()).thenReturn(BEARER_TOKEN);
-    when(this.keycloakClient.get(any(), any(), any()))
-        .thenThrow(new RestClientException("Fail test case"));
+    assertThrows(
+        RestClientException.class,
+        () -> {
+          when(keycloakClient.getBearerToken()).thenReturn(BEARER_TOKEN);
+          when(this.keycloakClient.get(any(), any(), any()))
+              .thenThrow(new RestClientException("Fail test case"));
 
-    keycloakService.getOtpCredential(USERNAME);
+          keycloakService.getOtpCredential(USERNAME);
+        });
   }
 
   @Test
@@ -454,18 +456,22 @@ public class KeycloakServiceTest {
     }
   }
 
-  @Test(expected = InternalServerErrorException.class)
+  @Test
   public void createKeycloakUser_Should_ThrowInternalServerException_When_errorIsUnknown() {
-    UsersResource usersResource = mock(UsersResource.class);
-    Response response = mock(Response.class);
-    when(usersResource.create(any())).thenReturn(response);
-    ErrorRepresentation errorRepresentation = mock(ErrorRepresentation.class);
-    when(errorRepresentation.getErrorMessage()).thenReturn("error");
-    when(response.readEntity(ErrorRepresentation.class)).thenReturn(errorRepresentation);
-    when(keycloakClient.getUsersResource()).thenReturn(usersResource);
-    UserDTO userDTO = new EasyRandom().nextObject(UserDTO.class);
+    assertThrows(
+        InternalServerErrorException.class,
+        () -> {
+          UsersResource usersResource = mock(UsersResource.class);
+          Response response = mock(Response.class);
+          when(usersResource.create(any())).thenReturn(response);
+          ErrorRepresentation errorRepresentation = mock(ErrorRepresentation.class);
+          when(errorRepresentation.getErrorMessage()).thenReturn("error");
+          when(response.readEntity(ErrorRepresentation.class)).thenReturn(errorRepresentation);
+          when(keycloakClient.getUsersResource()).thenReturn(usersResource);
+          UserDTO userDTO = new EasyRandom().nextObject(UserDTO.class);
 
-    this.keycloakService.createKeycloakUser(userDTO);
+          this.keycloakService.createKeycloakUser(userDTO);
+        });
   }
 
   @Test
@@ -522,28 +528,33 @@ public class KeycloakServiceTest {
     assertThat(isAvailable, is(false));
   }
 
-  @Test(expected = KeycloakException.class)
+  @Test
   public void updateRole_Should_throwKeycloakException_When_roleCouldNotBeUpdated() {
-    UserResource userResource = mock(UserResource.class);
-    UsersResource usersResource = mock(UsersResource.class);
-    when(usersResource.get(anyString())).thenReturn(userResource);
-    RoleScopeResource roleScopeResource = mock(RoleScopeResource.class);
-    RoleMappingResource roleMappingResource = mock(RoleMappingResource.class);
-    when(roleMappingResource.realmLevel()).thenReturn(roleScopeResource);
-    when(userResource.roles()).thenReturn(roleMappingResource);
+    assertThrows(
+        KeycloakException.class,
+        () -> {
+          UserResource userResource = mock(UserResource.class);
+          UsersResource usersResource = mock(UsersResource.class);
+          when(usersResource.get(anyString())).thenReturn(userResource);
+          RoleScopeResource roleScopeResource = mock(RoleScopeResource.class);
+          RoleMappingResource roleMappingResource = mock(RoleMappingResource.class);
+          when(roleMappingResource.realmLevel()).thenReturn(roleScopeResource);
+          when(userResource.roles()).thenReturn(roleMappingResource);
 
-    RoleRepresentation roleRepresentation = new EasyRandom().nextObject(RoleRepresentation.class);
-    RoleResource roleResource = mock(RoleResource.class);
-    when(roleResource.toRepresentation()).thenReturn(roleRepresentation);
-    RolesResource rolesResource = mock(RolesResource.class);
-    when(rolesResource.get(any())).thenReturn(roleResource);
+          RoleRepresentation roleRepresentation =
+              new EasyRandom().nextObject(RoleRepresentation.class);
+          RoleResource roleResource = mock(RoleResource.class);
+          when(roleResource.toRepresentation()).thenReturn(roleRepresentation);
+          RolesResource rolesResource = mock(RolesResource.class);
+          when(rolesResource.get(any())).thenReturn(roleResource);
 
-    RealmResource realmResource = mock(RealmResource.class);
-    when(realmResource.users()).thenReturn(usersResource);
-    when(realmResource.roles()).thenReturn(rolesResource);
-    when(keycloakClient.getRealmResource()).thenReturn(realmResource);
+          RealmResource realmResource = mock(RealmResource.class);
+          when(realmResource.users()).thenReturn(usersResource);
+          when(realmResource.roles()).thenReturn(rolesResource);
+          when(keycloakClient.getRealmResource()).thenReturn(realmResource);
 
-    this.keycloakService.updateRole("user", "role");
+          this.keycloakService.updateRole("user", "role");
+        });
   }
 
   @Test
@@ -773,13 +784,17 @@ public class KeycloakServiceTest {
     assertThat(hasAuthority, is(true));
   }
 
-  @Test(expected = KeycloakException.class)
+  @Test
   public void userHasAuthority_Should_returnThrowKeycloakException_When_userHasNoRoles() {
-    UserResource userResource = mock(UserResource.class);
-    UsersResource usersResource = givenUsersResourceWithAnyUserId(userResource);
-    when(keycloakClient.getUsersResource()).thenReturn(usersResource);
+    assertThrows(
+        KeycloakException.class,
+        () -> {
+          UserResource userResource = mock(UserResource.class);
+          UsersResource usersResource = givenUsersResourceWithAnyUserId(userResource);
+          when(keycloakClient.getUsersResource()).thenReturn(usersResource);
 
-    this.keycloakService.userHasAuthority("user", "authority");
+          this.keycloakService.userHasAuthority("user", "authority");
+        });
   }
 
   @Test

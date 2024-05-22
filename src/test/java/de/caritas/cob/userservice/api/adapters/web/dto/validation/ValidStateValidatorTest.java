@@ -8,18 +8,18 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_DTO_W
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_DTO_WITHOUT_MANDATORY_STATE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_DTO_WITH_INVALID_STATE;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_DTO_WITH_STATE;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.manager.consultingtype.registration.mandatoryfields.MandatoryFields;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ValidStateValidatorTest {
 
   @InjectMocks private ValidStateValidator validStateValidator;

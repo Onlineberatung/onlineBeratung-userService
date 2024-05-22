@@ -5,7 +5,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hibernate.search.util.impl.CollectionHelper.asSet;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ImportRecordAgencyCreationInputAdapterTest {
 

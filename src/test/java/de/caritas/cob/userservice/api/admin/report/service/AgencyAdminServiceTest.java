@@ -1,6 +1,6 @@
 package de.caritas.cob.userservice.api.admin.report.service;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.agencyadminserivce.generated.ApiClient;
@@ -9,17 +9,17 @@ import de.caritas.cob.userservice.api.admin.service.agency.AgencyAdminService;
 import de.caritas.cob.userservice.api.config.apiclient.AgencyAdminServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.service.httpheader.SecurityHeaderSupplier;
 import de.caritas.cob.userservice.api.service.httpheader.TenantHeaderSupplier;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AgencyAdminServiceTest {
+@ExtendWith(MockitoExtension.class)
+class AgencyAdminServiceTest {
 
   @InjectMocks private AgencyAdminService agencyAdminService;
   @Mock private SecurityHeaderSupplier securityHeaderSupplier;
@@ -31,7 +31,7 @@ public class AgencyAdminServiceTest {
   @Mock private AgencyAdminServiceApiControllerFactory agencyAdminServiceApiControllerFactory;
 
   @Test
-  public void agencyAdminControllerShouldHaveCorrectHeaders() {
+  void agencyAdminControllerShouldHaveCorrectHeaders() {
     var headers = new HttpHeaders();
     headers.add("header1", "header1");
     when(securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders()).thenReturn(headers);

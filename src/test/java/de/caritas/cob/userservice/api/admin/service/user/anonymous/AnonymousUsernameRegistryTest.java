@@ -20,30 +20,32 @@ import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-public class AnonymousUsernameRegistryTest {
+@MockitoSettings(strictness = org.mockito.quality.Strictness.LENIENT)
+class AnonymousUsernameRegistryTest {
 
   @InjectMocks private AnonymousUsernameRegistry anonymousUsernameRegistry;
   @Mock private UserService userService;
   @Mock private ConsultantService consultantService;
   @Mock private UsernameTranscoder usernameTranscoder;
 
-  @Before
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     setField(anonymousUsernameRegistry, "usernameTranscoder", usernameTranscoder);
     setField(anonymousUsernameRegistry, "usernamePrefix", "Ratsuchende_r ");
   }
 
   @Test
-  public void
+  void
       generateUniqueUsername_Should_GenerateUsernameWithMissingIdOfList_When_MissingUserIdNotExistingInDb() {
     LinkedList<Integer> idRegistryListWithoutThree = new LinkedList<>(List.of(1, 2, 4, 5));
     setIdRegistryField(idRegistryListWithoutThree);
@@ -61,7 +63,7 @@ public class AnonymousUsernameRegistryTest {
   }
 
   @Test
-  public void
+  void
       generateUniqueUsername_Should_GenerateUsernameWithSecondMissingIdOfList_When_FirstMissingUserIdIsExistingInDb() {
     LinkedList<Integer> idRegistryListWithoutThree = new LinkedList<>(List.of(1, 2, 4, 6));
     setIdRegistryField(idRegistryListWithoutThree);
@@ -76,7 +78,7 @@ public class AnonymousUsernameRegistryTest {
   }
 
   @Test
-  public void
+  void
       generateUniqueUsername_Should_GenerateUsernameWithIdOne_When_ListIsEmptyAndUserNotExistingInDb() {
     LinkedList<Integer> idRegistryListWithoutThree = new LinkedList<>();
     setIdRegistryField(idRegistryListWithoutThree);
@@ -90,7 +92,7 @@ public class AnonymousUsernameRegistryTest {
   }
 
   @Test
-  public void
+  void
       generateUniqueUsername_Should_GenerateUsernameWithIdGreaterThanBiggestListId_When_ListContainsContiguousIdsAndUserNotExistingInDb() {
     LinkedList<Integer> idRegistryListWithoutThree = new LinkedList<>(List.of(1, 2, 3, 4, 5));
     setIdRegistryField(idRegistryListWithoutThree);
@@ -104,7 +106,7 @@ public class AnonymousUsernameRegistryTest {
   }
 
   @Test
-  public void
+  void
       generateUniqueUsername_Should_GenerateUsernameWithIdGreaterThanBiggestListId_When_MissingIdsOfListHaveExistingUsersInDb() {
     LinkedList<Integer> idRegistryListWithoutThree = new LinkedList<>(List.of(1, 2, 4, 6));
     setIdRegistryField(idRegistryListWithoutThree);
@@ -120,7 +122,7 @@ public class AnonymousUsernameRegistryTest {
   }
 
   @Test
-  public void
+  void
       generateUniqueUsername_Should_GenerateUsernameWithIdGreaterThanBiggestListId_When_MissingIdsOfListHaveExistingConsultantsInDb() {
     LinkedList<Integer> idRegistryListWithoutThree = new LinkedList<>(List.of(1, 2, 4, 6));
     setIdRegistryField(idRegistryListWithoutThree);
@@ -138,7 +140,7 @@ public class AnonymousUsernameRegistryTest {
   }
 
   @Test
-  public void
+  void
       removeRegistryIdByUsername_Should_RemoveIdFromRegistry_When_UsernameMatchesUsernamePattern() {
     String usernameToDelete = "Ratsuchende_r 2";
 
@@ -159,7 +161,7 @@ public class AnonymousUsernameRegistryTest {
   }
 
   @Test
-  public void
+  void
       removeRegistryIdByUsername_Should_NotModifyTheRegistry_When_UsernameDoesNotMatchUsernamePattern() {
     String usernameNotMatchingPattern = "something else";
 
@@ -176,7 +178,7 @@ public class AnonymousUsernameRegistryTest {
   }
 
   @Test
-  public void
+  void
       removeRegistryIdByUsername_Should_NotModifyTheRegistry_When_UsernameDoesMatchUsernamePatternButHasNotExistingNumber() {
     String usernameWithNotExistingId = "Ratsuchende_r 3";
 
@@ -193,7 +195,7 @@ public class AnonymousUsernameRegistryTest {
   }
 
   @Test
-  public void removeRegistryIdByUsername_Should_NotModifyTheRegistry_When_EmptyValuePassed() {
+  void removeRegistryIdByUsername_Should_NotModifyTheRegistry_When_EmptyValuePassed() {
     LinkedList<Integer> idRegistryListWithoutThree = new LinkedList<>(List.of(1, 2, 4, 5));
     setIdRegistryField(idRegistryListWithoutThree);
     when(userService.findUserByUsername(any())).thenReturn(Optional.empty());
@@ -209,7 +211,7 @@ public class AnonymousUsernameRegistryTest {
   }
 
   @Test
-  public void removeRegistryIdByUsername_Should_NotModifyTheRegistry_When_NullPassed() {
+  void removeRegistryIdByUsername_Should_NotModifyTheRegistry_When_NullPassed() {
     LinkedList<Integer> idRegistryListWithoutThree = new LinkedList<>(List.of(1, 2, 4, 5));
     setIdRegistryField(idRegistryListWithoutThree);
     when(userService.findUserByUsername(any())).thenReturn(Optional.empty());

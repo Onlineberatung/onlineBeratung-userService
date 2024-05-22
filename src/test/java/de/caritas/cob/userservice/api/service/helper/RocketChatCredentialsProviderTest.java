@@ -18,11 +18,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.TECHNICAL_
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.TECHNICAL_USER_B_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.TECHNICAL_USER_B_TOKEN;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.TECHNICAL_USER_B_USERNAME;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,13 +32,13 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.dto.login.LoginRespons
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.logout.LogoutResponseDTO;
 import de.caritas.cob.userservice.api.exception.rocketchat.RocketChatUserNotInitializedException;
 import java.util.concurrent.atomic.AtomicReference;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -53,7 +49,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class RocketChatCredentialsProviderTest {
 
   /** FIELD Names */
@@ -134,7 +130,7 @@ public class RocketChatCredentialsProviderTest {
 
   @Mock private RestTemplate restTemplate;
 
-  @Before
+  @BeforeEach
   public void setup() throws NoSuchFieldException {
     setField(rcCredentialHelper, FIELD_NAME_TECHNICAL_USERNAME, TECHNICAL_USER_USERNAME);
     setField(rcCredentialHelper, FIELD_NAME_TECHNICAL_PASSWORD, TECHNICAL_USER_PW);
@@ -383,7 +379,7 @@ public class RocketChatCredentialsProviderTest {
       rcCredentialHelper.getTechnicalUser();
       fail("Expected exception: RocketChatUserNotInitializedException");
     } catch (RocketChatUserNotInitializedException ex) {
-      assertTrue("Excepted RocketChatUserNotInitializedException thrown", true);
+      assertTrue(true, "Excepted RocketChatUserNotInitializedException thrown");
     }
   }
 
@@ -455,7 +451,7 @@ public class RocketChatCredentialsProviderTest {
       rcCredentialHelper.getSystemUser();
       fail("Expected exception: RocketChatUserNotInitializedException");
     } catch (RocketChatUserNotInitializedException ex) {
-      assertTrue("Excepted RocketChatUserNotInitializedException thrown", true);
+      assertTrue(true, "Excepted RocketChatUserNotInitializedException thrown");
     }
   }
 

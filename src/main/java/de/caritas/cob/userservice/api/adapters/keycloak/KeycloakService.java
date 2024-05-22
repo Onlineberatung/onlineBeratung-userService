@@ -55,7 +55,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
@@ -617,7 +617,7 @@ public class KeycloakService implements IdentityClient {
     if (userRepresentation != null && userRepresentation.getEmail() != null) {
       return !userRepresentation.getEmail().equals(email);
     } else {
-      return !StringUtils.isEmpty(email);
+      return !ObjectUtils.isEmpty(email);
     }
   }
 

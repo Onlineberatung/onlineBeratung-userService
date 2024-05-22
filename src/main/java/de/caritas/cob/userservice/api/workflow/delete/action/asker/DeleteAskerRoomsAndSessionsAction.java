@@ -6,7 +6,6 @@ import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.SessionDataRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.workflow.delete.model.AskerDeletionWorkflowDTO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /** Delete action for sessions and Rocket.Chat rooms of a {@link User}. */
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Component;
 public class DeleteAskerRoomsAndSessionsAction extends DeleteRoomsAndSessionAction
     implements ActionCommand<AskerDeletionWorkflowDTO> {
 
-  @Autowired
   public DeleteAskerRoomsAndSessionsAction(
       SessionRepository sessionRepository,
       SessionDataRepository sessionDataRepository,

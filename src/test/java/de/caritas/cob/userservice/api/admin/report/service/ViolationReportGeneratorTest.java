@@ -14,14 +14,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
-import org.junit.After;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ViolationReportGeneratorTest {
 
   @InjectMocks private ViolationReportGenerator violationReportGenerator;
@@ -30,7 +30,7 @@ public class ViolationReportGeneratorTest {
 
   @Mock private AgencyAdminService agencyAdminService;
 
-  @After
+  @AfterEach
   public void cleanGeneratedFiles() throws IOException {
     FileUtils.deleteDirectory(new File("report"));
   }

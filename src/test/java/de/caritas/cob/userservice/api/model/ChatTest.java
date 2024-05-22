@@ -3,10 +3,11 @@ package de.caritas.cob.userservice.api.model;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import org.jeasy.random.EasyRandom;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ChatTest {
 
@@ -52,12 +53,16 @@ public class ChatTest {
     assertThat(equals, is(true));
   }
 
-  @Test(expected = InternalServerErrorException.class)
+  @Test
   public void nextDateShouldThrowExceptionWhenChatIsRepetitiveButNoStartDate() {
-    var chat = new Chat();
-    chat.setRepetitive(true);
+    assertThrows(
+        InternalServerErrorException.class,
+        () -> {
+          var chat = new Chat();
+          chat.setRepetitive(true);
 
-    chat.nextStart();
+          chat.nextStart();
+        });
   }
 
   @Test

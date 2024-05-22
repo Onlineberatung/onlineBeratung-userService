@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.facade.conversation;
 
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_KREUZBUND;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -20,13 +21,13 @@ import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManag
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import org.jeasy.random.EasyRandom;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class CreateAnonymousEnquiryFacadeTest {
 
   @InjectMocks private CreateAnonymousEnquiryFacade createAnonymousEnquiryFacade;
@@ -38,23 +39,29 @@ public class CreateAnonymousEnquiryFacadeTest {
 
   EasyRandom easyRandom = new EasyRandom();
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void
       createAnonymousEnquiry_Should_ThrowBadRequestException_When_GivenConsultingTypeDoesNotSupportAnonymousConversations() {
-    CreateAnonymousEnquiryDTO anonymousEnquiryDTO =
-        easyRandom.nextObject(CreateAnonymousEnquiryDTO.class);
-    anonymousEnquiryDTO.setConsultingType(CONSULTING_TYPE_ID_KREUZBUND);
-    var consultingTypeResponseDTO = easyRandom.nextObject(ExtendedConsultingTypeResponseDTO.class);
-    consultingTypeResponseDTO.setIsAnonymousConversationAllowed(false);
-    when(consultingTypeManager.getConsultingTypeSettings(anonymousEnquiryDTO.getConsultingType()))
-        .thenReturn(consultingTypeResponseDTO);
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          CreateAnonymousEnquiryDTO anonymousEnquiryDTO =
+              easyRandom.nextObject(CreateAnonymousEnquiryDTO.class);
+          anonymousEnquiryDTO.setConsultingType(CONSULTING_TYPE_ID_KREUZBUND);
+          var consultingTypeResponseDTO =
+              easyRandom.nextObject(ExtendedConsultingTypeResponseDTO.class);
+          consultingTypeResponseDTO.setIsAnonymousConversationAllowed(false);
+          when(consultingTypeManager.getConsultingTypeSettings(
+                  anonymousEnquiryDTO.getConsultingType()))
+              .thenReturn(consultingTypeResponseDTO);
 
-    createAnonymousEnquiryFacade.createAnonymousEnquiry(anonymousEnquiryDTO);
+          createAnonymousEnquiryFacade.createAnonymousEnquiry(anonymousEnquiryDTO);
 
-    verifyNoInteractions(anonymousUserCreatorService);
-    verifyNoInteractions(anonymousConversationCreatorService);
-    verifyNoInteractions(usernameRegistry);
-    verifyNoInteractions(userHelper);
+          verifyNoInteractions(anonymousUserCreatorService);
+          verifyNoInteractions(anonymousConversationCreatorService);
+          verifyNoInteractions(usernameRegistry);
+          verifyNoInteractions(userHelper);
+        });
   }
 
   @Test

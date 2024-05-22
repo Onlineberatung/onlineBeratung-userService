@@ -4,8 +4,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.ACTIVE_CHA
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CHAT_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_USER_ID;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -37,14 +36,14 @@ import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.List;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
-public class JoinAndLeaveChatFacadeTest {
+@ExtendWith(MockitoExtension.class)
+class JoinAndLeaveChatFacadeTest {
 
   private static final EasyRandom easyRandom = new EasyRandom();
 
@@ -67,21 +66,21 @@ public class JoinAndLeaveChatFacadeTest {
   @Mock private RocketChatService rocketChatService;
 
   @Test
-  public void joinChat_Should_ThrowNotFoundException_WhenChatDoesNotExist() {
+  void joinChat_Should_ThrowNotFoundException_WhenChatDoesNotExist() {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.empty());
 
     try {
       joinAndLeaveChatFacade.joinChat(CHAT_ID, authenticatedUser);
       fail("Expected exception: NotFoundException");
     } catch (NotFoundException notFoundException) {
-      assertTrue("Excepted NotFoundException thrown", true);
+      assertTrue(true, "Excepted NotFoundException thrown");
     }
 
     verify(chatService, times(1)).getChat(CHAT_ID);
   }
 
   @Test
-  public void joinChat_Should_ThrowConflictException_WhenChatIsNotActive() {
+  void joinChat_Should_ThrowConflictException_WhenChatIsNotActive() {
     Chat inactiveChat = mock(Chat.class);
     when(inactiveChat.isActive()).thenReturn(false);
 
@@ -91,15 +90,14 @@ public class JoinAndLeaveChatFacadeTest {
       joinAndLeaveChatFacade.joinChat(CHAT_ID, authenticatedUser);
       fail("Expected exception: ConflictException");
     } catch (ConflictException conflictException) {
-      assertTrue("Excepted ConflictException thrown", true);
+      assertTrue(true, "Excepted ConflictException thrown");
     }
 
     verify(chatService, times(1)).getChat(CHAT_ID);
   }
 
   @Test
-  public void
-      joinChat_Should_ThrowRequestForbiddenException_WhenConsultantHasNoPermissionForChat() {
+  void joinChat_Should_ThrowRequestForbiddenException_WhenConsultantHasNoPermissionForChat() {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
     doThrow(new ForbiddenException(""))
         .when(chatPermissionVerifier)
@@ -109,7 +107,7 @@ public class JoinAndLeaveChatFacadeTest {
       joinAndLeaveChatFacade.joinChat(CHAT_ID, authenticatedUser);
       fail("Expected exception: RequestForbiddenException");
     } catch (ForbiddenException requestForbiddenException) {
-      assertTrue("Excepted RequestForbiddenException thrown", true);
+      assertTrue(true, "Excepted RequestForbiddenException thrown");
     }
 
     verify(chatService, times(1)).getChat(CHAT_ID);
@@ -117,7 +115,7 @@ public class JoinAndLeaveChatFacadeTest {
   }
 
   @Test
-  public void joinChat_Should_ThrowRequestForbiddenException_WhenUserHasNoPermissionForChat() {
+  void joinChat_Should_ThrowRequestForbiddenException_WhenUserHasNoPermissionForChat() {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
     doThrow(new ForbiddenException(""))
         .when(chatPermissionVerifier)
@@ -127,7 +125,7 @@ public class JoinAndLeaveChatFacadeTest {
       joinAndLeaveChatFacade.joinChat(CHAT_ID, authenticatedUser);
       fail("Expected exception: RequestForbiddenException");
     } catch (ForbiddenException requestForbiddenException) {
-      assertTrue("Excepted RequestForbiddenException thrown", true);
+      assertTrue(true, "Excepted RequestForbiddenException thrown");
     }
 
     verify(chatService, times(1)).getChat(CHAT_ID);
@@ -135,7 +133,7 @@ public class JoinAndLeaveChatFacadeTest {
   }
 
   @Test
-  public void joinChat_Should_ThrowInternalServerErrorException_WhenConsultantHasNoRocketChatId() {
+  void joinChat_Should_ThrowInternalServerErrorException_WhenConsultantHasNoRocketChatId() {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
     when(consultantService.getConsultantViaAuthenticatedUser(authenticatedUser))
         .thenReturn(Optional.of(consultant));
@@ -145,7 +143,7 @@ public class JoinAndLeaveChatFacadeTest {
       joinAndLeaveChatFacade.joinChat(CHAT_ID, authenticatedUser);
       fail("Expected exception: InternalServerErrorException");
     } catch (InternalServerErrorException internalServerErrorException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
+      assertTrue(true, "Excepted InternalServerErrorException thrown");
     }
 
     verify(chatService, times(1)).getChat(CHAT_ID);
@@ -155,7 +153,7 @@ public class JoinAndLeaveChatFacadeTest {
   }
 
   @Test
-  public void joinChat_Should_ThrowInternalServerErrorException_WhenUserHasNoRocketChatId() {
+  void joinChat_Should_ThrowInternalServerErrorException_WhenUserHasNoRocketChatId() {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
     when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(Optional.of(user));
     when(user.getRcUserId()).thenReturn(null);
@@ -164,7 +162,7 @@ public class JoinAndLeaveChatFacadeTest {
       joinAndLeaveChatFacade.joinChat(CHAT_ID, authenticatedUser);
       fail("Expected exception: InternalServerErrorException");
     } catch (InternalServerErrorException internalServerErrorException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
+      assertTrue(true, "Excepted InternalServerErrorException thrown");
     }
 
     verify(chatService, times(1)).getChat(CHAT_ID);
@@ -173,8 +171,7 @@ public class JoinAndLeaveChatFacadeTest {
   }
 
   @Test
-  public void joinChat_Should_AddConsultantToRocketChatGroup()
-      throws RocketChatAddUserToGroupException {
+  void joinChat_Should_AddConsultantToRocketChatGroup() throws RocketChatAddUserToGroupException {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
     when(consultantService.getConsultantViaAuthenticatedUser(authenticatedUser))
         .thenReturn(Optional.of(CONSULTANT));
@@ -186,7 +183,7 @@ public class JoinAndLeaveChatFacadeTest {
   }
 
   @Test
-  public void joinChat_Should_AddUserToRocketChatGroup() throws RocketChatAddUserToGroupException {
+  void joinChat_Should_AddUserToRocketChatGroup() throws RocketChatAddUserToGroupException {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
     when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(Optional.of(user));
     when(user.getRcUserId()).thenReturn(RC_USER_ID);
@@ -197,21 +194,21 @@ public class JoinAndLeaveChatFacadeTest {
   }
 
   @Test
-  public void leaveChat_Should_ThrowNotFoundException_WhenChatDoesNotExist() {
+  void leaveChat_Should_ThrowNotFoundException_WhenChatDoesNotExist() {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.empty());
 
     try {
       joinAndLeaveChatFacade.leaveChat(CHAT_ID, authenticatedUser);
       fail("Expected exception: NotFoundException");
     } catch (NotFoundException notFoundException) {
-      assertTrue("Excepted NotFoundException thrown", true);
+      assertTrue(true, "Excepted NotFoundException thrown");
     }
 
     verify(chatService, times(1)).getChat(CHAT_ID);
   }
 
   @Test
-  public void leaveChat_Should_ThrowConflictException_WhenChatIsNotActive() {
+  void leaveChat_Should_ThrowConflictException_WhenChatIsNotActive() {
     Chat inactiveChat = mock(Chat.class);
     when(inactiveChat.isActive()).thenReturn(false);
 
@@ -221,15 +218,14 @@ public class JoinAndLeaveChatFacadeTest {
       joinAndLeaveChatFacade.leaveChat(CHAT_ID, authenticatedUser);
       fail("Expected exception: ConflictException");
     } catch (ConflictException conflictException) {
-      assertTrue("Excepted ConflictException thrown", true);
+      assertTrue(true, "Excepted ConflictException thrown");
     }
 
     verify(chatService, times(1)).getChat(CHAT_ID);
   }
 
   @Test
-  public void
-      leaveChat_Should_ThrowRequestForbiddenException_WhenConsultantHasNoPermissionForChat() {
+  void leaveChat_Should_ThrowRequestForbiddenException_WhenConsultantHasNoPermissionForChat() {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
     doThrow(new ForbiddenException(""))
         .when(chatPermissionVerifier)
@@ -239,7 +235,7 @@ public class JoinAndLeaveChatFacadeTest {
       joinAndLeaveChatFacade.leaveChat(CHAT_ID, authenticatedUser);
       fail("Expected exception: RequestForbiddenException");
     } catch (ForbiddenException requestForbiddenException) {
-      assertTrue("Excepted RequestForbiddenException thrown", true);
+      assertTrue(true, "Excepted RequestForbiddenException thrown");
     }
 
     verify(chatService, times(1)).getChat(CHAT_ID);
@@ -247,7 +243,7 @@ public class JoinAndLeaveChatFacadeTest {
   }
 
   @Test
-  public void leaveChat_Should_ThrowRequestForbiddenException_WhenUserHasNoPermissionForChat() {
+  void leaveChat_Should_ThrowRequestForbiddenException_WhenUserHasNoPermissionForChat() {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
     doThrow(new ForbiddenException(""))
         .when(chatPermissionVerifier)
@@ -257,7 +253,7 @@ public class JoinAndLeaveChatFacadeTest {
       joinAndLeaveChatFacade.leaveChat(CHAT_ID, authenticatedUser);
       fail("Expected exception: RequestForbiddenException");
     } catch (ForbiddenException requestForbiddenException) {
-      assertTrue("Excepted RequestForbiddenException thrown", true);
+      assertTrue(true, "Excepted RequestForbiddenException thrown");
     }
 
     verify(chatService, times(1)).getChat(CHAT_ID);
@@ -265,7 +261,7 @@ public class JoinAndLeaveChatFacadeTest {
   }
 
   @Test
-  public void leaveChat_Should_ThrowInternalServerErrorException_WhenConsultantHasNoRocketChatId() {
+  void leaveChat_Should_ThrowInternalServerErrorException_WhenConsultantHasNoRocketChatId() {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
     when(consultantService.getConsultantViaAuthenticatedUser(authenticatedUser))
         .thenReturn(Optional.of(consultant));
@@ -275,7 +271,7 @@ public class JoinAndLeaveChatFacadeTest {
       joinAndLeaveChatFacade.leaveChat(CHAT_ID, authenticatedUser);
       fail("Expected exception: InternalServerErrorException");
     } catch (InternalServerErrorException internalServerErrorException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
+      assertTrue(true, "Excepted InternalServerErrorException thrown");
     }
 
     verify(chatService, times(1)).getChat(CHAT_ID);
@@ -285,7 +281,7 @@ public class JoinAndLeaveChatFacadeTest {
   }
 
   @Test
-  public void leaveChat_Should_ThrowInternalServerErrorException_WhenUserHasNoRocketChatId() {
+  void leaveChat_Should_ThrowInternalServerErrorException_WhenUserHasNoRocketChatId() {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
     when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(Optional.of(user));
     when(user.getRcUserId()).thenReturn(null);
@@ -294,7 +290,7 @@ public class JoinAndLeaveChatFacadeTest {
       joinAndLeaveChatFacade.leaveChat(CHAT_ID, authenticatedUser);
       fail("Expected exception: InternalServerErrorException");
     } catch (InternalServerErrorException internalServerErrorException) {
-      assertTrue("Excepted InternalServerErrorException thrown", true);
+      assertTrue(true, "Excepted InternalServerErrorException thrown");
     }
 
     verify(chatService, times(1)).getChat(CHAT_ID);
@@ -303,7 +299,7 @@ public class JoinAndLeaveChatFacadeTest {
   }
 
   @Test
-  public void leaveChat_Should_RemoveConsultantFromRocketChatGroup()
+  void leaveChat_Should_RemoveConsultantFromRocketChatGroup()
       throws RocketChatRemoveUserFromGroupException, RocketChatUserNotInitializedException,
           RocketChatGetGroupMembersException {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
@@ -318,22 +314,26 @@ public class JoinAndLeaveChatFacadeTest {
         .removeUserFromGroup(CONSULTANT.getRocketChatId(), ACTIVE_CHAT.getGroupId());
   }
 
-  @Test(expected = InternalServerErrorException.class)
-  public void
-      leaveChat_Should_throwInternalServerErrorException_When_rocketChatUserCanNotBeRemoved()
-          throws RocketChatRemoveUserFromGroupException {
-    when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
-    when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(Optional.of(user));
-    when(user.getRcUserId()).thenReturn(RC_USER_ID);
-    doThrow(new RocketChatRemoveUserFromGroupException(""))
-        .when(rocketChatService)
-        .removeUserFromGroup(any(), any());
+  @Test
+  void leaveChat_Should_throwInternalServerErrorException_When_rocketChatUserCanNotBeRemoved()
+      throws RocketChatRemoveUserFromGroupException {
+    assertThrows(
+        InternalServerErrorException.class,
+        () -> {
+          when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
+          when(userService.getUserViaAuthenticatedUser(authenticatedUser))
+              .thenReturn(Optional.of(user));
+          when(user.getRcUserId()).thenReturn(RC_USER_ID);
+          doThrow(new RocketChatRemoveUserFromGroupException(""))
+              .when(rocketChatService)
+              .removeUserFromGroup(any(), any());
 
-    joinAndLeaveChatFacade.leaveChat(ACTIVE_CHAT.getId(), authenticatedUser);
+          joinAndLeaveChatFacade.leaveChat(ACTIVE_CHAT.getId(), authenticatedUser);
+        });
   }
 
   @Test
-  public void leaveChatShouldNotDeleteChatsWhenStandardMemberInChat()
+  void leaveChatShouldNotDeleteChatsWhenStandardMemberInChat()
       throws RocketChatUserNotInitializedException, RocketChatGetGroupMembersException {
     when(chatService.getChat(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
     when(userService.getUserViaAuthenticatedUser(authenticatedUser)).thenReturn(Optional.of(user));

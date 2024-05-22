@@ -4,9 +4,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME_D
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME_ENCODED;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME_TOO_LONG;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME_TOO_SHORT;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -19,14 +17,14 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class EncodeUsernameJsonSerializationUtilsTest {
 
   private ObjectMapper objectMapper;
@@ -35,7 +33,7 @@ public class EncodeUsernameJsonSerializationUtilsTest {
 
   @Mock private UserHelper userHelper;
 
-  @Before
+  @BeforeEach
   public void setup() {
     objectMapper = new ObjectMapper();
   }
@@ -68,7 +66,7 @@ public class EncodeUsernameJsonSerializationUtilsTest {
 
       fail("Expected exception: BadRequestException");
     } catch (BadRequestException badRequestException) {
-      assertTrue("Excepted BadRequestException thrown", true);
+      assertTrue(true, "Excepted BadRequestException thrown");
     }
   }
 
@@ -82,7 +80,7 @@ public class EncodeUsernameJsonSerializationUtilsTest {
 
       fail("Expected exception: BadRequestException");
     } catch (BadRequestException badRequestException) {
-      assertTrue("Excepted BadRequestException thrown", true);
+      assertTrue(true, "Excepted BadRequestException thrown");
     }
   }
 

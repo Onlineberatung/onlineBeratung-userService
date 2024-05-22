@@ -17,11 +17,7 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -45,18 +41,18 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ChatServiceTest {
+@ExtendWith(MockitoExtension.class)
+class ChatServiceTest {
 
   @InjectMocks private ChatService chatService;
 
@@ -72,13 +68,13 @@ public class ChatServiceTest {
 
   @Mock private AgencyService agencyService;
 
-  @Before
-  public void setup() {
+  @BeforeEach
+  void setup() {
     setInternalState(LogService.class, "LOGGER", logger);
   }
 
   @Test
-  public void getChatsForUserId_Should_CallFindByUserIdAndFindAssignedByUserIdOnChatRepository() {
+  void getChatsForUserId_Should_CallFindByUserIdAndFindAssignedByUserIdOnChatRepository() {
     chatService.getChatsForUserId(USER_ID);
 
     verify(chatRepository).findByUserId(USER_ID);
@@ -86,7 +82,7 @@ public class ChatServiceTest {
   }
 
   @Test
-  public void getChatsForUserId_Should_ConcatChatsAndAssignedChats() {
+  void getChatsForUserId_Should_ConcatChatsAndAssignedChats() {
     when(chatRepository.findByUserId(USER_ID)).thenReturn(singletonList(ACTIVE_CHAT));
     when(chatRepository.findAssignedByUserId(USER_ID)).thenReturn(singletonList(CHAT_V2));
 
@@ -96,7 +92,7 @@ public class ChatServiceTest {
   }
 
   @Test
-  public void getChatsForUserId_Should_ReturnListOfUserSessionResponseDTOWithChats() {
+  void getChatsForUserId_Should_ReturnListOfUserSessionResponseDTOWithChats() {
     when(chatRepository.findByUserId(USER_ID)).thenReturn(singletonList(ACTIVE_CHAT));
     when(consultantService.findConsultantsByAgencyIds(Mockito.any()))
         .thenReturn(singletonList(CONSULTANT));
@@ -130,7 +126,7 @@ public class ChatServiceTest {
   }
 
   @Test
-  public void
+  void
       getChatsForUserId_Should_ReturnListOfUserSessionResponseDTOWithChats_When_AssignedChatIsFound() {
     when(chatRepository.findAssignedByUserId(USER_ID)).thenReturn(singletonList(CHAT_V2));
     when(consultantService.findConsultantsByAgencyIds(Mockito.any()))
@@ -177,7 +173,7 @@ public class ChatServiceTest {
   }
 
   @Test
-  public void getChatsForConsultant_Should_ReturnListOfConsultantSessionResponseDTOWithChats() {
+  void getChatsForConsultant_Should_ReturnListOfConsultantSessionResponseDTOWithChats() {
     Consultant consultant = Mockito.mock(Consultant.class);
 
     when(chatRepository.findByAgencyIds(Mockito.any())).thenReturn(singletonList(ACTIVE_CHAT));
@@ -213,7 +209,7 @@ public class ChatServiceTest {
   }
 
   @Test
-  public void getChatsForConsultant_Should_ReturnEmptyListWhenListOfChatsIsEmpty() {
+  void getChatsForConsultant_Should_ReturnEmptyListWhenListOfChatsIsEmpty() {
     Consultant consultant = Mockito.mock(Consultant.class);
 
     List<ConsultantSessionResponseDTO> resultList = chatService.getChatsForConsultant(consultant);
@@ -222,7 +218,7 @@ public class ChatServiceTest {
   }
 
   @Test
-  public void getChat_Should_ReturnChatObject() {
+  void getChat_Should_ReturnChatObject() {
     when(chatRepository.findById(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
 
     Optional<Chat> result = chatService.getChat(CHAT_ID);
@@ -233,7 +229,7 @@ public class ChatServiceTest {
   }
 
   @Test
-  public void getChatByGroupId_Should_ReturnChatObject() {
+  void getChatByGroupId_Should_ReturnChatObject() {
     when(chatRepository.findByGroupId(RC_GROUP_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
 
     Optional<Chat> result = chatService.getChatByGroupId(RC_GROUP_ID);
@@ -244,43 +240,43 @@ public class ChatServiceTest {
   }
 
   @Test
-  public void updateChat_Should_ThrowBadRequestException_WhenChatDoesNotExist() {
+  void updateChat_Should_ThrowBadRequestException_WhenChatDoesNotExist() {
     when(chatRepository.findById(CHAT_ID)).thenReturn(Optional.empty());
 
     try {
       chatService.updateChat(CHAT_ID, CHAT_DTO, AUTHENTICATED_USER);
       fail("Expected exception: BadRequestException");
     } catch (BadRequestException badRequestException) {
-      assertTrue("Excepted BadRequestException thrown", true);
+      assertTrue(true, "Excepted BadRequestException thrown");
     }
   }
 
   @Test
-  public void updateChat_Should_ThrowForbiddenException_WhenCallingConsultantNotOwnerOfChat() {
+  void updateChat_Should_ThrowForbiddenException_WhenCallingConsultantNotOwnerOfChat() {
     when(chatRepository.findById(CHAT_ID)).thenReturn(Optional.of(INACTIVE_CHAT));
 
     try {
       chatService.updateChat(CHAT_ID, CHAT_DTO, AUTHENTICATED_USER_3);
       fail("Expected exception: ForbiddenException");
     } catch (ForbiddenException forbiddenException) {
-      assertTrue("Excepted ForbiddenException thrown", true);
+      assertTrue(true, "Excepted ForbiddenException thrown");
     }
   }
 
   @Test
-  public void updateChat_Should_ThrowConflictException_WhenChatIsActive() {
+  void updateChat_Should_ThrowConflictException_WhenChatIsActive() {
     when(chatRepository.findById(CHAT_ID)).thenReturn(Optional.of(ACTIVE_CHAT));
 
     try {
       chatService.updateChat(CHAT_ID, CHAT_DTO, AUTHENTICATED_USER_CONSULTANT);
       fail("Expected exception: ConflictException");
     } catch (ConflictException conflictException) {
-      assertTrue("Excepted ConflictException thrown", true);
+      assertTrue(true, "Excepted ConflictException thrown");
     }
   }
 
   @Test
-  public void updateChat_Should_SaveNewChatSettings() {
+  void updateChat_Should_SaveNewChatSettings() {
     // given
     Chat inactiveChat = new Chat();
     inactiveChat.setActive(false);
@@ -298,7 +294,7 @@ public class ChatServiceTest {
   }
 
   @Test
-  public void saveChatAgencyRelation_Should_saveChatAgencyInRepository() {
+  void saveChatAgencyRelation_Should_saveChatAgencyInRepository() {
     ChatAgency chatAgency = new ChatAgency();
 
     chatService.saveChatAgencyRelation(chatAgency);
@@ -307,7 +303,7 @@ public class ChatServiceTest {
   }
 
   @Test
-  public void saveUserChatRelation_Should_saveUserChatInRepository() {
+  void saveUserChatRelation_Should_saveUserChatInRepository() {
     UserChat chatUser = new UserChat();
 
     chatService.saveUserChatRelation(chatUser);
@@ -316,7 +312,7 @@ public class ChatServiceTest {
   }
 
   @Test
-  public void deleteChat_Should_deleteChatInRepository() {
+  void deleteChat_Should_deleteChatInRepository() {
     Chat chat = new Chat();
 
     chatService.deleteChat(chat);

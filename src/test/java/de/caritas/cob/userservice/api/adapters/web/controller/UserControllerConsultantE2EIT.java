@@ -685,7 +685,7 @@ class UserControllerConsultantE2EIT {
             .andExpect(jsonPath("_embedded[0]._links.addAgency.method", is("POST")))
             .andExpect(jsonPath("_embedded[0]._links.addAgency.templated", is(false)))
             .andExpect(jsonPath("_links.self.href", startsWith(pageUrlPrefix)))
-            .andExpect(jsonPath("_links.self.href", containsString("query=*")))
+            .andExpect(jsonPath("_links.self.href", containsString("query=")))
             .andExpect(jsonPath("_links.self.method", is("GET")))
             .andExpect(jsonPath("_links.self.templated", is(false)))
             .andExpect(jsonPath("_links.next", is(nullValue())))

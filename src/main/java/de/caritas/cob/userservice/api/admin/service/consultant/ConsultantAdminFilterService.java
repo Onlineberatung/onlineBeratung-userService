@@ -11,6 +11,7 @@ import de.caritas.cob.userservice.api.model.Consultant;
 import javax.persistence.EntityManagerFactory;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.search.SortField;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.FullTextQuery;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 /** Service class to provide filtered search for all {@link Consultant} entities. */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ConsultantAdminFilterService {
 
   private final @NonNull EntityManagerFactory entityManagerFactory;
@@ -40,7 +42,7 @@ public class ConsultantAdminFilterService {
       final Sort sort) {
     var fullTextEntityManager =
         Search.getFullTextEntityManager(entityManagerFactory.createEntityManager());
-
+    triggerLuceneToBuildIndex(fullTextEntityManager);
     var fullTextQuery = buildFilteredQuery(consultantFilter, fullTextEntityManager);
     fullTextQuery.setMaxResults(Math.max(perPage, 1));
     fullTextQuery.setFirstResult(Math.max((page - 1) * perPage, 0));
@@ -56,6 +58,15 @@ public class ConsultantAdminFilterService {
 
     fullTextEntityManager.close();
     return searchResultDTO;
+  }
+
+  private static void triggerLuceneToBuildIndex(FullTextEntityManager fullTextEntityManager) {
+    try {
+      fullTextEntityManager.createIndexer(Consultant.class).startAndWait();
+    } catch (InterruptedException e) {
+      log.info("Lucene index building was interrupted.");
+      Thread.currentThread().interrupt();
+    }
   }
 
   protected FullTextQuery buildFilteredQuery(

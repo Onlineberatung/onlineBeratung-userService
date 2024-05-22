@@ -23,6 +23,7 @@ public class JsonSerializationUtils {
       SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
       objectMapper.setDateFormat(dateFormat);
       objectMapper.registerModule(new JavaTimeModule());
+      objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
 
       return objectMapper.readValue(jsonString, clazz);
     } catch (JsonProcessingException e) {
