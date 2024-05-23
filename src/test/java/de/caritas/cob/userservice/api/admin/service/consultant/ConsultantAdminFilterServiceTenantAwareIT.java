@@ -11,13 +11,18 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest(classes = UserServiceApplication.class)
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-@TestPropertySource(properties = "multitenancy.enabled=false")
+@TestPropertySource(properties = "multitenancy.enabled=true")
 @Transactional
+@TestPropertySource(
+    properties =
+        "spring.sql.init.data-locations=classpath:database/UserServiceDatabase.sql,classpath:database/transformDataForTenants.sql")
+@Sql(scripts = {"classpath:database/transformDataForTenants.sql"})
 public class ConsultantAdminFilterServiceTenantAwareIT extends ConsultantAdminFilterServiceBase {
 
   @Autowired ConsultantRepository consultantRepository;
