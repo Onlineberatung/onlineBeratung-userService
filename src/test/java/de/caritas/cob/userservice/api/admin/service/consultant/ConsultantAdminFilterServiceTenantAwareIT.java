@@ -17,15 +17,12 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest(classes = UserServiceApplication.class)
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-@TestPropertySource(properties = "multitenancy.enabled=false")
-@TestPropertySource(
-    properties =
-        "spring.datasource.data=classpath*:database/UserServiceDatabase.sql,classpath*:database/transformDataForTenants.sql")
+@TestPropertySource(properties = "multitenancy.enabled=true")
+@Transactional
 @TestPropertySource(
     properties =
         "spring.sql.init.data-locations=classpath:database/UserServiceDatabase.sql,classpath:database/transformDataForTenants.sql")
 @Sql(scripts = {"classpath:database/transformDataForTenants.sql"})
-@Transactional
 public class ConsultantAdminFilterServiceTenantAwareIT extends ConsultantAdminFilterServiceBase {
 
   @Autowired ConsultantRepository consultantRepository;

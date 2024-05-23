@@ -144,7 +144,6 @@ import org.springframework.web.util.UriTemplateHandler;
 
 @SpringBootTest
 @ExtendWith(OutputCaptureExtension.class)
-// @AutoConfigureMockMvc
 @ActiveProfiles("testing")
 @AutoConfigureTestDatabase
 class UserControllerSessionE2EIT {
