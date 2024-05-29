@@ -201,9 +201,6 @@ components:
             languageFormal:
               type: boolean
               example: true
-            lockedAgencies:
-              type: boolean
-              example: false
             excludeNonMainConsultantsFromTeamSessions:
               type: boolean
               example: true
@@ -219,9 +216,6 @@ components:
             sendFurtherStepsMessage:
               type: boolean
               example: true
-            sendSaveSessionDataMessage:
-              type: boolean
-              example: false
             sessionDataInitializing:
               allOf:
                 - $ref: '#/components/schemas/SessionDataInitializingDTO'

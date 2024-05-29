@@ -314,6 +314,7 @@ class UserControllerSessionE2EIT {
     givenValidRocketChatCreationResponse();
     givenAnEnquiryMessageDto(true);
     givenASuccessfulMessageResponse(null);
+    givenAValidRocketChatSystemUser();
 
     mockMvc
         .perform(
@@ -348,6 +349,7 @@ class UserControllerSessionE2EIT {
     givenValidRocketChatCreationResponse();
     givenAnEnquiryMessageDto(false);
     givenASuccessfulMessageResponse(null);
+    givenAValidRocketChatSystemUser();
 
     mockMvc
         .perform(
@@ -379,6 +381,7 @@ class UserControllerSessionE2EIT {
     givenValidRocketChatCreationResponse();
     givenAnEnquiryMessageDto(false);
     givenASuccessfulMessageResponse("e2e");
+    givenAValidRocketChatSystemUser();
 
     mockMvc
         .perform(
