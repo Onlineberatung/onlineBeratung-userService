@@ -73,8 +73,6 @@ public class AskerDataProviderTest {
 
   @Mock SessionService sessionService;
 
-  @Mock SessionMapper sessionMapper;
-
   @Test
   public void
       retrieveData_Should_ReturnUserDataWithAgency_When_ProvidedWithUserWithAgencyInSession() {
@@ -121,7 +119,6 @@ public class AskerDataProviderTest {
   @Test
   public void retrieveData_Should_ReturnUserDataWithSessions_When_ProvidedWithUserWithSessions() {
     givenAnEmailDummySuffixConfig();
-    ReflectionTestUtils.setField(askerDataProvider, "sessionMapper", new SessionMapper());
     when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.USER.getValue()));
     ArrayList<Session> inputSessions =
         Lists.newArrayList(
