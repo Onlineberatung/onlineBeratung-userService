@@ -18,8 +18,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.api.client.util.Sets;
+import com.google.common.collect.Lists;
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -27,9 +30,15 @@ import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.SessionDataProvider;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.model.Session;
+import de.caritas.cob.userservice.api.model.Session.RegistrationType;
+import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import de.caritas.cob.userservice.api.service.session.SessionService;
+import de.caritas.cob.userservice.api.service.session.SessionTopicEnrichmentService;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -60,6 +69,10 @@ public class AskerDataProviderTest {
   @Mock IdentityClientConfig identityClientConfig;
 
   @Mock EmailNotificationMapper emailNotificationMapper;
+
+  @Mock SessionService sessionService;
+
+  @Mock SessionTopicEnrichmentService sessionTopicEnrichmentService;
 
   @Test
   public void
@@ -102,6 +115,41 @@ public class AskerDataProviderTest {
     AgencyDTO agency = (AgencyDTO) consultingTypeData.get("agency");
 
     assertEquals(AGENCY_DTO_KREUZBUND, agency);
+  }
+
+  @Test
+  public void retrieveData_Should_ReturnUserDataWithSessions_When_ProvidedWithUserWithSessions() {
+    givenAnEmailDummySuffixConfig();
+    when(authenticatedUser.getRoles()).thenReturn(asSet(UserRole.USER.getValue()));
+    ArrayList<Session> inputSessions =
+        Lists.newArrayList(
+            Session.builder()
+                .id(1L)
+                .registrationType(RegistrationType.ANONYMOUS)
+                .languageCode(LanguageCode.de)
+                .postcode("12111")
+                .status(SessionStatus.NEW)
+                .createDate(LocalDateTime.now())
+                .build(),
+            Session.builder()
+                .id(2L)
+                .registrationType(RegistrationType.REGISTERED)
+                .languageCode(LanguageCode.de)
+                .postcode("11111")
+                .createDate(LocalDateTime.now())
+                .status(SessionStatus.NEW)
+                .build());
+    when(sessionService.findSessionsByUser(Mockito.any(User.class))).thenReturn(inputSessions);
+    when(sessionTopicEnrichmentService.enrichSessionWithTopicData(Mockito.any(SessionDTO.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+    Set<SessionDTO> sessions = askerDataProvider.retrieveData(USER).getSessions();
+
+    assertEquals(2, sessions.size());
+    var expectedSessionsIds = Sets.newHashSet();
+    expectedSessionsIds.add(1L);
+    expectedSessionsIds.add(2L);
+    var sessionIds = sessions.stream().map(SessionDTO::getId).collect(Collectors.toSet());
+    assertEquals(sessionIds, expectedSessionsIds);
   }
 
   @Test(expected = InternalServerErrorException.class)

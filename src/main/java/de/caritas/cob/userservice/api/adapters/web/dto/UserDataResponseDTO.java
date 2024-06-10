@@ -89,4 +89,6 @@ public class UserDataResponseDTO {
   private Boolean available;
 
   private EmailNotificationsDTO emailNotifications;
+
+  private Set<SessionDTO> sessions;
 }
