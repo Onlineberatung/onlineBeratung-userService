@@ -44,8 +44,6 @@ public class AskerDataProvider {
 
   private final @NonNull EmailNotificationMapper emailNotificationMapper;
 
-  private final @NonNull SessionMapper sessionMapper;
-
   /**
    * Retrieve the user data of an asker, e.g. username, email, name, ...
    *
@@ -80,6 +78,7 @@ public class AskerDataProvider {
       User user, UserDataResponseDTOBuilder userDataResponseDTOBuilder) {
     List<Session> sessionsByUser = sessionService.findSessionsByUser(user);
     if (CollectionUtils.isNotEmpty(sessionsByUser)) {
+      SessionMapper sessionMapper = new SessionMapper();
       userDataResponseDTOBuilder.sessions(
           sessionsByUser.stream()
               .map(sessionMapper::convertToSessionDTO)
