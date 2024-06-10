@@ -2589,6 +2589,10 @@ components:
           description: "Datetime stamp when the user accepted data privacy"
         emailNotifications:
           $ref: "#/components/schemas/EmailNotificationsDTO"
+        sessions:
+          type: array
+          items:
+            $ref: "#/components/schemas/SessionDTO"
 
     PatchUserDTO:
       type: object

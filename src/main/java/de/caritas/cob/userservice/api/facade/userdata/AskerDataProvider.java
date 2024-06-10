@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.facade.userdata;
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.LanguageCode;
 import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.UserDataResponseDTO.UserDataResponseDTOBuilder;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.helper.SessionDataProvider;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
@@ -11,6 +12,8 @@ import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.model.UserAgency;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
+import de.caritas.cob.userservice.api.service.session.SessionMapper;
+import de.caritas.cob.userservice.api.service.session.SessionService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -37,7 +40,11 @@ public class AskerDataProvider {
   private final @NonNull ConsultingTypeManager consultingTypeManager;
   private final @NonNull IdentityClientConfig identityClientConfig;
 
+  private final @NonNull SessionService sessionService;
+
   private final @NonNull EmailNotificationMapper emailNotificationMapper;
+
+  private final @NonNull SessionMapper sessionMapper;
 
   /**
    * Retrieve the user data of an asker, e.g. username, email, name, ...
@@ -46,24 +53,38 @@ public class AskerDataProvider {
    * @return the user data
    */
   public UserDataResponseDTO retrieveData(User user) {
-    return UserDataResponseDTO.builder()
-        .userId(user.getUserId())
-        .userName(user.getUsername())
-        .email(observeUserEmailAddress(user))
-        .isAbsent(false)
-        .encourage2fa(user.getEncourage2fa())
-        .isFormalLanguage(user.isLanguageFormal())
-        .preferredLanguage(LanguageCode.fromValue(user.getLanguageCode().toString()))
-        .isInTeamAgency(false)
-        .userRoles(authenticatedUser.getRoles())
-        .grantedAuthorities(authenticatedUser.getGrantedAuthorities())
-        .consultingTypes(getConsultingTypes(user))
-        .hasAnonymousConversations(false)
-        .hasArchive(false)
-        .dataPrivacyConfirmation(user.getDataPrivacyConfirmation())
-        .termsAndConditionsConfirmation(user.getTermsAndConditionsConfirmation())
-        .emailNotifications(emailNotificationMapper.toEmailNotificationsDTO(user))
-        .build();
+    var userDataResponseDTOBuilder =
+        UserDataResponseDTO.builder()
+            .userId(user.getUserId())
+            .userName(user.getUsername())
+            .email(observeUserEmailAddress(user))
+            .isAbsent(false)
+            .encourage2fa(user.getEncourage2fa())
+            .isFormalLanguage(user.isLanguageFormal())
+            .preferredLanguage(LanguageCode.fromValue(user.getLanguageCode().toString()))
+            .isInTeamAgency(false)
+            .userRoles(authenticatedUser.getRoles())
+            .grantedAuthorities(authenticatedUser.getGrantedAuthorities())
+            .consultingTypes(getConsultingTypes(user))
+            .hasAnonymousConversations(false)
+            .hasArchive(false)
+            .dataPrivacyConfirmation(user.getDataPrivacyConfirmation())
+            .termsAndConditionsConfirmation(user.getTermsAndConditionsConfirmation())
+            .emailNotifications(emailNotificationMapper.toEmailNotificationsDTO(user));
+
+    enrichWithUserSessions(user, userDataResponseDTOBuilder);
+    return userDataResponseDTOBuilder.build();
+  }
+
+  private void enrichWithUserSessions(
+      User user, UserDataResponseDTOBuilder userDataResponseDTOBuilder) {
+    List<Session> sessionsByUser = sessionService.findSessionsByUser(user);
+    if (CollectionUtils.isNotEmpty(sessionsByUser)) {
+      userDataResponseDTOBuilder.sessions(
+          sessionsByUser.stream()
+              .map(sessionMapper::convertToSessionDTO)
+              .collect(Collectors.toSet()));
+    }
   }
 
   private String observeUserEmailAddress(User user) {

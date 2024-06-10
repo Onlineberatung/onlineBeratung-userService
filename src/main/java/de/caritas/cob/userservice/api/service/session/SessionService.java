@@ -747,6 +747,13 @@ public class SessionService {
     return Optional.empty();
   }
 
+  public List<Session> findSessionsByUser(User user) {
+    if (nonNull(user)) {
+      return sessionRepository.findByUser(user);
+    }
+    return emptyList();
+  }
+
   public String findGroupIdByConsultantAndUser(String consultantId, String askerId) {
 
     Optional<Consultant> consultant = consultantService.getConsultant(consultantId);
