@@ -14,7 +14,6 @@ import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.session.SessionMapper;
 import de.caritas.cob.userservice.api.service.session.SessionService;
-import de.caritas.cob.userservice.api.service.session.SessionTopicEnrichmentService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -44,8 +43,6 @@ public class AskerDataProvider {
   private final @NonNull SessionService sessionService;
 
   private final @NonNull EmailNotificationMapper emailNotificationMapper;
-
-  private final @NonNull SessionTopicEnrichmentService sessionTopicEnrichmentService;
 
   /**
    * Retrieve the user data of an asker, e.g. username, email, name, ...
@@ -85,7 +82,6 @@ public class AskerDataProvider {
       userDataResponseDTOBuilder.sessions(
           sessionsByUser.stream()
               .map(sessionMapper::convertToSessionDTO)
-              .map(sessionTopicEnrichmentService::enrichSessionWithTopicData)
               .collect(Collectors.toSet()));
     }
   }
