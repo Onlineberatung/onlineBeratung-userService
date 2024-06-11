@@ -36,7 +36,6 @@ import de.caritas.cob.userservice.api.model.User;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.session.SessionService;
-import de.caritas.cob.userservice.api.service.session.SessionTopicEnrichmentService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -71,8 +70,6 @@ public class AskerDataProviderTest {
   @Mock EmailNotificationMapper emailNotificationMapper;
 
   @Mock SessionService sessionService;
-
-  @Mock SessionTopicEnrichmentService sessionTopicEnrichmentService;
 
   @Test
   public void
@@ -140,11 +137,9 @@ public class AskerDataProviderTest {
                 .status(SessionStatus.NEW)
                 .build());
     when(sessionService.findSessionsByUser(Mockito.any(User.class))).thenReturn(inputSessions);
-    when(sessionTopicEnrichmentService.enrichSessionWithTopicData(Mockito.any(SessionDTO.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
     Set<SessionDTO> sessions = askerDataProvider.retrieveData(USER).getSessions();
 
-    assertEquals(2, sessions.size());
+    assertEquals(sessions.size(), 2);
     var expectedSessionsIds = Sets.newHashSet();
     expectedSessionsIds.add(1L);
     expectedSessionsIds.add(2L);
