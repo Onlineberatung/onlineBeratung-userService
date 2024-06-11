@@ -140,7 +140,6 @@ public class AskerDataProviderTest {
                 .status(SessionStatus.NEW)
                 .build());
     when(sessionService.findSessionsByUser(Mockito.any(User.class))).thenReturn(inputSessions);
-    when(sessionTopicEnrichmentService.enrichSessionWithTopicData(Mockito.any(SessionDTO.class))).thenAnswer(invocation -> invocation.getArgument(0));
     Set<SessionDTO> sessions = askerDataProvider.retrieveData(USER).getSessions();
 
     assertEquals(2, sessions.size());
