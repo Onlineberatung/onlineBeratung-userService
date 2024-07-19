@@ -125,8 +125,7 @@ public class DeleteInactiveSessionsAndUserService {
 
     Optional<Session> session = findSessionInUserSessionList(rcGroupId, userSessionList);
 
-    session.ifPresent(
-        s -> workflowErrors.addAll(deleteSessionService.performSessionDeletion(s)));
+    session.ifPresent(s -> workflowErrors.addAll(deleteSessionService.performSessionDeletion(s)));
 
     return workflowErrors;
   }
