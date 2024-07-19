@@ -125,17 +125,7 @@ public class DeleteInactiveSessionsAndUserService {
 
     Optional<Session> session = findSessionInUserSessionList(rcGroupId, userSessionList);
 
-    session.ifPresentOrElse(
-        s -> workflowErrors.addAll(deleteSessionService.performSessionDeletion(s)),
-        () ->
-            workflowErrors.add(
-                DeletionWorkflowError.builder()
-                    .deletionSourceType(ASKER)
-                    .deletionTargetType(ALL)
-                    .identifier(rcGroupId)
-                    .reason(RC_SESSION_GROUP_NOT_FOUND_REASON)
-                    .timestamp(nowInUtc())
-                    .build()));
+    session.ifPresent(s -> workflowErrors.addAll(deleteSessionService.performSessionDeletion(s)));
 
     return workflowErrors;
   }
