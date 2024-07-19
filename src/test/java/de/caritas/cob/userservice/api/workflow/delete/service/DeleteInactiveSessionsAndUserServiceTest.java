@@ -21,15 +21,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
-public class DeleteInactiveSessionsAndUserServiceTest {
+@ExtendWith(MockitoExtension.class)
+class DeleteInactiveSessionsAndUserServiceTest {
 
   @InjectMocks private DeleteInactiveSessionsAndUserService deleteInactiveSessionsAndUserService;
 
@@ -42,7 +42,7 @@ public class DeleteInactiveSessionsAndUserServiceTest {
   @Mock private InactivePrivateGroupsProvider inactivePrivateGroupsProvider;
 
   @Test
-  public void
+  void
       deleteInactiveSessionsAndUsers_Should_SendWorkflowErrorsMail_When_userNotFoundReason() {
 
     EasyRandom easyRandom = new EasyRandom();
@@ -71,7 +71,7 @@ public class DeleteInactiveSessionsAndUserServiceTest {
   }
 
   @Test
-  public void
+  void
       deleteInactiveSessionsAndUsers_Should_DeleteEntireUserAccount_WhenUserHasOnlyInactiveSessions() {
 
     EasyRandom easyRandom = new EasyRandom();
@@ -96,7 +96,7 @@ public class DeleteInactiveSessionsAndUserServiceTest {
   }
 
   @Test
-  public void
+  void
       deleteInactiveSessionsAndUsers_Should_DeleteSingleSession_WhenUserHasActiveAndInactiveSessions() {
 
     EasyRandom easyRandom = new EasyRandom();
@@ -121,7 +121,7 @@ public class DeleteInactiveSessionsAndUserServiceTest {
   }
 
   @Test
-  public void
+  void
       deleteInactiveSessionsAndUsers_Should_logWorkflowErrorMail_WhenUserHasActiveAndInactiveSessionsAndHasErrors() {
 
     EasyRandom easyRandom = new EasyRandom();
@@ -159,8 +159,8 @@ public class DeleteInactiveSessionsAndUserServiceTest {
   }
 
   @Test
-  public void
-      deleteInactiveSessionsAndUsers_Should_logWorkflowErrorMail_WhenSessionCouldNotBeFound() {
+  void
+      deleteInactiveSessionsAndUsers_Should_notLogError_WhenSessionCouldNotBeFound_BecauseItMayHaveBeenDeletedByPreviousWorkflowRun() {
 
     EasyRandom easyRandom = new EasyRandom();
     User user = easyRandom.nextObject(User.class);
@@ -181,14 +181,12 @@ public class DeleteInactiveSessionsAndUserServiceTest {
 
     deleteInactiveSessionsAndUserService.deleteInactiveSessionsAndUsers();
 
-    verify(workflowErrorLogService, Mockito.times(1))
-        .logWorkflowErrors(argThat(list -> !list.isEmpty()));
-    verify(workflowErrorMailService, Mockito.times(1))
-        .buildAndSendErrorMail(Collections.emptyList());
+    verify(workflowErrorLogService, Mockito.never()).logWorkflowErrors(Mockito.anyList());
+    verify(workflowErrorMailService, Mockito.never()).buildAndSendErrorMail(Mockito.anyList());
   }
 
   @Test
-  public void
+  void
       deleteInactiveSessionsAndUsers_Should_SendWorkflowErrorMail_WhenUserCouldNotBeFound() {
 
     EasyRandom easyRandom = new EasyRandom();
