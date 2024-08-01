@@ -1,8 +1,5 @@
 package de.caritas.cob.userservice.api.workflow.delete.service;
 
-import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
-import static de.caritas.cob.userservice.api.workflow.delete.model.DeletionSourceType.ASKER;
-import static de.caritas.cob.userservice.api.workflow.delete.model.DeletionTargetType.ALL;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import de.caritas.cob.userservice.api.model.Session;
@@ -86,14 +83,8 @@ public class DeleteInactiveSessionsAndUserService {
     user.ifPresentOrElse(
         u -> workflowErrors.addAll(deleteInactiveGroupsOrUser(userInactiveGroupEntry, u)),
         () ->
-            workflowErrors.add(
-                DeletionWorkflowError.builder()
-                    .deletionSourceType(ASKER)
-                    .deletionTargetType(ALL)
-                    .identifier(userInactiveGroupEntry.getKey())
-                    .reason(USER_NOT_FOUND_REASON)
-                    .timestamp(nowInUtc())
-                    .build()));
+            workflowErrors.addAll(
+                performUserSessionDeletionForNonExistingUser(userInactiveGroupEntry.getValue())));
 
     return workflowErrors;
   }
@@ -102,11 +93,14 @@ public class DeleteInactiveSessionsAndUserService {
       Entry<String, List<String>> userInactiveGroupEntry, User user) {
 
     List<Session> userSessionList = sessionRepository.findByUser(user);
-
     if (allSessionsOfUserAreInactive(userInactiveGroupEntry, userSessionList)) {
       return deleteUserAccountService.performUserDeletion(user);
     }
+    return perfomUserSessionDeletion(userInactiveGroupEntry, userSessionList);
+  }
 
+  private List<DeletionWorkflowError> perfomUserSessionDeletion(
+      Entry<String, List<String>> userInactiveGroupEntry, List<Session> userSessionList) {
     return userInactiveGroupEntry.getValue().stream()
         .map(rcGroupId -> performSessionDeletion(rcGroupId, userSessionList))
         .flatMap(Collection::stream)
@@ -120,13 +114,26 @@ public class DeleteInactiveSessionsAndUserService {
 
   private List<DeletionWorkflowError> performSessionDeletion(
       String rcGroupId, List<Session> userSessionList) {
-
     List<DeletionWorkflowError> workflowErrors = new ArrayList<>();
-
     Optional<Session> session = findSessionInUserSessionList(rcGroupId, userSessionList);
-
     session.ifPresent(s -> workflowErrors.addAll(deleteSessionService.performSessionDeletion(s)));
+    return workflowErrors;
+  }
 
+  private List<DeletionWorkflowError> performUserSessionDeletionForNonExistingUser(
+      List<String> rcGroupIds) {
+    List<DeletionWorkflowError> workflowErrors = new ArrayList<>();
+    rcGroupIds.forEach(
+        rcGroupId ->
+            workflowErrors.addAll(performUserSessionDeletionForNonExistingUser(rcGroupId)));
+    return workflowErrors;
+  }
+
+  private Collection<? extends DeletionWorkflowError> performUserSessionDeletionForNonExistingUser(
+      String rcGroupId) {
+    List<DeletionWorkflowError> workflowErrors = new ArrayList<>();
+    Optional<Session> session = sessionRepository.findByGroupId(rcGroupId);
+    session.ifPresent(s -> workflowErrors.addAll(deleteSessionService.performSessionDeletion(s)));
     return workflowErrors;
   }
 
