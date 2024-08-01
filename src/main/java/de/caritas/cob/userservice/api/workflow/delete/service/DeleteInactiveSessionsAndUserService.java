@@ -139,6 +139,9 @@ public class DeleteInactiveSessionsAndUserService {
 
   private Optional<Session> findSessionInUserSessionList(
       String rcGroupId, List<Session> userSessionList) {
-    return userSessionList.stream().filter(s -> s.getGroupId().equals(rcGroupId)).findFirst();
+
+    return userSessionList.stream()
+        .filter(s -> s.getGroupId() != null && s.getGroupId().equals(rcGroupId))
+        .findFirst();
   }
 }
