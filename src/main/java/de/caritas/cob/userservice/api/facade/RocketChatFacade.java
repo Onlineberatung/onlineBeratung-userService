@@ -139,6 +139,17 @@ public class RocketChatFacade {
     }
   }
 
+  public void removeUserFromGroupIgnoreGroupNotFound(String rcUserId, String groupId) {
+    try {
+      this.rocketChatService.removeUserFromGroupIgnoreGroupNotFound(rcUserId, groupId);
+    } catch (RocketChatRemoveUserFromGroupException e) {
+      var message =
+          String.format(
+              "Could not remove user with id %s from Rocket.Chat group id %s", rcUserId, groupId);
+      throw new InternalServerErrorException(message, LogService::logInternalServerError);
+    }
+  }
+
   /**
    * Get all standard members (all users except system user and technical user) of a rocket chat
    * group.

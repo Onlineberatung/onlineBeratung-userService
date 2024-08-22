@@ -133,7 +133,7 @@ public class RocketChatRemoveFromGroupOperationServiceTest {
 
     this.removeService.removeFromGroupOrRollbackOnFailure();
 
-    verify(this.rocketChatFacade, times(1)).removeUserFromGroup("rcId", "group");
+    verify(this.rocketChatFacade, times(1)).removeUserFromGroupIgnoreGroupNotFound("rcId", "group");
     verify(this.rocketChatFacade, never()).removeUserFromGroup("rcId", "feedback");
   }
 
@@ -149,7 +149,7 @@ public class RocketChatRemoveFromGroupOperationServiceTest {
         .thenReturn(singletonList(groupMemberDTO));
     doThrow(new RuntimeException(""))
         .when(this.rocketChatFacade)
-        .removeUserFromGroup(anyString(), anyString());
+        .removeUserFromGroupIgnoreGroupNotFound(anyString(), anyString());
     doThrow(new RuntimeException(""))
         .when(this.rocketChatFacade)
         .addUserToRocketChatGroup(anyString(), anyString());
@@ -172,7 +172,9 @@ public class RocketChatRemoveFromGroupOperationServiceTest {
     groupMemberDTO.set_id(this.consultant.getRocketChatId());
     when(this.rocketChatFacade.retrieveRocketChatMembers(any()))
         .thenReturn(singletonList(groupMemberDTO));
-    doThrow(new RuntimeException("")).when(this.rocketChatFacade).removeUserFromGroup(any(), any());
+    doThrow(new RuntimeException(""))
+        .when(this.rocketChatFacade)
+        .removeUserFromGroupIgnoreGroupNotFound(any(), any());
 
     try {
       this.removeService.removeFromGroupOrRollbackOnFailure();

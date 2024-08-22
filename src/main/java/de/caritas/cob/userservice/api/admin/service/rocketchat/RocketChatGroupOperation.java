@@ -9,6 +9,7 @@ import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.LogService;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import lombok.NonNull;
@@ -54,16 +55,27 @@ abstract class RocketChatGroupOperation {
   }
 
   void removeConsultantsFromSessionGroups(Session session, List<Consultant> consultants) {
-    removeConsultantsFromRocketChatGroup(session.getGroupId(), consultants);
-    removeConsultantsFromRocketChatGroup(session.getFeedbackGroupId(), consultants);
+    removeConsultantsFromRocketChatGroup(
+        session.getGroupId(), consultants, rocketChatFacade::removeUserFromGroup);
+    removeConsultantsFromRocketChatGroup(
+        session.getFeedbackGroupId(), consultants, rocketChatFacade::removeUserFromGroup);
   }
 
   void removeConsultantsFromSessionGroup(String rcGroupId, List<Consultant> consultants) {
-    removeConsultantsFromRocketChatGroup(rcGroupId, consultants);
+    removeConsultantsFromRocketChatGroup(
+        rcGroupId, consultants, rocketChatFacade::removeUserFromGroup);
+  }
+
+  void removeConsultantsFromSessionGroupAndIgnoreGroupNotFound(
+      String rcGroupId, List<Consultant> consultants) {
+    removeConsultantsFromRocketChatGroup(
+        rcGroupId, consultants, rocketChatFacade::removeUserFromGroupIgnoreGroupNotFound);
   }
 
   private void removeConsultantsFromRocketChatGroup(
-      String rcGroupId, List<Consultant> consultants) {
+      String rcGroupId,
+      List<Consultant> consultants,
+      BiConsumer<String, String> removeFromRocketchatGroupMethod) {
     if (rcGroupId == null) {
       return;
     }
@@ -73,7 +85,7 @@ abstract class RocketChatGroupOperation {
     consultants.stream()
         .map(Consultant::getRocketChatId)
         .filter(groupMemberList::contains)
-        .forEach(rcUserId -> rocketChatFacade.removeUserFromGroup(rcUserId, rcGroupId));
+        .forEach(rcUserId -> removeFromRocketchatGroupMethod.accept(rcUserId, rcGroupId));
     rocketChatFacade.leaveFromGroupAsTechnicalUser(rcGroupId);
   }
 
