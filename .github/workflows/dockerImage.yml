@@ -43,7 +43,7 @@ jobs:
         run: mvn -B -Pprod  clean package -DskipTests=true
       - name: Maven Verify
         run: mvn -B -Pprod clean verify -DskipTests=true
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: targetfiles
           path: target/*.jar
@@ -75,7 +75,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Download buildfiles artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: targetfiles
       - name: Get current time
