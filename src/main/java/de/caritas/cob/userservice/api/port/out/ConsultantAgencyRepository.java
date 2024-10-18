@@ -34,6 +34,8 @@ public interface ConsultantAgencyRepository extends CrudRepository<ConsultantAge
 
   List<ConsultantAgency> findByConsultantIdIn(Set<String> consultantIds);
 
+  List<ConsultantAgency> findByConsultantIdInAndDeleteDateIsNull(Set<String> consultantIds);
+
   @SuppressWarnings("all")
   List<ConsultantAgencyBase> findByConsultantIdIn(List<String> consultantIds);
 }

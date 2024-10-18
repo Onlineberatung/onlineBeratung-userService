@@ -14,6 +14,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
+import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.Consultant;
@@ -25,6 +26,7 @@ import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.Test;
@@ -135,6 +137,16 @@ public class ConsultantAgencyAdminUserServiceTest {
 
           this.consultantAgencyAdminService.removeConsultantsFromTeamSessionsByAgencyId(1L);
         });
+  }
+
+  @Test
+  void appendAgenciesForConsultants_Should_callConsultantAgencyRepositoryForNotDeletedEntries() {
+    ConsultantDTO consultantDTO = new EasyRandom().nextObject(ConsultantDTO.class);
+
+    this.consultantAgencyAdminService.appendAgenciesForConsultants(Set.of(consultantDTO));
+
+    verify(consultantAgencyRepository).findByConsultantIdInAndDeleteDateIsNull(any());
+    verify(agencyAdminService).retrieveAllAgencies();
   }
 
   @Test
