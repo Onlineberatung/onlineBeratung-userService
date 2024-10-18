@@ -42,8 +42,7 @@ class DeleteInactiveSessionsAndUserServiceTest {
   @Mock private InactivePrivateGroupsProvider inactivePrivateGroupsProvider;
 
   @Test
-  void
-      deleteInactiveSessionsAndUsers_Should_SendWorkflowErrorsMail_When_userNotFoundReason() {
+  void deleteInactiveSessionsAndUsers_Should_SendWorkflowErrorsMail_When_userNotFoundReason() {
 
     EasyRandom easyRandom = new EasyRandom();
     User user = easyRandom.nextObject(User.class);
@@ -186,8 +185,7 @@ class DeleteInactiveSessionsAndUserServiceTest {
   }
 
   @Test
-  void
-      deleteInactiveSessionsAndUsers_Should_SendWorkflowErrorMail_WhenUserCouldNotBeFound() {
+  void deleteInactiveSessionsAndUsers_Should_SendWorkflowErrorMail_WhenUserCouldNotBeFound() {
 
     EasyRandom easyRandom = new EasyRandom();
     User user = easyRandom.nextObject(User.class);
