@@ -69,7 +69,8 @@ class ConsultantAdminFacadeIT {
   @Autowired private EntityManager entityManager;
 
   @Test
-  void findFilteredConsultants_Should_retrieveDeletedAgencyRelations_When_consultantIsDeleted() {
+  void
+      findFilteredConsultants_Should_Not_RetrieveDeletedAgencyRelations_When_consultantIsDeleted() {
     var consultant = givenAPersistedDeletedConsultantWithTenAgencies();
 
     var searchResult =
@@ -88,7 +89,7 @@ class ConsultantAdminFacadeIT {
             .next();
 
     assertThat(resultConsultant.getEmbedded().getDeleteDate(), notNullValue());
-    assertThat(resultConsultant.getEmbedded().getAgencies(), hasSize(10));
+    assertThat(resultConsultant.getEmbedded().getAgencies(), hasSize(0));
   }
 
   @Test
