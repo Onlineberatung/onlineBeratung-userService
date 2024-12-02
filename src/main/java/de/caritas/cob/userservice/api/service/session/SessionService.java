@@ -633,6 +633,7 @@ public class SessionService {
 
     var consultantSessionDTO =
         new ConsultantSessionDTO()
+            .agencyName(agencyService.getAgency(session.getAgencyId()).getName())
             .isTeamSession(session.isTeamSession())
             .agencyId(session.getAgencyId())
             .consultingType(session.getConsultingTypeId())
@@ -647,6 +648,7 @@ public class SessionService {
             .consultantId(nonNull(session.getConsultant()) ? session.getConsultant().getId() : null)
             .consultantRcId(
                 nonNull(session.getConsultant()) ? session.getConsultant().getRocketChatId() : null)
+            .createDate(String.valueOf(session.getCreateDate()))
             .age(session.getUserAge())
             .gender(session.getUserGender())
             .counsellingRelation(session.getCounsellingRelation())

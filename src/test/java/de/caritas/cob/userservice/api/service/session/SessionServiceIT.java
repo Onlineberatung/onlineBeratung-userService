@@ -4,12 +4,14 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import com.neovisionaries.i18n.LanguageCode;
 import de.caritas.cob.userservice.agencyserivce.generated.ApiClient;
 import de.caritas.cob.userservice.agencyserivce.generated.web.AgencyControllerApi;
 import de.caritas.cob.userservice.api.UserServiceApplication;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionDTO;
 import de.caritas.cob.userservice.api.config.apiclient.AgencyServiceApiControllerFactory;
 import de.caritas.cob.userservice.api.config.apiclient.TopicServiceApiControllerFactory;
@@ -21,6 +23,7 @@ import de.caritas.cob.userservice.api.model.Session.RegistrationType;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.port.out.UserRepository;
+import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.topicservice.generated.web.TopicControllerApi;
 import java.util.Collections;
 import java.util.Set;
@@ -44,6 +47,8 @@ class SessionServiceIT {
 
   @Autowired private SessionService sessionService;
 
+  @MockBean private AgencyService agencyService;
+
   @Autowired private SessionRepository sessionRepository;
 
   @Autowired private ConsultantRepository consultantRepository;
@@ -65,6 +70,11 @@ class SessionServiceIT {
     when(topicServiceApiControllerFactory.createControllerApi()).thenReturn(topicControllerApi);
     when(agencyServiceApiControllerFactory.createControllerApi()).thenReturn(agencyControllerApi);
     when(agencyControllerApi.getApiClient()).thenReturn(new ApiClient());
+
+    AgencyDTO mockAgency = new AgencyDTO();
+    mockAgency.setId(1L);
+    mockAgency.setName("Mock Agency");
+    when(agencyService.getAgency(anyLong())).thenReturn(mockAgency);
   }
 
   @Test

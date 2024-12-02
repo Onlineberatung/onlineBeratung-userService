@@ -51,6 +51,7 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
 import com.neovisionaries.i18n.LanguageCode;
+import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantSessionResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionConsultantForConsultantDTO;
@@ -580,6 +581,8 @@ class SessionServiceTest {
     session.setConsultant(CONSULTANT_WITH_AGENCY);
     session.setUser(USER_WITH_RC_ID);
     when(sessionRepository.findById(session.getId())).thenReturn(Optional.of(session));
+    AgencyDTO agencyDTO = Mockito.mock(AgencyDTO.class);
+    when(agencyService.getAgency(session.getAgencyId())).thenReturn(agencyDTO);
 
     ConsultantSessionDTO result =
         sessionService.fetchSessionForConsultant(session.getId(), CONSULTANT_WITH_AGENCY);
@@ -600,6 +603,7 @@ class SessionServiceTest {
     assertEquals(session.getUserGender(), result.getGender());
     assertEquals(session.getCounsellingRelation(), result.getCounsellingRelation());
     assertEquals(session.getReferer(), result.getReferer());
+    assertEquals(String.valueOf(session.getCreateDate()), result.getCreateDate());
   }
 
   @Test
@@ -613,6 +617,8 @@ class SessionServiceTest {
     session.setConsultant(CONSULTANT_WITH_AGENCY);
     session.setUser(USER_WITH_RC_ID);
     when(sessionRepository.findById(session.getId())).thenReturn(Optional.of(session));
+    AgencyDTO agencyDTO = Mockito.mock(AgencyDTO.class);
+    when(agencyService.getAgency(session.getAgencyId())).thenReturn(agencyDTO);
 
     ConsultantSessionDTO result =
         sessionService.fetchSessionForConsultant(session.getId(), CONSULTANT_WITH_AGENCY);
@@ -636,6 +642,8 @@ class SessionServiceTest {
     session.setConsultant(CONSULTANT_WITH_AGENCY);
     session.setUser(USER_WITH_RC_ID);
     when(sessionRepository.findById(session.getId())).thenReturn(Optional.of(session));
+    AgencyDTO agencyDTO = Mockito.mock(AgencyDTO.class);
+    when(agencyService.getAgency(session.getAgencyId())).thenReturn(agencyDTO);
 
     sessionService.fetchSessionForConsultant(session.getId(), CONSULTANT_WITH_AGENCY);
 
@@ -645,6 +653,26 @@ class SessionServiceTest {
         .enrichSessionWithTopicsData(Mockito.any(ConsultantSessionDTO.class));
 
     ReflectionTestUtils.setField(sessionService, "topicsFeatureEnabled", false);
+  }
+
+  @Test
+  void
+      fetchSessionForConsultant_Should_Return_ConsultantSessionDTO_containing_createDate_and_agencyName() {
+
+    Session session = easyRandom.nextObject(Session.class);
+    session.setConsultant(CONSULTANT_WITH_AGENCY);
+    session.setUser(USER_WITH_RC_ID);
+    when(sessionRepository.findById(session.getId())).thenReturn(Optional.of(session));
+    AgencyDTO agencyDTO = new AgencyDTO();
+    agencyDTO.name("TestName");
+    when(agencyService.getAgency(session.getAgencyId())).thenReturn(agencyDTO);
+
+    ConsultantSessionDTO result =
+        sessionService.fetchSessionForConsultant(session.getId(), CONSULTANT_WITH_AGENCY);
+
+    assertNotNull(result.getAgencyName());
+    assertEquals("TestName", result.getAgencyName());
+    assertEquals(String.valueOf(session.getCreateDate()), result.getCreateDate());
   }
 
   @Test
@@ -672,6 +700,8 @@ class SessionServiceTest {
     session.setAgencyId(
         CONSULTANT_WITH_AGENCY.getConsultantAgencies().iterator().next().getAgencyId());
     when(sessionRepository.findById(session.getId())).thenReturn(Optional.of(session));
+    AgencyDTO agencyDTO = Mockito.mock(AgencyDTO.class);
+    when(agencyService.getAgency(session.getAgencyId())).thenReturn(agencyDTO);
 
     assertNotNull(
         sessionService.fetchSessionForConsultant(session.getId(), CONSULTANT_WITH_AGENCY));
@@ -688,6 +718,8 @@ class SessionServiceTest {
     session.setAgencyId(
         CONSULTANT_WITH_AGENCY.getConsultantAgencies().iterator().next().getAgencyId());
     when(sessionRepository.findById(session.getId())).thenReturn(Optional.of(session));
+    AgencyDTO agencyDTO = Mockito.mock(AgencyDTO.class);
+    when(agencyService.getAgency(session.getAgencyId())).thenReturn(agencyDTO);
 
     assertNotNull(
         sessionService.fetchSessionForConsultant(session.getId(), CONSULTANT_WITH_AGENCY));
