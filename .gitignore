@@ -39,3 +39,5 @@ consultants-import.txt*
 
 #local helper files
 *localdev*
+
+/src/main/resources/application-local.properties

@@ -1,0 +1,60 @@
+openapi: 3.0.1
+info:
+  title: API definition to integrate EmailNotificationChange with Public Plan
+  version: 0.0.1
+paths:
+  /user/{userId}/email:
+    put:
+      tags:
+        - user-controller
+      summary: Change consultant email
+      operationId: userExists
+      parameters:
+        - name: userId
+          in: path
+          description: consultantId = user id from keycloak
+          required: true
+          schema:
+              type: string
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/EmailChangeDTO'
+      responses:
+        200:
+          description: OK - email changed
+        401:
+          description: UNAUTHORIZED - user is not authenticated to perform this operation
+        403:
+          description: FORBIDDEN - access denied
+        404:
+          description: NOT FOUND - consultant does not exist
+        409:
+          description: CONFLICT - another consultant with given email exists
+      security:
+        - Bearer: [ ]
+components:
+  schemas:
+    EmailChangeDTO:
+      type: object
+      required:
+        - newEmail
+        - userRole
+      properties:
+        userRole:
+          type: string
+          enum:
+            - CONSULTANT
+            - ADVICESEEKER
+        newEmail:
+          type: string
+          example: max94
+        existingEmail:
+          type: string
+
+  securitySchemes:
+    Bearer:
+      type: apiKey
+      name: Authorization
+      in: header
