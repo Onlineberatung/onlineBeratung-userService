@@ -39,6 +39,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import de.caritas.cob.userservice.api.IdentityManager;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatCredentialsProvider;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.StandardResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupDeleteResponseDTO;
@@ -156,6 +157,8 @@ class UserControllerChatE2EIT {
   @MockBean private AgencyServiceApiControllerFactory agencyServiceApiControllerFactory;
 
   @Autowired private CacheManager cacheManager;
+
+  @MockBean private IdentityManager identityManager;
 
   @MockBean
   @Qualifier("restTemplate")

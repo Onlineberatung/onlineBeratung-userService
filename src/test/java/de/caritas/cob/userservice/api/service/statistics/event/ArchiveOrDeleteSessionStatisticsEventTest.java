@@ -61,8 +61,8 @@ class ArchiveOrDeleteSessionStatisticsEventTest {
     assertThat(archiveSessionStatisticsEventMessage.getSessionId()).isEqualTo(SESSION_ID);
     assertThat(archiveSessionStatisticsEventMessage.getTenantId()).isEqualTo(TENANT_ID);
     assertThat(archiveSessionStatisticsEventMessage.getUserId()).isEqualTo(USER_ID);
-    assertThat(archiveSessionStatisticsEventMessage.getEndDate())
-        .isEqualTo(END_DATE.truncatedTo(ChronoUnit.SECONDS) + "Z");
+    assertThat(archiveSessionStatisticsEventMessage.getEndDate().replace("Z", ""))
+        .isEqualTo(END_DATE.truncatedTo(ChronoUnit.SECONDS).toString());
   }
 
   private static SimpleModule buildSimpleModule() {

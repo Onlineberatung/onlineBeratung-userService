@@ -19,6 +19,34 @@ paths:
                 $ref: '#/components/schemas/RootDTO'
       security:
         - Bearer: [ ]
+  /useradmin/2fa/{consultantId}:
+    delete:
+      tags:
+        - admin-user-controller
+      summary: 'Deactivates 2FA of consultants [authorities: Tenant or agency admin]'
+      operationId: deactivateConsultantTwoFactorAuth
+      parameters:
+        - name: consultantId
+          in: path
+          description: consultantId
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK - successful operation
+        204:
+          description: NO CONTENT - consultant with the specific id was not found
+        400:
+          description: BAD REQUEST - invalid/incomplete request or body object
+        401:
+          description: UNAUTHORIZED - no/invalid Keycloak token
+        403:
+          description: FORBIDDEN - no/invalid role/authorization or CSRF token
+        500:
+          description: INTERNAL SERVER ERROR - server encountered unexpected condition
+      security:
+        - Bearer: [ ]
   /useradmin/sessions:
     get:
       tags:

@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.adapters.web.controller;
 
 import com.google.common.collect.Lists;
+import de.caritas.cob.userservice.api.IdentityManager;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminFilter;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminResponseDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.AdminSearchResultDTO;
@@ -64,6 +65,8 @@ public class UserAdminController implements UseradminApi {
   private final @NonNull AppointmentService appointmentService;
   private final @NonNull AdminDtoMapper adminDtoMapper;
 
+  private final @NonNull IdentityManager identityManager;
+
   /**
    * Creates the root hal based navigation entity.
    *
@@ -73,6 +76,15 @@ public class UserAdminController implements UseradminApi {
   public ResponseEntity<RootDTO> getRoot() {
     RootDTO rootDTO = new RootDTOBuilder().buildRootDTO();
     return ResponseEntity.ok(rootDTO);
+  }
+
+  @Override
+  public ResponseEntity<Void> deactivateConsultantTwoFactorAuth(@PathVariable String consultantId) {
+    ConsultantAdminResponseDTO consultantDTO =
+        this.consultantAdminFacade.findConsultant(consultantId);
+    identityManager.deleteOneTimePassword(consultantDTO.getEmbedded().getUsername());
+
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   /**
