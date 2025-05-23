@@ -2233,6 +2233,9 @@ components:
           type: integer
           format: int64
           example: 100
+        agencyName:
+          type: string
+          example: AgencyName
         consultingType:
           type: integer
           example: 1
@@ -2275,6 +2278,9 @@ components:
         isTeamSession:
           type: boolean
           example: false
+        create_date:
+          type: string
+          description: date of user registration
         age:
           type: integer
           example: 17

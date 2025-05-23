@@ -635,6 +635,7 @@ public class SessionService {
         new ConsultantSessionDTO()
             .isTeamSession(session.isTeamSession())
             .agencyId(session.getAgencyId())
+            .agencyName(agencyService.getAgency(session.getAgencyId()).getName())
             .consultingType(session.getConsultingTypeId())
             .id(session.getId())
             .status(session.getStatus().getValue())
@@ -647,6 +648,7 @@ public class SessionService {
             .consultantId(nonNull(session.getConsultant()) ? session.getConsultant().getId() : null)
             .consultantRcId(
                 nonNull(session.getConsultant()) ? session.getConsultant().getRocketChatId() : null)
+            .createDate(String.valueOf(session.getCreateDate()))
             .age(session.getUserAge())
             .gender(session.getUserGender())
             .counsellingRelation(session.getCounsellingRelation())
